@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5">
+<meta name="theme-color" content="#1A1A1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Armado MX">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="Enciclopedia divulgativa de armas legales en México · DCAM SEDENA">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%231A1A1A'/%3E%3Cg stroke='%23F5C518' stroke-width='2.5' fill='none' opacity='0.4'%3E%3Ccircle cx='90' cy='90' r='32'/%3E%3Ccircle cx='90' cy='90' r='52'/%3E%3Cline x1='90' y1='30' x2='90' y2='150'/%3E%3Cline x1='30' y1='90' x2='150' y2='90'/%3E%3C/g%3E%3Ccircle cx='90' cy='90' r='3.5' fill='%23F5C518'/%3E%3Ctext x='90' y='160' text-anchor='middle' fill='%23F5C518' font-family='monospace' font-size='14' font-weight='700' letter-spacing='2'%3EARMADO%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href='data:application/manifest+json;utf8,{"name":"Armado en México","short_name":"Armado MX","start_url":".","display":"standalone","orientation":"portrait","background_color":"%231A1A1A","theme_color":"%231A1A1A","icons":[{"src":"data:image/svg%2Bxml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 fill=%27%231A1A1A%27/%3E%3Cg stroke=%27%23F5C518%27 stroke-width=%276%27 fill=%27none%27 opacity=%270.4%27%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2790%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%27150%27/%3E%3Cline x1=%27256%27 y1=%2785%27 x2=%27256%27 y2=%27427%27/%3E%3Cline x1=%2785%27 y1=%27256%27 x2=%27427%27 y2=%27256%27/%3E%3C/g%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2710%27 fill=%27%23F5C518%27/%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml"}]}'>
+<title>Armado en México — Enciclopedia táctica</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #1A1A1A;
+    color: #FFFFFF;
+    font-family: 'Open Sans', system-ui, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html { height: -webkit-fill-available; }
+  body {
+    overflow-x: hidden;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overscroll-behavior-y: contain;
+    touch-action: manipulation;
+  }
+  /* iOS: prevent input zoom on focus by ensuring >=16px font-size */
+  input, select, textarea {
+    font-size: 16px;
+  }
+
+  /* fondo táctico — cuadrícula sutil global */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(245,197,24,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(245,197,24,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none; z-index: 0;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  #app-root {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+
+  /* animaciones */
+  @keyframes slideUp {
+    from { transform: translate(-50%, 12px); opacity: 0; }
+    to   { transform: translate(-50%, 0); opacity: 1; }
+  }
+
+  /* scrollbar dark (desktop solamente) */
+  @media (min-width: 720px) {
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #111111; }
+    ::-webkit-scrollbar-thumb { background: #3A3A3A; border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: #F5C518; }
+  }
+
+  /* horizontal chips */
+  ::-webkit-scrollbar:horizontal { height: 0; }
+
+  /* Horizontal carousels: hide scrollbar */
+  .amx-hscroll::-webkit-scrollbar { display: none; }
+  .amx-hscroll { scrollbar-width: none; }
+
+  /* Hide bundler error overlay (non-critical img/font load events trigger false positives) */
+  body > div[style*="z-index:99999"][style*="[bundle]"i],
+  body > div[style*="z-index: 99999"],
+  body > div[style*="background:#2b1518"],
+  body > div[style*="background: #2b1518"] {
+    display: none !important;
+  }
+
+  /* input placeholder */
+  input::placeholder { color: #7A7A7A; }
+
+  /* focus */
+  button:focus-visible { outline: 1px solid #F5C518; outline-offset: 1px; }
+  button { -webkit-tap-highlight-color: transparent; }
+
+  /* selección de texto */
+  ::selection { background: rgba(245,197,24,0.4); color: #fff; }
+
+  /* Safe-area insets para iOS (notch / home indicator) */
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TWEAKS — reshape global feel via body data-attrs
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* HUD INTENSITY · Discreta — quita las capas decorativas aria-hidden */
+  body[data-hud="minimal"] .gunsmith [aria-hidden="true"],
+  body[data-hud="minimal"] .gunsmith > div[style*="radial-gradient"] {
+    opacity: 0 !important;
+  }
+  body[data-hud="minimal"] .gunsmith {
+    background: #1A1A1A !important;
+  }
+
+  /* HUD INTENSITY · Máxima — scanlines + glow amplificado */
+  body[data-hud="max"] .gunsmith {
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.7) !important;
+  }
+  body[data-hud="max"] .gunsmith::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 9;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.025) 0 1px,
+      transparent 1px 3px
+    );
+    mix-blend-mode: overlay;
+  }
+  body[data-hud="max"] .gunsmith::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 8;
+    background:
+      radial-gradient(ellipse at top, rgba(245,197,24,0.06), transparent 60%),
+      radial-gradient(ellipse at bottom, rgba(245,197,24,0.04), transparent 60%);
+  }
+
+  /* TYPEFACE · Editorial — sustituye Montserrat (stencil militar) por Playfair display serif */
+  body[data-type="editorial"] *[style*="Montserrat"] {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    letter-spacing: -0.01em !important;
+    font-weight: 700 !important;
+  }
+  body[data-type="editorial"] *[style*="Courier Prime"] {
+    font-family: 'Open Sans', system-ui, sans-serif !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* TYPEFACE · Terminal — todo el sistema en mono retro CRT */
+  body[data-type="terminal"] *[style*="Montserrat"] {
+    font-family: 'Courier Prime', ui-monospace, monospace !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.08em !important;
+  }
+  body[data-type="terminal"] {
+    text-shadow: 0 0 1px rgba(255,255,255,0.06);
+  }
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail" data-bg-color="#1A1A1A">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#1A1A1A"/>
+    <g stroke="#F5C518" stroke-width="6" fill="none" opacity="0.5">
+      <circle cx="600" cy="400" r="140"/>
+      <circle cx="600" cy="400" r="220"/>
+      <line x1="600" y1="120" x2="600" y2="680"/>
+      <line x1="320" y1="400" x2="880" y2="400"/>
+    </g>
+    <circle cx="600" cy="400" r="18" fill="#F5C518"/>
+    <text x="600" y="740" text-anchor="middle" fill="#F5C518"
+          font-family="monospace" font-size="44" font-weight="700"
+          letter-spacing="8">ARMADO MX</text>
+  </svg>
+</template>
+
+<div id="app-root"></div>
+
+<!-- Splash de carga (se desvanece al montar React) -->
+<div id="amx-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:200;background:#1A1A1A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.35s ease;">
+  <svg width="88" height="88" viewBox="0 0 88 88" style="animation:amxSpin 6s linear infinite;">
+    <g stroke="#F5C518" stroke-width="1.5" fill="none" opacity="0.7">
+      <circle cx="44" cy="44" r="18"></circle>
+      <circle cx="44" cy="44" r="30"></circle>
+      <line x1="44" y1="6" x2="44" y2="82"></line>
+      <line x1="6" y1="44" x2="82" y2="44"></line>
+    </g>
+    <circle cx="44" cy="44" r="2.5" fill="#F5C518"></circle>
+  </svg>
+  <div style="font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.3em;color:#F5C518;">CARGANDO ARSENAL…</div>
+  <style>@keyframes amxSpin { to { transform: rotate(360deg); } }</style>
+</div>
+
+<!-- Silenciar errores de carga de imágenes/recursos no críticos (placeholders SVG, etc) -->
+<script>
+(function(){
+  // Capture-phase listener registered ANTES del bundler runtime → cancela el evento
+  // antes de que el overlay del bundler lo registre.
+  window.addEventListener('error', function(e) {
+    if (e.target && e.target !== window && (e.target.tagName === 'IMG' || e.target.tagName === 'LINK' || e.target.tagName === 'SOURCE')) {
+      // Solo preventDefault: NO usar stopImmediatePropagation, porque eso
+      // bloquea los onError de React (fallbacks de imagen/placeholder).
+      e.preventDefault();
+    }
+  }, true);
+  // Por si el overlay aparece de todas formas, observa y ocúltalo.
+  function hideOverlay() {
+    document.querySelectorAll('body > div').forEach(d => {
+      const s = (d.getAttribute('style') || '');
+      if (s.includes('99999') && /\[bundle\]/.test(d.textContent || '')) d.style.display = 'none';
+    });
+  }
+  if (document.body) hideOverlay();
+  new MutationObserver(hideOverlay).observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
+<!-- React + Babel pinned -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Data + Store + UI + screens + app -->
+<script src="data.js"></script>
+<script src="data-extra.js"></script>
+<script src="store.js"></script>
+<script>
+// Tweak defaults — the host rewrites this JSON in place when the user changes a tweak.
+window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "faction": "amarillo",
+  "hudIntensity": "standard",
+  "typeface": "stencil"
+}/*EDITMODE-END*/;
+</script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="screens-1.jsx"></script>
+<script type="text/babel" src="screens-2.jsx"></script>
+<script type="text/babel" src="screens-3.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+
+<!-- Mount -->
+<script type="text/babel">
+const root = ReactDOM.createRoot(document.getElementById('app-root'));
+// v2 optimizada: monta la app directamente — responsive nativo (sin marco de debug).
+root.render(<window.App />);
+</script>
+
+<!-- Retiro del splash (script plano: no depende de Babel) -->
+<script>
+(function(){
+  var done = false;
+  function hide() {
+    if (done) return; done = true;
+    var sp = document.getElementById('amx-splash');
+    if (!sp) return;
+    sp.style.opacity = '0';
+    setTimeout(function(){ sp.remove(); }, 400);
+  }
+  var t = setInterval(function(){
+    var el = document.getElementById('app-root');
+    if (el && el.children.length > 0) { clearInterval(t); hide(); }
+  }, 120);
+  // Tope de seguridad: nunca dejar el splash más de 15 s
+  setTimeout(function(){ clearInterval(t); hide(); }, 15000);
+})();
+</script>
+
+
+<!-- DEV: alternador de viewport escritorio/móvil (compartido por las 3 ramas) -->
+<script src="dev-viewport.js"></script>
+</body>
+</html>
