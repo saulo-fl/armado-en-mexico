@@ -38,7 +38,7 @@ window.CATEGORIES = {
     { id: 'militar',   label: 'Militar / Táctico', icon: '☆' },
   ],
   disponibilidad: [
-    { id: 'dcam',      label: 'Uso civil',           desc: 'Adquisición directa para civiles en DCAM con registro SEDENA.', color: '#9AA3AD' },
+    { id: 'dcam',      label: 'Uso civil',           desc: 'Adquisición directa para civiles en DCAM con registro SEDENA.', color: '#4FAE5C' },
     { id: 'seguridad', label: 'Policía / Seguridad', desc: 'Restringido a corporaciones de seguridad pública y privada con licencia colectiva.', color: '#F5C518' },
     { id: 'ejercito',  label: 'Exclusivo Ejército',  desc: 'Uso exclusivo de las Fuerzas Armadas de México.', color: '#C0392B' },
   ],

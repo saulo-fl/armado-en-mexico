@@ -181,7 +181,7 @@ function App() {
           right={pickerSlot !== null ? (
             <span style={{
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 9, color: PALETTE.amber,
+              fontSize: 11, color: PALETTE.amber,
               letterSpacing: '0.15em',
               background: 'rgba(245,197,24,0.12)',
               border: `1px solid ${PALETTE.amber}`,
@@ -204,7 +204,7 @@ function App() {
           background: PALETTE.amber, color: '#000',
           padding: '8px 28px',
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, letterSpacing: '0.15em',
+          fontSize: 13, letterSpacing: '0.15em',
           textTransform: 'uppercase',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
@@ -212,7 +212,7 @@ function App() {
           <button onClick={() => { window.cancelPicker && window.cancelPicker(); }} style={{
             background: 'rgba(0,0,0,0.2)', color: '#000', border: '1px solid #000',
             padding: '3px 8px', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 10, letterSpacing: '0.1em',
+            fontFamily: 'inherit', fontSize: 12, letterSpacing: '0.1em',
             textTransform: 'uppercase', fontWeight: 700,
           }}>Cancelar</button>
         </div>
@@ -238,7 +238,7 @@ function App() {
           position: 'fixed', bottom: 24, right: 24,
           background: PALETTE.amber, color: '#000', border: 'none',
           padding: '12px 18px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.15em', textTransform: 'uppercase',
           cursor: 'pointer',
           boxShadow: '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,197,24,0.4)',

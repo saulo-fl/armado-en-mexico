@@ -19,7 +19,7 @@
   };
 
   const DEFAULT_APP_CONFIG = {
-    logo: '',                // URL/data URI del logo de la app
+    logo: 'logo.png',        // borrador de logo (reemplazable desde admin)
     logoText: 'ARMADO en MX', // texto del header (si no hay logo)
     teamName: 'Armas M&S',   // nombre del equipo para "Favoritos de"
   };
@@ -271,7 +271,11 @@
     },
 
     // ─── APP CONFIG (logo y branding) ───────────────────────
-    getAppConfig() { return Object.assign({}, DEFAULT_APP_CONFIG, read(K.appConfig, {})); },
+    getAppConfig() {
+      const cfg = Object.assign({}, DEFAULT_APP_CONFIG, read(K.appConfig, {}));
+      if (!cfg.logo) cfg.logo = DEFAULT_APP_CONFIG.logo; // logo guardado vacío → usa el borrador
+      return cfg;
+    },
     setAppConfig(cfg) {
       const cur = this.getAppConfig();
       write(K.appConfig, Object.assign({}, cur, cfg));
