@@ -3,7 +3,7 @@
 
 const { useState, useMemo, useEffect } = React;
 
-// Foto hero 1:1 por categoría (preferencia: con persona o contexto, no fondo blanco)
+// Foto hero 4:5 por categoría (preferencia: con persona o contexto, no fondo blanco)
 const CATEGORY_HEROS = {
   pistola:  'imagenes/008_CZ_P-07.jpg',           // mano sosteniendo pistola en césped
   revolver: 'imagenes/021_Ruger_Wrangler.webp',   // revólver Ruger
@@ -39,6 +39,11 @@ function HomeScreen({ onNav, onOpenArma }) {
   const containerMax = { maxWidth: 1280, margin: '0 auto', width: '100%' };
   const teamName = (window.Store ? window.Store.getAppConfig().teamName : 'Armas M&S') || 'Armas M&S';
 
+  // Sugerencias para secciones aún vacías — carrusel swipeable en lugar de barra de aviso
+  const db = window.DB || [];
+  const sugerencias = (offset) => db.slice(offset, offset + 10);
+  const renderSugerencia = (a) => <window.ArmaCard arma={a} onClick={() => onOpenArma(a.id)} />;
+
   return (
     <div style={{ paddingBottom: 24 }}>
       {/* 1 ▸ SLIDERS uniformes y centrados */}
@@ -50,8 +55,10 @@ function HomeScreen({ onNav, onOpenArma }) {
       <CarouselSection
         eyebrow="◆ CURADURÍA DEL EQUIPO"
         title={`Favoritos de ${teamName}`}
-        emptyText="Aún no hay favoritos seleccionados. El admin puede curarlos desde el panel."
         items={favoritos}
+        fallbackItems={sugerencias(0)}
+        fallbackNote="Selección sugerida · el equipo aún no marca favoritos"
+        fallbackRender={renderSugerencia}
         renderItem={(a, i) =>
         <FavCard arma={a} rank={i + 1} onClick={() => onOpenArma(a.id)} />
         } />
@@ -61,8 +68,10 @@ function HomeScreen({ onNav, onOpenArma }) {
       <CarouselSection
         eyebrow="▸ POPULARIDAD · ÚLT. 30 DÍAS"
         title="Las más visitadas"
-        emptyText="Pronto verás aquí las armas más consultadas por la comunidad."
         items={masVisitadas}
+        fallbackItems={sugerencias(10)}
+        fallbackNote="Explora el catálogo · las visitas de la comunidad aparecerán aquí"
+        fallbackRender={renderSugerencia}
         renderItem={(a, i) =>
         <VisitedCard arma={a} rank={i + 1} onClick={() => onOpenArma(a.id)} />
         } />
@@ -72,8 +81,10 @@ function HomeScreen({ onNav, onOpenArma }) {
       <CarouselSection
         eyebrow="★ VALORACIÓN DE USUARIOS"
         title="Las mejor calificadas"
-        emptyText="Aún no hay calificaciones. Sé el primero en valorar un arma desde su ficha."
         items={mejorCalificadas}
+        fallbackItems={sugerencias(20)}
+        fallbackNote="Sé el primero en valorar un arma desde su ficha"
+        fallbackRender={renderSugerencia}
         renderItem={(a) =>
         <RatedCard arma={a} onClick={() => onOpenArma(a.id)} />
         } />
@@ -86,7 +97,7 @@ function HomeScreen({ onNav, onOpenArma }) {
         action={
         <button onClick={() => onNav('calibres')} style={{
           background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase'
+          fontFamily: 'Courier Prime, monospace', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase'
         }}>Ver guía →</button>
         }
         items={(window.CALIBRES || [])}
@@ -101,7 +112,7 @@ function HomeScreen({ onNav, onOpenArma }) {
         action={
         <button onClick={() => onNav('campos')} style={{
           background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase'
+          fontFamily: 'Courier Prime, monospace', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase'
         }}>Ver todos →</button>
         }
         items={(window.CAMPOS || [])}
@@ -116,7 +127,7 @@ function HomeScreen({ onNav, onOpenArma }) {
         action={
         <button onClick={() => onNav('cursos')} style={{
           background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase'
+          fontFamily: 'Courier Prime, monospace', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase'
         }}>Ver todos →</button>
         }
         items={(window.CURSOS || [])}
@@ -131,7 +142,7 @@ function HomeScreen({ onNav, onOpenArma }) {
           background: 'none', border: 'none', cursor: 'pointer',
           color: PALETTE.amber,
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 10, letterSpacing: '0.12em',
+          fontSize: 12, letterSpacing: '0.12em',
           textTransform: 'uppercase'
         }}>Ver Todas →</button>
         }>Categorías</SectionHeader>
@@ -153,9 +164,9 @@ function HomeScreen({ onNav, onOpenArma }) {
               }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor = PALETTE.amber; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor = PALETTE.border; }}>
-                {/* Foto 1:1 */}
+                {/* Foto 4:5 */}
                 <div style={{
-                  width: '100%', aspectRatio: '1 / 1',
+                  width: '100%', aspectRatio: '4 / 5',
                   position: 'relative', overflow: 'hidden',
                   background: `linear-gradient(135deg, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`
                 }}>
@@ -197,7 +208,7 @@ function HomeScreen({ onNav, onOpenArma }) {
                     color: PALETTE.amber,
                     padding: '2px 7px',
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: 9, letterSpacing: '0.1em',
+                    fontSize: 11, letterSpacing: '0.1em',
                     fontWeight: 700
                   }}>{String(count).padStart(2, '0')}</div>
                   {/* label overlay */}
@@ -206,7 +217,7 @@ function HomeScreen({ onNav, onOpenArma }) {
                   }}>
                     <div style={{
                       fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-                      fontSize: vp.isDesktop ? 16 : 14,
+                      fontSize: vp.isDesktop ? 17 : 16,
                       color: PALETTE.text,
                       textTransform: 'uppercase', letterSpacing: '0.06em',
                       lineHeight: 1,
@@ -214,12 +225,12 @@ function HomeScreen({ onNav, onOpenArma }) {
                     }}>{c.label}</div>
                     <div style={{
                       fontFamily: 'Courier Prime, monospace',
-                      fontSize: 9, color: PALETTE.amber,
+                      fontSize: 11, color: PALETTE.amber,
                       letterSpacing: '0.18em',
                       marginTop: 4,
                       display: 'flex', alignItems: 'center', gap: 6
                     }}>
-                      <span style={{ fontSize: 11 }}>{c.icon}</span>
+                      <span style={{ fontSize: 13 }}>{c.icon}</span>
                       <span>{count} unidades</span>
                     </div>
                   </div>
@@ -251,17 +262,17 @@ function HomeScreen({ onNav, onOpenArma }) {
               }}>
                 <div>
                   <div style={{
-                    fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 13,
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 15,
                     color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em'
                   }}>{d.label}</div>
                   <div style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 9,
+                    fontFamily: 'Courier Prime, monospace', fontSize: 11,
                     color: PALETTE.textMuted, marginTop: 2, lineHeight: 1.4
                   }}>{d.desc}</div>
                 </div>
                 <div style={{
                   fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-                  fontSize: 18, color: d.color, marginLeft: 10
+                  fontSize: 19, color: d.color, marginLeft: 10
                 }}>{count}</div>
               </button>);
 
@@ -277,12 +288,12 @@ function HomeScreen({ onNav, onOpenArma }) {
         background: PALETTE.bgElev,
         border: `1px dashed ${PALETTE.border}`,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 10, color: PALETTE.textMuted,
+        fontSize: 12, color: PALETTE.textMuted,
         lineHeight: 1.55, boxSizing: 'border-box'
       }}>
         <div style={{
           color: PALETTE.amber, fontWeight: 700,
-          letterSpacing: '0.15em', marginBottom: 4, fontSize: 9
+          letterSpacing: '0.15em', marginBottom: 4, fontSize: 11
         }}>◆ AVISO</div>
         Catálogo divulgativo sin fines de lucro. No es punto de venta. Información basada en la Ley Federal de Armas de Fuego y precios DCAM. Por <span style={{ color: PALETTE.text }}>Saulo Flores · {teamName}</span>.
       </div>
@@ -294,16 +305,19 @@ window.HomeScreen = HomeScreen;
 // ════════════════════════════════════════════════════════════════
 // CAROUSEL SECTION — sección con título + carrusel horizontal
 // ════════════════════════════════════════════════════════════════
-function CarouselSection({ eyebrow, title, items, renderItem, emptyText, action }) {
+function CarouselSection({ eyebrow, title, items, renderItem, emptyText, action, fallbackItems, fallbackNote, fallbackRender }) {
   const vp = window.useViewport();
   const PAD = 16;
+  const usingFallback = (!items || !items.length) && fallbackItems && fallbackItems.length > 0;
+  const list = usingFallback ? fallbackItems : items;
+  const render = usingFallback ? (fallbackRender || renderItem) : renderItem;
   return (
     <div style={{ marginBottom: 20, maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto' }}>
       <div style={{ padding: `0 ${PAD}px`, marginBottom: 10 }}>
         {eyebrow &&
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.amber,
+          fontSize: 11, color: PALETTE.amber,
           letterSpacing: '0.22em', textTransform: 'uppercase',
           marginBottom: 4, fontWeight: 600, margin: "25px 0px 4px"
         }}>{eyebrow}</div>
@@ -311,7 +325,7 @@ function CarouselSection({ eyebrow, title, items, renderItem, emptyText, action 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
           <div style={{
             fontFamily: 'Montserrat, sans-serif',
-            fontWeight: 700, fontSize: 20,
+            fontWeight: 700, fontSize: 21,
             color: PALETTE.text,
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
@@ -319,11 +333,18 @@ function CarouselSection({ eyebrow, title, items, renderItem, emptyText, action 
           }}>{title}</div>
           {action}
         </div>
+        {usingFallback && fallbackNote &&
+        <div style={{
+          fontFamily: 'Courier Prime, monospace',
+          fontSize: 11.5, color: PALETTE.textMuted,
+          letterSpacing: '0.08em', marginTop: 4
+        }}>◇ {fallbackNote}</div>
+        }
       </div>
       <window.HCarousel
-        items={items}
-        renderItem={renderItem}
-        itemWidth={vp.isDesktop ? 220 : 165}
+        items={list}
+        renderItem={render}
+        itemWidth={vp.isDesktop ? 340 : 300}
         padX={PAD}
         emptyText={emptyText} />
       
@@ -344,53 +365,32 @@ function FavCard({ arma, rank, onClick }) {
       borderTop: `2px solid ${PALETTE.amber}`,
       cursor: 'pointer', position: 'relative',
       overflow: 'hidden',
+      height: '100%', display: 'flex', flexDirection: 'row',
       transition: 'border-color 0.18s, transform 0.18s'
     }}
     onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
     onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
       {/* badge de favorito */}
       <div style={{
-        position: 'absolute', top: 0, right: 0, zIndex: 2,
+        position: 'absolute', top: 0, left: 0, zIndex: 2,
         background: PALETTE.amber, color: '#000',
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 9, fontWeight: 700,
+        fontSize: 11, fontWeight: 700,
         letterSpacing: '0.1em',
         padding: '3px 8px'
       }}>★ TOP</div>
       <div style={{
-        height: 105,
+        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
         background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        borderBottom: `1px solid ${PALETTE.border}`
+        position: 'relative',
+        borderRight: `1px solid ${PALETTE.border}`
       }}>
         <img src={arma.img} alt={arma.nombre}
         style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
         onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
       </div>
-      <div style={{ padding: '10px 12px' }}>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.textMuted,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          marginBottom: 3
-        }}>{arma.marca}</div>
-        <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-          fontSize: 14, color: PALETTE.text,
-          textTransform: 'uppercase', letterSpacing: '0.02em',
-          lineHeight: 1.15, marginBottom: 6,
-          height: 32, overflow: 'hidden'
-        }}>{arma.nombre}</div>
-        {rating.count > 0 ?
-        <window.StarRating value={rating.avg} count={rating.count} size="xs" /> :
-
-        <span style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.textMuted,
-          letterSpacing: '0.08em'
-        }}>{arma.calibre.replace(' Parabellum', '').replace('Winchester', 'Win')}</span>
-        }
-      </div>
+      <window.ArmaCardBody arma={arma} />
     </div>);
 
 }
@@ -403,51 +403,30 @@ function VisitedCard({ arma, rank, onClick }) {
       background: PALETTE.bgCard,
       border: `1px solid ${PALETTE.border}`,
       cursor: 'pointer', position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      height: '100%', display: 'flex', flexDirection: 'row'
     }}>
       <div style={{
         position: 'absolute', top: 8, left: 8, zIndex: 2,
         background: 'rgba(0,0,0,0.7)', border: `1px solid ${PALETTE.amber}`,
         color: PALETTE.amber,
         fontFamily: 'Montserrat, sans-serif',
-        fontSize: 11, fontWeight: 700,
+        fontSize: 13, fontWeight: 700,
         width: 26, height: 26,
         display: 'flex', alignItems: 'center', justifyContent: 'center'
       }}>{String(rank).padStart(2, '0')}</div>
       <div style={{
-        height: 105,
+        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
         background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        borderBottom: `1px solid ${PALETTE.border}`
+        position: 'relative',
+        borderRight: `1px solid ${PALETTE.border}`
       }}>
         <img src={arma.img} alt={arma.nombre}
         style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
         onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
       </div>
-      <div style={{ padding: '10px 12px' }}>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.textMuted,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          marginBottom: 3
-        }}>{arma.marca}</div>
-        <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-          fontSize: 14, color: PALETTE.text,
-          textTransform: 'uppercase', letterSpacing: '0.02em',
-          lineHeight: 1.15, marginBottom: 6,
-          height: 32, overflow: 'hidden'
-        }}>{arma.nombre}</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.amber,
-          letterSpacing: '0.06em',
-          display: 'flex', alignItems: 'center', gap: 4
-        }}>
-          <span>◉</span>
-          <span>{visits || 0} {visits === 1 ? 'visita' : 'visitas'}</span>
-        </div>
-      </div>
+      <window.ArmaCardBody arma={arma} />
     </div>);
 
 }
@@ -460,13 +439,15 @@ function RatedCard({ arma, onClick }) {
       background: PALETTE.bgCard,
       border: `1px solid ${PALETTE.border}`,
       cursor: 'pointer', position: 'relative',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      height: '100%', display: 'flex', flexDirection: 'row'
     }}>
       <div style={{
-        height: 105,
+        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
         background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        borderBottom: `1px solid ${PALETTE.border}`
+        position: 'relative',
+        borderRight: `1px solid ${PALETTE.border}`
       }}>
         <img src={arma.img} alt={arma.nombre}
         style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
@@ -476,7 +457,7 @@ function RatedCard({ arma, onClick }) {
           position: 'absolute', bottom: 8, right: 8,
           background: PALETTE.amber, color: '#000',
           fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 700, fontSize: 13,
+          fontWeight: 700, fontSize: 15,
           padding: '3px 8px',
           display: 'flex', alignItems: 'center', gap: 4
         }}>
@@ -484,22 +465,7 @@ function RatedCard({ arma, onClick }) {
           </div>
         }
       </div>
-      <div style={{ padding: '10px 12px' }}>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.textMuted,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          marginBottom: 3
-        }}>{arma.marca}</div>
-        <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-          fontSize: 14, color: PALETTE.text,
-          textTransform: 'uppercase', letterSpacing: '0.02em',
-          lineHeight: 1.15, marginBottom: 6,
-          height: 32, overflow: 'hidden'
-        }}>{arma.nombre}</div>
-        <window.StarRating value={rating.avg} count={rating.count} size="xs" />
-      </div>
+      <window.ArmaCardBody arma={arma} />
     </div>);
 
 }
@@ -514,7 +480,7 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
   const bgColor = p.bgColor || PALETTE.bgElev;
   const accent = p.accent || PALETTE.amber;
   // Dimensiones UNIFORMES (no varían según contenido)
-  const SLIDER_HEIGHT = vp.isDesktop ? 320 : 260;
+  const SLIDER_HEIGHT = vp.isDesktop ? 330 : 285;
   return (
     <div style={{
       position: 'relative',
@@ -551,16 +517,16 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 10, color: accent,
+          fontSize: 12, color: accent,
           letterSpacing: '0.25em', textTransform: 'uppercase',
           marginBottom: 10,
-          height: 14, lineHeight: '14px', // altura fija para evitar saltos
+          height: 18, lineHeight: '18px', // altura fija para evitar saltos
           overflow: 'hidden'
         }}>{p.eyebrow || ' '}</div>
 
         <div style={{
           fontFamily: 'Montserrat, sans-serif',
-          fontSize: vp.isDesktop ? 38 : 24,
+          fontSize: vp.isDesktop ? 38 : 25,
           fontWeight: 700, color: PALETTE.text,
           textTransform: 'uppercase',
           letterSpacing: '0.02em', lineHeight: 1.05,
@@ -576,11 +542,11 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
 
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: vp.isDesktop ? 13 : 11, color: PALETTE.textDim,
+          fontSize: vp.isDesktop ? 15 : 13, color: PALETTE.textDim,
           lineHeight: 1.55, maxWidth: 560,
           marginBottom: 18,
           // altura fija de 2 líneas
-          height: vp.isDesktop ? 40 : 36,
+          height: vp.isDesktop ? 48 : 42,
           display: '-webkit-box',
           WebkitBoxOrient: 'vertical',
           WebkitLineClamp: 2,
@@ -592,7 +558,7 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
           background: accent, color: '#000', border: 'none',
           padding: vp.isDesktop ? '12px 24px' : '10px 20px',
           fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-          fontSize: vp.isDesktop ? 13 : 12,
+          fontSize: vp.isDesktop ? 15 : 14,
           letterSpacing: '0.18em', textTransform: 'uppercase',
           cursor: 'pointer',
           display: 'inline-flex', gap: 10, alignItems: 'center',
@@ -618,7 +584,7 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
           style={promoBtnStyle()}>‹</button>
             <span style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 10, color: PALETTE.text,
+            fontSize: 12, color: PALETTE.text,
             letterSpacing: '0.15em', margin: '0 4px',
             minWidth: 28, textAlign: 'center'
           }}>{String(idx + 1).padStart(2, '0')}/{String(promos.length).padStart(2, '0')}</span>
@@ -652,7 +618,7 @@ function promoBtnStyle() {
     background: 'transparent', color: PALETTE.text,
     border: `1px solid ${PALETTE.border}`,
     width: 24, height: 24, cursor: 'pointer',
-    fontSize: 14, lineHeight: 1,
+    fontSize: 16, lineHeight: 1,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     padding: 0
   };
@@ -662,7 +628,7 @@ function promoBtnStyle() {
 // ════════════════════════════════════════════════════════════════
 function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare }) {
   const vp = window.useViewport();
-  const cols = vp.isDesktop ? 'repeat(4, 1fr)' : vp.isTablet ? 'repeat(3, 1fr)' : '1fr 1fr';
+  const cols = vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr';
   const [query, setQuery] = useState('');
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
@@ -732,24 +698,24 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             border: `1px solid ${PALETTE.border}`,
             padding: '8px 10px'
           }}>
-          <span style={{ color: PALETTE.amber, fontSize: 12 }}>⌕</span>
+          <span style={{ color: PALETTE.amber, fontSize: 14 }}>⌕</span>
           <input value={query} onChange={(e) => setQuery(e.target.value)}
             placeholder="Nombre, marca, calibre, país..." style={{
               flex: 1, background: 'none', border: 'none', outline: 'none',
               color: PALETTE.text,
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 11
+              fontSize: 13
             }} />
           {(query || activeCount > 0) &&
             <button onClick={clearAll} style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              color: PALETTE.textMuted, fontSize: 12
+              color: PALETTE.textMuted, fontSize: 14
             }}>✕</button>
             }
         </div>
 
         {/* CHIPS TIPO */}
-        <div style={{
+        <div className="amx-hscroll" style={{
             display: 'flex', gap: 6, overflowX: 'auto', marginTop: 10,
             paddingBottom: 2
           }}>
@@ -762,7 +728,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         </div>
 
         {/* AVAIL CHIPS */}
-        <div style={{
+        <div className="amx-hscroll" style={{
             display: 'flex', gap: 6, overflowX: 'auto', marginTop: 6,
             paddingBottom: 2
           }}>
@@ -780,7 +746,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             color: PALETTE.textDim,
             padding: '4px 10px',
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 9, letterSpacing: '0.12em',
+            fontSize: 11, letterSpacing: '0.12em',
             textTransform: 'uppercase', cursor: 'pointer',
             width: '100%'
           }}>
@@ -839,7 +805,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         ...innerMax,
         padding: `10px ${padX}px 6px`,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 10, color: PALETTE.textDim,
+        fontSize: 12, color: PALETTE.textDim,
         letterSpacing: '0.1em',
         display: 'flex', justifyContent: 'space-between'
       }}>
@@ -865,7 +831,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
           gridColumn: '1/-1',
           textAlign: 'center', padding: '40px 20px',
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.textMuted
+          fontSize: 13, color: PALETTE.textMuted
         }}>
             <div style={{ fontSize: 32, color: PALETTE.border, marginBottom: 10 }}>◯</div>
             Sin resultados.<br />Ajusta los filtros.
@@ -880,7 +846,7 @@ function FilterRow({ label, children }) {
     <div style={{ marginBottom: 6 }}>
       <div style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 9, color: PALETTE.textMuted,
+        fontSize: 11, color: PALETTE.textMuted,
         letterSpacing: '0.15em', textTransform: 'uppercase',
         marginBottom: 4
       }}>{label}</div>

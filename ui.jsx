@@ -11,6 +11,7 @@ const PALETTE = {
   amberDim:  '#D4A910',
   military:  '#555555',
   red:       '#C0392B',
+  green:     '#4FAE5C',
   blue:      '#7E8A99',
   text:      '#FFFFFF',
   textDim:   '#B5B5B5',
@@ -71,7 +72,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
       <button onClick={() => onNav('home')} style={{
         background: 'none', border: 'none', cursor: 'pointer',
         fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-        fontSize: 20, color: PALETTE.amber,
+        fontSize: 21, color: PALETTE.amber,
         letterSpacing: '0.1em',
         display: 'flex', alignItems: 'center', gap: 8,
         padding: 0,
@@ -101,13 +102,13 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                   background: 'none', border: 'none', cursor: 'pointer',
                   padding: '8px 14px',
                   fontFamily: 'Montserrat, sans-serif',
-                  fontSize: 12, fontWeight: 600,
+                  fontSize: 14, fontWeight: 600,
                   letterSpacing: '0.12em', textTransform: 'uppercase',
                   color: (dActive || moreOpen) ? PALETTE.amber : PALETTE.textDim,
                   borderBottom: dActive ? `2px solid ${PALETTE.amber}` : '2px solid transparent',
                   whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
                   transition: 'color 0.15s',
-                }}>{it.label} <span style={{ fontSize: 9, transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span></button>
+                }}>{it.label} <span style={{ fontSize: 11, transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span></button>
                 {moreOpen && (
                   <div style={{
                     position: 'absolute', top: '100%', right: 0, minWidth: 200,
@@ -124,7 +125,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                           display: 'block', width: '100%', textAlign: 'left',
                           background: miActive ? 'rgba(245,197,24,0.10)' : 'none',
                           border: 'none', cursor: 'pointer', padding: '10px 12px',
-                          fontFamily: 'Montserrat, sans-serif', fontSize: 12, fontWeight: 600,
+                          fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600,
                           letterSpacing: '0.08em', textTransform: 'uppercase',
                           color: miActive ? PALETTE.amber : PALETTE.text,
                           transition: 'background 0.12s, color 0.12s',
@@ -146,7 +147,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
               border: it.accent ? `1px solid ${PALETTE.amber}` : 'none', cursor: 'pointer',
               padding: it.accent ? '8px 12px' : '8px 14px',
               fontFamily: 'Montserrat, sans-serif',
-              fontSize: 12, fontWeight: 600,
+              fontSize: 14, fontWeight: 600,
               letterSpacing: '0.12em', textTransform: 'uppercase',
               color: active ? (it.accent ? '#000' : PALETTE.amber) : (it.accent ? PALETTE.amber : PALETTE.textDim),
               borderBottom: active && !it.accent ? `2px solid ${PALETTE.amber}` : (it.accent ? `1px solid ${PALETTE.amber}` : '2px solid transparent'),
@@ -160,7 +161,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                 <span style={{
                   position: 'absolute', top: 2, right: 2,
                   background: PALETTE.amber, color: '#000',
-                  fontSize: 8, fontWeight: 700,
+                  fontSize: 10, fontWeight: 700,
                   padding: '1px 4px', borderRadius: 8,
                   fontFamily: 'Courier Prime, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
@@ -172,7 +173,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
       </div>
       <div style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 9, color: PALETTE.textMuted,
+        fontSize: 11, color: PALETTE.textMuted,
         letterSpacing: '0.2em', textTransform: 'uppercase',
       }}>ENCICLOPEDIA TÁCTICA · ED. 2026</div>
     </div>
@@ -185,10 +186,10 @@ window.TopNav = TopNav;
 // ──────────────────────────────────────────────────────────────
 function AvailBadge({ avail, compact = false }) {
   const map = {
-    dcam:      { label: 'CIVIL · DCAM',   color: PALETTE.military, dot: '●' },
-    externo:   { label: 'CIVIL · EXT',    color: PALETTE.blue,     dot: '●' },
-    seguridad: { label: 'SEGURIDAD',      color: PALETTE.amber,    dot: '◆' },
-    ejercito:  { label: 'EJÉRCITO',       color: PALETTE.red,      dot: '▲' },
+    dcam:      { label: 'CIVIL · DCAM',   short: 'CIVIL',     color: PALETTE.green, dot: '●' },
+    externo:   { label: 'CIVIL · EXT',    short: 'CIVIL',     color: PALETTE.green, dot: '●' },
+    seguridad: { label: 'SEGURIDAD',      short: 'SEGURIDAD', color: PALETTE.amber,    dot: '◆' },
+    ejercito:  { label: 'EJÉRCITO',       short: 'EJÉRCITO',  color: PALETTE.red,      dot: '▲' },
   };
   const m = map[avail] || map.dcam;
   return (
@@ -200,19 +201,88 @@ function AvailBadge({ avail, compact = false }) {
       border: `1px solid ${m.color}`,
       color: m.color,
       fontFamily: 'Courier Prime, monospace',
-      fontSize: compact ? '8px' : '9px',
+      fontSize: compact ? '10px' : '11px',
       fontWeight: 600,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
       lineHeight: 1,
       whiteSpace: 'nowrap',
     }}>
-      <span style={{ fontSize: compact ? '6px' : '7px' }}>{m.dot}</span>
-      <span>{m.label}</span>
+      <span style={{ fontSize: compact ? '8px' : '9px' }}>{m.dot}</span>
+      <span>{compact ? m.short : m.label}</span>
     </span>
   );
 }
 window.AvailBadge = AvailBadge;
+
+// ──────────────────────────────────────────────────────────────
+// PRICE LEVEL — escala de precio 1-5 con "$" llenos y vacíos
+// ──────────────────────────────────────────────────────────────
+function PriceLevel({ lvl, size = 12 }) {
+  const n = Math.max(1, Math.min(5, Number(lvl) || 1));
+  return (
+    <span style={{
+      fontFamily: 'Courier Prime, monospace',
+      fontSize: size, fontWeight: 700,
+      letterSpacing: '0.06em', whiteSpace: 'nowrap', lineHeight: 1,
+    }}>
+      <span style={{ color: PALETTE.amber }}>{'$'.repeat(n)}</span>
+      <span style={{ color: 'rgba(245,197,24,0.28)' }}>{'$'.repeat(5 - n)}</span>
+    </span>
+  );
+}
+window.PriceLevel = PriceLevel;
+
+// ──────────────────────────────────────────────────────────────
+// ARMA CARD BODY — cuerpo estándar de ficha:
+// marca + bandera · nombre (2 líneas) · calibre · legalidad · precio
+// ──────────────────────────────────────────────────────────────
+function ArmaCardBody({ arma }) {
+  return (
+    <div style={{ padding: '10px 12px 12px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
+        <CountryFlag pais={arma.pais} height={12} />
+        <span style={{
+          fontFamily: 'Courier Prime, monospace',
+          fontSize: 11, color: PALETTE.amber,
+          letterSpacing: '0.12em', textTransform: 'uppercase',
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>{arma.marca}</span>
+      </div>
+      <div style={{
+        fontFamily: 'Montserrat, sans-serif',
+        fontWeight: 600, fontSize: 17,
+        color: PALETTE.text,
+        textTransform: 'uppercase',
+        lineHeight: 1.15,
+        marginBottom: 6,
+        letterSpacing: '0.02em',
+        // altura fija de 2 líneas para fichas uniformes
+        height: 40,
+        display: '-webkit-box',
+        WebkitBoxOrient: 'vertical',
+        WebkitLineClamp: 2,
+        overflow: 'hidden',
+      }}>{arma.nombre}</div>
+      {/* calibre */}
+      <div style={{
+        fontFamily: 'Courier Prime, monospace',
+        fontSize: 11,
+        color: PALETTE.textDim,
+        marginBottom: 8,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>
+        <span style={{ color: PALETTE.textMuted }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}
+      </div>
+      {/* legalidad + precio */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
+        <AvailBadge avail={arma.avail} compact />
+        <PriceLevel lvl={arma.priceLvl} />
+      </div>
+    </div>
+  );
+}
+window.ArmaCardBody = ArmaCardBody;
 
 // ──────────────────────────────────────────────────────────────
 // TACTICAL CORNERS — esquinas tipo mira para enmarcar contenido
@@ -248,7 +318,7 @@ function StatsBar({ label, value, max = 100, color = PALETTE.amber, compareValue
       <div style={{
         display: 'flex', justifyContent: 'space-between',
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 10, color: PALETTE.textDim,
+        fontSize: 12, color: PALETTE.textDim,
         textTransform: 'uppercase', letterSpacing: '0.1em',
         marginBottom: 4,
       }}>
@@ -304,7 +374,7 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
       }} />
       <div style={{
         fontFamily: 'Montserrat, sans-serif',
-        fontSize: 14, fontWeight: 600,
+        fontSize: 16, fontWeight: 600,
         color: PALETTE.text,
         textTransform: 'uppercase', letterSpacing: '0.15em',
         flex: 1,
@@ -334,13 +404,13 @@ function AppHeader({ title, back, onBack, right }) {
       {back ? (
         <button onClick={onBack} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.amber, fontSize: 18, padding: 4,
+          color: PALETTE.amber, fontSize: 19, padding: 4,
           fontFamily: 'Courier Prime, monospace',
         }}>‹</button>
       ) : (
         <div style={{
           fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-          fontSize: 16, color: PALETTE.amber,
+          fontSize: 17, color: PALETTE.amber,
           letterSpacing: '0.08em',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
@@ -356,7 +426,7 @@ function AppHeader({ title, back, onBack, right }) {
               border: `1.5px dashed ${PALETTE.amber}`,
               borderRadius: 6, color: PALETTE.amber,
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 9, letterSpacing: '0.1em',
+              fontSize: 11, letterSpacing: '0.1em',
               background: 'rgba(245,197,24,0.08)',
             }}>LOGO</span>
           )}
@@ -372,7 +442,7 @@ function AppHeader({ title, back, onBack, right }) {
       <div style={{
         flex: 1,
         fontFamily: 'Montserrat, sans-serif',
-        fontSize: 14, fontWeight: 500,
+        fontSize: 16, fontWeight: 500,
         color: PALETTE.text,
         textTransform: 'uppercase', letterSpacing: '0.12em',
         textAlign: back ? 'left' : 'right',
@@ -421,13 +491,13 @@ function BottomNav({ current, onNav, compareCount }) {
                 boxShadow: `0 0 6px ${PALETTE.amber}`,
               }} />
             )}
-            <span style={{ fontSize: 16, lineHeight: 1, position: 'relative' }}>
+            <span style={{ fontSize: 17, lineHeight: 1, position: 'relative' }}>
               {it.icon}
               {it.badge ? (
                 <span style={{
                   position: 'absolute', top: -4, right: -8,
                   background: PALETTE.amber, color: '#000',
-                  fontSize: 8, fontWeight: 700,
+                  fontSize: 10, fontWeight: 700,
                   borderRadius: 8, padding: '1px 4px',
                   fontFamily: 'Courier Prime, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
@@ -436,7 +506,7 @@ function BottomNav({ current, onNav, compareCount }) {
             </span>
             <span style={{
               fontFamily: 'Montserrat, sans-serif',
-              fontSize: 9, fontWeight: 500,
+              fontSize: 11, fontWeight: 500,
               letterSpacing: '0.08em',
             }}>{it.label}</span>
           </button>
@@ -460,20 +530,22 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
       cursor: 'pointer',
       transition: 'border-color 0.18s',
       overflow: 'hidden',
+      height: '100%',
+      display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto',
-      containIntrinsicSize: 'auto 232px',
+      containIntrinsicSize: 'auto 150px',
     }}
     onMouseEnter={e => e.currentTarget.style.borderColor = PALETTE.amber}
     onMouseLeave={e => e.currentTarget.style.borderColor = PALETTE.border}
     >
       <TacticalCorners size={8} color={PALETTE.amber} />
-      {/* imagen */}
+      {/* imagen · columna izquierda */}
       <div style={{
-        height: 110,
+        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
         background: `radial-gradient(circle at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
-        borderBottom: `1px solid ${PALETTE.border}`,
+        borderRight: `1px solid ${PALETTE.border}`,
         overflow: 'hidden',
       }}>
         <div style={{
@@ -501,7 +573,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 8, fontWeight: 600,
+          fontSize: 10, fontWeight: 600,
           color: PALETTE.textDim,
           background: 'rgba(0,0,0,0.6)',
           padding: '2px 5px',
@@ -509,57 +581,24 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
           textTransform: 'uppercase',
           borderLeft: `2px solid ${PALETTE.amber}`,
         }}>{arma.tipo}</span>
-        {/* compare button */}
-        <button onClick={(e) => { e.stopPropagation(); onCompare && onCompare(); }}
-          style={{
-            position: 'absolute', top: 6, right: 6,
-            background: inCompare ? PALETTE.amber : 'rgba(0,0,0,0.6)',
-            color: inCompare ? '#000' : PALETTE.textDim,
-            border: `1px solid ${inCompare ? PALETTE.amber : PALETTE.border}`,
-            padding: '2px 5px',
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 9, fontWeight: 700,
-            cursor: 'pointer',
-            letterSpacing: '0.05em',
-          }}>{inCompare ? '✓' : '⇄'}</button>
       </div>
-      {/* body */}
-      <div style={{ padding: '10px 12px 12px' }}>
-        <div style={{
+      {/* compare button — sólo donde hay comparador */}
+      {onCompare &&
+      <button onClick={(e) => { e.stopPropagation(); onCompare(); }}
+        style={{
+          position: 'absolute', top: 6, right: 6, zIndex: 2,
+          background: inCompare ? PALETTE.amber : 'rgba(0,0,0,0.6)',
+          color: inCompare ? '#000' : PALETTE.textDim,
+          border: `1px solid ${inCompare ? PALETTE.amber : PALETTE.border}`,
+          padding: '2px 5px',
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.amber,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          marginBottom: 2,
-        }}>{arma.marca} · {arma.pais}</div>
-        <div style={{
-          fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 600, fontSize: 15,
-          color: PALETTE.text,
-          textTransform: 'uppercase',
-          lineHeight: 1.15,
-          marginBottom: 6,
-          letterSpacing: '0.02em',
-        }}>{arma.nombre}</div>
-        {/* mini specs */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3px 8px',
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 9,
-          color: PALETTE.textDim,
-          marginBottom: 8,
-        }}>
-          <div><span style={{ color: PALETTE.textMuted }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}</div>
-          <div><span style={{ color: PALETTE.textMuted }}>CAP </span>{arma.capacidad}</div>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <AvailBadge avail={arma.avail} compact />
-          <span style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 10, color: PALETTE.amber,
-            letterSpacing: '0.1em', fontWeight: 700,
-          }}>{window.starsCost(arma.priceLvl)}</span>
-        </div>
-      </div>
+          fontSize: 11, fontWeight: 700,
+          cursor: 'pointer',
+          letterSpacing: '0.05em',
+        }}>{inCompare ? '✓' : '⇄'}</button>
+      }
+      {/* body — sólo: marca + bandera · nombre · calibre · legalidad · precio */}
+      <ArmaCardBody arma={arma} />
     </div>
   );
 }
@@ -575,12 +614,12 @@ function SpecRow({ label, value, accent }) {
       padding: '7px 10px',
       borderBottom: `1px solid ${PALETTE.border}`,
       fontFamily: 'Courier Prime, monospace',
-      fontSize: 11,
+      fontSize: 13,
     }}>
       <span style={{
         color: PALETTE.textMuted,
         textTransform: 'uppercase', letterSpacing: '0.08em',
-        fontSize: 10,
+        fontSize: 12,
       }}>{label}</span>
       <span style={{ color: accent || PALETTE.text, fontWeight: 600, textAlign: 'right' }}>{value}</span>
     </div>
@@ -787,7 +826,7 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
         <span style={{
           display: icon ? 'none' : 'block',
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 14, fontWeight: 700,
+          fontSize: 16, fontWeight: 700,
           color: PALETTE.amber,
           letterSpacing: 0,
         }}>{fallbackIcon || '◆'}</span>
@@ -796,13 +835,13 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 9, color: PALETTE.amber,
+          fontSize: 11, color: PALETTE.amber,
           textTransform: 'uppercase', letterSpacing: '0.14em',
           marginBottom: 2,
         }}>{label}</div>
         <div style={{
           fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 600, fontSize: 14,
+          fontWeight: 600, fontSize: 16,
           color: PALETTE.text,
           letterSpacing: '0.02em',
           whiteSpace: 'nowrap',
@@ -827,7 +866,7 @@ function FilterChip({ children, active, onClick, count }) {
       border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
       padding: '5px 10px',
       fontFamily: 'Courier Prime, monospace',
-      fontSize: 10, fontWeight: 600,
+      fontSize: 12, fontWeight: 600,
       letterSpacing: '0.08em', textTransform: 'uppercase',
       cursor: 'pointer',
       whiteSpace: 'nowrap',
@@ -837,7 +876,7 @@ function FilterChip({ children, active, onClick, count }) {
       {children}
       {count != null && (
         <span style={{
-          fontSize: 9, opacity: 0.7,
+          fontSize: 11, opacity: 0.7,
         }}>· {count}</span>
       )}
     </button>
@@ -864,25 +903,25 @@ function CompareFloat({ ids, onOpen, onClear }) {
     }}>
       <span style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 10, color: PALETTE.amber,
+        fontSize: 12, color: PALETTE.amber,
         letterSpacing: '0.1em', fontWeight: 700,
       }}>⇄ {ids.length}/2</span>
       <span style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 10, color: PALETTE.textDim, flex: 1,
+        fontSize: 12, color: PALETTE.textDim, flex: 1,
       }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
       {ids.length === 2 && (
         <button onClick={onOpen} style={{
           background: PALETTE.amber, color: '#000', border: 'none',
           padding: '5px 10px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11,
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
           letterSpacing: '0.1em', textTransform: 'uppercase',
           cursor: 'pointer',
         }}>Ver</button>
       )}
       <button onClick={onClear} style={{
         background: 'none', border: 'none', cursor: 'pointer',
-        color: PALETTE.textDim, fontSize: 14, padding: 2,
+        color: PALETTE.textDim, fontSize: 16, padding: 2,
       }}>✕</button>
     </div>
   );
@@ -896,7 +935,7 @@ let __starUid = 0;
 function StarRating({ value = 0, count = 0, interactive = false, onRate, size = 'sm', showCount = true, label }) {
   const [hover, setHover] = React.useState(0);
   const [uid] = React.useState(() => 'sr' + (++__starUid));
-  const PX = { xs: 11, sm: 14, md: 18, lg: 26 }[size] || 14;
+  const PX = { xs: 13, sm: 16, md: 20, lg: 28 }[size] || 16;
   const v = hover || value || 0;
   const onClick = (n) => { if (interactive && typeof onRate === 'function') onRate(n); };
   return (
@@ -939,7 +978,7 @@ function StarRating({ value = 0, count = 0, interactive = false, onRate, size = 
       {showCount && (
         <span style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: Math.max(9, PX - 5),
+          fontSize: Math.max(11, PX - 5),
           color: PALETTE.textMuted,
           letterSpacing: '0.04em',
           whiteSpace: 'nowrap',
@@ -952,7 +991,7 @@ function StarRating({ value = 0, count = 0, interactive = false, onRate, size = 
       {label && (
         <span style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: Math.max(9, PX - 5),
+          fontSize: Math.max(11, PX - 5),
           color: PALETTE.textDim,
           letterSpacing: '0.04em',
         }}>{label}</span>
@@ -963,9 +1002,13 @@ function StarRating({ value = 0, count = 0, interactive = false, onRate, size = 
 window.StarRating = StarRating;
 
 // ──────────────────────────────────────────────────────────────
-// HORIZONTAL CAROUSEL — scroll-snap horizontal con flechas opcionales
+// HORIZONTAL CAROUSEL — carrusel moderno: swipe táctil + arrastre con mouse + snap + flechas
 // ──────────────────────────────────────────────────────────────
 function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, emptyText }) {
+  const scrollerRef = React.useRef(null);
+  const drag = React.useRef({ down: false, moved: false, startX: 0, startScroll: 0 });
+  const [dragging, setDragging] = React.useState(false);
+
   if (!items || !items.length) {
     return emptyText ? (
       <div style={{
@@ -974,27 +1017,86 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
         border: `1px dashed ${PALETTE.border}`,
         color: PALETTE.textMuted,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, letterSpacing: '0.04em',
+        fontSize: 13, letterSpacing: '0.04em',
         textAlign: 'center',
         margin: `0 ${padX}px`,
       }}>{emptyText}</div>
     ) : null;
   }
+
+  const step = itemWidth + gap;
+
+  const onPointerDown = (e) => {
+    if (e.pointerType !== 'mouse') return; // táctil: scroll nativo con momentum
+    const el = scrollerRef.current;
+    if (!el) return;
+    drag.current = { down: true, moved: false, startX: e.clientX, startScroll: el.scrollLeft };
+    el.style.scrollSnapType = 'none';
+  };
+  const onPointerMove = (e) => {
+    if (!drag.current.down) return;
+    const el = scrollerRef.current;
+    if (!el) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 6 && !drag.current.moved) {
+      drag.current.moved = true;
+      setDragging(true);
+    }
+    el.scrollLeft = drag.current.startScroll - dx;
+  };
+  const endDrag = () => {
+    if (!drag.current.down) return;
+    const el = scrollerRef.current;
+    drag.current.down = false;
+    setDragging(false);
+    if (el) {
+      if (drag.current.moved) {
+        // asentar en la tarjeta más cercana y reactivar el snap
+        const target = Math.max(0, Math.round(el.scrollLeft / step) * step);
+        el.scrollTo({ left: target, behavior: 'smooth' });
+        setTimeout(() => { el.style.scrollSnapType = ''; }, 360);
+      } else {
+        el.style.scrollSnapType = '';
+      }
+    }
+  };
+  const onClickCapture = (e) => {
+    if (drag.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current.moved = false;
+    }
+  };
+
   return (
-    <div style={{
-      display: 'flex', gap, overflowX: 'auto', overflowY: 'hidden',
-      scrollSnapType: 'x mandatory',
-      WebkitOverflowScrolling: 'touch',
-      padding: `4px ${padX}px 12px`,
-      scrollPaddingLeft: padX,
-      // hide scrollbar on mobile, subtle on desktop
-    }} className="amx-hscroll">
-      {items.map((it, i) => (
-        <div key={it.id || i} style={{
-          flex: `0 0 ${itemWidth}px`,
-          scrollSnapAlign: 'start',
-        }}>{renderItem(it, i)}</div>
-      ))}
+    <div style={{ position: 'relative' }} className="amx-carousel">
+      <div
+        ref={scrollerRef}
+        className="amx-hscroll"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onPointerLeave={endDrag}
+        onClickCapture={onClickCapture}
+        onDragStart={(e) => e.preventDefault()}
+        style={{
+          display: 'flex', gap, overflowX: 'auto', overflowY: 'hidden',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+          padding: `4px ${padX}px 12px`,
+          scrollPaddingLeft: padX,
+          cursor: dragging ? 'grabbing' : 'grab',
+          userSelect: dragging ? 'none' : undefined,
+        }}>
+        {items.map((it, i) => (
+          <div key={it.id || i} style={{
+            flex: `0 0 ${itemWidth}px`,
+            width: itemWidth, minWidth: 0, overflow: 'hidden',
+            scrollSnapAlign: 'start',
+          }}>{renderItem(it, i)}</div>
+        ))}
+      </div>
     </div>
   );
 }

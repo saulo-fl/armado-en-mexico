@@ -18,7 +18,7 @@ const CLASE_GLYPH = {
 function StripePlaceholder({ label, ratio = '16 / 9', children }) {
   return (
     <div style={{
-      position: 'relative', width: '100%', aspectRatio: ratio,
+      position: 'relative', width: '100%', aspectRatio: ratio, flexShrink: 0,
       overflow: 'hidden',
       background: `repeating-linear-gradient(135deg, ${PALETTE.bgElev} 0 10px, ${PALETTE.bg} 10px 20px)`,
       borderBottom: `1px solid ${PALETTE.border}`,
@@ -29,7 +29,7 @@ function StripePlaceholder({ label, ratio = '16 / 9', children }) {
       <span style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${PALETTE.amber}`, borderRight: `1.5px solid ${PALETTE.amber}`, opacity: 0.7 }} />
       {children || (
         <span style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 10,
+          fontFamily: 'Courier Prime, monospace', fontSize: 12,
           color: PALETTE.textMuted, letterSpacing: '0.18em',
           textTransform: 'uppercase', textAlign: 'center', padding: '0 10px',
         }}>▢ {label}</span>
@@ -43,7 +43,7 @@ window.StripePlaceholder = StripePlaceholder;
 function MiniBadge({ children, color = PALETTE.amber, solid = false }) {
   return (
     <span style={{
-      fontFamily: 'Courier Prime, monospace', fontSize: 9, fontWeight: 700,
+      fontFamily: 'Courier Prime, monospace', fontSize: 11, fontWeight: 700,
       letterSpacing: '0.12em', textTransform: 'uppercase',
       padding: '3px 7px',
       color: solid ? '#1A1A1A' : color,
@@ -69,9 +69,9 @@ function CalibresScreen({ onOpenArma, onNav }) {
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* encabezado */}
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 9, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◉ MUNICIÓN · GUÍA DIVULGATIVA</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◉ MUNICIÓN · GUÍA DIVULGATIVA</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Guía de calibres</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 14, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
+      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
         Conoce los calibres presentes en el catálogo: su uso típico, balística aproximada y las armas que los emplean. Cifras divulgativas, varían según marca y munición.
       </div>
 
@@ -86,7 +86,7 @@ function CalibresScreen({ onOpenArma, onNav }) {
               color: active ? '#1A1A1A' : PALETTE.textDim,
               border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
               padding: '7px 14px', cursor: 'pointer',
-              fontFamily: 'Courier Prime, monospace', fontSize: 11,
+              fontFamily: 'Courier Prime, monospace', fontSize: 13,
               letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700,
             }}>{cl}</button>
           );
@@ -106,8 +106,8 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
   const armas = armasPorCalibre(cal.id);
   const stat = (k, v) => (
     <div style={{ flex: 1, minWidth: 90 }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14, color: PALETTE.text }}>{v}</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
+      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 16, color: PALETTE.text }}>{v}</div>
     </div>
   );
   return (
@@ -116,15 +116,15 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
         {/* título + clase */}
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-            <span style={{ color: PALETTE.amber, fontFamily: 'Courier Prime, monospace', fontSize: 16 }}>{CLASE_GLYPH[cal.clase] || '◆'}</span>
-            <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 24 : 20, color: PALETTE.text, letterSpacing: '0.01em' }}>{cal.id}</span>
+            <span style={{ color: PALETTE.amber, fontFamily: 'Courier Prime, monospace', fontSize: 17 }}>{CLASE_GLYPH[cal.clase] || '◆'}</span>
+            <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 25 : 21, color: PALETTE.text, letterSpacing: '0.01em' }}>{cal.id}</span>
           </div>
           <MiniBadge>{cal.clase}</MiniBadge>
         </div>
         {/* uso */}
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
         {/* desc */}
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
+        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
         {/* balística */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
           {stat('Velocidad', cal.velocidad)}
@@ -135,7 +135,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
         {/* armas que lo usan */}
         {armas.length > 0 && (
           <div style={{ marginTop: 14 }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>Armas que lo usan</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>Armas que lo usan</div>
             <div className="amx-hscroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
               {armas.map((a) => (
                 <button key={a.id} onClick={() => onOpenArma(a.id)} style={{
@@ -144,14 +144,14 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
                 }}
                   onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
                   onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
-                  <div style={{ width: '100%', aspectRatio: '4 / 3', background: '#fff', overflow: 'hidden' }}>
+                  <div style={{ width: '100%', aspectRatio: '16 / 9', background: '#fff', overflow: 'hidden' }}>
                     {a.img
                       ? <img src={a.img} alt={a.nombre} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
                       : <div style={{ width: '100%', height: '100%', background: `repeating-linear-gradient(135deg, ${PALETTE.bgElev} 0 8px, ${PALETTE.bgCard} 8px 16px)` }} />}
                   </div>
                   <div style={{ padding: '6px 7px' }}>
-                    <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8, color: PALETTE.textMuted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{a.marca}</div>
-                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, fontWeight: 600, color: PALETTE.text, lineHeight: 1.15, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
+                    <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10, color: PALETTE.textMuted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{a.marca}</div>
+                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, fontWeight: 600, color: PALETTE.text, lineHeight: 1.15, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
                   </div>
                 </button>
               ))}
@@ -172,7 +172,7 @@ function CamposScreen({ onNav }) {
   const campos = window.CAMPOS || [];
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 9, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◎ CAMPOS Y CLUBES DE TIRO</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◎ CAMPOS Y CLUBES DE TIRO</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 10 }}>Campos de tiro</div>
 
       {/* banner suscripción a futuro */}
@@ -182,15 +182,15 @@ function CamposScreen({ onNav }) {
         marginBottom: 20, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap',
       }}>
         <div style={{ flex: 1, minWidth: 220 }}>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Suscripción próximamente</div>
-          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 4 }}>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Suscripción próximamente</div>
+          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 4 }}>
             Pronto podrás suscribirte para acceder a campos y clubes de tiro aliados con beneficios y reservación. Estos son ejemplos de lo que vendrá.
           </div>
         </div>
         <button onClick={() => onNav && onNav('submit')} style={{
           flexShrink: 0, background: PALETTE.amber, color: '#1A1A1A', border: 'none',
           padding: '11px 18px', cursor: 'pointer',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12,
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.12em', textTransform: 'uppercase',
         }}>Avísame</button>
       </div>
@@ -210,15 +210,15 @@ function CampoCard({ campo, vp }) {
     <div style={{ background: PALETTE.bgCard, border: `1px solid ${destacado ? PALETTE.amber : PALETTE.border}` }}>
       <StripePlaceholder label={`Foto · ${campo.ciudad}`} ratio="16 / 9">
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CAMPO</div>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, color: PALETTE.textDim, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{campo.entorno}</div>
+          <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CAMPO</div>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: PALETTE.textDim, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{campo.entorno}</div>
         </div>
       </StripePlaceholder>
       <div style={{ padding: '14px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15 }}>{campo.nombre}</div>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15 }}>{campo.nombre}</div>
         </div>
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 5 }}>◉ {campo.ciudad}, {campo.estado}</div>
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 5 }}>◉ {campo.ciudad}, {campo.estado}</div>
         {/* disciplinas */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
           {campo.disciplinas.map((d) => <MiniBadge key={d} color={PALETTE.border === d ? PALETTE.amber : PALETTE.textDim}>{d}</MiniBadge>)}
@@ -226,12 +226,12 @@ function CampoCard({ campo, vp }) {
         {/* meta */}
         <div style={{ display: 'flex', gap: 14, marginTop: 12, paddingTop: 10, borderTop: `1px solid ${PALETTE.border}` }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Distancias</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.distancias}</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Distancias</div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.distancias}</div>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Acceso</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.plan}</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Acceso</div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.plan}</div>
           </div>
         </div>
         <div style={{ marginTop: 12 }}>
@@ -245,7 +245,7 @@ function CampoCard({ campo, vp }) {
 // ═══════════════════════════════════════════════════════════════════════
 // CURSOS — catálogo de formación (placeholder)
 // ═══════════════════════════════════════════════════════════════════════
-const NIVEL_COLOR = { 'Básico': '#9AA3AD', 'Intermedio': '#F5C518', 'Avanzado': '#C0392B' };
+const NIVEL_COLOR = { 'Básico': '#9AA3AD', 'Intermedio': '#9AA3AD', 'Avanzado': '#9AA3AD' };
 
 function CursosScreen({ onNav }) {
   const vp = window.useViewport();
@@ -253,9 +253,9 @@ function CursosScreen({ onNav }) {
   const cursos = window.CURSOS || [];
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 9, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>✦ FORMACIÓN Y CURSOS</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>✦ FORMACIÓN Y CURSOS</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Cursos</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 14, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
+      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
         Aprende antes de decidir. Catálogo de formación con instructores certificados, del manejo seguro al tiro defensivo y de precisión. Contenido de muestra.
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr', gap: 14 }}>
@@ -270,27 +270,33 @@ function CursoCard({ curso, onNav, vp }) {
   const col = NIVEL_COLOR[curso.nivel] || PALETTE.amber;
   return (
     <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${col}`, display: 'flex', flexDirection: 'column' }}>
+      <StripePlaceholder label={`Foto · ${curso.titulo}`} ratio="16 / 9">
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CURSO</div>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: PALETTE.textDim, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{curso.modalidad}</div>
+        </div>
+      </StripePlaceholder>
       <div style={{ padding: '14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-          <MiniBadge color={col} solid={curso.nivel === 'Intermedio'}>{curso.nivel}</MiniBadge>
-          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10, color: PALETTE.textMuted, letterSpacing: '0.08em' }}>{curso.modalidad}</span>
+          <MiniBadge color={col}>{curso.nivel}</MiniBadge>
+          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.08em' }}>{curso.modalidad}</span>
         </div>
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.1, marginTop: 12 }}>{curso.titulo}</div>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 8, flex: 1 }}>{curso.desc}</div>
+        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 18, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.1, marginTop: 12 }}>{curso.titulo}</div>
+        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 8, flex: 1 }}>{curso.desc}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
           <div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Duración</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 12, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{curso.duracion}</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Duración</div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{curso.duracion}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Inversión</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, fontWeight: 700, color: PALETTE.amber, marginTop: 2 }}>{curso.precio}</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Inversión</div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 15, fontWeight: 700, color: PALETTE.amber, marginTop: 2 }}>{curso.precio}</div>
           </div>
         </div>
         <button onClick={() => onNav && onNav('submit')} style={{
           marginTop: 12, width: '100%', background: 'transparent', color: PALETTE.amber,
           border: `1.5px solid ${PALETTE.amber}`, padding: '10px', cursor: 'pointer',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12,
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.12em', textTransform: 'uppercase',
         }}
           onMouseEnter={(e) => { e.currentTarget.style.background = PALETTE.amber; e.currentTarget.style.color = '#1A1A1A'; }}
@@ -315,12 +321,12 @@ function CaliberMiniCard({ cal, onClick }) {
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ color: PALETTE.amber, fontFamily: 'Courier Prime, monospace', fontSize: 15 }}>{CLASE_GLYPH[cal.clase] || '◆'}</span>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 8.5, color: PALETTE.textMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{cal.clase}</span>
+        <span style={{ color: PALETTE.amber, fontFamily: 'Courier Prime, monospace', fontSize: 17 }}>{CLASE_GLYPH[cal.clase] || '◆'}</span>
+        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{cal.clase}</span>
       </div>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, marginTop: 10, lineHeight: 1 }}>{cal.id}</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 11, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 9, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
+      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 10, lineHeight: 1 }}>{cal.id}</div>
+      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
     </div>
   );
 }
@@ -335,12 +341,12 @@ function CampoMiniCard({ campo, onClick }) {
     }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = destacado ? PALETTE.amber : PALETTE.border}>
-      <StripePlaceholder label="Foto" ratio="16 / 10">
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, color: PALETTE.textDim, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{campo.entorno}</div>
+      <StripePlaceholder label="Foto" ratio="16 / 9">
+        <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: PALETTE.textDim, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{campo.entorno}</div>
       </StripePlaceholder>
       <div style={{ padding: '11px 12px' }}>
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{campo.nombre}</div>
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 9.5, color: PALETTE.amber, letterSpacing: '0.05em', marginTop: 4 }}>◉ {campo.ciudad}</div>
+        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{campo.nombre}</div>
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.amber, letterSpacing: '0.05em', marginTop: 4 }}>◉ {campo.ciudad}</div>
       </div>
     </div>
   );
@@ -352,15 +358,20 @@ function CursoMiniCard({ curso, onClick }) {
   return (
     <div onClick={onClick} style={{
       background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${col}`,
-      cursor: 'pointer', padding: '14px', height: '100%', display: 'flex', flexDirection: 'column',
+      cursor: 'pointer', overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column',
     }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
-      <MiniBadge color={col} solid={curso.nivel === 'Intermedio'}>{curso.nivel}</MiniBadge>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, marginTop: 12, flex: 1 }}>{curso.titulo}</div>
+      <StripePlaceholder label="Foto" ratio="16 / 9">
+        <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: PALETTE.textDim, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{curso.modalidad}</div>
+      </StripePlaceholder>
+      <div style={{ padding: '11px 14px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <MiniBadge color={col}>{curso.nivel}</MiniBadge>
+      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, marginTop: 10, flex: 1 }}>{curso.titulo}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 9.5, color: PALETTE.textMuted, letterSpacing: '0.06em' }}>{curso.duracion}</span>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 9.5, color: PALETTE.amber, letterSpacing: '0.08em' }}>Ver →</span>
+        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.textMuted, letterSpacing: '0.06em' }}>{curso.duracion}</span>
+        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.amber, letterSpacing: '0.08em' }}>Ver →</span>
+      </div>
       </div>
     </div>
   );
