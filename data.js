@@ -85,7 +85,7 @@ const _legalFor = (avail) => {
   if (avail === 'seguridad') return {
     availLabel: "Policía / Seguridad",
     legalTit:   "Restringido — Seguridad pública/privada",
-    legalDesc:  "Únicamente se vende a corporaciones de seguridad pública o privada con licencia colectiva vigente expedida por SEDENA. No se entrega a particulares. Las pistolas de cañón largo en calibre .380 también están restringidas a este uso.",
+    legalDesc:  "Únicamente se distribuye a corporaciones de seguridad pública o privada con licencia colectiva vigente expedida por SEDENA. No se entrega a particulares. Las pistolas de cañón largo en calibre .380 también están restringidas a este uso.",
     disponibilidad: ["DCAM con licencia colectiva vigente"],
   };
   return {
@@ -485,15 +485,15 @@ window.DB = [
   // ═══════════════════════════════════════════════════════════
   mk(80, "Tippmann M4-22 Elite", "Tippmann", "rifle", "EE.UU.", ".22 LR", "25", "2800g", "850mm", "Semi-auto, réplica AR-15", 2019, "ejercito", "30497.36", "RIFLE 0.22 L.R. TIPPMANN M4-22 ELITE",
     "imagenes/096_Tippmann_M4-22_Elite.jpg",
-    "Réplica .22 LR del M4. Venta EXCLUSIVA para Oficiales, Jefes y Generales del Ejército y Fuerza Aérea Mexicana, y equivalencias en la Armada de México."),
+    "Réplica .22 LR del M4. Distribución EXCLUSIVA para Oficiales, Jefes y Generales del Ejército y Fuerza Aérea Mexicana, y equivalencias en la Armada de México."),
 
   mk(81, "Tippmann M4-22 Redline", "Tippmann", "rifle", "EE.UU.", ".22 LR", "25", "2800g", "850mm", "Semi-auto, edición Redline", 2021, "ejercito", "36042.33", "RIFLE 0.22 TIPPMANN M4-22 REDLINE",
     "imagenes/097_Tippmann_M4-22_Redline.jpg",
-    "Edición Redline con detalles rojos. Venta exclusiva para Oficiales, Jefes y Generales del Ejército y Fuerza Aérea Mexicana."),
+    "Edición Redline con detalles rojos. Distribución exclusiva para Oficiales, Jefes y Generales del Ejército y Fuerza Aérea Mexicana."),
 
   mk(82, "Tippmann M4-22 OD-Green", "Tippmann", "rifle", "EE.UU.", ".22 LR", "25", "2800g", "850mm", "Semi-auto, edición OD-Green", 2020, "ejercito", "17189.42", "RIFLE CAL 22 TIPPMANN M4-22 OD-GREEN",
     "imagenes/098_Tippmann_M4-22_OD-Green.jpg",
-    "Edición verde militar. Venta exclusiva para Oficiales del Ejército Mexicano."),
+    "Edición verde militar. Distribución exclusiva para Oficiales del Ejército Mexicano."),
 
   // ═══════════════════════════════════════════════════════════
   //  SUBAMETRALLADORAS — EXCLUSIVO EJÉRCITO

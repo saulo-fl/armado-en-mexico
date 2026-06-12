@@ -1460,12 +1460,13 @@ function LegalScreen({ onNav }) {
   { t: 'Registro en plataforma SEDENA', d: 'Crear cuenta en el portal oficial de Defensa Nacional y completar perfil con tus datos.' },
   { t: 'Solicitud de licencia', d: 'Pedir Licencia Particular (uso doméstico) o de tiro/cacería según el caso. Pago de derechos.' },
   { t: 'Cita en la DCAM', d: 'Agendar visita al Campo Militar No. 1 (CDMX) o sede Monterrey. Llevar documentación completa.' },
-  { t: 'Selección y compra', d: 'Elegir arma del catálogo oficial. La DCAM es el único punto legal de venta civil en México.' },
+  { t: 'Selección y compra', d: 'Elegir arma del catálogo oficial. La DCAM es el único punto legal de adquisición civil de armas de fuego en México.' },
   { t: 'Registro federal del arma', d: 'Toda arma adquirida queda registrada a tu nombre en el Registro Federal de Armas (RFA).' }];
 
   const waPhone = page?.whatsapp_phone || '525555555555';
   const waMsg = page?.whatsapp_msg || 'Hola, me interesa asesoría para trámite SEDENA';
   const waPitch = page?.whatsapp_pitch || 'El acompañamiento legal para el trámite SEDENA es prestado por un abogado externo especializado, en lo individual y bajo su propia cédula profesional. Armas M&S no es despacho jurídico y únicamente facilita el contacto con el profesional.';
+  const decl = window.ARMADO_DECLARACION || { titulo: 'Declaración de intenciones', parrafos: [] };
   return (
     <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{
@@ -1514,7 +1515,7 @@ function LegalScreen({ onNav }) {
           fontSize: 13, color: PALETTE.text,
           lineHeight: 1.65
         }}>
-          <b>Armas M&amp;S no forma parte de SEDENA, DCAM ni de ninguna dependencia del gobierno mexicano.</b> No comercializamos armas, municiones ni accesorios, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. <b>Armas M&amp;S tampoco presta servicios jurídicos.</b>
+          <b>Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano.</b> Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. <b>Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos.</b>
           <br /><br />
           La asesoría legal relativa al proceso SEDENA es prestada de forma independiente por un <span style={{ color: PALETTE.amber, fontWeight: 700 }}>abogado externo especializado</span>, bajo su propia cédula profesional y responsabilidad. Armas M&amp;S no es despacho jurídico ni mantiene relación laboral con dicho profesional, y se limita a facilitar el contacto entre el interesado y el abogado. Honorarios, alcance y términos del servicio se acuerdan directamente con el profesional.
         </div>
@@ -1544,6 +1545,26 @@ function LegalScreen({ onNav }) {
           }}>{d.desc}</div>
           </div>
         )}
+        {/* 4ª categoría — Armas traumáticas (sin licencia) */}
+        <div style={{
+          background: PALETTE.bgCard,
+          border: `1px solid ${PALETTE.border}`,
+          borderLeft: `4px solid #FFFFFF`,
+          padding: '12px 14px'
+        }}>
+          <div style={{
+            fontFamily: 'Montserrat, sans-serif',
+            fontWeight: 700, fontSize: 15,
+            color: '#FFFFFF',
+            textTransform: 'uppercase', letterSpacing: '0.08em',
+            marginBottom: 4
+          }}>Sin Licencia</div>
+          <div style={{
+            fontFamily: 'Courier Prime, monospace',
+            fontSize: 12, color: PALETTE.textDim,
+            lineHeight: 1.55
+          }}>Armas traumáticas. No letales impulsadas por aire comprimido, menores a 140 Joules de potencia.</div>
+        </div>
       </div>
 
       {/* REQUISITOS */}
@@ -1684,7 +1705,8 @@ function AboutScreen() {
   const autor = page?.autor || 'Saulo Flores';
   const empresa = page?.empresa || 'Armas M&S';
   const bio = page?.bio || 'Catálogo curado y mantenido con base en información oficial de DCAM, SEDENA y publicaciones técnicas de los fabricantes.';
-  const aviso = page?.aviso || 'Este catálogo NO es un punto de venta. Es un proyecto educativo y divulgativo sin fines de lucro.';
+  const aviso = page?.aviso || 'Las armas de fuego de este catálogo se muestran únicamente con fines informativos y de transparencia. Las únicas que comercializamos son las tres armas traumáticas menos letales.';
+  const decl = window.ARMADO_DECLARACION || { titulo: 'Declaración de intenciones', parrafos: [] };
   return (
     <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 800, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{
@@ -1693,6 +1715,13 @@ function AboutScreen() {
         borderBottom: `1px solid ${PALETTE.border}`,
         marginBottom: 18
       }}>
+        {/* LOGO Armado en México */}
+        <div style={{
+          width: 132, margin: '0 auto 16px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <img src="imagenes/logo-armado-mx.png" alt="Armado en México" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 14 }} />
+        </div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
           fontSize: 11, color: PALETTE.amber,
@@ -1707,6 +1736,47 @@ function AboutScreen() {
         }}>{title}</div>
       </div>
 
+      {/* 1 ▸ DISCLAIMER OFICIAL — NO SOMOS GOBIERNO */}
+      <div style={{
+        background: 'rgba(168,58,42,0.08)',
+        border: `1px solid ${PALETTE.red}`,
+        borderLeft: `4px solid ${PALETTE.red}`,
+        padding: 14, marginBottom: 18
+      }}>
+        <div style={{
+          fontFamily: 'Courier Prime, monospace',
+          fontSize: 11, color: PALETTE.red,
+          letterSpacing: '0.2em', textTransform: 'uppercase',
+          marginBottom: 6, fontWeight: 700
+        }}>▲ NO SOMOS GOBIERNO · FINES INFORMATIVOS</div>
+        <div style={{
+          fontFamily: 'Courier Prime, monospace',
+          fontSize: 13, color: PALETTE.text,
+          lineHeight: 1.7
+        }}>
+          <b>Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano.</b> Somos un proyecto privado divulgativo. <b>No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No tramitamos licencias ni permisos.</b> Lo único que comercializamos son las tres armas traumáticas menos letales. El único servicio adicional que ofrecemos es <span style={{ color: PALETTE.amber, fontWeight: 700 }}>asesoría legal personalizada</span> con un abogado especializado, contratada de forma independiente y con costo.
+        </div>
+      </div>
+
+      {/* 2 ▸ DECLARACIÓN DE INTENCIONES */}
+      <SectionHeader>{decl.titulo}</SectionHeader>
+      <div style={{
+        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `4px solid ${PALETTE.amber}`,
+        padding: vp.isDesktop ? '20px 22px' : '16px', marginBottom: 18,
+      }}>
+        {decl.parrafos.map((t, i) => (
+          <p key={i} style={{
+            margin: i === 0 ? 0 : '14px 0 0', fontFamily: 'Open Sans, sans-serif',
+            fontSize: 14.5, color: i === 0 ? PALETTE.text : PALETTE.textDim, lineHeight: 1.7, textWrap: 'pretty',
+          }}>{t}</p>
+        ))}
+        <div style={{
+          marginTop: 18, paddingTop: 12, borderTop: `1px dashed ${PALETTE.border}`,
+          fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.textMuted, letterSpacing: '0.04em',
+        }}>Armado en México · ¡Protege lo que amas!</div>
+      </div>
+
+      {/* 3 ▸ MISIÓN */}
       <SectionHeader>Misión</SectionHeader>
       <div style={{
         background: PALETTE.bgCard,
@@ -1722,28 +1792,35 @@ function AboutScreen() {
         }}>{mision}</div>
       </div>
 
-      {/* DISCLAIMER OFICIAL */}
+      {/* 4 ▸ DIFERENCIA — ARMADO EN MÉXICO vs ARMAS M&S */}
+      <SectionHeader>Armado en México vs. Armas M&amp;S</SectionHeader>
       <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.red}`,
-        borderLeft: `4px solid ${PALETTE.red}`,
-        padding: 14, marginBottom: 18
+        display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
+        gap: 12, marginBottom: 18,
       }}>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.red,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          marginBottom: 6, fontWeight: 700
-        }}>▲ NO SOMOS GOBIERNO · NO VENDEMOS</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.text,
-          lineHeight: 1.7
-        }}>
-          <b>Armado en México NO forma parte de SEDENA, DCAM ni de ninguna dependencia del gobierno mexicano.</b> Somos un proyecto privado divulgativo. <b>No realizamos ventas de armas, municiones o accesorios. No tramitamos licencias ni permisos.</b> El único servicio que ofrecemos es <span style={{ color: PALETTE.amber, fontWeight: 700 }}>asesoría legal personalizada</span> con un abogado especializado, contratada de forma independiente y con costo.
+        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <img src="imagenes/logo-armado-mx.png" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
+          </div>
+          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.65 }}>
+            Una <b style={{ color: PALETTE.text }}>enciclopedia libre</b> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
+          </div>
+        </div>
+        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <img src="imagenes/logo-main.png" alt="Armas M&amp;S" style={{ width: '90%', height: 'auto', display: 'block' }} />
+            </div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
+          </div>
+          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.65 }}>
+            Un <b style={{ color: PALETTE.text }}>proyecto digital de e-commerce</b> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
+          </div>
         </div>
       </div>
 
+      {/* AUTOR */}
       <SectionHeader>Autor</SectionHeader>
       <div style={{
         background: PALETTE.bgCard,
@@ -1752,11 +1829,10 @@ function AboutScreen() {
         display: 'flex', gap: 16, alignItems: 'flex-start',
         flexWrap: 'wrap'
       }}>
-        {/* FOTO PLACEHOLDER */}
+        {/* FOTO */}
         <div style={{
           width: 120, height: 120,
           background: PALETTE.bgElev,
-          border: `1.5px solid ${PALETTE.amber}`,
           position: 'relative',
           flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -1776,19 +1852,9 @@ function AboutScreen() {
               FOTO<br />PENDIENTE
             </div>
           }
-          <span style={{ position: 'absolute', top: -1, left: -1, width: 10, height: 10, borderTop: `1.5px solid ${PALETTE.amber}`, borderLeft: `1.5px solid ${PALETTE.amber}` }} />
-          <span style={{ position: 'absolute', top: -1, right: -1, width: 10, height: 10, borderTop: `1.5px solid ${PALETTE.amber}`, borderRight: `1.5px solid ${PALETTE.amber}` }} />
-          <span style={{ position: 'absolute', bottom: -1, left: -1, width: 10, height: 10, borderBottom: `1.5px solid ${PALETTE.amber}`, borderLeft: `1.5px solid ${PALETTE.amber}` }} />
-          <span style={{ position: 'absolute', bottom: -1, right: -1, width: 10, height: 10, borderBottom: `1.5px solid ${PALETTE.amber}`, borderRight: `1.5px solid ${PALETTE.amber}` }} />
         </div>
 
         <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 11, color: PALETTE.amber,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            marginBottom: 4
-          }}>━ AUTOR</div>
           <div style={{
             fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
             fontSize: 23, color: PALETTE.text,
@@ -1798,33 +1864,15 @@ function AboutScreen() {
           }}>{autor}</div>
           <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 13, color: PALETTE.textDim,
-            marginTop: 4, marginBottom: 10
-          }}>{empresa}</div>
+            fontSize: 13, color: PALETTE.amber,
+            marginTop: 6, lineHeight: 1.5
+          }}>Co-Fundador de Armas M&amp;S<br />Creador de Armado en México</div>
           <div style={{
             fontFamily: 'Courier Prime, monospace',
             fontSize: 12, color: PALETTE.textDim,
-            lineHeight: 1.65
+            lineHeight: 1.65, marginTop: 10
           }}>{bio}</div>
         </div>
-      </div>
-
-      <div style={{
-        background: PALETTE.bgElev,
-        border: `1px dashed ${PALETTE.border}`,
-        padding: 14, marginBottom: 16
-      }}>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          marginBottom: 6
-        }}>◆ AVISO IMPORTANTE</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 12, color: PALETTE.textMuted,
-          lineHeight: 1.65
-        }}>{aviso}</div>
       </div>
 
       <div style={{
@@ -1889,7 +1937,7 @@ function FAQScreen() {
           fontSize: 13, color: PALETTE.text,
           lineHeight: 1.65
         }}>
-          <b>Armas M&amp;S no es SEDENA ni autoridad gubernamental.</b> No vendemos armamento, municiones ni accesorios, y no realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM.
+          <b>Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental.</b> Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
           <br /><br />
           <b>Armas M&amp;S no presta servicios jurídicos.</b> La asesoría legal sobre el proceso SEDENA es ofrecida de forma independiente por un <span style={{ color: PALETTE.amber, fontWeight: 700 }}>abogado externo</span> bajo su propia cédula profesional; nuestra función se limita a facilitar el contacto entre el interesado y el profesional.
         </div>
@@ -1948,6 +1996,7 @@ function MenuScreen({ onNav }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
   const items = [
+  { id: 'traumaticas', icon: '◎', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
   { id: 'calibres', icon: '◉', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
   { id: 'campos', icon: '◎', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados · suscripción próximamente' },
   { id: 'cursos', icon: '✦', title: 'Cursos', desc: 'Formación: manejo seguro, tiro defensivo y más' },

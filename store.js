@@ -6,7 +6,7 @@
   const K = {
     armas:       'amx_armas_v2',
     pending:     'amx_pending_v2',
-    pages:       'amx_pages_v2',
+    pages:       'amx_pages_v4',
     admin:       'amx_admin_v2',
     rejected:    'amx_rejected_v2',
     visits:      'amx_visits_v2',
@@ -86,7 +86,7 @@
         { t: 'Registro en plataforma SEDENA', d: 'Crear cuenta en el portal oficial de Defensa Nacional y completar perfil con tus datos.' },
         { t: 'Solicitud de licencia',         d: 'Pedir Licencia Particular (uso doméstico) o de tiro/cacería según el caso. Pago de derechos.' },
         { t: 'Cita en la DCAM',                d: 'Agendar visita al Campo Militar No. 1 (CDMX) o sede Monterrey. Llevar documentación completa.' },
-        { t: 'Selección y compra',             d: 'Elegir arma del catálogo oficial. La DCAM es el único punto legal de venta civil en México.' },
+        { t: 'Selección y compra',             d: 'Elegir arma del catálogo oficial. La DCAM es el único punto legal de adquisición civil de armas de fuego en México.' },
         { t: 'Registro federal del arma',      d: 'Toda arma adquirida queda registrada a tu nombre en el Registro Federal de Armas (RFA).' },
       ],
       whatsapp_phone: '525555555555',
@@ -94,6 +94,9 @@
       whatsapp_pitch: 'El acompañamiento legal para el trámite SEDENA es prestado por un abogado externo especializado, en lo individual y bajo su propia cédula profesional. Armas M&S no es despacho jurídico y únicamente facilita el contacto con el profesional.',
     },
     faq: [
+      { q: '¿Necesito permiso de la SEDENA para una arma traumática?', a: 'No. Las armas traumáticas (HDP 50, Secure 68P y HDX 68) son dispositivos menos letales accionados por gas CO₂; al no usar pólvora no son armas de fuego y, conforme al Artículo 13 de la LFAFE —que permite dispositivos de hasta 140 Joules de energía—, no requieren permiso ni registro ante la SEDENA. Puedes adquirirlas siendo mayor de edad.' },
+      { q: '¿Puedo adquirir una arma traumática directamente con ustedes?', a: 'Sí. Las armas traumáticas son los únicos tres modelos de armamento que comercializamos y puedes adquirirlas directamente en armasmys.com, sin trámite ante la SEDENA. Las armas de fuego del resto de la app se muestran solo con fines informativos y de transparencia.' },
+      { q: '¿Las armas traumáticas son legales en todo México?', a: 'Su posesión es legal para mayores de edad por estar muy por debajo del límite de 140 Joules del Artículo 13 de la LFAFE (desarrollan entre 13 y 40 Joules). No obstante, el Artículo 12 remite a los códigos penales de cada estado, por lo que las reglas de traslado pueden variar: algunos estados (como Morelos) reconocen la defensa personal como fin lícito y otros (como la CDMX) exigen acreditar un motivo lícito. Verifica la normativa local antes de trasladarla o usarla.' },
       { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México la única forma legal de adquirir un arma de fuego es a través de la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), ubicada en el Campo Militar No. 1 de CDMX y en sede Monterrey.' },
       { q: '¿Cuánto cuesta tramitar la licencia?', a: 'El costo de derechos varía por tipo de licencia. La Licencia Particular (uso doméstico) y la de tiro/cacería tienen tarifas oficiales publicadas por SEDENA. El trámite básico ronda los $1,000 a $3,000 MXN sin incluir el arma.' },
       { q: '¿Qué calibres puedo tener como civil?', a: 'Para uso doméstico: pistolas .380 ACP máximo, revólveres .38 Special máximo, escopetas hasta calibre 12, rifles deportivos en calibres permitidos. El 9mm Parabellum requiere licencia de tiro/cacería en club registrado.' },
@@ -111,9 +114,9 @@
       autor: 'Saulo Flores',
       empresa: 'Armas M&S',
       bio: 'Catálogo mantenido con base en información oficial de DCAM, SEDENA y publicaciones técnicas de los fabricantes.',
-      foto: '', // URL de foto del autor
-      aviso: 'Este catálogo NO es un punto de venta. Es un proyecto educativo y divulgativo sin fines de lucro. No se ofrecen armas, municiones, ni se intermedia en transacción alguna. La adquisición legal solo puede realizarse a través de la DCAM-SEDENA.',
-      disclaimerOficial: 'Armas M&S no forma parte de SEDENA, DCAM ni de ninguna dependencia del gobierno mexicano. No comercializamos armas, municiones ni accesorios, y no gestionamos licencias, permisos ni trámites administrativos. Armas M&S tampoco presta servicios jurídicos por sí mismo: la asesoría legal sobre el proceso SEDENA es prestada de forma independiente por un abogado externo especializado, bajo su propia cédula profesional. Nuestra función se limita a facilitar el contacto entre el interesado y dicho profesional; los honorarios y términos se acuerdan directamente con el abogado.',
+      foto: 'imagenes/saulo-flores.png', // URL de foto del autor
+      aviso: 'Las armas de fuego de este catálogo se muestran únicamente con fines informativos y de transparencia; no se intermedia en su adquisición, que solo puede realizarse a través de la DCAM-SEDENA. Las únicas que comercializamos directamente son las tres armas traumáticas (menos letales), disponibles en armasmys.com.',
+      disclaimerOficial: 'Armas M&S no forma parte de SEDENA, DCAM ni de ninguna dependencia del gobierno mexicano. No comercializamos armas de fuego, municiones ni accesorios para ellas: las armas de fuego se muestran solo con fines informativos y de transparencia. Lo único que comercializamos directamente son las tres armas traumáticas menos letales. Tampoco gestionamos licencias, permisos ni trámites administrativos. Armas M&S no presta servicios jurídicos por sí mismo: la asesoría legal sobre el proceso SEDENA es prestada de forma independiente por un abogado externo especializado, bajo su propia cédula profesional. Nuestra función se limita a facilitar el contacto entre el interesado y dicho profesional; los honorarios y términos se acuerdan directamente con el abogado.',
     },
   };
 

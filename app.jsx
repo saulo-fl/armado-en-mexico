@@ -90,6 +90,7 @@ function App() {
     else if (id === 'calibres') setScreen('calibres');
     else if (id === 'campos') setScreen('campos');
     else if (id === 'cursos') setScreen('cursos');
+    else if (id === 'traumaticas') setScreen('traumaticas');
     else if (id === 'home') setScreen('home');
   };
 
@@ -115,13 +116,14 @@ function App() {
     about: 'Acerca', faq: 'FAQ', menu: 'Más',
     submit: 'Proponer arma',
     calibres: 'Calibres', campos: 'Campos de tiro', cursos: 'Cursos',
+    traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'about', 'faq', 'submit', 'calibres', 'campos', 'cursos'].includes(screen) || (screen === 'catalog' && history.length > 0);
+  const isInternal = ['product', 'about', 'faq', 'submit', 'calibres', 'campos', 'cursos', 'traumaticas'].includes(screen) || (screen === 'catalog' && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
     legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
-    calibres: 'menu', campos: 'menu', cursos: 'menu',
+    calibres: 'menu', campos: 'menu', cursos: 'menu', traumaticas: 'menu',
     product: history[history.length-1]?.screen === 'compare' ? 'compare' : 'catalog',
   })[screen] || 'home';
 
@@ -162,6 +164,8 @@ function App() {
     content = <window.CamposScreen onNav={navigate} />;
   } else if (screen === 'cursos') {
     content = <window.CursosScreen onNav={navigate} />;
+  } else if (screen === 'traumaticas') {
+    content = <window.TraumaticasScreen onNav={navigate} />;
   }
 
   return (

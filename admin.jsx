@@ -879,7 +879,7 @@ function AboutEditor() {
       </FormField>
       <FormField label="Bio del autor" span="2"><textarea value={v.bio} onChange={(e) => set('bio', e.target.value)} style={taStyle()} rows={3} /></FormField>
       <FormField label="Aviso importante" span="2"><textarea value={v.aviso} onChange={(e) => set('aviso', e.target.value)} style={taStyle()} rows={4} /></FormField>
-      <FormField label="Disclaimer oficial (no SEDENA / no ventas)" span="2">
+      <FormField label="Disclaimer oficial (no SEDENA / informativo)" span="2">
         <textarea value={v.disclaimerOficial || ''} onChange={(e) => set('disclaimerOficial', e.target.value)} style={taStyle()} rows={4} />
       </FormField>
       <div style={{ gridColumn: '1/-1', textAlign: 'right' }}>

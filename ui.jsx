@@ -46,6 +46,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
   const navCfg = window.Store ? window.Store.getAppConfig() : { logo: '' };
   const moreItems = [
+    { id: 'traumaticas', label: 'Armas traumáticas' },
     { id: 'calibres', label: 'Calibres' },
     { id: 'campos',   label: 'Campos de tiro' },
     { id: 'cursos',   label: 'Cursos' },

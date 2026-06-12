@@ -120,6 +120,9 @@ function HomeScreen({ onNav, onOpenArma }) {
         <CampoMiniCard campo={c} onClick={() => onNav('campos')} />
         } />
 
+      {/* 6.5 ▸ Banner destacado: Armas traumáticas (defensa menos letal) — arriba de Cursos */}
+      <window.HomeTraumaBanner onNav={onNav} />
+
       {/* 7 ▸ Cursos */}
       <CarouselSection
         eyebrow="✦ FORMACIÓN"
@@ -295,7 +298,7 @@ function HomeScreen({ onNav, onOpenArma }) {
           color: PALETTE.amber, fontWeight: 700,
           letterSpacing: '0.15em', marginBottom: 4, fontSize: 11
         }}>◆ AVISO</div>
-        Catálogo divulgativo sin fines de lucro. No es punto de venta. Información basada en la Ley Federal de Armas de Fuego y precios DCAM. Por <span style={{ color: PALETTE.text }}>Saulo Flores · {teamName}</span>.
+        Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la Ley Federal de Armas de Fuego y precios DCAM. Por <span style={{ color: PALETTE.text }}>Saulo Flores · {teamName}</span>.
       </div>
     </div>);
 
