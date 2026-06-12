@@ -44,6 +44,7 @@ window.useViewport = useViewport;
 // ──────────────────────────────────────────────────────────────
 function TopNav({ current, onNav, compareCount, onSearch }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
+  const navCfg = window.Store ? window.Store.getAppConfig() : { logo: '' };
   const moreItems = [
     { id: 'calibres', label: 'Calibres' },
     { id: 'campos',   label: 'Campos de tiro' },
@@ -77,14 +78,23 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
         display: 'flex', alignItems: 'center', gap: 8,
         padding: 0,
       }}>
-        <span style={{
-          display: 'inline-block', width: 18, height: 18,
-          border: `1.5px solid ${PALETTE.amber}`,
-          position: 'relative',
-        }}>
-          <span style={{ position: 'absolute', inset: 3, background: PALETTE.amber }} />
-        </span>
-        ARMADO<span style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.75em', marginLeft: 4 }}>en MX</span>
+        {navCfg.logo ? (
+          <img src={navCfg.logo} alt="Armado en México" style={{
+            width: 40, height: 40, objectFit: 'contain',
+            borderRadius: 6, display: 'block',
+          }} />
+        ) : (
+          <React.Fragment>
+            <span style={{
+              display: 'inline-block', width: 18, height: 18,
+              border: `1.5px solid ${PALETTE.amber}`,
+              position: 'relative',
+            }}>
+              <span style={{ position: 'absolute', inset: 3, background: PALETTE.amber }} />
+            </span>
+            ARMADO<span style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.75em', marginLeft: 4 }}>en MX</span>
+          </React.Fragment>
+        )}
       </button>
       <div style={{
         display: 'flex', gap: 4, marginLeft: 12,
@@ -415,28 +425,30 @@ function AppHeader({ title, back, onBack, right }) {
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
           {cfg.logo ? (
-            <img src={cfg.logo} alt="logo" style={{
-              width: 28, height: 28, objectFit: 'contain',
-              borderRadius: 6,
+            <img src={cfg.logo} alt="Armado en México" style={{
+              width: 34, height: 34, objectFit: 'contain',
+              borderRadius: 6, display: 'block',
             }} />
           ) : (
-            <span aria-label="logo placeholder" style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              width: 28, height: 28,
-              border: `1.5px dashed ${PALETTE.amber}`,
-              borderRadius: 6, color: PALETTE.amber,
-              fontFamily: 'Courier Prime, monospace',
-              fontSize: 11, letterSpacing: '0.1em',
-              background: 'rgba(245,197,24,0.08)',
-            }}>LOGO</span>
+            <React.Fragment>
+              <span aria-label="logo placeholder" style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                width: 28, height: 28,
+                border: `1.5px dashed ${PALETTE.amber}`,
+                borderRadius: 6, color: PALETTE.amber,
+                fontFamily: 'Courier Prime, monospace',
+                fontSize: 11, letterSpacing: '0.1em',
+                background: 'rgba(245,197,24,0.08)',
+              }}>LOGO</span>
+              <span style={{ whiteSpace: 'nowrap' }}>
+                {(cfg.logoText || 'ARMADO en MX').split(/\s+(?=en\s+MX)/i).map((part, i) =>
+                  i === 0
+                    ? <span key="t">{part}</span>
+                    : <span key="s" style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.72em', marginLeft: 4 }}>{part}</span>
+                )}
+              </span>
+            </React.Fragment>
           )}
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {(cfg.logoText || 'ARMADO en MX').split(/\s+(?=en\s+MX)/i).map((part, i) =>
-              i === 0
-                ? <span key="t">{part}</span>
-                : <span key="s" style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.72em', marginLeft: 4 }}>{part}</span>
-            )}
-          </span>
         </div>
       )}
       <div style={{
