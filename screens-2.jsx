@@ -1992,7 +1992,7 @@ window.FAQScreen = FAQScreen;
 // ════════════════════════════════════════════════════════════════
 // MENU — pantalla "Más"
 // ════════════════════════════════════════════════════════════════
-function MenuScreen({ onNav }) {
+function MenuScreen({ onNav, onTutorial }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
   const items = [
@@ -2003,7 +2003,8 @@ function MenuScreen({ onNav }) {
   { id: 'submit', icon: '＋', title: 'Proponer arma', desc: 'Envía un arma al curador para revisión', accent: true },
   { id: 'legal', icon: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
   { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
-  { id: 'faq', icon: '?', title: 'FAQ', desc: 'Preguntas frecuentes' }];
+  { id: 'faq', icon: '?', title: 'FAQ', desc: 'Preguntas frecuentes' },
+  { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' }];
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
@@ -2014,7 +2015,7 @@ function MenuScreen({ onNav }) {
       }}>☰ MÁS</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {items.map((it) =>
-        <button key={it.id} onClick={() => onNav(it.id)} style={{
+        <button key={it.id} onClick={() => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)} style={{
           background: it.accent ? `linear-gradient(135deg, ${PALETTE.bgCard} 0%, ${PALETTE.bgElev} 100%)` : PALETTE.bgCard,
           border: `1px solid ${it.accent ? PALETTE.amber : PALETTE.border}`,
           padding: '14px',

@@ -35,6 +35,19 @@ function App() {
   const [pickerSlot, setPickerSlot] = useStateApp(null);
   const [history, setHistory] = useStateApp([]);
 
+  // ─── Tutorial de bienvenida (primer arranque + reproducible desde MÁS) ───
+  const [tutorialOpen, setTutorialOpen] = useStateApp(false);
+  useEffectApp(() => {
+    let seen = false;
+    try { seen = !!localStorage.getItem('amx_onboarded_v1'); } catch (e) {}
+    if (!seen) setTutorialOpen(true);
+  }, []);
+  const closeTutorial = () => {
+    try { localStorage.setItem('amx_onboarded_v1', '1'); } catch (e) {}
+    setTutorialOpen(false);
+  };
+  const replayTutorial = () => setTutorialOpen(true);
+
   const scrollRef = useRefApp(null);
 
   useEffectApp(() => {
@@ -155,7 +168,7 @@ function App() {
   } else if (screen === 'faq') {
     content = <window.FAQScreen />;
   } else if (screen === 'menu') {
-    content = <window.MenuScreen onNav={navigate} />;
+    content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
   } else if (screen === 'submit') {
     content = <window.SubmitScreen onNav={navigate} />;
   } else if (screen === 'calibres') {
@@ -259,6 +272,11 @@ function App() {
           current={currentNavId}
           onNav={navTab}
           compareCount={compareIds.length} />
+      )}
+
+      {/* ─── TUTORIAL DE BIENVENIDA (overlay) ─── */}
+      {window.OnboardingTutorial && (
+        <window.OnboardingTutorial open={tutorialOpen} onClose={closeTutorial} />
       )}
 
       {/* ─── TWEAKS PANEL ─── */}
