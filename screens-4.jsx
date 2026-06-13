@@ -249,6 +249,7 @@ function TraumaTierCard({ p, vp, onNav }) {
       position: 'relative', background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
       borderTop: `2px solid ${p.tierColor}`,
       borderRadius: 8, display: 'flex', flexDirection: 'column', paddingTop: 26,
+      height: '100%', width: '100%', boxSizing: 'border-box',
       boxShadow: '0 4px 16px rgba(0,0,0,0.28)',
     }}>
       {/* Tier badge — pill centrado sobre el borde superior */}
@@ -303,10 +304,39 @@ function TraumaTierCard({ p, vp, onNav }) {
 function HomeTraumaBanner({ onNav }) {
   const vp = window.useViewport();
   const productos = window.TRAUMATICAS || [];
-  const PAD = vp.isDesktop ? 28 : 16;
+  const PAD = 16; // mismo margen que el resto del feed (coherencia con CarouselSection)
+
+  // Arrastre con mouse para el carrusel móvil (el táctil usa scroll nativo con momentum).
+  // Sin esto, en vista móvil emulada con mouse no se podría "swipe".
+  const scrollerRef = React.useRef(null);
+  const drag = React.useRef({ down: false, moved: false, startX: 0, startScroll: 0 });
+  const [dragging, setDragging] = React.useState(false);
+  const onPointerDown = (e) => {
+    if (e.pointerType !== 'mouse') return;
+    const el = scrollerRef.current; if (!el) return;
+    drag.current = { down: true, moved: false, startX: e.clientX, startScroll: el.scrollLeft };
+    el.style.scrollSnapType = 'none';
+  };
+  const onPointerMove = (e) => {
+    if (!drag.current.down) return;
+    const el = scrollerRef.current; if (!el) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 6 && !drag.current.moved) { drag.current.moved = true; setDragging(true); }
+    el.scrollLeft = drag.current.startScroll - dx;
+  };
+  const endDrag = () => {
+    if (!drag.current.down) return;
+    drag.current.down = false; setDragging(false);
+    const el = scrollerRef.current;
+    // Restaurar el snap → el navegador re-asienta en la ficha más cercana.
+    if (el) setTimeout(() => { el.style.scrollSnapType = 'x mandatory'; }, 40);
+  };
+  const onClickCapture = (e) => {
+    if (drag.current.moved) { e.preventDefault(); e.stopPropagation(); drag.current.moved = false; }
+  };
 
   return (
-    <div style={{ padding: `8px ${PAD}px 6px` }}>
+    <div style={{ padding: `8px 0 6px`, maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto', width: '100%', boxSizing: 'border-box' }}>
       {/* Animaciones de las tarjetas traumáticas */}
       <style>{`
         /* Solo efectos de luz/color — sin transform. Movimiento muy lento. */
@@ -339,7 +369,7 @@ function HomeTraumaBanner({ onNav }) {
         }
       `}</style>
       {/* Encabezado de sección */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: 26, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: vp.isDesktop ? 26 : 14, flexWrap: 'wrap', padding: `0 ${PAD}px` }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>◉ Defensa menos letal</span>
@@ -353,15 +383,54 @@ function HomeTraumaBanner({ onNav }) {
         }}>Ver detalles →</button>
       </div>
 
-      {/* 3 tarjetas */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: vp.isDesktop ? 'repeat(3, 1fr)' : '1fr',
-        gap: vp.isDesktop ? 22 : 28,
-        alignItems: 'start',
-      }}>
-        {productos.map((p) => <TraumaTierCard key={p.id} p={p} vp={vp} onNav={onNav} />)}
-      </div>
+      {/* Escritorio: 3 tarjetas en grid · Móvil: carrusel horizontal con swipe */}
+      {vp.isDesktop ? (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: 22,
+          alignItems: 'stretch',
+          padding: `0 ${PAD}px`,
+        }}>
+          {productos.map((p) => <TraumaTierCard key={p.id} p={p} vp={vp} onNav={onNav} />)}
+        </div>
+      ) : (
+        <div
+          ref={scrollerRef}
+          className="amx-hscroll"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerCancel={endDrag}
+          onPointerLeave={endDrag}
+          onClickCapture={onClickCapture}
+          onDragStart={(e) => e.preventDefault()}
+          style={{
+            display: 'flex',
+            gap: 18,
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            // Padding vertical generoso: el badge sobresale (-12) y el glow se expande ~56px
+            padding: `22px ${PAD}px 30px`,
+            scrollPaddingLeft: PAD,
+            alignItems: 'stretch',
+            cursor: dragging ? 'grabbing' : 'grab',
+            userSelect: dragging ? 'none' : undefined,
+          }}>
+          {productos.map((p) => (
+            <div key={p.id} style={{
+              flex: '0 0 78%',
+              maxWidth: 300,
+              minWidth: 0,
+              display: 'flex',
+              scrollSnapAlign: 'start',
+            }}>
+              <TraumaTierCard p={p} vp={vp} onNav={onNav} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
