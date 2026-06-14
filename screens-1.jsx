@@ -484,15 +484,36 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
   const accent = p.accent || PALETTE.amber;
   // Dimensiones UNIFORMES (no varían según contenido)
   const SLIDER_HEIGHT = vp.isDesktop ? 330 : 285;
+  // Swipe táctil (móvil) — desliza entre slides sin bloquear el scroll vertical
+  const touch = React.useRef({ x: 0, y: 0, active: false });
+  const onTouchStart = (e) => {
+    const t = e.touches[0];
+    touch.current = { x: t.clientX, y: t.clientY, active: true };
+  };
+  const onTouchEnd = (e) => {
+    if (!touch.current.active || promos.length < 2) return;
+    touch.current.active = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touch.current.x;
+    const dy = t.clientY - touch.current.y;
+    // sólo si el gesto fue predominantemente horizontal y con recorrido suficiente
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) setIdx((i) => (i + 1) % promos.length);
+    else setIdx((i) => (i - 1 + promos.length) % promos.length);
+  };
   return (
-    <div style={{
+    <div
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      style={{
       position: 'relative',
       background: bgColor,
       borderBottom: `2px solid ${accent}`,
       overflow: 'hidden',
       height: SLIDER_HEIGHT, // ← altura fija
       maxWidth: 1280,
-      margin: '0 auto'
+      margin: '0 auto',
+      touchAction: 'pan-y'
     }}>
       {/* imagen de fondo (opcional) */}
       {p.bgImage &&

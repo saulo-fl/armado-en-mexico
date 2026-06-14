@@ -1482,6 +1482,18 @@ window.PromosTab = PromosTab;
 function PromoEditor({ promo, onSave, onCancel }) {
   const [f, setF] = useState(promo);
   const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  const bgFileRef = useRef(null);
+  const uploadBg = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 400 * 1024) {
+      if (!confirm('La imagen pesa ' + Math.round(file.size / 1024) + 'KB. ' +
+        'Para mejor rendimiento en móvil se recomienda <400KB. ¿Continuar igualmente?')) return;
+    }
+    const r = new FileReader();
+    r.onload = (ev) => set('bgImage', ev.target.result);
+    r.readAsDataURL(file);
+  };
   const save = () => {
     if (!f.title) { alert('Falta el título del slide.'); return; }
     window.Store.upsertPromo(f);
@@ -1511,8 +1523,37 @@ function PromoEditor({ promo, onSave, onCancel }) {
           <FormField label="Subtítulo / descripción" span="2">
             <textarea value={f.subtitle} onChange={(e) => set('subtitle', e.target.value)} style={taStyle()} rows={2} placeholder="Texto de apoyo, ~140 caracteres" />
           </FormField>
-          <FormField label="URL de imagen de fondo (opcional)" span="2">
-            <input value={f.bgImage} onChange={(e) => set('bgImage', e.target.value)} style={inpStyle()} placeholder="https://...jpg" />
+          <FormField label="Imagen de fondo (opcional)" span="2">
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginTop: 4 }}>
+              <div style={{
+                width: 112, height: 63, background: P.bg,
+                border: `1px dashed ${P.border}`, borderRadius: 6,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden', color: P.textMuted, fontSize: 10, flexShrink: 0,
+              }}>
+                {f.bgImage
+                  ? <img src={f.bgImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : 'Sin imagen'}
+              </div>
+              <div style={{ flex: 1 }}>
+                <input ref={bgFileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={uploadBg} />
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button type="button" onClick={() => bgFileRef.current.click()} style={btnPrimary}>📤 Subir imagen</button>
+                  {f.bgImage && (
+                    <button type="button" onClick={() => set('bgImage', '')} style={Object.assign({}, btnGhost, { color: '#ff8b8b' })}>
+                      Quitar
+                    </button>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: P.textMuted, marginTop: 8, lineHeight: 1.5 }}>
+                  Recomendado: JPG/WebP horizontal ~1600×640, &lt;400KB. El texto se superpone con un degradado oscuro.<br/>
+                  También puedes pegar una URL pública abajo.
+                </div>
+                <input value={f.bgImage || ''} onChange={(e) => set('bgImage', e.target.value)}
+                  style={Object.assign({}, inpStyle(), { marginTop: 10 })}
+                  placeholder="O pega una URL: https://...jpg" />
+              </div>
+            </div>
           </FormField>
           <FormField label="Color de fondo">
             <input type="color" value={f.bgColor || '#0d0f0c'} onChange={(e) => set('bgColor', e.target.value)} style={Object.assign({}, inpStyle(), { padding: 4, height: 38 })} />
