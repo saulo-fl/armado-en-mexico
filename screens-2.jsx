@@ -1513,7 +1513,7 @@ function LegalScreen({ onNav }) {
           fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.65
         }}>
-          <b>Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano.</b> Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. <b>Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos.</b>
+          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos.
           <br /><br />
           La asesoría legal relativa al proceso SEDENA es prestada de forma independiente por un <span style={{ color: PALETTE.amber, fontWeight: 700 }}>abogado externo especializado</span>, bajo su propia cédula profesional y responsabilidad. Armas M&amp;S no es despacho jurídico ni mantiene relación laboral con dicho profesional, y se limita a facilitar el contacto entre el interesado y el abogado. Honorarios, alcance y términos del servicio se acuerdan directamente con el profesional.
         </div>
