@@ -115,6 +115,7 @@ function AdminShell({ onLogout, children, tab, setTab, stats }) {
     { id: 'queue',      label: 'COLA',         badge: stats.pending },
     { id: 'suggests',   label: 'SUGERENCIAS',  badge: stats.suggestions },
     { id: 'catalog',    label: 'CATÁLOGO',     badge: null },
+    { id: 'manuales',   label: 'INVENTARIOS',  badge: stats.manuales || null },
     { id: 'favorites',  label: 'FAVORITOS',    badge: null },
     { id: 'bulk',       label: 'IMPORT CSV',   badge: null },
     { id: 'promos',     label: 'PROMOS',       badge: null },
@@ -498,6 +499,32 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
     };
   });
 
+  // Historial de precios ligado a inventarios DCAM-SEDENA
+  const [priceHist, setPriceHist] = useState(() =>
+    (arma && arma.id ? (window.Store.getPriceHistory(arma.id) || []) : []).slice()
+  );
+  const manuales = useMemo(() => window.Store.getManuales(), []);
+  // historial ordenado cronológicamente (más antiguo → más reciente); el último es el precio actual
+  const sortedHist = useMemo(() =>
+    priceHist.slice().sort((a, b) => String(a.date || '').localeCompare(String(b.date || ''))),
+    [priceHist]
+  );
+  const latestEntry = sortedHist[sortedHist.length - 1];
+
+  const addPriceEntry = () => {
+    const m = manuales[0];
+    setPriceHist(prev => [...prev, {
+      price: '', manualId: m ? m.id : '',
+      date: m ? m.fecha : '', note: m ? m.nombre : '',
+    }]);
+  };
+  const setPriceEntry = (i, patch) => setPriceHist(prev => prev.map((e, idx) => idx === i ? Object.assign({}, e, patch) : e));
+  const onPickManual = (i, mid) => {
+    const m = manuales.find(x => x.id === mid);
+    setPriceEntry(i, { manualId: mid, date: m ? m.fecha : '', note: m ? m.nombre : '' });
+  };
+  const removePriceEntry = (i) => setPriceHist(prev => prev.filter((_, idx) => idx !== i));
+
   const set = (k, v) => setF(prev => ({ ...prev, [k]: v }));
   const setStat = (k, v) => setF(prev => ({ ...prev, stats: { ...prev.stats, [k]: Number(v) } }));
   const toggleUse = (u) => setF(prev => ({ ...prev, uses: prev.uses.includes(u) ? prev.uses.filter(x => x !== u) : [...prev.uses, u] }));
@@ -513,11 +540,26 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
       anio: Number(f.anio) || new Date().getFullYear(),
       priceLvl: Number(f.priceLvl) || 1,
     };
+    // Si hay historial de inventarios, el precio actual = entrada más reciente
+    const cleanHist = priceHist
+      .filter(h => h.price && String(h.price).trim())
+      .map(h => ({ price: String(h.price).trim(), manualId: h.manualId || '', date: h.date || '', note: h.note || '' }))
+      .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+    const latest = cleanHist[cleanHist.length - 1];
+    if (latest) {
+      out.priceExact = latest.price;
+      out.priceManualId = latest.manualId || '';
+    }
+    let savedArma;
     if (mode === 'pending') {
       // aprobar la submission con overrides
-      window.Store.approvePending(source.id, out);
+      savedArma = window.Store.approvePending(source.id, out);
     } else {
-      window.Store.upsertArma(out);
+      savedArma = window.Store.upsertArma(out);
+    }
+    // Persistir historial curado (sobrescribe cualquier auto-registro)
+    if (savedArma && savedArma.id) {
+      window.Store.setPriceHistory(savedArma.id, cleanHist);
     }
     onSave();
   };
@@ -663,6 +705,9 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
 
           <FormField label="Precio (texto)">
             <input value={f.priceExact} onChange={(e) => set('priceExact', e.target.value)} style={inpStyle()} placeholder="$10,084 MXN" />
+            <div style={{ fontSize: 10, color: P.textMuted, marginTop: 5, lineHeight: 1.4 }}>
+              Se sobrescribe con el inventario más reciente del historial de abajo, si lo hay.
+            </div>
           </FormField>
           <FormField label="Nivel de precio (1-5)">
             <select value={f.priceLvl} onChange={(e) => set('priceLvl', e.target.value)} style={selStyle()}>
@@ -672,6 +717,62 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
 
           <FormField label="Ref. DCAM" span="2">
             <input value={f.dcamRef} onChange={(e) => set('dcamRef', e.target.value)} style={inpStyle()} placeholder="PISTOLA CAL. 9mm MCA TAURUS MOD. GX4 PAVON" />
+          </FormField>
+
+          <FormField label="Historial de precios DCAM (por inventario oficial)" span="2">
+            <div style={{
+              fontSize: 11, color: P.textDim, lineHeight: 1.55, marginBottom: 10,
+            }}>
+              Registra el precio que aparece en cada PDF de inventario. El <b style={{ color: P.amber }}>más reciente</b> se publica como precio actual y los campos «Precio» y «Ref. DCAM» de arriba se actualizan solos.
+            </div>
+
+            {manuales.length === 0 ? (
+              <div style={{
+                background: 'rgba(168,58,42,0.08)', border: `1px solid ${P.red}`,
+                padding: '10px 14px', fontSize: 12, color: P.textDim, lineHeight: 1.5,
+              }}>
+                ⚠ Aún no has cargado ningún inventario. Ve a la pestaña <b style={{ color: P.amber }}>INVENTARIOS</b> y sube el PDF oficial de la DCAM antes de registrar precios.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {priceHist.length === 0 && (
+                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.textMuted }}>
+                    Sin registros. Agrega el primer precio desde un inventario.
+                  </div>
+                )}
+                {priceHist.map((h, i) => {
+                  const isLatest = latestEntry && h === latestEntry;
+                  return (
+                    <div key={i} style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1.6fr 1fr auto auto',
+                      gap: 8, alignItems: 'center',
+                      background: isLatest ? 'rgba(201,162,39,0.07)' : P.bg,
+                      border: `1px solid ${isLatest ? P.amber : P.border}`,
+                      padding: '8px 10px',
+                    }}>
+                      <select value={h.manualId || ''} onChange={(e) => onPickManual(i, e.target.value)} style={selStyle()}>
+                        <option value="">— Elegir inventario —</option>
+                        {manuales.map(m => (
+                          <option key={m.id} value={m.id}>{fmtFecha(m.fecha)} · {m.nombre}</option>
+                        ))}
+                      </select>
+                      <input value={h.price || ''} onChange={(e) => setPriceEntry(i, { price: e.target.value })}
+                        style={inpStyle()} placeholder="$10,084 MXN" />
+                      <span style={{
+                        fontFamily: 'JetBrains Mono, monospace', fontSize: 9,
+                        letterSpacing: '0.1em', textTransform: 'uppercase',
+                        color: isLatest ? P.amber : 'transparent', width: 54, textAlign: 'center',
+                      }}>{isLatest ? '● actual' : ''}</span>
+                      <button onClick={() => removePriceEntry(i)} style={Object.assign({}, btnGhost, { color: '#ff8b8b', padding: '6px 10px' })}>✕</button>
+                    </div>
+                  );
+                })}
+                <button onClick={addPriceEntry} style={Object.assign({}, btnSecondary, { alignSelf: 'flex-start', marginTop: 2 })}>
+                  ＋ Agregar precio de inventario
+                </button>
+              </div>
+            )}
           </FormField>
 
           <FormField label="Usos recomendados" span="2">
@@ -1141,6 +1242,7 @@ function AdminApp() {
   const [stats, setStats] = useState({
     pending: window.Store.getPending().length,
     suggestions: window.Store.getSuggestions().length,
+    manuales: window.Store.getManuales().length,
   });
 
   useEffect(() => {
@@ -1148,6 +1250,7 @@ function AdminApp() {
       setStats({
         pending: window.Store.getPending().length,
         suggestions: window.Store.getSuggestions().length,
+        manuales: window.Store.getManuales().length,
       });
     });
   }, []);
@@ -1162,6 +1265,7 @@ function AdminApp() {
       {tab === 'queue'    && <QueueTab onEdit={(p, mode) => setEditing({ arma: p, mode, source: p })} />}
       {tab === 'suggests' && <SuggestionsTab />}
       {tab === 'catalog'  && <CatalogTab onEdit={(a, mode) => setEditing({ arma: a, mode, source: null })} />}
+      {tab === 'manuales' && <ManualesTab />}
       {tab === 'favorites'&& <FavoritesTab />}
       {tab === 'bulk'     && <BulkImportTab />}
       {tab === 'promos'   && <PromosTab />}
@@ -1884,3 +1988,255 @@ function BrandingTab() {
   );
 }
 window.BrandingTab = BrandingTab;
+
+// ════════════════════════════════════════════════════════════════
+// MANUALES / INVENTARIOS — biblioteca de PDFs oficiales DCAM-SEDENA
+// ════════════════════════════════════════════════════════════════
+function fmtFecha(f) {
+  if (!f) return '—';
+  const d = new Date(f + (f.length === 10 ? 'T12:00:00' : ''));
+  if (isNaN(d)) return f;
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function ManualesTab() {
+  const [manuales, setManuales] = useState(window.Store.getManuales());
+  const [editing, setEditing] = useState(null); // manual object or 'new'
+  const refresh = () => setManuales(window.Store.getManuales());
+
+  const add = () => setEditing({ nombre: '', fecha: '', url: '', fileName: '' });
+  const remove = (m) => {
+    if (!confirm('¿Eliminar el inventario "' + (m.nombre || 'sin nombre') + '"?\n\nLas fichas que lo referencian dejarán de mostrar el enlace al PDF.')) return;
+    window.Store.deleteManual(m.id);
+    refresh();
+  };
+
+  // cuántas armas referencian cada manual (en su historial de precios)
+  const usageCount = (mid) => {
+    let n = 0;
+    window.Store.getArmas().forEach(a => {
+      const h = window.Store.getPriceHistory(a.id) || [];
+      if (h.some(e => e.manualId === mid)) n++;
+    });
+    return n;
+  };
+
+  return (
+    <div>
+      <SectionHead
+        title="Inventarios oficiales DCAM-SEDENA"
+        sub={`${manuales.length} ${manuales.length === 1 ? 'PDF cargado' : 'PDFs cargados'} · fuente verificable de los precios del catálogo`}
+        action={<button onClick={add} style={btnPrimary}>＋ Cargar inventario</button>}
+      />
+
+      <div style={{
+        background: 'rgba(201,162,39,0.06)',
+        border: `1px solid ${P.border}`, borderLeft: `3px solid ${P.amber}`,
+        padding: '12px 16px', marginBottom: 22,
+        fontSize: 12, color: P.textDim, lineHeight: 1.6,
+      }}>
+        <b style={{ color: P.amber }}>◆ Cómo funciona (PDFs en el repositorio):</b> coloca cada PDF oficial de la DCAM-SEDENA
+        en la carpeta <code style={{ color: P.text, fontFamily: 'JetBrains Mono, monospace' }}>inventarios/</code> del repositorio
+        y aquí registra su <b>nombre</b>, <b>fecha</b> y <b>ruta relativa</b> (ej. <code style={{ color: P.text, fontFamily: 'JetBrains Mono, monospace' }}>inventarios/dcam-existencias-2025-10-03.pdf</code>).
+        Así viajan con el despliegue, quedan versionados en git y los ve cualquier usuario.
+        El inventario más reciente es la <b>fuente principal de precios</b>; para registrar el precio de cada arma por inventario, edítala en <b>CATÁLOGO</b>.
+      </div>
+
+      {manuales.length === 0 ? (
+        <Empty icon="📄" title="Sin inventarios cargados" sub="Carga el primer PDF oficial de la DCAM para empezar a referenciar precios." />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {manuales.map(m => {
+            const used = usageCount(m.id);
+            return (
+              <div key={m.id} style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                background: P.bgCard, border: `1px solid ${P.border}`,
+                padding: '12px 16px', position: 'relative',
+              }}>
+                <div style={{
+                  width: 38, height: 46, flexShrink: 0,
+                  border: `1px solid ${P.amber}`, color: P.amber,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 8, letterSpacing: '0.05em',
+                  background: 'rgba(201,162,39,0.06)',
+                }}>
+                  <span style={{ fontSize: 16 }}>▦</span>PDF
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 15,
+                    color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em',
+                  }}>{m.nombre || 'Inventario sin nombre'}</div>
+                  <div style={{
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
+                    color: P.textDim, marginTop: 3, letterSpacing: '0.04em',
+                  }}>
+                    📅 {fmtFecha(m.fecha)}
+                    {m.fileName ? ' · ' + m.fileName : ''}
+                    {' · '}
+                    {used > 0
+                      ? <span style={{ color: P.amber }}>{used} {used === 1 ? 'arma referencia' : 'armas referencian'}</span>
+                      : <span>sin referencias aún</span>}
+                  </div>
+                </div>
+                {m.url ? (
+                  <a href={m.url} target="_blank" rel="noopener" style={Object.assign({}, btnGhost, {
+                    textDecoration: 'none', display: 'inline-block',
+                  })}>↗ Abrir PDF</a>
+                ) : (
+                  <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: '#ff8b8b' }}>⚠ sin archivo</span>
+                )}
+                <button onClick={() => setEditing(m)} style={btnGhost}>✎ Editar</button>
+                <button onClick={() => remove(m)} style={Object.assign({}, btnGhost, { color: '#ff8b8b' })}>✕</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {editing && (
+        <ManualEditor
+          manual={editing}
+          onSave={() => { setEditing(null); refresh(); }}
+          onCancel={() => setEditing(null)}
+        />
+      )}
+    </div>
+  );
+}
+window.ManualesTab = ManualesTab;
+
+function ManualEditor({ manual, onSave, onCancel }) {
+  const [f, setF] = useState({
+    id: manual.id,
+    nombre: manual.nombre || '',
+    fecha: manual.fecha || '',
+    url: manual.url || '',
+    fileName: manual.fileName || '',
+  });
+  const fileRef = useRef(null);
+  const set = (k, v) => setF(prev => Object.assign({}, prev, { [k]: v }));
+
+  const upload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+      if (!confirm('El archivo no parece ser un PDF. ¿Cargarlo de todas formas?')) return;
+    }
+    const mb = file.size / (1024 * 1024);
+    if (mb > 2) {
+      if (!confirm('El PDF pesa ' + mb.toFixed(1) + ' MB. Guardarlo dentro de la app puede agotar el espacio del navegador.\n\nRecomendado: súbelo a Drive/servidor y pega su enlace público en el campo URL.\n\n¿Cargar el archivo de todas formas?')) {
+        e.target.value = '';
+        return;
+      }
+    }
+    const r = new FileReader();
+    r.onload = (ev) => setF(prev => Object.assign({}, prev, { url: ev.target.result, fileName: file.name }));
+    r.readAsDataURL(file);
+  };
+
+  const save = () => {
+    if (!f.nombre.trim()) { alert('Ponle un nombre al inventario (ej. "Catálogo DCAM · Q4 2025").'); return; }
+    if (!f.fecha) { alert('Indica la fecha del inventario.'); return; }
+    if (!f.url) { alert('Sube el PDF o pega su enlace público.'); return; }
+    window.Store.upsertManual(f);
+    onSave();
+  };
+
+  const isData = f.url && f.url.startsWith('data:');
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(7,8,10,0.92)', backdropFilter: 'blur(6px)',
+      overflowY: 'auto', padding: '40px 20px',
+    }}>
+      <div style={{
+        maxWidth: 620, margin: '0 auto', background: P.bgCard,
+        border: `1px solid ${P.amber}`, boxShadow: '0 30px 80px rgba(0,0,0,0.6)',
+      }}>
+        <div style={{
+          background: P.bgElev, padding: '16px 22px',
+          borderBottom: `2px solid ${P.amber}`,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: P.amber, letterSpacing: '0.2em' }}>
+              {manual.id ? '✎ EDITAR INVENTARIO' : '＋ CARGAR INVENTARIO'}
+            </div>
+            <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 20, textTransform: 'uppercase' }}>
+              {f.nombre || 'Inventario DCAM-SEDENA'}
+            </div>
+          </div>
+          <button onClick={onCancel} style={btnGhost}>✕ Cancelar</button>
+        </div>
+
+        <div style={{ padding: 22, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+          <FormField label="Nombre del inventario" required span="2">
+            <input value={f.nombre} onChange={(e) => set('nombre', e.target.value)} style={inpStyle()}
+              placeholder="Catálogo de precios DCAM · 4° trimestre 2025" />
+          </FormField>
+          <FormField label="Fecha del inventario" required>
+            <input type="date" value={f.fecha} onChange={(e) => set('fecha', e.target.value)} style={inpStyle()} />
+          </FormField>
+          <FormField label="Vista previa fecha">
+            <div style={{
+              padding: '8px 10px', fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+              color: P.amber, border: `1px solid ${P.border}`, background: P.bg,
+            }}>{fmtFecha(f.fecha)}</div>
+          </FormField>
+
+          <FormField label="Ruta del PDF en el repositorio (recomendado)" required span="2">
+            <input value={isData ? '' : f.url} onChange={(e) => set('url', e.target.value)} style={inpStyle()}
+              placeholder="inventarios/dcam-existencias-2025-10-03.pdf"
+              disabled={isData} />
+            <div style={{ fontSize: 11, color: P.textMuted, marginTop: 6, lineHeight: 1.55 }}>
+              Ruta relativa a un PDF dentro del repo (carpeta <code style={{ fontFamily: 'JetBrains Mono, monospace', color: P.textDim }}>inventarios/</code>),
+              o un enlace público (Drive, servidor, etc.).
+              {isData && (
+                <React.Fragment>
+                  {' '}Hay un archivo cargado en la app; para usar una ruta o enlace, primero
+                  <button onClick={() => setF(prev => Object.assign({}, prev, { url: '', fileName: '' }))}
+                    style={{ background: 'none', border: 'none', color: P.amber, cursor: 'pointer', textDecoration: 'underline', padding: 0, marginLeft: 4, font: 'inherit' }}>
+                    quita el archivo
+                  </button>.
+                </React.Fragment>
+              )}
+            </div>
+            {f.url && !isData && (
+              <a href={f.url} target="_blank" rel="noopener" style={Object.assign({}, btnGhost, { textDecoration: 'none', marginTop: 8, display: 'inline-block' })}>↗ Abrir / verificar</a>
+            )}
+          </FormField>
+
+          <FormField label="Alternativa: cargar el archivo en la app (borrador local)" span="2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <input ref={fileRef} type="file" accept="application/pdf,.pdf" style={{ display: 'none' }} onChange={upload} />
+              <button onClick={() => fileRef.current.click()} style={btnSecondary}>📤 Subir PDF al navegador</button>
+              {isData && (
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.text }}>
+                  ✓ PDF cargado{f.fileName ? ' · ' + f.fileName : ''}
+                </span>
+              )}
+              {isData && (
+                <a href={f.url} target="_blank" rel="noopener" style={Object.assign({}, btnGhost, { textDecoration: 'none' })}>↗ Ver</a>
+              )}
+            </div>
+            <div style={{ fontSize: 11, color: P.textMuted, marginTop: 6, lineHeight: 1.5 }}>
+              Solo para pruebas rápidas: el archivo queda en este navegador (no se versiona ni lo ven otros usuarios) y el espacio es limitado. Para producción, usa la ruta del repo de arriba.
+            </div>
+          </FormField>
+        </div>
+
+        <div style={{
+          padding: '14px 22px', borderTop: `1px solid ${P.border}`, background: P.bgElev,
+          display: 'flex', justifyContent: 'flex-end', gap: 8,
+        }}>
+          <button onClick={onCancel} style={btnGhost}>Cancelar</button>
+          <button onClick={save} style={btnPrimary}>💾 Guardar inventario</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+window.ManualEditor = ManualEditor;

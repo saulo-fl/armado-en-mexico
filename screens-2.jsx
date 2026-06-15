@@ -2,6 +2,14 @@
 
 const { useState: useState2, useMemo: useMemo2 } = React;
 
+// Formatea la fecha de un inventario DCAM (YYYY-MM-DD) a texto legible es-MX
+function amxFmtManualDate(f) {
+  if (!f) return '';
+  const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
+  if (isNaN(d)) return String(f);
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
 // ════════════════════════════════════════════════════════════════
 // PRODUCT — Ficha completa de un arma
 // ════════════════════════════════════════════════════════════════
@@ -24,6 +32,13 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
   const PAD = vp.isDesktop ? 28 : 16;
   const flag = window.countryFlag(arma.pais);
   const priceHistory = window.Store ? window.Store.getPriceHistory(arma.id) : [];
+  const manuales = window.Store ? window.Store.getManuales() : [];
+  const manualById = (id) => (id ? manuales.find((m) => m.id === id) : null) || null;
+  // Inventario fuente del precio actual: el ligado al arma, el del registro más
+  // reciente, o el inventario principal del repo (fuente general de precios)
+  const currentManual = manualById(arma.priceManualId) ||
+    (priceHistory.length ? manualById(priceHistory[priceHistory.length - 1].manualId) : null) ||
+    (window.Store ? window.Store.getPrimaryManual() : null);
 
   // armas relacionadas (mismo tipo)
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
@@ -628,6 +643,26 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                 fontSize: 13, color: PALETTE.textMuted,
                 marginTop: 4, lineHeight: 1.4
               }}>Ref. DCAM: {arma.dcamRef}</div>
+              {currentManual && currentManual.url &&
+                <a href={currentManual.url} target="_blank" rel="noopener" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  marginTop: 9,
+                  fontFamily: 'Courier Prime, monospace', fontSize: 11,
+                  color: PALETTE.amber, textDecoration: 'none',
+                  border: `1px solid ${PALETTE.amber}`,
+                  padding: '5px 9px', letterSpacing: '0.04em',
+                }}>
+                  <span aria-hidden="true">▦</span>
+                  Ver inventario fuente · {amxFmtManualDate(currentManual.fecha)}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              }
+              {!currentManual &&
+                <div style={{
+                  fontFamily: 'Courier Prime, monospace', fontSize: 10,
+                  color: PALETTE.textDim, marginTop: 7, lineHeight: 1.4
+                }}>Sin PDF de inventario vinculado.</div>
+              }
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
                 fontSize: 13, color: PALETTE.textDim,
@@ -643,32 +678,59 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
             <React.Fragment>
                 <SectionHeader>Historial de precios</SectionHeader>
                 <div style={{
+                  fontFamily: 'Courier Prime, monospace', fontSize: 10,
+                  color: PALETTE.textDim, letterSpacing: '0.04em',
+                  marginTop: -6, marginBottom: 10, lineHeight: 1.4
+                }}>Según inventarios oficiales DCAM-SEDENA</div>
+                <div style={{
                 background: PALETTE.bgCard,
                 border: `1px solid ${PALETTE.border}`,
                 marginBottom: 16
               }}>
                   {priceHistory.slice().reverse().map((h, i) => {
-                  const d = new Date(h.date);
+                  const man = manualById(h.manualId);
                   return (
                     <div key={i} style={{
-                      display: 'flex', justifyContent: 'space-between',
-                      padding: '9px 12px',
+                      padding: '10px 12px',
                       borderBottom: i < priceHistory.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
                       fontFamily: 'Courier Prime, monospace',
                       fontSize: 15.5,
                       background: i === 0 ? 'rgba(245,197,24,0.06)' : 'transparent'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span style={{
-                          color: i === 0 ? PALETTE.amber : PALETTE.textMuted,
-                          fontSize: 13, letterSpacing: '0.1em'
-                        }}>{i === 0 ? '● ACTUAL' : '○'}</span>
-                          <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
-                          {h.note && <span style={{ color: PALETTE.textMuted, fontSize: 13}}>· {h.note}</span>}
+                        <div style={{
+                          display: 'flex', justifyContent: 'space-between',
+                          alignItems: 'center', gap: 10
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                            <span style={{
+                            color: i === 0 ? PALETTE.amber : PALETTE.textMuted,
+                            fontSize: 13, letterSpacing: '0.1em', flexShrink: 0
+                          }}>{i === 0 ? '● ACTUAL' : '○'}</span>
+                            <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
+                          </div>
+                          <span style={{ color: PALETTE.textDim, fontSize: 14.5, flexShrink: 0 }}>
+                            {amxFmtManualDate(h.date) || '—'}
+                          </span>
                         </div>
-                        <span style={{ color: PALETTE.textDim, fontSize: 14.5}}>
-                          {d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
-                        </span>
+                        {(man || h.note) &&
+                          <div style={{
+                            display: 'flex', justifyContent: 'space-between',
+                            alignItems: 'center', gap: 10,
+                            marginTop: 6, paddingLeft: 22
+                          }}>
+                            <span style={{
+                              color: PALETTE.textMuted, fontSize: 13,
+                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                            }}>{man ? man.nombre : h.note}</span>
+                            {man && man.url &&
+                              <a href={man.url} target="_blank" rel="noopener" style={{
+                                color: PALETTE.amber, fontSize: 13, textDecoration: 'none',
+                                borderBottom: `1px solid ${PALETTE.amber}`, flexShrink: 0,
+                                whiteSpace: 'nowrap'
+                              }}>▦ Ver PDF ↗</a>
+                            }
+                          </div>
+                        }
                       </div>);
 
                 })}
