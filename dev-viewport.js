@@ -16,6 +16,13 @@
   window.__AMX_EMBEDDED = EMBEDDED;
   if (EMBEDDED) return; // dentro del marco: nada de UI de debug
 
+  // Ocultar la barra DEBUG en la WEB PÚBLICA (producción). Es una herramienta
+  // de desarrollo: se mantiene en Claude Design, en local y en previews, pero
+  // no debe aparecer en el sitio publicado.
+  var HOST = (location.hostname || '').toLowerCase();
+  var IS_PROD = HOST === 'armado.mx' || HOST === 'www.armado.mx' || /\.pages\.dev$/.test(HOST);
+  if (IS_PROD) return;
+
   var PAGE = (location.pathname.split('/').pop() || 'index').replace(/\W+/g, '_');
   var KEY = 'amx_devvp_' + PAGE;
   var mode = 'auto';
