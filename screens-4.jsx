@@ -5,18 +5,20 @@
 // ── Badge de stock
 function TraumaStock({ stock }) {
   const ok = stock > 0;
+  // Tonos más brillantes + fondo casi opaco → buen contraste sobre la foto en panel blanco
+  const tone = ok ? '#5FC46B' : '#FF6F61';
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 6,
       fontFamily: 'Courier Prime, monospace', fontSize: 13, fontWeight: 700,
       letterSpacing: '0.12em', textTransform: 'uppercase',
       padding: '4px 9px',
-      color: ok ? PALETTE.green : PALETTE.red,
-      border: `1px solid ${ok ? PALETTE.green : PALETTE.red}`,
-      background: 'rgba(0,0,0,0.35)',
+      color: tone,
+      border: `1px solid ${tone}`,
+      background: 'rgba(0,0,0,0.88)',
       whiteSpace: 'nowrap',
     }}>
-      <span style={{ width: 7, height: 7, borderRadius: '50%', background: ok ? PALETTE.green : PALETTE.red, display: 'inline-block' }} />
+      <span style={{ width: 7, height: 7, borderRadius: '50%', background: tone, display: 'inline-block' }} />
       {ok ? (stock <= 3 ? `Últimas ${stock} pzas` : 'Disponible') : 'Agotado'}
     </span>
   );
