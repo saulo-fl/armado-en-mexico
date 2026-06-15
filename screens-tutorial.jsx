@@ -19,7 +19,7 @@
         border: `1px solid ${accent ? P.amber : P.border}`,
         color: P.amber,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 22,
+        fontSize: 26.5,
         borderRadius: 6,
       }}>{icon}</span>
     );
@@ -42,7 +42,7 @@
             color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em',
           }}>{title}</div>
           <div style={{
-            fontFamily: 'Open Sans, sans-serif', fontSize: 12.5, color: P.textDim,
+            fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: P.textDim,
             lineHeight: 1.5, marginTop: 3, textWrap: 'pretty',
           }}>{desc}</div>
         </div>
@@ -59,7 +59,7 @@
         border: `1px solid ${P.red || '#C0392B'}`,
         color: P.text,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 12, letterSpacing: '0.06em',
+        fontSize: 14.5, letterSpacing: '0.06em',
         padding: '7px 12px',
       }}>
         <span style={{ color: P.red || '#C0392B', fontWeight: 700 }}>✕</span>{children}
@@ -133,7 +133,7 @@
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: `1px solid ${P.amber}`, borderRadius: 12,
             background: 'rgba(245,197,24,0.06)',
-            fontFamily: 'Courier Prime, monospace', fontSize: vp.isDesktop ? 64 : 54, color: P.amber,
+            fontFamily: 'Courier Prime, monospace', fontSize: vp.isDesktop ? 77 : 65, color: P.amber,
             boxShadow: '0 0 0 1px rgba(245,197,24,0.18), 0 10px 30px rgba(0,0,0,0.45)',
           }}>◎</div>
         ),
@@ -149,7 +149,7 @@
             width: vp.isDesktop ? 110 : 96, height: vp.isDesktop ? 110 : 96, margin: '0 auto',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: `2px solid ${P.amber}`, borderRadius: '50%',
-            color: P.amber, fontSize: vp.isDesktop ? 52 : 44, fontFamily: 'Courier Prime, monospace',
+            color: P.amber, fontSize: vp.isDesktop ? 62.5 : 53, fontFamily: 'Courier Prime, monospace',
             boxShadow: '0 0 0 6px rgba(245,197,24,0.08)',
           }}>✓</div>
         ),
@@ -258,7 +258,7 @@
           <button onClick={finish} style={{
             background: 'none', border: 'none', cursor: 'pointer',
             color: P.textMuted, fontFamily: 'Courier Prime, monospace',
-            fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase',
+            fontSize: 13, letterSpacing: '0.14em', textTransform: 'uppercase',
             padding: '4px 2px', whiteSpace: 'nowrap',
           }}>{last ? '' : 'Saltar ✕'}</button>
         </div>
@@ -285,7 +285,7 @@
 
             {/* Eyebrow */}
             <div style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 12,
+              fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
               color: P.amber, letterSpacing: '0.2em', textTransform: 'uppercase',
               marginBottom: 10, textAlign: s.rows ? 'left' : 'center',
             }}>{s.eyebrow}</div>
@@ -303,7 +303,7 @@
             {s.body && (
               <p style={{
                 margin: '14px 0 0',
-                fontFamily: 'Open Sans, sans-serif', fontSize: vp.isDesktop ? 16 : 15,
+                fontFamily: 'Open Sans, sans-serif', fontSize: vp.isDesktop ? 19 : 18,
                 color: P.textDim, lineHeight: 1.65, textAlign: 'center', textWrap: 'pretty',
               }}>{s.body}</p>
             )}
@@ -319,7 +319,7 @@
             {s.tagline && (
               <div style={{
                 marginTop: 20, textAlign: 'center',
-                fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+                fontFamily: 'Courier Prime, monospace', fontSize: 15,
                 color: P.amber, letterSpacing: '0.08em',
               }}>{s.tagline}</div>
             )}
@@ -342,7 +342,7 @@
           }}>‹ Atrás</button>
 
           <div style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted,
+            fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.textMuted,
             letterSpacing: '0.1em',
           }}>{String(idx + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}</div>
 

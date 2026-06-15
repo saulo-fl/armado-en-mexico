@@ -198,7 +198,7 @@ function App() {
           right={pickerSlot !== null ? (
             <span style={{
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 11, color: PALETTE.amber,
+              fontSize: 13, color: PALETTE.amber,
               letterSpacing: '0.15em',
               background: 'rgba(245,197,24,0.12)',
               border: `1px solid ${PALETTE.amber}`,
@@ -221,7 +221,7 @@ function App() {
           background: PALETTE.amber, color: '#000',
           padding: '8px 28px',
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, letterSpacing: '0.15em',
+          fontSize: 15.5, letterSpacing: '0.15em',
           textTransform: 'uppercase',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         }}>
@@ -229,7 +229,7 @@ function App() {
           <button onClick={() => { window.cancelPicker && window.cancelPicker(); }} style={{
             background: 'rgba(0,0,0,0.2)', color: '#000', border: '1px solid #000',
             padding: '3px 8px', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 12, letterSpacing: '0.1em',
+            fontFamily: 'inherit', fontSize: 14.5, letterSpacing: '0.1em',
             textTransform: 'uppercase', fontWeight: 700,
           }}>Cancelar</button>
         </div>

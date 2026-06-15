@@ -49,7 +49,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
         <div style={{
             position: 'absolute', top: 12, left: 12,
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 11, color: PALETTE.amber,
+            fontSize: 13, color: PALETTE.amber,
             letterSpacing: '0.18em', textTransform: 'uppercase'
           }}>
           ◢ ID-{String(arma.id).padStart(3, '0')}
@@ -72,7 +72,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
             position: 'absolute', bottom: 12, left: 12, right: 12,
             display: 'flex', justifyContent: 'space-between',
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 10, color: PALETTE.textMuted,
+            fontSize: 12, color: PALETTE.textMuted,
             letterSpacing: '0.15em'
           }}>
           <span>━━ {arma.longitud}</span>
@@ -84,7 +84,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
       <div style={{ padding: `16px ${PAD}px 12px`, borderBottom: `1px solid ${PALETTE.border}` }}>
         <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 12, color: PALETTE.amber,
+            fontSize: 14.5, color: PALETTE.amber,
             letterSpacing: '0.18em', textTransform: 'uppercase',
             marginBottom: 4,
             display: 'flex', alignItems: 'center', gap: 8
@@ -102,7 +102,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
           }}>{arma.nombre}</div>
         <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 13, color: PALETTE.textDim,
+            fontSize: 15.5, color: PALETTE.textDim,
             marginBottom: 12
           }}>{arma.mecanismo}</div>
 
@@ -189,14 +189,14 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               <span style={{
                 display: icon ? 'none' : 'block',
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: vp.isDesktop ? 15 : 12, fontWeight: 700, color: ORANGE
+                fontSize: vp.isDesktop ? 18 : 14.5, fontWeight: 700, color: ORANGE
               }}>{fallbackIcon || '◆'}</span>
             </div>
             {/* texto */}
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: vp.isDesktop ? 10.5 : 9.5, color: '#A3A3A3',
+                fontSize: vp.isDesktop ? 12.5 : 11.5, color: '#A3A3A3',
                 textTransform: 'uppercase', letterSpacing: '0.16em',
                 marginBottom: 1
               }}>{label}</div>
@@ -287,7 +287,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                     display: 'flex',
                     gap: vp.isDesktop ? 28 : 16,
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: vp.isDesktop ? 13 : 12,
+                    fontSize: vp.isDesktop ? 15.5 : 14.5,
                     letterSpacing: '0.18em',
                     textTransform: 'uppercase',
                     flexWrap: 'wrap',
@@ -318,7 +318,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: 11, color: '#A3A3A3',
+                    fontSize: 13, color: '#A3A3A3',
                     letterSpacing: '0.20em', textTransform: 'uppercase',
                     marginBottom: 4
                   }}>Nivel de uso</div>
@@ -338,7 +338,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                 </div>
                 <div style={{
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: 11, color: '#A3A3A3',
+                    fontSize: 13, color: '#A3A3A3',
                     marginTop: 4, letterSpacing: '0.08em'
                   }}>{arma.availLabel}</div>
               </div>
@@ -449,12 +449,12 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                     border: `1.5px dashed ${PALETTE.border}`,
                     padding: vp.isDesktop ? '40px 80px' : '24px 40px',
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: vp.isDesktop ? 13 : 11, color: '#A3A3A3',
+                    fontSize: vp.isDesktop ? 15.5 : 13, color: '#A3A3A3',
                     letterSpacing: '0.18em', textTransform: 'uppercase',
                     textAlign: 'center'
                   }}>
                       <div style={{ color: ORANGE }}>[ ▢ PNG SIN FONDO ]</div>
-                      <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>{arma.nombre}</div>
+                      <div style={{ fontSize: 13, opacity: 0.7, marginTop: 4 }}>{arma.nombre}</div>
                     </div>
                   }
                 </div>
@@ -503,7 +503,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                     }}>ESTADISTICAS</div>
                   <span style={{
                       fontFamily: 'Courier Prime, monospace',
-                      fontSize: 10, color: '#A3A3A3',
+                      fontSize: 12, color: '#A3A3A3',
                       letterSpacing: '0.16em', textTransform: 'uppercase'
                     }}>Est. divulgativa</span>
                 </div>
@@ -520,7 +520,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                       }}>
                       <span style={{
                           fontFamily: 'Courier Prime, monospace',
-                          fontSize: 12, color: '#A3A3A3',
+                          fontSize: 14.5, color: '#A3A3A3',
                           textTransform: 'uppercase', letterSpacing: '0.10em'
                         }}>{s.l}</span>
                       <div style={{
@@ -545,7 +545,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               <div style={{
                   padding: '10px 12px',
                   fontFamily: 'Courier Prime, monospace',
-                  fontSize: 11, color: '#A3A3A3', lineHeight: 1.55,
+                  fontSize: 13, color: '#A3A3A3', lineHeight: 1.55,
                   borderLeft: `2px solid ${ORANGE}`,
                   background: 'rgba(44,44,44,0.4)',
                   marginTop: vp.isDesktop ? 0 : 10,
@@ -614,7 +614,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               <TacticalCorners size={12} color={PALETTE.amber} thickness={2} />
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 11, color: PALETTE.textMuted,
+                fontSize: 13, color: PALETTE.textMuted,
                 letterSpacing: '0.18em', textTransform: 'uppercase',
                 marginBottom: 4
               }}>◆ Precio Actual (con IVA)</div>
@@ -625,12 +625,12 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               }}>{arma.priceExact}</div>
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 11, color: PALETTE.textMuted,
+                fontSize: 13, color: PALETTE.textMuted,
                 marginTop: 4, lineHeight: 1.4
               }}>Ref. DCAM: {arma.dcamRef}</div>
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 11, color: PALETTE.textDim,
+                fontSize: 13, color: PALETTE.textDim,
                 marginTop: 6
               }}>Nivel: <window.PriceLevel lvl={arma.priceLvl} size={13} /></div>
             </div>
@@ -655,18 +655,18 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                       padding: '9px 12px',
                       borderBottom: i < priceHistory.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
                       fontFamily: 'Courier Prime, monospace',
-                      fontSize: 13,
+                      fontSize: 15.5,
                       background: i === 0 ? 'rgba(245,197,24,0.06)' : 'transparent'
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <span style={{
                           color: i === 0 ? PALETTE.amber : PALETTE.textMuted,
-                          fontSize: 11, letterSpacing: '0.1em'
+                          fontSize: 13, letterSpacing: '0.1em'
                         }}>{i === 0 ? '● ACTUAL' : '○'}</span>
                           <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
-                          {h.note && <span style={{ color: PALETTE.textMuted, fontSize: 11 }}>· {h.note}</span>}
+                          {h.note && <span style={{ color: PALETTE.textMuted, fontSize: 13}}>· {h.note}</span>}
                         </div>
-                        <span style={{ color: PALETTE.textDim, fontSize: 12 }}>
+                        <span style={{ color: PALETTE.textDim, fontSize: 14.5}}>
                           {d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </span>
                       </div>);
@@ -687,7 +687,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                     borderLeft: `2px solid ${PALETTE.amber}`,
                     padding: '6px 10px',
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: 12, color: PALETTE.text,
+                    fontSize: 14.5, color: PALETTE.text,
                     letterSpacing: '0.08em', textTransform: 'uppercase',
                     display: 'inline-flex', alignItems: 'center', gap: 6
                   }}>
@@ -719,7 +719,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               }}>{arma.legalTit}</div>
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 13, color: PALETTE.textDim,
+                fontSize: 15.5, color: PALETTE.textDim,
                 lineHeight: 1.55
               }}>{arma.legalDesc}</div>
             </div>
@@ -734,7 +734,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               {arma.disponibilidad.map((d, i) =>
               <div key={i} style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 12, color: PALETTE.text,
+                fontSize: 14.5, color: PALETTE.text,
                 padding: '5px 0',
                 borderBottom: i < arma.disponibilidad.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
                 display: 'flex', alignItems: 'center', gap: 8
@@ -771,13 +771,13 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               <TacticalCorners size={10} color={PALETTE.amber} />
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 10, color: PALETTE.amber,
+                fontSize: 12, color: PALETTE.amber,
                 letterSpacing: '0.2em', textTransform: 'uppercase',
                 marginBottom: 8
               }}>━━━ ENTRADA · {arma.anio} ━━━</div>
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 13, color: PALETTE.text,
+                fontSize: 15.5, color: PALETTE.text,
                 lineHeight: 1.7
               }}>{arma.historia}</div>
             </div>
@@ -878,13 +878,13 @@ function RatingBlock({ armaId }) {
             minWidth: 60
           }}>
             {rating.count ? rating.avg.toFixed(1) : '—'}
-            <span style={{ fontSize: 16, color: PALETTE.textMuted }}>/5</span>
+            <span style={{ fontSize: 19, color: PALETTE.textMuted }}>/5</span>
           </div>
           <div style={{ flex: 1 }}>
             <window.StarRating value={rating.avg} count={rating.count} size="sm" showCount={false} />
             <div style={{
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 12, color: PALETTE.textDim,
+              fontSize: 14.5, color: PALETTE.textDim,
               letterSpacing: '0.06em', marginTop: 4
             }}>
               {rating.count === 0 ?
@@ -901,7 +901,7 @@ function RatingBlock({ armaId }) {
         }}>
           <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 12, color: PALETTE.textDim,
+            fontSize: 14.5, color: PALETTE.textDim,
             letterSpacing: '0.08em', textTransform: 'uppercase',
             marginBottom: 8
           }}>{userR ? 'Tu calificación' : 'Califica este modelo'}</div>
@@ -911,7 +911,7 @@ function RatingBlock({ armaId }) {
             {thanks &&
             <span style={{
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 13, color: PALETTE.amber,
+              fontSize: 15.5, color: PALETTE.amber,
               letterSpacing: '0.08em', fontWeight: 700,
               animation: 'slideUp 0.25s'
             }}>✓ ¡Gracias!</span>
@@ -941,7 +941,7 @@ function YouTubeBlock({ arma, padX = 16 }) {
       <a href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noopener noreferrer"
       style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, color: PALETTE.textMuted,
+        fontSize: 13, color: PALETTE.textMuted,
         letterSpacing: '0.1em', textDecoration: 'none'
       }}>
           @ArmasMS ↗
@@ -1006,14 +1006,14 @@ function YouTubeBlock({ arma, padX = 16 }) {
             <div style={{
             position: 'absolute', bottom: 10, left: 12,
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 13, color: '#fff',
+            fontSize: 15.5, color: '#fff',
             letterSpacing: '0.08em',
             textShadow: '0 2px 6px rgba(0,0,0,0.8)',
             display: 'flex', alignItems: 'center', gap: 6
           }}>
               <span style={{
               background: PALETTE.amber, color: '#000',
-              padding: '2px 6px', fontWeight: 700, fontSize: 11,
+              padding: '2px 6px', fontWeight: 700, fontSize: 13,
               letterSpacing: '0.1em'
             }}>YOUTUBE</span>
               @ArmasMS
@@ -1021,7 +1021,7 @@ function YouTubeBlock({ arma, padX = 16 }) {
             <div style={{
             position: 'absolute', top: 10, right: 12,
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 11, color: '#fff', opacity: 0.85,
+            fontSize: 13, color: '#fff', opacity: 0.85,
             letterSpacing: '0.12em',
             background: 'rgba(0,0,0,0.5)',
             padding: '3px 7px'
@@ -1078,21 +1078,21 @@ function SuggestChangesModal({ arma, onClose }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
           <div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.amber, letterSpacing: '0.2em' }}>✎ SUGERIR CAMBIO</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em' }}>✎ SUGERIR CAMBIO</div>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase' }}>{arma.nombre}</div>
           </div>
           <button onClick={onClose} style={{
             background: 'none', border: `1px solid ${PALETTE.border}`,
             color: PALETTE.textDim, width: 28, height: 28, cursor: 'pointer',
-            fontSize: 16, lineHeight: 1
+            fontSize: 19, lineHeight: 1
           }}>✕</button>
         </div>
 
         {sent ?
         <div style={{ padding: 28, textAlign: 'center' }}>
-            <div style={{ fontSize: 42, color: PALETTE.amber, lineHeight: 1, marginBottom: 12 }}>✓</div>
+            <div style={{ fontSize: 50.5, color: PALETTE.amber, lineHeight: 1, marginBottom: 12 }}>✓</div>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textDim, lineHeight: 1.6, marginBottom: 20 }}>Tu sugerencia entró en la cola. El curador revisará la información y, si procede, aplicará el cambio.</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6, marginBottom: 20 }}>Tu sugerencia entró en la cola. El curador revisará la información y, si procede, aplicará el cambio.</div>
             <button onClick={onClose} style={{
             background: PALETTE.amber, color: '#000', border: 'none',
             padding: '10px 20px',
@@ -1123,7 +1123,7 @@ function SuggestChangesModal({ arma, onClose }) {
             <div style={{
             background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
             padding: 10, marginTop: 8,
-            fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.textMuted,
+            fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textMuted,
             lineHeight: 1.5
           }}>
               <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu sugerencia va a la cola del curador. No se aplica al instante; se revisa, se valida con la fuente y luego se publica.
@@ -1156,7 +1156,7 @@ function sfld(label, k, f, set, p = {}) {
       <label style={{
         display: 'block',
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, color: PALETTE.textMuted,
+        fontSize: 13, color: PALETTE.textMuted,
         letterSpacing: '0.15em', textTransform: 'uppercase',
         marginBottom: 4
       }}>{label} {p.required && <span style={{ color: PALETTE.amber }}>*</span>}</label>
@@ -1203,9 +1203,9 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
         fontFamily: 'Courier Prime, monospace',
         color: PALETTE.textMuted
       }}>
-        <div style={{ fontSize: 48, color: PALETTE.border, marginBottom: 16 }}>⇄</div>
-        <div style={{ fontSize: 14, marginBottom: 8, color: PALETTE.text }}>COMPARADOR VACÍO</div>
-        <div style={{ fontSize: 12, lineHeight: 1.6, marginBottom: 18 }}>
+        <div style={{ fontSize: 57.5, color: PALETTE.border, marginBottom: 16 }}>⇄</div>
+        <div style={{ fontSize: 17, marginBottom: 8, color: PALETTE.text }}>COMPARADOR VACÍO</div>
+        <div style={{ fontSize: 14.5, lineHeight: 1.6, marginBottom: 18 }}>
           Selecciona armas desde el catálogo<br />tocando el botón ⇄ en cada tarjeta.
         </div>
         <button onClick={() => onNav('catalog')} style={{
@@ -1225,7 +1225,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
       <div style={{
         padding: `${vp.isDesktop ? 22 : 14}px ${padX}px 10px`,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, color: PALETTE.amber,
+        fontSize: 13, color: PALETTE.amber,
         letterSpacing: '0.2em', textTransform: 'uppercase',
         textAlign: 'center'
       }}>━━━ LOADOUT · COMPARATIVA ━━━</div>
@@ -1272,7 +1272,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
                   <div style={{ textAlign: 'right' }}>
                     <div style={{
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: 13, color: winner === 'a' ? PALETTE.amber : PALETTE.text,
+                    fontSize: 15.5, color: winner === 'a' ? PALETTE.amber : PALETTE.text,
                     fontWeight: 700
                   }}>{va}</div>
                     <div style={{
@@ -1290,14 +1290,14 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
                   </div>
                   <div style={{
                   fontFamily: 'Courier Prime, monospace',
-                  fontSize: 11, color: PALETTE.textMuted,
+                  fontSize: 13, color: PALETTE.textMuted,
                   textAlign: 'center', letterSpacing: '0.1em',
                   textTransform: 'uppercase'
                 }}>{stat.l}</div>
                   <div>
                     <div style={{
                     fontFamily: 'Courier Prime, monospace',
-                    fontSize: 13, color: winner === 'b' ? PALETTE.amber : PALETTE.text,
+                    fontSize: 15.5, color: winner === 'b' ? PALETTE.amber : PALETTE.text,
                     fontWeight: 700
                   }}>{vb}</div>
                     <div style={{
@@ -1340,14 +1340,12 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
             borderBottom: `1px solid ${PALETTE.border}`,
             padding: '8px 10px', alignItems: 'center', gap: 8,
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 12
-          }}>
+            fontSize: 14.5}}>
                 <div style={{ color: PALETTE.text, textAlign: 'right', lineHeight: 1.3 }}>{row.av}</div>
                 <div style={{
               color: PALETTE.textMuted,
               textAlign: 'center', letterSpacing: '0.1em',
-              textTransform: 'uppercase', fontSize: 10
-            }}>{row.l}</div>
+              textTransform: 'uppercase', fontSize: 12}}>{row.l}</div>
                 <div style={{ color: PALETTE.text, lineHeight: 1.3 }}>{row.bv}</div>
               </div>
           )}
@@ -1370,11 +1368,11 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
         fontFamily: 'Courier Prime, monospace',
         color: PALETTE.textMuted
       }}>
-        <div style={{ fontSize: 32, color: PALETTE.border }}>+</div>
+        <div style={{ fontSize: 38.5, color: PALETTE.border }}>+</div>
         <div style={{
-          fontSize: 11, letterSpacing: '0.18em', textTransform: 'uppercase'
+          fontSize: 13, letterSpacing: '0.18em', textTransform: 'uppercase'
         }}>SLOT {side}</div>
-        <div style={{ fontSize: 11, color: PALETTE.textDim }}>Añadir arma</div>
+        <div style={{ fontSize: 13, color: PALETTE.textDim }}>Añadir arma</div>
       </button>);
 
   }
@@ -1392,12 +1390,12 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
       }}>
         <span style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 10, color: PALETTE.amber,
+          fontSize: 12, color: PALETTE.amber,
           letterSpacing: '0.2em'
         }}>◆ SLOT {side}</span>
         <button onClick={onRemove} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.textMuted, fontSize: 13, padding: 0
+          color: PALETTE.textMuted, fontSize: 15.5, padding: 0
         }}>✕</button>
       </div>
       <div style={{
@@ -1414,7 +1412,7 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
       </div>
       <div style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 10, color: PALETTE.amber,
+        fontSize: 12, color: PALETTE.amber,
         letterSpacing: '0.1em', textTransform: 'uppercase',
         marginBottom: 2
       }}>{arma.marca}</div>
@@ -1427,7 +1425,7 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
       }}>{arma.nombre}</div>
       <div style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, color: PALETTE.textDim,
+        fontSize: 13, color: PALETTE.textDim,
         marginBottom: 6
       }}>{arma.calibre.replace(' Parabellum', '').replace('Winchester', 'Win')}</div>
       <AvailBadge avail={arma.avail} compact />
@@ -1437,7 +1435,7 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
         color: PALETTE.text,
         padding: '5px',
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, letterSpacing: '0.1em',
+        fontSize: 13, letterSpacing: '0.1em',
         cursor: 'pointer', textTransform: 'uppercase'
       }}>Ver ficha →</button>
     </div>);
@@ -1477,7 +1475,7 @@ function LegalScreen({ onNav }) {
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
+          fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', marginBottom: 6
         }}>{eyebrow}</div>
         <div style={{
@@ -1489,7 +1487,7 @@ function LegalScreen({ onNav }) {
         }}>{title}</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 12, color: PALETTE.textDim,
+          fontSize: 14.5, color: PALETTE.textDim,
           marginTop: 10, maxWidth: 480, marginInline: 'auto',
           lineHeight: 1.5
         }}>{intro}</div>
@@ -1505,17 +1503,17 @@ function LegalScreen({ onNav }) {
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.red,
+          fontSize: 13, color: PALETTE.red,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6,
           fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.text,
+          fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.65
         }}>
-          <b>Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano.</b> Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. <b>Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos.</b>
+          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos.
           <br /><br />
           La asesoría legal relativa al proceso SEDENA es prestada de forma independiente por un <span style={{ color: PALETTE.amber, fontWeight: 700 }}>abogado externo especializado</span>, bajo su propia cédula profesional y responsabilidad. Armas M&amp;S no es despacho jurídico ni mantiene relación laboral con dicho profesional, y se limita a facilitar el contacto entre el interesado y el abogado. Honorarios, alcance y términos del servicio se acuerdan directamente con el profesional.
         </div>
@@ -1540,7 +1538,7 @@ function LegalScreen({ onNav }) {
           }}>{d.label}</div>
             <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 12, color: PALETTE.textDim,
+            fontSize: 14.5, color: PALETTE.textDim,
             lineHeight: 1.55
           }}>{d.desc}</div>
           </div>
@@ -1561,7 +1559,7 @@ function LegalScreen({ onNav }) {
           }}>Sin Licencia</div>
           <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 12, color: PALETTE.textDim,
+            fontSize: 14.5, color: PALETTE.textDim,
             lineHeight: 1.55
           }}>Armas traumáticas. No letales impulsadas por aire comprimido, menores a 140 Joules de potencia.</div>
         </div>
@@ -1580,7 +1578,7 @@ function LegalScreen({ onNav }) {
         {requisitos.map((r, i) =>
         <div key={i} style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.text,
+          fontSize: 15.5, color: PALETTE.text,
           padding: '7px 0',
           borderBottom: i < requisitos.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
           display: 'flex', alignItems: 'center', gap: 10
@@ -1589,7 +1587,7 @@ function LegalScreen({ onNav }) {
             width: 18, height: 18,
             border: `1px solid ${PALETTE.amber}`,
             color: PALETTE.amber,
-            fontSize: 11, fontWeight: 700,
+            fontSize: 13, fontWeight: 700,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0
           }}>{String(i + 1).padStart(2, '0')}</span>
@@ -1629,7 +1627,7 @@ function LegalScreen({ onNav }) {
             }}>{s.t}</div>
               <div style={{
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 12, color: PALETTE.textDim,
+              fontSize: 14.5, color: PALETTE.textDim,
               lineHeight: 1.55
             }}>{s.d}</div>
             </div>
@@ -1648,7 +1646,7 @@ function LegalScreen({ onNav }) {
         <TacticalCorners size={14} color={PALETTE.amber} thickness={2} />
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
+          fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6
         }}>▸ ABOGADO EXTERNO · ASESORÍA INDEPENDIENTE</div>
@@ -1662,12 +1660,12 @@ function LegalScreen({ onNav }) {
         }}>Acompañamiento legal<br />con abogado especializado</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 12, color: PALETTE.textDim,
+          fontSize: 14.5, color: PALETTE.textDim,
           lineHeight: 1.6, marginBottom: 10
         }}>{waPitch}</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.textMuted,
+          fontSize: 13, color: PALETTE.textMuted,
           lineHeight: 1.55, marginBottom: 14,
           paddingTop: 8,
           borderTop: `1px dashed ${PALETTE.border}`
@@ -1684,7 +1682,7 @@ function LegalScreen({ onNav }) {
           letterSpacing: '0.15em', textTransform: 'uppercase'
         }}>
           <span>Contactar al abogado</span>
-          <span style={{ fontSize: 17 }}>↗</span>
+          <span style={{ fontSize: 20.5}}>↗</span>
         </a>
       </div>
     </div>);
@@ -1724,7 +1722,7 @@ function AboutScreen() {
         </div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
+          fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', marginBottom: 6
         }}>{eyebrow}</div>
         <div style={{
@@ -1745,13 +1743,13 @@ function AboutScreen() {
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.red,
+          fontSize: 13, color: PALETTE.red,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
         }}>▲ NO SOMOS GOBIERNO · FINES INFORMATIVOS</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.text,
+          fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.7
         }}>
           <b>Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano.</b> Somos un proyecto privado divulgativo. <b>No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No tramitamos licencias ni permisos.</b> Lo único que comercializamos son las tres armas traumáticas menos letales. El único servicio adicional que ofrecemos es <span style={{ color: PALETTE.amber, fontWeight: 700 }}>asesoría legal personalizada</span> con un abogado especializado, contratada de forma independiente y con costo.
@@ -1767,12 +1765,12 @@ function AboutScreen() {
         {decl.parrafos.map((t, i) => (
           <p key={i} style={{
             margin: i === 0 ? 0 : '14px 0 0', fontFamily: 'Open Sans, sans-serif',
-            fontSize: 14.5, color: i === 0 ? PALETTE.text : PALETTE.textDim, lineHeight: 1.7, textWrap: 'pretty',
+            fontSize: 17.5, color: i === 0 ? PALETTE.text : PALETTE.textDim, lineHeight: 1.7, textWrap: 'pretty',
           }}>{t}</p>
         ))}
         <div style={{
           marginTop: 18, paddingTop: 12, borderTop: `1px dashed ${PALETTE.border}`,
-          fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.textMuted, letterSpacing: '0.04em',
+          fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textMuted, letterSpacing: '0.04em',
         }}>Armado en México · ¡Protege lo que amas!</div>
       </div>
 
@@ -1787,7 +1785,7 @@ function AboutScreen() {
         <TacticalCorners size={10} color={PALETTE.amber} />
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.text,
+          fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.7
         }}>{mision}</div>
       </div>
@@ -1803,7 +1801,7 @@ function AboutScreen() {
             <img src="imagenes/logo-armado-mx.png" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
           </div>
-          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.65 }}>
+          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
             Una <b style={{ color: PALETTE.text }}>enciclopedia libre</b> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
           </div>
         </div>
@@ -1814,7 +1812,7 @@ function AboutScreen() {
             </div>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
           </div>
-          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.65 }}>
+          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
             Un <b style={{ color: PALETTE.text }}>proyecto digital de e-commerce</b> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
           </div>
         </div>
@@ -1844,11 +1842,11 @@ function AboutScreen() {
 
           <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 11, color: PALETTE.textMuted,
+            fontSize: 13, color: PALETTE.textMuted,
             letterSpacing: '0.15em', textAlign: 'center',
             padding: 8, lineHeight: 1.5
           }}>
-              <div style={{ fontSize: 32, color: PALETTE.amber, marginBottom: 4 }}>◯</div>
+              <div style={{ fontSize: 38.5, color: PALETTE.amber, marginBottom: 4 }}>◯</div>
               FOTO<br />PENDIENTE
             </div>
           }
@@ -1864,12 +1862,12 @@ function AboutScreen() {
           }}>{autor}</div>
           <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 13, color: PALETTE.amber,
+            fontSize: 15.5, color: PALETTE.amber,
             marginTop: 6, lineHeight: 1.5
           }}>Co-Fundador de Armas M&amp;S<br />Creador de Armado en México</div>
           <div style={{
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 12, color: PALETTE.textDim,
+            fontSize: 14.5, color: PALETTE.textDim,
             lineHeight: 1.65, marginTop: 10
           }}>{bio}</div>
         </div>
@@ -1879,7 +1877,7 @@ function AboutScreen() {
         textAlign: 'center',
         padding: '16px',
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, color: PALETTE.textMuted,
+        fontSize: 13, color: PALETTE.textMuted,
         letterSpacing: '0.15em'
       }}>━━━ EDICIÓN 2026 · v1.0 ━━━</div>
     </div>);
@@ -1907,7 +1905,7 @@ function FAQScreen() {
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
+          fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', marginBottom: 6
         }}>? PREGUNTAS FRECUENTES</div>
         <div style={{
@@ -1928,13 +1926,13 @@ function FAQScreen() {
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.red,
+          fontSize: 13, color: PALETTE.red,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.text,
+          fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.65
         }}>
           <b>Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental.</b> Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
@@ -1968,14 +1966,14 @@ function FAQScreen() {
               <span style={{
               color: PALETTE.amber,
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 16, flexShrink: 0
+              fontSize: 19, flexShrink: 0
             }}>{open === i ? '−' : '+'}</span>
             </button>
             {open === i &&
           <div style={{
             padding: '0 14px 14px',
             fontFamily: 'Courier Prime, monospace',
-            fontSize: 13, color: PALETTE.textDim,
+            fontSize: 15.5, color: PALETTE.textDim,
             lineHeight: 1.65,
             borderTop: `1px dashed ${PALETTE.border}`,
             paddingTop: 12
@@ -2010,7 +2008,7 @@ function MenuScreen({ onNav, onTutorial }) {
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, color: PALETTE.amber,
+        fontSize: 13, color: PALETTE.amber,
         letterSpacing: '0.2em', marginBottom: 14
       }}>☰ MÁS</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -2024,7 +2022,7 @@ function MenuScreen({ onNav, onTutorial }) {
           display: 'flex', alignItems: 'center', gap: 14
         }}>
             <span style={{
-            fontSize: 23, color: PALETTE.amber,
+            fontSize: 27.5, color: PALETTE.amber,
             width: 30, textAlign: 'center',
             fontFamily: 'Courier Prime, monospace'
           }}>{it.icon}</span>
@@ -2038,11 +2036,11 @@ function MenuScreen({ onNav, onTutorial }) {
             }}>{it.title}</div>
               <div style={{
               fontFamily: 'Courier Prime, monospace',
-              fontSize: 12, color: PALETTE.textMuted,
+              fontSize: 14.5, color: PALETTE.textMuted,
               marginTop: 2
             }}>{it.desc}</div>
             </div>
-            <span style={{ color: PALETTE.amber, fontSize: 17 }}>›</span>
+            <span style={{ color: PALETTE.amber, fontSize: 20.5}}>›</span>
           </button>
         )}
       </div>
@@ -2053,10 +2051,10 @@ function MenuScreen({ onNav, onTutorial }) {
         background: PALETTE.bgElev,
         border: `1px dashed ${PALETTE.border}`,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 12, color: PALETTE.textMuted,
+        fontSize: 14.5, color: PALETTE.textMuted,
         lineHeight: 1.6
       }}>
-        <div style={{ color: PALETTE.amber, fontWeight: 700, letterSpacing: '0.15em', marginBottom: 4, fontSize: 11 }}>◆ ARMADO·MX</div>
+        <div style={{ color: PALETTE.amber, fontWeight: 700, letterSpacing: '0.15em', marginBottom: 4, fontSize: 13}}>◆ ARMADO·MX</div>
         Catálogo divulgativo. Edición 2026. Curado por Saulo Flores · Armas M&amp;S.
       </div>
     </div>);
@@ -2109,11 +2107,11 @@ function SubmitScreen({ onNav }) {
     return (
       <div style={{ padding: `40px ${padX}px 90px`, maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
         <div style={{
-          fontSize: 56, color: PALETTE.amber, marginBottom: 20, lineHeight: 1
+          fontSize: 67, color: PALETTE.amber, marginBottom: 20, lineHeight: 1
         }}>✓</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 12, color: PALETTE.amber,
+          fontSize: 14.5, color: PALETTE.amber,
           letterSpacing: '0.25em', marginBottom: 10
         }}>◆ ENVÍO RECIBIDO</div>
         <div style={{
@@ -2123,7 +2121,7 @@ function SubmitScreen({ onNav }) {
         }}>¡Gracias por contribuir!</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 14, color: PALETTE.textDim,
+          fontSize: 17, color: PALETTE.textDim,
           lineHeight: 1.7, marginBottom: 28
         }}>
           Tu propuesta entró en la cola de revisión. Saulo Flores revisará la información,
@@ -2156,7 +2154,7 @@ function SubmitScreen({ onNav }) {
       <label style={{
       display: 'block',
       fontFamily: 'Courier Prime, monospace',
-      fontSize: 11, color: PALETTE.textMuted,
+      fontSize: 13, color: PALETTE.textMuted,
       letterSpacing: '0.15em', textTransform: 'uppercase',
       marginBottom: 5
     }}>{label} {props.required && <span style={{ color: PALETTE.amber }}>*</span>}</label>
@@ -2184,7 +2182,7 @@ function SubmitScreen({ onNav }) {
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
+          fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.25em', marginBottom: 8
         }}>＋ COLABORA</div>
         <div style={{
@@ -2194,7 +2192,7 @@ function SubmitScreen({ onNav }) {
         }}>Proponer un arma</div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.textDim,
+          fontSize: 15.5, color: PALETTE.textDim,
           lineHeight: 1.6, maxWidth: 540, margin: '0 auto'
         }}>¿Tienes información de un arma que falta en el catálogo? Compártela. El curador revisará tu envío y lo publicará si cumple los criterios divulgativos.</div>
       </div>
@@ -2235,7 +2233,7 @@ function SubmitScreen({ onNav }) {
       <div style={{
         background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
         padding: 14, marginBottom: 22,
-        fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted,
+        fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textMuted,
         lineHeight: 1.6
       }}>
         <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu envío no se publica automáticamente. Pasa primero por la revisión del curador. Pueden completarse datos faltantes (precio, ficha legal, ref. DCAM), corregir errores y enriquecerlo con fotografía oficial.

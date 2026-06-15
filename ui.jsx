@@ -119,7 +119,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                   borderBottom: dActive ? `2px solid ${PALETTE.amber}` : '2px solid transparent',
                   whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
                   transition: 'color 0.15s',
-                }}>{it.label} <span style={{ fontSize: 11, transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span></button>
+                }}>{it.label} <span style={{ fontSize: 13, transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span></button>
                 {moreOpen && (
                   <div style={{
                     position: 'absolute', top: '100%', right: 0, minWidth: 200,
@@ -172,7 +172,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                 <span style={{
                   position: 'absolute', top: 2, right: 2,
                   background: PALETTE.amber, color: '#000',
-                  fontSize: 10, fontWeight: 700,
+                  fontSize: 12, fontWeight: 700,
                   padding: '1px 4px', borderRadius: 8,
                   fontFamily: 'Courier Prime, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
@@ -184,7 +184,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
       </div>
       <div style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11, color: PALETTE.textMuted,
+        fontSize: 13, color: PALETTE.textMuted,
         letterSpacing: '0.2em', textTransform: 'uppercase',
       }}>ENCICLOPEDIA TÁCTICA · ED. 2026</div>
     </div>
@@ -255,7 +255,7 @@ function ArmaCardBody({ arma }) {
         <CountryFlag pais={arma.pais} height={12} />
         <span style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
+          fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.12em', textTransform: 'uppercase',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>{arma.marca}</span>
@@ -278,7 +278,7 @@ function ArmaCardBody({ arma }) {
       {/* calibre */}
       <div style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 11,
+        fontSize: 13,
         color: PALETTE.textDim,
         marginBottom: 8,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
@@ -329,7 +329,7 @@ function StatsBar({ label, value, max = 100, color = PALETTE.amber, compareValue
       <div style={{
         display: 'flex', justifyContent: 'space-between',
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 12, color: PALETTE.textDim,
+        fontSize: 14.5, color: PALETTE.textDim,
         textTransform: 'uppercase', letterSpacing: '0.1em',
         marginBottom: 4,
       }}>
@@ -415,7 +415,7 @@ function AppHeader({ title, back, onBack, right }) {
       {back ? (
         <button onClick={onBack} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.amber, fontSize: 19, padding: 4,
+          color: PALETTE.amber, fontSize: 23, padding: 4,
           fontFamily: 'Courier Prime, monospace',
         }}>‹</button>
       ) : (
@@ -438,7 +438,7 @@ function AppHeader({ title, back, onBack, right }) {
                 border: `1.5px dashed ${PALETTE.amber}`,
                 borderRadius: 6, color: PALETTE.amber,
                 fontFamily: 'Courier Prime, monospace',
-                fontSize: 11, letterSpacing: '0.1em',
+                fontSize: 13, letterSpacing: '0.1em',
                 background: 'rgba(245,197,24,0.08)',
               }}>LOGO</span>
               <span style={{ whiteSpace: 'nowrap' }}>
@@ -504,13 +504,13 @@ function BottomNav({ current, onNav, compareCount }) {
                 boxShadow: `0 0 6px ${PALETTE.amber}`,
               }} />
             )}
-            <span style={{ fontSize: 17, lineHeight: 1, position: 'relative' }}>
+            <span style={{ fontSize: 20.5, lineHeight: 1, position: 'relative' }}>
               {it.icon}
               {it.badge ? (
                 <span style={{
                   position: 'absolute', top: -4, right: -8,
                   background: PALETTE.amber, color: '#000',
-                  fontSize: 10, fontWeight: 700,
+                  fontSize: 12, fontWeight: 700,
                   borderRadius: 8, padding: '1px 4px',
                   fontFamily: 'Courier Prime, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
@@ -586,7 +586,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 10, fontWeight: 600,
+          fontSize: 12, fontWeight: 600,
           color: PALETTE.textDim,
           background: 'rgba(0,0,0,0.6)',
           padding: '2px 5px',
@@ -605,7 +605,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
           border: `1px solid ${inCompare ? PALETTE.amber : PALETTE.border}`,
           padding: '2px 5px',
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, fontWeight: 700,
+          fontSize: 13, fontWeight: 700,
           cursor: 'pointer',
           letterSpacing: '0.05em',
         }}>{inCompare ? '✓' : '⇄'}</button>
@@ -627,12 +627,12 @@ function SpecRow({ label, value, accent }) {
       padding: '7px 10px',
       borderBottom: `1px solid ${PALETTE.border}`,
       fontFamily: 'Courier Prime, monospace',
-      fontSize: 13,
+      fontSize: 15.5,
     }}>
       <span style={{
         color: PALETTE.textMuted,
         textTransform: 'uppercase', letterSpacing: '0.08em',
-        fontSize: 12,
+        fontSize: 14.5,
       }}>{label}</span>
       <span style={{ color: accent || PALETTE.text, fontWeight: 600, textAlign: 'right' }}>{value}</span>
     </div>
@@ -839,7 +839,7 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
         <span style={{
           display: icon ? 'none' : 'block',
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 16, fontWeight: 700,
+          fontSize: 19, fontWeight: 700,
           color: PALETTE.amber,
           letterSpacing: 0,
         }}>{fallbackIcon || '◆'}</span>
@@ -848,7 +848,7 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 11, color: PALETTE.amber,
+          fontSize: 13, color: PALETTE.amber,
           textTransform: 'uppercase', letterSpacing: '0.14em',
           marginBottom: 2,
         }}>{label}</div>
@@ -879,7 +879,7 @@ function FilterChip({ children, active, onClick, count }) {
       border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
       padding: '5px 10px',
       fontFamily: 'Courier Prime, monospace',
-      fontSize: 12, fontWeight: 600,
+      fontSize: 14.5, fontWeight: 600,
       letterSpacing: '0.08em', textTransform: 'uppercase',
       cursor: 'pointer',
       whiteSpace: 'nowrap',
@@ -889,7 +889,7 @@ function FilterChip({ children, active, onClick, count }) {
       {children}
       {count != null && (
         <span style={{
-          fontSize: 11, opacity: 0.7,
+          fontSize: 13, opacity: 0.7,
         }}>· {count}</span>
       )}
     </button>
@@ -916,12 +916,12 @@ function CompareFloat({ ids, onOpen, onClear }) {
     }}>
       <span style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 12, color: PALETTE.amber,
+        fontSize: 14.5, color: PALETTE.amber,
         letterSpacing: '0.1em', fontWeight: 700,
       }}>⇄ {ids.length}/2</span>
       <span style={{
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 12, color: PALETTE.textDim, flex: 1,
+        fontSize: 14.5, color: PALETTE.textDim, flex: 1,
       }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
       {ids.length === 2 && (
         <button onClick={onOpen} style={{
@@ -934,7 +934,7 @@ function CompareFloat({ ids, onOpen, onClear }) {
       )}
       <button onClick={onClear} style={{
         background: 'none', border: 'none', cursor: 'pointer',
-        color: PALETTE.textDim, fontSize: 16, padding: 2,
+        color: PALETTE.textDim, fontSize: 19, padding: 2,
       }}>✕</button>
     </div>
   );
@@ -1030,7 +1030,7 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
         border: `1px dashed ${PALETTE.border}`,
         color: PALETTE.textMuted,
         fontFamily: 'Courier Prime, monospace',
-        fontSize: 13, letterSpacing: '0.04em',
+        fontSize: 15.5, letterSpacing: '0.04em',
         textAlign: 'center',
         margin: `0 ${padX}px`,
       }}>{emptyText}</div>
