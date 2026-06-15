@@ -16,6 +16,7 @@
     favorites:   'amx_favorites_v2',
     ratings:     'amx_ratings_v2',
     appConfig:   'amx_appconfig_v2',
+    manuales:    'amx_manuales_v2',
   };
 
   const DEFAULT_APP_CONFIG = {
@@ -67,6 +68,25 @@
       accent: '#c9a227',
     },
   ];
+
+  // ── INVENTARIOS OFICIALES (PDFs versionados en el repo) ──────────────
+  // Fuente de verdad en data-precios.js (window.AMX_MANUALES_SEED). El
+  // arreglo de abajo es solo respaldo por si ese archivo no cargó.
+  const DEFAULT_MANUALES = (window.AMX_MANUALES_SEED && window.AMX_MANUALES_SEED.length)
+    ? window.AMX_MANUALES_SEED
+    : [
+    {
+      id: 'man_dcam_2025_10_03',
+      nombre: 'Existencias de armas DCAM · 3 de octubre 2025',
+      fecha: '2025-10-03',
+      url: 'inventarios/dcam-existencias-2025-10-03.pdf',
+      fileName: 'dcam-existencias-2025-10-03.pdf',
+      addedAt: '2025-10-03T12:00:00.000Z',
+      primary: true,
+    },
+  ];
+  // Historial de precios sembrado por arma (window.AMX_PRICE_HISTORY_SEED)
+  const PRICE_HISTORY_SEED = window.AMX_PRICE_HISTORY_SEED || {};
 
   const DEFAULT_PAGES = {
     legal: {
@@ -315,7 +335,20 @@
     // ─── PRICE HISTORY ────────────────────────────────────
     getPriceHistory(armaId) {
       const h = read(K.priceHist, {});
-      return h[armaId] || [];
+      // 1) edición explícita en este navegador (admin) tiene prioridad
+      if (Object.prototype.hasOwnProperty.call(h, armaId)) return h[armaId];
+      // 2) historial sembrado en código (data-precios.js)
+      if (PRICE_HISTORY_SEED[armaId] && PRICE_HISTORY_SEED[armaId].length) {
+        return PRICE_HISTORY_SEED[armaId].slice()
+          .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+      }
+      // 3) auto: si el arma tiene precio real, atribúyelo al inventario principal
+      const arma = (this.getArmas() || []).find(a => a.id === armaId);
+      const primary = this.getPrimaryManual();
+      if (arma && primary && arma.priceExact && /\d/.test(String(arma.priceExact))) {
+        return [{ manualId: primary.id, price: arma.priceExact, date: primary.fecha, note: primary.nombre }];
+      }
+      return [];
     },
     addPriceHistory(armaId, price, prevPrice) {
       const h = read(K.priceHist, {});
@@ -333,6 +366,38 @@
       const h = read(K.priceHist, {});
       h[armaId] = arr;
       write(K.priceHist, h);
+    },
+
+    // ─── MANUALES / INVENTARIOS OFICIALES DCAM-SEDENA ──────
+    // Cada manual: { id, nombre, fecha (YYYY-MM-DD del inventario),
+    //                url (dataURL o enlace externo al PDF), fileName, addedAt }
+    getManuales() {
+      const arr = read(K.manuales, DEFAULT_MANUALES);
+      // más reciente primero (por fecha del inventario)
+      return arr.slice().sort((a, b) => String(b.fecha || '').localeCompare(String(a.fecha || '')));
+    },
+    // Inventario fuente principal: el marcado como primary, o el más reciente
+    getPrimaryManual() {
+      const arr = this.getManuales();
+      return arr.find(m => m.primary) || arr[0] || null;
+    },
+    getManual(id) {
+      if (!id) return null;
+      return read(K.manuales, DEFAULT_MANUALES).find(m => m.id === id) || null;
+    },
+    saveManuales(arr) { write(K.manuales, arr); Store._notify(); },
+    upsertManual(m) {
+      const arr = read(K.manuales, DEFAULT_MANUALES).slice();
+      if (!m.id) m.id = 'man_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      if (!m.addedAt) m.addedAt = new Date().toISOString();
+      const idx = arr.findIndex(x => x.id === m.id);
+      if (idx >= 0) arr[idx] = Object.assign({}, arr[idx], m);
+      else arr.push(m);
+      this.saveManuales(arr);
+      return m;
+    },
+    deleteManual(id) {
+      this.saveManuales(read(K.manuales, DEFAULT_MANUALES).filter(m => m.id !== id));
     },
 
     // ─── PROMOS (banners slider) ──────────────────────────

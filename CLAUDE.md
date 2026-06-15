@@ -42,9 +42,34 @@ gh api -X POST "repos/{owner}/armado-en-mexico/pages" \
 - Smoke test visual (ver `CHANGES.md` § Verificación): fichas horizontales, badges
   CIVIL en verde, carruseles con arrastre y sin flechas
 
+## Conciliar inventarios y precios (tarea recurrente)
+
+Los precios oficiales se alimentan desde los **PDFs de existencias de la DCAM**.
+Toda la conciliación vive en **código versionado**, no en `localStorage`:
+
+- Los PDFs van en la carpeta **`inventarios/`** con nombre `dcam-existencias-AAAA-MM-DD.pdf`.
+- El registro de inventarios y el historial de precios por arma viven en **`data-precios.js`**
+  (`window.AMX_MANUALES_SEED` y `window.AMX_PRICE_HISTORY_SEED`). Ese archivo tiene el
+  esquema completo y las reglas documentadas en su cabecera — léelo antes de editar.
+
+**Flujo al recibir un PDF nuevo:**
+1. Copia el PDF a `inventarios/dcam-existencias-AAAA-MM-DD.pdf`.
+2. Agrega su entrada en `AMX_MANUALES_SEED`. Si es el más reciente, ponle `primary: true`
+   y quítaselo al inventario anterior (el `primary`/más reciente es la fuente de precios actual).
+3. Lee el PDF, concilia precio por arma y **añade** (no reemplaces) un registro por arma en
+   `AMX_PRICE_HISTORY_SEED[armaId]` con el precio de ESE inventario. Conserva los registros
+   previos: el historial completo es el valor que muestra la ficha.
+4. Si el precio actual de un arma cambió, actualiza también su `priceExact` en `data.js`
+   (es lo que usan las tarjetas y el comparador). El último registro del historial debe
+   coincidir con ese `priceExact`.
+
+Armas sin registro explícito en `AMX_PRICE_HISTORY_SEED` muestran automáticamente su
+`priceExact` (de `data.js`) atribuido al inventario principal — así nada queda sin fuente
+mientras se concilia el resto.
+
 ## Reglas importantes
 
-- **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa.
+- **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
 - **No elimines `.nojekyll`** — evita que Jekyll interfiera con el servido de archivos.
 - **No "compiles" los `.jsx`**: se transpilan en el navegador con Babel standalone a propósito. La precompilación es una mejora futura opcional, no parte de este deploy.
 - Los scripts de React/Babel vienen de unpkg con hashes `integrity` fijados — no cambies las versiones.
@@ -54,7 +79,7 @@ gh api -X POST "repos/{owner}/armado-en-mexico/pages" \
 
 ## Limitación conocida (documentar, no arreglar ahora)
 
-El "backend" (`store.js` + `admin.html`) persiste en `localStorage`: la curaduría del admin solo vive en el navegador donde se hizo. Para compartir catálogo curado entre visitantes hará falta un backend real (API + DB) en una fase posterior.
+El "backend" (`store.js` + `admin.html`) persiste en `localStorage`: la curaduría del admin (catálogo, páginas, favoritos, sugerencias) solo vive en el navegador donde se hizo. **Excepción:** los inventarios DCAM y el historial de precios se siembran en código (`data-precios.js`), así que esos sí viajan con el despliegue y los ven todos. Para compartir el resto de la curaduría entre visitantes hará falta un backend real (API + DB) en una fase posterior.
 
 ## Mejoras futuras opcionales (NO hacer ahora)
 
