@@ -8,7 +8,7 @@ function TraumaStock({ stock }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 6,
-      fontFamily: 'Courier Prime, monospace', fontSize: 11, fontWeight: 700,
+      fontFamily: 'Courier Prime, monospace', fontSize: 13, fontWeight: 700,
       letterSpacing: '0.12em', textTransform: 'uppercase',
       padding: '4px 9px',
       color: ok ? PALETTE.green : PALETTE.red,
@@ -62,7 +62,7 @@ function TraumaFicha({ p, vp }) {
       </div>
       <div style={{
         position: 'absolute', bottom: 12, left: 12,
-        fontFamily: 'Courier Prime, monospace', fontSize: 10.5, fontWeight: 700,
+        fontFamily: 'Courier Prime, monospace', fontSize: 12.5, fontWeight: 700,
         letterSpacing: '0.14em', textTransform: 'uppercase',
         color: '#1A1A1A', background: PALETTE.amber, padding: '3px 8px',
       }}>{p.tipo} · cal. {p.specs[0][1]}</div>
@@ -77,15 +77,15 @@ function TraumaFicha({ p, vp }) {
       {photo}
       <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '22px 24px' : '16px' }}>
         {/* marca + modelo */}
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{p.marca}</div>
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{p.marca}</div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
           <h3 style={{ margin: 0, fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 30 : 25, color: PALETTE.text, letterSpacing: '0.01em', lineHeight: 1 }}>{p.modelo}</h3>
           <SinPermisoTag />
         </div>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 14, color: PALETTE.textDim, marginTop: 6 }}>{p.nombre}</div>
+        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 17, color: PALETTE.textDim, marginTop: 6 }}>{p.nombre}</div>
 
         {/* resumen */}
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 12 }}>{p.resumen}</div>
+        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 12 }}>{p.resumen}</div>
 
         {/* specs */}
         <div style={{
@@ -94,7 +94,7 @@ function TraumaFicha({ p, vp }) {
         }}>
           {p.specs.map(([k, v]) => (
             <div key={k}>
-              <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
+              <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
               <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 16, color: PALETTE.text }}>{v}</div>
             </div>
           ))}
@@ -102,10 +102,10 @@ function TraumaFicha({ p, vp }) {
 
         {/* munición compatible */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Munición</span>
+          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Munición</span>
           {p.municion.map((m) => (
             <span key={m} style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.textDim,
+              fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textDim,
               border: `1px solid ${PALETTE.border}`, padding: '3px 9px', letterSpacing: '0.05em',
             }}>{m}</span>
           ))}
@@ -114,7 +114,7 @@ function TraumaFicha({ p, vp }) {
         {/* destacados */}
         <ul style={{ listStyle: 'none', margin: '16px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
           {p.destacados.map((d) => (
-            <li key={d} style={{ display: 'flex', gap: 9, fontFamily: 'Open Sans, sans-serif', fontSize: 14, color: PALETTE.textDim, lineHeight: 1.5 }}>
+            <li key={d} style={{ display: 'flex', gap: 9, fontFamily: 'Open Sans, sans-serif', fontSize: 17, color: PALETTE.textDim, lineHeight: 1.5 }}>
               <span style={{ color: PALETTE.amber, flexShrink: 0 }}>▸</span>{d}
             </li>
           ))}
@@ -127,9 +127,9 @@ function TraumaFicha({ p, vp }) {
         }}>
           <div>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 28, color: PALETTE.amber, lineHeight: 1 }}>
-              ${p.precio.toLocaleString('es-MX')} <span style={{ fontSize: 14, color: PALETTE.textMuted, fontWeight: 600 }}>MXN</span>
+              ${p.precio.toLocaleString('es-MX')} <span style={{ fontSize: 17, color: PALETTE.textMuted, fontWeight: 600 }}>MXN</span>
             </div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.textMuted, marginTop: 4 }}>Los tanques de CO₂ se adquieren por separado</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textMuted, marginTop: 4 }}>Los tanques de CO₂ se adquieren por separado</div>
           </div>
           <a href={url} target="_blank" rel="noopener noreferrer" style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -159,15 +159,15 @@ function TraumaLegal({ vp }) {
   const conManual = (window.TRAUMATICAS || []).find((p) => p.manual);
   return (
     <div style={{ marginTop: 28 }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.amber, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>§ Marco legal · México</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>§ Marco legal · México</div>
       <h3 style={{ margin: 0, fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 24 : 20, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Por qué no requieren permiso</h3>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 10, marginBottom: 16, maxWidth: 720 }}>{L.resumen}</div>
+      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 10, marginBottom: 16, maxWidth: 720 }}>{L.resumen}</div>
 
       <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(2, 1fr)' : '1fr', gap: 12 }}>
         {L.puntos.map((pt) => (
           <div key={pt.tit} style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `3px solid ${PALETTE.amber}`, padding: '14px 16px' }}>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14.5, color: PALETTE.text, marginBottom: 6 }}>{pt.tit}</div>
-            <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.55 }}>{pt.desc}</div>
+            <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.55 }}>{pt.desc}</div>
           </div>
         ))}
       </div>
@@ -176,8 +176,8 @@ function TraumaLegal({ vp }) {
         marginTop: 16, padding: '12px 16px', background: 'rgba(168,58,42,0.08)',
         border: `1px solid ${PALETTE.red}`, borderLeft: `4px solid ${PALETTE.red}`,
       }}>
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: PALETTE.red, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>▲ Aviso</div>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 13, color: PALETTE.textDim, lineHeight: 1.6 }}>{L.disclaimer}</div>
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.red, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>▲ Aviso</div>
+        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6 }}>{L.disclaimer}</div>
       </div>
     </div>
   );
@@ -196,9 +196,9 @@ function TraumaticasScreen({ onNav }) {
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* encabezado */}
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◉ DEFENSA MENOS LETAL · CATEGORÍA APARTE</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◉ DEFENSA MENOS LETAL · CATEGORÍA APARTE</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 36 : 27, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.04, marginBottom: 10 }}>Armas Traumáticas</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 680, marginBottom: 14 }}>
+      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 680, marginBottom: 14 }}>
         Dispositivos de defensa <strong style={{ color: PALETTE.text }}>NO letal</strong> propulsados por CO₂, en calibre .50 y .68. Disparan munición de pimienta, goma o polvo inerte para detener una amenaza sin recurrir a fuerza letal. Puedes adquirirlos directamente en <strong style={{ color: PALETTE.amber }}>armasmys.com</strong>.
       </div>
 
@@ -208,8 +208,8 @@ function TraumaticasScreen({ onNav }) {
         background: 'rgba(245,197,24,0.07)', border: `1px solid ${PALETTE.amber}`, borderLeft: `4px solid ${PALETTE.amber}`,
         padding: '14px 16px', marginBottom: 18,
       }}>
-        <span style={{ color: PALETTE.amber, fontSize: 18, lineHeight: 1.2, flexShrink: 0 }}>◎</span>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 14.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
+        <span style={{ color: PALETTE.amber, fontSize: 21.5, lineHeight: 1.2, flexShrink: 0 }}>◎</span>
+        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 17.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
           <strong style={{ color: PALETTE.text }}>Una categoría totalmente distinta del arsenal.</strong> Al no ser armas de fuego, no requieren permiso de la SEDENA y <strong style={{ color: PALETTE.text }}>puedes adquirirlas directamente con nosotros</strong>. Son los <strong style={{ color: PALETTE.amber }}>únicos tres modelos de armamento que comercializamos</strong>; todas las armas de fuego de esta app se muestran solo con fines informativos.
         </div>
       </div>
@@ -226,7 +226,7 @@ function TraumaticasScreen({ onNav }) {
       <div style={{
         marginTop: 24, padding: '14px 16px',
         background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
-        fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, lineHeight: 1.6,
+        fontFamily: 'Courier Prime, monospace', fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6,
       }}>
         <span style={{ color: PALETTE.amber, fontWeight: 700 }}>◆ También en tienda:</span> cargadores, municiones cal. .50/.68 (goma, pimienta, polvo), tanques de CO₂ y fundas. Consulta el catálogo completo en armasmys.com.
       </div>
@@ -278,7 +278,7 @@ function TraumaTierCard({ p, vp, onNav }) {
           color: PALETTE.text, letterSpacing: '0.01em',
         }}>P2P {p.modelo}</h3>
         <div style={{
-          fontFamily: 'Open Sans, sans-serif', fontSize: 13, color: PALETTE.textDim,
+          fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim,
           lineHeight: 1.5, marginTop: 8, textWrap: 'pretty',
         }}>{p.tagline}</div>
       </div>
@@ -291,9 +291,9 @@ function TraumaTierCard({ p, vp, onNav }) {
               flexShrink: 0, width: 16, height: 16, marginTop: 1, borderRadius: 999,
               background: 'rgba(245,197,24,0.16)', color: PALETTE.amber,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 700,
+              fontSize: 12, fontWeight: 700,
             }}>✓</span>
-            <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 12.5, color: PALETTE.textDim, lineHeight: 1.45 }}>{f}</span>
+            <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.45 }}>{f}</span>
           </li>
         ))}
       </ul>
@@ -372,14 +372,14 @@ function HomeTraumaBanner({ onNav }) {
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: vp.isDesktop ? 26 : 14, flexWrap: 'wrap', padding: `0 ${PAD}px` }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>◉ Defensa menos letal</span>
+            <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>◉ Defensa menos letal</span>
             <SinPermisoTag small />
           </div>
           <h2 style={{ margin: '8px 0 0', fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 26 : 21, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Armas Traumáticas</h2>
         </div>
         <button onClick={() => onNav('traumaticas')} style={{
           background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace', fontSize: 12, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
         }}>Ver detalles →</button>
       </div>
 
