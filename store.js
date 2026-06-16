@@ -390,8 +390,18 @@
     },
 
     // ─── PROMOS (banners slider) ──────────────────────────
-    // Oculta por el momento el promo de asesoría legal con abogado externo (id 'p2')
-    getPromos() { return read(K.promos, DEFAULT_PROMOS).filter(p => p.id !== 'p2'); },
+    // Oculta por el momento el promo de asesoría legal con abogado externo.
+    // Robusto: no depende del id 'p2' (puede venir distinto desde localStorage);
+    // filtra por destino 'legal' o por mención de abogado/asesoría en el texto.
+    getPromos() {
+      return read(K.promos, DEFAULT_PROMOS).filter(p => {
+        if (p.id === 'p2') return false;
+        if (p.ctaTarget === 'legal') return false;
+        const txt = ((p.title || '') + ' ' + (p.subtitle || '') + ' ' + (p.eyebrow || '') + ' ' + (p.cta || '')).toLowerCase();
+        if (/abogad|asesor[íi]a/.test(txt)) return false;
+        return true;
+      });
+    },
     savePromos(arr) { write(K.promos, arr); Store._notify(); },
     upsertPromo(promo) {
       const arr = this.getPromos();
