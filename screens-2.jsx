@@ -13,7 +13,7 @@ function amxFmtManualDate(f) {
 // ════════════════════════════════════════════════════════════════
 // PRODUCT — Ficha completa de un arma
 // ════════════════════════════════════════════════════════════════
-function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onNav, compareIds, toggleCompare }) {
+function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   const arma = window.findArma(armaId);
   const [tab, setTab] = useState2('specs');
@@ -444,6 +444,22 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onNav, compareIds,
                     title={compat.length === 1 ? 'Accesorio compatible' : `Accesorios compatibles · ${compat.length}`}
                     items={compat}
                     renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />}
+                  />
+                </div>
+              );
+            })()}
+
+            {/* MUNICIÓN COMPATIBLE (informativo · inventario DCAM/OTCA) */}
+            {(() => {
+              const muns = window.getMunicionesParaArma ? window.getMunicionesParaArma(arma) : [];
+              if (!muns.length) return null;
+              return (
+                <div style={{ marginTop: 8 }}>
+                  <window.CarouselSection
+                    eyebrow="◉ COMPATIBLE · MUNICIÓN"
+                    title={muns.length === 1 ? `Munición compatible · ${arma.calibre}` : `Munición compatible · ${arma.calibre} · ${muns.length}`}
+                    items={muns}
+                    renderItem={(m) => <window.MunicionCard mun={m} onClick={() => onOpenMunicion && onOpenMunicion(m.id)} />}
                   />
                 </div>
               );
@@ -1753,6 +1769,7 @@ function MenuScreen({ onNav, onTutorial }) {
   const items = [
   { id: 'traumaticas', icon: '◎', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
   { id: 'accesorios', icon: '▫', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
+  { id: 'municiones', icon: '◉', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
   { id: 'calibres', icon: '◉', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
   { id: 'campos', icon: '◎', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados · suscripción próximamente' },
   { id: 'cursos', icon: '✦', title: 'Cursos', desc: 'Formación: manejo seguro, tiro defensivo y más' },

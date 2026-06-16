@@ -16,7 +16,7 @@ window.CATEGORY_HEROS = CATEGORY_HEROS;
 // ════════════════════════════════════════════════════════════════
 // HOME — Mobile-first · Header + Sliders + 3 Carruseles
 // ════════════════════════════════════════════════════════════════
-function HomeScreen({ onNav, onOpenArma, onOpenAccesorio }) {
+function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const vp = window.useViewport();
   const [promoIdx, setPromoIdx] = useState(0);
   const [, forceRender] = useState(0);
@@ -233,6 +233,11 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio }) {
       {/* 8.5 ▸ Accesorios DCAM — categorías (justo después de las categorías de armas) */}
       {window.HomeAccesoriosSection &&
         <window.HomeAccesoriosSection onOpen={onOpenAccesorio} onNav={onNav} />
+      }
+
+      {/* 8.6 ▸ Municiones DCAM/OTCA — por calibre */}
+      {window.HomeMunicionesSection &&
+        <window.HomeMunicionesSection onNav={onNav} />
       }
 
       {/* 6 ▸ Disponibilidad legal */}
