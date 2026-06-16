@@ -223,6 +223,14 @@ window.ACCESORIOS = [
     ['Revólver Chiappa Rhino .38'],
     [['Tipo', 'Moon clips'], ['Calibre', '.38'], ['Plataforma', 'Chiappa Rhino']],
     'Juego de moon clips para recarga rápida del revólver Chiappa Rhino en .38.'),
+
+  // ── OTCA (Monterrey · 26-sep) ──
+  { ...amx(118, 'Cargador .380 ACP · Taurus TH380', 'Taurus', 'Brasil', 'cargadores', 'dcam', 580.17,
+    'CARGADOR CALIBRE 0.380" MARCA TAURUS PARA PISTOLA MODELO TH380', ['Pistola Taurus TH380', '.380 ACP'], [['Calibre', '.380 ACP'], ['Plataforma', 'Taurus TH380']],
+    'Cargador para pistola Taurus TH380 en .380 ACP. Inventario OTCA (Monterrey).'), priceManualId: 'man_acc_2025_09_26' },
+  { ...amx(119, 'Cargador .22 LR · CZ P-09', 'Česká Zbrojovka', 'Rep. Checa', 'cargadores', 'dcam', 233.13,
+    'CARGADOR P/ PISTOLA CAL. 0.22" L.R. MARCA CESKA ZBROJOVKA MOD. CZ P-09', ['Pistola CZ P-09 .22', '.22 LR'], [['Calibre', '.22 LR'], ['Plataforma', 'CZ P-09 Kadet']],
+    'Cargador para pistola CZ P-09 en conversión .22 LR. Inventario OTCA (Monterrey).'), priceManualId: 'man_acc_2025_09_26' },
 ];
 
 // ── COMPATIBILIDAD ESTRUCTURADA (derivada de la compatibilidad declarada) ────
@@ -253,6 +261,8 @@ const ACC_COMPAT = {
   301: { tipos: ['escopeta'] },
   401: { tipos: ['escopeta'], calibres: ['12 GA'] },
   402: { tipos: ['revolver'], calibres: ['.38 Special'] },
+  118: { tipos: ['pistola'], calibres: ['.380 ACP'] },
+  119: { tipos: ['pistola'], calibres: ['.22 LR'] },
 };
 window.ACCESORIOS.forEach(a => { a.compat = ACC_COMPAT[a.id] || {}; });
 
@@ -296,14 +306,14 @@ window.ACCESORIOS_PRICE_HISTORY = {
   103: [_h(OCT, 138.62, OCTd, 20)],
   104: [_h(OCT, 841.81, OCTd, 39)],
   105: [_h(OCT, 362.63, OCTd, 8)],
-  106: [_h(OCT, 554.5, OCTd, 5)],
-  107: [_h(OCT, 554.5, OCTd, 51)],
+  106: [_h(SEP, 555.08, SEPd, 18), _h(OCT, 554.5, OCTd, 5)],
+  107: [_h(SEP, 555.08, SEPd, 17), _h(OCT, 554.5, OCTd, 51)],
   108: [_h(OCT, 554.5, OCTd, 37)],
   109: [_h(OCT, 723.95, OCTd, 8)],
   110: [_h(OCT, 621.04, OCTd, 5)],
-  111: [_h(OCT, 1053.55, OCTd, 40)],
-  112: [_h(OCT, 693.12, OCTd, 42)],
-  113: [_h(OCT, 543.41, OCTd, 70)],
+  111: [_h(SEP, 1054.65, SEPd, 8), _h(OCT, 1053.55, OCTd, 40)],
+  112: [_h(SEP, 701.44, SEPd, 5), _h(OCT, 693.12, OCTd, 42)],
+  113: [_h(SEP, 666.1, SEPd, 35), _h(OCT, 543.41, OCTd, 70)],
   114: [_h(OCT, 368.86, OCTd, 36)],
   115: [_h(OCT, 546.2, OCTd, 18)],
   116: [_h(OCT, 9426.46, OCTd, 5)],
@@ -314,6 +324,8 @@ window.ACCESORIOS_PRICE_HISTORY = {
   401: [_h(OCT, 5045.93, OCTd, 10)],
   402: [_h(OCT, 809.43, OCTd, 5)],
   // Datos reales del inventario DCAM 3-oct-2025 (EXIST_ACCESORIOS). OTCA 26-sep pendiente de conciliar.
+  118: [_h(SEP, 580.17, SEPd, 9)],
+  119: [_h(SEP, 233.13, SEPd, 10)],
 };
 
 // ── Helpers (auto-contenidos; no tocan el store de armas) ────────────────────
