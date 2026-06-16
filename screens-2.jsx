@@ -336,9 +336,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               }}>Nivel: <window.PriceLevel lvl={arma.priceLvl} size={13} /></div>
             </div>
 
-            {/* CALIFICACIÓN DE USUARIOS */}
-            <RatingBlock armaId={arma.id} />
-
             {/* HISTORIAL DE PRECIOS */}
             {priceHistory.length > 0 &&
             <React.Fragment>
@@ -576,6 +573,11 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* VIDEO YOUTUBE (sólo si hay) */}
       <YouTubeBlock arma={arma} padX={PAD} />
+
+      {/* CALIFICACIÓN DE LA COMUNIDAD — al final de la ficha, antes de las armas sugeridas */}
+      <div style={{ padding: `0 ${PAD}px 16px`, maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+        <RatingBlock armaId={arma.id} />
+      </div>
 
       {/* RELATED */}
       {related.length > 0 &&
