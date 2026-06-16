@@ -331,7 +331,9 @@ function App() {
 
       {/* Scroll body */}
       <div ref={scrollRef} style={{
-        flex: 1, overflowY: vp.isMobile ? 'auto' : 'visible',
+        flex: 1, minHeight: 0,
+        overflowY: vp.isMobile ? 'auto' : 'visible',
+        WebkitOverflowScrolling: 'touch',
       }}>
         {content}
       </div>
