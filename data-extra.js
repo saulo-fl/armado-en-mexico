@@ -53,6 +53,13 @@ window.CALIBRES = [
     mm: 71.1, cartucho: 'imagenes/cartuchos/762x51.png', desc: 'Equivalente militar del .308. Gran energía y alcance para fusiles de batalla y precisión. Uso restringido.' },
 ];
 
+// Sistema de percusión (ignición) del cartucho: lo que el slider muestra como
+// "clase". Solo el .22 LR (y fuego anular en general) es Rimfire; el resto es
+// de percusión central (centerfire).
+window.CALIBRES.forEach((c) => {
+  c.sistema = (c.clase === 'Rimfire' || c.id === '.22 LR') ? 'Rimfire' : 'Percusión central';
+});
+
 // ═══════════════════════════════════════════════════════════════════════
 // CAMPOS DE TIRO — clubes y polígonos (PLACEHOLDER · suscripción a futuro)
 // ═══════════════════════════════════════════════════════════════════════

@@ -46,17 +46,6 @@
       accent: '#c9a227',
     },
     {
-      id: 'p2',
-      eyebrow: '⚖ ASESORÍA LEGAL',
-      title: 'Trámite SEDENA con abogado',
-      subtitle: 'Trámite acompañado por un abogado externo especializado, bajo su propia cédula profesional. Armas M&S facilita el contacto.',
-      cta: 'Cotizar por WhatsApp',
-      ctaTarget: 'legal',
-      bgImage: '',
-      bgColor: '#161a14',
-      accent: '#c9a227',
-    },
-    {
       id: 'p3',
       eyebrow: '＋ COLABORA',
       title: '¿Conoces un arma que falta?',
@@ -401,7 +390,8 @@
     },
 
     // ─── PROMOS (banners slider) ──────────────────────────
-    getPromos() { return read(K.promos, DEFAULT_PROMOS); },
+    // Oculta por el momento el promo de asesoría legal con abogado externo (id 'p2')
+    getPromos() { return read(K.promos, DEFAULT_PROMOS).filter(p => p.id !== 'p2'); },
     savePromos(arr) { write(K.promos, arr); Store._notify(); },
     upsertPromo(promo) {
       const arr = this.getPromos();

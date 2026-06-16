@@ -13,7 +13,7 @@ function amxFmtManualDate(f) {
 // ════════════════════════════════════════════════════════════════
 // PRODUCT — Ficha completa de un arma
 // ════════════════════════════════════════════════════════════════
-function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare }) {
+function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   const arma = window.findArma(armaId);
   const [tab, setTab] = useState2('specs');
@@ -39,6 +39,8 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
   const currentManual = manualById(arma.priceManualId) ||
     (priceHistory.length ? manualById(priceHistory[priceHistory.length - 1].manualId) : null) ||
     (window.Store ? window.Store.getPrimaryManual() : null);
+  const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
+  const curSigla = curAut ? curAut.sigla : 'DCAM';
 
   // armas relacionadas (mismo tipo)
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
@@ -132,445 +134,71 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               letterSpacing: '0.15em', textTransform: 'uppercase',
               cursor: 'pointer'
             }}>{inCmp ? '✓ AÑADIDA' : '⇄ Comparar'}</button>
-          <button onClick={() => onNav('catalog', { mode: 'tipo', value: arma.tipo })} style={{
-              flex: 1,
-              background: PALETTE.bgCard,
-              color: PALETTE.text,
-              border: `1.5px solid ${PALETTE.border}`,
-              padding: '10px',
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
-              letterSpacing: '0.15em', textTransform: 'uppercase',
-              cursor: 'pointer'
-            }}>+ Similares</button>
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-             GUNSMITH PANEL — ficha HUD táctica rediseñada
-             ─ Header: nombre + pestañas tipo/marca + nivel de uso
-             ─ Centro: imagen grande del arma + tarjetas flotantes
-             ─ Stats panel + leyenda
-             (Diseño original; estética táctica, no afiliada a marca alguna)
-             ═══════════════════════════════════════════════════════════ */}
+{/* RESUMEN — specs clave + valoración (rediseño e-commerce, una sola imagen, sin HUD) */}
       {(() => {
           const ORANGE = window.GUN_ACCENT || '#F5C518';
           const ORANGE_DEEP = window.GUN_ACCENT_DEEP || '#D4A910';
-          const NIVEL = { dcam: 'Civil', seguridad: 'Policial', ejercito: 'Militar' };
-          const nivel = NIVEL[arma.avail] || 'Civil';
           const statsKeys = [
-          { k: 'precision', l: 'Precisión' },
-          { k: 'poder', l: 'Daño' },
-          { k: 'alcance', l: 'Alcance' },
-          { k: 'manejo', l: 'Movilidad' },
-          { k: 'capacidad', l: 'Capacidad' },
-          { k: 'retroceso', l: 'Retroceso', invert: true }];
-
-
-          // Tarjeta flotante (estilo HUD táctico) — mobile-first sizing
-          const FloatCard = ({ icon, fallbackIcon, label, value, connectorSide = 'bottom' }) =>
-          <div style={{
-            position: 'relative',
-            background: 'rgba(44,44,44,0.85)',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blur(6px)',
-            border: `1px solid rgba(255,255,255,0.08)`,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.45)',
-            padding: vp.isDesktop ? '10px 14px 10px 10px' : '7px 10px 7px 7px',
-            display: 'flex', alignItems: 'center',
-            gap: vp.isDesktop ? 10 : 7,
-            minWidth: vp.isDesktop ? 168 : 102,
-            maxWidth: vp.isDesktop ? 220 : 132
-          }}>
-            {/* dot naranja arriba-derecha */}
-            <span style={{
-              position: 'absolute', top: 7, right: 8,
-              width: 6, height: 6, borderRadius: 6,
-              background: ORANGE,
-              boxShadow: `0 0 8px ${ORANGE}cc, 0 0 0 1px rgba(0,0,0,0.4)`
-            }} />
-            {/* icono */}
-            <div style={{
-              width: vp.isDesktop ? 30 : 22,
-              height: vp.isDesktop ? 30 : 22,
-              background: 'rgba(0,0,0,0.4)',
-              border: '1px solid rgba(255,255,255,0.06)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              {icon ?
-              <img src={icon} alt={label} style={{ maxWidth: vp.isDesktop ? 22 : 16, maxHeight: vp.isDesktop ? 22 : 16, objectFit: 'contain' }}
-              onError={(e) => {e.target.style.display = 'none';if (e.target.nextSibling) e.target.nextSibling.style.display = 'block';}} /> :
-              null}
-              <span style={{
-                display: icon ? 'none' : 'block',
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: vp.isDesktop ? 18 : 14.5, fontWeight: 700, color: ORANGE
-              }}>{fallbackIcon || '◆'}</span>
-            </div>
-            {/* texto */}
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: vp.isDesktop ? 12.5 : 11.5, color: '#A3A3A3',
-                textTransform: 'uppercase', letterSpacing: '0.16em',
-                marginBottom: 1
-              }}>{label}</div>
-              <div style={{
-                fontFamily: 'Montserrat, sans-serif',
-                fontWeight: 600, fontSize: vp.isDesktop ? 15 : 12.5,
-                color: '#FFFFFF',
-                letterSpacing: '0.03em',
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                lineHeight: 1.1
-              }}>{value}</div>
-            </div>
-            {/* línea conectora — apunta hacia el arma */}
-            {connectorSide === 'bottom' &&
-            <span style={{
-              position: 'absolute', left: '50%', bottom: -22,
-              width: 1, height: 18,
-              background: `linear-gradient(180deg, ${ORANGE}99, transparent)`,
-              transform: 'translateX(-50%)'
-            }}><span style={{
-                position: 'absolute', left: '50%', bottom: -3,
-                width: 5, height: 5, borderRadius: 5,
-                background: ORANGE,
-                boxShadow: `0 0 4px ${ORANGE}`,
-                transform: 'translateX(-50%)'
-              }} /></span>
-            }
-            {connectorSide === 'top' &&
-            <span style={{
-              position: 'absolute', left: '50%', top: -22,
-              width: 1, height: 18,
-              background: `linear-gradient(0deg, ${ORANGE}99, transparent)`,
-              transform: 'translateX(-50%)'
-            }}><span style={{
-                position: 'absolute', left: '50%', top: -3,
-                width: 5, height: 5, borderRadius: 5,
-                background: ORANGE,
-                boxShadow: `0 0 4px ${ORANGE}`,
-                transform: 'translateX(-50%)'
-              }} /></span>
-            }
-          </div>;
-
-
+            { k: 'precision', l: 'Precisión' },
+            { k: 'poder', l: 'Daño' },
+            { k: 'alcance', l: 'Alcance' },
+            { k: 'manejo', l: 'Movilidad' },
+            { k: 'capacidad', l: 'Capacidad' },
+            { k: 'retroceso', l: 'Retroceso', invert: true }];
+          const quick = [
+            { l: 'Calibre', v: arma.calibre },
+            { l: 'Capacidad', v: arma.capacidad },
+            { l: 'Longitud', v: arma.longitud },
+            { l: 'Peso', v: arma.peso }];
           return (
-            <div className="gunsmith" style={{
-              position: 'relative',
-              padding: vp.isDesktop ? `28px ${PAD}px 24px` : `20px ${PAD}px 18px`,
-              background: `radial-gradient(ellipse 75% 55% at 50% 48%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 80%)`,
-              borderBottom: `1px solid ${PALETTE.border}`,
-              overflow: 'hidden'
-            }}>
-            {/* topograph overlay */}
-            <div aria-hidden style={{
-                position: 'absolute', inset: 0,
-                backgroundImage: `linear-gradient(90deg, ${PALETTE.border}22 1px, transparent 1px), linear-gradient(0deg, ${PALETTE.border}22 1px, transparent 1px)`,
-                backgroundSize: '64px 64px',
-                maskImage: 'radial-gradient(ellipse at center, black 0%, transparent 85%)',
-                WebkitMaskImage: 'radial-gradient(ellipse at center, black 0%, transparent 85%)',
-                pointerEvents: 'none'
-              }} />
-
-            {/* ── HEADER ───────────────────────────────────────────── */}
-            <div style={{
-                position: 'relative', zIndex: 3,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: 16,
-                marginBottom: vp.isDesktop ? 24 : 18,
-                flexWrap: 'wrap'
-              }}>
-              {/* LEFT — título + pestañas */}
-              <div style={{ minWidth: 0, flex: '1 1 auto' }}>
-                <div style={{
-                    fontFamily: 'Montserrat, sans-serif',
-                    fontWeight: 700,
-                    fontSize: vp.isDesktop ? 38 : 25,
-                    color: '#FFFFFF',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.04em',
-                    lineHeight: 0.95,
-                    marginBottom: 14
-                  }}>{arma.nombre}</div>
-
-                {/* TABS */}
-                <div style={{
-                    display: 'flex',
-                    gap: vp.isDesktop ? 28 : 16,
-                    fontFamily: 'Courier Prime, monospace',
-                    fontSize: vp.isDesktop ? 15.5 : 14.5,
-                    letterSpacing: '0.18em',
-                    textTransform: 'uppercase',
-                    flexWrap: 'wrap',
-                    alignItems: 'flex-end'
-                  }}>
-                  {/* TAB ACTIVA — tipo de arma */}
-                  <div style={{
-                      color: '#FFFFFF',
-                      fontWeight: 600,
-                      paddingBottom: 6,
-                      borderBottom: `2px solid ${ORANGE}`
-                    }}>{arma.tipo}</div>
-                  {/* TAB inactiva — marca + bandera + país */}
-                  <div style={{
-                      color: '#A3A3A3',
-                      paddingBottom: 6,
-                      borderBottom: `2px solid transparent`,
-                      display: 'inline-flex', alignItems: 'center', gap: 6
-                    }}>
-                    <span>{arma.marca}</span>
-                    <CountryFlag pais={arma.pais} height={10} style={{ marginLeft: 2 }} />
-                    <span>{arma.pais}</span>
+            <div style={{ padding: vp.isDesktop ? `20px ${PAD}px 6px` : `16px ${PAD}px 4px` }}>
+              {/* KEY SPECS STRIP */}
+              <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
+                  gap: 1, background: PALETTE.border,
+                  border: `1px solid ${PALETTE.border}`, marginBottom: 22
+                }}>
+                {quick.map((q) =>
+                  <div key={q.l} style={{ background: PALETTE.bgCard, padding: '12px 14px' }}>
+                    <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
+                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: PALETTE.text, lineHeight: 1.1 }}>{q.v}</div>
                   </div>
-                </div>
+                )}
               </div>
 
-              {/* RIGHT — nivel de uso */}
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{
-                    fontFamily: 'Courier Prime, monospace',
-                    fontSize: 13, color: '#A3A3A3',
-                    letterSpacing: '0.20em', textTransform: 'uppercase',
-                    marginBottom: 4
-                  }}>Nivel de uso</div>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
-                  <span style={{
-                      width: 6, height: 6, borderRadius: 6,
-                      background: ORANGE,
-                      boxShadow: `0 0 8px ${ORANGE}`
-                    }} />
-                  <div style={{
-                      fontFamily: 'Montserrat, sans-serif',
-                      fontWeight: 700, fontSize: vp.isDesktop ? 23 : 17,
-                      color: ORANGE,
-                      textTransform: 'uppercase', letterSpacing: '0.10em',
-                      lineHeight: 1
-                    }}>{nivel}</div>
-                </div>
-                <div style={{
-                    fontFamily: 'Courier Prime, monospace',
-                    fontSize: 13, color: '#A3A3A3',
-                    marginTop: 4, letterSpacing: '0.08em'
-                  }}>{arma.availLabel}</div>
-              </div>
-            </div>
-
-            {/* ── ÁREA CENTRAL: imagen + tarjetas flotantes ─────────
-                Layout unificado mobile-first. La app es móvil; escritorio
-                solo aumenta tamaños. */}
-            {true ?
+              {/* VALORACIÓN DIVULGATIVA — barras */}
               <div style={{
-                position: 'relative',
-                height: vp.isDesktop ? 420 : 300,
-                margin: '0 auto',
-                maxWidth: 1100,
-                zIndex: 2
-              }}>
-                {/* TARJETAS ARRIBA (3) — connector vía SVG overlay (sin conector propio) */}
-                <div style={{
-                  position: 'absolute',
-                  top: 0, left: 0, right: 0,
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: vp.isDesktop ? 16 : 4,
-                  paddingLeft: vp.isDesktop ? 8 : 0,
-                  paddingRight: vp.isDesktop ? 8 : 0,
-                  zIndex: 3
+                  display: vp.isDesktop ? 'grid' : 'block',
+                  gridTemplateColumns: vp.isDesktop ? 'minmax(0,420px) 1fr' : '1fr',
+                  gap: vp.isDesktop ? 24 : 0, alignItems: 'start'
                 }}>
-                  <FloatCard fallbackIcon="●" label="Calibre" value={arma.calibre} connectorSide="none" />
-                  <FloatCard fallbackIcon="━" label="Longitud" value={arma.longitud} connectorSide="none" />
-                  <FloatCard fallbackIcon="⚙" label="Mecanismo" value={arma.mecanismo} connectorSide="none" />
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
+                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.16em' }}>Valoración divulgativa</div>
+                    <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Estimada</span>
+                  </div>
+                  {statsKeys.map((s) => {
+                      const raw = arma.stats[s.k] || 0;
+                      const v = s.invert ? 100 - raw : raw;
+                      const barColor = v >= 67 ? '#4FAE5C' : v >= 34 ? '#F5C518' : '#C0392B';
+                      return (
+                        <div key={s.k} style={{ display: 'grid', gridTemplateColumns: '92px 1fr', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.l}</span>
+                          <div style={{ position: 'relative', height: 5, background: 'rgba(255,255,255,0.06)' }}>
+                            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${Math.max(2, Math.min(100, v))}%`, background: barColor, transition: 'width 0.3s ease' }} />
+                          </div>
+                        </div>);
+                    })}
                 </div>
-
-                {/* ── SVG CONNECTOR OVERLAY ──────────────────────────
-                       Solo las líneas indicadas: 4 conectores simples
-                       + 1 regla horizontal para Longitud. Sin extras. */}
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none"
-                     style={{
-                       position: 'absolute', inset: 0,
-                       width: '100%', height: '100%',
-                       pointerEvents: 'none', zIndex: 1,
-                       overflow: 'visible'
-                     }}>
-                  {/* CALIBRE — curva down-right hacia donde irá la imagen del cartucho */}
-                  <path d="M 9 13 C 9 35, 12 55, 18 70"
-                        stroke={ORANGE} strokeWidth="1.25" fill="none"
-                        strokeLinecap="round" opacity="0.85"
-                        vectorEffect="non-scaling-stroke" />
-
-                  {/* LONGITUD — regla: drop vertical + línea horizontal que mide el arma */}
-                  <path d="M 50 13 L 50 78"
-                        stroke={ORANGE} strokeWidth="1.25" fill="none"
-                        strokeLinecap="round" opacity="0.85"
-                        vectorEffect="non-scaling-stroke" />
-                  <line x1="20" y1="78" x2="80" y2="78"
-                        stroke={ORANGE} strokeWidth="1.25"
-                        strokeLinecap="round" opacity="0.85"
-                        vectorEffect="non-scaling-stroke" />
-                  <line x1="20" y1="75" x2="20" y2="81"
-                        stroke={ORANGE} strokeWidth="1.5"
-                        opacity="0.9" vectorEffect="non-scaling-stroke" />
-                  <line x1="80" y1="75" x2="80" y2="81"
-                        stroke={ORANGE} strokeWidth="1.5"
-                        opacity="0.9" vectorEffect="non-scaling-stroke" />
-
-                  {/* MECANISMO — curva down-left hacia el cuerpo del arma */}
-                  <path d="M 91 13 C 91 28, 86 42, 76 42"
-                        stroke={ORANGE} strokeWidth="1.25" fill="none"
-                        strokeLinecap="round" opacity="0.85"
-                        vectorEffect="non-scaling-stroke" />
-
-                  {/* PESO — curva up-right hacia el cuerpo del arma */}
-                  <path d="M 28 87 C 28 75, 33 62, 42 62"
-                        stroke={ORANGE} strokeWidth="1.25" fill="none"
-                        strokeLinecap="round" opacity="0.85"
-                        vectorEffect="non-scaling-stroke" />
-
-                  {/* CAPACIDAD — curva up-left hacia el cargador del arma */}
-                  <path d="M 72 87 C 72 75, 68 62, 60 62"
-                        stroke={ORANGE} strokeWidth="1.25" fill="none"
-                        strokeLinecap="round" opacity="0.85"
-                        vectorEffect="non-scaling-stroke" />
-                </svg>
-
-                {/* IMAGEN DEL ARMA — centrada horizontal */}
-                <div style={{
-                  position: 'absolute',
-                  top: '50%', left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '92%',
-                  maxWidth: 820,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  {/* underglow sutil */}
-                  <div aria-hidden style={{
-                    position: 'absolute', inset: 0,
-                    background: `radial-gradient(ellipse 60% 40% at 50% 60%, ${ORANGE}18 0%, transparent 70%)`,
-                    pointerEvents: 'none'
-                  }} />
-                  {arma.img ?
-                  <img src={arma.img} alt={arma.nombre} loading="lazy" decoding="async" style={{
-                    maxWidth: '100%', maxHeight: vp.isDesktop ? 240 : 150,
-                    objectFit: 'contain',
-                    filter: 'drop-shadow(0 18px 30px rgba(0,0,0,0.7))',
-                    position: 'relative', zIndex: 1
-                  }} onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} /> :
-
-                  <div style={{
-                    border: `1.5px dashed ${PALETTE.border}`,
-                    padding: vp.isDesktop ? '40px 80px' : '24px 40px',
-                    fontFamily: 'Courier Prime, monospace',
-                    fontSize: vp.isDesktop ? 15.5 : 13, color: '#A3A3A3',
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    textAlign: 'center'
-                  }}>
-                      <div style={{ color: ORANGE }}>[ ▢ PNG SIN FONDO ]</div>
-                      <div style={{ fontSize: 13, opacity: 0.7, marginTop: 4 }}>{arma.nombre}</div>
-                    </div>
-                  }
+                <div style={{ padding: '10px 12px', fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textMuted, lineHeight: 1.55, borderLeft: `2px solid ${ORANGE}`, background: PALETTE.bgCard, marginTop: vp.isDesktop ? 28 : 14 }}>
+                  Estimaciones cualitativas derivadas de las especificaciones técnicas, con fines divulgativos y de comparación entre modelos.
                 </div>
-
-                {/* TARJETAS ABAJO (2) — connector vía SVG overlay */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0, left: 0, right: 0,
-                  display: 'flex',
-                  justifyContent: 'space-around',
-                  gap: vp.isDesktop ? 16 : 8,
-                  paddingLeft: vp.isDesktop ? 60 : 14,
-                  paddingRight: vp.isDesktop ? 60 : 14,
-                  zIndex: 3
-                }}>
-                  <FloatCard fallbackIcon="◆" label="Peso" value={arma.peso} connectorSide="none" />
-                  <FloatCard fallbackIcon="▦" label="Capacidad" value={arma.capacidad} connectorSide="none" />
-                </div>
-              </div> : null
-              }
-
-            {/* ── STATS PANEL — abajo-izquierda ───────────────────── */}
-            <div style={{
-                position: 'relative', zIndex: 3,
-                marginTop: vp.isDesktop ? 20 : 18,
-                display: vp.isDesktop ? 'grid' : 'block',
-                gridTemplateColumns: vp.isDesktop ? 'minmax(0, 360px) 1fr' : '1fr',
-                gap: vp.isDesktop ? 24 : 0,
-                alignItems: 'start'
-              }}>
-              <div style={{
-                  background: 'rgba(44,44,44,0.7)',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  padding: '14px 16px 12px'
-                }}>
-                <div style={{
-                    display: 'flex', justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 12
-                  }}>
-                  <div style={{
-                      fontFamily: 'Montserrat, sans-serif',
-                      fontWeight: 700, fontSize: 15,
-                      color: '#FFFFFF',
-                      textTransform: 'uppercase', letterSpacing: '0.18em'
-                    }}>ESTADISTICAS</div>
-                  <span style={{
-                      fontFamily: 'Courier Prime, monospace',
-                      fontSize: 12, color: '#A3A3A3',
-                      letterSpacing: '0.16em', textTransform: 'uppercase'
-                    }}>Est. divulgativa</span>
-                </div>
-                {statsKeys.map((s) => {
-                    const raw = arma.stats[s.k] || 0;
-                    const v = s.invert ? 100 - raw : raw;
-                    return (
-                      <div key={s.k} style={{
-                        display: 'grid',
-                        gridTemplateColumns: '88px 1fr',
-                        alignItems: 'center',
-                        gap: 12,
-                        marginBottom: 9
-                      }}>
-                      <span style={{
-                          fontFamily: 'Courier Prime, monospace',
-                          fontSize: 14.5, color: '#A3A3A3',
-                          textTransform: 'uppercase', letterSpacing: '0.10em'
-                        }}>{s.l}</span>
-                      <div style={{
-                          position: 'relative',
-                          height: 3,
-                          background: 'rgba(255,255,255,0.06)',
-                          overflow: 'hidden'
-                        }}>
-                        <div style={{
-                            position: 'absolute', top: 0, bottom: 0, left: 0,
-                            width: `${Math.max(2, Math.min(100, v))}%`,
-                            background: `linear-gradient(90deg, ${ORANGE_DEEP}, ${ORANGE})`,
-                            boxShadow: `0 0 6px ${ORANGE}66`
-                          }} />
-                      </div>
-                    </div>);
-
-                  })}
               </div>
-
-              {/* disclaimer */}
-              <div style={{
-                  padding: '10px 12px',
-                  fontFamily: 'Courier Prime, monospace',
-                  fontSize: 13, color: '#A3A3A3', lineHeight: 1.55,
-                  borderLeft: `2px solid ${ORANGE}`,
-                  background: 'rgba(44,44,44,0.4)',
-                  marginTop: vp.isDesktop ? 0 : 10,
-                  alignSelf: 'start'
-                }}>
-                Las estadísticas mostradas son estimaciones cualitativas derivadas de las especificaciones técnicas. Se proveen con fines divulgativos y de comparación entre modelos.
-              </div>
-            </div>
-          </div>);
-
+            </div>);
         })()}
 
       {/* TABS */}
@@ -580,8 +208,8 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
           background: PALETTE.bgElev
         }}>
         {[
-          { id: 'specs', label: 'Specs' },
-          { id: 'legal', label: 'Legal' },
+          { id: 'specs', label: 'Ficha Técnica' },
+          { id: 'legal', label: 'Legalidad' },
           { id: 'history', label: 'Historia' }].
           map((t) =>
           <button key={t.id} onClick={() => setTab(t.id)} style={{
@@ -618,7 +246,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               <SpecRow label="Tipo" value={arma.tipo.toUpperCase()} />
             </div>
 
-            <SectionHeader>Precio Referencia DCAM</SectionHeader>
+            <SectionHeader>Precio de Referencia</SectionHeader>
             <div style={{
               background: PALETTE.bgCard,
               border: `1px solid ${PALETTE.amber}`,
@@ -627,12 +255,19 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               position: 'relative'
             }}>
               <TacticalCorners size={12} color={PALETTE.amber} thickness={2} />
-              <div style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 13, color: PALETTE.textMuted,
-                letterSpacing: '0.18em', textTransform: 'uppercase',
-                marginBottom: 4
-              }}>◆ Precio Actual (con IVA)</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                <span style={{
+                  fontFamily: 'Courier Prime, monospace',
+                  fontSize: 13, color: PALETTE.textMuted,
+                  letterSpacing: '0.18em', textTransform: 'uppercase',
+                }}>◆ Precio Actual (con IVA)</span>
+                {curAut &&
+                  <span title={curAut.nombre} style={{
+                    fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                    letterSpacing: '0.12em', color: '#000', background: curAut.color,
+                    padding: '2px 7px', flexShrink: 0,
+                  }}>{curAut.sigla}</span>}
+              </div>
               <div style={{
                 fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
                 fontSize: 23, color: PALETTE.amber,
@@ -642,24 +277,55 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                 fontFamily: 'Courier Prime, monospace',
                 fontSize: 13, color: PALETTE.textMuted,
                 marginTop: 4, lineHeight: 1.4
-              }}>Ref. DCAM: {arma.dcamRef}</div>
+              }}>Ref. {curSigla}: {arma.dcamRef}</div>
               {currentManual && currentManual.url &&
                 <a href={currentManual.url} target="_blank" rel="noopener" style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   marginTop: 9,
-                  fontFamily: 'Courier Prime, monospace', fontSize: 11,
+                  fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
                   color: PALETTE.amber, textDecoration: 'none',
                   border: `1px solid ${PALETTE.amber}`,
-                  padding: '5px 9px', letterSpacing: '0.04em',
+                  padding: '9px 12px', minHeight: 40, boxSizing: 'border-box', letterSpacing: '0.04em',
                 }}>
                   <span aria-hidden="true">▦</span>
                   Ver inventario fuente · {amxFmtManualDate(currentManual.fecha)}
                   <span aria-hidden="true">↗</span>
                 </a>
               }
+              {(() => {
+                const ex = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
+                return (
+                  <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${PALETTE.border}` }}>
+                    {ex != null ? (
+                      <React.Fragment>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                          <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(ex).toLocaleString('es-MX')}</span>
+                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.text, letterSpacing: '0.06em' }}>disponibles en DCAM</span>
+                        </div>
+                        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textDim, marginTop: 5, lineHeight: 1.55 }}>
+                          De acuerdo a{' '}
+                          {currentManual && currentManual.url ? (
+                            <a href={currentManual.url} target="_blank" rel="noopener" style={{ color: PALETTE.amber, textDecoration: 'none', borderBottom: `1px solid ${PALETTE.amber}` }}>▦ {currentManual.nombre} ↗</a>
+                          ) : (
+                            <span style={{ color: PALETTE.textMuted }}>{currentManual ? currentManual.nombre : 'inventario oficial DCAM'}</span>
+                          )}
+                          {currentManual ? ', publicado el ' + amxFmtManualDate(currentManual.fecha) : ''}.
+                        </div>
+                        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, marginTop: 4, lineHeight: 1.5 }}>
+                          ⚠ Dato <b style={{ color: PALETTE.textDim }}>histórico</b>, no en tiempo real: la disponibilidad actual puede variar.
+                        </div>
+                      </React.Fragment>
+                    ) : (
+                      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textDim, lineHeight: 1.5 }}>
+                        <span style={{ color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Existencias</span> · pendientes de conciliar con el inventario oficial DCAM (dato histórico del PDF, no en tiempo real).
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               {!currentManual &&
                 <div style={{
-                  fontFamily: 'Courier Prime, monospace', fontSize: 10,
+                  fontFamily: 'Courier Prime, monospace', fontSize: 12,
                   color: PALETTE.textDim, marginTop: 7, lineHeight: 1.4
                 }}>Sin PDF de inventario vinculado.</div>
               }
@@ -670,18 +336,15 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               }}>Nivel: <window.PriceLevel lvl={arma.priceLvl} size={13} /></div>
             </div>
 
-            {/* CALIFICACIÓN DE USUARIOS */}
-            <RatingBlock armaId={arma.id} />
-
             {/* HISTORIAL DE PRECIOS */}
             {priceHistory.length > 0 &&
             <React.Fragment>
                 <SectionHeader>Historial de precios</SectionHeader>
                 <div style={{
-                  fontFamily: 'Courier Prime, monospace', fontSize: 10,
+                  fontFamily: 'Courier Prime, monospace', fontSize: 12,
                   color: PALETTE.textDim, letterSpacing: '0.04em',
                   marginTop: -6, marginBottom: 10, lineHeight: 1.4
-                }}>Según inventarios oficiales DCAM-SEDENA</div>
+                }}>Según inventarios oficiales DCAM / OTCA</div>
                 <div style={{
                 background: PALETTE.bgCard,
                 border: `1px solid ${PALETTE.border}`,
@@ -689,6 +352,7 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
               }}>
                   {priceHistory.slice().reverse().map((h, i) => {
                   const man = manualById(h.manualId);
+                  const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
                   return (
                     <div key={i} style={{
                       padding: '10px 12px',
@@ -707,6 +371,12 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
                             fontSize: 13, letterSpacing: '0.1em', flexShrink: 0
                           }}>{i === 0 ? '● ACTUAL' : '○'}</span>
                             <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
+                            {hAut &&
+                              <span title={hAut.nombre} style={{
+                                fontFamily: 'Courier Prime, monospace', fontSize: 11, fontWeight: 700,
+                                letterSpacing: '0.1em', color: '#000', background: hAut.color,
+                                padding: '1px 6px', flexShrink: 0,
+                              }}>{hAut.sigla}</span>}
                           </div>
                           <span style={{ color: PALETTE.textDim, fontSize: 14.5, flexShrink: 0 }}>
                             {amxFmtManualDate(h.date) || '—'}
@@ -759,6 +429,38 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
 
               })}
             </div>
+
+            {/* ACCESORIOS COMPATIBLES (informativo · inventario DCAM) */}
+            {(() => {
+              const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
+              if (!compat.length) return null;
+              return (
+                <div style={{ marginTop: 8 }}>
+                  <window.CarouselSection
+                    eyebrow="▫ COMPATIBLE · ACCESORIOS DCAM"
+                    title={compat.length === 1 ? 'Accesorio compatible' : `Accesorios compatibles · ${compat.length}`}
+                    items={compat}
+                    renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />}
+                  />
+                </div>
+              );
+            })()}
+
+            {/* MUNICIÓN COMPATIBLE (informativo · inventario DCAM/OTCA) */}
+            {(() => {
+              const muns = window.getMunicionesParaArma ? window.getMunicionesParaArma(arma) : [];
+              if (!muns.length) return null;
+              return (
+                <div style={{ marginTop: 8 }}>
+                  <window.CarouselSection
+                    eyebrow="◉ COMPATIBLE · MUNICIÓN"
+                    title={muns.length === 1 ? `Munición compatible · ${arma.calibre}` : `Munición compatible · ${arma.calibre} · ${muns.length}`}
+                    items={muns}
+                    renderItem={(m) => <window.MunicionCard mun={m} onClick={() => onOpenMunicion && onOpenMunicion(m.id)} />}
+                  />
+                </div>
+              );
+            })()}
           </div>
           }
 
@@ -872,6 +574,11 @@ function ProductScreen({ armaId, onOpenArma, onNav, compareIds, toggleCompare })
       {/* VIDEO YOUTUBE (sólo si hay) */}
       <YouTubeBlock arma={arma} padX={PAD} />
 
+      {/* CALIFICACIÓN DE LA COMUNIDAD — al final de la ficha, antes de las armas sugeridas */}
+      <div style={{ padding: `0 ${PAD}px 16px`, maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+        <RatingBlock armaId={arma.id} />
+      </div>
+
       {/* RELATED */}
       {related.length > 0 &&
         <div style={{ padding: `0 ${PAD}px 16px` }}>
@@ -921,7 +628,13 @@ function RatingBlock({ armaId }) {
 
   return (
     <React.Fragment>
-      <SectionHeader>Calificación de usuarios</SectionHeader>
+      <SectionHeader>Calificación de la comunidad</SectionHeader>
+      <div style={{
+        fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim,
+        lineHeight: 1.55, marginTop: -6, marginBottom: 10
+      }}>
+        Las valoraciones las hacen otros usuarios para ayudarte a elegir el arma que más te conviene. Comparte tu experiencia y ayuda a la comunidad.
+      </div>
       <div style={{
         background: PALETTE.bgCard,
         border: `1px solid ${PALETTE.border}`,
@@ -966,7 +679,7 @@ function RatingBlock({ armaId }) {
             fontSize: 14.5, color: PALETTE.textDim,
             letterSpacing: '0.08em', textTransform: 'uppercase',
             marginBottom: 8
-          }}>{userR ? 'Tu calificación' : 'Califica este modelo'}</div>
+          }}>{userR ? 'Tu valoración' : 'Comparte tu experiencia'}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <window.StarRating value={userR} count={0} interactive
             onRate={onRate} size="lg" showCount={false} />
@@ -1575,9 +1288,7 @@ function LegalScreen({ onNav }) {
           fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.65
         }}>
-          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos.
-          <br /><br />
-          La asesoría legal relativa al proceso SEDENA es prestada de forma independiente por un <span style={{ color: PALETTE.amber, fontWeight: 700 }}>abogado externo especializado</span>, bajo su propia cédula profesional y responsabilidad. Armas M&amp;S no es despacho jurídico ni mantiene relación laboral con dicho profesional, y se limita a facilitar el contacto entre el interesado y el abogado. Honorarios, alcance y términos del servicio se acuerdan directamente con el profesional.
+          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM.
         </div>
       </div>
 
@@ -1697,7 +1408,8 @@ function LegalScreen({ onNav }) {
         )}
       </div>
 
-      {/* ASESORÍA WHATSAPP */}
+      {/* ASESORÍA WHATSAPP — oculta por el momento (abogado externo / asesoría legal) */}
+      {false && (
       <div style={{
         background: `linear-gradient(135deg, ${PALETTE.bgCard} 0%, ${PALETTE.bgElev} 100%)`,
         border: `1.5px solid ${PALETTE.amber}`,
@@ -1747,6 +1459,7 @@ function LegalScreen({ onNav }) {
           <span style={{ fontSize: 20.5}}>↗</span>
         </a>
       </div>
+      )}
     </div>);
 
 }
@@ -1814,7 +1527,7 @@ function AboutScreen() {
           fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.7
         }}>
-          <b>Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano.</b> Somos un proyecto privado divulgativo. <b>No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No tramitamos licencias ni permisos.</b> Lo único que comercializamos son las tres armas traumáticas menos letales. El único servicio adicional que ofrecemos es <span style={{ color: PALETTE.amber, fontWeight: 700 }}>asesoría legal personalizada</span> con un abogado especializado, contratada de forma independiente y con costo.
+          Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No tramitamos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.
         </div>
       </div>
 
@@ -1864,7 +1577,7 @@ function AboutScreen() {
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
           </div>
           <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
-            Una <b style={{ color: PALETTE.text }}>enciclopedia libre</b> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
+            Una <span style={{ color: PALETTE.text }}>enciclopedia libre</span> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
           </div>
         </div>
         <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
@@ -1875,7 +1588,7 @@ function AboutScreen() {
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
           </div>
           <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
-            Un <b style={{ color: PALETTE.text }}>proyecto digital de e-commerce</b> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
+            Un <span style={{ color: PALETTE.text }}>proyecto digital de e-commerce</span> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
           </div>
         </div>
       </div>
@@ -1997,9 +1710,9 @@ function FAQScreen() {
           fontSize: 15.5, color: PALETTE.text,
           lineHeight: 1.65
         }}>
-          <b>Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental.</b> Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
+          Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
           <br /><br />
-          <b>Armas M&amp;S no presta servicios jurídicos.</b> La asesoría legal sobre el proceso SEDENA es ofrecida de forma independiente por un <span style={{ color: PALETTE.amber, fontWeight: 700 }}>abogado externo</span> bajo su propia cédula profesional; nuestra función se limita a facilitar el contacto entre el interesado y el profesional.
+          Armas M&amp;S no presta servicios jurídicos.
         </div>
       </div>
 
@@ -2057,14 +1770,16 @@ function MenuScreen({ onNav, onTutorial }) {
   const padX = vp.isDesktop ? 28 : 16;
   const items = [
   { id: 'traumaticas', icon: '◎', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
+  { id: 'accesorios', icon: '▫', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
+  { id: 'municiones', icon: '◉', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
   { id: 'calibres', icon: '◉', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
   { id: 'campos', icon: '◎', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados · suscripción próximamente' },
   { id: 'cursos', icon: '✦', title: 'Cursos', desc: 'Formación: manejo seguro, tiro defensivo y más' },
-  { id: 'submit', icon: '＋', title: 'Proponer arma', desc: 'Envía un arma al curador para revisión', accent: true },
   { id: 'legal', icon: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
+  { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
   { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
-  { id: 'faq', icon: '?', title: 'FAQ', desc: 'Preguntas frecuentes' },
-  { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' }];
+  { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
+  { id: 'submit', icon: '＋', title: 'Proponer arma', desc: 'Envía un arma al curador para revisión' }];
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>

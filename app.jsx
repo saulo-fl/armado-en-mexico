@@ -2,6 +2,44 @@
 
 const { useState: useStateApp, useEffect: useEffectApp, useRef: useRefApp } = React;
 
+// ─── RUTEO POR URL (cada pantalla con su propia dirección: /calibres, /arsenal…) ───
+const APP_BASE = (window.APP_BASE || '/').replace(/[^/]*$/, (m) => (m.indexOf('.') >= 0 ? '' : m)) || '/';
+const SCREEN_TO_PATH = {
+  home: '', catalog: 'arsenal', accesorios: 'accesorios',
+  calibres: 'calibres', campos: 'campos', cursos: 'cursos',
+  compare: 'comparar', legal: 'legalidad', about: 'acerca',
+  faq: 'preguntas', menu: 'mas', submit: 'proponer', traumaticas: 'traumaticas',
+  municiones: 'municiones',
+};
+const PATH_TO_SCREEN = Object.keys(SCREEN_TO_PATH).reduce((m, s) => {
+  if (SCREEN_TO_PATH[s]) m[SCREEN_TO_PATH[s]] = s;
+  return m;
+}, {});
+
+function amxBuildPath(screen, productId, accesorioId, municionId) {
+  if (screen === 'product') return 'arma/' + (productId != null ? productId : '');
+  if (screen === 'accesorio') return 'accesorio/' + (accesorioId != null ? accesorioId : '');
+  if (screen === 'municion') return 'municion/' + (municionId != null ? municionId : '');
+  return SCREEN_TO_PATH[screen] || '';
+}
+function amxBuildUrl(screen, productId, accesorioId, municionId) {
+  const p = amxBuildPath(screen, productId, accesorioId, municionId);
+  return APP_BASE + p;
+}
+function amxParsePath(pathname) {
+  let rel = pathname || '';
+  if (APP_BASE !== '/' && rel.indexOf(APP_BASE) === 0) rel = rel.slice(APP_BASE.length);
+  else if (APP_BASE === '/' && rel[0] === '/') rel = rel.slice(1);
+  rel = rel.replace(/index\.html$/, '').replace(/^\/+|\/+$/g, '');
+  if (!rel) return { screen: 'home', productId: null, accesorioId: null, municionId: null };
+  const seg = rel.split('/');
+  if (seg[0] === 'arma') return { screen: 'product', productId: Number(seg[1]) || null, accesorioId: null, municionId: null };
+  if (seg[0] === 'accesorio') return { screen: 'accesorio', productId: null, accesorioId: Number(seg[1]) || null, municionId: null };
+  if (seg[0] === 'municion') return { screen: 'municion', productId: null, accesorioId: null, municionId: Number(seg[1]) || null };
+  const sc = PATH_TO_SCREEN[seg[0]];
+  return { screen: sc || 'home', productId: null, accesorioId: null, municionId: null };
+}
+
 function App() {
   const vp = window.useViewport();
 
@@ -27,13 +65,41 @@ function App() {
     document.body.dataset.type = tw.typeface || 'stencil';
   }, [tw.faction, tw.hudIntensity, tw.typeface]);
 
-  // Navegación
-  const [screen, setScreen] = useStateApp('home');
-  const [productId, setProductId] = useStateApp(null);
+  // Navegación — estado inicial leído de la URL (deep-links)
+  const _init = amxParsePath(window.location.pathname);
+  const [screen, setScreen] = useStateApp(_init.screen);
+  const [productId, setProductId] = useStateApp(_init.productId);
+  const [accesorioId, setAccesorioId] = useStateApp(_init.accesorioId);
+  const [municionId, setMunicionId] = useStateApp(_init.municionId);
   const [catalogFilter, setCatalogFilter] = useStateApp(null);
   const [compareIds, setCompareIds] = useStateApp([]);
   const [pickerSlot, setPickerSlot] = useStateApp(null);
   const [history, setHistory] = useStateApp([]);
+  const skipPush = useRefApp(false);
+
+  // URL ↔ pantalla: empuja una nueva dirección al cambiar de pantalla
+  useEffectApp(() => {
+    if (skipPush.current) { skipPush.current = false; return; }
+    const cur = amxParsePath(window.location.pathname);
+    if (cur.screen === screen && cur.productId === productId && cur.accesorioId === accesorioId && cur.municionId === municionId) return;
+    const url = amxBuildUrl(screen, productId, accesorioId, municionId);
+    try { window.history.pushState({ screen, productId, accesorioId, municionId }, '', url); } catch (e) {}
+  }, [screen, productId, accesorioId, municionId]);
+
+  // Botón atrás/adelante del navegador → aplica la pantalla de la URL
+  useEffectApp(() => {
+    const onPop = () => {
+      const s = amxParsePath(window.location.pathname);
+      skipPush.current = true;
+      setHistory([]);
+      setScreen(s.screen);
+      setProductId(s.productId);
+      setAccesorioId(s.accesorioId);
+      setMunicionId(s.municionId);
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   // ─── Tutorial de bienvenida (primer arranque + reproducible desde MÁS) ───
   const [tutorialOpen, setTutorialOpen] = useStateApp(false);
@@ -80,6 +146,18 @@ function App() {
     }
   };
 
+  const openAccesorio = (id) => {
+    setHistory(h => [...h, { screen, productId, catalogFilter }]);
+    setAccesorioId(id);
+    setScreen('accesorio');
+  };
+
+  const openMunicion = (id) => {
+    setHistory(h => [...h, { screen, productId, catalogFilter }]);
+    setMunicionId(id);
+    setScreen('municion');
+  };
+
   const goBack = () => {
     setHistory(h => {
       if (!h.length) { setScreen('home'); return []; }
@@ -100,6 +178,8 @@ function App() {
     else if (id === 'submit') setScreen('submit');
     else if (id === 'compare') setScreen('compare');
     else if (id === 'catalog') { setCatalogFilter(null); setScreen('catalog'); }
+    else if (id === 'accesorios') { setCatalogFilter(null); setScreen('accesorios'); }
+    else if (id === 'municiones') { setCatalogFilter(null); setScreen('municiones'); }
     else if (id === 'calibres') setScreen('calibres');
     else if (id === 'campos') setScreen('campos');
     else if (id === 'cursos') setScreen('cursos');
@@ -125,6 +205,8 @@ function App() {
 
   const titles = {
     home: '', catalog: 'Arsenal', product: 'Ficha',
+    accesorios: 'Accesorios', accesorio: 'Ficha',
+    municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
     about: 'Acerca', faq: 'FAQ', menu: 'Más',
     submit: 'Proponer arma',
@@ -132,18 +214,20 @@ function App() {
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'about', 'faq', 'submit', 'calibres', 'campos', 'cursos', 'traumaticas'].includes(screen) || (screen === 'catalog' && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'submit', 'calibres', 'campos', 'cursos', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
     legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
     calibres: 'menu', campos: 'menu', cursos: 'menu', traumaticas: 'menu',
+    municiones: 'menu', municion: 'menu',
+    accesorios: 'accesorios', accesorio: 'accesorios',
     product: history[history.length-1]?.screen === 'compare' ? 'compare' : 'catalog',
   })[screen] || 'home';
 
   // contenido del screen
   let content;
   if (screen === 'home') {
-    content = <window.HomeScreen onNav={navigate} onOpenArma={openArma} />;
+    content = <window.HomeScreen onNav={navigate} onOpenArma={openArma} onOpenAccesorio={openAccesorio} onOpenMunicion={openMunicion} />;
   } else if (screen === 'catalog') {
     content = <window.CatalogScreen initialFilter={catalogFilter}
       onOpenArma={openArma}
@@ -152,6 +236,8 @@ function App() {
   } else if (screen === 'product') {
     content = <window.ProductScreen armaId={productId}
       onOpenArma={openArma}
+      onOpenAccesorio={openAccesorio}
+      onOpenMunicion={openMunicion}
       onNav={navigate}
       compareIds={compareIds}
       toggleCompare={toggleCompare} />;
@@ -179,6 +265,14 @@ function App() {
     content = <window.CursosScreen onNav={navigate} />;
   } else if (screen === 'traumaticas') {
     content = <window.TraumaticasScreen onNav={navigate} />;
+  } else if (screen === 'accesorios') {
+    content = <window.AccesoriosScreen initialFilter={catalogFilter} onOpenAccesorio={openAccesorio} onNav={navigate} />;
+  } else if (screen === 'accesorio') {
+    content = <window.AccesorioFicha accesorioId={accesorioId} onOpenAccesorio={openAccesorio} onOpenArma={openArma} onNav={navigate} />;
+  } else if (screen === 'municiones') {
+    content = <window.MunicionesScreen initialFilter={catalogFilter} onOpenMunicion={openMunicion} onNav={navigate} />;
+  } else if (screen === 'municion') {
+    content = <window.MunicionFicha municionId={municionId} onOpenMunicion={openMunicion} onOpenArma={openArma} />;
   }
 
   return (
@@ -237,7 +331,9 @@ function App() {
 
       {/* Scroll body */}
       <div ref={scrollRef} style={{
-        flex: 1, overflowY: vp.isMobile ? 'auto' : 'visible',
+        flex: 1, minHeight: 0,
+        overflowY: vp.isMobile ? 'auto' : 'visible',
+        WebkitOverflowScrolling: 'touch',
       }}>
         {content}
       </div>
