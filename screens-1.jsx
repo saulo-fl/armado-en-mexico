@@ -16,7 +16,7 @@ window.CATEGORY_HEROS = CATEGORY_HEROS;
 // ════════════════════════════════════════════════════════════════
 // HOME — Mobile-first · Header + Sliders + 3 Carruseles
 // ════════════════════════════════════════════════════════════════
-function HomeScreen({ onNav, onOpenArma }) {
+function HomeScreen({ onNav, onOpenArma, onOpenAccesorio }) {
   const vp = window.useViewport();
   const [promoIdx, setPromoIdx] = useState(0);
   const [, forceRender] = useState(0);
@@ -33,7 +33,6 @@ function HomeScreen({ onNav, onOpenArma }) {
   // Tres listas curadas / dinámicas
   const favoritos = useMemo(() => window.Store ? window.Store.getFavoriteArmas() : [], [forceRender]);
   const masVisitadas = useMemo(() => window.Store ? window.Store.getTopPopular(10, 30) : [], [forceRender]);
-  const mejorCalificadas = useMemo(() => window.Store ? window.Store.getTopRated(10, 1) : [], [forceRender]);
 
   const PAD = 16;
   const containerMax = { maxWidth: 1280, margin: '0 auto', width: '100%' };
@@ -74,19 +73,6 @@ function HomeScreen({ onNav, onOpenArma }) {
         fallbackRender={renderSugerencia}
         renderItem={(a, i) =>
         <VisitedCard arma={a} rank={i + 1} onClick={() => onOpenArma(a.id)} />
-        } />
-      
-
-      {/* 4 ▸ Carrusel: Las mejor calificadas */}
-      <CarouselSection
-        eyebrow="★ VALORACIÓN DE USUARIOS"
-        title="Las mejor calificadas"
-        items={mejorCalificadas}
-        fallbackItems={sugerencias(20)}
-        fallbackNote="Sé el primero en valorar un arma desde su ficha"
-        fallbackRender={renderSugerencia}
-        renderItem={(a) =>
-        <RatedCard arma={a} onClick={() => onOpenArma(a.id)} />
         } />
       
 
@@ -243,6 +229,11 @@ function HomeScreen({ onNav, onOpenArma }) {
           })}
         </div>
       </div>
+
+      {/* 8.5 ▸ Accesorios DCAM — categorías (justo después de las categorías de armas) */}
+      {window.HomeAccesoriosSection &&
+        <window.HomeAccesoriosSection onOpen={onOpenAccesorio} onNav={onNav} />
+      }
 
       {/* 6 ▸ Disponibilidad legal */}
       <div style={{ ...containerMax, padding: `0 ${PAD}px` }}>

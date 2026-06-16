@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Armado en México</title>
+<script>
+  /* GitHub Pages SPA fallback. Cualquier dirección profunda (ej. /calibres,
+     /arma/5) que el servidor no encuentra como archivo cae aquí; reescribimos
+     la ruta a /?/<ruta> y redirigimos al index, que la restaura con History API.
+     pathSegmentsToKeep = 0  →  app servida en la raíz del dominio (armado.mx). */
+  (function () {
+    var pathSegmentsToKeep = 0;
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+      l.hash
+    );
+  })();
+</script>
+</head>
+<body></body>
+</html>

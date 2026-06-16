@@ -680,29 +680,16 @@ window.armaPlaceholder = function(arma) {
       <line x1='184' y1='148' x2='196' y2='148' stroke-width='0.6' opacity='0.4' />
     `,
   };
-  const shape = SIL[arma.tipo] || SIL.pistola;
+  // Aviso discreto "sin imagen disponible" (reemplaza la silueta placeholder).
+  void SIL;
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 200' preserveAspectRatio='xMidYMid meet'>
-    <defs>
-      <linearGradient id='gradGun' x1='0' y1='0' x2='0' y2='1'>
-        <stop offset='0' stop-color='%23c9a227' stop-opacity='0.95'/>
-        <stop offset='1' stop-color='%238a6e1a' stop-opacity='0.85'/>
-      </linearGradient>
-      <pattern id='dot' patternUnits='userSpaceOnUse' width='10' height='10'>
-        <circle cx='5' cy='5' r='0.5' fill='%23c9a227' opacity='0.15'/>
-      </pattern>
-    </defs>
-    <rect width='480' height='200' fill='url(%23dot)'/>
-    <g stroke='%23c9a227' stroke-width='0.6' opacity='0.25'>
-      <line x1='240' y1='10' x2='240' y2='40'/>
-      <line x1='240' y1='160' x2='240' y2='190'/>
-      <line x1='10' y1='100' x2='40' y2='100'/>
-      <line x1='440' y1='100' x2='470' y2='100'/>
-      <circle cx='240' cy='100' r='90' fill='none'/>
+    <g fill='none' stroke='%23555555' stroke-width='2.5' opacity='0.55' stroke-linejoin='round'>
+      <rect x='206' y='64' width='68' height='52' rx='4'/>
+      <circle cx='240' cy='90' r='13'/>
+      <line x1='210' y1='60' x2='270' y2='120'/>
     </g>
-    <g fill='url(%23gradGun)' stroke='%23c9a227' stroke-width='1' stroke-linejoin='round'>
-      ${shape.replace(/#/g, '%23')}
-    </g>
-    <text x='240' y='194' font-family='JetBrains Mono,monospace' font-size='7' fill='%236a685e' text-anchor='middle' letter-spacing='3'>${(arma.marca||'').toUpperCase()} · ${(arma.tipo||'').toUpperCase()}</text>
+    <text x='240' y='148' font-family='Courier New,monospace' font-size='13' fill='%237A7A7A' text-anchor='middle' letter-spacing='1'>Sin imagen disponible</text>
+    <text x='240' y='168' font-family='Courier New,monospace' font-size='13' fill='%237A7A7A' text-anchor='middle' letter-spacing='1'>por el momento</text>
   </svg>`;
   return 'data:image/svg+xml;utf8,' + svg.replace(/\n\s+/g, '').replace(/#/g, '%23');
 };

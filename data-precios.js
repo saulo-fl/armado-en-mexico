@@ -52,6 +52,7 @@ window.AMX_MANUALES_SEED = [
   {
     id: 'man_dcam_2025_10_03',
     nombre: 'Existencias de armas DCAM · 3 de octubre 2025',
+    autoridad: 'DCAM',
     fecha: '2025-10-03',
     url: 'inventarios/dcam-existencias-2025-10-03.pdf',
     fileName: 'dcam-existencias-2025-10-03.pdf',
@@ -71,3 +72,16 @@ window.AMX_MANUALES_SEED = [
 //     ],
 //   };
 window.AMX_PRICE_HISTORY_SEED = {};
+
+// ── EXISTENCIAS DE ARMAS por inventario (cantidad marcada en el PDF) ─────────
+// Mapa  armaId -> cantidad  según el inventario MÁS RECIENTE (el de priceManualId
+// o el principal). Dato HISTÓRICO del PDF, no en tiempo real. La ficha lo muestra
+// con ese aviso. Vacío por ahora: se concilia desde el PDF oficial de existencias
+// de armas (inventarios/dcam-existencias-2025-10-03.pdf) — ver CLAUDE.md.
+// Ej.:  window.AMX_ARMAS_EXISTENCIAS = { 1: 84, 2: 0, 7: 153 };
+window.AMX_ARMAS_EXISTENCIAS = {};
+window.getArmaExistencias = function (armaId) {
+  const m = window.AMX_ARMAS_EXISTENCIAS || {};
+  const q = m[Number(armaId)];
+  return (q == null) ? null : q;
+};

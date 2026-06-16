@@ -7,32 +7,58 @@ const { useState: useState3, useMemo: useMemo3 } = React;
 function armasPorCalibre(id) {
   return (window.DB || []).filter((a) => a.calibre === id);
 }
-const CLASE_GLYPH = {
-  'Rimfire': '·', 'Pistola': '◢', 'Revólver': '◉',
-  'Rifle': '━', 'Escopeta': '═', 'Carabina': '╌',
-};
+
+// Tira horizontal con arrastre por mouse (drag-to-scroll) + táctil nativo.
+// Resuelve que en escritorio no se pudiera deslizar sin barra visible.
+function DragScroll({ children, style }) {
+  const ref = React.useRef(null);
+  const st = React.useRef({ down: false, moved: false, x0: 0, s0: 0 });
+  const [grab, setGrab] = React.useState(false);
+  const down = (e) => {
+    if (e.pointerType === 'touch') return; // táctil: scroll nativo
+    const el = ref.current; if (!el) return;
+    st.current = { down: true, moved: false, x0: e.clientX, s0: el.scrollLeft };
+  };
+  const move = (e) => {
+    if (!st.current.down) return;
+    const el = ref.current; if (!el) return;
+    const dx = e.clientX - st.current.x0;
+    if (Math.abs(dx) > 5 && !st.current.moved) { st.current.moved = true; setGrab(true); }
+    if (st.current.moved) el.scrollLeft = st.current.s0 - dx;
+  };
+  const up = () => { st.current.down = false; setGrab(false); };
+  const onClickCapture = (e) => {
+    if (st.current.moved) { e.preventDefault(); e.stopPropagation(); st.current.moved = false; }
+  };
+  return (
+    <div ref={ref} className="amx-hscroll"
+      onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerLeave={up}
+      onClickCapture={onClickCapture}
+      style={Object.assign({ cursor: grab ? 'grabbing' : 'grab' }, style)}>
+      {children}
+    </div>
+  );
+}
+window.DragScroll = DragScroll;
 
 // ═══════════════════════════════════════════════════════════════════════
-// STRIPE PLACEHOLDER — marcador rayado con etiqueta mono (imagen a futuro)
+// IMAGE SLOT — panel sólido limpio con etiqueta (foto real a futuro)
 // ═══════════════════════════════════════════════════════════════════════
 function StripePlaceholder({ label, ratio = '16 / 9', children }) {
   return (
     <div style={{
       position: 'relative', width: '100%', aspectRatio: ratio, flexShrink: 0,
       overflow: 'hidden',
-      background: `repeating-linear-gradient(135deg, ${PALETTE.bgElev} 0 10px, ${PALETTE.bg} 10px 20px)`,
+      background: PALETTE.bgElev,
       borderBottom: `1px solid ${PALETTE.border}`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      {/* corner ticks */}
-      <span style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${PALETTE.amber}`, borderLeft: `1.5px solid ${PALETTE.amber}`, opacity: 0.7 }} />
-      <span style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${PALETTE.amber}`, borderRight: `1.5px solid ${PALETTE.amber}`, opacity: 0.7 }} />
       {children || (
         <span style={{
           fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
           color: PALETTE.textMuted, letterSpacing: '0.18em',
           textTransform: 'uppercase', textAlign: 'center', padding: '0 10px',
-        }}>▢ {label}</span>
+        }}>{label}</span>
       )}
     </div>
   );
@@ -62,9 +88,9 @@ function CalibresScreen({ onOpenArma, onNav }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
   const calibres = window.CALIBRES || [];
-  const clases = useMemo3(() => ['Todos', ...Array.from(new Set(calibres.map((c) => c.clase)))], [calibres]);
+  const clases = useMemo3(() => ['Todos', ...Array.from(new Set(calibres.map((c) => c.sistema)))], [calibres]);
   const [clase, setClase] = useState3('Todos');
-  const list = clase === 'Todos' ? calibres : calibres.filter((c) => c.clase === clase);
+  const list = clase === 'Todos' ? calibres : calibres.filter((c) => c.sistema === clase);
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
@@ -149,13 +175,10 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
   return (
     <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `3px solid ${PALETTE.amber}`, display: 'flex', alignItems: 'stretch', minHeight: vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop + 28 : CARTUCHO_FICHA_MAXH.mobile + 24 }}>
       <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '18px 20px' : '14px' }}>
-        {/* título + clase */}
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
-            <span style={{ color: PALETTE.amber, fontFamily: 'Courier Prime, monospace', fontSize: 20.5}}>{CLASE_GLYPH[cal.clase] || '◆'}</span>
-            <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 25 : 21, color: PALETTE.text, letterSpacing: '0.01em' }}>{cal.id}</span>
-          </div>
-          <MiniBadge>{cal.clase}</MiniBadge>
+        {/* título + sistema */}
+        <div>
+          <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{cal.sistema}</div>
+          <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 25 : 21, color: PALETTE.text, letterSpacing: '0.01em' }}>{cal.id}</span>
         </div>
         {/* uso */}
         <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
@@ -172,7 +195,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
         {armas.length > 0 && (
           <div style={{ marginTop: 14 }}>
             <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>Armas que lo usan</div>
-            <div className="amx-hscroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+            <DragScroll style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
               {armas.map((a) => (
                 <button key={a.id} onClick={() => onOpenArma(a.id)} style={{
                   flexShrink: 0, width: 118, background: PALETTE.bgElev, border: `1px solid ${PALETTE.border}`,
@@ -191,7 +214,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
                   </div>
                 </button>
               ))}
-            </div>
+            </DragScroll>
           </div>
         )}
       </div>
@@ -358,33 +381,20 @@ function CaliberMiniCard({ cal, onClick }) {
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
       <div style={{ padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ color: PALETTE.amber, fontFamily: 'Courier Prime, monospace', fontSize: 20.5}}>{CLASE_GLYPH[cal.clase] || '◆'}</span>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{cal.clase}</span>
-      </div>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 10, lineHeight: 1 }}>{cal.id}</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{cal.sistema}</div>
+      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 8, lineHeight: 1 }}>{cal.id}</div>
       <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
       <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
       </div>
-      {/* CARTUCHO SLOT — PNG vertical del cartucho a escala real, anclado al piso */}
+      {/* CARTUCHO SLOT — PNG vertical del cartucho a escala REAL (altura ∝ mm), anclado al piso */}
       <div style={{
         flexShrink: 0, width: 58, alignSelf: 'stretch', position: 'relative', overflow: 'hidden',
         borderLeft: `1px solid ${PALETTE.border}`,
-        background: cal.cartucho ? PALETTE.bgElev
-          : `repeating-linear-gradient(135deg, ${PALETTE.bgElev} 0 8px, ${PALETTE.bg} 8px 16px)`,
+        background: PALETTE.bgElev,
         display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
       }}>
-        <span style={{ position: 'absolute', top: 6, left: 6, width: 8, height: 8, borderTop: `1.5px solid ${PALETTE.amber}`, borderLeft: `1.5px solid ${PALETTE.amber}`, opacity: 0.7 }} />
-        <span style={{ position: 'absolute', bottom: 6, right: 6, width: 8, height: 8, borderBottom: `1.5px solid ${PALETTE.amber}`, borderRight: `1.5px solid ${PALETTE.amber}`, opacity: 0.7 }} />
-        {cal.cartucho
-          ? <img src={cal.cartucho} alt={`Cartucho ${cal.id}`} loading="lazy"
-              style={{ height: Math.round(((cal.mm || 40) / CARTUCHO_MAX_MM) * CARTUCHO_HOME_MAXH), width: 'auto', maxWidth: 'calc(100% - 10px)', objectFit: 'contain', objectPosition: 'bottom', display: 'block', marginBottom: 9 }} />
-          : <span style={{
-              position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%) rotate(180deg)',
-              writingMode: 'vertical-rl',
-              fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.textMuted,
-              letterSpacing: '0.18em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-            }}>▢ Cartucho</span>}
+        <img src={cal.cartucho} alt={`Cartucho ${cal.id}`} loading="lazy"
+          style={{ height: Math.round(((cal.mm || 40) / CARTUCHO_MAX_MM) * CARTUCHO_HOME_MAXH), width: 'auto', maxWidth: 'calc(100% - 10px)', objectFit: 'contain', objectPosition: 'bottom', display: 'block', marginBottom: 9 }} />
       </div>
     </div>
   );

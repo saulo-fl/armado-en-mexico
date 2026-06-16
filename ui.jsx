@@ -54,6 +54,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
   const items = [
     { id: 'home',    label: 'INICIO' },
     { id: 'catalog', label: 'ARSENAL' },
+    { id: 'accesorios', label: 'ACCESORIOS' },
     { id: 'compare', label: 'COMPARAR', badge: compareCount },
     { id: 'legal',   label: 'LEGALIDAD' },
     { id: 'faq',     label: 'FAQ' },
@@ -234,11 +235,11 @@ function PriceLevel({ lvl, size = 12 }) {
   return (
     <span style={{
       fontFamily: 'Courier Prime, monospace',
-      fontSize: size, fontWeight: 700,
-      letterSpacing: '0.06em', whiteSpace: 'nowrap', lineHeight: 1,
+      fontSize: Math.round(size * 1.35), fontWeight: 700,
+      letterSpacing: '0.08em', whiteSpace: 'nowrap', lineHeight: 1,
     }}>
-      <span style={{ color: PALETTE.amber }}>{'$'.repeat(n)}</span>
-      <span style={{ color: 'rgba(245,197,24,0.28)' }}>{'$'.repeat(5 - n)}</span>
+      <span style={{ color: '#4FAE5C' }}>{'$'.repeat(n)}</span>
+      <span style={{ color: 'rgba(79,174,92,0.30)' }}>{'$'.repeat(5 - n)}</span>
     </span>
   );
 }
