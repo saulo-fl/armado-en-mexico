@@ -997,6 +997,29 @@ function SettingsTab() {
   const [newPw, setNewPw] = useState('');
   const [importText, setImportText] = useState('');
   const fileRef = useRef(null);
+  const [remote, setRemote] = useState(window.Store.remoteStatus());
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState('');
+
+  // refrescar el estado del backend cuando termine la hidratación de arranque
+  useEffect(() => {
+    const t = setInterval(() => setRemote(window.Store.remoteStatus()), 2000);
+    return () => clearInterval(t);
+  }, []);
+
+  const pushAll = async () => {
+    if (!confirm('Subirás TODA la curaduría de este navegador al servidor compartido, sobrescribiendo lo que haya allí. ¿Continuar?')) return;
+    setSyncing(true); setSyncMsg('');
+    try {
+      const res = await window.Store.pushAllToServer();
+      const okN = Object.values(res).filter(v => v === 'ok').length;
+      const fail = Object.entries(res).filter(([, v]) => v !== 'ok' && v !== 'vacío');
+      setSyncMsg('✓ ' + okN + ' dominios sincronizados.' + (fail.length ? ' Fallaron: ' + fail.map(([k, v]) => k + ' (' + v + ')').join(', ') : ''));
+      setRemote(window.Store.remoteStatus());
+    } catch (e) {
+      setSyncMsg('✗ ' + e.message);
+    } finally { setSyncing(false); }
+  };
 
   const exportJson = () => {
     const data = window.Store.exportAll();
@@ -1074,10 +1097,25 @@ function SettingsTab() {
             <div>◆ Promos activas: <b style={{ color: P.amber }}>{window.Store.getPromos().length}</b></div>
           </div>
         </Card>
+
+        <Card title="Backend compartido (Cloudflare D1)">
+          {remote.ok ? (
+            <p style={{ ...txtMuted, color: '#4FAE5C' }}>● Conectado. La curaduría se sincroniza automáticamente con el servidor; todos los visitantes ven los mismos datos.</p>
+          ) : remote.enabled ? (
+            <p style={{ ...txtMuted, color: P.amber }}>○ Sin respuesta del backend (modo offline). Aún no se aprovisiona D1 o no hay Functions en este dominio. Los cambios viven solo en este navegador.</p>
+          ) : (
+            <p style={{ ...txtMuted }}>Backend no disponible en este contexto (file://). Sirve la app por HTTP en el dominio con Functions.</p>
+          )}
+          <p style={txtMuted}>Usa esto la primera vez para subir la curaduría de este navegador al servidor (sembrado inicial). Después, cada cambio se sincroniza solo.</p>
+          <button onClick={pushAll} disabled={syncing || !remote.enabled} style={Object.assign({}, btnPrimary, { opacity: (syncing || !remote.enabled) ? 0.5 : 1 })}>
+            {syncing ? '⏳ Sincronizando…' : '☁ Sincronizar todo al servidor'}
+          </button>
+          {syncMsg && <p style={{ ...txtMuted, marginTop: 8, color: syncMsg.startsWith('✓') ? '#4FAE5C' : P.red }}>{syncMsg}</p>}
+        </Card>
       </div>
 
       <div style={{ marginTop: 24, padding: 14, background: P.bgElev, border: `1px dashed ${P.border}`, fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textMuted, lineHeight: 1.6 }}>
-        <b style={{ color: P.amber }}>◆ Nota:</b> Este admin guarda datos en <code style={{ color: P.amber }}>localStorage</code> del navegador. Funciona offline y no requiere servidor. Para usarlo en producción con sincronización entre dispositivos, exporta el JSON regularmente o monta una API real.
+        <b style={{ color: P.amber }}>◆ Nota:</b> Este admin guarda en <code style={{ color: P.amber }}>localStorage</code> y, cuando el <b>backend compartido</b> está conectado, replica cada cambio a Cloudflare D1 para que todos los visitantes vean la misma curaduría. El export/import JSON sigue siendo útil como respaldo. La verificación de admin la hace Cloudflare Access sobre <code style={{ color: P.amber }}>/admin*</code> y <code style={{ color: P.amber }}>/api/admin/*</code>.
       </div>
     </div>
   );

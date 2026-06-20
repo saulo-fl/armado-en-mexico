@@ -93,9 +93,31 @@ Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que correspon
 - La barra "◉ DEBUG" (abajo-izquierda) es una herramienta de desarrollo intencional; no la quites.
 - `logo.png` es un **borrador** del logo — se reemplazará por la versión final más adelante (mismo nombre de archivo).
 
-## Limitación conocida (documentar, no arreglar ahora)
+## Backend compartido (Cloudflare Pages Functions + D1)
 
-El "backend" (`store.js` + `admin.html`) persiste en `localStorage`: la curaduría del admin (catálogo, páginas, favoritos, sugerencias) solo vive en el navegador donde se hizo. **Excepción:** los inventarios DCAM y el historial de precios se siembran en código (`data-precios.js`), así que esos sí viajan con el despliegue y los ven todos. Para compartir el resto de la curaduría entre visitantes hará falta un backend real (API + DB) en una fase posterior.
+La curaduría del admin ya puede compartirse entre visitantes mediante un backend
+**opcional y no intrusivo** (ver **`BACKEND.md`** para el detalle y el alta):
+
+- Las **Functions** viven en `functions/api/` y Cloudflare Pages las despliega solas:
+  `GET /api/state` (snapshot público), `POST /api/append/:domain` (escritura pública de
+  `suggestions`/`pending`/`ratings`/`visits` con merge atómico en el server) y
+  `PUT /api/admin/state/:domain` (reemplazo de un dominio, **solo admin**).
+- **D1** guarda un *document store* por dominio: una fila `state(domain, data, updated_at)`
+  con el mismo JSON que `localStorage` (esquema en `schema.sql`, binding `env.DB` en `wrangler.toml`).
+- `store.js` **hidrata** al arrancar (`GET /api/state`) y empuja cada cambio. El render sigue
+  siendo síncrono: la hidratación solo refresca el cache local y dispara `_notify()`.
+- **Auth admin = Cloudflare Access** sobre `/admin*` y `/api/admin/*` (más verificación del
+  JWT en la Function vía `CF_ACCESS_TEAM_DOMAIN`/`CF_ACCESS_AUD`; sin esas vars = fail-closed).
+- **Compatibilidad total:** si no hay Functions/D1 (GitHub Pages, `file://`, antes de aprovisionar),
+  `/api/*` da 404, `store.js` cae a modo offline y la app funciona igual que antes con seeds +
+  `localStorage`. El sembrado inicial se hace desde **Admin → Configuración → «Sincronizar todo al servidor»**.
+
+**No** toques el orden de carga ni conviertas store.js en async: la capa de backend es aditiva y
+tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se sincroniza nunca.
+
+**Limitación restante:** "última escritura gana" en los `PUT` de admin (sin versionado) y el
+*append* hace read-modify-write por petición (suficiente para este tráfico). Migrar
+`ratings`/`visits`/colas a tablas fila-por-item es la evolución natural si crece el volumen.
 
 ## Mejoras futuras opcionales (NO hacer ahora)
 
