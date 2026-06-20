@@ -478,7 +478,7 @@ window.DB = [
 
   mk(79, "IWI ARAD 7", "IWI", "carabina", "Israel", "7.62x51mm", "20", "3800g", "920mm", "Semi-auto, plataforma AR-10", 2023, "ejercito", "47132.28", "FUSIL 7.62x51 MM IWI ARAD 7",
     "imagenes/109_IWI_ARAD_7.png",
-    "Versión 7.62 OTAN del ARAD para tirador designado. Exclusiva militar."),
+    "Fusil de combate de IWI en 7.62×51 mm OTAN sobre plataforma modular tipo AR-10, de uso general (versión militar select-fire). Robusto y versátil para servicio. La variante de precisión de tirador designado se cataloga aparte como ARAD 7 DMR (id 128)."),
 
   // ═══════════════════════════════════════════════════════════
   //  RIFLES TIPPMANN — EXCLUSIVO OFICIALES (Ejército)
@@ -616,6 +616,64 @@ window.DB = [
   mk(111, "Fair SLX800P", "Fair", "escopeta", "Italia", "12 GA", "2", "3500g", "1200mm", "Superpuesta premium", 2018, "dcam", "60059.97", "ESCOPETA 2 CAÑS FAIR SLX800P CAL 12",
     "imagenes/068_Fair_SLX800P.jpg",
     "Superpuesta de gama media-alta. Bloques laterales grabados. Tiro deportivo y caza fina."),
+
+  // ── ARMAS OTCA (Monterrey) — inventario 26-sep-2025, no presentes en el catálogo DCAM ──
+  mk(112, "IWI Galil ACE 21N", "IWI", "carabina", "Israel", "5.56x45mm", "30+1", "3.3 kg", "845 mm", "Selectivo, pistón de gas", 2012, "ejercito", "37218.13", "FUSIL DE ASALTO CALIBRE 5.56 x 45 mm. (.223\") MARCA I.W.I. MODELO GALIL ACE 21N",
+    "",
+    "Versión compacta del fusil Galil ACE israelí en 5.56 OTAN, con cañón corto. Plataforma de pistón de gas robusta derivada del AK; de uso exclusivo de las Fuerzas Armadas."),
+  mk(113, "CZ Scorpion EVO 3 A1", "Česká Zbrojovka", "carabina", "Rep. Checa", "9mm Parabellum", "20+1", "1.9 kg", "625 mm", "Blowback, selectivo", 2009, "ejercito", "40798.40", "SUBAMETRALLADORA AUTOMATICA CALIBRE 9X19 MM MARCA CESKA ZBROJOVKA MODELO CZ SCORPION EVO 3 A1",
+    "",
+    "Subfusil checo de 9 mm con armazón de polímero y disparo selectivo, sucesor del Škorpion. Cañón de 208 mm y culata plegable; uso exclusivo de las Fuerzas Armadas."),
+  mk(114, "SIG MPX", "SIG Sauer", "carabina", "EE.UU.", "9mm Parabellum", "30+1", "2.7 kg", "660 mm", "Gas, cerrojo cerrado, selectivo", 2015, "ejercito", "54120.33", "SUBAMETRALLADORA CALIBRE 9 X 19 mm MARCA SIG SAUER MODELO SIG MPX, STANDARD",
+    "",
+    "Subfusil de SIG Sauer con sistema de gas de pistón corto y cerrojo cerrado, inusual para un arma de 9 mm, lo que mejora seguridad y suavidad. Uso exclusivo de las Fuerzas Armadas."),
+  mk(115, "Benelli Vinci", "Benelli", "escopeta", "Italia", "12 GA", "3+1", "3.0 kg", "1257 mm", "Semi-auto inercial", 2009, "dcam", "61127.13", "ESCOPETA SEMIAUTOMÁTICA CAL. 12 G.A. MARCA BENELLI MODELO VINCI, SUPERSPORT, CAÑÓN DE 28\", SISTEMA COMFORTECH",
+    "",
+    "Escopeta semiautomática italiana de diseño modular en tres módulos, con el sistema de inercia Benelli y reducción de retroceso ComforTech. Acabado SuperSport para tiro deportivo."),
+  mk(116, "Benelli Super Vinci", "Benelli", "escopeta", "Italia", "12 GA", "3+1", "3.1 kg", "1257 mm", "Semi-auto inercial", 2011, "dcam", "50272.96", "ESCOPETA SEMIAUTOMÁTICA CAL. 12 G.A. MARCA BENELLI MODELO SUPER VINCI, CAÑÓN DE 28\", SISTEMA COMFORTECH",
+    "",
+    "Evolución de la Vinci con recámara de 3½\" para cartuchos magnum, sistema de inercia y ComforTech 3. Pensada para cacería de ave en condiciones exigentes."),
+  mk(117, "Benelli Super Black Eagle 3", "Benelli", "escopeta", "Italia", "12 GA", "3+1", "3.1 kg", "1257 mm", "Semi-auto inercial", 2017, "dcam", "60610.27", "ESCOPETA SEMIAUTOMÁTICA CAL. 12 G.A. MARCA BENELLI MODELO SUPER BLACK EAGLE 3, CAÑÓN DE 28\", SISTEMA COMFORTECH",
+    "",
+    "Escopeta insignia de Benelli para cacería de ave acuática, con recámara de 3½\", sistema de inercia y ComforTech 3 que reduce notablemente el retroceso. Referente del segmento."),
+  mk(118, "Benelli 828U", "Benelli", "escopeta", "Italia", "12 GA", "2", "3.1 kg", "1190 mm", "Sobrepuesta (acción quebrada)", 2015, "dcam", "81543.34", "ESCOPETA SOBREPUESTA CAL. 12 G.A. MARCA BENELLI MODELO 828 U, TERMINADO SILVER, CAÑÓN DE 28\"",
+    "",
+    "Escopeta sobrepuesta (over/under) de Benelli con báscula de aluminio y sistema de bloqueo patentado, ligera para su clase. Acabado plata para tiro deportivo y cacería."),
+  mk(119, "Benelli M2 cal 12", "Benelli", "escopeta", "Italia", "12 GA", "3+1", "3.2 kg", "1200 mm", "Semi-auto inercial", 2005, "dcam", "42907.62", "ESCOPETA SEMIAUTOMÁTICA CAL. 12 G.A. MARCA BENELLI MODELO M2, CAÑÓN DE 26\", SISTEMA COMFORTECH",
+    "",
+    "Escopeta semiautomática versátil con el sistema de inercia Benelli, muy popular para cacería y tiro deportivo por su fiabilidad y ligereza. Versión calibre 12."),
+  mk(120, "Benelli Nova", "Benelli", "escopeta", "Italia", "12 GA", "4+1", "3.6 kg", "1257 mm", "Acción de bomba", 1999, "dcam", "21070.03", "ESCOPETA A BOMBA CAL. 12 G.A. MARCA BENELLI MODELO NOVA, CAÑÓN DE 28\", CULATA ESTÁNDAR",
+    "",
+    "Escopeta de acción de bomba (corredera) con armazón técnico-polimérico de una pieza, robusta y económica. Popular para cacería y defensa de domicilio."),
+  mk(121, "Benelli Super Nova", "Benelli", "escopeta", "Italia", "12 GA", "4+1", "3.8 kg", "1257 mm", "Acción de bomba", 2006, "dcam", "22782.15", "ESCOPETA A BOMBA CAL. 12 G.A. MARCA BENELLI MODELO SUPER NOVA, CAÑÓN DE 28\", SISTEMA COMFORTECH",
+    "",
+    "Versión reforzada de la Nova con recámara de 3½\" y sistema ComforTech para reducir el retroceso de cargas magnum. Escopeta de corredera para uso intensivo."),
+  mk(122, "Derya MR-300", "Derya Arms", "escopeta", "Turquía", "12 GA", "2", "3.2 kg", "1190 mm", "Sobrepuesta (acción quebrada)", 2018, "dcam", "27976.05", "ESCOPETA SOBREPUESTA MARCA DERYA, MODELO MR-300, CALIBRE 12, CAÑÓN DE 28\"",
+    "",
+    "Escopeta sobrepuesta turca de Derya Arms, alternativa accesible en el segmento over/under para tiro deportivo de plato y cacería."),
+  mk(123, "Derya AG12", "Derya Arms", "escopeta", "Turquía", "12 GA", "4+1", "3.4 kg", "1200 mm", "Acción de bomba", 2017, "dcam", "13988.03", "ESCOPETA ACCIÓN DE BOMBA MARCA DERYA, MODELO AG12, CALIBRE 12, CAÑÓN DE 28\"",
+    "",
+    "Escopeta de corredera turca de Derya Arms en calibre 12, opción económica y fiable para cacería y defensa de domicilio."),
+  mk(124, "Glock 19X", "Glock", "pistola", "Austria", "9mm Parabellum", "17+1", "0.80 kg", "187 mm", "Semi-auto, striker (Safe Action)", 2018, "ejercito", "14848.40", "PISTOLA SEMIAUTOMÁTICA CALIBRE 9X19 MM MARCA GLOCK MODELO 19X, COLOR COYOTE",
+    "",
+    "Pistola de Glock que combina la corredera compacta de la G19 con la empuñadura de tamaño completo de la G17, en acabado coyote. Derivada del concurso militar MHS de EE.UU."),
+  mk(125, "Springfield Echelon", "Springfield Armory", "pistola", "EE.UU.", "9mm Parabellum", "17+1", "0.74 kg", "203 mm", "Semi-auto, striker", 2023, "ejercito", "12840.12", "PISTOLA SEMIAUTOMÁTICA CALIBRE 9 X 19 mm MARCA SPRINGFIELD ARMORY MODELO ECHELON",
+    "",
+    "Pistola moderna de Springfield Armory con chasis de acero serializado (Central Operating Group) y sistema de miras de montaje directo. Plataforma full-size para servicio."),
+  mk(126, "Taurus 82S", "Taurus", "revolver", "Brasil", ".38 Special", "6", "0.96 kg", "235 mm", "Revólver, doble acción", 2012, "dcam", "11135.14", "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 82S, CAÑÓN DE 4\" CALIBRE .38 SPL, 6 CARTUCHOS, ACERO INOXIDABLE",
+    "",
+    "Revólver de servicio clásico de Taurus en .38 Special con cañón de 4\" y capacidad de 6 cartuchos. Sólido y económico, muy difundido para defensa de domicilio."),
+  mk(127, "Grand Power LP380", "Grand Power", "pistola", "Eslovaquia", ".380 ACP", "15+1", "0.66 kg", "168 mm", "Semi-auto, blowback", 2019, "dcam", "17095.34", "PISTOLA SEMIAUTOMÁTICA CALIBRE 0.380\" ACP MARCA GRAND POWER MODELO LP 380",
+    "",
+    "Pistola eslovaca de Grand Power en .380 ACP, de tamaño completo y alta capacidad para su calibre, de libre adquisición civil para defensa de domicilio."),
+
+  // ═══════════════════════════════════════════════════════════
+  //  IWI ARAD 7 DMR — variante de TIRADOR DESIGNADO (OTCA)
+  //  Modelo aparte del ARAD 7 estándar (id 79): build de precisión.
+  // ═══════════════════════════════════════════════════════════
+  mk(128, "IWI ARAD 7 DMR", "IWI", "carabina", "Israel", "7.62x51mm", "20+1", "≈4.0 kg", "≈1000 mm", "Semiauto de precisión (DMR), gatillo de dos etapas", 2023, "ejercito", "111016.06", "FUSIL DE ASALTO CALIBRE 7.62 X 51 mm MARCA I.W.I. MODELO ARAD 7 DMR, SEMIAUTOMÁTICO",
+    "",
+    "Variante DMR (Designated Marksman Rifle) del ARAD 7: el mismo chasis modular tipo AR-10 en 7.62×51 mm OTAN, pero re-configurado para el rol de TIRADOR DESIGNADO de media-larga distancia. Frente al ARAD 7 estándar (fusil de asalto select-fire de uso general, id 79), el DMR es exclusivamente SEMIAUTOMÁTICO y prioriza la precisión: cañón más largo de paso de estría más rápido (≈1:254 mm / 1:10\" vs ≈1:304 mm / 1:12\" del fusil de asalto) optimizado para proyectiles pesados, cañón flotante (free-float) que no toca el guardamanos, gatillo de DOS ETAPAS para un disparo limpio y repetible, y riel superior continuo pensado para montar óptica de aumento. Esa combinación de cañón de precisión, gatillo de competencia y la mira telescópica que casi siempre lo acompaña explica el salto de precio: ≈\$111,016 MXN, más del doble del ARAD 7 estándar (≈\$47,132 MXN). En síntesis: el ARAD 7 es el fusil de combate versátil; el ARAD 7 DMR es la herramienta de tiro de precisión derivada de él."),
 
 ];
 

@@ -67,6 +67,22 @@ Armas sin registro explícito en `AMX_PRICE_HISTORY_SEED` muestran automáticame
 `priceExact` (de `data.js`) atribuido al inventario principal — así nada queda sin fuente
 mientras se concilia el resto.
 
+**Autoridades DCAM / OTCA:** cada inventario en `AMX_MANUALES_SEED` lleva `autoridad`
+(`'DCAM'` o `'OTCA'`); la ficha pinta el badge con `window.manualAutoridad`. Además del
+inventario DCAM (3-oct, `primary`), está registrado el de **OTCA (Monterrey, 26-sep)**.
+Las armas 112-128 son exclusivas de OTCA (no estaban en el DCAM); la **128 (IWI ARAD 7 DMR)**
+es la variante de tirador designado del ARAD 7 estándar (id 79), catalogada como modelo aparte.
+
+**Existencias POR SUCURSAL (no primaria/secundaria):** cada sede lleva su propia cantidad y la
+ficha muestra una fila por sucursal donde el arma exista.
+- **DCAM** → `window.AMX_ARMAS_EXISTENCIAS` (mapa `armaId → cantidad`, solo armas 1-111, las del
+  PDF DCAM). Se lee con `window.getArmaExistencias(id)`.
+- **OTCA** → campo `qty` dentro de cada registro OTCA de `AMX_PRICE_HISTORY_SEED` (cada inventario
+  trae su cantidad). Se lee con `window.getArmaExistenciasOTCA(id)`. Las armas OTCA-exclusivas
+  (112-128) **no** van en `AMX_ARMAS_EXISTENCIAS`: su existencia vive en ese `qty`.
+Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que corresponda (mapa DCAM o
+`qty` del registro del inventario), nunca como un único número global.
+
 ## Reglas importantes
 
 - **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
