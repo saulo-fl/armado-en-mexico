@@ -300,7 +300,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                       <React.Fragment>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                           <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(ex).toLocaleString('es-MX')}</span>
-                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.text, letterSpacing: '0.06em' }}>disponibles en DCAM</span>
+                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.text, letterSpacing: '0.06em' }}>disponibles en {curSigla}</span>
                         </div>
                         <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textDim, marginTop: 5, lineHeight: 1.55 }}>
                           De acuerdo a{' '}

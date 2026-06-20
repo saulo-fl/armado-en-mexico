@@ -59,6 +59,16 @@ window.AMX_MANUALES_SEED = [
     addedAt: '2025-10-03T12:00:00.000Z',
     primary: true,
   },
+  {
+    id: 'man_otca_armas_2025_09_26',
+    nombre: 'Existencias de armas OTCA · 26 de septiembre 2025',
+    autoridad: 'OTCA',
+    fecha: '2025-09-26',
+    url: 'inventarios/otca-stock-2025-09-26.pdf',
+    fileName: 'otca-stock-2025-09-26.pdf',
+    addedAt: '2025-09-26T12:00:00.000Z',
+    primary: false,
+  },
 ];
 
 // armaId -> [{ manualId, price, date, note? }]  (cronológico; el último = actual)
@@ -71,7 +81,44 @@ window.AMX_MANUALES_SEED = [
 //       { manualId: 'man_dcam_2025_10_03', price: '$8,733.33 MXN', date: '2025-10-03' },
 //     ],
 //   };
-window.AMX_PRICE_HISTORY_SEED = {};
+// Armas presentes en DCAM y OTCA: 2 registros (OTCA 26-sep → DCAM 3-oct, el actual).
+window.AMX_PRICE_HISTORY_SEED = {
+  2: [{ manualId: 'man_otca_armas_2025_09_26', price: '$10,953.46 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$10,979.05 MXN', date: '2025-10-03' }],
+  5: [{ manualId: 'man_otca_armas_2025_09_26', price: '$10,144.65 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$10,133.99 MXN', date: '2025-10-03' }],
+  6: [{ manualId: 'man_otca_armas_2025_09_26', price: '$14,891.47 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$14,875.83 MXN', date: '2025-10-03' }],
+  7: [{ manualId: 'man_otca_armas_2025_09_26', price: '$15,903.05 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$15,886.35 MXN', date: '2025-10-03' }],
+  9: [{ manualId: 'man_otca_armas_2025_09_26', price: '$12,628.07 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$13,002.96 MXN', date: '2025-10-03' }],
+  10: [{ manualId: 'man_otca_armas_2025_09_26', price: '$36,052.46 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$36,014.61 MXN', date: '2025-10-03' }],
+  11: [{ manualId: 'man_otca_armas_2025_09_26', price: '$12,073.00 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$12,060.32 MXN', date: '2025-10-03' }],
+  12: [{ manualId: 'man_otca_armas_2025_09_26', price: '$12,073.00 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$12,060.32 MXN', date: '2025-10-03' }],
+  13: [{ manualId: 'man_otca_armas_2025_09_26', price: '$12,290.81 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$15,055.46 MXN', date: '2025-10-03' }],
+  23: [{ manualId: 'man_otca_armas_2025_09_26', price: '$9,824.92 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$9,814.60 MXN', date: '2025-10-03' }],
+  25: [{ manualId: 'man_otca_armas_2025_09_26', price: '$10,596.48 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$10,585.36 MXN', date: '2025-10-03' }],
+  31: [{ manualId: 'man_otca_armas_2025_09_26', price: '$13,294.17 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$13,280.21 MXN', date: '2025-10-03' }],
+  34: [{ manualId: 'man_otca_armas_2025_09_26', price: '$9,824.92 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$9,814.60 MXN', date: '2025-10-03' }],
+  37: [{ manualId: 'man_otca_armas_2025_09_26', price: '$12,322.78 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$12,309.84 MXN', date: '2025-10-03' }],
+  38: [{ manualId: 'man_otca_armas_2025_09_26', price: '$12,322.78 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$12,309.84 MXN', date: '2025-10-03' }],
+  41: [{ manualId: 'man_otca_armas_2025_09_26', price: '$15,958.56 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$15,941.80 MXN', date: '2025-10-03' }],
+  42: [{ manualId: 'man_otca_armas_2025_09_26', price: '$16,596.90 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$16,579.47 MXN', date: '2025-10-03' }],
+  45: [{ manualId: 'man_otca_armas_2025_09_26', price: '$11,887.91 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$11,914.86 MXN', date: '2025-10-03' }],
+  46: [{ manualId: 'man_otca_armas_2025_09_26', price: '$11,615.16 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$12,476.19 MXN', date: '2025-10-03' }],
+  47: [{ manualId: 'man_otca_armas_2025_09_26', price: '$14,004.68 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$12,060.32 MXN', date: '2025-10-03' }],
+  57: [{ manualId: 'man_otca_armas_2025_09_26', price: '$13,155.40 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$21,514.50 MXN', date: '2025-10-03' }],
+  59: [{ manualId: 'man_otca_armas_2025_09_26', price: '$24,756.58 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$24,730.58 MXN', date: '2025-10-03' }],
+  74: [{ manualId: 'man_otca_armas_2025_09_26', price: '$38,855.62 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$38,814.82 MXN', date: '2025-10-03' }],
+  75: [{ manualId: 'man_otca_armas_2025_09_26', price: '$42,741.18 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$42,696.30 MXN', date: '2025-10-03' }],
+  76: [{ manualId: 'man_otca_armas_2025_09_26', price: '$53,315.46 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$53,259.48 MXN', date: '2025-10-03' }],
+  77: [{ manualId: 'man_otca_armas_2025_09_26', price: '$55,924.34 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$52,815.88 MXN', date: '2025-10-03' }],
+  81: [{ manualId: 'man_otca_armas_2025_09_26', price: '$36,080.22 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$36,042.33 MXN', date: '2025-10-03' }],
+  82: [{ manualId: 'man_otca_armas_2025_09_26', price: '$17,207.49 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$17,189.42 MXN', date: '2025-10-03' }],
+  102: [{ manualId: 'man_otca_armas_2025_09_26', price: '$25,800.13 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$25,773.04 MXN', date: '2025-10-03' }],
+  103: [{ manualId: 'man_otca_armas_2025_09_26', price: '$15,231.40 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$15,215.41 MXN', date: '2025-10-03' }],
+  104: [{ manualId: 'man_otca_armas_2025_09_26', price: '$15,386.82 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$15,370.67 MXN', date: '2025-10-03' }],
+  105: [{ manualId: 'man_otca_armas_2025_09_26', price: '$14,609.71 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$14,594.37 MXN', date: '2025-10-03' }],
+  106: [{ manualId: 'man_otca_armas_2025_09_26', price: '$24,898.61 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$22,667.85 MXN', date: '2025-10-03' }],
+  108: [{ manualId: 'man_otca_armas_2025_09_26', price: '$15,449.03 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$15,432.77 MXN', date: '2025-10-03' }],
+  109: [{ manualId: 'man_otca_armas_2025_09_26', price: '$8,237.39 MXN', date: '2025-09-26' }, { manualId: 'man_dcam_2025_10_03', price: '$8,228.74 MXN', date: '2025-10-03' }],
+};
 
 // ── EXISTENCIAS DE ARMAS por inventario (cantidad marcada en el PDF) ─────────
 // Mapa  armaId -> cantidad  según el inventario MÁS RECIENTE (el de priceManualId
