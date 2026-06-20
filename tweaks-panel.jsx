@@ -250,6 +250,7 @@ function TweaksPanel({ title = 'Tweaks', noDeckControls = false, children }) {
 
   React.useEffect(() => {
     const onMsg = (e) => {
+      if (e.origin !== window.location.origin) return; // sólo mensajes del mismo origen
       const t = e?.data?.type;
       if (t === '__activate_edit_mode') setOpen(true);
       else if (t === '__deactivate_edit_mode') setOpen(false);
