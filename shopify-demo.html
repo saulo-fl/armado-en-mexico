@@ -1232,10 +1232,10 @@
   function usesPills(uses) {
     if (!uses || !uses.length) return '';
     return '<div class="amx-uses">' + uses.slice(0,3).map(u =>
-      '<span class="amx-use-pill is-'+u+'">'+(USE_LABEL[u] || u)+'</span>'
+      '<span class="amx-use-pill is-'+esc(u)+'">'+esc(USE_LABEL[u] || u)+'</span>'
     ).join('') + '</div>';
   }
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function filtered() {
     return DATA.filter(a => {

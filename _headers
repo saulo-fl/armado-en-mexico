@@ -1,0 +1,25 @@
+# Cabeceras para Cloudflare Pages — seguridad + caché
+# (sin CSP a propósito: la app transpila JSX en el navegador con Babel inline)
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: geolocation=(), camera=(), microphone=()
+
+# HTML: caché corta para poder hotfixear (no hay fingerprint de archivos)
+/*.html
+  Cache-Control: public, max-age=600
+
+# Código sin fingerprint: revalidar para no servir versiones viejas tras un deploy
+/*.js
+  Cache-Control: public, max-age=0, must-revalidate
+/*.jsx
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Assets estáticos: caché larga
+/imagenes/*
+  Cache-Control: public, max-age=31536000
+/inventarios/*
+  Cache-Control: public, max-age=86400

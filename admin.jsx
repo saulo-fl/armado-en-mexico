@@ -182,7 +182,7 @@ function AdminShell({ onLogout, children, tab, setTab, stats }) {
               </button>
             ))}
           </div>
-          <a href="index.html" target="_blank" style={{
+          <a href="index.html" target="_blank" rel="noopener noreferrer" style={{
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: 10, color: P.textDim,
             textDecoration: 'none',
@@ -1598,9 +1598,21 @@ function PromoEditor({ promo, onSave, onCancel }) {
     r.onload = (ev) => set('bgImage', ev.target.result);
     r.readAsDataURL(file);
   };
+  // Sólo URLs http(s) o data:image, sin caracteres que rompan el url("...") en CSS del slider
+  const sanitizeBg = (v) => {
+    v = (v || '').trim();
+    if (!v) return '';
+    if (!/^(https?:\/\/|data:image\/)/i.test(v)) return '';
+    if (/["')]|\s/.test(v)) return '';
+    return v;
+  };
   const save = () => {
     if (!f.title) { alert('Falta el título del slide.'); return; }
-    window.Store.upsertPromo(f);
+    const clean = Object.assign({}, f, { bgImage: sanitizeBg(f.bgImage) });
+    if (f.bgImage && !clean.bgImage) {
+      if (!confirm('La imagen de fondo no es una URL http(s) o data:image válida y se ignorará. ¿Guardar de todas formas?')) return;
+    }
+    window.Store.upsertPromo(clean);
     onSave();
   };
   return (
