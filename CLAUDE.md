@@ -67,6 +67,12 @@ Armas sin registro explícito en `AMX_PRICE_HISTORY_SEED` muestran automáticame
 `priceExact` (de `data.js`) atribuido al inventario principal — así nada queda sin fuente
 mientras se concilia el resto.
 
+**Autoridades DCAM / OTCA:** cada inventario en `AMX_MANUALES_SEED` lleva `autoridad`
+(`'DCAM'` o `'OTCA'`); la ficha pinta el badge con `window.manualAutoridad`. Además del
+inventario DCAM (3-oct, `primary`), está registrado el de **OTCA (Monterrey, 26-sep)**.
+Las **existencias** de armas viven en `window.AMX_ARMAS_EXISTENCIAS` (mapa `armaId → cantidad`,
+poblado desde los PDFs). Las armas 112-127 son exclusivas de OTCA (no estaban en el DCAM).
+
 ## Reglas importantes
 
 - **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
