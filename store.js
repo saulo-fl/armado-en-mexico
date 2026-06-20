@@ -143,6 +143,74 @@
     catch (e) { console.warn('[Store] error writing', k, e); }
   }
 
+  // ── BACKEND COMPARTIDO (Cloudflare Pages Functions + D1) ─────────────
+  // La app sigue 100% funcional SIN backend: si /api no responde (GitHub
+  // Pages, file://, o antes de aprovisionar D1) opera en modo offline con
+  // los seeds + localStorage, igual que antes. Cuando hay backend vivo, este
+  // es la fuente compartida: hidratamos al arrancar (GET /api/state) y
+  // empujamos los cambios — admin con PUT (protegido por Cloudflare Access),
+  // público con POST /append (el server hace el merge atómico).
+  // El render de la app es síncrono y NO cambia: la hidratación solo
+  // refresca el cache (localStorage) y dispara _notify() para re-renderizar.
+  const REMOTE = {
+    enabled: (typeof fetch === 'function' && typeof location !== 'undefined' && /^https?:$/.test(location.protocol || '')),
+    base: (typeof location !== 'undefined' ? location.origin : '') + '/api',
+    ok: false, // true tras una hidratación o escritura exitosa (backend vivo)
+  };
+  // dominio → clave de localStorage (mismo nombre; 'admin' NO se sincroniza)
+  const DOMAIN_K = {
+    armas: K.armas, pages: K.pages, promos: K.promos, favorites: K.favorites,
+    appConfig: K.appConfig, manuales: K.manuales, priceHist: K.priceHist,
+    suggestions: K.suggestions, pending: K.pending, rejected: K.rejected,
+    visits: K.visits, ratings: K.ratings,
+  };
+  const SYNCABLE = Object.keys(DOMAIN_K);
+
+  const _putTimers = {};
+  // Empuje de admin: reemplaza el blob completo del dominio (debounced).
+  function adminSync(domain) {
+    if (!REMOTE.enabled || !REMOTE.ok) return;
+    const k = DOMAIN_K[domain]; if (!k) return;
+    clearTimeout(_putTimers[domain]);
+    _putTimers[domain] = setTimeout(() => {
+      const body = localStorage.getItem(k); if (body == null) return;
+      fetch(REMOTE.base + '/admin/state/' + domain, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body, credentials: 'include',
+      }).catch(() => {});
+    }, 400);
+  }
+  // Escritura pública por append (un item; el server hace el merge).
+  function publicAppend(domain, item) {
+    if (!REMOTE.enabled || !REMOTE.ok) return;
+    fetch(REMOTE.base + '/append/' + domain, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item), credentials: 'include',
+    }).catch(() => {});
+  }
+  // Hidratación: trae el snapshot compartido y refresca el cache local.
+  async function hydrate() {
+    if (!REMOTE.enabled) return false;
+    try {
+      const res = await fetch(REMOTE.base + '/state', { credentials: 'include' });
+      if (!res.ok) return false;            // 404 (sin Functions) → modo offline
+      const data = await res.json();
+      REMOTE.ok = true;                     // backend vivo (aunque venga {})
+      Object.keys(data || {}).forEach((domain) => {
+        const k = DOMAIN_K[domain]; if (!k) return;
+        const val = data[domain];
+        if (val == null) return;            // dominio aún no sembrado en D1 → conserva seed
+        write(k, val);
+        if (domain === 'armas' && Array.isArray(val)) {
+          window.DB.length = 0;
+          val.forEach((a) => { if (!a.img) a.img = window.armaPlaceholder(a); window.DB.push(a); });
+        }
+      });
+      Store._notify();
+      return true;
+    } catch (e) { return false; }           // offline
+  }
+
   const Store = {
     // ─── INIT ─────────────────────────────────────────────
     init() {
@@ -197,6 +265,7 @@
         window.DB.push(a);
       });
       Store._notify();
+      adminSync('armas');
     },
     upsertArma(arma) {
       const arr = this.getArmas();
@@ -222,7 +291,7 @@
 
     // ─── FAVORITOS (curados por admin) ──────────────────────
     getFavorites() { return read(K.favorites, []); },
-    setFavorites(ids) { write(K.favorites, (ids || []).map(Number).filter(Boolean)); Store._notify(); },
+    setFavorites(ids) { write(K.favorites, (ids || []).map(Number).filter(Boolean)); Store._notify(); adminSync('favorites'); },
     toggleFavorite(id) {
       const f = this.getFavorites();
       this.setFavorites(f.includes(id) ? f.filter(x => x !== id) : [...f, id]);
@@ -256,6 +325,10 @@
       try { localStorage.setItem(userKey, String(stars)); } catch(e) {}
       write(K.ratings, ratings);
       Store._notify();
+      // escritura pública: el server incrementa sum/count de forma atómica.
+      // Solo el PRIMER voto de este navegador cuenta en el server (evita doble
+      // conteo al re-votar; el ajuste de un re-voto queda en el cache local).
+      if (!prev) publicAppend('ratings', { armaId: Number(armaId), stars });
     },
     getUserRating(armaId) {
       try {
@@ -280,6 +353,7 @@
       ratings[armaId] = { sum: Number(sum) || 0, count: Number(count) || 0 };
       write(K.ratings, ratings);
       Store._notify();
+      adminSync('ratings');
     },
 
     // ─── APP CONFIG (logo y branding) ───────────────────────
@@ -292,6 +366,7 @@
       const cur = this.getAppConfig();
       write(K.appConfig, Object.assign({}, cur, cfg));
       Store._notify();
+      adminSync('appConfig');
     },
 
     // ─── VISITS (tracking 30 días) ────────────────────────
@@ -304,6 +379,7 @@
       const cutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
       v[armaId] = v[armaId].filter(t => t > cutoff);
       write(K.visits, v);
+      publicAppend('visits', { armaId: Number(armaId), ts: Date.now() });
     },
     getVisits() { return read(K.visits, {}); },
     getTopPopular(n = 5, days = 30) {
@@ -350,11 +426,13 @@
       // máx 24 entradas
       if (h[armaId].length > 24) h[armaId] = h[armaId].slice(-24);
       write(K.priceHist, h);
+      adminSync('priceHist');
     },
     setPriceHistory(armaId, arr) {
       const h = read(K.priceHist, {});
       h[armaId] = arr;
       write(K.priceHist, h);
+      adminSync('priceHist');
     },
 
     // ─── MANUALES / INVENTARIOS OFICIALES DCAM-SEDENA ──────
@@ -374,7 +452,7 @@
       if (!id) return null;
       return read(K.manuales, DEFAULT_MANUALES).find(m => m.id === id) || null;
     },
-    saveManuales(arr) { write(K.manuales, arr); Store._notify(); },
+    saveManuales(arr) { write(K.manuales, arr); Store._notify(); adminSync('manuales'); },
     upsertManual(m) {
       const arr = read(K.manuales, DEFAULT_MANUALES).slice();
       if (!m.id) m.id = 'man_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
@@ -402,7 +480,7 @@
         return true;
       });
     },
-    savePromos(arr) { write(K.promos, arr); Store._notify(); },
+    savePromos(arr) { write(K.promos, arr); Store._notify(); adminSync('promos'); },
     upsertPromo(promo) {
       const arr = this.getPromos();
       if (!promo.id) promo.id = 'p_' + Date.now();
@@ -426,11 +504,13 @@
       s.status = 'pending';
       arr.unshift(s);
       this.saveSuggestions(arr);
+      publicAppend('suggestions', s); // el server le asigna su propio id/fecha
       return s;
     },
     deleteSuggestion(id) {
       const arr = this.getSuggestions().filter(s => s.id !== id);
       this.saveSuggestions(arr);
+      adminSync('suggestions');
     },
 
     // ─── PENDING SUBMISSIONS ──────────────────────────────
@@ -443,6 +523,7 @@
       sub.status = 'pending';
       arr.unshift(sub);
       this.savePending(arr);
+      publicAppend('pending', sub); // el server le asigna su propio id/fecha
       return sub;
     },
     approvePending(pid, overrides) {
@@ -452,6 +533,7 @@
       const sub = arr[idx];
       arr.splice(idx, 1);
       this.savePending(arr);
+      adminSync('pending');
       // crear arma
       const arma = Object.assign({}, sub, overrides || {});
       // limpiar campos de submission
@@ -467,10 +549,12 @@
       const rej = Object.assign({}, arr[idx], { status: 'rejected', rejectionReason: reason, rejectedAt: new Date().toISOString() });
       arr.splice(idx, 1);
       this.savePending(arr);
+      adminSync('pending');
       const rejected = read(K.rejected, []);
       rejected.unshift(rej);
       write(K.rejected, rejected);
       Store._notify();
+      adminSync('rejected');
     },
     updatePending(pid, fields) {
       const arr = this.getPending();
@@ -478,12 +562,13 @@
       if (idx < 0) return;
       arr[idx] = Object.assign({}, arr[idx], fields);
       this.savePending(arr);
+      adminSync('pending');
     },
     getRejected() { return read(K.rejected, []); },
 
     // ─── PÁGINAS ──────────────────────────────────────────
     getPages() { return Object.assign({}, DEFAULT_PAGES, read(K.pages, {})); },
-    savePages(p) { write(K.pages, p); Store._notify(); },
+    savePages(p) { write(K.pages, p); Store._notify(); adminSync('pages'); },
     updatePage(section, fields) {
       const pages = this.getPages();
       pages[section] = Object.assign({}, pages[section], fields);
@@ -645,6 +730,33 @@
     reset() {
       Object.values(K).forEach(k => localStorage.removeItem(k));
     },
+
+    // ─── BACKEND COMPARTIDO ───────────────────────────────
+    // Estado del backend (para la UI del admin).
+    remoteStatus() { return { enabled: REMOTE.enabled, ok: REMOTE.ok, base: REMOTE.base }; },
+    // Trae el snapshot compartido y refresca el cache local. Se llama solo al
+    // arrancar, pero puede invocarse para forzar un refresco.
+    hydrate() { return hydrate(); },
+    // Sube TODO el estado local actual al servidor (sembrado inicial / migración
+    // de la curaduría de este navegador a D1). Requiere sesión admin (Access).
+    async pushAllToServer() {
+      if (!REMOTE.enabled) throw new Error('Sin backend: ejecuta en el dominio con Functions (no file://).');
+      const results = {};
+      for (const domain of SYNCABLE) {
+        const body = localStorage.getItem(DOMAIN_K[domain]);
+        if (body == null) { results[domain] = 'vacío'; continue; }
+        try {
+          const r = await fetch(REMOTE.base + '/admin/state/' + domain, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body, credentials: 'include',
+          });
+          if (r.ok) { REMOTE.ok = true; results[domain] = 'ok'; }
+          else results[domain] = 'http ' + r.status;
+        } catch (e) { results[domain] = 'error'; }
+      }
+      return results;
+    },
+
     _listeners: [],
     onChange(fn) { Store._listeners.push(fn); return () => { Store._listeners = Store._listeners.filter(f => f !== fn); }; },
     _notify() { Store._listeners.forEach(f => { try { f(); } catch(e){} }); },
@@ -685,4 +797,18 @@
 
   window.Store = Store;
   window.Store.init();
+
+  // Hidratar desde el backend compartido al arrancar (no bloquea el render: la
+  // app monta con seeds/cache y se actualiza vía _notify cuando llega el snapshot).
+  // Si no hay backend, falla en silencio y queda en modo offline.
+  if (REMOTE.enabled) {
+    hydrate();
+    // Re-hidratar al volver a la pestaña, para ver curaduría hecha en otro lado.
+    let _lastHydrate = Date.now();
+    window.addEventListener('focus', () => {
+      if (Date.now() - _lastHydrate < 15000) return; // no más de 1 vez / 15s
+      _lastHydrate = Date.now();
+      hydrate();
+    });
+  }
 })();

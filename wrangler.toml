@@ -1,0 +1,29 @@
+# Armado en México — configuración de Cloudflare Pages + Functions + D1
+# =============================================================================
+# La app es estática (raíz del repo). Las Functions viven en  functions/  y
+# Cloudflare Pages las despliega automáticamente. La base D1 se expone a las
+# Functions como  env.DB .
+#
+# PASOS DE ALTA (una sola vez) — ver BACKEND.md:
+#   1. wrangler d1 create armado-en-mexico   → copia el database_id de abajo.
+#   2. wrangler d1 execute armado-en-mexico --remote --file=./schema.sql
+#   3. Define las variables de Access (CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD) en
+#      el dashboard de Pages (Settings → Variables) o aquí en [vars].
+#   4. Asegúrate de que una política de Cloudflare Access cubra  /admin*  y
+#      /api/admin/*  (es lo que realmente protege la escritura del admin).
+# =============================================================================
+
+name = "armado-en-mexico"
+compatibility_date = "2024-09-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "armado-en-mexico"
+database_id = "REEMPLAZA_CON_EL_DATABASE_ID"   # ← de `wrangler d1 create`
+
+# Variables públicas (no secretas). El admin se valida contra Cloudflare Access.
+# Puedes definirlas aquí o en el dashboard de Pages.
+# [vars]
+# CF_ACCESS_TEAM_DOMAIN = "tu-equipo.cloudflareaccess.com"
+# CF_ACCESS_AUD = "<application audience tag de la app de Access>"
