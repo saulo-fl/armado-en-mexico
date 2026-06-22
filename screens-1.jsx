@@ -19,6 +19,7 @@ window.CATEGORY_HEROS = CATEGORY_HEROS;
 function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const vp = window.useViewport();
   const [promoIdx, setPromoIdx] = useState(0);
+  const [homeQuery, setHomeQuery] = useState('');
   const [, forceRender] = useState(0);
   useEffect(() => window.Store && window.Store.onChange(() => forceRender((x) => x + 1)), []);
 
@@ -42,6 +43,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const db = window.DB || [];
   const sugerencias = (offset) => db.slice(offset, offset + 10);
   const renderSugerencia = (a) => <window.ArmaCard arma={a} onClick={() => onOpenArma(a.id)} />;
+  const doHomeSearch = () => { const q = homeQuery.trim(); if (q) onNav('category', { mode: 'search', value: q }); };
 
   return (
     <div style={{ paddingBottom: 24 }}>
@@ -49,6 +51,35 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
       {promos.length > 0 &&
       <PromoSlider promos={promos} idx={promoIdx} setIdx={setPromoIdx} onNav={onNav} vp={vp} />
       }
+
+      {/* 1.5 ▸ Buscador rápido — acceso directo al arsenal desde el inicio */}
+      <div style={{ ...containerMax, padding: `12px ${PAD}px 4px` }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          background: PALETTE.bgCard, border: `1px solid ${PALETTE.amber}`, padding: '10px 12px'
+        }}>
+          <span style={{ color: PALETTE.amber, fontSize: 18 }}>⌕</span>
+          <input value={homeQuery}
+            onChange={(e) => setHomeQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') doHomeSearch(); }}
+            placeholder="Buscar arma · nombre, marca, calibre…"
+            aria-label="Buscar arma"
+            style={{
+              flex: 1, background: 'none', border: 'none', outline: 'none', color: PALETTE.text,
+              fontFamily: 'Courier Prime, monospace', fontSize: 15.5
+            }} />
+          {homeQuery &&
+            <button onClick={() => setHomeQuery('')} aria-label="Limpiar búsqueda" style={{
+              background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.textMuted, fontSize: 16
+            }}>✕</button>
+          }
+          <button onClick={doHomeSearch} style={{
+            background: PALETTE.amber, border: 'none', cursor: 'pointer', color: '#000',
+            fontFamily: 'Courier Prime, monospace', fontSize: 13, fontWeight: 700,
+            letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', whiteSpace: 'nowrap'
+          }}>Buscar</button>
+        </div>
+      </div>
 
       {/* 2 ▸ Carrusel: Favoritos de Armas M&S */}
       <CarouselSection
@@ -105,9 +136,6 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         renderItem={(c) =>
         <CampoMiniCard campo={c} onClick={() => onNav('campos')} />
         } />
-
-      {/* 6.5 ▸ Banner destacado: Armas traumáticas (defensa menos letal) — arriba de Cursos */}
-      <window.HomeTraumaBanner onNav={onNav} />
 
       {/* 7 ▸ Cursos */}
       <CarouselSection
@@ -278,6 +306,9 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           })}
         </div>
       </div>
+
+      {/* 9 ▸ Armas traumáticas (defensa menos letal) — al final del feed de inicio */}
+      <window.HomeTraumaBanner onNav={onNav} />
 
       {/* 7 ▸ Disclaimer */}
       <div style={{
@@ -648,9 +679,10 @@ function promoBtnStyle() {
 function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   const cols = vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr';
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
+  const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : 'all');
   const [calibre, setCalibre] = useState(initialFilter?.mode === 'calibre' ? initialFilter.value : 'all');
   const [uso, setUso] = useState(initialFilter?.mode === 'uso' ? initialFilter.value : 'all');
   const [showAdv, setShowAdv] = useState(false);
@@ -663,6 +695,11 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
     return window.DB.filter((a) => {
       if (tipo !== 'all' && a.tipo !== tipo) return false;
       if (avail !== 'all' && a.avail !== avail) return false;
+      if (sucursal !== 'all') {
+        const s = window.getArmaSucursales ? window.getArmaSucursales(a.id) : { dcam: true, otca: false };
+        if (sucursal === 'DCAM' && !s.dcam) return false;
+        if (sucursal === 'OTCA' && !s.otca) return false;
+      }
       if (calibre !== 'all' && a.calibre !== calibre) return false;
       if (uso !== 'all' && !a.uses.includes(uso)) return false;
       if (marca !== 'all' && a.marca !== marca) return false;
@@ -685,17 +722,17 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       }
       return true;
     });
-  }, [query, tipo, avail, calibre, uso, marca, era, precio, mecanismo]);
+  }, [query, tipo, avail, sucursal, calibre, uso, marca, era, precio, mecanismo]);
 
   const marcas = useMemo(() => Array.from(new Set(window.DB.map((a) => a.marca))).sort(), []);
 
   const clearAll = () => {
-    setTipo('all');setAvail('all');setCalibre('all');setUso('all');
+    setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
     setMarca('all');setEra('all');setPrecio('all');setMecanismo('all');
     setQuery('');
   };
 
-  const activeCount = [tipo, avail, calibre, uso, marca, era, precio, mecanismo].filter((v) => v !== 'all').length;
+  const activeCount = [tipo, avail, sucursal, calibre, uso, marca, era, precio, mecanismo].filter((v) => v !== 'all').length;
 
   const innerMax = { maxWidth: 1400, margin: '0 auto', width: '100%' };
   const padX = vp.isDesktop ? 28 : 14;
@@ -754,6 +791,16 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
               {d.label}
             </FilterChip>
             )}
+        </div>
+
+        {/* SUCURSAL CHIPS (DCAM / OTCA) */}
+        <div className="amx-hscroll" style={{
+            display: 'flex', gap: 6, overflowX: 'auto', marginTop: 6,
+            paddingBottom: 2
+          }}>
+          <FilterChip active={sucursal === 'all'} onClick={() => setSucursal('all')}>Toda sucursal</FilterChip>
+          <FilterChip active={sucursal === 'DCAM'} onClick={() => setSucursal(sucursal === 'DCAM' ? 'all' : 'DCAM')}>◆ DCAM</FilterChip>
+          <FilterChip active={sucursal === 'OTCA'} onClick={() => setSucursal(sucursal === 'OTCA' ? 'all' : 'OTCA')}>◆ OTCA</FilterChip>
         </div>
 
         {/* avanzados toggle */}
