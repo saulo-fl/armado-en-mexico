@@ -17,10 +17,18 @@ name = "armado-en-mexico"
 compatibility_date = "2024-09-01"
 pages_build_output_dir = "."
 
-[[d1_databases]]
-binding = "DB"
-database_name = "armado-en-mexico"
-database_id = "REEMPLAZA_CON_EL_DATABASE_ID"   # ← de `wrangler d1 create`
+# ── D1 DESACTIVADO temporalmente ─────────────────────────────────────────────
+# El binding está comentado porque la base D1 aún no se ha creado. Con el
+# placeholder, el deploy de Cloudflare FALLA al publicar la Function
+# ("Error 8000022: Invalid database UUID") y NO publica el sitio. Sin binding,
+# las Functions corren en modo fallback (la app usa seeds + localStorage, como
+# offline). Para activar el backend compartido: crea la base
+# (`wrangler d1 create armado-en-mexico`), descomenta el bloque y pega el
+# database_id real.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "armado-en-mexico"
+# database_id = "REEMPLAZA_CON_EL_DATABASE_ID"   # ← de `wrangler d1 create`
 
 # Variables públicas (no secretas). El admin se valida contra Cloudflare Access.
 # Puedes definirlas aquí o en el dashboard de Pages.
