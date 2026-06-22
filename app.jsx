@@ -200,6 +200,7 @@ function App() {
   const openPickerForSlot = (slot) => {
     setPickerSlot(slot);
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
+    setCatalogFilter({ mode: 'all' }); // mostrar el listado (no el hub) para elegir arma
     setScreen('catalog');
   };
 
@@ -229,10 +230,12 @@ function App() {
   if (screen === 'home') {
     content = <window.HomeScreen onNav={navigate} onOpenArma={openArma} onOpenAccesorio={openAccesorio} onOpenMunicion={openMunicion} />;
   } else if (screen === 'catalog') {
-    content = <window.CatalogScreen initialFilter={catalogFilter}
-      onOpenArma={openArma}
-      compareIds={compareIds}
-      toggleCompare={toggleCompare} />;
+    content = catalogFilter
+      ? <window.CatalogScreen initialFilter={catalogFilter}
+          onOpenArma={openArma}
+          compareIds={compareIds}
+          toggleCompare={toggleCompare} />
+      : <window.ArsenalHubScreen onNav={navigate} />;
   } else if (screen === 'product') {
     content = <window.ProductScreen armaId={productId}
       onOpenArma={openArma}
