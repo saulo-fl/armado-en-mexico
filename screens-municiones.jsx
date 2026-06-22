@@ -519,26 +519,53 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                 <span aria-hidden="true">↗</span>
               </a>
             }
-            {existencias &&
-              <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${P.border}` }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                  <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{existencias.qty.toLocaleString('es-MX')}</span>
-                  <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>cartuchos en {curSigla}</span>
+            {(() => {
+              // Regla: SOLO cuenta el ÚLTIMO inventario de cada sucursal (DCAM y OTCA
+              // por separado). Si el cartucho no aparece en él (pero antes sí estuvo
+              // en la sucursal), se muestra AGOTADO.
+              const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'OTCA'))) || 'OTCA';
+              const allMan = (window.MUNICIONES_MANUALES || []).slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+              const latestOf = (s) => allMan.find((m) => autOf(m) === s) || null;
+              const everIn = (s) => priceHistory.some((h) => autOf(manualById(h.manualId)) === s);
+              const branches = [];
+              ['DCAM', 'OTCA'].forEach((s) => {
+                const man = latestOf(s); if (!man) return;
+                const rec = priceHistory.find((h) => h.manualId === man.id);
+                if (rec && rec.qty != null) branches.push({ sigla: s, qty: rec.qty, manual: man, agotado: false });
+                else if (everIn(s)) branches.push({ sigla: s, qty: null, manual: man, agotado: true });
+              });
+              if (!branches.length) return null;
+              return (
+                <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${P.border}` }}>
+                  {branches.map((b, bi) => (
+                    <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                        {b.agotado ? (
+                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#C0392B', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                        ) : (
+                          <React.Fragment>
+                            <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
+                            <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>cartuchos en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                          </React.Fragment>
+                        )}
+                      </div>
+                      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
+                        {b.agotado ? 'No aparece en el último inventario: ' : 'De acuerdo a '}
+                        {b.manual && b.manual.url ? (
+                          <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: P.amber, textDecoration: 'none', borderBottom: `1px solid ${P.amber}` }}>▦ {b.manual.nombre} ↗</a>
+                        ) : (
+                          <span style={{ color: P.textMuted }}>{b.manual ? b.manual.nombre : 'inventario oficial ' + b.sigla}</span>
+                        )}
+                        {b.manual ? (b.agotado ? ' (' + munFmtDate(b.manual.fecha) + ').' : ', publicado el ' + munFmtDate(b.manual.fecha) + '.') : '.'}
+                      </div>
+                    </div>
+                  ))}
+                  <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted, marginTop: 4, lineHeight: 1.5 }}>
+                    ⚠ Dato <b style={{ color: P.textDim }}>histórico</b> por sucursal, no en tiempo real: la disponibilidad actual puede variar.
+                  </div>
                 </div>
-                <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
-                  De acuerdo a{' '}
-                  {currentManual && currentManual.url ? (
-                    <a href={currentManual.url} target="_blank" rel="noopener" style={{ color: P.amber, textDecoration: 'none', borderBottom: `1px solid ${P.amber}` }}>▦ {currentManual.nombre} ↗</a>
-                  ) : (
-                    <span style={{ color: P.textMuted }}>{currentManual ? currentManual.nombre : 'inventario oficial'}</span>
-                  )}
-                  {currentManual ? ', publicado el ' + munFmtDate(currentManual.fecha) : ''}.
-                </div>
-                <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted, marginTop: 4, lineHeight: 1.5 }}>
-                  ⚠ Dato <b style={{ color: P.textDim }}>histórico</b>, no en tiempo real: la disponibilidad actual puede variar.
-                </div>
-              </div>
-            }
+              );
+            })()}
             <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim, marginTop: 9 }}>Nivel: <window.PriceLevel lvl={mun.priceLvl} size={13} /></div>
           </div>
 
