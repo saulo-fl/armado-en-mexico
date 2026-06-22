@@ -690,6 +690,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   const [era, setEra] = useState('all');
   const [precio, setPrecio] = useState('all'); // 1..5
   const [mecanismo, setMecanismo] = useState('all');
+  const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible');
 
   const filtered = useMemo(() => {
     return window.DB.filter((a) => {
@@ -699,6 +700,11 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         const s = window.getArmaSucursales ? window.getArmaSucursales(a.id) : { dcam: true, otca: false };
         if (sucursal === 'DCAM' && !s.dcam) return false;
         if (sucursal === 'OTCA' && !s.otca) return false;
+      }
+      if (disponible) {
+        const inStock = (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
+          (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id));
+        if (!inStock) return false;
       }
       if (calibre !== 'all' && a.calibre !== calibre) return false;
       if (uso !== 'all' && !a.uses.includes(uso)) return false;
@@ -722,17 +728,17 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       }
       return true;
     });
-  }, [query, tipo, avail, sucursal, calibre, uso, marca, era, precio, mecanismo]);
+  }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, precio, mecanismo]);
 
   const marcas = useMemo(() => Array.from(new Set(window.DB.map((a) => a.marca))).sort(), []);
 
   const clearAll = () => {
     setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
-    setMarca('all');setEra('all');setPrecio('all');setMecanismo('all');
+    setMarca('all');setEra('all');setPrecio('all');setMecanismo('all');setDisponible(false);
     setQuery('');
   };
 
-  const activeCount = [tipo, avail, sucursal, calibre, uso, marca, era, precio, mecanismo].filter((v) => v !== 'all').length;
+  const activeCount = [tipo, avail, sucursal, calibre, uso, marca, era, precio, mecanismo].filter((v) => v !== 'all').length + (disponible ? 1 : 0);
 
   const innerMax = { maxWidth: 1400, margin: '0 auto', width: '100%' };
   const padX = vp.isDesktop ? 28 : 14;
@@ -801,6 +807,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
           <FilterChip active={sucursal === 'all'} onClick={() => setSucursal('all')}>Toda sucursal</FilterChip>
           <FilterChip active={sucursal === 'DCAM'} onClick={() => setSucursal(sucursal === 'DCAM' ? 'all' : 'DCAM')}>◆ DCAM</FilterChip>
           <FilterChip active={sucursal === 'OTCA'} onClick={() => setSucursal(sucursal === 'OTCA' ? 'all' : 'OTCA')}>◆ OTCA</FilterChip>
+          <FilterChip active={disponible} onClick={() => setDisponible((d) => !d)}>● Disponibles</FilterChip>
         </div>
 
         {/* avanzados toggle */}
@@ -921,3 +928,97 @@ function FilterRow({ label, children }) {
 
 }
 window.CatalogScreen = CatalogScreen;
+
+// ════════════════════════════════════════════════════════════════
+// ARSENAL HUB — al entrar al arsenal se elige una categoría (no lista plana)
+// ════════════════════════════════════════════════════════════════
+function ArsenalHubScreen({ onNav }) {
+  const vp = window.useViewport();
+  const P = PALETTE;
+  const DB = window.DB || [];
+  const PAD = vp.isDesktop ? 28 : 16;
+  const max = { maxWidth: 1100, margin: '0 auto', width: '100%' };
+
+  const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
+  const usoCount = (id) => DB.filter((a) => a.uses.includes(id)).length;
+  const availCount = (id) => DB.filter((a) => a.avail === id).length;
+  const sucCount = (s) => DB.filter((a) => {
+    const x = window.getArmaSucursales ? window.getArmaSucursales(a.id) : { dcam: true, otca: false };
+    return s === 'DCAM' ? x.dcam : x.otca;
+  }).length;
+  const dispCount = DB.filter((a) =>
+    (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
+    (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id))).length;
+
+  const grid = (cols) => ({ display: 'grid', gridTemplateColumns: vp.isDesktop ? `repeat(${cols},1fr)` : '1fr 1fr', gap: 8, marginBottom: 4 });
+  const Hdr = ({ icon, children }) => (
+    <div style={{
+      fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.amber,
+      letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 600, margin: '22px 0 8px',
+    }}>{icon} {children}</div>
+  );
+  const Card = ({ label, sub, count, color, onClick }) => (
+    <button onClick={onClick} style={{
+      background: P.bgCard, border: `1px solid ${P.border}`, borderLeft: `3px solid ${color || P.amber}`,
+      padding: '12px 14px', cursor: 'pointer', textAlign: 'left', display: 'flex',
+      justifyContent: 'space-between', alignItems: 'center', gap: 10, width: '100%', transition: 'border-color 0.18s',
+    }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+        {sub && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.textMuted, marginTop: 2, lineHeight: 1.4 }}>{sub}</div>}
+      </div>
+      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 18, color: color || P.amber, flexShrink: 0 }}>{count}</div>
+    </button>
+  );
+
+  return (
+    <div style={{ ...max, padding: `8px ${PAD}px 90px` }}>
+      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px' }}>Arsenal</div>
+      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.textDim, lineHeight: 1.5 }}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
+
+      <Hdr icon="◢">Por tipo de arma</Hdr>
+      <div style={grid(5)}>
+        {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
+          ? <Card key={c.id} label={c.label} count={tipoCount(c.id)} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+          : null)}
+      </div>
+
+      <Hdr icon="☆">Por uso</Hdr>
+      <div style={grid(3)}>
+        <Card label="Tiro deportivo" sub="Clubes y polígonos" count={usoCount('club')} onClick={() => onNav('category', { mode: 'uso', value: 'club' })} />
+        <Card label="Cacería" sub="Caza mayor y menor" count={usoCount('caza')} onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
+        <Card label="Defensa del hogar" sub="Uso en domicilio" count={usoCount('domicilio')} onClick={() => onNav('category', { mode: 'uso', value: 'domicilio' })} />
+        <Card label="Seguridad privada" sub="Licencia colectiva" color="#F5C518" count={availCount('seguridad')} onClick={() => onNav('category', { mode: 'avail', value: 'seguridad' })} />
+        <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color="#C0392B" count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
+      </div>
+
+      <Hdr icon="◈">Por calibre</Hdr>
+      <div style={grid(4)}>
+        {window.CATEGORIES.calibre.map((c) => {
+          const n = DB.filter((a) => a.calibre === c.id).length;
+          return n ? <Card key={c.id} label={c.label} count={n} onClick={() => onNav('category', { mode: 'calibre', value: c.id })} /> : null;
+        })}
+      </div>
+
+      <Hdr icon="◆">Por sucursal</Hdr>
+      <div style={grid(2)}>
+        <Card label="DCAM" sub="Catálogo nacional" count={sucCount('DCAM')} onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
+        <Card label="OTCA" sub="Monterrey" color="#4FAE5C" count={sucCount('OTCA')} onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
+      </div>
+
+      <Hdr icon="●">Disponibilidad</Hdr>
+      <div style={grid(1)}>
+        <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color="#4FAE5C" count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
+      </div>
+
+      <button onClick={() => onNav('category', { mode: 'all' })} style={{
+        marginTop: 18, background: 'none', border: `1px dashed ${P.border}`, color: P.textDim,
+        padding: '11px', fontFamily: 'Courier Prime, monospace', fontSize: 13, letterSpacing: '0.12em',
+        textTransform: 'uppercase', cursor: 'pointer', width: '100%',
+      }}>▤ Ver todas las armas ({DB.length})</button>
+    </div>
+  );
+}
+window.ArsenalHubScreen = ArsenalHubScreen;
