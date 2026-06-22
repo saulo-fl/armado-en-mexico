@@ -295,23 +295,31 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               {(() => {
                 // Existencias POR SUCURSAL (no hay primaria/secundaria): DCAM y OTCA
                 // se muestran por separado, cada una con su inventario fuente.
+                // Regla: SOLO cuenta el ÚLTIMO inventario de cada sucursal (DCAM y
+                // OTCA por separado). Si el arma no aparece en el último inventario
+                // de esa sucursal, se asume AGOTADA en ella.
+                const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'DCAM'))) || 'DCAM';
+                const latestByBranch = (sigla) => manuales.find((m) => autOf(m) === sigla) || null; // manuales: más reciente primero
+                const everIn = (sigla) => priceHistory.some((h) => autOf(manualById(h.manualId)) === sigla);
                 const branches = [];
-                // Sucursal DCAM — del mapa AMX_ARMAS_EXISTENCIAS (armas 1-111)
+                // Sucursal DCAM — existencia del ÚLTIMO inventario DCAM (AMX_ARMAS_EXISTENCIAS)
                 const dcamQty = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
+                const latestDcam = latestByBranch('DCAM');
                 if (dcamQty != null) {
-                  const dcamMan = manualById('man_dcam_2025_10_03') ||
-                    (window.Store ? window.Store.getPrimaryManual() : null);
-                  branches.push({ sigla: 'DCAM', qty: dcamQty, manual: dcamMan });
+                  branches.push({ sigla: 'DCAM', qty: dcamQty, manual: latestDcam, agotado: false });
+                } else if (everIn('DCAM') && latestDcam) {
+                  branches.push({ sigla: 'DCAM', qty: null, manual: latestDcam, agotado: true });
                 }
-                // Sucursal(es) OTCA — del qty en los registros de historial de precios
-                priceHistory.forEach((h) => {
-                  if (h.qty == null) return;
-                  const man = manualById(h.manualId);
-                  const aut = window.manualAutoridad ? window.manualAutoridad(man) : null;
-                  const sigla = aut ? aut.sigla : 'OTCA';
-                  if (sigla === 'DCAM') return; // DCAM ya se contó arriba
-                  branches.push({ sigla, qty: h.qty, manual: man });
-                });
+                // Sucursal OTCA — qty del registro del ÚLTIMO inventario OTCA
+                const latestOtca = latestByBranch('OTCA');
+                if (latestOtca) {
+                  const rec = priceHistory.find((h) => h.manualId === latestOtca.id);
+                  if (rec && rec.qty != null) {
+                    branches.push({ sigla: 'OTCA', qty: rec.qty, manual: latestOtca, agotado: false });
+                  } else if (everIn('OTCA')) {
+                    branches.push({ sigla: 'OTCA', qty: null, manual: latestOtca, agotado: true });
+                  }
+                }
                 return (
                   <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${PALETTE.border}` }}>
                     {branches.length > 0 ? (
@@ -319,20 +327,28 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                         {branches.map((b, bi) => (
                           <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                              <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
-                              <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.text, letterSpacing: '0.06em' }}>
-                                disponibles en{' '}
-                                <b style={{ color: PALETTE.text, letterSpacing: '0.08em' }}>{b.sigla}</b>
-                              </span>
+                              {b.agotado ? (
+                                <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#C0392B', letterSpacing: '0.06em' }}>
+                                  AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b>
+                                </span>
+                              ) : (
+                                <React.Fragment>
+                                  <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
+                                  <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.text, letterSpacing: '0.06em' }}>
+                                    disponibles en{' '}
+                                    <b style={{ color: PALETTE.text, letterSpacing: '0.08em' }}>{b.sigla}</b>
+                                  </span>
+                                </React.Fragment>
+                              )}
                             </div>
                             <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textDim, marginTop: 4, lineHeight: 1.55 }}>
-                              De acuerdo a{' '}
+                              {b.agotado ? 'No aparece en el último inventario: ' : 'De acuerdo a '}
                               {b.manual && b.manual.url ? (
                                 <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: PALETTE.amber, textDecoration: 'none', borderBottom: `1px solid ${PALETTE.amber}` }}>▦ {b.manual.nombre} ↗</a>
                               ) : (
                                 <span style={{ color: PALETTE.textMuted }}>{b.manual ? b.manual.nombre : 'inventario oficial ' + b.sigla}</span>
                               )}
-                              {b.manual ? ', publicado el ' + amxFmtManualDate(b.manual.fecha) : ''}.
+                              {b.manual ? (b.agotado ? ' (' + amxFmtManualDate(b.manual.fecha) + ').' : ', publicado el ' + amxFmtManualDate(b.manual.fecha) + '.') : '.'}
                             </div>
                           </div>
                         ))}
