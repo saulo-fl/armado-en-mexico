@@ -293,3 +293,19 @@ window.getArmaExistenciasOTCA = function (armaId) {
   }
   return null;
 };
+
+// Sucursales (DCAM / OTCA) donde el arma ha aparecido — para filtrar el arsenal.
+// Devuelve { dcam, otca } booleanos, según las autoridades de su historial de
+// precios y los mapas de existencias por sucursal.
+window.getArmaSucursales = function (armaId) {
+  const id = Number(armaId);
+  const man = window.AMX_MANUALES_SEED || [];
+  const autOf = (mid) => { const m = man.find((x) => x.id === mid); return m ? (m.autoridad || 'DCAM') : null; };
+  const recs = (window.AMX_PRICE_HISTORY_SEED || {})[id] || [];
+  let dcam = false, otca = false;
+  recs.forEach((r) => { const a = autOf(r.manualId); if (a === 'DCAM') dcam = true; else if (a === 'OTCA') otca = true; });
+  if (window.getArmaExistencias && window.getArmaExistencias(id) != null) dcam = true;
+  if (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(id)) otca = true;
+  if (!dcam && !otca) dcam = true; // por defecto, atribuible al inventario principal (DCAM)
+  return { dcam: dcam, otca: otca };
+};
