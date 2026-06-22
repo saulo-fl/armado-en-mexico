@@ -1067,7 +1067,7 @@ function ArsenalHubScreen({ onNav }) {
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px' }}>Arsenal</div>
       <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.textDim, lineHeight: 1.5 }}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
 
-      <Hdr icon="◆">Por armería</Hdr>
+      <Hdr icon="◆">Armería</Hdr>
       <div style={grid(2)}>
         <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" count={sucCount('DCAM')} img="imagenes/armeria-dcam.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
         <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" count={sucCount('OTCA')} img="imagenes/armeria-otca.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
@@ -1078,14 +1078,14 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color="#4FAE5C" count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
       </div>
 
-      <Hdr icon="◢">Por tipo de arma</Hdr>
+      <Hdr icon="◢">Tipo de arma</Hdr>
       <div style={grid(5)}>
         {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
           ? <ArsenalPhotoCard key={c.id} label={c.label} count={tipoCount(c.id)} img={HEROS[c.id]} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
           : null)}
       </div>
 
-      <Hdr icon="☆">Por uso</Hdr>
+      <Hdr icon="☆">Uso</Hdr>
       <div style={grid(3)}>
         <Card label="Tiro deportivo" sub="Clubes y polígonos" count={usoCount('club')} onClick={() => onNav('category', { mode: 'uso', value: 'club' })} />
         <Card label="Cacería" sub="Caza mayor y menor" count={usoCount('caza')} onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
@@ -1094,7 +1094,7 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color="#C0392B" count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
       </div>
 
-      <Hdr icon="◈">Por calibre</Hdr>
+      <Hdr icon="◈">Calibre</Hdr>
       <div style={grid(4)}>
         {window.CATEGORIES.calibre.map((c) => {
           const n = DB.filter((a) => a.calibre === c.id).length;
