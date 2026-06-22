@@ -691,17 +691,13 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   const [showAdv, setShowAdv] = useState(false);
   const [marca, setMarca] = useState('all');
   const [era, setEra] = useState('all');
-  const priceBounds = useMemo(() => {
-    const ps = (window.DB || []).map(parsePrice).filter((n) => n > 0);
-    if (!ps.length) return { min: 0, max: 100000 };
-    return { min: Math.floor(Math.min(...ps) / 1000) * 1000, max: Math.ceil(Math.max(...ps) / 1000) * 1000 };
-  }, []);
-  const [precioLo, setPrecioLo] = useState(priceBounds.min);
-  const [precioHi, setPrecioHi] = useState(priceBounds.max);
+  const [precioLo, setPrecioLo] = useState(0);
+  const [precioHi, setPrecioHi] = useState(100000);
   const [mecanismo, setMecanismo] = useState('all');
   const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible' ? 'si' : 'all'); // 'all' | 'si' | 'no'
 
-  const filtered = useMemo(() => {
+  // Conjunto filtrado por TODO excepto el precio (base para los límites dinámicos)
+  const baseFiltered = useMemo(() => {
     return window.DB.filter((a) => {
       if (tipo !== 'all' && a.tipo !== tipo) return false;
       if (avail !== 'all' && a.avail !== avail) return false;
@@ -720,8 +716,6 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       if (uso !== 'all' && !a.uses.includes(uso)) return false;
       if (marca !== 'all' && a.marca !== marca) return false;
       if (era !== 'all' && a.era !== era) return false;
-      const _pp = parsePrice(a);
-      if (_pp < precioLo || _pp > precioHi) return false;
       if (mecanismo !== 'all') {
         const m = a.mecanismo.toLowerCase();
         if (mecanismo === 'semi' && !m.includes('semi')) return false;
@@ -739,7 +733,40 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       }
       return true;
     });
-  }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, precioLo, precioHi, mecanismo]);
+  }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo]);
+
+  // Límites de precio DINÁMICOS según lo filtrado; tope en $100k (mostrado como "$100k+").
+  const PRICE_CAP = 100000, PRICE_STEP = 1000;
+  const priceBounds = useMemo(() => {
+    const ps = baseFiltered.map(parsePrice).filter((n) => n > 0);
+    if (!ps.length) return { min: 0, max: PRICE_CAP, capped: true };
+    let lo = Math.floor(Math.min(...ps) / PRICE_STEP) * PRICE_STEP;
+    let hi = Math.ceil(Math.max(...ps) / PRICE_STEP) * PRICE_STEP;
+    const capped = hi > PRICE_CAP;
+    if (capped) hi = PRICE_CAP;
+    if (lo > hi) lo = hi;
+    if (hi <= lo) hi = lo + PRICE_STEP;
+    return { min: lo, max: hi, capped: capped };
+  }, [baseFiltered]);
+
+  // Al cambiar los límites dinámicos, reajusta el rango del slider (evita rangos vacíos)
+  const _pbRef = React.useRef(null);
+  if (!_pbRef.current || _pbRef.current.min !== priceBounds.min || _pbRef.current.max !== priceBounds.max) {
+    _pbRef.current = { min: priceBounds.min, max: priceBounds.max };
+    if (precioLo !== priceBounds.min) setPrecioLo(priceBounds.min);
+    if (precioHi !== priceBounds.max) setPrecioHi(priceBounds.max);
+  }
+
+  // Si el tope ($100k) está al máximo, no hay límite superior (incluye todo lo de "$100k+")
+  const noUpper = priceBounds.capped && precioHi >= priceBounds.max;
+  const filtered = useMemo(() => {
+    return baseFiltered.filter((a) => {
+      const p = parsePrice(a);
+      if (p < precioLo) return false;
+      if (!noUpper && p > precioHi) return false;
+      return true;
+    });
+  }, [baseFiltered, precioLo, precioHi, noUpper]);
 
   const marcas = useMemo(() => Array.from(new Set(window.DB.map((a) => a.marca))).sort(), []);
 
@@ -803,7 +830,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
 
         {/* Rango de precio — barra de mínimo/máximo (estilo Amazon) */}
         <div style={{ marginTop: 12 }}>
-          <PriceRange min={priceBounds.min} max={priceBounds.max} lo={precioLo} hi={precioHi} step={1000}
+          <PriceRange min={priceBounds.min} max={priceBounds.max} lo={precioLo} hi={precioHi} step={PRICE_STEP} capped={priceBounds.capped}
             onChange={(lo, hi) => { setPrecioLo(lo); setPrecioHi(hi); }} />
         </div>
 
@@ -884,17 +911,18 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
 
 }
 // Barra de rango de precio (doble manija, estilo Amazon): min–max
-function PriceRange({ min, max, lo, hi, step, onChange }) {
+function PriceRange({ min, max, lo, hi, step, capped, onChange }) {
   const P = PALETTE;
   const span = max > min ? max - min : 1;
   const pct = (v) => ((Math.min(max, Math.max(min, v)) - min) / span) * 100;
   const fmt = (v) => '$' + Math.round(v).toLocaleString('es-MX');
+  const hiLabel = (capped && hi >= max) ? (fmt(max) + '+') : fmt(hi);
   const loPct = pct(lo), hiPct = pct(hi);
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
         <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {fmt(hi)}</span>
+        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {hiLabel}</span>
       </div>
       <div style={{ position: 'relative', height: 28 }}>
         <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: P.border }} />
