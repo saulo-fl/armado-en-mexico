@@ -272,7 +272,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                 fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
                 fontSize: 23, color: PALETTE.amber,
                 letterSpacing: '0.02em'
-              }}>{arma.priceExact}</div>
+              }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact}</div>
               <div style={{
                 fontFamily: 'Courier Prime, monospace',
                 fontSize: 13, color: PALETTE.textMuted,
