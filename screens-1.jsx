@@ -13,6 +13,9 @@ const CATEGORY_HEROS = {
 };
 window.CATEGORY_HEROS = CATEGORY_HEROS;
 
+// precio numérico (MXN) a partir de priceExact "$10,061.26 MXN"
+const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^\d.]/g, '')) || 0;
+
 // ════════════════════════════════════════════════════════════════
 // HOME — Mobile-first · Header + Sliders + 3 Carruseles
 // ════════════════════════════════════════════════════════════════
@@ -688,7 +691,13 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   const [showAdv, setShowAdv] = useState(false);
   const [marca, setMarca] = useState('all');
   const [era, setEra] = useState('all');
-  const [precio, setPrecio] = useState('all'); // 1..5
+  const priceBounds = useMemo(() => {
+    const ps = (window.DB || []).map(parsePrice).filter((n) => n > 0);
+    if (!ps.length) return { min: 0, max: 100000 };
+    return { min: Math.floor(Math.min(...ps) / 1000) * 1000, max: Math.ceil(Math.max(...ps) / 1000) * 1000 };
+  }, []);
+  const [precioLo, setPrecioLo] = useState(priceBounds.min);
+  const [precioHi, setPrecioHi] = useState(priceBounds.max);
   const [mecanismo, setMecanismo] = useState('all');
   const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible' ? 'si' : 'all'); // 'all' | 'si' | 'no'
 
@@ -711,7 +720,8 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       if (uso !== 'all' && !a.uses.includes(uso)) return false;
       if (marca !== 'all' && a.marca !== marca) return false;
       if (era !== 'all' && a.era !== era) return false;
-      if (precio !== 'all' && a.priceLvl !== Number(precio)) return false;
+      const _pp = parsePrice(a);
+      if (_pp < precioLo || _pp > precioHi) return false;
       if (mecanismo !== 'all') {
         const m = a.mecanismo.toLowerCase();
         if (mecanismo === 'semi' && !m.includes('semi')) return false;
@@ -729,17 +739,17 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       }
       return true;
     });
-  }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, precio, mecanismo]);
+  }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, precioLo, precioHi, mecanismo]);
 
   const marcas = useMemo(() => Array.from(new Set(window.DB.map((a) => a.marca))).sort(), []);
 
   const clearAll = () => {
     setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
-    setMarca('all');setEra('all');setPrecio('all');setMecanismo('all');setDisponible('all');
+    setMarca('all');setEra('all');setPrecioLo(priceBounds.min);setPrecioHi(priceBounds.max);setMecanismo('all');setDisponible('all');
     setQuery('');
   };
 
-  const activeCount = [tipo, avail, sucursal, disponible, calibre, uso, marca, era, precio, mecanismo].filter((v) => v !== 'all').length;
+  const activeCount = [tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo].filter((v) => v !== 'all').length + ((precioLo > priceBounds.min || precioHi < priceBounds.max) ? 1 : 0);
 
   const innerMax = { maxWidth: 1400, margin: '0 auto', width: '100%' };
   const padX = vp.isDesktop ? 28 : 14;
@@ -778,7 +788,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         {/* FILTROS PRINCIPALES — menús desplegables */}
         <div style={{
             display: 'grid',
-            gridTemplateColumns: vp.isDesktop ? 'repeat(5, 1fr)' : '1fr 1fr',
+            gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : '1fr 1fr',
             gap: 8, marginTop: 10
           }}>
           <FilterSelect label="Tipo de arma" value={tipo} onChange={setTipo}
@@ -789,8 +799,12 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Ciudad de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
           <FilterSelect label="Disponibilidad" value={disponible} onChange={setDisponible}
             options={[{ value: 'all', label: 'Todas' }, { value: 'si', label: 'Con existencias' }, { value: 'no', label: 'Agotadas' }]} />
-          <FilterSelect label="Rango de precio" value={precio} onChange={setPrecio}
-            options={[{ value: 'all', label: 'Todos' }].concat([1, 2, 3, 4, 5].map((p) => ({ value: String(p), label: '$'.repeat(p) })))} />
+        </div>
+
+        {/* Rango de precio — barra de mínimo/máximo (estilo Amazon) */}
+        <div style={{ marginTop: 12 }}>
+          <PriceRange min={priceBounds.min} max={priceBounds.max} lo={precioLo} hi={precioHi} step={1000}
+            onChange={(lo, hi) => { setPrecioLo(lo); setPrecioHi(hi); }} />
         </div>
 
         {/* avanzados toggle */}
@@ -869,6 +883,32 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
     </div>);
 
 }
+// Barra de rango de precio (doble manija, estilo Amazon): min–max
+function PriceRange({ min, max, lo, hi, step, onChange }) {
+  const P = PALETTE;
+  const span = max > min ? max - min : 1;
+  const pct = (v) => ((Math.min(max, Math.max(min, v)) - min) / span) * 100;
+  const fmt = (v) => '$' + Math.round(v).toLocaleString('es-MX');
+  const loPct = pct(lo), hiPct = pct(hi);
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
+        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {fmt(hi)}</span>
+      </div>
+      <div style={{ position: 'relative', height: 28 }}>
+        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: P.border }} />
+        <div style={{ position: 'absolute', top: 12, left: loPct + '%', width: (hiPct - loPct) + '%', height: 4, background: P.amber }} />
+        <input type="range" className="amx-price-range" min={min} max={max} step={step} value={lo} aria-label="Precio mínimo"
+          onChange={(e) => { const v = Math.min(Number(e.target.value), hi - step); onChange(Math.max(min, v), hi); }} />
+        <input type="range" className="amx-price-range" min={min} max={max} step={step} value={hi} aria-label="Precio máximo"
+          onChange={(e) => { const v = Math.max(Number(e.target.value), lo + step); onChange(lo, Math.min(max, v)); }} />
+      </div>
+    </div>
+  );
+}
+window.PriceRange = PriceRange;
+
 // Menú desplegable de filtro (select nativo estilizado, fácil de navegar en móvil)
 function FilterSelect({ label, value, onChange, options }) {
   const active = value !== 'all';
