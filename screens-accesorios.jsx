@@ -554,7 +554,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <div style={{
               fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23,
               color: P.amber, letterSpacing: '0.02em',
-            }}>{acc.priceExact}</div>
+            }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : acc.priceExact}</div>
             {acc.dcamRef &&
               <div style={{
                 fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textMuted,

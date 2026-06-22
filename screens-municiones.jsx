@@ -503,7 +503,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                   letterSpacing: '0.12em', color: '#000', background: curAut.color, padding: '2px 7px', flexShrink: 0,
                 }}>{curAut.sigla}</span>}
             </div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23, color: P.amber, letterSpacing: '0.02em' }}>{mun.priceExact}</div>
+            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23, color: P.amber, letterSpacing: '0.02em' }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : mun.priceExact}</div>
             {mun.dcamRef &&
               <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textMuted, marginTop: 4, lineHeight: 1.4 }}>Ref. {curSigla}: {mun.dcamRef}</div>
             }
