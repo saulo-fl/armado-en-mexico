@@ -583,18 +583,6 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
               position: 'relative', zIndex: 1, opacity: 0.85,
             }} />
         )}
-        {/* tipo top-left */}
-        <span style={{
-          position: 'absolute', top: 6, left: 6,
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 12, fontWeight: 600,
-          color: PALETTE.textDim,
-          background: 'rgba(0,0,0,0.6)',
-          padding: '2px 5px',
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          borderLeft: `2px solid ${PALETTE.amber}`,
-        }}>{arma.tipo}</span>
       </div>
       {/* compare button — sólo donde hay comparador */}
       {onCompare &&
