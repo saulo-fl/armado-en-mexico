@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 400" width="320" height="400">
+  <rect width="320" height="400" fill="#1A1A1A"/>
+  <g stroke="#4FAE5C" stroke-opacity="0.10" stroke-width="1">
+    <line x1="160" y1="30" x2="160" y2="370"/>
+    <line x1="30" y1="190" x2="290" y2="190"/>
+    <circle cx="160" cy="190" r="74" fill="none"/>
+    <circle cx="160" cy="190" r="42" fill="none"/>
+  </g>
+  <g transform="translate(160 188)" fill="none" stroke="#4FAE5C" stroke-opacity="0.55" stroke-width="2.5" stroke-linejoin="round">
+    <path d="M-48 10 L-48 -10 L0 -36 L48 -10 L48 10 Z"/>
+    <line x1="-48" y1="10" x2="48" y2="10"/>
+    <rect x="-32" y="-6" width="15" height="16"/>
+    <rect x="17" y="-6" width="15" height="16"/>
+  </g>
+  <text x="160" y="300" font-family="Courier New, monospace" font-size="12" letter-spacing="2" fill="#555" text-anchor="middle">foto de armería · pendiente</text>
+</svg>
