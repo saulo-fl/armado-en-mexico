@@ -221,6 +221,47 @@ window.AMX_PRICE_HISTORY_SEED = {
   126: [{ manualId: 'man_otca_armas_2025_09_26', price: '$11,135.14 MXN', date: '2025-09-26', qty: 2 }, { manualId: 'man_dcam_2026_06_16', price: '$9,643.45 MXN', date: '2026-06-16' }],
   127: [{ manualId: 'man_otca_armas_2025_09_26', price: '$17,095.34 MXN', date: '2025-09-26', qty: 9 }],
   128: [{ manualId: 'man_otca_armas_2025_09_26', price: '$111,016.06 MXN', date: '2025-09-26', qty: 1 }, { manualId: 'man_dcam_2026_06_16', price: '$99,764.64 MXN', date: '2026-06-16' }],
+  // ── Nuevos modelos DCAM 16-jun-2026 ──
+  129: [{ manualId: 'man_dcam_2026_06_16', price: '$29,192.10 MXN', date: '2026-06-16' }],
+  130: [{ manualId: 'man_dcam_2026_06_16', price: '$10,107.18 MXN', date: '2026-06-16' }],
+  131: [{ manualId: 'man_dcam_2026_06_16', price: '$7,482.35 MXN', date: '2026-06-16' }],
+  132: [{ manualId: 'man_dcam_2026_06_16', price: '$10,849.40 MXN', date: '2026-06-16' }],
+  133: [{ manualId: 'man_dcam_2026_06_16', price: '$7,731.76 MXN', date: '2026-06-16' }],
+  134: [{ manualId: 'man_dcam_2026_06_16', price: '$19,055.95 MXN', date: '2026-06-16' }],
+  135: [{ manualId: 'man_dcam_2026_06_16', price: '$10,628.47 MXN', date: '2026-06-16' }],
+  136: [{ manualId: 'man_dcam_2026_06_16', price: '$13,321.79 MXN', date: '2026-06-16' }],
+  137: [{ manualId: 'man_dcam_2026_06_16', price: '$8,340.32 MXN', date: '2026-06-16' }],
+  138: [{ manualId: 'man_dcam_2026_06_16', price: '$6,993.50 MXN', date: '2026-06-16' }],
+  139: [{ manualId: 'man_dcam_2026_06_16', price: '$11,707.38 MXN', date: '2026-06-16' }],
+  140: [{ manualId: 'man_dcam_2026_06_16', price: '$9,138.44 MXN', date: '2026-06-16' }],
+  141: [{ manualId: 'man_dcam_2026_06_16', price: '$13,078.94 MXN', date: '2026-06-16' }],
+  142: [{ manualId: 'man_dcam_2026_06_16', price: '$9,475.45 MXN', date: '2026-06-16' }],
+  143: [{ manualId: 'man_dcam_2026_06_16', price: '$22,305.77 MXN', date: '2026-06-16' }],
+  144: [{ manualId: 'man_dcam_2026_06_16', price: '$27,338.63 MXN', date: '2026-06-16' }],
+  145: [{ manualId: 'man_dcam_2026_06_16', price: '$12,849.69 MXN', date: '2026-06-16' }],
+  146: [{ manualId: 'man_dcam_2026_06_16', price: '$16,481.12 MXN', date: '2026-06-16' }],
+  147: [{ manualId: 'man_dcam_2026_06_16', price: '$19,952.93 MXN', date: '2026-06-16' }],
+  148: [{ manualId: 'man_dcam_2026_06_16', price: '$37,411.74 MXN', date: '2026-06-16' }],
+  149: [{ manualId: 'man_dcam_2026_06_16', price: '$28,931.75 MXN', date: '2026-06-16' }],
+  150: [{ manualId: 'man_dcam_2026_06_16', price: '$28,682.33 MXN', date: '2026-06-16' }],
+  151: [{ manualId: 'man_dcam_2026_06_16', price: '$14,212.67 MXN', date: '2026-06-16' }],
+  152: [{ manualId: 'man_dcam_2026_06_16', price: '$33,241.58 MXN', date: '2026-06-16' }],
+  153: [{ manualId: 'man_dcam_2026_06_16', price: '$48,653.50 MXN', date: '2026-06-16' }],
+  154: [{ manualId: 'man_dcam_2026_06_16', price: '$78,106.24 MXN', date: '2026-06-16' }],
+  155: [{ manualId: 'man_dcam_2026_06_16', price: '$83,811.44 MXN', date: '2026-06-16' }],
+  156: [{ manualId: 'man_dcam_2026_06_16', price: '$40,341.86 MXN', date: '2026-06-16' }],
+  157: [{ manualId: 'man_dcam_2026_06_16', price: '$50,738.65 MXN', date: '2026-06-16' }],
+  158: [{ manualId: 'man_dcam_2026_06_16', price: '$164,929.56 MXN', date: '2026-06-16' }],
+  159: [{ manualId: 'man_dcam_2026_06_16', price: '$65,226.12 MXN', date: '2026-06-16' }],
+  160: [{ manualId: 'man_dcam_2026_06_16', price: '$51,259.07 MXN', date: '2026-06-16' }],
+  161: [{ manualId: 'man_dcam_2026_06_16', price: '$13,827.38 MXN', date: '2026-06-16' }],
+  162: [{ manualId: 'man_dcam_2026_06_16', price: '$35,621.31 MXN', date: '2026-06-16' }],
+  163: [{ manualId: 'man_dcam_2026_06_16', price: '$83,927.28 MXN', date: '2026-06-16' }],
+  164: [{ manualId: 'man_dcam_2026_06_16', price: '$115,581.02 MXN', date: '2026-06-16' }],
+  165: [{ manualId: 'man_dcam_2026_06_16', price: '$17,598.48 MXN', date: '2026-06-16' }],
+  166: [{ manualId: 'man_dcam_2026_06_16', price: '$19,553.87 MXN', date: '2026-06-16' }],
+  167: [{ manualId: 'man_dcam_2026_06_16', price: '$22,347.28 MXN', date: '2026-06-16' }],
+  168: [{ manualId: 'man_dcam_2026_06_16', price: '$13,129.03 MXN', date: '2026-06-16' }],
 };
 
 // ── EXISTENCIAS DE ARMAS — SUCURSAL DCAM ─────────────────────────────────────
@@ -234,7 +275,7 @@ window.AMX_PRICE_HISTORY_SEED = {
 //              (cada inventario lleva su propia cantidad por arma).
 // Las armas exclusivas de OTCA (112-128) normalmente NO van aquí; la excepción son
 // las que YA tienen stock en DCAM (p. ej. 122, 124, 125, 126, 128), que sí se listan.
-window.AMX_ARMAS_EXISTENCIAS = { 1: 1, 2: 37, 7: 38, 8: 51, 9: 56, 10: 49, 11: 36, 13: 48, 15: 2, 18: 40, 19: 14, 20: 18, 21: 17, 23: 7, 24: 16, 25: 16, 26: 8, 27: 16, 29: 14, 30: 1, 31: 14, 33: 1, 34: 6, 36: 33, 37: 14, 38: 19, 40: 27, 41: 14, 43: 32, 44: 11, 45: 26, 46: 12, 47: 16, 48: 12, 49: 5, 54: 6, 57: 6, 58: 3, 59: 5, 67: 10, 68: 6, 69: 1, 73: 2, 74: 5, 75: 1, 76: 5, 77: 1, 79: 4, 83: 2, 85: 5, 86: 2, 87: 1, 88: 1, 89: 1, 90: 1, 93: 1, 94: 1, 100: 7, 102: 6, 103: 1, 111: 1, 122: 2, 124: 23, 125: 16, 126: 23, 128: 1 };
+window.AMX_ARMAS_EXISTENCIAS = { 1: 1, 2: 37, 7: 38, 8: 51, 9: 56, 10: 49, 11: 36, 13: 48, 15: 2, 18: 40, 19: 14, 20: 18, 21: 17, 23: 7, 24: 16, 25: 16, 26: 8, 27: 16, 29: 14, 30: 1, 31: 14, 33: 1, 34: 6, 36: 33, 37: 14, 38: 19, 40: 27, 41: 14, 43: 32, 44: 11, 45: 26, 46: 12, 47: 16, 48: 12, 49: 5, 54: 6, 57: 6, 58: 3, 59: 5, 67: 10, 68: 6, 69: 1, 73: 2, 74: 5, 75: 1, 76: 5, 77: 1, 79: 4, 83: 2, 85: 5, 86: 2, 87: 1, 88: 1, 89: 1, 90: 1, 93: 1, 94: 1, 100: 7, 102: 6, 103: 1, 111: 1, 122: 2, 124: 23, 125: 16, 126: 23, 128: 1, 129: 11, 130: 1, 131: 1, 132: 20, 133: 39, 134: 41, 135: 46, 136: 18, 137: 9, 138: 9, 139: 10, 140: 6, 141: 37, 142: 8, 143: 7, 144: 1, 145: 22, 146: 9, 147: 7, 148: 4, 149: 10, 150: 10, 151: 15, 152: 1, 153: 1, 154: 10, 155: 4, 156: 1, 157: 8, 158: 8, 159: 6, 160: 29, 161: 3, 162: 8, 163: 2, 164: 3, 165: 7, 166: 8, 167: 6, 168: 4 };
 window.getArmaExistencias = function (armaId) {
   const m = window.AMX_ARMAS_EXISTENCIAS || {};
   const q = m[Number(armaId)];
