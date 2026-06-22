@@ -690,7 +690,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   const [era, setEra] = useState('all');
   const [precio, setPrecio] = useState('all'); // 1..5
   const [mecanismo, setMecanismo] = useState('all');
-  const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible');
+  const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible' ? 'si' : 'all'); // 'all' | 'si' | 'no'
 
   const filtered = useMemo(() => {
     return window.DB.filter((a) => {
@@ -701,10 +701,11 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         if (sucursal === 'DCAM' && !s.dcam) return false;
         if (sucursal === 'OTCA' && !s.otca) return false;
       }
-      if (disponible) {
+      if (disponible !== 'all') {
         const inStock = (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
           (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id));
-        if (!inStock) return false;
+        if (disponible === 'si' && !inStock) return false;
+        if (disponible === 'no' && inStock) return false;
       }
       if (calibre !== 'all' && a.calibre !== calibre) return false;
       if (uso !== 'all' && !a.uses.includes(uso)) return false;
@@ -734,11 +735,11 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
 
   const clearAll = () => {
     setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
-    setMarca('all');setEra('all');setPrecio('all');setMecanismo('all');setDisponible(false);
+    setMarca('all');setEra('all');setPrecio('all');setMecanismo('all');setDisponible('all');
     setQuery('');
   };
 
-  const activeCount = [tipo, avail, sucursal, calibre, uso, marca, era, precio, mecanismo].filter((v) => v !== 'all').length + (disponible ? 1 : 0);
+  const activeCount = [tipo, avail, sucursal, disponible, calibre, uso, marca, era, precio, mecanismo].filter((v) => v !== 'all').length;
 
   const innerMax = { maxWidth: 1400, margin: '0 auto', width: '100%' };
   const padX = vp.isDesktop ? 28 : 14;
@@ -774,40 +775,22 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             }
         </div>
 
-        {/* CHIPS TIPO */}
-        <div className="amx-hscroll" style={{
-            display: 'flex', gap: 6, overflowX: 'auto', marginTop: 10,
-            paddingBottom: 2
+        {/* FILTROS PRINCIPALES — menús desplegables */}
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: vp.isDesktop ? 'repeat(5, 1fr)' : '1fr 1fr',
+            gap: 8, marginTop: 10
           }}>
-          <FilterChip active={tipo === 'all'} onClick={() => setTipo('all')}>Todas</FilterChip>
-          {window.CATEGORIES.tipo.map((c) =>
-            <FilterChip key={c.id} active={tipo === c.id} onClick={() => setTipo(c.id)}>
-              {c.label}
-            </FilterChip>
-            )}
-        </div>
-
-        {/* AVAIL CHIPS */}
-        <div className="amx-hscroll" style={{
-            display: 'flex', gap: 6, overflowX: 'auto', marginTop: 6,
-            paddingBottom: 2
-          }}>
-          {window.CATEGORIES.disponibilidad.map((d) =>
-            <FilterChip key={d.id} active={avail === d.id} onClick={() => setAvail(avail === d.id ? 'all' : d.id)}>
-              {d.label}
-            </FilterChip>
-            )}
-        </div>
-
-        {/* SUCURSAL CHIPS (DCAM / OTCA) */}
-        <div className="amx-hscroll" style={{
-            display: 'flex', gap: 6, overflowX: 'auto', marginTop: 6,
-            paddingBottom: 2
-          }}>
-          <FilterChip active={sucursal === 'all'} onClick={() => setSucursal('all')}>Toda sucursal</FilterChip>
-          <FilterChip active={sucursal === 'DCAM'} onClick={() => setSucursal(sucursal === 'DCAM' ? 'all' : 'DCAM')}>◆ DCAM</FilterChip>
-          <FilterChip active={sucursal === 'OTCA'} onClick={() => setSucursal(sucursal === 'OTCA' ? 'all' : 'OTCA')}>◆ OTCA</FilterChip>
-          <FilterChip active={disponible} onClick={() => setDisponible((d) => !d)}>● Disponibles</FilterChip>
+          <FilterSelect label="Tipo de arma" value={tipo} onChange={setTipo}
+            options={[{ value: 'all', label: 'Todas' }].concat(window.CATEGORIES.tipo.map((c) => ({ value: c.id, label: c.label })))} />
+          <FilterSelect label="Calibre" value={calibre} onChange={setCalibre}
+            options={[{ value: 'all', label: 'Todos' }].concat(window.CATEGORIES.calibre.map((c) => ({ value: c.id, label: c.label })))} />
+          <FilterSelect label="Armería" value={sucursal} onChange={setSucursal}
+            options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Ciudad de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
+          <FilterSelect label="Disponibilidad" value={disponible} onChange={setDisponible}
+            options={[{ value: 'all', label: 'Todas' }, { value: 'si', label: 'Con existencias' }, { value: 'no', label: 'Agotadas' }]} />
+          <FilterSelect label="Rango de precio" value={precio} onChange={setPrecio}
+            options={[{ value: 'all', label: 'Todos' }].concat([1, 2, 3, 4, 5].map((p) => ({ value: String(p), label: '$'.repeat(p) })))} />
         </div>
 
         {/* avanzados toggle */}
@@ -825,47 +808,21 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         </button>
 
         {showAdv &&
-          <div style={{ marginTop: 8 }}>
-            <FilterRow label="Calibre">
-              <FilterChip active={calibre === 'all'} onClick={() => setCalibre('all')}>Todos</FilterChip>
-              {window.CATEGORIES.calibre.map((c) =>
-              <FilterChip key={c.id} active={calibre === c.id} onClick={() => setCalibre(c.id)}>{c.label}</FilterChip>
-              )}
-            </FilterRow>
-            <FilterRow label="Función">
-              <FilterChip active={uso === 'all'} onClick={() => setUso('all')}>Cualquiera</FilterChip>
-              {window.CATEGORIES.uso.map((u) =>
-              <FilterChip key={u.id} active={uso === u.id} onClick={() => setUso(u.id)}>{u.label}</FilterChip>
-              )}
-            </FilterRow>
-            <FilterRow label="Marca">
-              <FilterChip active={marca === 'all'} onClick={() => setMarca('all')}>Todas</FilterChip>
-              {marcas.map((m) =>
-              <FilterChip key={m} active={marca === m} onClick={() => setMarca(m)}>{m}</FilterChip>
-              )}
-            </FilterRow>
-            <FilterRow label="Mecanismo">
-              <FilterChip active={mecanismo === 'all'} onClick={() => setMecanismo('all')}>Todos</FilterChip>
-              <FilterChip active={mecanismo === 'semi'} onClick={() => setMecanismo('semi')}>Semi-auto</FilterChip>
-              <FilterChip active={mecanismo === 'cerrojo'} onClick={() => setMecanismo('cerrojo')}>Cerrojo</FilterChip>
-              <FilterChip active={mecanismo === 'bomba'} onClick={() => setMecanismo('bomba')}>Bombeo</FilterChip>
-              <FilterChip active={mecanismo === 'revolver'} onClick={() => setMecanismo('revolver')}>Revólver</FilterChip>
-              <FilterChip active={mecanismo === 'sobrepuesta'} onClick={() => setMecanismo('sobrepuesta')}>Sobrepuesta</FilterChip>
-            </FilterRow>
-            <FilterRow label="Era">
-              <FilterChip active={era === 'all'} onClick={() => setEra('all')}>Cualquiera</FilterChip>
-              <FilterChip active={era === 'clasico'} onClick={() => setEra('clasico')}>Clásico</FilterChip>
-              <FilterChip active={era === 'moderno'} onClick={() => setEra('moderno')}>Moderno</FilterChip>
-              <FilterChip active={era === 'vanguardia'} onClick={() => setEra('vanguardia')}>Vanguardia</FilterChip>
-            </FilterRow>
-            <FilterRow label="Rango de precio">
-              <FilterChip active={precio === 'all'} onClick={() => setPrecio('all')}>Todos</FilterChip>
-              {[1, 2, 3, 4, 5].map((p) =>
-              <FilterChip key={p} active={precio === String(p)} onClick={() => setPrecio(String(p))}>
-                  {'$'.repeat(p)}
-                </FilterChip>
-              )}
-            </FilterRow>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : '1fr 1fr',
+            gap: 8, marginTop: 8
+          }}>
+            <FilterSelect label="Uso" value={uso} onChange={setUso}
+              options={[{ value: 'all', label: 'Cualquiera' }].concat(window.CATEGORIES.uso.map((u) => ({ value: u.id, label: u.label })))} />
+            <FilterSelect label="Clasificación legal" value={avail} onChange={setAvail}
+              options={[{ value: 'all', label: 'Todas' }].concat(window.CATEGORIES.disponibilidad.map((d) => ({ value: d.id, label: d.label })))} />
+            <FilterSelect label="Marca" value={marca} onChange={setMarca}
+              options={[{ value: 'all', label: 'Todas' }].concat(marcas.map((m) => ({ value: m, label: m })))} />
+            <FilterSelect label="Mecanismo" value={mecanismo} onChange={setMecanismo}
+              options={[{ value: 'all', label: 'Todos' }, { value: 'semi', label: 'Semi-auto' }, { value: 'cerrojo', label: 'Cerrojo' }, { value: 'bomba', label: 'Bombeo' }, { value: 'revolver', label: 'Revólver' }, { value: 'sobrepuesta', label: 'Sobrepuesta' }]} />
+            <FilterSelect label="Era" value={era} onChange={setEra}
+              options={[{ value: 'all', label: 'Cualquiera' }, { value: 'clasico', label: 'Clásico' }, { value: 'moderno', label: 'Moderno' }, { value: 'vanguardia', label: 'Vanguardia' }]} />
           </div>
           }
        </div>
@@ -912,6 +869,36 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
     </div>);
 
 }
+// Menú desplegable de filtro (select nativo estilizado, fácil de navegar en móvil)
+function FilterSelect({ label, value, onChange, options }) {
+  const active = value !== 'all';
+  return (
+    <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+      <span style={{
+        fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.textMuted,
+        letterSpacing: '0.14em', textTransform: 'uppercase',
+      }}>{label}</span>
+      <div style={{ position: 'relative' }}>
+        <select value={value} onChange={(e) => onChange(e.target.value)} style={{
+          width: '100%', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
+          background: PALETTE.bg, color: active ? PALETTE.amber : PALETTE.text,
+          border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
+          padding: '10px 28px 10px 10px', borderRadius: 0, cursor: 'pointer', outline: 'none',
+          fontFamily: 'Courier Prime, monospace', fontSize: 14, letterSpacing: '0.02em',
+        }}>
+          {options.map((o) => (
+            <option key={String(o.value)} value={o.value} style={{ background: PALETTE.bgElev, color: PALETTE.text }}>{o.label}</option>
+          ))}
+        </select>
+        <span aria-hidden="true" style={{
+          position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)',
+          pointerEvents: 'none', color: active ? PALETTE.amber : PALETTE.textMuted, fontSize: 11,
+        }}>▾</span>
+      </div>
+    </label>
+  );
+}
+window.FilterSelect = FilterSelect;
 function FilterRow({ label, children }) {
   return (
     <div style={{ marginBottom: 6 }}>
@@ -932,12 +919,46 @@ window.CatalogScreen = CatalogScreen;
 // ════════════════════════════════════════════════════════════════
 // ARSENAL HUB — al entrar al arsenal se elige una categoría (no lista plana)
 // ════════════════════════════════════════════════════════════════
+// Tarjeta con foto (fondo de imagen + overlay) para el hub del arsenal
+function ArsenalPhotoCard({ label, sub, count, img, color, onClick }) {
+  const P = PALETTE;
+  const [err, setErr] = useState(false);
+  const showImg = img && !err;
+  const ac = color || P.amber;
+  return (
+    <button onClick={onClick} style={{
+      background: P.bgCard, border: `1px solid ${P.border}`, padding: 0, cursor: 'pointer',
+      textAlign: 'left', position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
+      transition: 'border-color 0.18s',
+    }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
+      <div style={{ width: '100%', aspectRatio: '4 / 5', position: 'relative', overflow: 'hidden', background: `linear-gradient(135deg, ${P.bgElev} 0%, ${P.bg} 100%)` }}>
+        {showImg
+          ? <img src={img} alt={label} loading="lazy" onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'contrast(1.06) saturate(0.92) brightness(0.92)', display: 'block' }} />
+          : <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.borderHi, fontSize: 30 }}>▦</div>}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(26,26,26,0.05) 0%, rgba(26,26,26,0.42) 55%, rgba(26,26,26,0.94) 100%)`, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${ac}`, borderLeft: `1.5px solid ${ac}`, opacity: 0.8 }} />
+        <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${ac}`, borderRight: `1.5px solid ${ac}`, opacity: 0.8 }} />
+        <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.78)', border: `1px solid ${ac}`, color: ac, padding: '2px 7px', fontFamily: 'Courier Prime, monospace', fontSize: 13, letterSpacing: '0.1em', fontWeight: 700 }}>{count}</div>
+        <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
+          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{label}</div>
+          {sub && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: ac, marginTop: 3, letterSpacing: '0.08em', textShadow: '0 1px 2px rgba(0,0,0,0.7)' }}>{sub}</div>}
+          {!showImg && img && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: P.textMuted, marginTop: 2 }}>foto pendiente</div>}
+        </div>
+      </div>
+    </button>
+  );
+}
+window.ArsenalPhotoCard = ArsenalPhotoCard;
+
 function ArsenalHubScreen({ onNav }) {
   const vp = window.useViewport();
   const P = PALETTE;
   const DB = window.DB || [];
   const PAD = vp.isDesktop ? 28 : 16;
   const max = { maxWidth: 1100, margin: '0 auto', width: '100%' };
+  const HEROS = window.CATEGORY_HEROS || {};
 
   const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
   const usoCount = (id) => DB.filter((a) => a.uses.includes(id)).length;
@@ -978,10 +999,21 @@ function ArsenalHubScreen({ onNav }) {
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px' }}>Arsenal</div>
       <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.textDim, lineHeight: 1.5 }}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
 
+      <Hdr icon="◆">Por armería</Hdr>
+      <div style={grid(2)}>
+        <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" count={sucCount('DCAM')} img="imagenes/armeria-dcam.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
+        <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" count={sucCount('OTCA')} img="imagenes/armeria-otca.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
+      </div>
+
+      <Hdr icon="●">Disponibilidad</Hdr>
+      <div style={grid(1)}>
+        <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color="#4FAE5C" count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
+      </div>
+
       <Hdr icon="◢">Por tipo de arma</Hdr>
       <div style={grid(5)}>
         {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
-          ? <Card key={c.id} label={c.label} count={tipoCount(c.id)} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+          ? <ArsenalPhotoCard key={c.id} label={c.label} count={tipoCount(c.id)} img={HEROS[c.id]} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
           : null)}
       </div>
 
@@ -1000,17 +1032,6 @@ function ArsenalHubScreen({ onNav }) {
           const n = DB.filter((a) => a.calibre === c.id).length;
           return n ? <Card key={c.id} label={c.label} count={n} onClick={() => onNav('category', { mode: 'calibre', value: c.id })} /> : null;
         })}
-      </div>
-
-      <Hdr icon="◆">Por sucursal</Hdr>
-      <div style={grid(2)}>
-        <Card label="DCAM" sub="Catálogo nacional" count={sucCount('DCAM')} onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
-        <Card label="OTCA" sub="Monterrey" color="#4FAE5C" count={sucCount('OTCA')} onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
-      </div>
-
-      <Hdr icon="●">Disponibilidad</Hdr>
-      <div style={grid(1)}>
-        <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color="#4FAE5C" count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
       </div>
 
       <button onClick={() => onNav('category', { mode: 'all' })} style={{
