@@ -3,6 +3,28 @@
 Este directorio es el contenido COMPLETO del repositorio `armado-en-mexico`.
 Es una app estática (HTML + JSX transpilado en navegador, sin build step).
 
+## Tooling de Claude — flujos, skills y agentes (`.claude/`)
+
+Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
+`description`. Úsalos; no reinventes estos flujos a mano:
+
+- **`conciliar-inventario`** — incorporar un PDF de DCAM/OTCA (precios, existencias,
+  altas de fichas). Incluye scripts: `parse_pdf.py` (parser posicional para ambos
+  formatos) y `auditar.js` (verificación de integridad).
+- **`verificar-app`** — antes de commitear: transpila los `.jsx` + carga los
+  `data-*.js` + valida invariantes. Orden: `node .claude/skills/conciliar-inventario/scripts/auditar.js`.
+- **`fidelidad-diseno`** — al tocar UI: mantener el look táctico/tecnológico y no
+  romper la transpilación ni el orden de carga. Complementa `HANDOFF-DISENO.md`.
+- **`publicar`** — flujo git: `fetch` antes de `checkout -B` (gotcha), PR a `main` **y**
+  `develop`, cache-busting `?v=` si cambian los `data-*.js`.
+- **`mejorar-tooling`** — al cerrar una tarea: capturar aprendizajes/edge-cases en las
+  skills (automejora). Mantén su inventario al día.
+
+Agentes delegables: **`conciliador-inventario`** (conciliación completa) y
+**`revisor-armado`** (auditoría de datos + fidelidad de diseño). **Regla:** cualquier
+cambio de datos o UI se **verifica con `auditar.js`** y respeta `fidelidad-diseno`
+antes de publicar. Al terminar algo no trivial, aplica `mejorar-tooling`.
+
 ## Tarea actual: publicar esta iteración como BRANCH
 
 Esta carpeta contiene una **iteración de UI/UX ya aplicada** sobre la app
