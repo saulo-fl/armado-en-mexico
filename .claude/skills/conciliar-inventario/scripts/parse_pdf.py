@@ -46,8 +46,16 @@ def parse_dcam(doc):
 
 
 def parse_otca(doc):
-    # Layout apilado: recorre bloques en orden de lectura; acumula texto de descripción
-    # hasta topar con un entero (existencia) seguido de un "$ precio".
+    # Layout apilado: DESCRIPCIÓN (multi-linea) -> EXISTENCIA (entero, puede traer coma)
+    # -> PRECIO ("$ n.nn"). Salta el boilerplate de encabezado/pie que se repite por pagina.
+    BOIL = ("DESCRIPC", "EXISTENC", "PRECIO", "INCLUYE", "LAS EXISTENC", "LA ADQUISIC",
+            "FEDERAL DE ARMAS", "SECRETAR", "DIRECCI", "OFICINAS", "EXISTENCIAS DE",
+            "RVC-", "CAPACIDAD DE 5 CARTUCHOS, CA")
+
+    def boil(s):
+        u = s.upper()
+        return any(u.startswith(b) for b in BOIL) or re.match(r'^\d{1,2} DE [A-ZÁÉÍÓÚ]+ DE \d{4}$', u)
+
     lines = []
     for page in doc:
         for b in page.get_text("blocks"):
@@ -57,20 +65,20 @@ def parse_otca(doc):
                     lines.append(s)
     recs = []
     desc = []
-    pend_qty = None
-    money = re.compile(r'\$?\s*([\d,]+\.\d{2})')
+    qty = None
+    money = re.compile(r'\$\s*([\d,]+\.\d{2})')
     for s in lines:
-        if s.upper().startswith(("DESCRIPC", "EXISTENC", "PRECIO", "INCLUYE")):
+        if boil(s):
             continue
-        if s.isdigit():
-            pend_qty = int(s)
+        if re.fullmatch(r'[\d,]+', s):            # EXISTENCIA (permite coma: 17,700)
+            qty = int(s.replace(",", ""))
             continue
-        m = money.fullmatch(s.replace(" ", "")) or (money.search(s) if '$' in s else None)
-        if m and pend_qty is not None:
-            recs.append({"name": " ".join(desc).strip(),
-                         "qty": pend_qty, "priceN": float(m.group(1).replace(",", ""))})
-            desc, pend_qty = [], None
-        else:
+        m = money.search(s)
+        if m and qty is not None:                 # cierra el item
+            recs.append({"name": " ".join(desc).strip(), "qty": qty,
+                         "priceN": float(m.group(1).replace(",", ""))})
+            desc, qty = [], None
+        elif not m:                               # texto de descripción (incluye palabras sueltas)
             desc.append(s)
     return recs
 

@@ -56,7 +56,17 @@ Guiado por las reglas de `CLAUDE.md` y `data-precios.js`:
 - **Accesorios/municiones**: mismo patrón. La existencia vive en el `qty` del último
   registro del historial (no en un mapa aparte). Municiones DCAM y OTCA suelen ser
   sets DISTINTOS (nacionales vs. españolas de competencia) → casi todo es alta nueva.
-  Dedup renglones repetidos del mismo producto sumando existencias.
+
+## Decisiones de producto (CONVENCIÓN FIJA — el usuario ya las tomó)
+- **Modelos nuevos → SIEMPRE se dan de alta como fichas** (no omitir). Specs derivadas
+  del PDF + conocimiento; imagen ""; avail por calibre. Si un modelo es variante de
+  acabado/cañón de uno ya catalogado, NO dupliques; si es calibre distinto o marca
+  distinta, SÍ es ficha propia.
+- **Municiones — registra el precio TAL CUAL lo da el inventario. NO inventes, NO
+  prorratees, NO calcules por-unidad.** Si DCAM vende por cartucho, registras por
+  cartucho; si OTCA vende por caja (p. ej. PMC 9mm: 17,700 existencia / $406.19), lo
+  registras por caja. Por eso DCAM y OTCA van SEPARADOS. **Marca distinta del mismo
+  calibre = ficha propia** (no consolidar marcas). Existencia = la del inventario.
 
 ## 4) Verificar (obligatorio antes de commitear)
 Invoca el skill `verificar-app` o corre `scripts/auditar.js`:
@@ -77,3 +87,17 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
 - 2026-06: OTCA anexo trae un layout distinto al DCAM (columnas apiladas).
 - 2026-06: gotcha git — `checkout -B <rama> origin/main` SIN `fetch` previo te basa
   en un main viejo; rebasa antes de pushear si te pasó.
+- 2026-06 (anexos 18-jun): un "ANEXO" DCAM puede ser SOLO armas (sin accesorios ni
+  municiones). Verifica composición antes de asumir refresco de los 3 catálogos.
+- 2026-06: cuando llega un inventario casi idéntico a uno ya conciliado (16→18-jun),
+  reconstruir el mapeo arma→renglón por `(precio, qty)` exacto del estado actual es
+  rápido y auto-verificable (Δ mediano ~0 confirma; un mis-map da saltos enormes).
+- 2026-06: `getArmaExistenciasOTCA` tenía hardcodeado el manualId del 26-sep → al alta
+  de un OTCA nuevo hay que leer el OTCA MÁS RECIENTE (ya se hizo genérico).
+- 2026-06: parser OTCA — la EXISTENCIA puede traer coma (`17,700`); usar
+  `re.fullmatch(r'[\d,]+', s)`, no `isdigit()`. Saltar el boilerplate de pie/encabezado
+  que se repite por página (RVC-…, "18 DE JUNIO…", "SECRETARÍA…"). Los números grandes
+  con coma son EXISTENCIA, no precio.
+- 2026-06: variante representativa puede desaparecer aunque el modelo siga disponible
+  (Browning Maxus V.H.→B.G.). No agotar por ausencia del nombre exacto; revalidar por
+  marca+modelo.
