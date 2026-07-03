@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '%s\\n' 'ARMADO EN MÉXICO — tooling en .claude/skills (autoinvocables por su description):' '  • conciliar-inventario  → incorporar un PDF DCAM/OTCA (precios/existencias/altas).' '  • verificar-app         → antes de commitear: node .claude/skills/conciliar-inventario/scripts/auditar.js' '  • fidelidad-diseno      → al tocar UI: mantener el look táctico y no romper la transpilación.' '  • publicar              → git fetch antes de checkout -B; PR a main Y develop; cache-busting ?v=.' '  • mejorar-tooling       → al cerrar una tarea: capturar aprendizajes en las skills.' 'Agentes: conciliador-inventario, revisor-armado. Verifica SIEMPRE con auditar.js antes de publicar.'"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(node .claude/skills/conciliar-inventario/scripts/auditar.js)",
+      "Bash(python3 .claude/skills/conciliar-inventario/scripts/parse_pdf.py:*)",
+      "Bash(git fetch:*)",
+      "Bash(git status:*)",
+      "Bash(git log:*)",
+      "Bash(git diff:*)"
+    ]
+  }
+}
