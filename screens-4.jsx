@@ -176,9 +176,9 @@ function TraumaLegal({ vp }) {
 
       <div style={{
         marginTop: 16, padding: '12px 16px', background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.red}`, borderLeft: `4px solid ${PALETTE.red}`,
+        border: `1px solid ${PALETTE.redHi}`, borderLeft: `4px solid ${PALETTE.redHi}`,
       }}>
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.red, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>▲ Aviso</div>
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.redHi, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>▲ Aviso</div>
         <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6 }}>{L.disclaimer}</div>
       </div>
     </div>
@@ -258,7 +258,7 @@ function TraumaTierCard({ p, vp, onNav }) {
       <div style={{
         position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
         background: p.tierColor, color: badgeTextDark ? '#1A1A1A' : '#FFFFFF',
-        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 11.5,
+        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12,
         letterSpacing: '0.02em', padding: '5px 14px', borderRadius: 999, whiteSpace: 'nowrap',
       }}>{p.tier}</div>
 

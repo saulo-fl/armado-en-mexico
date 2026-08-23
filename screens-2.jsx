@@ -129,7 +129,8 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               background: inCmp ? PALETTE.amber : 'transparent',
               color: inCmp ? '#000' : PALETTE.amber,
               border: `1.5px solid ${PALETTE.amber}`,
-              padding: '10px',
+              clipPath: CUT_TR,
+              padding: '12px 10px', minHeight: 48,
               fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
               letterSpacing: '0.15em', textTransform: 'uppercase',
               cursor: 'pointer'
@@ -184,7 +185,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                   {statsKeys.map((s) => {
                       const raw = arma.stats[s.k] || 0;
                       const v = s.invert ? 100 - raw : raw;
-                      const barColor = v >= 67 ? '#4FAE5C' : v >= 34 ? '#F5C518' : '#C0392B';
+                      const barColor = v >= 67 ? '#4FAE5C' : v >= 34 ? '#F5C518' : '#E4574B';
                       return (
                         <div key={s.k} style={{ display: 'grid', gridTemplateColumns: '92px 1fr', alignItems: 'center', gap: 12, marginBottom: 10 }}>
                           <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.l}</span>
@@ -213,8 +214,10 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           { id: 'history', label: 'Historia' }].
           map((t) =>
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, background: 'none', border: 'none',
-            padding: '12px 8px',
+            flex: 1,
+            background: tab === t.id ? 'linear-gradient(180deg, transparent, rgba(245,197,24,0.06))' : 'none',
+            border: 'none',
+            padding: '14px 8px', minHeight: 48,
             borderBottom: tab === t.id ? `2px solid ${PALETTE.amber}` : '2px solid transparent',
             cursor: 'pointer',
             fontFamily: 'Montserrat, sans-serif',
@@ -248,7 +251,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
             <SectionHeader>Precio de Referencia</SectionHeader>
             <div style={{
-              background: PALETTE.bgCard,
+              background: 'linear-gradient(180deg, #262420, #211F1B)',
               border: `1px solid ${PALETTE.amber}`,
               padding: '14px 14px',
               marginBottom: 16,
@@ -328,7 +331,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                           <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                               {b.agotado ? (
-                                <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#C0392B', letterSpacing: '0.06em' }}>
+                                <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#E4574B', letterSpacing: '0.06em' }}>
                                   AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b>
                                 </span>
                               ) : (
@@ -414,7 +417,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                             <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
                             {hAut &&
                               <span title={hAut.nombre} style={{
-                                fontFamily: 'Courier Prime, monospace', fontSize: 11, fontWeight: 700,
+                                fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
                                 letterSpacing: '0.1em', color: '#000', background: hAut.color,
                                 padding: '1px 6px', flexShrink: 0,
                               }}>{hAut.sigla}</span>}
@@ -646,6 +649,44 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         </div>
         }
      </div>
+
+      {/* BARRA FIJA DE ACCIÓN (móvil) — precio + comparar en zona del pulgar.
+          Se oculta si el flotante de comparación está activo (mismo hueco). */}
+      {vp.isMobile && compareIds.length === 0 &&
+        <div style={{
+          position: 'fixed', left: 0, right: 0,
+          bottom: 'calc(76px + env(safe-area-inset-bottom))', // mismo hueco que CompareFloat (sobre BottomNav)
+          background: 'rgba(26,26,26,0.97)',
+          backdropFilter: 'blur(10px)',
+          borderTop: `1px solid ${PALETTE.border}`,
+          padding: '10px 16px',
+          display: 'flex', alignItems: 'center', gap: 12,
+          zIndex: 55,
+        }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{
+              fontFamily: 'Courier Prime, monospace', fontSize: 12,
+              color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase',
+            }}>Precio actual</div>
+            <div style={{
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18,
+              color: PALETTE.amber, whiteSpace: 'nowrap',
+            }}>{(priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact).replace(' MXN', '')}</div>
+          </div>
+          <div style={{ flex: 1 }} />
+          <button onClick={() => toggleCompare(arma.id)} style={{
+            background: inCmp ? 'transparent' : PALETTE.amber,
+            color: inCmp ? PALETTE.amber : '#000',
+            border: `1.5px solid ${PALETTE.amber}`,
+            clipPath: CUT_TR,
+            minHeight: 46, padding: '0 20px',
+            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+            letterSpacing: '0.12em', textTransform: 'uppercase',
+            cursor: 'pointer',
+            boxShadow: inCmp ? 'none' : '0 0 16px rgba(245,197,24,0.25)',
+          }}>{inCmp ? '✓ Añadida' : '⇄ Comparar'}</button>
+        </div>
+      }
     </div>);
 
 }
@@ -1312,14 +1353,14 @@ function LegalScreen({ onNav }) {
       {/* DISCLAIMER OFICIAL — visible al principio */}
       <div style={{
         background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.red}`,
-        borderLeft: `4px solid ${PALETTE.red}`,
+        border: `1px solid ${PALETTE.redHi}`,
+        borderLeft: `4px solid ${PALETTE.redHi}`,
         padding: '14px',
         marginBottom: 22
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.red,
+          fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6,
           fontWeight: 700
@@ -1553,13 +1594,13 @@ function AboutScreen() {
       {/* 1 ▸ DISCLAIMER OFICIAL — NO SOMOS GOBIERNO */}
       <div style={{
         background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.red}`,
-        borderLeft: `4px solid ${PALETTE.red}`,
+        border: `1px solid ${PALETTE.redHi}`,
+        borderLeft: `4px solid ${PALETTE.redHi}`,
         padding: 14, marginBottom: 18
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.red,
+          fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
         }}>▲ NO SOMOS GOBIERNO · FINES INFORMATIVOS</div>
@@ -1736,13 +1777,13 @@ function FAQScreen() {
       {/* DISCLAIMER */}
       <div style={{
         background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.red}`,
-        borderLeft: `4px solid ${PALETTE.red}`,
+        border: `1px solid ${PALETTE.redHi}`,
+        borderLeft: `4px solid ${PALETTE.redHi}`,
         padding: 14, marginBottom: 18
       }}>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.red,
+          fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
