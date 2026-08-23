@@ -79,7 +79,8 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           <button onClick={doHomeSearch} style={{
             background: PALETTE.amber, border: 'none', cursor: 'pointer', color: '#000',
             fontFamily: 'Courier Prime, monospace', fontSize: 13, fontWeight: 700,
-            letterSpacing: '0.1em', textTransform: 'uppercase', padding: '7px 14px', whiteSpace: 'nowrap'
+            letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 16px', whiteSpace: 'nowrap',
+            clipPath: CUT_TR, minHeight: 44
           }}>Buscar</button>
         </div>
       </div>
@@ -921,7 +922,7 @@ function PriceRange({ min, max, lo, hi, step, capped, onChange }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
+        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
         <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {hiLabel}</span>
       </div>
       <div style={{ position: 'relative', height: 28 }}>
@@ -943,7 +944,7 @@ function FilterSelect({ label, value, onChange, options }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <span style={{
-        fontFamily: 'Courier Prime, monospace', fontSize: 11.5, color: PALETTE.textMuted,
+        fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted,
         letterSpacing: '0.14em', textTransform: 'uppercase',
       }}>{label}</span>
       <div style={{ position: 'relative' }}>
@@ -960,7 +961,7 @@ function FilterSelect({ label, value, onChange, options }) {
         </select>
         <span aria-hidden="true" style={{
           position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)',
-          pointerEvents: 'none', color: active ? PALETTE.amber : PALETTE.textMuted, fontSize: 11,
+          pointerEvents: 'none', color: active ? PALETTE.amber : PALETTE.textMuted, fontSize: 12,
         }}>▾</span>
       </div>
     </label>
@@ -1012,7 +1013,7 @@ function ArsenalPhotoCard({ label, sub, count, img, color, onClick }) {
         <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
           <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{label}</div>
           {sub && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: ac, marginTop: 3, letterSpacing: '0.08em', textShadow: '0 1px 2px rgba(0,0,0,0.7)' }}>{sub}</div>}
-          {!showImg && img && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 10.5, color: P.textMuted, marginTop: 2 }}>foto pendiente</div>}
+          {!showImg && img && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted, marginTop: 2 }}>foto pendiente</div>}
         </div>
       </div>
     </button>
@@ -1042,9 +1043,13 @@ function ArsenalHubScreen({ onNav }) {
   const grid = (cols) => ({ display: 'grid', gridTemplateColumns: vp.isDesktop ? `repeat(${cols},1fr)` : '1fr 1fr', gap: 8, marginBottom: 4 });
   const Hdr = ({ icon, children }) => (
     <div style={{
+      display: 'flex', alignItems: 'center', gap: 10,
       fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.amber,
-      letterSpacing: '0.2em', textTransform: 'uppercase', fontWeight: 600, margin: '22px 0 8px',
-    }}>{icon} {children}</div>
+      letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600, margin: '22px 0 8px',
+    }}>
+      <span>{icon} {children}</span>
+      <span aria-hidden="true" style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${P.border}, transparent)` }} />
+    </div>
   );
   const Card = ({ label, sub, count, color, onClick }) => (
     <button onClick={onClick} style={{
@@ -1091,7 +1096,7 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Cacería" sub="Caza mayor y menor" count={usoCount('caza')} onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
         <Card label="Defensa del hogar" sub="Uso en domicilio" count={usoCount('domicilio')} onClick={() => onNav('category', { mode: 'uso', value: 'domicilio' })} />
         <Card label="Seguridad privada" sub="Licencia colectiva" color="#F5C518" count={availCount('seguridad')} onClick={() => onNav('category', { mode: 'avail', value: 'seguridad' })} />
-        <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color="#C0392B" count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
+        <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color="#E4574B" count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
       </div>
 
       <Hdr icon="◈">Calibre</Hdr>

@@ -5,19 +5,27 @@ const PALETTE = {
   bg:        '#1A1A1A',
   bgElev:    '#2C2C2C',
   bgCard:    '#2C2C2C',
+  // gradiente sutil de profundidad para tarjetas (rediseño móvil 2026)
+  bgCardGrad:'linear-gradient(180deg, #2F2F2F, #272727)',
   border:    '#3A3A3A',
   borderHi:  '#555555',
   amber:     '#F5C518',
   amberDim:  '#D4A910',
   military:  '#555555',
-  red:       '#C0392B',
+  red:       '#C0392B',   // relleno (con texto blanco: 5.4:1)
+  redHi:     '#E4574B',   // texto/borde sobre fondo oscuro (4.8:1 AA; #C0392B solo da 3.2:1)
   green:     '#4FAE5C',
   blue:      '#7E8A99',
   text:      '#FFFFFF',
   textDim:   '#B5B5B5',
-  textMuted: '#7A7A7A',
+  textMuted: '#9A9A9A',   // antes #7A7A7A (4.0:1, fallaba AA); ahora 6.1:1
 };
 window.PALETTE = PALETTE;
+
+// Corte biselado (esquina superior derecha) — lenguaje "menos cuadrado" del rediseño
+const CUT_TR = 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)';
+const CUT_TR_SM = 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)';
+window.CUT_TR = CUT_TR;
 
 // ──────────────────────────────────────────────────────────────
 // USE VIEWPORT — hook responsivo
@@ -201,26 +209,26 @@ function AvailBadge({ avail, compact = false }) {
     dcam:      { label: 'CIVIL · DCAM',   short: 'CIVIL',     color: PALETTE.green, dot: '●' },
     externo:   { label: 'CIVIL · EXT',    short: 'CIVIL',     color: PALETTE.green, dot: '●' },
     seguridad: { label: 'SEGURIDAD',      short: 'SEGURIDAD', color: PALETTE.amber,    dot: '◆' },
-    ejercito:  { label: 'EJÉRCITO',       short: 'EJÉRCITO',  color: PALETTE.red,      dot: '▲' },
+    ejercito:  { label: 'EJÉRCITO',       short: 'EJÉRCITO',  color: PALETTE.redHi,    dot: '▲' },
   };
   const m = map[avail] || map.dcam;
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
-      padding: compact ? '2px 6px' : '3px 8px',
-      borderRadius: 2,
+      padding: compact ? '3px 8px' : '4px 9px',
       background: 'rgba(0,0,0,0.55)',
       border: `1px solid ${m.color}`,
+      clipPath: CUT_TR_SM,
       color: m.color,
       fontFamily: 'Courier Prime, monospace',
-      fontSize: compact ? '10px' : '11px',
+      fontSize: '12px', // piso tipográfico 12px (antes 10-11px)
       fontWeight: 600,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
       lineHeight: 1,
       whiteSpace: 'nowrap',
     }}>
-      <span style={{ fontSize: compact ? '8px' : '9px' }}>{m.dot}</span>
+      <span style={{ fontSize: compact ? '9px' : '10px' }}>{m.dot}</span>
       <span>{compact ? m.short : m.label}</span>
     </span>
   );
@@ -250,6 +258,14 @@ window.PriceLevel = PriceLevel;
 // marca + bandera · nombre (2 líneas) · calibre · legalidad · precio
 // ──────────────────────────────────────────────────────────────
 function ArmaCardBody({ arma }) {
+  // Existencias por sucursal en la tarjeta (rediseño 2026): dato del último
+  // inventario de cada sede, mismas fuentes que la ficha (solo lectura).
+  const exD = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
+  const exOReg = window.getArmaExistenciasOTCA ? window.getArmaExistenciasOTCA(arma.id) : null;
+  const exO = exOReg && exOReg.qty != null ? exOReg.qty : null;
+  const enStock = exD != null || exO != null;
+  // precio exacto compacto: "$9,870.04 MXN" → "$9,870"
+  const priceShort = (arma.priceExact || '').replace(/\.\d{2}\s*MXN\s*$/, '');
   return (
     <div style={{ padding: '10px 12px 12px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
@@ -286,10 +302,28 @@ function ArmaCardBody({ arma }) {
       }}>
         <span style={{ color: PALETTE.textMuted }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}
       </div>
+      {/* existencias por sucursal (último inventario de cada sede) */}
+      <div style={{
+        fontFamily: 'Courier Prime, monospace',
+        fontSize: 12,
+        color: enStock ? PALETTE.green : PALETTE.redHi,
+        marginBottom: 8,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>
+        {enStock
+          ? <>● {exD != null && <>{exD} DCAM</>}{exD != null && exO != null && ' · '}{exO != null && <>{exO} OTCA</>}</>
+          : '✕ AGOTADO'}
+      </div>
       {/* legalidad + precio */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
         <AvailBadge avail={arma.avail} compact />
-        <PriceLevel lvl={arma.priceLvl} />
+        <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+          <PriceLevel lvl={arma.priceLvl} />
+          {priceShort && <span style={{
+            fontFamily: 'Courier Prime, monospace',
+            fontSize: 12, color: PALETTE.textDim, lineHeight: 1,
+          }}>{priceShort}</span>}
+        </span>
       </div>
     </div>
   );
@@ -299,7 +333,9 @@ window.ArmaCardBody = ArmaCardBody;
 // ──────────────────────────────────────────────────────────────
 // TACTICAL CORNERS — esquinas tipo mira para enmarcar contenido
 // ──────────────────────────────────────────────────────────────
-function TacticalCorners({ color = PALETTE.amber, size = 10, thickness = 1.5 }) {
+function TacticalCorners({ color = PALETTE.amber, size = 10, thickness = 1.5, all = false }) {
+  // Rediseño 2026: 2 esquinas asimétricas (tl+br) por defecto — menos rígido que 4.
+  // `all` conserva el marco completo para los casos que lo pidan explícitamente.
   const style = (pos) => {
     const s = { position: 'absolute', width: size, height: size, pointerEvents: 'none' };
     if (pos.includes('t')) { s.top = 0; s.borderTop = `${thickness}px solid ${color}`; }
@@ -311,8 +347,8 @@ function TacticalCorners({ color = PALETTE.amber, size = 10, thickness = 1.5 }) 
   return (
     <React.Fragment>
       <span style={style('tl')}></span>
-      <span style={style('tr')}></span>
-      <span style={style('bl')}></span>
+      {all && <span style={style('tr')}></span>}
+      {all && <span style={style('bl')}></span>}
       <span style={style('br')}></span>
     </React.Fragment>
   );
@@ -388,9 +424,12 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
         fontFamily: 'Montserrat, sans-serif',
         fontSize: 16, fontWeight: 600,
         color: PALETTE.text,
-        textTransform: 'uppercase', letterSpacing: '0.15em',
-        flex: 1,
+        textTransform: 'uppercase', letterSpacing: '0.13em',
       }}>{children}</div>
+      <span aria-hidden="true" style={{
+        flex: 1, height: 1, minWidth: 12,
+        background: `linear-gradient(90deg, ${PALETTE.border}, transparent)`,
+      }} />
       {action}
     </div>
   );
@@ -471,12 +510,28 @@ window.AppHeader = AppHeader;
 // BOTTOM NAV — navegación inferior
 // ──────────────────────────────────────────────────────────────
 function BottomNav({ current, onNav, compareCount }) {
+  // Iconos SVG de trazo (1.75) — los glifos de fuente (◈▤⇄§☰) renderizan
+  // distinto por plataforma; el SVG es consistente y escala limpio.
+  const NavIcon = ({ id }) => {
+    const paths = {
+      home:    <React.Fragment><path d="M4 11.2 12 4.8l8 6.4" /><path d="M6.4 10v9h11.2v-9" /></React.Fragment>,
+      catalog: <React.Fragment><circle cx="12" cy="12" r="6.4" /><path d="M12 2.8v4M12 17.2v4M2.8 12h4M17.2 12h4" /></React.Fragment>,
+      compare: <path d="M6.5 8.5h11l-3.2-3.2M17.5 15.5h-11l3.2 3.2" />,
+      legal:   <React.Fragment><path d="M12 3.6 18.8 6v5c0 4-2.9 6.4-6.8 7.9C8.1 17.4 5.2 15 5.2 11V6z" /><path d="m9.4 11.5 1.9 1.9 3.4-3.4" /></React.Fragment>,
+      menu:    <path d="M5 7h14M5 12h14M5 17h14" />,
+    };
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+        style={{ display: 'block' }}>{paths[id] || paths.menu}</svg>
+    );
+  };
   const items = [
-    { id: 'home',    label: 'INICIO',     icon: '◈' },
-    { id: 'catalog', label: 'ARSENAL',    icon: '▤' },
-    { id: 'compare', label: 'COMPARAR',   icon: '⇄', badge: compareCount },
-    { id: 'legal',   label: 'LEGALIDAD',  icon: '§' },
-    { id: 'menu',    label: 'MÁS',        icon: '☰' },
+    { id: 'home',    label: 'INICIO' },
+    { id: 'catalog', label: 'ARSENAL' },
+    { id: 'compare', label: 'COMPARAR', badge: compareCount },
+    { id: 'legal',   label: 'LEGALIDAD' },
+    { id: 'menu',    label: 'MÁS' },
   ];
   return (
     <div style={{
@@ -494,7 +549,7 @@ function BottomNav({ current, onNav, compareCount }) {
           <button key={it.id} onClick={() => onNav(it.id)} style={{
             flex: 1, background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            padding: '6px 4px', gap: 3,
+            padding: '8px 4px', gap: 4, minHeight: 48,
             color: active ? PALETTE.amber : PALETTE.textDim,
             position: 'relative',
           }}>
@@ -505,11 +560,11 @@ function BottomNav({ current, onNav, compareCount }) {
                 boxShadow: `0 0 6px ${PALETTE.amber}`,
               }} />
             )}
-            <span style={{ fontSize: 20.5, lineHeight: 1, position: 'relative' }}>
-              {it.icon}
+            <span style={{ lineHeight: 1, position: 'relative' }}>
+              <NavIcon id={it.id} />
               {it.badge ? (
                 <span style={{
-                  position: 'absolute', top: -4, right: -8,
+                  position: 'absolute', top: -4, right: -10,
                   background: PALETTE.amber, color: '#000',
                   fontSize: 12, fontWeight: 700,
                   borderRadius: 8, padding: '1px 4px',
@@ -520,8 +575,8 @@ function BottomNav({ current, onNav, compareCount }) {
             </span>
             <span style={{
               fontFamily: 'Montserrat, sans-serif',
-              fontSize: 11, fontWeight: 500,
-              letterSpacing: '0.08em',
+              fontSize: 12, fontWeight: active ? 600 : 500,
+              letterSpacing: '0.07em',
             }}>{it.label}</span>
           </button>
         );
@@ -539,7 +594,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
   return (
     <div onClick={onClick} style={{
       position: 'relative',
-      background: PALETTE.bgCard,
+      background: PALETTE.bgCardGrad,
       border: `1px solid ${PALETTE.border}`,
       cursor: 'pointer',
       transition: 'border-color 0.18s',
@@ -547,7 +602,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
       height: '100%',
       display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto',
-      containIntrinsicSize: 'auto 150px',
+      containIntrinsicSize: 'auto 170px',
     }}
     onMouseEnter={e => e.currentTarget.style.borderColor = PALETTE.amber}
     onMouseLeave={e => e.currentTarget.style.borderColor = PALETTE.border}
@@ -866,7 +921,8 @@ function FilterChip({ children, active, onClick, count }) {
       background: active ? PALETTE.amber : 'transparent',
       color: active ? '#000' : PALETTE.textDim,
       border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
-      padding: '5px 10px',
+      padding: '10px 12px', minHeight: 44,
+      clipPath: CUT_TR_SM,
       fontFamily: 'Courier Prime, monospace',
       fontSize: 14.5, fontWeight: 600,
       letterSpacing: '0.08em', textTransform: 'uppercase',

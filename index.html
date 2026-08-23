@@ -135,9 +135,24 @@
   /* input placeholder */
   input::placeholder { color: #7A7A7A; }
 
-  /* focus */
-  button:focus-visible { outline: 1px solid #F5C518; outline-offset: 1px; }
+  /* focus — anillo visible 2px (accesibilidad).
+     OJO: en elementos con clip-path el anillo va en un wrapper sin recorte
+     (el clip se traga el outline). */
+  button:focus-visible, a:focus-visible, input:focus-visible,
+  select:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid #F5C518; outline-offset: 2px;
+  }
   button { -webkit-tap-highlight-color: transparent; }
+
+  /* accesibilidad: respetar la preferencia de menos movimiento */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 
   /* selección de texto */
   ::selection { background: rgba(245,197,24,0.4); color: #fff; }

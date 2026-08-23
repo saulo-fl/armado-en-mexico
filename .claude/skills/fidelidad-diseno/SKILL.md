@@ -29,6 +29,28 @@ description: Guía de fidelidad estética para "Armado en México" — mantén e
 - Mobile-first (hay `BottomNav` y `useViewport`); áreas táctiles ≥40px; contraste ok.
 - Mantén el rendimiento (las tarjetas usan `contentVisibility`).
 
+## Rediseño móvil 2026 (canvas aprobado — tokens vigentes)
+Canvas de referencia: https://claude.ai/code/artifact/5bfe4baa-8106-44a4-b122-1f49a622905e
+- **Contraste AA sobre #1A1A1A:** `textMuted = #9A9A9A` (nunca volver a #7A7A7A);
+  rojo para TEXTO/BORDE = `PALETTE.redHi #E4574B`; `PALETTE.red #C0392B` queda SOLO
+  como relleno con texto blanco.
+- **Piso tipográfico 12px** en todo texto informativo (badges, etiquetas, nav).
+- **Áreas táctiles:** botones ≥44-48px, chips ≥44px, filas de nav ≥48px.
+- **Lenguaje "menos cuadrado":** corte biselado `window.CUT_TR` (clip-path esquina
+  sup-der) en CTAs/badges/chips; `TacticalCorners` ahora pinta 2 esquinas (tl+br)
+  por defecto (`all` para las 4); tarjetas con `PALETTE.bgCardGrad`; separadores
+  `linear-gradient(90deg, border, transparent)` (SectionHeader/Hdr ya lo hacen).
+- **OJO clip-path + foco:** el clip se traga el `outline` — el anillo de foco va en
+  un wrapper sin recorte si el elemento lleva corte.
+- **Nav inferior:** iconos SVG de trazo 1.75 (componente `NavIcon` en BottomNav);
+  no volver a glifos de fuente (◈▤⇄§☰ renderizan distinto por plataforma).
+- **Tarjetas de arma:** muestran existencias por sucursal (`● 36 DCAM · 18 OTCA` /
+  `✕ AGOTADO`) y precio exacto compacto bajo la escala $$$$$ (solo lectura de
+  getArmaExistencias/getArmaExistenciasOTCA — sin tocar store).
+- **Ficha móvil:** barra fija de acción (precio + comparar) a `bottom: calc(76px +
+  safe-area)` — mismo hueco que CompareFloat; se oculta si hay comparación activa.
+- `index.html`: foco visible 2px + offset y `prefers-reduced-motion` ya globales.
+
 ## Decisiones de producto ya tomadas (respétalas)
 - El arsenal abre en un HUB por categorías (`ArsenalHubScreen`), no lista plana.
 - Encabezados del hub sin "Por": Armería, Disponibilidad, Tipo de arma, Uso, Calibre.
@@ -39,5 +61,13 @@ description: Guía de fidelidad estética para "Armado en México" — mantén e
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
 - 2026-06: `@babel/standalone` está vendorizado en `node_modules` → úsalo para validar.
+- 2026-08: `node_modules` NO está en git — al reciclarse el contenedor se pierde.
+  Reinstalar: `npm install --no-save @babel/standalone@7.29.0`. GOTCHA: sin
+  package.json, cada `npm install --no-save X` BORRA los paquetes anteriores —
+  instala todo lo que necesites en UN solo comando.
+- 2026-08: smoke test visual sin red del navegador: `python3 -m http.server` +
+  playwright-core con `executablePath:'/opt/pw-browsers/chromium'` y `page.route`
+  ruteando unpkg a copias locales (npm react@18.3.1 trae `umd/`). El tutorial de
+  bienvenida cubre la home la primera vez — clic en SALTAR antes de capturar.
 - 2026-06: fotos de armería son placeholders SVG (`imagenes/armeria-*.svg`) por falta
   de red; cuando lleguen fotos reales, apuntar a `.jpg`.
