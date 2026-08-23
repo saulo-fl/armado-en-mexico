@@ -331,7 +331,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
           </select>
           {anyFilter &&
             <button onClick={clearAll} style={{
-              background: 'transparent', color: P.red, border: `1px solid ${P.red}`,
+              background: 'transparent', color: P.redHi, border: `1px solid ${P.redHi}`,
               padding: '11px 14px', minHeight: 44, boxSizing: 'border-box', cursor: 'pointer',
               fontFamily: 'Courier Prime, monospace',
               fontSize: 15, letterSpacing: '0.08em', textTransform: 'uppercase',
@@ -595,7 +595,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                     <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                         {b.agotado ? (
-                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#C0392B', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#E4574B', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                         ) : (
                           <React.Fragment>
                             <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
@@ -652,7 +652,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                           <span style={{ color: P.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
                           {hAut &&
                             <span title={hAut.nombre} style={{
-                              fontFamily: 'Courier Prime, monospace', fontSize: 11, fontWeight: 700,
+                              fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
                               letterSpacing: '0.1em', color: '#000', background: hAut.color,
                               padding: '1px 6px', flexShrink: 0,
                             }}>{hAut.sigla}</span>}
