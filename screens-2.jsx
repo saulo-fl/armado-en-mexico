@@ -13,10 +13,25 @@ function amxFmtManualDate(f) {
 // ════════════════════════════════════════════════════════════════
 // PRODUCT — Ficha completa de un arma
 // ════════════════════════════════════════════════════════════════
+// Sección de la ficha. Vive FUERA de ProductScreen a propósito: definida
+// dentro, React la trataría como un componente nuevo en cada render y
+// remontaría el subárbol — lo que cerraría los <details> abiertos.
+function ProdSection({ pad, gap, band, children }) {
+  return (
+    <section style={{
+      padding: `${gap}px ${pad}px ${band ? gap : 0}px`,
+      background: band ? PALETTE.bgElev : 'transparent'
+    }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+        {children}
+      </div>
+    </section>
+  );
+}
+
 function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   const arma = window.findArma(armaId);
-  const [tab, setTab] = useState2('specs');
   const [showSuggest, setShowSuggest] = useState2(false);
 
   // track de visita una vez por mount
@@ -30,7 +45,10 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const inCmp = compareIds.includes(arma.id);
   const containerMax = { maxWidth: 1200, margin: '0 auto', width: '100%' };
   const PAD = vp.isDesktop ? 28 : 16;
-  const flag = window.countryFlag(arma.pais);
+  const SEC = vp.isDesktop ? 52 : 34;   // aire ENTRE secciones (dentro se usa 12-22)
+  const ORANGE = window.GUN_ACCENT || PALETTE.amber;
+  const NUM = { fontVariantNumeric: 'tabular-nums' };
+
   const priceHistory = window.Store ? window.Store.getPriceHistory(arma.id) : [];
   const manuales = window.Store ? window.Store.getManuales() : [];
   const manualById = (id) => (id ? manuales.find((m) => m.id === id) : null) || null;
@@ -41,18 +59,125 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
     (window.Store ? window.Store.getPrimaryManual() : null);
   const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
   const curSigla = curAut ? curAut.sigla : 'DCAM';
+  const precioActual = priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact;
 
-  // armas relacionadas (mismo tipo)
+  // Existencias POR SUCURSAL (no hay primaria/secundaria): DCAM y OTCA se
+  // muestran por separado, cada una con su inventario fuente. Regla: SOLO
+  // cuenta el ÚLTIMO inventario de cada sucursal. Si el arma no aparece en él,
+  // se asume AGOTADA en esa sede.
+  const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'DCAM'))) || 'DCAM';
+  const latestByBranch = (sigla) => manuales.find((m) => autOf(m) === sigla) || null; // manuales: más reciente primero
+  const everIn = (sigla) => priceHistory.some((h) => autOf(manualById(h.manualId)) === sigla);
+  const branches = [];
+  const dcamQty = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
+  const latestDcam = latestByBranch('DCAM');
+  if (dcamQty != null) {
+    branches.push({ sigla: 'DCAM', qty: dcamQty, manual: latestDcam, agotado: false });
+  } else if (everIn('DCAM') && latestDcam) {
+    branches.push({ sigla: 'DCAM', qty: null, manual: latestDcam, agotado: true });
+  }
+  const latestOtca = latestByBranch('OTCA');
+  if (latestOtca) {
+    const rec = priceHistory.find((h) => h.manualId === latestOtca.id);
+    if (rec && rec.qty != null) {
+      branches.push({ sigla: 'OTCA', qty: rec.qty, manual: latestOtca, agotado: false });
+    } else if (everIn('OTCA')) {
+      branches.push({ sigla: 'OTCA', qty: null, manual: latestOtca, agotado: true });
+    }
+  }
+
+  // La gráfica necesita DOS fechas distintas: DCAM y OTCA publican el mismo
+  // día y sus registros se funden en un solo punto.
+  const fechasHist = [];
+  priceHistory.forEach((h) => { if (fechasHist.indexOf(h.date) < 0) fechasHist.push(h.date); });
+  const hayGrafica = fechasHist.length >= 2;
+  const pIni = priceHistory.length ? window.amxPrecioNum(priceHistory[0].price) : null;
+  const pFin = window.amxPrecioNum(precioActual);
+  const deltaPct = (hayGrafica && pIni && pFin != null) ? ((pFin - pIni) / pIni) * 100 : null;
+
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
+  const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
+  const muns = window.getMunicionesParaArma ? window.getMunicionesParaArma(arma) : [];
+
+  // Valoración: 'retroceso' se invierte (barra larga = poco retroceso), por eso
+  // la etiqueta dice "control" — con el número a la vista, "Retroceso 52" se
+  // habría leído justo al revés.
+  const statsKeys = [
+    { k: 'precision', l: 'Precisión' },
+    { k: 'poder', l: 'Daño' },
+    { k: 'alcance', l: 'Alcance' },
+    { k: 'manejo', l: 'Movilidad' },
+    { k: 'capacidad', l: 'Capacidad' },
+    { k: 'retroceso', l: 'Control retroceso', invert: true }];
+  const quick = [
+    { l: 'Calibre', v: arma.calibre },
+    { l: 'Capacidad', v: arma.capacidad },
+    { l: 'Longitud', v: arma.longitud },
+    { l: 'Peso', v: arma.peso }];
+
+  const btnComparar = (
+    <span className="amx-cut" style={{ display: vp.isDesktop ? 'inline-block' : 'block' }}>
+      <button onClick={() => toggleCompare(arma.id)} style={{
+        width: '100%',
+        background: inCmp ? PALETTE.amber : 'transparent',
+        color: inCmp ? '#000' : PALETTE.amber,
+        border: `1.5px solid ${PALETTE.amber}`,
+        clipPath: CUT_TR,
+        padding: '12px 22px', minHeight: 48,
+        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+        letterSpacing: '0.15em', textTransform: 'uppercase',
+        cursor: 'pointer'
+      }}>{inCmp ? '✓ AÑADIDA' : '⇄ Comparar'}</button>
+    </span>
+  );
 
   return (
     <div style={{ paddingBottom: 90 }}>
      <div style={containerMax}>
-      {/* HERO IMAGE — original (foto principal del arma) */}
+
+      {/* ── 1 · IDENTIDAD — quién es el arma, antes de enseñarla ───────── */}
+      <div style={{ padding: `${vp.isDesktop ? 26 : 18}px ${PAD}px ${vp.isDesktop ? 16 : 12}px` }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+          fontFamily: 'Courier Prime, monospace', fontSize: 14,
+          color: ORANGE, letterSpacing: '0.18em', textTransform: 'uppercase',
+          marginBottom: 6
+        }}>
+          <CountryFlag pais={arma.pais} height={12} />
+          <span>{arma.marca} · {arma.pais} · {arma.anio}</span>
+          <span style={{ flex: 1 }} />
+          <span style={{ color: PALETTE.textMuted, ...NUM }}>◢ ID-{String(arma.id).padStart(3, '0')}</span>
+        </div>
+
+        <h1 style={{
+          fontFamily: 'Montserrat, sans-serif',
+          fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26,
+          color: PALETTE.text, textTransform: 'uppercase',
+          lineHeight: 1.04, letterSpacing: '0.02em',
+          margin: '0 0 8px'
+        }}>{arma.nombre}</h1>
+
+        <div style={{
+          fontFamily: 'Courier Prime, monospace',
+          fontSize: 15.5, color: PALETTE.textDim, marginBottom: 12
+        }}>{arma.mecanismo}</div>
+
+        {/* la pregunta que trae al visitante, resuelta antes del pliegue */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <AvailBadge avail={arma.avail} />
+          <span style={{
+            fontFamily: 'Courier Prime, monospace', fontSize: 14,
+            color: availMeta?.color || PALETTE.textDim, letterSpacing: '0.04em'
+          }}>{arma.legalTit}</span>
+        </div>
+      </div>
+
+      {/* ── 2 · HERO — el arma es lo único brillante de la pantalla ────── */}
       <div style={{
           position: 'relative',
           height: vp.isDesktop ? 380 : 240,
           background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
+          borderTop: `1px solid ${PALETTE.border}`,
           borderBottom: `1px solid ${PALETTE.border}`,
           overflow: 'hidden'
         }}>
@@ -62,183 +187,293 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             backgroundSize: '20px 20px',
             maskImage: 'radial-gradient(circle, black 0%, transparent 70%)'
           }} />
-        {/* readouts */}
-        <div style={{
-            position: 'absolute', top: 12, left: 12,
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 13, color: PALETTE.amber,
-            letterSpacing: '0.18em', textTransform: 'uppercase'
-          }}>
-          ◢ ID-{String(arma.id).padStart(3, '0')}
-        </div>
-        <div style={{
-            position: 'absolute', top: 12, right: 12
-          }}>
-          <AvailBadge avail={arma.avail} compact />
-        </div>
-
         <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high" style={{
             position: 'absolute', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
             maxWidth: '85%', maxHeight: '75%',
             filter: 'grayscale(0.1) contrast(1.15) drop-shadow(0 8px 24px rgba(0,0,0,0.6))'
           }} onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-
-        {/* bottom readouts */}
-        <div style={{
-            position: 'absolute', bottom: 12, left: 12, right: 12,
-            display: 'flex', justifyContent: 'space-between',
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 12, color: PALETTE.textMuted,
-            letterSpacing: '0.15em'
-          }}>
-          <span>━━ {arma.longitud}</span>
-          <span>{arma.peso} ●</span>
-        </div>
       </div>
 
-      {/* TITLE BLOCK — original */}
-      <div style={{ padding: `16px ${PAD}px 12px`, borderBottom: `1px solid ${PALETTE.border}` }}>
+      {/* ── 3 · DATOS CLAVE ────────────────────────────────────────────── */}
+      <ProdSection pad={PAD} gap={vp.isDesktop ? 26 : 20}>
         <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 14.5, color: PALETTE.amber,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            marginBottom: 4,
-            display: 'flex', alignItems: 'center', gap: 8
+            display: 'grid',
+            gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
+            gap: 1, background: PALETTE.border,
+            border: `1px solid ${PALETTE.border}`
           }}>
-          <CountryFlag pais={arma.pais} height={12} />
-          <span>{arma.marca} · {arma.pais} · {arma.anio}</span>
-        </div>
-        <div style={{
-            fontFamily: 'Montserrat, sans-serif',
-            fontWeight: 700, fontSize: 26,
-            color: PALETTE.text,
-            textTransform: 'uppercase',
-            lineHeight: 1.05, letterSpacing: '0.02em',
-            marginBottom: 8
-          }}>{arma.nombre}</div>
-        <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 15.5, color: PALETTE.textDim,
-            marginBottom: 12
-          }}>{arma.mecanismo}</div>
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => toggleCompare(arma.id)} style={{
-              flex: 1,
-              background: inCmp ? PALETTE.amber : 'transparent',
-              color: inCmp ? '#000' : PALETTE.amber,
-              border: `1.5px solid ${PALETTE.amber}`,
-              clipPath: CUT_TR,
-              padding: '12px 10px', minHeight: 48,
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
-              letterSpacing: '0.15em', textTransform: 'uppercase',
-              cursor: 'pointer'
-            }}>{inCmp ? '✓ AÑADIDA' : '⇄ Comparar'}</button>
-        </div>
-      </div>
-
-{/* RESUMEN — specs clave + valoración (rediseño e-commerce, una sola imagen, sin HUD) */}
-      {(() => {
-          const ORANGE = window.GUN_ACCENT || '#F5C518';
-          const ORANGE_DEEP = window.GUN_ACCENT_DEEP || '#D4A910';
-          const statsKeys = [
-            { k: 'precision', l: 'Precisión' },
-            { k: 'poder', l: 'Daño' },
-            { k: 'alcance', l: 'Alcance' },
-            { k: 'manejo', l: 'Movilidad' },
-            { k: 'capacidad', l: 'Capacidad' },
-            { k: 'retroceso', l: 'Retroceso', invert: true }];
-          const quick = [
-            { l: 'Calibre', v: arma.calibre },
-            { l: 'Capacidad', v: arma.capacidad },
-            { l: 'Longitud', v: arma.longitud },
-            { l: 'Peso', v: arma.peso }];
-          return (
-            <div style={{ padding: vp.isDesktop ? `20px ${PAD}px 6px` : `16px ${PAD}px 4px` }}>
-              {/* KEY SPECS STRIP */}
-              <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
-                  gap: 1, background: PALETTE.border,
-                  border: `1px solid ${PALETTE.border}`, marginBottom: 22
-                }}>
-                {quick.map((q) =>
-                  <div key={q.l} style={{ background: PALETTE.bgCard, padding: '12px 14px' }}>
-                    <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
-                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: PALETTE.text, lineHeight: 1.1 }}>{q.v}</div>
-                  </div>
-                )}
-              </div>
-
-              {/* VALORACIÓN DIVULGATIVA — barras */}
-              <div style={{
-                  display: vp.isDesktop ? 'grid' : 'block',
-                  gridTemplateColumns: vp.isDesktop ? 'minmax(0,420px) 1fr' : '1fr',
-                  gap: vp.isDesktop ? 24 : 0, alignItems: 'start'
-                }}>
-                <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.16em' }}>Valoración divulgativa</div>
-                    <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Estimada</span>
-                  </div>
-                  {statsKeys.map((s) => {
-                      const raw = arma.stats[s.k] || 0;
-                      const v = s.invert ? 100 - raw : raw;
-                      const barColor = v >= 67 ? '#4FAE5C' : v >= 34 ? '#F5C518' : '#E4574B';
-                      return (
-                        <div key={s.k} style={{ display: 'grid', gridTemplateColumns: '92px 1fr', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.l}</span>
-                          <div style={{ position: 'relative', height: 5, background: 'rgba(255,255,255,0.06)' }}>
-                            <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${Math.max(2, Math.min(100, v))}%`, background: barColor, transition: 'width 0.3s ease' }} />
-                          </div>
-                        </div>);
-                    })}
-                </div>
-                <div style={{ padding: '10px 12px', fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textMuted, lineHeight: 1.55, borderLeft: `2px solid ${ORANGE}`, background: PALETTE.bgCard, marginTop: vp.isDesktop ? 28 : 14 }}>
-                  Estimaciones cualitativas derivadas de las especificaciones técnicas, con fines divulgativos y de comparación entre modelos.
-                </div>
-              </div>
-            </div>);
-        })()}
-
-      {/* TABS */}
-      <div style={{
-          display: 'flex',
-          borderBottom: `1px solid ${PALETTE.border}`,
-          background: PALETTE.bgElev
-        }}>
-        {[
-          { id: 'specs', label: 'Ficha Técnica' },
-          { id: 'legal', label: 'Legalidad' },
-          { id: 'history', label: 'Historia' }].
-          map((t) =>
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1,
-            background: tab === t.id ? 'linear-gradient(180deg, transparent, rgba(245,197,24,0.06))' : 'none',
-            border: 'none',
-            padding: '14px 8px', minHeight: 48,
-            borderBottom: tab === t.id ? `2px solid ${PALETTE.amber}` : '2px solid transparent',
-            cursor: 'pointer',
-            fontFamily: 'Montserrat, sans-serif',
-            fontSize: 13, fontWeight: 600,
-            letterSpacing: '0.12em', textTransform: 'uppercase',
-            color: tab === t.id ? PALETTE.amber : PALETTE.textDim
-          }}>{t.label}</button>
+          {quick.map((q) =>
+            <div key={q.l} style={{ background: PALETTE.bgCard, padding: '13px 14px' }}>
+              <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, lineHeight: 1.1, ...NUM }}>{q.v}</div>
+            </div>
           )}
-      </div>
+        </div>
+        <div style={{ marginTop: 14 }}>{btnComparar}</div>
+      </ProdSection>
 
-      {/* TAB CONTENT */}
-      <div style={{ padding: vp.isDesktop ? `20px ${PAD}px` : '16px', maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        {tab === 'specs' &&
-          <div>
-            <SectionHeader>Especificaciones Técnicas</SectionHeader>
-            <div style={{
-              background: PALETTE.bgCard,
-              border: `1px solid ${PALETTE.border}`,
-              marginBottom: 16
+      {/* ── 4 · VALORACIÓN DIVULGATIVA ─────────────────────────────────── */}
+      <ProdSection pad={PAD} gap={SEC} band>
+        <SectionHeader>Valoración divulgativa</SectionHeader>
+        <div style={{
+          // Panel HUNDIDO sobre la banda elevada: con bgCard (#2C2C2C) sobre la
+          // propia banda (#2C2C2C) la tarjeta desaparecía.
+          background: PALETTE.bg,
+          border: `1px solid ${PALETTE.border}`,
+          padding: vp.isDesktop ? '18px 20px 8px' : '15px 15px 5px',
+          position: 'relative'
+        }}>
+          <TacticalCorners size={10} color={ORANGE} />
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: vp.isDesktop ? 'repeat(2, minmax(0, 1fr))' : '1fr',
+            columnGap: 26
+          }}>
+            {statsKeys.map((s) => {
+              const raw = arma.stats[s.k] || 0;
+              const v = s.invert ? 100 - raw : raw;
+              const barColor = v >= 67 ? PALETTE.green : v >= 34 ? ORANGE : PALETTE.redHi;
+              return <window.StatsBar key={s.k} label={s.l} value={v} color={barColor} />;
+            })}
+          </div>
+          <div style={{
+            borderTop: `1px dashed ${PALETTE.border}`,
+            marginTop: 4, paddingTop: 10, paddingBottom: 10,
+            fontFamily: 'Courier Prime, monospace', fontSize: 13,
+            color: PALETTE.textMuted, lineHeight: 1.6
+          }}>
+            <b style={{ color: PALETTE.textDim }}>Estimación por familia</b> · todas las armas
+            de tipo {arma.tipo} en calibre {arma.calibre} comparten estos valores. Derivan de las
+            especificaciones técnicas y sirven para comparar entre modelos, no para medir un
+            ejemplar concreto.
+          </div>
+        </div>
+      </ProdSection>
+
+      {/* ── 5 · PRECIO DE REFERENCIA + 6 · HISTORIAL ───────────────────── */}
+      <ProdSection pad={PAD} gap={SEC}>
+        <SectionHeader>Precio de referencia</SectionHeader>
+        <div style={{
+          background: 'linear-gradient(180deg, #262420, #211F1B)',
+          border: `1px solid ${PALETTE.amber}`,
+          padding: vp.isDesktop ? '16px 18px' : '14px',
+          position: 'relative'
+        }}>
+          <TacticalCorners size={12} color={PALETTE.amber} thickness={2} />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{
+              fontFamily: 'Courier Prime, monospace', fontSize: 13,
+              color: PALETTE.textMuted, letterSpacing: '0.18em', textTransform: 'uppercase'
+            }}>◆ Precio actual · con IVA</span>
+            {curAut &&
+              <span title={curAut.nombre} style={{
+                fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                letterSpacing: '0.12em', color: '#000', background: curAut.color,
+                padding: '2px 7px', flexShrink: 0
+              }}>{curAut.sigla}</span>}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+            <span style={{
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+              fontSize: vp.isDesktop ? 30 : 25, color: PALETTE.amber,
+              letterSpacing: '0.01em', ...NUM
+            }}>{precioActual}</span>
+            {currentManual &&
+              <span style={{
+                fontFamily: 'Courier Prime, monospace', fontSize: 13,
+                color: PALETTE.textMuted, letterSpacing: '0.06em'
+              }}>{amxFmtManualDate(currentManual.fecha)}</span>}
+          </div>
+
+          {/* existencias: un chip por sucursal, sin prosa */}
+          {branches.length > 0 &&
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
+              {branches.map((b, bi) => {
+                const col = b.agotado ? PALETTE.redHi : PALETTE.green;
+                return (
+                  <span key={b.sigla + bi}
+                    title={b.manual ? b.manual.nombre : ''}
+                    style={{
+                      display: 'inline-flex', alignItems: 'baseline', gap: 7,
+                      background: PALETTE.bg, border: `1px solid ${col}55`,
+                      clipPath: window.CUT_TR_SM,
+                      padding: '7px 12px'
+                    }}>
+                    <span style={{
+                      fontFamily: 'Courier Prime, monospace', fontSize: 12.5, fontWeight: 700,
+                      color: PALETTE.textDim, letterSpacing: '0.14em'
+                    }}>{b.sigla}</span>
+                    {b.agotado
+                      ? <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: col, letterSpacing: '0.08em' }}>AGOTADO</span>
+                      : <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: col, ...NUM }}>{Number(b.qty).toLocaleString('es-MX')}</span>}
+                  </span>);
+              })}
+            </div>}
+
+          {currentManual && currentManual.url &&
+            <a href={currentManual.url} target="_blank" rel="noopener" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 14,
+              fontFamily: 'Courier Prime, monospace', fontSize: 14,
+              color: PALETTE.amber, textDecoration: 'none',
+              border: `1px solid ${PALETTE.amber}`,
+              padding: '10px 13px', minHeight: 44, boxSizing: 'border-box', letterSpacing: '0.04em'
             }}>
-              <TacticalCorners size={10} color={PALETTE.amber} />
+              <span aria-hidden="true">▦</span>
+              Inventario fuente (PDF)
+              <span aria-hidden="true">↗</span>
+            </a>}
+        </div>
+
+        {/* la prosa de atribución vive aquí: sigue en el sitio, deja de hacer bulto */}
+        <div style={{ marginTop: 10 }}>
+          <window.Disclosure title="Detalle de la fuente">
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
+              <div style={{ marginBottom: 10 }}>
+                <span style={{ color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: 12 }}>Ref. {curSigla}</span>
+                <div style={{ color: PALETTE.text }}>{arma.dcamRef}</div>
+              </div>
+              {branches.map((b, bi) => (
+                <div key={b.sigla + bi} style={{ marginBottom: 8 }}>
+                  {b.agotado ? 'No aparece en el último inventario de ' : `${Number(b.qty).toLocaleString('es-MX')} en `}
+                  <b style={{ color: PALETTE.text, letterSpacing: '0.08em' }}>{b.sigla}</b>
+                  {' — '}
+                  {b.manual && b.manual.url
+                    ? <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: PALETTE.amber, textDecoration: 'none', borderBottom: `1px solid ${PALETTE.amber}` }}>▦ {b.manual.nombre} ↗</a>
+                    : <span style={{ color: PALETTE.textMuted }}>{b.manual ? b.manual.nombre : 'inventario oficial ' + b.sigla}</span>}
+                  {b.manual ? ` (${amxFmtManualDate(b.manual.fecha)}).` : '.'}
+                </div>
+              ))}
+              {branches.length === 0 &&
+                <div style={{ marginBottom: 8 }}>Existencias pendientes de conciliar con el inventario oficial.</div>}
+              {!currentManual &&
+                <div style={{ marginBottom: 8 }}>Sin PDF de inventario vinculado.</div>}
+              <div style={{ fontSize: 12.5, color: PALETTE.textMuted, marginTop: 10 }}>
+                ⚠ Dato <b style={{ color: PALETTE.textDim }}>histórico</b> por sucursal, no en tiempo
+                real: la disponibilidad actual puede variar.
+              </div>
+              <div style={{ marginTop: 8 }}>
+                Nivel de precio: <window.PriceLevel lvl={arma.priceLvl} size={13} />
+              </div>
+            </div>
+          </window.Disclosure>
+        </div>
+
+        {/* HISTORIAL — con UN solo registro no hay historia que contar: el precio
+            y su PDF ya están arriba, y la sección quedaba hueca (le pasa a la
+            mayoría de las armas). La gráfica pide además dos fechas distintas. */}
+        {priceHistory.length > 1 &&
+          <div style={{ marginTop: vp.isDesktop ? 34 : 26 }}>
+            <SectionHeader>Historial de precios</SectionHeader>
+            {hayGrafica &&
+              <div style={{
+                background: PALETTE.bgCard,
+                border: `1px solid ${PALETTE.border}`,
+                padding: '12px 14px 10px',
+                position: 'relative', marginBottom: 10
+              }}>
+                <TacticalCorners size={10} color={ORANGE} />
+                <window.PriceChart history={priceHistory} color={ORANGE} height={vp.isDesktop ? 170 : 148} />
+                <div style={{
+                  display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+                  gap: 10, flexWrap: 'wrap', marginTop: 6,
+                  borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 10
+                }}>
+                  <span style={{
+                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                    color: deltaPct <= 0 ? PALETTE.green : PALETTE.redHi, ...NUM
+                  }}>
+                    {deltaPct <= 0 ? '▼' : '▲'} {deltaPct > 0 ? '+' : '−'}{Math.abs(deltaPct).toFixed(1)} %
+                  </span>
+                  <span style={{
+                    fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+                    color: PALETTE.textMuted, letterSpacing: '0.04em'
+                  }}>{fechasHist.length} inventarios oficiales DCAM / OTCA</span>
+                </div>
+              </div>}
+            <window.Disclosure
+              title={hayGrafica ? 'Ver inventarios y PDFs' : 'Ver el registro de precios'}>
+              <div>
+                {priceHistory.slice().reverse().map((h, i, arr) => {
+                  const man = manualById(h.manualId);
+                  const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
+                  return (
+                    <div key={i} style={{
+                      padding: i === 0 ? '0 0 10px' : '10px 0',
+                      borderBottom: i < arr.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
+                      fontFamily: 'Courier Prime, monospace', fontSize: 15
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                          <span style={{
+                            color: i === 0 ? PALETTE.amber : PALETTE.textMuted,
+                            fontSize: 13, letterSpacing: '0.1em', flexShrink: 0
+                          }}>{i === 0 ? '● ACTUAL' : '○'}</span>
+                          <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500, ...NUM }}>{h.price}</span>
+                          {hAut &&
+                            <span title={hAut.nombre} style={{
+                              fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                              letterSpacing: '0.1em', color: '#000', background: hAut.color,
+                              padding: '1px 6px', flexShrink: 0
+                            }}>{hAut.sigla}</span>}
+                        </div>
+                        <span style={{ color: PALETTE.textDim, fontSize: 14, flexShrink: 0, ...NUM }}>
+                          {amxFmtManualDate(h.date) || '—'}
+                        </span>
+                      </div>
+                      {(man || h.note) &&
+                        <div style={{
+                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                          gap: 10, marginTop: 6, paddingLeft: 22
+                        }}>
+                          <span style={{
+                            color: PALETTE.textMuted, fontSize: 13,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                          }}>{man ? man.nombre : h.note}</span>
+                          {man && man.url &&
+                            <a href={man.url} target="_blank" rel="noopener" style={{
+                              color: PALETTE.amber, fontSize: 13, textDecoration: 'none',
+                              borderBottom: `1px solid ${PALETTE.amber}`, flexShrink: 0, whiteSpace: 'nowrap'
+                            }}>▦ Ver PDF ↗</a>}
+                        </div>}
+                    </div>);
+                })}
+              </div>
+            </window.Disclosure>
+          </div>}
+      </ProdSection>
+
+      {/* ── 7 · MUNICIÓN COMPATIBLE ────────────────────────────────────── */}
+      {/* sin banda: las tarjetas de munición ya usan bgCard y sobre la banda
+          (mismo color) perderían su contorno */}
+      {muns.length > 0 &&
+        <ProdSection pad={PAD} gap={SEC}>
+          <window.CarouselSection
+            eyebrow="◉ COMPATIBLE · MUNICIÓN"
+            title={muns.length === 1 ? `Munición compatible · ${arma.calibre}` : `Munición compatible · ${arma.calibre} · ${muns.length}`}
+            items={muns}
+            renderItem={(m) => <window.MunicionCard mun={m} onClick={() => onOpenMunicion && onOpenMunicion(m.id)} />} />
+        </ProdSection>}
+
+      {/* ── 8 · ACCESORIOS COMPATIBLES ─────────────────────────────────── */}
+      {compat.length > 0 &&
+        <ProdSection pad={PAD} gap={muns.length > 0 ? (vp.isDesktop ? 30 : 22) : SEC}>
+          <window.CarouselSection
+            eyebrow="▫ COMPATIBLE · ACCESORIOS DCAM"
+            title={compat.length === 1 ? 'Accesorio compatible' : `Accesorios compatibles · ${compat.length}`}
+            items={compat}
+            renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />} />
+        </ProdSection>}
+
+      {/* ── 9-12 · DOSSIER — todo el texto sigue en el DOM, sin saturar ─── */}
+      <ProdSection pad={PAD} gap={SEC}>
+        <SectionHeader>Dossier</SectionHeader>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+          <window.Disclosure title="Ficha técnica completa">
+            <div style={{ position: 'relative' }}>
               <SpecRow label="Calibre" value={arma.calibre} accent={PALETTE.amber} />
               <SpecRow label="Capacidad" value={arma.capacidad} />
               <SpecRow label="Peso" value={arma.peso} />
@@ -248,406 +483,128 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               <SpecRow label="Año intro." value={arma.anio} />
               <SpecRow label="Tipo" value={arma.tipo.toUpperCase()} />
             </div>
+          </window.Disclosure>
 
-            <SectionHeader>Precio de Referencia</SectionHeader>
-            <div style={{
-              background: 'linear-gradient(180deg, #262420, #211F1B)',
-              border: `1px solid ${PALETTE.amber}`,
-              padding: '14px 14px',
-              marginBottom: 16,
-              position: 'relative'
-            }}>
-              <TacticalCorners size={12} color={PALETTE.amber} thickness={2} />
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{
-                  fontFamily: 'Courier Prime, monospace',
-                  fontSize: 13, color: PALETTE.textMuted,
-                  letterSpacing: '0.18em', textTransform: 'uppercase',
-                }}>◆ Precio Actual (con IVA)</span>
-                {curAut &&
-                  <span title={curAut.nombre} style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
-                    letterSpacing: '0.12em', color: '#000', background: curAut.color,
-                    padding: '2px 7px', flexShrink: 0,
-                  }}>{curAut.sigla}</span>}
-              </div>
-              <div style={{
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-                fontSize: 23, color: PALETTE.amber,
-                letterSpacing: '0.02em'
-              }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact}</div>
-              <div style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 13, color: PALETTE.textMuted,
-                marginTop: 4, lineHeight: 1.4
-              }}>Ref. {curSigla}: {arma.dcamRef}</div>
-              {currentManual && currentManual.url &&
-                <a href={currentManual.url} target="_blank" rel="noopener" style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  marginTop: 9,
-                  fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
-                  color: PALETTE.amber, textDecoration: 'none',
-                  border: `1px solid ${PALETTE.amber}`,
-                  padding: '9px 12px', minHeight: 40, boxSizing: 'border-box', letterSpacing: '0.04em',
-                }}>
-                  <span aria-hidden="true">▦</span>
-                  Ver inventario fuente · {amxFmtManualDate(currentManual.fecha)}
-                  <span aria-hidden="true">↗</span>
-                </a>
-              }
-              {(() => {
-                // Existencias POR SUCURSAL (no hay primaria/secundaria): DCAM y OTCA
-                // se muestran por separado, cada una con su inventario fuente.
-                // Regla: SOLO cuenta el ÚLTIMO inventario de cada sucursal (DCAM y
-                // OTCA por separado). Si el arma no aparece en el último inventario
-                // de esa sucursal, se asume AGOTADA en ella.
-                const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'DCAM'))) || 'DCAM';
-                const latestByBranch = (sigla) => manuales.find((m) => autOf(m) === sigla) || null; // manuales: más reciente primero
-                const everIn = (sigla) => priceHistory.some((h) => autOf(manualById(h.manualId)) === sigla);
-                const branches = [];
-                // Sucursal DCAM — existencia del ÚLTIMO inventario DCAM (AMX_ARMAS_EXISTENCIAS)
-                const dcamQty = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
-                const latestDcam = latestByBranch('DCAM');
-                if (dcamQty != null) {
-                  branches.push({ sigla: 'DCAM', qty: dcamQty, manual: latestDcam, agotado: false });
-                } else if (everIn('DCAM') && latestDcam) {
-                  branches.push({ sigla: 'DCAM', qty: null, manual: latestDcam, agotado: true });
-                }
-                // Sucursal OTCA — qty del registro del ÚLTIMO inventario OTCA
-                const latestOtca = latestByBranch('OTCA');
-                if (latestOtca) {
-                  const rec = priceHistory.find((h) => h.manualId === latestOtca.id);
-                  if (rec && rec.qty != null) {
-                    branches.push({ sigla: 'OTCA', qty: rec.qty, manual: latestOtca, agotado: false });
-                  } else if (everIn('OTCA')) {
-                    branches.push({ sigla: 'OTCA', qty: null, manual: latestOtca, agotado: true });
-                  }
-                }
-                return (
-                  <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${PALETTE.border}` }}>
-                    {branches.length > 0 ? (
-                      <React.Fragment>
-                        {branches.map((b, bi) => (
-                          <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
-                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                              {b.agotado ? (
-                                <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#E4574B', letterSpacing: '0.06em' }}>
-                                  AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b>
-                                </span>
-                              ) : (
-                                <React.Fragment>
-                                  <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
-                                  <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.text, letterSpacing: '0.06em' }}>
-                                    disponibles en{' '}
-                                    <b style={{ color: PALETTE.text, letterSpacing: '0.08em' }}>{b.sigla}</b>
-                                  </span>
-                                </React.Fragment>
-                              )}
-                            </div>
-                            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textDim, marginTop: 4, lineHeight: 1.55 }}>
-                              {b.agotado ? 'No aparece en el último inventario: ' : 'De acuerdo a '}
-                              {b.manual && b.manual.url ? (
-                                <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: PALETTE.amber, textDecoration: 'none', borderBottom: `1px solid ${PALETTE.amber}` }}>▦ {b.manual.nombre} ↗</a>
-                              ) : (
-                                <span style={{ color: PALETTE.textMuted }}>{b.manual ? b.manual.nombre : 'inventario oficial ' + b.sigla}</span>
-                              )}
-                              {b.manual ? (b.agotado ? ' (' + amxFmtManualDate(b.manual.fecha) + ').' : ', publicado el ' + amxFmtManualDate(b.manual.fecha) + '.') : '.'}
-                            </div>
-                          </div>
-                        ))}
-                        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, marginTop: 7, lineHeight: 1.5 }}>
-                          ⚠ Dato <b style={{ color: PALETTE.textDim }}>histórico</b> por sucursal, no en tiempo real: la disponibilidad actual puede variar.
-                        </div>
-                      </React.Fragment>
-                    ) : (
-                      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textDim, lineHeight: 1.5 }}>
-                        <span style={{ color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Existencias</span> · pendientes de conciliar con el inventario oficial (dato histórico del PDF, no en tiempo real).
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-              {!currentManual &&
-                <div style={{
-                  fontFamily: 'Courier Prime, monospace', fontSize: 12,
-                  color: PALETTE.textDim, marginTop: 7, lineHeight: 1.4
-                }}>Sin PDF de inventario vinculado.</div>
-              }
-              <div style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 13, color: PALETTE.textDim,
-                marginTop: 6
-              }}>Nivel: <window.PriceLevel lvl={arma.priceLvl} size={13} /></div>
-            </div>
-
-            {/* HISTORIAL DE PRECIOS */}
-            {priceHistory.length > 0 &&
-            <React.Fragment>
-                <SectionHeader>Historial de precios</SectionHeader>
-                <div style={{
-                  fontFamily: 'Courier Prime, monospace', fontSize: 12,
-                  color: PALETTE.textDim, letterSpacing: '0.04em',
-                  marginTop: -6, marginBottom: 10, lineHeight: 1.4
-                }}>Según inventarios oficiales DCAM / OTCA</div>
-                <div style={{
-                background: PALETTE.bgCard,
-                border: `1px solid ${PALETTE.border}`,
-                marginBottom: 16
-              }}>
-                  {priceHistory.slice().reverse().map((h, i) => {
-                  const man = manualById(h.manualId);
-                  const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
+          {arma.uses && arma.uses.length > 0 &&
+            <window.Disclosure title="Usos recomendados">
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {arma.uses.map((u) => {
+                  const meta = window.CATEGORIES.uso.find((x) => x.id === u);
                   return (
-                    <div key={i} style={{
-                      padding: '10px 12px',
-                      borderBottom: i < priceHistory.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
+                    <span key={u} style={{
+                      background: PALETTE.bg,
+                      border: `1px solid ${PALETTE.border}`,
+                      clipPath: window.CUT_TR_SM,
+                      padding: '7px 11px',
                       fontFamily: 'Courier Prime, monospace',
-                      fontSize: 15.5,
-                      background: i === 0 ? 'rgba(245,197,24,0.06)' : 'transparent'
+                      fontSize: 14, color: PALETTE.text,
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                      display: 'inline-flex', alignItems: 'center', gap: 6
                     }}>
-                        <div style={{
-                          display: 'flex', justifyContent: 'space-between',
-                          alignItems: 'center', gap: 10
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                            <span style={{
-                            color: i === 0 ? PALETTE.amber : PALETTE.textMuted,
-                            fontSize: 13, letterSpacing: '0.1em', flexShrink: 0
-                          }}>{i === 0 ? '● ACTUAL' : '○'}</span>
-                            <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
-                            {hAut &&
-                              <span title={hAut.nombre} style={{
-                                fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
-                                letterSpacing: '0.1em', color: '#000', background: hAut.color,
-                                padding: '1px 6px', flexShrink: 0,
-                              }}>{hAut.sigla}</span>}
-                          </div>
-                          <span style={{ color: PALETTE.textDim, fontSize: 14.5, flexShrink: 0 }}>
-                            {amxFmtManualDate(h.date) || '—'}
-                          </span>
-                        </div>
-                        {(man || h.note) &&
-                          <div style={{
-                            display: 'flex', justifyContent: 'space-between',
-                            alignItems: 'center', gap: 10,
-                            marginTop: 6, paddingLeft: 22
-                          }}>
-                            <span style={{
-                              color: PALETTE.textMuted, fontSize: 13,
-                              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-                            }}>{man ? man.nombre : h.note}</span>
-                            {man && man.url &&
-                              <a href={man.url} target="_blank" rel="noopener" style={{
-                                color: PALETTE.amber, fontSize: 13, textDecoration: 'none',
-                                borderBottom: `1px solid ${PALETTE.amber}`, flexShrink: 0,
-                                whiteSpace: 'nowrap'
-                              }}>▦ Ver PDF ↗</a>
-                            }
-                          </div>
-                        }
-                      </div>);
-
+                      <span style={{ color: ORANGE }}>{meta?.icon || '●'}</span>
+                      {meta?.label || u}
+                    </span>);
                 })}
-                </div>
-              </React.Fragment>
-            }
+              </div>
+            </window.Disclosure>}
 
-            <SectionHeader>Usos Recomendados</SectionHeader>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-              {arma.uses.map((u) => {
-                const meta = window.CATEGORIES.uso.find((x) => x.id === u);
-                return (
-                  <span key={u} style={{
-                    background: PALETTE.bgCard,
-                    border: `1px solid ${PALETTE.border}`,
-                    borderLeft: `2px solid ${PALETTE.amber}`,
-                    padding: '6px 10px',
-                    fontFamily: 'Courier Prime, monospace',
-                    fontSize: 14.5, color: PALETTE.text,
-                    letterSpacing: '0.08em', textTransform: 'uppercase',
-                    display: 'inline-flex', alignItems: 'center', gap: 6
-                  }}>
-                    <span style={{ color: PALETTE.amber }}>{meta?.icon || '●'}</span>
-                    {meta?.label || u}
-                  </span>);
-
-              })}
-            </div>
-
-            {/* ACCESORIOS COMPATIBLES (informativo · inventario DCAM) */}
-            {(() => {
-              const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
-              if (!compat.length) return null;
-              return (
-                <div style={{ marginTop: 8 }}>
-                  <window.CarouselSection
-                    eyebrow="▫ COMPATIBLE · ACCESORIOS DCAM"
-                    title={compat.length === 1 ? 'Accesorio compatible' : `Accesorios compatibles · ${compat.length}`}
-                    items={compat}
-                    renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />}
-                  />
-                </div>
-              );
-            })()}
-
-            {/* MUNICIÓN COMPATIBLE (informativo · inventario DCAM/OTCA) */}
-            {(() => {
-              const muns = window.getMunicionesParaArma ? window.getMunicionesParaArma(arma) : [];
-              if (!muns.length) return null;
-              return (
-                <div style={{ marginTop: 8 }}>
-                  <window.CarouselSection
-                    eyebrow="◉ COMPATIBLE · MUNICIÓN"
-                    title={muns.length === 1 ? `Munición compatible · ${arma.calibre}` : `Munición compatible · ${arma.calibre} · ${muns.length}`}
-                    items={muns}
-                    renderItem={(m) => <window.MunicionCard mun={m} onClick={() => onOpenMunicion && onOpenMunicion(m.id)} />}
-                  />
-                </div>
-              );
-            })()}
-          </div>
-          }
-
-        {tab === 'legal' &&
-          <div>
-            <SectionHeader>Estatus Legal en México</SectionHeader>
-            <div style={{
-              background: PALETTE.bgCard,
-              border: `1px solid ${availMeta?.color || PALETTE.border}`,
-              borderLeft: `4px solid ${availMeta?.color || PALETTE.border}`,
-              padding: '14px 14px',
-              marginBottom: 12
-            }}>
+          <window.Disclosure title="Estatus legal en México">
+            <div>
               <div style={{
-                fontFamily: 'Montserrat, sans-serif',
-                fontWeight: 700, fontSize: 16,
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
                 color: availMeta?.color || PALETTE.text,
-                textTransform: 'uppercase', letterSpacing: '0.08em',
-                marginBottom: 6
+                textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7
               }}>{arma.legalTit}</div>
               <div style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 15.5, color: PALETTE.textDim,
-                lineHeight: 1.55
+                fontFamily: 'Courier Prime, monospace', fontSize: 15,
+                color: PALETTE.textDim, lineHeight: 1.6, marginBottom: 14
               }}>{arma.legalDesc}</div>
+
+              {arma.disponibilidad && arma.disponibilidad.length > 0 &&
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{
+                    fontFamily: 'Courier Prime, monospace', fontSize: 12,
+                    color: PALETTE.textMuted, letterSpacing: '0.16em',
+                    textTransform: 'uppercase', marginBottom: 6
+                  }}>Disponibilidad</div>
+                  {arma.disponibilidad.map((d, i) =>
+                    <div key={i} style={{
+                      fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
+                      color: PALETTE.text, padding: '5px 0',
+                      display: 'flex', alignItems: 'center', gap: 8
+                    }}>
+                      <span style={{ color: ORANGE }}>▸</span>{d}
+                    </div>)}
+                </div>}
+
+              <button onClick={() => onNav('legal')} style={{
+                width: '100%', background: 'transparent',
+                border: `1.5px dashed ${PALETTE.border}`, color: PALETTE.amber,
+                padding: '12px', minHeight: 48,
+                fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600,
+                letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
+              }}>§ Guía legal completa →</button>
             </div>
+          </window.Disclosure>
 
-            <SectionHeader>Disponibilidad</SectionHeader>
-            <div style={{
-              background: PALETTE.bgCard,
-              border: `1px solid ${PALETTE.border}`,
-              padding: '10px 12px',
-              marginBottom: 16
-            }}>
-              {arma.disponibilidad.map((d, i) =>
-              <div key={i} style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 14.5, color: PALETTE.text,
-                padding: '5px 0',
-                borderBottom: i < arma.disponibilidad.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
-                display: 'flex', alignItems: 'center', gap: 8
-              }}>
-                  <span style={{ color: PALETTE.amber }}>▸</span>
-                  {d}
-                </div>
-              )}
-            </div>
-
-            <button onClick={() => onNav('legal')} style={{
-              width: '100%',
-              background: 'transparent',
-              border: `1.5px dashed ${PALETTE.border}`,
-              color: PALETTE.amber,
-              padding: '12px',
-              fontFamily: 'Montserrat, sans-serif',
-              fontSize: 14, fontWeight: 600,
-              letterSpacing: '0.15em', textTransform: 'uppercase',
-              cursor: 'pointer'
-            }}>§ Guía Legal Completa →</button>
-          </div>
-          }
-
-        {tab === 'history' &&
-          <div>
-            <SectionHeader>Dossier Histórico</SectionHeader>
-            <div style={{
-              background: PALETTE.bgCard,
-              border: `1px solid ${PALETTE.border}`,
-              padding: 14,
-              position: 'relative'
-            }}>
-              <TacticalCorners size={10} color={PALETTE.amber} />
+          {arma.historia &&
+            <window.Disclosure title="Dossier histórico" eyebrow={`Entrada · ${arma.anio}`}>
               <div style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 12, color: PALETTE.amber,
-                letterSpacing: '0.2em', textTransform: 'uppercase',
-                marginBottom: 8
-              }}>━━━ ENTRADA · {arma.anio} ━━━</div>
-              <div style={{
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 15.5, color: PALETTE.text,
-                lineHeight: 1.7
+                fontFamily: 'Courier Prime, monospace', fontSize: 15,
+                color: PALETTE.text, lineHeight: 1.75
               }}>{arma.historia}</div>
-            </div>
-          </div>
-          }
-      </div>
+            </window.Disclosure>}
 
-      {/* SUGERIR CAMBIOS */}
-      <div style={{ padding: `0 ${PAD}px 16px`, maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+        </div>
+      </ProdSection>
+
+      {/* ── SUGERIR CAMBIOS ────────────────────────────────────────────── */}
+      <ProdSection pad={PAD} gap={vp.isDesktop ? 30 : 22}>
         <button onClick={() => setShowSuggest(true)} style={{
-            width: '100%',
-            background: 'transparent',
-            color: PALETTE.amber,
+            width: '100%', background: 'transparent', color: PALETTE.amber,
             border: `1.5px dashed ${PALETTE.amber}`,
-            padding: '14px',
+            padding: '14px', minHeight: 48,
             fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
-            letterSpacing: '0.15em', textTransform: 'uppercase',
-            cursor: 'pointer',
+            letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center'
           }}>
           <span>✎ ¿Encontraste un error? Sugerir cambios</span>
-          <span>→</span>
+          <span aria-hidden="true">→</span>
         </button>
-      </div>
+      </ProdSection>
 
       {showSuggest &&
-        <SuggestChangesModal arma={arma} onClose={() => setShowSuggest(false)} />
-        }
+        <SuggestChangesModal arma={arma} onClose={() => setShowSuggest(false)} />}
 
       {/* VIDEO YOUTUBE (sólo si hay) */}
       <YouTubeBlock arma={arma} padX={PAD} />
 
-      {/* CALIFICACIÓN DE LA COMUNIDAD — al final de la ficha, antes de las armas sugeridas */}
-      <div style={{ padding: `0 ${PAD}px 16px`, maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      {/* CALIFICACIÓN DE LA COMUNIDAD */}
+      <ProdSection pad={PAD} gap={SEC}>
         <RatingBlock armaId={arma.id} />
-      </div>
+      </ProdSection>
 
-      {/* RELATED */}
+      {/* RELACIONADAS */}
       {related.length > 0 &&
-        <div style={{ padding: `0 ${PAD}px 16px` }}>
-          <SectionHeader>Misma Categoría</SectionHeader>
+        <div style={{ padding: `${SEC}px ${PAD}px 0` }}>
+          <SectionHeader>Misma categoría</SectionHeader>
           <div className="amx-hscroll" style={{
             display: vp.isDesktop ? 'grid' : 'flex',
             gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : undefined,
             gap: vp.isDesktop ? 14 : 10,
             overflowX: vp.isDesktop ? 'visible' : 'auto',
-            paddingBottom: 4,
             margin: vp.isDesktop ? 0 : `0 -${PAD}px`,
             padding: vp.isDesktop ? 0 : `0 ${PAD}px 4px`
           }}>
             {related.map((a) =>
-            <div key={a.id} style={{ width: vp.isDesktop ? 'auto' : 300, flexShrink: 0 }}>
+              <div key={a.id} style={{ width: vp.isDesktop ? 'auto' : 300, flexShrink: 0 }}>
                 <ArmaCard arma={a}
-              onClick={() => onOpenArma(a.id)}
-              onCompare={() => toggleCompare(a.id)}
-              inCompare={compareIds.includes(a.id)} />
-              
-              </div>
-            )}
+                  onClick={() => onOpenArma(a.id)}
+                  onCompare={() => toggleCompare(a.id)}
+                  inCompare={compareIds.includes(a.id)} />
+              </div>)}
           </div>
-        </div>
-        }
+        </div>}
      </div>
 
       {/* BARRA FIJA DE ACCIÓN (móvil) — precio + comparar en zona del pulgar.
@@ -655,38 +612,38 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {vp.isMobile && compareIds.length === 0 &&
         <div style={{
           position: 'fixed', left: 0, right: 0,
-          bottom: 'calc(76px + env(safe-area-inset-bottom))', // mismo hueco que CompareFloat (sobre BottomNav)
+          bottom: 'calc(76px + env(safe-area-inset-bottom))', // mismo hueco que CompareFloat
           background: 'rgba(26,26,26,0.97)',
           backdropFilter: 'blur(10px)',
           borderTop: `1px solid ${PALETTE.border}`,
           padding: '10px 16px',
           display: 'flex', alignItems: 'center', gap: 12,
-          zIndex: 55,
+          zIndex: 55
         }}>
           <div style={{ minWidth: 0 }}>
             <div style={{
               fontFamily: 'Courier Prime, monospace', fontSize: 12,
-              color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase',
+              color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase'
             }}>Precio actual</div>
             <div style={{
               fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18,
-              color: PALETTE.amber, whiteSpace: 'nowrap',
-            }}>{(priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact).replace(' MXN', '')}</div>
+              color: PALETTE.amber, whiteSpace: 'nowrap', ...NUM
+            }}>{String(precioActual).replace(' MXN', '')}</div>
           </div>
           <div style={{ flex: 1 }} />
-          <button onClick={() => toggleCompare(arma.id)} style={{
-            background: inCmp ? 'transparent' : PALETTE.amber,
-            color: inCmp ? PALETTE.amber : '#000',
-            border: `1.5px solid ${PALETTE.amber}`,
-            clipPath: CUT_TR,
-            minHeight: 46, padding: '0 20px',
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
-            letterSpacing: '0.12em', textTransform: 'uppercase',
-            cursor: 'pointer',
-            boxShadow: inCmp ? 'none' : '0 0 16px rgba(245,197,24,0.25)',
-          }}>{inCmp ? '✓ Añadida' : '⇄ Comparar'}</button>
-        </div>
-      }
+          <span className="amx-cut" style={{ display: 'block' }}>
+            <button onClick={() => toggleCompare(arma.id)} style={{
+              background: inCmp ? 'transparent' : PALETTE.amber,
+              color: inCmp ? PALETTE.amber : '#000',
+              border: `1.5px solid ${PALETTE.amber}`,
+              clipPath: CUT_TR,
+              minHeight: 46, padding: '0 20px',
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
+              boxShadow: inCmp ? 'none' : '0 0 16px rgba(245,197,24,0.25)'
+            }}>{inCmp ? '✓ Añadida' : '⇄ Comparar'}</button>
+          </span>
+        </div>}
     </div>);
 
 }
