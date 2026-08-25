@@ -111,6 +111,37 @@ ficha muestra una fila por sucursal donde el arma exista.
 Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que corresponda (mapa DCAM o
 `qty` del registro del inventario), nunca como un único número global.
 
+## Direcciones (URLs) — esquema y reglas
+
+Rutas legibles y jerárquicas, pensadas para SEO/GEO. Todo el ruteo vive en la
+cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParsePath`):
+
+```
+/pistolas                                  listado del tipo (filtro aplicado)
+/pistolas/glock-19                         ficha del arma
+  tipos: pistolas · revolveres · rifles · escopetas · carabinas
+/cargadores                                listado de la categoría
+/cargadores/cargador-22-lr-mossberg        ficha del accesorio
+  categorías: cargadores · opticas · refacciones · empunaduras
+/municiones                                listado (las municiones NO llevan sub-rama)
+/municiones/12-ga-rio-perdigon-7-5-28-gr   ficha de la munición
+```
+
+- **Los slugs se derivan de los datos, no se guardan.** Armas: `tipo/nombre`.
+  Accesorios: `categoria/nombre`. Municiones: `calibre marca bala grano` — calibre
+  y marca **no bastan** (hay tres «12 GA · Rio» distintos), por eso se suman bala y
+  grano; los 4 que aun así coinciden reciben sufijo `-2`, `-3`… asignado **por id
+  ascendente**, para que la URL de una ficha no cambie al añadir otras.
+- Si renombras un arma o cambias su tipo, **su URL cambia**. Es el precio de tener
+  direcciones legibles; tenlo en cuenta si ya está indexada o compartida.
+- El índice de slugs se memoiza y se reconstruye solo si cambia el tamaño de algún
+  catálogo (p. ej. tras hidratar desde el backend).
+- `404.html` es lo que hace funcionar las rutas profundas: Cloudflare no encuentra el
+  archivo, sirve `404.html`, este redirige a `/?/<ruta>` y `index.html` la restaura.
+  Gracias a ese rodeo `APP_BASE` se calcula con `pathname === '/'` y el `<base>` sale
+  correcto aun en rutas de dos segmentos. **No toques ese trío sin probar una recarga
+  directa sobre `/pistolas/glock-19`.**
+
 ## Reglas importantes
 
 - **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
