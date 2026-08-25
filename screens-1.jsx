@@ -5,9 +5,9 @@ const { useState, useMemo, useEffect } = React;
 
 // Foto hero 4:5 por categoría (preferencia: con persona o contexto, no fondo blanco)
 const CATEGORY_HEROS = {
-  pistola:  'imagenes/008_CZ_P-07.jpg',           // mano sosteniendo pistola en césped
+  pistola:  'imagenes/008_CZ_P-07.webp',           // mano sosteniendo pistola en césped
   revolver: 'imagenes/021_Ruger_Wrangler.webp',   // revólver Ruger
-  rifle:    'imagenes/032_CZ_600_American.jpg',   // cazador apuntando en campo
+  rifle:    'imagenes/032_CZ_600_American.webp',   // cazador apuntando en campo
   escopeta: 'imagenes/050_Browning_Maxus.webp',   // cazador en escena invernal
   carabina: 'imagenes/058_Derya_MR-S1.webp',      // tiradora con gafas, fondo negro
 };
