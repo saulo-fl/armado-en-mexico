@@ -1,5 +1,6 @@
 # Cabeceras para Cloudflare Pages — seguridad + caché
-# (sin CSP a propósito: la app transpila JSX en el navegador con Babel inline)
+# (sin CSP todavía: ya no hay Babel inline — los .jsx se precompilan —, así que
+#  añadir una CSP es posible; queda pendiente de definir las fuentes permitidas)
 
 /*
   X-Content-Type-Options: nosniff

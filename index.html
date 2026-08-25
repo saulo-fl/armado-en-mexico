@@ -277,10 +277,9 @@
 })();
 </script>
 
-<!-- React + Babel pinned -->
+<!-- React pinned (los .jsx se precompilan a .js en el build — ver package.json) -->
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
 <!-- Data + Store + UI + screens + app -->
 <script src="data.js?v=20260824"></script>
@@ -298,22 +297,22 @@ window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "typeface": "stencil"
 }/*EDITMODE-END*/;
 </script>
-<script type="text/babel" src="tweaks-panel.jsx"></script>
-<script type="text/babel" src="ui.jsx"></script>
-<script type="text/babel" src="screens-1.jsx"></script>
-<script type="text/babel" src="screens-2.jsx"></script>
-<script type="text/babel" src="screens-3.jsx"></script>
-<script type="text/babel" src="screens-4.jsx"></script>
-<script type="text/babel" src="screens-accesorios.jsx"></script>
-<script type="text/babel" src="screens-municiones.jsx"></script>
-<script type="text/babel" src="screens-tutorial.jsx"></script>
-<script type="text/babel" src="app.jsx"></script>
+<script src="tweaks-panel.js"></script>
+<script src="ui.js"></script>
+<script src="screens-1.js"></script>
+<script src="screens-2.js"></script>
+<script src="screens-3.js"></script>
+<script src="screens-4.js"></script>
+<script src="screens-accesorios.js"></script>
+<script src="screens-municiones.js"></script>
+<script src="screens-tutorial.js"></script>
+<script src="app.js"></script>
 
 <!-- Mount -->
-<script type="text/babel">
+<script>
 const root = ReactDOM.createRoot(document.getElementById('app-root'));
 // v2 optimizada: monta la app directamente — responsive nativo (sin marco de debug).
-root.render(<window.App />);
+root.render(React.createElement(window.App));
 </script>
 
 <!-- Retiro del splash (script plano: no depende de Babel) -->

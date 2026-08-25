@@ -31,9 +31,10 @@ shopify/              ← sección Liquid instalable + catálogo JSON + INSTALL.
 
 ## Notas técnicas
 
-- **Sin build**: el JSX se transpila en el navegador con Babel standalone (CDN). React 18.3.1 vía unpkg con hashes de integridad.
+- **Un solo paso de build**: los `.jsx` se precompilan a `.js` con Babel CLI (`npm run build`); el navegador recibe JS plano. No hay bundler ni módulos: los archivos siguen comunicándose por `window.*` y el orden de los `<script>` sigue importando. React 18.3.1 vía unpkg con hashes de integridad.
+- **Los `.js` generados no se commitean** (están en `.gitignore`): los produce el build de Cloudflare Pages en cada deploy. La fuente son los `.jsx`.
 - **Datos**: el catálogo curado vive en `localStorage` por navegador y, cuando está aprovisionado el **backend compartido** (Cloudflare Pages Functions + D1), se replica al servidor para que todos los visitantes vean lo mismo. La app funciona igual sin backend (modo offline con seeds). Detalle y alta en **`BACKEND.md`**.
-- **Desarrollo local**: requiere servir por HTTP (Babel no puede leer `.jsx` desde `file://`):
+- **Desarrollo local**: instala (`npm install`), compila (`npm run build`, o `npm run watch` para recompilar al guardar) y sirve por HTTP:
   ```bash
   npx serve .        # o: python3 -m http.server 8080
   ```

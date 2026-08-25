@@ -25,8 +25,15 @@ Los `<script src="data-*.js?v=YYYYMMDD...">` en `index.html`, `admin.html` y
 cuando cambien los datos, para forzar descarga fresca (el navegador puede cachear
 `data.js` viejo aunque el historial venga fresco). Los `.jsx` revalidan solos.
 
+## Build (Cloudflare lo corre solo)
+El proyecto de Pages tiene **build command `npm ci && npm run build`** y output `.`:
+Babel CLI precompila los `.jsx` a `.js` en cada deploy. Los `.js` NO se commitean.
+Si tocas `package.json` o `babel.config.json`, comprueba el build del preview del PR
+antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
+
 ## Flujo
-1. Verifica: `node .claude/skills/conciliar-inventario/scripts/auditar.js` (skill `verificar-app`).
+1. Verifica: `npm run build` y luego
+   `node .claude/skills/conciliar-inventario/scripts/auditar.js` (skill `verificar-app`).
 2. `git add ...` && commit con mensaje claro. Cierra el mensaje con la línea
    `Co-Authored-By` y `Claude-Session` que exige el entorno.
 3. `git push -u origin <rama>` (reintenta con backoff si falla por red).
