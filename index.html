@@ -105,6 +105,13 @@
   .amx-hscroll::-webkit-scrollbar { display: none; }
   .amx-hscroll { scrollbar-width: none; }
 
+  /* Secciones desplegables (<details> nativo, componente window.Disclosure).
+     El marcador por defecto se quita aquí porque es un pseudo-elemento y no
+     se puede tocar desde los estilos inline de React. */
+  summary { list-style: none; cursor: pointer; }
+  summary::-webkit-details-marker { display: none; }
+  summary::marker { content: ''; }
+
   /* Slider de rango de precio (doble manija, estilo Amazon) */
   .amx-price-range {
     position: absolute; top: 0; left: 0; width: 100%; height: 28px; margin: 0;
@@ -143,6 +150,10 @@
     outline: 2px solid #F5C518; outline-offset: 2px;
   }
   button { -webkit-tap-highlight-color: transparent; }
+
+  /* Controles con corte biselado: el clip-path se traga el outline, así que
+     el anillo de foco lo pinta el envoltorio sin recortar. */
+  .amx-cut:has(:focus-visible) { outline: 2px solid #F5C518; outline-offset: 2px; }
 
   /* accesibilidad: respetar la preferencia de menos movimiento */
   @media (prefers-reduced-motion: reduce) {
