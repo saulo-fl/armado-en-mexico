@@ -43,9 +43,14 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
 
 ## Verificar el deploy (lo hace el usuario; tú no tienes red)
 - Cloudflare reconstruye `main` al hacer merge; ~1-2 min.
-- Si el deploy queda **Failed**: revisar el log. Causa conocida: `wrangler.toml` con
-  binding D1 y `database_id` placeholder → la Function no publica y NADA se despliega.
-  El binding D1 está comentado a propósito hasta crear la base (ver BACKEND.md).
+- Si el deploy queda **Failed**: revisar el log. Causa conocida: un `database_id`
+  inválido en `wrangler.toml` («Error 8000022») → la Function no publica y NADA se
+  despliega.
+- **El backend D1 está ACTIVO desde el 25-ago-2026.** Tras cualquier deploy que toque
+  `wrangler.toml` o `functions/`, comprueba que no cayó a fallback:
+  `curl -s -o /dev/null -w '%{http_code}' https://armado.mx/api/state` → **200**.
+  Un 404 significa que las Functions perdieron el binding y la app volvió a modo
+  offline **sin avisar**: se ve perfecta, pero nada se comparte entre visitantes.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
 - 2026-06: un deploy fallido NO publica el sitio aunque suban los assets.

@@ -61,8 +61,15 @@ done
 ```
 
 Si el deploy queda **Failed**, NO se publica nada y sigue vivo el anterior. Causa
-conocida: `wrangler.toml` con `database_id` placeholder (el binding D1 está comentado
-a propósito hasta crear la base — ver `BACKEND.md`).
+conocida: un `database_id` inválido en `wrangler.toml` («Error 8000022»). Comprueba
+también el backend, que ya está activo:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' https://armado.mx/api/state   # 200 (no 404)
+```
+
+Un **404** ahí significa que las Functions cayeron a fallback (sin binding D1) y la
+app volvió a modo offline sin avisar: se ve bien, pero nada se comparte.
 
 ## Conciliar inventarios y precios (tarea recurrente)
 
@@ -133,11 +140,15 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
    `index.html` lo crea por JS, y eso no basta: el *preload scanner* pide los
    `<script src="app.js">` **antes** de ejecutar ese inline, resolviéndolos contra
    `/pistolas/` → 18 peticiones 404 por visita. Con la etiqueta estática: 0.
-2. **`_redirects` fija los listados.** Coexisten `pistolas.html` (listado) y el
-   directorio `pistolas/` (fichas); la documentación de Cloudflare **no** define cuál
-   gana en `/pistolas`, así que se fuerza con un rewrite `200` por rama. **Nunca uses
-   un catch-all `/*`**: en Pages los redirects se siguen exista o no el asset, y se
-   comería `sitemap.xml`, `robots.txt`, `app.js` e `imagenes/`.
+2. **NO añadas un `_redirects`** (hoy no existe, y es deliberado). Coexisten
+   `pistolas.html` (listado) y el directorio `pistolas/` (fichas); la documentación
+   de Cloudflare no define cuál gana en `/pistolas`, pero **empíricamente gana el
+   fichero**, que es justo lo que se quiere. Forzarlo con un rewrite
+   `/pistolas → /pistolas.html 200` provoca un **bucle infinito**: Pages redirige
+   todo `.html` a su versión sin extensión, así que el rewrite se persigue a sí
+   mismo. Ya ocurrió una vez. Y **nunca un catch-all `/*`**: en Pages los redirects
+   se siguen exista o no el asset, y se comería `sitemap.xml`, `robots.txt`,
+   `app.js` e `imagenes/`.
 
 `sitemap.xml` y `robots.txt` salen del mismo script. El `lastmod` se toma del commit
 que tocó cada `data-*.js`; las páginas fijas van **sin** `lastmod` a propósito (Google
@@ -231,9 +242,14 @@ Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en 
 producción · `imagenes/` a WebP · URLs legibles por tipo y modelo · prerender estático
 con `sitemap.xml` y `robots.txt` · iconos separados por tamaño de uso.
 
-**Fuera del código (pendientes del dueño del sitio):** cerrar `/admin` en Cloudflare
-Access —la política cubre `/admin.html` pero Pages sirve el mismo fichero en `/admin`,
-que responde 200—, definir `CF_ACCESS_TEAM_DOMAIN` y `CF_ACCESS_AUD` en Pages, dar de
-alta armado.mx en Search Console y enviar el sitemap, y decidir si se abre el
-`robots.txt` gestionado de Cloudflare a GPTBot/ClaudeBot (hoy bloquea el entrenamiento;
-los bots de citación sí pasan). Ver `SEO.md`.
+**Fuera del código — ya resuelto (25-ago-2026):** `/admin` está cerrado en Cloudflare
+Access (destino `admin*`, política «Solo Admins» = Allow · Emails; la trampa era que
+Access compara paths **literalmente** y Pages sirve `admin.html` también en `/admin`,
+así que la política sobre `admin.html` no cubría nada). armado.mx está dado de alta en
+Search Console con el sitemap enviado. Las vars de Access viven en `wrangler.toml`.
+
+**Fuera del código — pendiente:** decidir si se abre el `robots.txt` gestionado de
+Cloudflare a GPTBot/ClaudeBot (hoy bloquea el **entrenamiento**; los bots de citación
+sí pasan, que son los que importan para GEO). Ver `SEO.md`. Y cambiar la contraseña
+por defecto del admin (`armado2026`, en claro en `store.js` dentro de un repo público):
+ya no es la única barrera —Access va delante— pero sigue ahí.
