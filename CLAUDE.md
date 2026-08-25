@@ -243,6 +243,13 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 - Revisar 3 municiones indistinguibles entre sí por calibre, marca, bala y grano
   (ids 2002/2034, 2048/2033, 2051/2029): puede ser el mismo producto en dos inventarios
   o un error de conciliación. Requiere los PDFs a la mano.
+- **Recortar el fondo de las fotos de arma a WebP con alfa.** Muchas son recortes sobre
+  blanco opaco (otras ya traen alfa) y sobre el hero oscuro de la ficha el blanco se lee
+  como un error. Es problema de assets, no de CSS: cualquier truco de mezcla que "quite"
+  el blanco rompe las que ya son transparentes.
+- **`TopNav` desborda a lo ancho alrededor de los 1200px** y mete scroll horizontal en
+  TODO el sitio: el rótulo `ENCICLOPEDIA TÁCTICA · ED. 2026` no cabe junto a los enlaces.
+  Está en `ui.jsx`; se arregla ocultándolo o dejándolo encoger por debajo de cierto ancho.
 
 Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en builds de
 producción · `imagenes/` a WebP · URLs legibles por tipo y modelo · prerender estático
