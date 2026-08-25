@@ -26,6 +26,7 @@ window.PALETTE = PALETTE;
 const CUT_TR = 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)';
 const CUT_TR_SM = 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)';
 window.CUT_TR = CUT_TR;
+window.CUT_TR_SM = CUT_TR_SM;
 
 // ──────────────────────────────────────────────────────────────
 // USE VIEWPORT — hook responsivo
@@ -1159,3 +1160,189 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
   );
 }
 window.HCarousel = HCarousel;
+
+// ──────────────────────────────────────────────────────────────
+// DISCLOSURE — sección desplegable (<details> nativo)
+// El navegador ya da aria-expanded, teclado y estado: no hace falta ARIA
+// manual ni JS de apertura. El estado local es SOLO para el estilo (borde
+// ámbar y signo +/−). Estilo heredado del acordeón del FAQ.
+// OJO: el <summary> lleva un <span> flex dentro, no display:flex él mismo
+// (ponerlo en el summary se traga el marcador y rompe el click en Safari
+// viejo). El list-style:none va en el <style> de index.html.
+// ──────────────────────────────────────────────────────────────
+function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.amber, children }) {
+  const [open, setOpen] = React.useState(!!defaultOpen);
+  return (
+    <details
+      open={open}
+      onToggle={(e) => setOpen(e.currentTarget.open)}
+      style={{
+        background: PALETTE.bgCard,
+        border: `1px solid ${open ? accent : PALETTE.border}`,
+        transition: 'border-color 0.18s'
+      }}>
+      <summary style={{ padding: '12px 14px', cursor: 'pointer', listStyle: 'none' }}>
+        <span style={{
+          display: 'flex', alignItems: 'center', gap: 11,
+          minHeight: 24 /* + padding = 48px de área táctil */
+        }}>
+          <span aria-hidden="true" style={{
+            width: 3, height: 15, flexShrink: 0,
+            background: open ? accent : PALETTE.borderHi,
+            boxShadow: open ? `0 0 6px ${accent}66` : 'none',
+            transition: 'background 0.18s'
+          }} />
+          <span style={{ flex: 1, minWidth: 0 }}>
+            {eyebrow &&
+              <span style={{
+                display: 'block',
+                fontFamily: 'Courier Prime, monospace', fontSize: 12,
+                color: PALETTE.textMuted, letterSpacing: '0.16em',
+                textTransform: 'uppercase', marginBottom: 2
+              }}>{eyebrow}</span>}
+            <span style={{
+              display: 'block',
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 15,
+              color: open ? accent : PALETTE.text,
+              textTransform: 'uppercase', letterSpacing: '0.11em', lineHeight: 1.25
+            }}>{title}</span>
+          </span>
+          <span aria-hidden="true" style={{
+            color: accent, fontFamily: 'Courier Prime, monospace',
+            fontSize: 21, lineHeight: 1, flexShrink: 0, width: 14, textAlign: 'center'
+          }}>{open ? '−' : '+'}</span>
+        </span>
+      </summary>
+      <div style={{
+        padding: '13px 14px 15px',
+        borderTop: `1px dashed ${PALETTE.border}`
+      }}>{children}</div>
+    </details>
+  );
+}
+window.Disclosure = Disclosure;
+
+// ──────────────────────────────────────────────────────────────
+// PRICE CHART — historial de precios en SVG inline, sin librerías
+// Los precios llegan como string ya formateado ('$10,842.09 MXN'), así que
+// hay que parsearlos. Eje X en escala de TIEMPO REAL (no índice del array):
+// entre dos inventarios puede haber 9 meses o 2 días y tiene que verse.
+// ──────────────────────────────────────────────────────────────
+function amxPrecioNum(s) {
+  const n = parseFloat(String(s == null ? '' : s).replace(/[^\d.]/g, ''));
+  return isFinite(n) ? n : null;
+}
+window.amxPrecioNum = amxPrecioNum;
+
+function amxFechaCorta(f) {
+  const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
+  if (isNaN(d)) return String(f || '');
+  return d.toLocaleDateString('es-MX', { month: 'short', year: '2-digit' }).replace('.', '');
+}
+window.amxFechaCorta = amxFechaCorta;
+
+function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
+  const uid = React.useId().replace(/:/g, '');
+  const wrapRef = React.useRef(null);
+  const [w, setW] = React.useState(640);
+
+  // Medimos el contenedor para dibujar en píxeles 1:1. Sin esto habría que
+  // escalar el viewBox, y eso deforma el trazo y agranda el texto en desktop.
+  React.useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const medir = () => setW(Math.max(240, el.clientWidth));
+    medir();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', medir);
+      return () => window.removeEventListener('resize', medir);
+    }
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Parseo + deduplicado por fecha: DCAM y OTCA publican el MISMO día y
+  // colisionarían en la misma X. Se queda el último registro de esa fecha.
+  const pts = React.useMemo(() => {
+    const porFecha = new Map();
+    (history || []).forEach((h) => {
+      const v = amxPrecioNum(h.price);
+      const t = Date.parse(String(h.date).length === 10 ? h.date + 'T12:00:00' : h.date);
+      if (v == null || isNaN(t)) return;
+      porFecha.set(h.date, { v: v, t: t, price: h.price, date: h.date });
+    });
+    return Array.from(porFecha.values()).sort((a, b) => a.t - b.t);
+  }, [history]);
+
+  if (pts.length < 2) return null;
+
+  const PL = 10, PR = 10, PT = 26, PB = 24;
+  const x0 = PL, x1 = Math.max(PL + 40, w - PR);
+  const y0 = PT, y1 = height - PB;
+  const tMin = pts[0].t, tMax = pts[pts.length - 1].t;
+  const vs = pts.map((p) => p.v);
+  const vMin = Math.min.apply(null, vs), vMax = Math.max.apply(null, vs);
+  // Margen del 10% para que el punto máximo no quede pegado al borde, y
+  // guarda de dominio plano: hay armas con dos precios idénticos.
+  const span = (vMax - vMin) || 1;
+  const dMin = vMin - span * 0.1, dMax = vMax + span * 0.1;
+  const px = (p) => (tMax === tMin ? x1 : x0 + ((p.t - tMin) / (tMax - tMin)) * (x1 - x0));
+  const py = (p) => y1 - ((p.v - dMin) / (dMax - dMin)) * (y1 - y0);
+
+  const xy = pts.map((p) => ({ x: px(p), y: py(p), p: p }));
+  const linea = xy.map((c, i) => `${i ? 'L' : 'M'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+  const area = `${linea} L${xy[xy.length - 1].x.toFixed(1)},${y1} L${xy[0].x.toFixed(1)},${y1} Z`;
+
+  const ini = pts[0], fin = pts[pts.length - 1];
+  const deltaPct = ini.v ? ((fin.v - ini.v) / ini.v) * 100 : 0;
+  const resumen = `${pts.length} registros entre ${amxFechaCorta(ini.date)} y ${amxFechaCorta(fin.date)}: ` +
+    `de ${ini.price} a ${fin.price}, ${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)}%.`;
+
+  // Etiqueta de valor pegada a su propio punto; si el punto está arriba del
+  // todo, la etiqueta baja para no salirse del lienzo.
+  const etiqY = (y) => (y - 10 < y0 - 4 ? y + 17 : y - 10);
+  const MONO = 'Courier Prime, monospace';
+
+  return (
+    <div ref={wrapRef} style={{ width: '100%' }}>
+      <svg
+        width={w} height={height} viewBox={`0 0 ${w} ${height}`}
+        role="img" aria-labelledby={`pcT${uid} pcD${uid}`}
+        style={{ display: 'block', width: '100%', height: height }}>
+        <title id={`pcT${uid}`}>Historial de precio de referencia</title>
+        <desc id={`pcD${uid}`}>{resumen}</desc>
+        <defs>
+          <linearGradient id={`pcG${uid}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.28" />
+            <stop offset="100%" stopColor={color} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <line x1={x0} y1={y1} x2={x1} y2={y1} stroke={PALETTE.border} strokeWidth="1" />
+        <path d={area} fill={`url(#pcG${uid})`} />
+        <path d={linea} fill="none" stroke={color} strokeWidth="2"
+          strokeLinejoin="round" strokeLinecap="round" />
+        {xy.map((c, i) => {
+          const ext = i === 0 || i === xy.length - 1;
+          return (
+            <circle key={i} cx={c.x} cy={c.y} r={ext ? 4.5 : 3}
+              fill={ext ? color : PALETTE.bg} stroke={color} strokeWidth="2" />
+          );
+        })}
+        <text x={x0} y={etiqY(xy[0].y)} textAnchor="start"
+          fontFamily={MONO} fontSize="13" fill={PALETTE.textDim}
+          style={{ fontVariantNumeric: 'tabular-nums' }}>{String(ini.price).replace(' MXN', '')}</text>
+        <text x={x1} y={etiqY(xy[xy.length - 1].y)} textAnchor="end"
+          fontFamily={MONO} fontSize="13" fontWeight="700" fill={color}
+          style={{ fontVariantNumeric: 'tabular-nums' }}>{String(fin.price).replace(' MXN', '')}</text>
+        <text x={x0} y={height - 7} textAnchor="start"
+          fontFamily={MONO} fontSize="12" fill={PALETTE.textMuted}
+          letterSpacing="0.1em">{amxFechaCorta(ini.date).toUpperCase()}</text>
+        <text x={x1} y={height - 7} textAnchor="end"
+          fontFamily={MONO} fontSize="12" fill={PALETTE.textMuted}
+          letterSpacing="0.1em">{amxFechaCorta(fin.date).toUpperCase()}</text>
+      </svg>
+    </div>
+  );
+}
+window.PriceChart = PriceChart;

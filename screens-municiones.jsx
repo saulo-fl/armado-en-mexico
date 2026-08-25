@@ -26,6 +26,15 @@ function munCartucho(cal) {
   return MUN_CARTUCHO[cal] ? ('imagenes/cartuchos/' + MUN_CARTUCHO[cal]) : '';
 }
 
+// Unidad del precio de referencia. El inventario cotiza casi todo POR CARTUCHO,
+// pero no todo: la 2046 (9mm PMC) viene por caja y su descripción lo dice — por
+// eso cuesta $406 y no $6. Sin este chequeo la tarjeta la etiquetaría mal.
+// Única fuente de verdad para la tarjeta Y la ficha.
+function munUnidadPrecio(mun) {
+  return /por\s+caja/i.test((mun && mun.descripcion) || '') ? 'caja' : 'cartucho';
+}
+window.munUnidadPrecio = munUnidadPrecio;
+
 // ════════════════════════════════════════════════════════════════
 // MUNICION CARD — tarjeta horizontal (gemela de ArmaCard/AccesorioCard)
 // ════════════════════════════════════════════════════════════════
@@ -89,9 +98,24 @@ function MunicionCard({ mun, onClick }) {
         }}>
           <span style={{ color: P.textMuted }}>BALA </span>{mun.bala}{mun.grano ? ` · ${mun.grano}` : ''}
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
+        {/* La cifra sustituye a la escala $$$··: es estrictamente más informativa
+            para quien compara municiones. La unidad sale de munUnidadPrecio. */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
           <window.AvailBadge avail={mun.avail} compact />
-          <window.PriceLevel lvl={mun.priceLvl} />
+          {mun.priceExact ? (
+            <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 5, whiteSpace: 'nowrap' }}>
+              <span style={{
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                color: P.amber, fontVariantNumeric: 'tabular-nums',
+              }}>{String(mun.priceExact).replace(' MXN', '')}</span>
+              <span style={{
+                fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted,
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+              }}>/ {munUnidadPrecio(mun)}</span>
+            </span>
+          ) : (
+            <window.PriceLevel lvl={mun.priceLvl} />
+          )}
         </div>
       </div>
     </div>
@@ -496,7 +520,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
               <span style={{
                 fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textMuted,
                 letterSpacing: '0.18em', textTransform: 'uppercase',
-              }}>◆ Precio por cartucho (con IVA)</span>
+              }}>◆ Precio por {munUnidadPrecio(mun)} (con IVA)</span>
               {curAut &&
                 <span title={curAut.nombre} style={{
                   fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
