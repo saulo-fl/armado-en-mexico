@@ -123,7 +123,7 @@
       autor: 'Saulo Flores',
       empresa: 'Armas M&S',
       bio: 'Catálogo mantenido con base en información oficial de DCAM, SEDENA y publicaciones técnicas de los fabricantes.',
-      foto: 'imagenes/saulo-flores.png', // URL de foto del autor
+      foto: 'imagenes/saulo-flores.webp', // URL de foto del autor
       aviso: 'Las armas de fuego de este catálogo se muestran únicamente con fines informativos y de transparencia; no se intermedia en su adquisición, que solo puede realizarse a través de la DCAM-SEDENA. Las únicas que comercializamos directamente son las tres armas traumáticas (menos letales), disponibles en armasmys.com.',
       disclaimerOficial: 'Armas M&S no forma parte de SEDENA, DCAM ni de ninguna dependencia del gobierno mexicano. No comercializamos armas de fuego, municiones ni accesorios para ellas: las armas de fuego se muestran solo con fines informativos y de transparencia. Lo único que comercializamos directamente son las tres armas traumáticas menos letales. Tampoco gestionamos licencias, permisos ni trámites administrativos. Armas M&S no presta servicios jurídicos por sí mismo: la asesoría legal sobre el proceso SEDENA es prestada de forma independiente por un abogado externo especializado, bajo su propia cédula profesional. Nuestra función se limita a facilitar el contacto entre el interesado y dicho profesional; los honorarios y términos se acuerdan directamente con el abogado.',
     },
@@ -141,6 +141,27 @@
   function write(k, v) {
     try { localStorage.setItem(k, JSON.stringify(v)); }
     catch (e) { console.warn('[Store] error writing', k, e); }
+  }
+
+  // ── Rutas de imagen del seed (data.js) ───────────────────────────────
+  // Se capturan al cargar, ANTES de que init() o hydrate() sobrescriban
+  // window.DB, para poder reparar catálogos guardados que quedaron con
+  // rutas anteriores a la conversión a WebP.
+  const SEED_IMG = {};
+  (window.DB || []).forEach(s => { if (s && s.img) SEED_IMG[s.id] = s.img; });
+
+  // Repara la imagen de un arma guardada cuando está vacía, es un
+  // placeholder SVG, o apunta a una ruta local con extensión vieja
+  // (.jpg/.png) que ya no existe en disco. Devuelve true si la cambió.
+  // No toca URLs remotas configuradas desde el admin (no empiezan por
+  // "imagenes/"), ni armas que no estén en el seed.
+  function fixArmaImg(a) {
+    if (!a || !SEED_IMG[a.id]) return false;
+    const img = a.img;
+    const vacia = !img || (typeof img === 'string' && img.startsWith('data:image/svg+xml'));
+    const stale = typeof img === 'string' && /^imagenes\/.+\.(jpe?g|png)$/i.test(img);
+    if (vacia || stale) { a.img = SEED_IMG[a.id]; return true; }
+    return false;
   }
 
   // ── BACKEND COMPARTIDO (Cloudflare Pages Functions + D1) ─────────────
@@ -203,7 +224,7 @@
         write(k, val);
         if (domain === 'armas' && Array.isArray(val)) {
           window.DB.length = 0;
-          val.forEach((a) => { if (!a.img) a.img = window.armaPlaceholder(a); window.DB.push(a); });
+          val.forEach((a) => { fixArmaImg(a); if (!a.img) a.img = window.armaPlaceholder(a); window.DB.push(a); });
         }
       });
       Store._notify();
@@ -220,17 +241,11 @@
       } else {
         // override window.DB con el array guardado
         const saved = read(K.armas, window.DB);
-        // Migración: si img guardada es placeholder SVG o vacía, usar la del seed (data.js)
-        const seedById = {};
-        (window.DB || []).forEach(s => { seedById[s.id] = s; });
+        // Migración: repara imágenes vacías, placeholder SVG o con ruta
+        // anterior a WebP, usando la del seed (data.js) — ver fixArmaImg.
         let migrated = 0;
         saved.forEach(a => {
-          const isPlaceholder = !a.img || (typeof a.img === 'string' && a.img.startsWith('data:image/svg+xml'));
-          const seed = seedById[a.id];
-          if (isPlaceholder && seed && seed.img && !seed.img.startsWith('data:image/svg+xml')) {
-            a.img = seed.img;
-            migrated++;
-          }
+          if (fixArmaImg(a)) migrated++;
           if (!a.img) a.img = window.armaPlaceholder(a);
         });
         if (migrated > 0) {

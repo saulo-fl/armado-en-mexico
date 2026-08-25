@@ -15,12 +15,12 @@ function munCatMeta(cal) {
   return (window.MUNICION_CATEGORIES.categoria.find(c => c.id === cal)) || { label: cal, icon: '◉' };
 }
 
-// Imagen del cartucho por calibre (reusa imagenes/cartuchos/*.png)
+// Imagen del cartucho por calibre (reusa imagenes/cartuchos/*.webp)
 const MUN_CARTUCHO = {
-  '.22 LR': '22lr.png', '.380 ACP': '380acp.png', '.38 Special': '38special.png',
-  '.38 Super': '38super.png', '9mm Parabellum': '9mm.png', '.40 S&W': '40sw.png',
-  '12 GA': '12ga.png', '20 GA': '20ga.png', '.410 Bore': '410.png',
-  '5.56x45mm': '556.png', '7.62x39mm': '762x39.png', '7.62x51mm': '762x51.png',
+  '.22 LR': '22lr.webp', '.380 ACP': '380acp.webp', '.38 Special': '38special.webp',
+  '.38 Super': '38super.webp', '9mm Parabellum': '9mm.webp', '.40 S&W': '40sw.webp',
+  '12 GA': '12ga.webp', '20 GA': '20ga.webp', '.410 Bore': '410.webp',
+  '5.56x45mm': '556.webp', '7.62x39mm': '762x39.webp', '7.62x51mm': '762x51.webp',
 };
 function munCartucho(cal) {
   return MUN_CARTUCHO[cal] ? ('imagenes/cartuchos/' + MUN_CARTUCHO[cal]) : '';
