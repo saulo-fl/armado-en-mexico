@@ -83,7 +83,7 @@
             width: logoSize, height: logoSize, margin: '0 auto',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <img src="imagenes/logo-armado-mx.png" alt="Armado en México"
+            <img src="imagenes/logo-armado-mx.webp" alt="Armado en México"
               style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 18, boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }} />
           </div>
         ),

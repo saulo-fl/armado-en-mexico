@@ -31,44 +31,38 @@ Agentes delegables: **`conciliador-inventario`** (conciliación completa) y
 cambio de datos o UI se **verifica con `auditar.js`** y respeta `fidelidad-diseno`
 antes de publicar. Al terminar algo no trivial, aplica `mejorar-tooling`.
 
-## Tarea actual: publicar esta iteración como BRANCH
+## Cómo se trabaja aquí
 
-Esta carpeta contiene una **iteración de UI/UX ya aplicada** sobre la app
-(detalle completo en `CHANGES.md`). Tu trabajo es publicarla como rama y abrir PR
-— **no modificar el código**.
-
-### Si el repo YA existe (caso esperado)
-
-```bash
-# dentro de una copia clonada del repo
-git checkout -b feature/ui-accesibilidad-fichas
-# reemplaza el contenido del repo con el de este zip (respetando .git/)
-rsync -a --delete --exclude '.git' <carpeta-de-este-zip>/ .
-git add -A
-git commit -m "UI: fichas horizontales estandarizadas, accesibilidad tipográfica y carruseles con swipe"
-git push -u origin feature/ui-accesibilidad-fichas
-gh pr create --fill --title "UI: fichas horizontales + accesibilidad" --body-file CHANGES.md
-```
-
-### Si el repo NO existe (primer deploy)
+Producción es **armado.mx**, servida por **Cloudflare Pages** desde `main`. `main` y
+`develop` se mantienen en espejo. Sigue la skill **`publicar`** para el flujo de git
+(el gotcha crítico: `git fetch origin main` **antes** de `checkout -B`, porque los
+merges se hacen por la API y tu `origin/main` local se queda viejo).
 
 ```bash
-git init -b main
-git add -A
-git commit -m "Primer deploy: Armado en México (app + admin + demo Shopify)"
-gh repo create armado-en-mexico --public --source . --push
-gh api -X POST "repos/{owner}/armado-en-mexico/pages" \
-  -f "source[branch]=main" -f "source[path]=/"
+npm install                 # una vez
+npm run build               # .jsx -> .js  +  prerender de las 294 páginas
+npx serve .                 # o cualquier servidor HTTP: los .jsx no cargan desde file://
+node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
 ```
 
-### Verificación del deploy / preview
+Antes de publicar, la skill **`verificar-app`**. Al tocar UI, **`fidelidad-diseno`**.
+Al cerrar algo no trivial, **`mejorar-tooling`**.
 
-- `https://<OWNER>.github.io/armado-en-mexico/` → app principal (splash "CARGANDO ARSENAL…" y luego la home)
-- `.../admin.html` → panel de administración
-- `.../shopify-demo.html` → demo de la sección Shopify
-- Consola sin 404 de `imagenes/`, `logo.png` ni de los `.jsx`
-- Smoke test visual (ver `CHANGES.md` § Verificación): fichas horizontales, badges
-  CIVIL en verde, carruseles con arrastre y sin flechas
+### Verificar un despliegue
+
+Cloudflare reconstruye `main` al mergear (~1-2 min). Comprueba **estados HTTP**, que es
+lo que ve un crawler — no basta con que se vea bien en el navegador:
+
+```bash
+for u in / /pistolas /pistolas/glock-19 /municiones/12-ga-rio-perdigon-7-5-28-gr          /sitemap.xml /robots.txt /app.js /imagenes/favicon.png /noexiste-xyz; do
+  echo "$(curl -s -o /dev/null -w '%{http_code}' https://armado.mx$u)  $u"
+done
+# Esperado: 200 en todas menos /noexiste-xyz -> 404
+```
+
+Si el deploy queda **Failed**, NO se publica nada y sigue vivo el anterior. Causa
+conocida: `wrangler.toml` con `database_id` placeholder (el binding D1 está comentado
+a propósito hasta crear la base — ver `BACKEND.md`).
 
 ## Conciliar inventarios y precios (tarea recurrente)
 
@@ -184,12 +178,18 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
 ## Reglas importantes
 
 - **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
-- **No elimines `.nojekyll`** — evita que Jekyll interfiera con el servido de archivos.
+- `.nojekyll` es un resto de la época de GitHub Pages; en Cloudflare no hace nada. Es inofensivo: déjalo.
 - **Los `.jsx` se precompilan** con `npm run build` (Babel CLI, `babel.config.json` con `runtime: "classic"` — obligatorio: React se carga como global UMD, y el runtime `automatic` que Babel 8 trae por defecto emite `import` y rompe la app). Tras editar un `.jsx`, recompila antes de probar.
 - Los scripts de React/Babel vienen de unpkg con hashes `integrity` fijados — no cambies las versiones.
 - La carpeta `shopify/` no es parte de la web servida: contiene la sección Liquid instalable en el tema de Shopify de armasmys.com (instrucciones en `shopify/INSTALL.md`). Déjala en el repo como fuente de verdad.
 - La barra "◉ DEBUG" (abajo-izquierda) es una herramienta de desarrollo intencional; no la quites.
-- `logo.png` es un **borrador** del logo — se reemplazará por la versión final más adelante (mismo nombre de archivo).
+- `logo.png` (raíz) es el logo del **header**, y es un borrador: se reemplazará por la
+  versión final con el mismo nombre. No confundir con los iconos de `imagenes/`.
+- **Los iconos están separados por uso a propósito** — no los unifiques: `favicon.png`
+  (48px, 2 KB) es lo que pide todo navegador en cada visita; `apple-touch-icon.png`
+  (180px) solo lo pide Safari al añadir a inicio; `logo-armado-mx.webp` (512px) es el
+  icono PWA del manifest y el que sale en el tutorial. Servir el de 512 como favicon
+  costaba 324 KB por visita.
 
 ## Backend compartido (Cloudflare Pages Functions + D1)
 
@@ -221,6 +221,19 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 
 - Añadir una CSP en `_headers` (ya es posible: no queda JS inline transpilado).
 - Servir imágenes en varios tamaños (`srcset`) para móvil; hoy son WebP uniformes de máx 1400px que las fichas muestran con `object-fit: contain`.
+- Sincronizar `shopify/armado-en-mexico.catalog.json` (36 armas) con el catálogo real
+  (179). Pendiente hasta la 1.0, y se quiere una versión **recortada** que empuje a la app.
+- Revisar 3 municiones indistinguibles entre sí por calibre, marca, bala y grano
+  (ids 2002/2034, 2048/2033, 2051/2029): puede ser el mismo producto en dos inventarios
+  o un error de conciliación. Requiere los PDFs a la mano.
 
-Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en builds
-de producción · conversión de `imagenes/` a WebP.
+Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en builds de
+producción · `imagenes/` a WebP · URLs legibles por tipo y modelo · prerender estático
+con `sitemap.xml` y `robots.txt` · iconos separados por tamaño de uso.
+
+**Fuera del código (pendientes del dueño del sitio):** cerrar `/admin` en Cloudflare
+Access —la política cubre `/admin.html` pero Pages sirve el mismo fichero en `/admin`,
+que responde 200—, definir `CF_ACCESS_TEAM_DOMAIN` y `CF_ACCESS_AUD` en Pages, dar de
+alta armado.mx en Search Console y enviar el sitemap, y decidir si se abre el
+`robots.txt` gestionado de Cloudflare a GPTBot/ClaudeBot (hoy bloquea el entrenamiento;
+los bots de citación sí pasan). Ver `SEO.md`.

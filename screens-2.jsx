@@ -1575,7 +1575,7 @@ function AboutScreen() {
           width: 132, margin: '0 auto 16px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <img src="imagenes/logo-armado-mx.png" alt="Armado en México" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 14 }} />
+          <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 14 }} />
         </div>
         <div style={{
           fontFamily: 'Courier Prime, monospace',
@@ -1655,7 +1655,7 @@ function AboutScreen() {
       }}>
         <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <img src="imagenes/logo-armado-mx.png" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
+            <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
           </div>
           <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>

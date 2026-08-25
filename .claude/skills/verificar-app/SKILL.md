@@ -35,8 +35,10 @@ node -e 'const B=require("./node_modules/@babel/standalone/babel.js");const fs=r
 - No commitees si `npm run build` o la auditoría fallan.
 - Los `.js` generados están en `.gitignore` — si aparecen en `git status`, algo se
   salió del patrón: revísalo antes de commitear.
-- OJO: hoy `auditar.js` imprime los hallazgos pero **sale con código 0 igualmente**,
-  así que no sirve como puerta automática en CI. Lee su salida.
+- `auditar.js` **sí** sale con código 1 si hay hallazgos, así que sirve como puerta
+  automática. Pero **no midas el código tras un pipe**: `node auditar.js | tail; echo $?`
+  devuelve el de `tail` (siempre 0) y parece que la auditoría pasó. Usa
+  `node auditar.js` a secas, o `set -o pipefail`.
 - Si tocaste lógica de precios/existencias, además SIMULA a mano un par de casos
   (presente, agotado, solo-OTCA, ficha nueva) cargando los datos en Node.
 - No puedes abrir un navegador real (sin red para unpkg): la transpilación + carga
