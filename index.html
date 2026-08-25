@@ -7,7 +7,7 @@
      1) Congela la base donde vive la app (raíz en armado.mx). */
   window.APP_BASE = window.location.pathname.replace(/[^/]*$/, '');
   /* 1b) <base> para que TODA ruta relativa (imágenes, scripts) se resuelva contra
-        la raíz de la app aunque la URL sea profunda (/arma/1, /calibres…). */
+        la raíz de la app aunque la URL sea profunda (/pistolas/glock-19…). */
   (function () {
     var b = document.createElement('base');
     b.href = window.APP_BASE;
