@@ -1,0 +1,82 @@
+// Comprobación de los topes anti-abuso de la API pública.
+// Correr con:  node functions/api/_lib.test.mjs
+// (El prefijo "_" impide que Pages lo convierta en una ruta.)
+//
+// Existe porque estos límites protegen contra algo que NO se nota: un item
+// descomunal no da error, se guarda, y a partir de ahí /api/state lo sirve
+// entero en cada carga de página. Sin esta prueba, subir un tope o tocar
+// sanitizeItem rompe la protección en silencio.
+import assert from 'node:assert/strict';
+import { mergeAppend } from './_lib.js';
+
+const pesa = (v) => JSON.stringify(v).length;
+let n = 0;
+const ok = (msg) => { n++; console.log('  ok', msg); };
+
+// ── Un objeto anidado descomunal no entra ───────────────────────────────────
+{
+  const specs = {};
+  for (let i = 0; i < 2500; i++) specs['k' + i] = 'x'.repeat(100);   // ~276 KB
+  const out = mergeAppend('pending', [], { nombre: 'Prueba', specs });
+  assert.equal(out.length, 1, 'el item debe guardarse');
+  assert.equal(out[0].specs, undefined, 'specs de 276 KB debe descartarse');
+  assert.equal(out[0].nombre, 'Prueba', 'los campos normales sobreviven');
+  ok('objeto anidado de 276 KB descartado, el resto del item intacto');
+}
+
+// ── Un objeto anidado razonable SÍ entra (no romper el caso legítimo) ────────
+{
+  const out = mergeAppend('pending', [], {
+    nombre: 'Glock 19', specs: { calibre: '9mm', capacidad: '15+1', peso: '670g' },
+  });
+  assert.equal(out[0].specs.calibre, '9mm', 'las specs normales deben conservarse');
+  ok('specs legítimas conservadas');
+}
+
+// ── Un array de objetos gordos tampoco pasa por el hueco del slice(0,100) ───
+{
+  const fotos = Array.from({ length: 100 }, () => ({ b64: 'x'.repeat(1000) }));  // ~100 KB
+  const out = mergeAppend('pending', [], { nombre: 'A', fotos });
+  assert.equal(out[0].fotos, undefined, 'array de 100 KB debe descartarse');
+  ok('array grande descartado (slice por elementos no bastaba)');
+}
+
+// ── La lista acumulada del dominio tiene techo en bytes ─────────────────────
+{
+  let lista = [];
+  for (let i = 0; i < 300; i++) {
+    lista = mergeAppend('pending', lista, { nombre: 'n' + i, texto: 'y'.repeat(5000) });
+  }
+  const bytes = pesa(lista);
+  assert.ok(bytes <= 512 * 1024, `el dominio debe quedar bajo 512 KB, mide ${bytes}`);
+  assert.ok(lista.length > 20, `debe conservar items utiles, conserva ${lista.length}`);
+  assert.equal(lista[0].nombre, 'n299', 'el mas reciente va primero');
+  ok(`dominio acotado a ${bytes} bytes con ${lista.length} items, el mas nuevo primero`);
+}
+
+// ── visits: tope por arma, y la fila entera cabe en D1 ──────────────────────
+{
+  let v = {};
+  for (let i = 0; i < 600; i++) v = mergeAppend('visits', v, { armaId: 1, ts: Date.now() - i });
+  assert.equal(v['1'].length, 500, 'maximo 500 marcas por arma');
+
+  let full = {};
+  for (let id = 1; id <= 179; id++) {
+    for (let i = 0; i < 600; i++) full = mergeAppend('visits', full, { armaId: id, ts: Date.now() - i });
+  }
+  const bytes = pesa(full);
+  assert.ok(bytes < 2_000_000, `179 armas saturadas deben caber en la fila de 2 MB de D1, miden ${bytes}`);
+  ok(`visits saturado en las 179 armas = ${bytes} bytes, bajo el limite de 2 MB`);
+}
+
+// ── ratings sigue siendo agregado, sin identidad ────────────────────────────
+{
+  let r = {};
+  r = mergeAppend('ratings', r, { armaId: 7, stars: 5, submitterEmail: 'a@b.c' });
+  r = mergeAppend('ratings', r, { armaId: 7, stars: 3 });
+  assert.deepEqual(r['7'], { sum: 8, count: 2 }, 'suma y cuenta');
+  assert.ok(!JSON.stringify(r).includes('a@b.c'), 'ratings no debe guardar datos de la persona');
+  ok('ratings agrega sin conservar identidad');
+}
+
+console.log(`\n✔ ${n} comprobaciones OK`);

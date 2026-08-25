@@ -43,9 +43,25 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
 
 ## Verificar el deploy (lo hace el usuario; tú no tienes red)
 - Cloudflare reconstruye `main` al hacer merge; ~1-2 min.
-- Si el deploy queda **Failed**: revisar el log. Causa conocida: `wrangler.toml` con
-  binding D1 y `database_id` placeholder → la Function no publica y NADA se despliega.
-  El binding D1 está comentado a propósito hasta crear la base (ver BACKEND.md).
+- Si el deploy queda **Failed**: revisar el log. Causa conocida: un `database_id`
+  inválido en `wrangler.toml` («Error 8000022») → la Function no publica y NADA se
+  despliega.
+- **El backend D1 está ACTIVO desde el 25-ago-2026.** Tras cualquier deploy que toque
+  `wrangler.toml` o `functions/`, comprueba que no cayó a fallback — es silencioso: el
+  sitio se ve perfecto y nada se comparte entre visitantes.
+  **`/api/state` NO sirve como sonda:** devuelve `200 {}` con binding y sin él.
+  Usa un `append` con JSON inválido, que comprueba `env.DB` antes de parsear el cuerpo
+  (así que no escribe nada):
+  ```bash
+  curl -s -X POST https://armado.mx/api/append/ratings -d 'x'       # json_invalido = OK
+  curl -s -X PUT  https://armado.mx/api/admin/state/pages -d '{}'   # no_autenticado = OK
+  ```
+  `sin_backend` = se perdió el binding D1. `admin_auth_no_configurado` = se perdieron
+  las vars de Access. Los dos responden 503.
+- **Verifica en el preview del PR antes de mergear** cuando toques `wrangler.toml` o
+  `functions/`: el alias por rama es `<rama-con-guiones>.armado-en-mexico.pages.dev`
+  (`claude/x-y` → `claude-x-y`). Las mismas sondas funcionan ahí y el binding es el
+  mismo, así que un fallo se ve sin arriesgar producción.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
 - 2026-06: un deploy fallido NO publica el sitio aunque suban los assets.
