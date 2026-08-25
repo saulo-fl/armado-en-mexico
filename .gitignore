@@ -1,8 +1,11 @@
 node_modules
 
-# JS generados por `npm run build` a partir de los .jsx (fuente).
-# NO se commitean: los produce el build de Cloudflare Pages en cada deploy.
-# Ojo: data*.js, store.js y dev-viewport.js SÍ son fuente y no van aquí.
+# ── Generados por `npm run build` — NO se commitean ────────────────────────
+# Los produce el build de Cloudflare Pages en cada deploy. La fuente son los
+# .jsx y los data-*.js.
+
+# 1) JS transpilado de los .jsx (build:js)
+#    Ojo: data*.js, store.js y dev-viewport.js SÍ son fuente y no van aquí.
 /admin.js
 /app.js
 /screens-1.js
@@ -14,3 +17,42 @@ node_modules
 /screens-tutorial.js
 /tweaks-panel.js
 /ui.js
+
+# 2) HTML prerenderizado (build:html) — ver build-prerender.mjs
+#    Fuente que NO se toca: index.html, admin.html, 404.html, shopify-demo.html
+/pistolas/
+/revolveres/
+/rifles/
+/escopetas/
+/carabinas/
+/cargadores/
+/opticas/
+/refacciones/
+/empunaduras/
+/municiones/
+/pistolas.html
+/revolveres.html
+/rifles.html
+/escopetas.html
+/carabinas.html
+/cargadores.html
+/opticas.html
+/refacciones.html
+/empunaduras.html
+/municiones.html
+/arsenal.html
+/calibres.html
+/legalidad.html
+/traumaticas.html
+/preguntas.html
+/campos.html
+/cursos.html
+/acerca.html
+/comparar.html
+/proponer.html
+/mas.html
+
+# 3) Ficheros de despliegue generados junto al prerender
+/sitemap.xml
+/robots.txt
+/_redirects
