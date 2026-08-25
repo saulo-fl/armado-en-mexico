@@ -1,1 +1,16 @@
 node_modules
+
+# JS generados por `npm run build` a partir de los .jsx (fuente).
+# NO se commitean: los produce el build de Cloudflare Pages en cada deploy.
+# Ojo: data*.js, store.js y dev-viewport.js SÍ son fuente y no van aquí.
+/admin.js
+/app.js
+/screens-1.js
+/screens-2.js
+/screens-3.js
+/screens-4.js
+/screens-accesorios.js
+/screens-municiones.js
+/screens-tutorial.js
+/tweaks-panel.js
+/ui.js

@@ -1,7 +1,13 @@
 # CLAUDE.md — Instrucciones para Claude Code (Armado en México)
 
 Este directorio es el contenido COMPLETO del repositorio `armado-en-mexico`.
-Es una app estática (HTML + JSX transpilado en navegador, sin build step).
+Es una app estática con **un solo paso de build**: los `.jsx` se precompilan a `.js`
+con Babel CLI (`npm run build`). No hay bundler ni módulos ES — los archivos se
+comunican por `window.*` y el orden de los `<script>` en el HTML sigue importando.
+
+**Los `.js` generados no se commitean** (`.gitignore`): los produce el build de
+Cloudflare Pages en cada deploy. La fuente son los `.jsx`. En local: `npm install`
+y `npm run build` (o `npm run watch`) antes de abrir la app por HTTP.
 
 ## Tooling de Claude — flujos, skills y agentes (`.claude/`)
 
@@ -109,7 +115,7 @@ Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que correspon
 
 - **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
 - **No elimines `.nojekyll`** — evita que Jekyll interfiera con el servido de archivos.
-- **No "compiles" los `.jsx`**: se transpilan en el navegador con Babel standalone a propósito. La precompilación es una mejora futura opcional, no parte de este deploy.
+- **Los `.jsx` se precompilan** con `npm run build` (Babel CLI, `babel.config.json` con `runtime: "classic"` — obligatorio: React se carga como global UMD, y el runtime `automatic` que Babel 8 trae por defecto emite `import` y rompe la app). Tras editar un `.jsx`, recompila antes de probar.
 - Los scripts de React/Babel vienen de unpkg con hashes `integrity` fijados — no cambies las versiones.
 - La carpeta `shopify/` no es parte de la web servida: contiene la sección Liquid instalable en el tema de Shopify de armasmys.com (instrucciones en `shopify/INSTALL.md`). Déjala en el repo como fuente de verdad.
 - La barra "◉ DEBUG" (abajo-izquierda) es una herramienta de desarrollo intencional; no la quites.
@@ -143,6 +149,8 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 
 ## Mejoras futuras opcionales (NO hacer ahora)
 
-- GitHub Action que precompile los `.jsx` con Babel CLI y sirva JS plano (quita ~1-2 s de arranque).
-- Cambiar React development → production builds.
-- Convertir `imagenes/` a WebP uniformes con tamaños responsivos (hoy son mezcla de jpg/png/webp con relaciones de aspecto heterogéneas; las fichas las muestran con `object-fit: contain`).
+- Añadir una CSP en `_headers` (ya es posible: no queda JS inline transpilado).
+- Servir imágenes en varios tamaños (`srcset`) para móvil; hoy son WebP uniformes de máx 1400px que las fichas muestran con `object-fit: contain`.
+
+Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en builds
+de producción · conversión de `imagenes/` a WebP.
