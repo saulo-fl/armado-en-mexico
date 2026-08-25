@@ -111,6 +111,45 @@ ficha muestra una fila por sucursal donde el arma exista.
 Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que corresponda (mapa DCAM o
 `qty` del registro del inventario), nunca como un único número global.
 
+## Prerender: un .html real por URL (`build-prerender.mjs`)
+
+`npm run build` hace dos cosas: **`build:js`** (Babel) y **`build:html`**
+(`build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 294 — con su
+`<title>`, `description`, `canonical`, Open Graph, JSON-LD y el contenido **en HTML
+crudo** dentro de `#app-root`.
+
+**Por qué existe** (detalle y fuentes en `SEO.md`): la app pinta todo con JS y las
+rutas profundas devolvían **404** (las resolvía el truco SPA de `404.html`).
+Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBot
+**no ejecutan JS nunca**. Sin estos ficheros el sitio era invisible para ambos.
+
+- React monta con `createRoot` (no `hydrateRoot`) y **reemplaza** ese contenido: no
+  hay hidratación ni riesgo de desajuste. El HTML crudo es solo para los crawlers.
+- **Nada de esto se commitea** (`.gitignore`): lo genera el build de Cloudflare.
+  La fuente son los `.jsx` y los `data-*.js`. `index.html`, `admin.html`, `404.html`
+  y `shopify-demo.html` **sí** son fuente y no se tocan.
+- El script **falla ruidosamente** si `index.html` cambia de forma (busca el cálculo
+  de `APP_BASE`, el `<base>`, el `<title>`, la `description` y `#app-root`). Si tocas
+  esas líneas, actualiza las marcas del script — es a propósito: mejor romper el
+  build que publicar 294 páginas mal generadas.
+
+**Dos trampas ya resueltas — no las reintroduzcas:**
+
+1. **`<base href="/">` va estático en el `<head>` de las páginas generadas.** El
+   `index.html` lo crea por JS, y eso no basta: el *preload scanner* pide los
+   `<script src="app.js">` **antes** de ejecutar ese inline, resolviéndolos contra
+   `/pistolas/` → 18 peticiones 404 por visita. Con la etiqueta estática: 0.
+2. **`_redirects` fija los listados.** Coexisten `pistolas.html` (listado) y el
+   directorio `pistolas/` (fichas); la documentación de Cloudflare **no** define cuál
+   gana en `/pistolas`, así que se fuerza con un rewrite `200` por rama. **Nunca uses
+   un catch-all `/*`**: en Pages los redirects se siguen exista o no el asset, y se
+   comería `sitemap.xml`, `robots.txt`, `app.js` e `imagenes/`.
+
+`sitemap.xml` y `robots.txt` salen del mismo script. El `lastmod` se toma del commit
+que tocó cada `data-*.js`; las páginas fijas van **sin** `lastmod` a propósito (Google
+se cree la columna entera o la descarta entera: una fecha inventada contamina las
+buenas).
+
 ## Direcciones (URLs) — esquema y reglas
 
 Rutas legibles y jerárquicas, pensadas para SEO/GEO. Todo el ruteo vive en la
