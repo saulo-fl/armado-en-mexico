@@ -5,14 +5,17 @@ description: Verifica la integridad de "Armado en México" antes de commitear/pu
 
 # Verificar app (checklist obligatorio antes de publicar)
 
-La app se transpila en el navegador con Babel standalone (sin build step). Un error
-de sintaxis en un `.jsx` rompe la app en producción sin que ningún test lo atrape,
-así que la verificación es manual pero automatizable.
+Los `.jsx` se precompilan a `.js` con Babel CLI y el navegador recibe JS plano.
+Un error de sintaxis en un `.jsx` rompe la app en producción sin que ningún test lo
+atrape, así que la verificación es manual pero automatizable.
 
-## Rápido (una sola orden)
+## Rápido (dos órdenes)
 ```bash
+npm run build                                              # los .jsx -> .js
 node .claude/skills/conciliar-inventario/scripts/auditar.js
 ```
+Si `npm run build` falla, NO sigas: el deploy publicaría HTML apuntando a `.js`
+que no existen. Corre `npm install` primero si no hay `node_modules/`.
 Debe terminar en `✔✔ AUDITORÍA SIN HALLAZGOS` (sale con código !=0 si falla). Cubre:
 - Todos los `.jsx` transpilan con `@babel/standalone`.
 - Los `data-*.js` cargan juntos en Node (shim de `window`).
@@ -25,7 +28,11 @@ node -e 'const B=require("./node_modules/@babel/standalone/babel.js");const fs=r
 ```
 
 ## Reglas
-- No commitees si la auditoría falla o algún `.jsx` no transpila.
+- No commitees si `npm run build` o la auditoría fallan.
+- Los `.js` generados están en `.gitignore` — si aparecen en `git status`, algo se
+  salió del patrón: revísalo antes de commitear.
+- OJO: hoy `auditar.js` imprime los hallazgos pero **sale con código 0 igualmente**,
+  así que no sirve como puerta automática en CI. Lee su salida.
 - Si tocaste lógica de precios/existencias, además SIMULA a mano un par de casos
   (presente, agotado, solo-OTCA, ficha nueva) cargando los datos en Node.
 - No puedes abrir un navegador real (sin red para unpkg): la transpilación + carga

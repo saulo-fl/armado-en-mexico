@@ -1,0 +1,16 @@
+{
+  "name": "armado-en-mexico",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enciclopedia divulgativa de armas legales en México (DCAM · SEDENA) — app estática. El único paso de build precompila los .jsx a .js con Babel; no hay bundler.",
+  "scripts": {
+    "build": "babel --extensions .jsx --out-dir . --out-file-extension .js *.jsx",
+    "watch": "npm run build -- --watch"
+  },
+  "devDependencies": {
+    "@babel/cli": "^8.0.4",
+    "@babel/core": "^8.0.1",
+    "@babel/preset-react": "^8.0.1",
+    "@babel/standalone": "^7.29.0"
+  }
+}
