@@ -348,19 +348,12 @@ ${enSitemap.map(({ ruta, fuente }) => {
 `;
 writeFileSync(join(RAIZ, 'sitemap.xml'), xml, 'utf8');
 
-// ─── 6b. _redirects: resolver el choque fichero/directorio ──────────────────
-// Para cada rama existen a la vez `pistolas.html` (el listado) y el directorio
-// `pistolas/` (las fichas). La documentación de Cloudflare Pages NO especifica
-// cuál gana en la URL `/pistolas`, así que no lo dejamos al azar: un rewrite
-// explícito con 200 lo fija. Son reglas estáticas (sin comodín), muy por debajo
-// del límite de 2000, y NO usamos un catch-all `/*` — en Pages los redirects se
-// siguen siempre, exista o no el asset, y un `/*` se comería sitemap.xml,
-// robots.txt, app.js e imagenes/. Ver SEO.md.
-const rutasListado = listados.map((l) => l.ruta);
-writeFileSync(join(RAIZ, '_redirects'),
-  '# Generado por build-prerender.mjs — no editar a mano.\n'
-  + '# Fija el listado de cada rama frente al directorio del mismo nombre.\n'
-  + rutasListado.map((r) => `/${r}  /${r}.html  200`).join('\n') + '\n', 'utf8');
+// ─── 6b. (sin _redirects) ───────────────────────────────────────────────────
+// Aquí hubo un rewrite `/pistolas -> /pistolas.html 200` para fijar el listado
+// frente al directorio del mismo nombre. Provocaba un BUCLE: Cloudflare redirige
+// todo `.html` a su versión sin extensión, así que /pistolas.html volvía a
+// /pistolas y de ahí otra vez a la regla. Medido en el preview: 308 -> /pistolas.
+// Se deja que Pages resuelva `pistolas.html` en /pistolas por su cuenta.
 
 // ─── 7. robots.txt ──────────────────────────────────────────────────────────
 // Cloudflare antepone su propio bloque gestionado (Content Signals) a este
