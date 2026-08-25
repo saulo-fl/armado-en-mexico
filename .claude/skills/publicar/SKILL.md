@@ -47,10 +47,21 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
   inválido en `wrangler.toml` («Error 8000022») → la Function no publica y NADA se
   despliega.
 - **El backend D1 está ACTIVO desde el 25-ago-2026.** Tras cualquier deploy que toque
-  `wrangler.toml` o `functions/`, comprueba que no cayó a fallback:
-  `curl -s -o /dev/null -w '%{http_code}' https://armado.mx/api/state` → **200**.
-  Un 404 significa que las Functions perdieron el binding y la app volvió a modo
-  offline **sin avisar**: se ve perfecta, pero nada se comparte entre visitantes.
+  `wrangler.toml` o `functions/`, comprueba que no cayó a fallback — es silencioso: el
+  sitio se ve perfecto y nada se comparte entre visitantes.
+  **`/api/state` NO sirve como sonda:** devuelve `200 {}` con binding y sin él.
+  Usa un `append` con JSON inválido, que comprueba `env.DB` antes de parsear el cuerpo
+  (así que no escribe nada):
+  ```bash
+  curl -s -X POST https://armado.mx/api/append/ratings -d 'x'       # json_invalido = OK
+  curl -s -X PUT  https://armado.mx/api/admin/state/pages -d '{}'   # no_autenticado = OK
+  ```
+  `sin_backend` = se perdió el binding D1. `admin_auth_no_configurado` = se perdieron
+  las vars de Access. Los dos responden 503.
+- **Verifica en el preview del PR antes de mergear** cuando toques `wrangler.toml` o
+  `functions/`: el alias por rama es `<rama-con-guiones>.armado-en-mexico.pages.dev`
+  (`claude/x-y` → `claude-x-y`). Las mismas sondas funcionan ahí y el binding es el
+  mismo, así que un fallo se ve sin arriesgar producción.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
 - 2026-06: un deploy fallido NO publica el sitio aunque suban los assets.

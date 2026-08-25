@@ -61,15 +61,21 @@ done
 ```
 
 Si el deploy queda **Failed**, NO se publica nada y sigue vivo el anterior. Causa
-conocida: un `database_id` inválido en `wrangler.toml` («Error 8000022»). Comprueba
-también el backend, que ya está activo:
+conocida: un `database_id` inválido en `wrangler.toml` («Error 8000022»).
+
+**Comprueba también que el backend no cayó a fallback.** Un fallback no se nota: el
+sitio se ve perfecto y nada se comparte. **No sirve mirar `/api/state`** — devuelve
+`200 {}` tanto con binding como sin él (`if (!env.DB) return json({})`). La sonda que
+sí distingue es un `append` con JSON inválido, que llega a comprobar `env.DB` **antes**
+de parsear el cuerpo, así que no escribe nada:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' https://armado.mx/api/state   # 200 (no 404)
+curl -s -X POST https://armado.mx/api/append/ratings -d 'x'       # -> {"error":"json_invalido"}
+curl -s -X PUT  https://armado.mx/api/admin/state/pages -d '{}'   # -> {"error":"no_autenticado"}
 ```
 
-Un **404** ahí significa que las Functions cayeron a fallback (sin binding D1) y la
-app volvió a modo offline sin avisar: se ve bien, pero nada se comparte.
+`sin_backend` en la primera = se perdió el binding D1. `admin_auth_no_configurado` en
+la segunda = se perdieron las vars de Access. Ambos son 503 y ambos son silenciosos.
 
 ## Conciliar inventarios y precios (tarea recurrente)
 
