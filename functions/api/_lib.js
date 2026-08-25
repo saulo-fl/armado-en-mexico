@@ -51,7 +51,11 @@ export function mergeAppend(domain, current, item) {
     clean.submittedAt = new Date().toISOString();
     clean.status = 'pending';
     arr.unshift(clean);
-    return arr.slice(0, 1000); // tope anti-abuso
+    // Doble tope: por número de items y por bytes. Solo el de items dejaba un
+    // techo de 1000 × el tamaño de cada uno, que era ilimitado antes de acotar
+    // los campos anidados. Los más recientes van primero, así que el recorte
+    // descarta los más viejos.
+    return recortarPorBytes(arr.slice(0, 1000), MAX_DOMINIO);
   }
   if (domain === 'ratings') {
     const out = (current && typeof current === 'object') ? { ...current } : {};
@@ -69,13 +73,28 @@ export function mergeAppend(domain, current, item) {
     const ts = Number(item.ts) || Date.now();
     const cutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
     const list = (Array.isArray(out[armaId]) ? out[armaId] : []).concat([ts]).filter((t) => t > cutoff);
-    out[armaId] = list.slice(-5000);
+    // ponytail: 500 marcas por arma acota la fila a ~1.2 MB con las 179 armas,
+    // bajo el límite de 2 MB de D1. Con 5000 el techo eran ~12 MB y la escritura
+    // habría empezado a fallar en silencio. Si algún día hace falta el conteo
+    // exacto, la salida es una tabla fila-por-visita agregada con COUNT, no
+    // subir este número.
+    out[armaId] = list.slice(-500);
     return out;
   }
   return current;
 }
 
-// Recorta strings descomunales en items enviados por el público.
+// Recorta items enviados por el público. Los topes son POR BYTES SERIALIZADOS,
+// no por número de elementos: recortar un array a 100 no sirve de nada si cada
+// elemento es un objeto de 50 KB. Sin esto, un solo POST anónimo mete cientos de
+// KB en la fila del dominio — y /api/state la sirve entera en CADA carga de
+// página, a todos los visitantes.
+const MAX_CAMPO = 8 * 1024;    // un campo anidado (specs de un arma propuesta, etc.)
+const MAX_ITEM = 16 * 1024;    // el item completo ya saneado
+const MAX_DOMINIO = 512 * 1024; // la lista acumulada de un dominio
+
+function pesa(v) { try { return JSON.stringify(v).length; } catch { return Infinity; } }
+
 function sanitizeItem(item) {
   const out = {};
   for (const k of Object.keys(item || {})) {
@@ -83,8 +102,32 @@ function sanitizeItem(item) {
     const v = item[k];
     if (typeof v === 'string') out[k] = v.slice(0, 5000);
     else if (typeof v === 'number' || typeof v === 'boolean') out[k] = v;
-    else if (Array.isArray(v)) out[k] = v.slice(0, 100);
-    else if (v && typeof v === 'object') out[k] = v; // p.ej. specs anidadas de un arma propuesta
+    else if (Array.isArray(v)) { const a = v.slice(0, 100); if (pesa(a) <= MAX_CAMPO) out[k] = a; }
+    else if (v && typeof v === 'object') { if (pesa(v) <= MAX_CAMPO) out[k] = v; }
+  }
+  // Red de seguridad: muchos campos pequeños también suman. Conserva los que
+  // quepan, en orden, y descarta el resto.
+  if (pesa(out) > MAX_ITEM) {
+    const min = {};
+    for (const k of Object.keys(out)) {
+      min[k] = out[k];
+      if (pesa(min) > MAX_ITEM) { delete min[k]; break; }
+    }
+    return min;
+  }
+  return out;
+}
+
+// Corta una lista para que el JSON del dominio no crezca sin techo. D1 rechaza
+// filas de más de 2 MB, y aunque no lo hiciera, esto viaja en cada /api/state.
+function recortarPorBytes(arr, maxBytes) {
+  const out = [];
+  let total = 2; // los corchetes
+  for (const it of arr) {
+    const s = pesa(it) + 1;
+    if (total + s > maxBytes) break;
+    out.push(it);
+    total += s;
   }
   return out;
 }
