@@ -2,7 +2,15 @@
 
 const { useState: useStateApp, useEffect: useEffectApp, useRef: useRefApp } = React;
 
-// ─── RUTEO POR URL (cada pantalla con su propia dirección: /calibres, /arsenal…) ───
+// ─── RUTEO POR URL ───────────────────────────────────────────────────────
+// Direcciones legibles y jerárquicas, pensadas para SEO/GEO:
+//   /pistolas                          listado del tipo
+//   /pistolas/glock-19                 ficha del arma
+//   /cargadores                        listado de la categoría
+//   /cargadores/cargador-22-lr-mossberg
+//   /municiones                        listado (las municiones no llevan sub-rama)
+//   /municiones/12-ga-rio-perdigon-7-5-28-gr
+// Los slugs se derivan de los datos (no se guardan): ver amxSlugIndex().
 const APP_BASE = (window.APP_BASE || '/').replace(/[^/]*$/, (m) => (m.indexOf('.') >= 0 ? '' : m)) || '/';
 const SCREEN_TO_PATH = {
   home: '', catalog: 'arsenal', accesorios: 'accesorios',
@@ -16,28 +24,124 @@ const PATH_TO_SCREEN = Object.keys(SCREEN_TO_PATH).reduce((m, s) => {
   return m;
 }, {});
 
-function amxBuildPath(screen, productId, accesorioId, municionId) {
-  if (screen === 'product') return 'arma/' + (productId != null ? productId : '');
-  if (screen === 'accesorio') return 'accesorio/' + (accesorioId != null ? accesorioId : '');
-  if (screen === 'municion') return 'municion/' + (municionId != null ? municionId : '');
+// tipo de arma (dato) ↔ segmento de URL (plural, sin acentos)
+const TIPO_TO_PATH = {
+  pistola: 'pistolas', revolver: 'revolveres', rifle: 'rifles',
+  escopeta: 'escopetas', carabina: 'carabinas',
+};
+const PATH_TO_TIPO = Object.keys(TIPO_TO_PATH).reduce((m, t) => { m[TIPO_TO_PATH[t]] = t; return m; }, {});
+
+function amxSlug(s) {
+  return String(s == null ? '' : s)
+    .normalize('NFD').replace(/\p{Diacritic}/gu, '')   // quita acentos
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+window.amxSlug = amxSlug;
+
+// Índice slug ↔ id. Se reconstruye si cambia el tamaño de algún catálogo
+// (p. ej. tras hidratar desde el backend), no en cada navegación.
+let _slugIdx = null, _slugKey = '';
+function amxSlugIndex() {
+  const DB = window.DB || [], AC = window.ACCESORIOS || [], MU = window.MUNICIONES || [];
+  const key = DB.length + ':' + AC.length + ':' + MU.length;
+  if (_slugIdx && _slugKey === key) return _slugIdx;
+
+  const idx = { aPorSlug: {}, slugPorA: {}, cPorSlug: {}, slugPorC: {}, mPorSlug: {}, slugPorM: {} };
+  // Desempate determinista: recorremos por id, y al repetirse un slug se le
+  // añade -2, -3… Así la URL de una ficha no cambia al añadir otras.
+  const unico = (mapa, base) => {
+    const b = base || 'sin-nombre';
+    let s = b, n = 2;
+    while (Object.prototype.hasOwnProperty.call(mapa, s)) { s = b + '-' + n; n++; }
+    return s;
+  };
+  const porId = (arr) => arr.slice().sort((x, y) => (x.id || 0) - (y.id || 0));
+
+  porId(DB).forEach((a) => {
+    const rama = TIPO_TO_PATH[a.tipo] || 'otras';
+    const s = unico(idx.aPorSlug, rama + '/' + amxSlug(a.nombre));
+    idx.aPorSlug[s] = a.id; idx.slugPorA[a.id] = s;
+  });
+  porId(AC).forEach((c) => {
+    const s = unico(idx.cPorSlug, amxSlug(c.categoria || 'accesorios') + '/' + amxSlug(c.nombre));
+    idx.cPorSlug[s] = c.id; idx.slugPorC[c.id] = s;
+  });
+  // Municiones: sin sub-rama. Calibre y marca no bastan (hay varios cartuchos
+  // del mismo calibre y marca), así que el slug suma bala y grano.
+  porId(MU).forEach((m) => {
+    const base = amxSlug([m.calibre, m.marca, m.bala, m.grano].filter(Boolean).join(' '));
+    const s = unico(idx.mPorSlug, base);
+    idx.mPorSlug[s] = m.id; idx.slugPorM[m.id] = s;
+  });
+
+  _slugIdx = idx; _slugKey = key;
+  return idx;
+}
+window.amxSlugIndex = amxSlugIndex;
+
+function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter) {
+  const idx = amxSlugIndex();
+  if (screen === 'product') return idx.slugPorA[productId] || 'arsenal';
+  if (screen === 'accesorio') return idx.slugPorC[accesorioId] || 'accesorios';
+  if (screen === 'municion') return 'municiones/' + (idx.slugPorM[municionId] || '');
+  // Listados por rama: /pistolas, /cargadores…
+  if (screen === 'catalog' && catalogFilter && catalogFilter.mode === 'tipo' && TIPO_TO_PATH[catalogFilter.value]) {
+    return TIPO_TO_PATH[catalogFilter.value];
+  }
+  if (screen === 'accesorios' && catalogFilter && catalogFilter.categoria && catalogFilter.categoria !== 'all') {
+    return amxSlug(catalogFilter.categoria);
+  }
   return SCREEN_TO_PATH[screen] || '';
 }
-function amxBuildUrl(screen, productId, accesorioId, municionId) {
-  const p = amxBuildPath(screen, productId, accesorioId, municionId);
-  return APP_BASE + p;
+function amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter) {
+  return APP_BASE + amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter);
 }
+
+const VACIO = { screen: 'home', productId: null, accesorioId: null, municionId: null, catalogFilter: null };
 function amxParsePath(pathname) {
   let rel = pathname || '';
   if (APP_BASE !== '/' && rel.indexOf(APP_BASE) === 0) rel = rel.slice(APP_BASE.length);
   else if (APP_BASE === '/' && rel[0] === '/') rel = rel.slice(1);
   rel = rel.replace(/index\.html$/, '').replace(/^\/+|\/+$/g, '');
-  if (!rel) return { screen: 'home', productId: null, accesorioId: null, municionId: null };
-  const seg = rel.split('/');
-  if (seg[0] === 'arma') return { screen: 'product', productId: Number(seg[1]) || null, accesorioId: null, municionId: null };
-  if (seg[0] === 'accesorio') return { screen: 'accesorio', productId: null, accesorioId: Number(seg[1]) || null, municionId: null };
-  if (seg[0] === 'municion') return { screen: 'municion', productId: null, accesorioId: null, municionId: Number(seg[1]) || null };
-  const sc = PATH_TO_SCREEN[seg[0]];
-  return { screen: sc || 'home', productId: null, accesorioId: null, municionId: null };
+  if (!rel) return Object.assign({}, VACIO);
+
+  const seg = rel.split('/').map((s) => decodeURIComponent(s).toLowerCase());
+  const idx = amxSlugIndex();
+
+  // Pantallas con nombre propio (/arsenal, /calibres…) y el listado de municiones
+  if (seg.length === 1 && PATH_TO_SCREEN[seg[0]]) {
+    return Object.assign({}, VACIO, { screen: PATH_TO_SCREEN[seg[0]] });
+  }
+  // Ficha de munición: /municiones/<slug>
+  if (seg[0] === SCREEN_TO_PATH.municiones && seg[1]) {
+    const id = idx.mPorSlug[seg[1]];
+    return id != null
+      ? Object.assign({}, VACIO, { screen: 'municion', municionId: id })
+      : Object.assign({}, VACIO, { screen: 'municiones' });
+  }
+  // Listado por tipo de arma: /pistolas
+  if (seg.length === 1 && PATH_TO_TIPO[seg[0]]) {
+    return Object.assign({}, VACIO, { screen: 'catalog', catalogFilter: { mode: 'tipo', value: PATH_TO_TIPO[seg[0]] } });
+  }
+  // Ficha de arma: /pistolas/<slug>
+  if (seg.length >= 2 && PATH_TO_TIPO[seg[0]]) {
+    const id = idx.aPorSlug[seg[0] + '/' + seg[1]];
+    return id != null
+      ? Object.assign({}, VACIO, { screen: 'product', productId: id })
+      : Object.assign({}, VACIO, { screen: 'catalog', catalogFilter: { mode: 'tipo', value: PATH_TO_TIPO[seg[0]] } });
+  }
+  // Accesorios: /cargadores y /cargadores/<slug>
+  const catAcc = (window.ACCESORIOS || []).some((c) => amxSlug(c.categoria) === seg[0]);
+  if (catAcc) {
+    if (seg[1]) {
+      const id = idx.cPorSlug[seg[0] + '/' + seg[1]];
+      if (id != null) return Object.assign({}, VACIO, { screen: 'accesorio', accesorioId: id });
+    }
+    return Object.assign({}, VACIO, { screen: 'accesorios', catalogFilter: { categoria: seg[0] } });
+  }
+  return Object.assign({}, VACIO);
 }
 
 function App() {
@@ -71,7 +175,7 @@ function App() {
   const [productId, setProductId] = useStateApp(_init.productId);
   const [accesorioId, setAccesorioId] = useStateApp(_init.accesorioId);
   const [municionId, setMunicionId] = useStateApp(_init.municionId);
-  const [catalogFilter, setCatalogFilter] = useStateApp(null);
+  const [catalogFilter, setCatalogFilter] = useStateApp(_init.catalogFilter);
   const [compareIds, setCompareIds] = useStateApp([]);
   const [pickerSlot, setPickerSlot] = useStateApp(null);
   const [history, setHistory] = useStateApp([]);
@@ -80,11 +184,12 @@ function App() {
   // URL ↔ pantalla: empuja una nueva dirección al cambiar de pantalla
   useEffectApp(() => {
     if (skipPush.current) { skipPush.current = false; return; }
-    const cur = amxParsePath(window.location.pathname);
-    if (cur.screen === screen && cur.productId === productId && cur.accesorioId === accesorioId && cur.municionId === municionId) return;
-    const url = amxBuildUrl(screen, productId, accesorioId, municionId);
+    // Basta comparar la dirección que toca con la que hay. Al depender también
+    // del filtro, /arsenal y /pistolas son direcciones distintas.
+    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter);
+    if (window.location.pathname === url) return;
     try { window.history.pushState({ screen, productId, accesorioId, municionId }, '', url); } catch (e) {}
-  }, [screen, productId, accesorioId, municionId]);
+  }, [screen, productId, accesorioId, municionId, catalogFilter]);
 
   // Botón atrás/adelante del navegador → aplica la pantalla de la URL
   useEffectApp(() => {
@@ -96,6 +201,7 @@ function App() {
       setProductId(s.productId);
       setAccesorioId(s.accesorioId);
       setMunicionId(s.municionId);
+      setCatalogFilter(s.catalogFilter);
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
