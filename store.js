@@ -221,11 +221,22 @@
         const k = DOMAIN_K[domain]; if (!k) return;
         const val = data[domain];
         if (val == null) return;            // dominio aún no sembrado en D1 → conserva seed
-        write(k, val);
+        // Un array vacío NO es un estado que deba propagarse. Si se aceptara, un
+        // 'armas: []' en D1 (p. ej. una importación de CSV fallida del admin, que
+        // hace saveArmas([]) y lo sincroniza) vaciaría el catálogo de TODOS los
+        // visitantes: write() cachearía el vacío y, en la carga siguiente, init()
+        // vería la clave presente y volvería a leer []. No se recupera solo — hay
+        // que borrar localStorage a mano. Ante la duda, conserva el seed.
+        if (Array.isArray(val) && val.length === 0) return;
         if (domain === 'armas' && Array.isArray(val)) {
+          // Reparar ANTES de cachear: getArmas() lee de localStorage, no de
+          // window.DB, así que escribir primero dejaba el cache (y de ahí el
+          // admin, y de ahí el siguiente PUT a D1) con las rutas de imagen viejas.
+          val.forEach((a) => { fixArmaImg(a); if (!a.img) a.img = window.armaPlaceholder(a); });
           window.DB.length = 0;
-          val.forEach((a) => { fixArmaImg(a); if (!a.img) a.img = window.armaPlaceholder(a); window.DB.push(a); });
+          val.forEach((a) => window.DB.push(a));
         }
+        write(k, val);
       });
       Store._notify();
       return true;
