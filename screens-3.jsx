@@ -95,7 +95,6 @@ function CalibresScreen({ onOpenArma, onNav }) {
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* encabezado */}
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◉ MUNICIÓN · GUÍA DIVULGATIVA</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Guía de calibres</div>
       <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
         Conoce los calibres presentes en el catálogo: su uso típico, balística aproximada y las armas que los emplean. Cifras divulgativas, varían según marca y munición.
@@ -232,7 +231,6 @@ function CamposScreen({ onNav }) {
   const campos = window.CAMPOS || [];
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◎ CAMPOS Y CLUBES DE TIRO</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 10 }}>Campos de tiro</div>
 
       {/* banner suscripción a futuro */}
@@ -313,7 +311,6 @@ function CursosScreen({ onNav }) {
   const cursos = window.CURSOS || [];
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>✦ FORMACIÓN Y CURSOS</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Cursos</div>
       <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
         Aprende antes de decidir. Catálogo de formación con instructores certificados, del manejo seguro al tiro defensivo y de precisión. Contenido de muestra.

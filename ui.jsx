@@ -193,11 +193,6 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
           );
         })}
       </div>
-      <div style={{
-        fontFamily: 'Courier Prime, monospace',
-        fontSize: 13, color: PALETTE.textMuted,
-        letterSpacing: '0.2em', textTransform: 'uppercase',
-      }}>ENCICLOPEDIA TÁCTICA · ED. 2026</div>
     </div>
   );
 }

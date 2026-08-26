@@ -87,33 +87,28 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
 
       {/* 2 ▸ Carrusel: Favoritos de Armas M&S */}
       <CarouselSection
-        eyebrow="◆ SELECCIÓN DEL EQUIPO"
         title={`Favoritos de ${teamName}`}
         items={favoritos}
         fallbackItems={sugerencias(0)}
-        fallbackNote="Selección sugerida · el equipo aún no marca favoritos"
         fallbackRender={renderSugerencia}
         renderItem={(a, i) =>
-        <FavCard arma={a} rank={i + 1} onClick={() => onOpenArma(a.id)} />
+        <FavCard arma={a} onClick={() => onOpenArma(a.id)} />
         } />
       
 
       {/* 3 ▸ Carrusel: Las más visitadas */}
       <CarouselSection
-        eyebrow="▸ POPULARIDAD · ÚLT. 30 DÍAS"
         title="Las más visitadas"
         items={masVisitadas}
         fallbackItems={sugerencias(10)}
-        fallbackNote="Explora el catálogo · las visitas de la comunidad aparecerán aquí"
         fallbackRender={renderSugerencia}
         renderItem={(a, i) =>
-        <VisitedCard arma={a} rank={i + 1} onClick={() => onOpenArma(a.id)} />
+        <VisitedCard arma={a} onClick={() => onOpenArma(a.id)} />
         } />
       
 
       {/* 5 ▸ Calibres · guía enciclopédica */}
       <CarouselSection
-        eyebrow="◉ MUNICIÓN · GUÍA"
         title="Calibres"
         action={
         <button onClick={() => onNav('calibres')} style={{
@@ -128,7 +123,6 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
 
       {/* 6 ▸ Campos de tiro */}
       <CarouselSection
-        eyebrow="◎ CAMPOS Y CLUBES · PRÓXIMAMENTE"
         title="Campos de tiro"
         action={
         <button onClick={() => onNav('campos')} style={{
@@ -143,7 +137,6 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
 
       {/* 7 ▸ Cursos */}
       <CarouselSection
-        eyebrow="✦ FORMACIÓN"
         title="Cursos"
         action={
         <button onClick={() => onNav('cursos')} style={{
@@ -221,17 +214,6 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                     borderRight: `1.5px solid ${PALETTE.amber}`,
                     opacity: 0.75
                   }} />
-                  {/* badge de conteo */}
-                  <div style={{
-                    position: 'absolute', top: 8, right: 8,
-                    background: 'rgba(0,0,0,0.78)',
-                    border: `1px solid ${PALETTE.amber}`,
-                    color: PALETTE.amber,
-                    padding: '2px 7px',
-                    fontFamily: 'Courier Prime, monospace',
-                    fontSize: 13, letterSpacing: '0.1em',
-                    fontWeight: 700
-                  }}>{String(count).padStart(2, '0')}</div>
                   {/* label overlay */}
                   <div style={{
                     position: 'absolute', left: 10, right: 10, bottom: 10
@@ -327,7 +309,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <div style={{
           fontFamily: 'Courier Prime, monospace', color: PALETTE.amber, fontWeight: 700,
           letterSpacing: '0.15em', marginBottom: 4, fontSize: 13}}>◆ AVISO</div>
-        Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la Ley Federal de Armas de Fuego y precios DCAM. Por <span style={{ color: PALETTE.text }}>Saulo Flores · {teamName}</span>.
+        Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la Ley Federal de Armas de Fuego y precios DCAM.
       </div>
     </div>);
 
@@ -337,7 +319,7 @@ window.HomeScreen = HomeScreen;
 // ════════════════════════════════════════════════════════════════
 // CAROUSEL SECTION — sección con título + carrusel horizontal
 // ════════════════════════════════════════════════════════════════
-function CarouselSection({ eyebrow, title, items, renderItem, emptyText, action, fallbackItems, fallbackNote, fallbackRender }) {
+function CarouselSection({ title, items, renderItem, emptyText, action, fallbackItems, fallbackRender }) {
   const vp = window.useViewport();
   const PAD = 16;
   const usingFallback = (!items || !items.length) && fallbackItems && fallbackItems.length > 0;
@@ -345,15 +327,7 @@ function CarouselSection({ eyebrow, title, items, renderItem, emptyText, action,
   const render = usingFallback ? (fallbackRender || renderItem) : renderItem;
   return (
     <div style={{ marginBottom: 20, maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto' }}>
-      <div style={{ padding: `0 ${PAD}px`, marginBottom: 10 }}>
-        {eyebrow &&
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.22em', textTransform: 'uppercase',
-          marginBottom: 4, fontWeight: 600, margin: "25px 0px 4px"
-        }}>{eyebrow}</div>
-        }
+      <div style={{ padding: `0 ${PAD}px`, margin: '25px 0 10px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
           <div style={{
             fontFamily: 'Montserrat, sans-serif',
@@ -365,13 +339,6 @@ function CarouselSection({ eyebrow, title, items, renderItem, emptyText, action,
           }}>{title}</div>
           {action}
         </div>
-        {usingFallback && fallbackNote &&
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 14, color: PALETTE.textMuted,
-          letterSpacing: '0.08em', marginTop: 4
-        }}>◇ {fallbackNote}</div>
-        }
       </div>
       <window.HCarousel
         items={list}
@@ -388,7 +355,7 @@ window.CarouselSection = CarouselSection;
 // ════════════════════════════════════════════════════════════════
 // CARDS para los tres carruseles
 // ════════════════════════════════════════════════════════════════
-function FavCard({ arma, rank, onClick }) {
+function FavCard({ arma, onClick }) {
   return (
     <div onClick={onClick} style={{
       background: PALETTE.bgCard,
@@ -427,7 +394,7 @@ function FavCard({ arma, rank, onClick }) {
 }
 window.FavCard = FavCard;
 
-function VisitedCard({ arma, rank, onClick }) {
+function VisitedCard({ arma, onClick }) {
   const visits = window.Store ? (window.Store.getVisits()[arma.id] || []).length : 0;
   return (
     <div onClick={onClick} style={{
@@ -437,15 +404,6 @@ function VisitedCard({ arma, rank, onClick }) {
       overflow: 'hidden',
       height: '100%', display: 'flex', flexDirection: 'row'
     }}>
-      <div style={{
-        position: 'absolute', top: 8, left: 8, zIndex: 2,
-        background: 'rgba(0,0,0,0.7)', border: `1px solid ${PALETTE.amber}`,
-        color: PALETTE.amber,
-        fontFamily: 'Montserrat, sans-serif',
-        fontSize: 13, fontWeight: 700,
-        width: 26, height: 26,
-        display: 'flex', alignItems: 'center', justifyContent: 'center'
-      }}>{String(rank).padStart(2, '0')}</div>
       <div style={{
         width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
         background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
@@ -948,7 +906,7 @@ window.CatalogScreen = CatalogScreen;
 // ARSENAL HUB — al entrar al arsenal se elige una categoría (no lista plana)
 // ════════════════════════════════════════════════════════════════
 // Tarjeta con foto (fondo de imagen + overlay) para el hub del arsenal
-function ArsenalPhotoCard({ label, sub, count, img, color, onClick }) {
+function ArsenalPhotoCard({ label, sub, img, color, onClick }) {
   const P = PALETTE;
   const [err, setErr] = useState(false);
   const showImg = img && !err;
@@ -968,7 +926,6 @@ function ArsenalPhotoCard({ label, sub, count, img, color, onClick }) {
         <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(26,26,26,0.05) 0%, rgba(26,26,26,0.42) 55%, rgba(26,26,26,0.94) 100%)`, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${ac}`, borderLeft: `1.5px solid ${ac}`, opacity: 0.8 }} />
         <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${ac}`, borderRight: `1.5px solid ${ac}`, opacity: 0.8 }} />
-        <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.78)', border: `1px solid ${ac}`, color: ac, padding: '2px 7px', fontFamily: 'Courier Prime, monospace', fontSize: 13, letterSpacing: '0.1em', fontWeight: 700 }}>{count}</div>
         <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
           <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{label}</div>
           {sub && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: ac, marginTop: 3, letterSpacing: '0.08em', textShadow: '0 1px 2px rgba(0,0,0,0.7)' }}>{sub}</div>}
@@ -991,10 +948,6 @@ function ArsenalHubScreen({ onNav }) {
   const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
   const usoCount = (id) => DB.filter((a) => a.uses.includes(id)).length;
   const availCount = (id) => DB.filter((a) => a.avail === id).length;
-  const sucCount = (s) => DB.filter((a) => {
-    const x = window.getArmaSucursales ? window.getArmaSucursales(a.id) : { dcam: true, otca: false };
-    return s === 'DCAM' ? x.dcam : x.otca;
-  }).length;
   const dispCount = DB.filter((a) =>
     (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
     (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id))).length;
@@ -1033,8 +986,8 @@ function ArsenalHubScreen({ onNav }) {
 
       <Hdr icon="◆">Armería</Hdr>
       <div style={grid(2)}>
-        <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" count={sucCount('DCAM')} img="imagenes/armeria-dcam.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
-        <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" count={sucCount('OTCA')} img="imagenes/armeria-otca.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
+        <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" img="imagenes/armeria-dcam.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
+        <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" img="imagenes/armeria-otca.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
       </div>
 
       <Hdr icon="●">Disponibilidad</Hdr>
@@ -1045,7 +998,7 @@ function ArsenalHubScreen({ onNav }) {
       <Hdr icon="◢">Tipo de arma</Hdr>
       <div style={grid(5)}>
         {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
-          ? <ArsenalPhotoCard key={c.id} label={c.label} count={tipoCount(c.id)} img={HEROS[c.id]} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+          ? <ArsenalPhotoCard key={c.id} label={c.label} img={HEROS[c.id]} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
           : null)}
       </div>
 
