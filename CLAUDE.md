@@ -215,7 +215,8 @@ Lo editado en el admin ya puede compartirse entre visitantes mediante un backend
 
 - Las **Functions** viven en `functions/api/` y Cloudflare Pages las despliega solas:
   `GET /api/state` (snapshot público), `POST /api/append/:domain` (escritura pública de
-  `suggestions`/`pending`/`ratings`/`visits` con merge atómico en el server) y
+  `suggestions`/`pending`/`reviewsQueue`/`reports`/`visits` con merge atómico y
+  **validación** en el server) y
   `PUT /api/admin/state/:domain` (reemplazo de un dominio, **solo admin**).
 - **D1** guarda un *document store* por dominio: una fila `state(domain, data, updated_at)`
   con el mismo JSON que `localStorage` (esquema en `schema.sql`, binding `env.DB` en `wrangler.toml`).
@@ -232,7 +233,39 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 
 **Limitación restante:** "última escritura gana" en los `PUT` de admin (sin versionado) y el
 *append* hace read-modify-write por petición (suficiente para este tráfico). Migrar
-`ratings`/`visits`/colas a tablas fila-por-item es la evolución natural si crece el volumen.
+`reviews`/`visits`/colas a tablas fila-por-item es la evolución natural si crece el volumen.
+
+## PENDIENTE CON PRIORIDAD — «DCAM Monterrey» sigue vivo en producción
+
+**Es un error de dato legal, no cosmético.** La DCAM está **solo** en el Campo Militar
+No. 1 (CDMX). La sede de Monterrey es de **OTCA**, que es otra institución. El 25-ago-2026
+se corrigió en `data.js` (la ficha de arma) y **se dio por cerrado sin grepear el resto** —
+error de método: el texto vivía en cinco sitios más.
+
+Lo que queda por corregir:
+
+| Archivo | Qué dice mal |
+|---|---|
+| `store.js:111` | FAQ: «la DCAM… Campo Militar No. 1 de CDMX **y en sede Monterrey**» |
+| `store.js:99` | Paso del trámite: «Agendar visita al Campo Militar No. 1 (CDMX) **o sede Monterrey**» |
+| `screens-2.jsx:1419` | **El mismo texto duplicado** — por eso se escapó. Al corregirlo, corrige los dos. |
+| `admin.jsx:705` | `placeholder` que enseña el dato falso a quien captura armas |
+| `admin.jsx:1613` | Igual, en el CSV de ejemplo |
+
+**Segundo error en el mismo FAQ**, distinto del anterior: dos respuestas declaran que la DCAM
+es el **único** punto legal de adquisición de armas y municiones. Eso omite a **OTCA** — que es
+justo quien surte el catálogo de municiones de esta app, así que la app se contradice a sí misma.
+
+**Corregir el código NO basta, y esta es la parte que se pasa por alto.** El dominio `pages`
+**ya está guardado en D1** con el texto viejo (comprobado el 25-ago-2026: `GET /api/state`
+devuelve `pages` conteniendo «sede Monterrey»). Como `store.js` hidrata desde ahí y eso pisa
+`DEFAULT_PAGES`, editar la semilla solo alcanza a instalaciones nuevas: **todo el que ya visitó
+el sitio seguiría viendo el dato falso**. Tras publicar el fix hay que reguardar las páginas
+desde **Admin → Contenido**, que hace el `PUT /api/admin/state/pages`. Verifica con:
+
+```bash
+curl -s https://armado.mx/api/state | grep -c "sede Monterrey"   # debe dar 0
+```
 
 ## Mejoras futuras opcionales (NO hacer ahora)
 
