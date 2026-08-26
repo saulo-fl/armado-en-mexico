@@ -764,7 +764,7 @@
     // arrancar, pero puede invocarse para forzar un refresco.
     hydrate() { return hydrate(); },
     // Sube TODO el estado local actual al servidor (sembrado inicial / migración
-    // de la curaduría de este navegador a D1). Requiere sesión admin (Access).
+    // del contenido editado en este navegador a D1). Requiere sesión admin (Access).
     async pushAllToServer() {
       if (!REMOTE.enabled) throw new Error('Sin backend: ejecuta en el dominio con Functions (no file://).');
       const results = {};
@@ -829,7 +829,7 @@
   // Si no hay backend, falla en silencio y queda en modo offline.
   if (REMOTE.enabled) {
     hydrate();
-    // Re-hidratar al volver a la pestaña, para ver curaduría hecha en otro lado.
+    // Re-hidratar al volver a la pestaña, para ver ediciones hechas en otro lado.
     let _lastHydrate = Date.now();
     window.addEventListener('focus', () => {
       if (Date.now() - _lastHydrate < 15000) return; // no más de 1 vez / 15s

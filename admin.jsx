@@ -815,7 +815,7 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
             </div>
           </FormField>
 
-          <FormField label="Historia / Dossier" span="2">
+          <FormField label="Historia" span="2">
             <textarea value={f.historia} onChange={(e) => set('historia', e.target.value)} style={taStyle()} rows={5} placeholder="Contexto histórico, fabricante, datos curiosos..." />
           </FormField>
         </div>
@@ -1008,7 +1008,7 @@ function SettingsTab() {
   }, []);
 
   const pushAll = async () => {
-    if (!confirm('Subirás TODA la curaduría de este navegador al servidor compartido, sobrescribiendo lo que haya allí. ¿Continuar?')) return;
+    if (!confirm('Subirás TODO el contenido editado en este navegador al servidor compartido, sobrescribiendo lo que haya allí. ¿Continuar?')) return;
     setSyncing(true); setSyncMsg('');
     try {
       const res = await window.Store.pushAllToServer();
@@ -1100,13 +1100,13 @@ function SettingsTab() {
 
         <Card title="Backend compartido (Cloudflare D1)">
           {remote.ok ? (
-            <p style={{ ...txtMuted, color: '#4FAE5C' }}>● Conectado. La curaduría se sincroniza automáticamente con el servidor; todos los visitantes ven los mismos datos.</p>
+            <p style={{ ...txtMuted, color: '#4FAE5C' }}>● Conectado. Los cambios se sincronizan automáticamente con el servidor; todos los visitantes ven los mismos datos.</p>
           ) : remote.enabled ? (
             <p style={{ ...txtMuted, color: P.amber }}>○ Sin respuesta del backend (modo offline). Aún no se aprovisiona D1 o no hay Functions en este dominio. Los cambios viven solo en este navegador.</p>
           ) : (
             <p style={{ ...txtMuted }}>Backend no disponible en este contexto (file://). Sirve la app por HTTP en el dominio con Functions.</p>
           )}
-          <p style={txtMuted}>Usa esto la primera vez para subir la curaduría de este navegador al servidor (sembrado inicial). Después, cada cambio se sincroniza solo.</p>
+          <p style={txtMuted}>Usa esto la primera vez para subir el contenido editado en este navegador al servidor (sembrado inicial). Después, cada cambio se sincroniza solo.</p>
           <button onClick={pushAll} disabled={syncing || !remote.enabled} style={Object.assign({}, btnPrimary, { opacity: (syncing || !remote.enabled) ? 0.5 : 1 })}>
             {syncing ? '⏳ Sincronizando…' : '☁ Sincronizar todo al servidor'}
           </button>
@@ -1115,7 +1115,7 @@ function SettingsTab() {
       </div>
 
       <div style={{ marginTop: 24, padding: 14, background: P.bgElev, border: `1px dashed ${P.border}`, fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textMuted, lineHeight: 1.6 }}>
-        <b style={{ color: P.amber }}>◆ Nota:</b> Este admin guarda en <code style={{ color: P.amber }}>localStorage</code> y, cuando el <b>backend compartido</b> está conectado, replica cada cambio a Cloudflare D1 para que todos los visitantes vean la misma curaduría. El export/import JSON sigue siendo útil como respaldo. La verificación de admin la hace Cloudflare Access sobre <code style={{ color: P.amber }}>/admin*</code> y <code style={{ color: P.amber }}>/api/admin/*</code>.
+        <b style={{ color: P.amber }}>◆ Nota:</b> Este admin guarda en <code style={{ color: P.amber }}>localStorage</code> y, cuando el <b>backend compartido</b> está conectado, replica cada cambio a Cloudflare D1 para que todos los visitantes vean lo mismo. El export/import JSON sigue siendo útil como respaldo. La verificación de admin la hace Cloudflare Access sobre <code style={{ color: P.amber }}>/admin*</code> y <code style={{ color: P.amber }}>/api/admin/*</code>.
       </div>
     </div>
   );
@@ -1736,7 +1736,7 @@ function PromoEditor({ promo, onSave, onCancel }) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// FAVORITES TAB — curaduría de armas "Favoritas del equipo"
+// FAVORITES TAB — selección de armas "Favoritas del equipo"
 // ════════════════════════════════════════════════════════════════
 function FavoritesTab() {
   const [favs, setFavs] = useState(window.Store.getFavorites());
@@ -1776,7 +1776,7 @@ function FavoritesTab() {
         textTransform: 'uppercase', marginBottom: 8, color: P.text,
       }}>★ Favoritos del equipo</div>
       <p style={{ fontSize: 13, color: P.textDim, marginBottom: 22, maxWidth: 700, lineHeight: 1.5 }}>
-        Curaduría editorial: estas armas aparecen en el carrusel <b style={{ color: P.amber }}>"Favoritos de Armas M&S"</b> en el inicio de la app. Arrastra o usa las flechas para reordenar.
+        Selección editorial: estas armas aparecen en el carrusel <b style={{ color: P.amber }}>"Favoritos de Armas M&S"</b> en el inicio de la app. Arrastra o usa las flechas para reordenar.
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 22 }}>

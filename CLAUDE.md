@@ -210,7 +210,7 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
 
 ## Backend compartido (Cloudflare Pages Functions + D1)
 
-La curaduría del admin ya puede compartirse entre visitantes mediante un backend
+Lo editado en el admin ya puede compartirse entre visitantes mediante un backend
 **opcional y no intrusivo** (ver **`BACKEND.md`** para el detalle y el alta):
 
 - Las **Functions** viven en `functions/api/` y Cloudflare Pages las despliega solas:
@@ -236,6 +236,11 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 
 ## Mejoras futuras opcionales (NO hacer ahora)
 
+- **Engrosar la sección «Historia» de cada arma con investigación real.** Hoy
+  `arma.historia` sale del builder de `data.js` y mide 58/118/982 caracteres
+  (mín/media/máx): en la mayoría son dos frases. Es el contenido con más valor
+  divulgativo y de GEO de toda la ficha, y el que menos peso tiene. Pedido
+  explícito de Saulo (25-ago-2026) para una sesión dedicada.
 - Añadir una CSP en `_headers` (ya es posible: no queda JS inline transpilado).
 - Servir imágenes en varios tamaños (`srcset`) para móvil; hoy son WebP uniformes de máx 1400px que las fichas muestran con `object-fit: contain`.
 - Sincronizar `shopify/armado-en-mexico.catalog.json` (36 armas) con el catálogo real

@@ -79,8 +79,8 @@ const _legalFor = (avail) => {
   if (avail === 'dcam') return {
     availLabel: "Uso civil — DCAM",
     legalTit:   "Civil — Adquisición directa en DCAM",
-    legalDesc:  "Adquisición legal para civiles mexicanos mayores de edad con trámite SEDENA previo (RFC, INE, comprobante de domicilio, antecedentes no penales). Compra exclusiva en DCAM Campo Militar No. 1 (CDMX) o DCAM Monterrey.",
-    disponibilidad: ["DCAM Campo Militar No. 1 — CDMX","DCAM Monterrey"],
+    legalDesc:  "Adquisición legal para civiles mexicanos mayores de edad con trámite SEDENA previo (RFC, INE, comprobante de domicilio, antecedentes no penales). Compra exclusiva en DCAM Campo Militar No. 1 (CDMX) u OTCA (Monterrey, N.L.).",
+    disponibilidad: ["DCAM Campo Militar No. 1 — CDMX","OTCA — Monterrey, N.L."],
   };
   if (avail === 'seguridad') return {
     availLabel: "Policía / Seguridad",

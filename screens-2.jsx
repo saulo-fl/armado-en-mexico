@@ -145,8 +145,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         }}>
           <CountryFlag pais={arma.pais} height={12} />
           <span>{arma.marca} · {arma.pais} · {arma.anio}</span>
-          <span style={{ flex: 1 }} />
-          <span style={{ color: PALETTE.textMuted, ...NUM }}>◢ ID-{String(arma.id).padStart(3, '0')}</span>
         </div>
 
         <h1 style={{
@@ -313,23 +311,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               })}
             </div>}
 
-          {currentManual && currentManual.url &&
-            <a href={currentManual.url} target="_blank" rel="noopener" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 14,
-              fontFamily: 'Courier Prime, monospace', fontSize: 14,
-              color: PALETTE.amber, textDecoration: 'none',
-              border: `1px solid ${PALETTE.amber}`,
-              padding: '10px 13px', minHeight: 44, boxSizing: 'border-box', letterSpacing: '0.04em'
-            }}>
-              <span aria-hidden="true">▦</span>
-              Inventario fuente (PDF)
-              <span aria-hidden="true">↗</span>
-            </a>}
         </div>
 
-        {/* la prosa de atribución vive aquí: sigue en el sitio, deja de hacer bulto */}
+        {/* La atribución y el PDF viven aquí, como pie de nota: siguen en el
+            sitio y dejan de competir con el precio. `compact` los pinta
+            pequeños, sin fondo ni barrita de acento. */}
         <div style={{ marginTop: 10 }}>
-          <window.Disclosure title="Detalle de la fuente">
+          <window.Disclosure title="Detalle de la fuente" compact>
             <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
               <div style={{ marginBottom: 10 }}>
                 <span style={{ color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: 12 }}>Ref. {curSigla}</span>
@@ -357,6 +345,18 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               <div style={{ marginTop: 8 }}>
                 Nivel de precio: <window.PriceLevel lvl={arma.priceLvl} size={13} />
               </div>
+              {currentManual && currentManual.url &&
+                <a href={currentManual.url} target="_blank" rel="noopener" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 12,
+                  fontFamily: 'Courier Prime, monospace', fontSize: 13.5,
+                  color: PALETTE.amber, textDecoration: 'none',
+                  border: `1px solid ${PALETTE.amber}`,
+                  padding: '10px 13px', minHeight: 44, boxSizing: 'border-box', letterSpacing: '0.04em'
+                }}>
+                  <span aria-hidden="true">▦</span>
+                  Inventario fuente (PDF)
+                  <span aria-hidden="true">↗</span>
+                </a>}
             </div>
           </window.Disclosure>
         </div>
@@ -451,8 +451,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {muns.length > 0 &&
         <ProdSection pad={PAD} gap={SEC}>
           <window.CarouselSection
-            eyebrow="◉ COMPATIBLE · MUNICIÓN"
-            title={muns.length === 1 ? `Munición compatible · ${arma.calibre}` : `Munición compatible · ${arma.calibre} · ${muns.length}`}
+            title="Munición compatible"
             items={muns}
             renderItem={(m) => <window.MunicionCard mun={m} onClick={() => onOpenMunicion && onOpenMunicion(m.id)} />} />
         </ProdSection>}
@@ -461,15 +460,14 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {compat.length > 0 &&
         <ProdSection pad={PAD} gap={muns.length > 0 ? (vp.isDesktop ? 30 : 22) : SEC}>
           <window.CarouselSection
-            eyebrow="▫ COMPATIBLE · ACCESORIOS DCAM"
-            title={compat.length === 1 ? 'Accesorio compatible' : `Accesorios compatibles · ${compat.length}`}
+            title="Accesorios compatibles"
             items={compat}
             renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />} />
         </ProdSection>}
 
-      {/* ── 9-12 · DOSSIER — todo el texto sigue en el DOM, sin saturar ─── */}
+      {/* ── 9-12 · DESPLEGABLES — todo el texto sigue en el DOM, sin saturar.
+             Sin encabezado de sección: cada <details> ya se anuncia solo. ─── */}
       <ProdSection pad={PAD} gap={SEC}>
-        <SectionHeader>Dossier</SectionHeader>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
           <window.Disclosure title="Ficha técnica completa">
@@ -548,7 +546,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           </window.Disclosure>
 
           {arma.historia &&
-            <window.Disclosure title="Dossier histórico" eyebrow={`Entrada · ${arma.anio}`}>
+            <window.Disclosure title="Historia">
               <div style={{
                 fontFamily: 'Courier Prime, monospace', fontSize: 15,
                 color: PALETTE.text, lineHeight: 1.75
@@ -557,24 +555,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
         </div>
       </ProdSection>
-
-      {/* ── SUGERIR CAMBIOS ────────────────────────────────────────────── */}
-      <ProdSection pad={PAD} gap={vp.isDesktop ? 30 : 22}>
-        <button onClick={() => setShowSuggest(true)} style={{
-            width: '100%', background: 'transparent', color: PALETTE.amber,
-            border: `1.5px dashed ${PALETTE.amber}`,
-            padding: '14px', minHeight: 48,
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
-            letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-          }}>
-          <span>✎ ¿Encontraste un error? Sugerir cambios</span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </ProdSection>
-
-      {showSuggest &&
-        <SuggestChangesModal arma={arma} onClose={() => setShowSuggest(false)} />}
 
       {/* VIDEO YOUTUBE (sólo si hay) */}
       <YouTubeBlock arma={arma} padX={PAD} />
@@ -605,6 +585,20 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               </div>)}
           </div>
         </div>}
+
+      {/* ── SUGERIR CAMBIOS — cierra la página ─────────────────────────── */}
+      <ProdSection pad={PAD} gap={SEC}>
+        <button onClick={() => setShowSuggest(true)} style={{
+            width: '100%', background: 'transparent', color: PALETTE.amber,
+            border: `1.5px dashed ${PALETTE.amber}`,
+            padding: '14px', minHeight: 48,
+            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+            letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
+          }}>Sugerir cambios</button>
+      </ProdSection>
+
+      {showSuggest &&
+        <SuggestChangesModal arma={arma} onClose={() => setShowSuggest(false)} />}
      </div>
 
       {/* BARRA FIJA DE ACCIÓN (móvil) — precio + comparar en zona del pulgar.
@@ -612,7 +606,10 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {vp.isMobile && compareIds.length === 0 &&
         <div style={{
           position: 'fixed', left: 0, right: 0,
-          bottom: 'calc(76px + env(safe-area-inset-bottom))', // mismo hueco que CompareFloat
+          // --amx-nav-h la publica BottomNav midiéndose (ya incluye el safe-area).
+          // El -1px superpone los dos bordes en una sola línea: si se apoya justo
+          // encima queda una rendija por la que se ve pasar el contenido.
+          bottom: 'calc(var(--amx-nav-h, 74px) - 1px)',
           background: 'rgba(26,26,26,0.97)',
           backdropFilter: 'blur(10px)',
           borderTop: `1px solid ${PALETTE.border}`,
@@ -650,7 +647,12 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 window.ProductScreen = ProductScreen;
 
 // ════════════════════════════════════════════════════════════════
-// RATING BLOCK — bloque visual para calificar un arma (1-5★)
+// RATING BLOCK — lo que opina la comunidad de un arma.
+// Manda la ETIQUETA (patrón Steam: "Mayormente positivas"), no la cifra: un
+// 4.2 no le dice nada a nadie de un vistazo. El promedio y el conteo quedan
+// debajo, en una sola línea, para quien quiera el dato exacto.
+// La escala vive en window.amxRatingLabel (ui.jsx), que también usan las
+// tarjetas de arma.
 // ════════════════════════════════════════════════════════════════
 function RatingBlock({ armaId }) {
   const [, force] = useState2(0);
@@ -658,6 +660,7 @@ function RatingBlock({ armaId }) {
   const rating = window.Store ? window.Store.getRating(armaId) : { avg: 0, count: 0 };
   const userR = window.Store ? window.Store.getUserRating(armaId) : 0;
   const [thanks, setThanks] = useState2(false);
+  const et = window.amxRatingLabel(rating.avg, rating.count);
 
   const onRate = (n) => {
     window.Store && window.Store.addRating(armaId, n);
@@ -669,67 +672,51 @@ function RatingBlock({ armaId }) {
     <React.Fragment>
       <SectionHeader>Calificación de la comunidad</SectionHeader>
       <div style={{
-        fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim,
-        lineHeight: 1.55, marginTop: -6, marginBottom: 10
-      }}>
-        Las valoraciones las hacen otros usuarios para ayudarte a elegir el arma que más te conviene. Comparte tu experiencia y ayuda a la comunidad.
-      </div>
-      <div style={{
         background: PALETTE.bgCard,
         border: `1px solid ${PALETTE.border}`,
-        borderLeft: `3px solid ${PALETTE.amber}`,
-        padding: '14px 16px',
-        marginBottom: 16,
-        display: 'flex', flexDirection: 'column', gap: 10
+        padding: '16px 18px',
+        position: 'relative',
+        display: 'flex', flexDirection: 'column', gap: 14
       }}>
-        {/* Promedio destacado */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <TacticalCorners size={10} color={et.color} />
+
+        <div>
           <div style={{
-            fontFamily: 'Montserrat, sans-serif',
-            fontWeight: 700, fontSize: 36,
-            color: rating.count ? PALETTE.amber : PALETTE.textMuted,
-            lineHeight: 1,
-            minWidth: 60
-          }}>
-            {rating.count ? rating.avg.toFixed(1) : '—'}
-            <span style={{ fontSize: 19, color: PALETTE.textMuted }}>/5</span>
-          </div>
-          <div style={{ flex: 1 }}>
-            <window.StarRating value={rating.avg} count={rating.count} size="sm" showCount={false} />
+            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19,
+            color: et.color, textTransform: 'uppercase',
+            letterSpacing: '0.1em', lineHeight: 1.2
+          }}>{et.label}</div>
+          {rating.count > 0 &&
             <div style={{
-              fontFamily: 'Courier Prime, monospace',
-              fontSize: 14.5, color: PALETTE.textDim,
-              letterSpacing: '0.06em', marginTop: 4
+              display: 'flex', alignItems: 'center', gap: 10,
+              flexWrap: 'wrap', marginTop: 9
             }}>
-              {rating.count === 0 ?
-              'Sé el primero en calificar' :
-              `${rating.count} ${rating.count === 1 ? 'calificación' : 'calificaciones'}`}
-            </div>
-          </div>
+              <window.StarRating value={rating.avg} size="sm" showCount={false} />
+              <span style={{
+                fontFamily: 'Courier Prime, monospace', fontSize: 13.5,
+                color: PALETTE.textMuted, letterSpacing: '0.06em', fontVariantNumeric: 'tabular-nums'
+              }}>
+                {rating.avg.toFixed(1)} · {rating.count} {rating.count === 1 ? 'valoración' : 'valoraciones'}
+              </span>
+            </div>}
         </div>
 
         {/* Acción del usuario */}
-        <div style={{
-          paddingTop: 10,
-          borderTop: `1px dashed ${PALETTE.border}`
-        }}>
+        <div style={{ borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 13 }}>
           <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 14.5, color: PALETTE.textDim,
-            letterSpacing: '0.08em', textTransform: 'uppercase',
-            marginBottom: 8
-          }}>{userR ? 'Tu valoración' : 'Comparte tu experiencia'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+            color: PALETTE.textMuted, letterSpacing: '0.16em',
+            textTransform: 'uppercase', marginBottom: 9
+          }}>{userR ? 'Tu valoración' : rating.count === 0 ? 'Sé el primero en calificar' : 'Califica esta arma'}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <window.StarRating value={userR} count={0} interactive
-            onRate={onRate} size="lg" showCount={false} />
+              onRate={onRate} size="lg" showCount={false} />
             {thanks &&
-            <span style={{
-              fontFamily: 'Courier Prime, monospace',
-              fontSize: 15.5, color: PALETTE.amber,
-              letterSpacing: '0.08em', fontWeight: 700,
-              animation: 'slideUp 0.25s'
-            }}>✓ ¡Gracias!</span>
-            }
+              <span style={{
+                fontFamily: 'Courier Prime, monospace', fontSize: 15,
+                color: PALETTE.amber, letterSpacing: '0.08em', fontWeight: 700,
+                animation: 'slideUp 0.25s'
+              }}>✓ ¡Gracias!</span>}
           </div>
         </div>
       </div>

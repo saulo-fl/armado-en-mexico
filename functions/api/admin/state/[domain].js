@@ -1,5 +1,5 @@
 // PUT /api/admin/state/:domain — reemplazo COMPLETO de un dominio (solo admin).
-// Lo usa el panel para persistir cualquier curaduría (páginas, promos, catálogo,
+// Lo usa el panel para persistir cualquier edición (páginas, promos, catálogo,
 // favoritos, branding, inventarios, historial de precios, y la gestión de la
 // cola: aprobar/rechazar propuestas y sugerencias).
 //
