@@ -1,4 +1,4 @@
-// GET /api/state — snapshot de los dominios de curaduría.
+// GET /api/state — snapshot de los dominios de contenido editable.
 // La app pública lo lee al arrancar (hydrate) y lo cachea en localStorage.
 // Si D1 no está vinculada todavía, devuelve {} → la app opera con sus seeds.
 //
@@ -10,7 +10,7 @@
 // necesita para gestionar la cola desde cualquier navegador.
 import { json, ALL_DOMAINS, requireAdmin } from './_lib.js';
 
-// Lo que puede ver cualquiera: curaduría publicada + agregados sin identidad
+// Lo que puede ver cualquiera: contenido publicado + agregados sin identidad
 // ('ratings' son sumas y 'visits' marcas de tiempo, ninguno lleva persona).
 const PUBLIC_DOMAINS = ALL_DOMAINS.filter(
   (d) => !['pending', 'suggestions', 'rejected'].includes(d)
