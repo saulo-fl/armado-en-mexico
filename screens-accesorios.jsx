@@ -135,11 +135,7 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
 
   return (
     <div style={{ marginBottom: 20, maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto' }}>
-      <div style={{ padding: `0 ${PAD}px`, marginBottom: 10 }}>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.amber,
-          letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 600, margin: '25px 0 4px',
-        }}>◫ EQUIPAMIENTO · INVENTARIO DCAM</div>
+      <div style={{ padding: `0 ${PAD}px`, margin: '25px 0 10px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
           <div style={{
             fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
@@ -183,12 +179,6 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
               {/* corner ticks */}
               <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${P.amber}`, borderLeft: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
               <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${P.amber}`, borderRight: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-              {/* badge de conteo */}
-              <div style={{
-                position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.78)',
-                border: `1px solid ${P.amber}`, color: P.amber, padding: '2px 7px',
-                fontFamily: 'Courier Prime, monospace', fontSize: 13, letterSpacing: '0.1em', fontWeight: 700,
-              }}>{String(counts[c.id]).padStart(2, '0')}</div>
               {/* gradient inferior + label */}
               <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(26,26,26,0) 45%, rgba(26,26,26,0.55) 72%, rgba(26,26,26,0.94) 100%)`, pointerEvents: 'none' }} />
               <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
@@ -269,10 +259,6 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
     <div style={{ paddingBottom: 90 }}>
       {/* Encabezado + encuadre legal */}
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `20px ${padX}px 0`, boxSizing: 'border-box' }}>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.amber,
-          letterSpacing: '0.22em', textTransform: 'uppercase', marginBottom: 6,
-        }}>◫ EQUIPAMIENTO · INVENTARIO DCAM</div>
         <div style={{
           fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
           color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05,
@@ -708,7 +694,6 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
       {armasComp.length > 0 &&
         <div style={{ marginTop: 6 }}>
           <window.CarouselSection
-            eyebrow="◢ COMPATIBLE · ARMAS EN INVENTARIO"
             title={armasComp.length === 1 ? 'Arma compatible' : `Armas compatibles · ${armasComp.length}`}
             items={armasComp}
             renderItem={(a) => <window.ArmaCard arma={a} onClick={() => onOpenArma && onOpenArma(a.id)} />}
@@ -720,7 +705,6 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
       {relacionados.length > 0 &&
         <div style={{ marginTop: 6 }}>
           <window.CarouselSection
-            eyebrow={`${cat.icon} MISMA CATEGORÍA`}
             title="Accesorios relacionados"
             items={relacionados}
             renderItem={(a) => <AccesorioCard acc={a} onClick={() => onOpenAccesorio(a.id)} />}

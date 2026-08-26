@@ -82,7 +82,6 @@ function TraumaFicha({ p, vp }) {
         <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{p.marca}</div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
           <h3 style={{ margin: 0, fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 30 : 25, color: PALETTE.text, letterSpacing: '0.01em', lineHeight: 1 }}>{p.modelo}</h3>
-          <SinPermisoTag />
         </div>
         <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 17, color: PALETTE.textDim, marginTop: 6 }}>{p.nombre}</div>
 
@@ -198,7 +197,6 @@ function TraumaticasScreen({ onNav }) {
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* encabezado */}
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', marginBottom: 8 }}>◉ DEFENSA MENOS LETAL · CATEGORÍA APARTE</div>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 36 : 27, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.04, marginBottom: 10 }}>Armas Traumáticas</div>
       <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 680, marginBottom: 14 }}>
         Dispositivos de defensa <strong style={{ color: PALETTE.text }}>NO letal</strong> propulsados por CO₂, en calibre .50 y .68. Disparan munición de pimienta, goma o polvo inerte para detener una amenaza sin recurrir a fuerza letal. Puedes adquirirlos directamente en <strong style={{ color: PALETTE.amber }}>armasmys.com</strong>.
