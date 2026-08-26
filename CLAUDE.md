@@ -48,6 +48,29 @@ node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada co
 Antes de publicar, la skill **`verificar-app`**. Al tocar UI, **`fidelidad-diseno`**.
 Al cerrar algo no trivial, **`mejorar-tooling`**.
 
+### PENDIENTE EN EL DASHBOARD — «Browser Cache TTL» pisa el `_headers`
+
+**Un deploy tarda 4 horas en llegar a quien ya visitó el sitio.** El ajuste
+**Caching → Configuration → Browser Cache TTL** de la zona `armado.mx` está en **4 h**,
+y ese ajuste **eleva cualquier `max-age` menor** que envíe el origen, en todo tipo de
+archivo que Cloudflare cachea (`.js`, `.png`, `.txt`…). Los `.js` salen de Pages con
+`max-age=0, must-revalidate` y llegan al navegador con `max-age=14400`.
+
+**Arreglo (1 clic, nadie lo puede hacer desde el repo):** poner ese ajuste en
+**«Respect Existing Headers»**. Entonces manda `_headers`, que ya es correcto.
+
+Se aisló comparando el origen con la zona — la sonda que lo demuestra:
+
+```bash
+curl -sI https://armado-en-mexico.pages.dev/app.js | grep -i cache-control  # max-age=0      ← origen OK
+curl -sI https://armado.mx/app.js                  | grep -i cache-control  # max-age=14400  ← lo pisa la zona
+```
+
+Por qué solo se nota en algunos ficheros: el ajuste **sube** los TTL bajos, nunca baja
+los altos, y solo toca lo que Cloudflare cachea. Por eso `imagenes/` (`max-age=31536000`)
+e `inventarios/` (`86400`) pasan intactos, el HTML y `.xml`/`.webmanifest` también (no son
+cacheables por defecto), y en cambio `robots.txt` sí sale reescrito a 14400.
+
 ### Verificar un despliegue
 
 Cloudflare reconstruye `main` al mergear (~1-2 min). Comprueba **estados HTTP**, que es
