@@ -451,6 +451,26 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
 window.SectionHeader = SectionHeader;
 
 // ──────────────────────────────────────────────────────────────
+// PROSA — estilo de texto de lectura corrida
+// ──────────────────────────────────────────────────────────────
+// Avisos, notas, disclaimers, normas, respuestas del FAQ, la historia de un arma,
+// los campos de formulario. Courier Prime va con el look táctico, pero en párrafo
+// cansa y se lee mal: aquí la accesibilidad gana al estilo. Es la misma receta que
+// ya usaba la «Declaración de intenciones» (Open Sans / lh 1.7), ahora compartida.
+//
+// La mono NO se toca en lo que se escanea en vez de leerse: rótulos HUD en
+// versalitas (§ LEGALIDAD · MX), precios, existencias, fechas, siglas y badges.
+// Esa es la frontera; si dudas, pregúntate si la frase se lee o se mira.
+function amxProsa(o) {
+  return Object.assign({
+    fontFamily: 'Open Sans, sans-serif',
+    fontSize: 16, lineHeight: 1.7,
+    color: PALETTE.textDim, textWrap: 'pretty',
+  }, o);
+}
+window.amxProsa = amxProsa;
+
+// ──────────────────────────────────────────────────────────────
 // APP HEADER — barra superior con logo + acciones
 // ──────────────────────────────────────────────────────────────
 function AppHeader({ title, back, onBack, right }) {

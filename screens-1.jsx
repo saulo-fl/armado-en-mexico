@@ -321,12 +321,11 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         padding: '12px',
         background: PALETTE.bgElev,
         border: `1px dashed ${PALETTE.border}`,
-        fontFamily: 'Courier Prime, monospace',
-        fontSize: 14.5, color: PALETTE.textMuted,
-        lineHeight: 1.55, boxSizing: 'border-box'
+        ...window.amxProsa({ fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6 }),
+        boxSizing: 'border-box'
       }}>
         <div style={{
-          color: PALETTE.amber, fontWeight: 700,
+          fontFamily: 'Courier Prime, monospace', color: PALETTE.amber, fontWeight: 700,
           letterSpacing: '0.15em', marginBottom: 4, fontSize: 13}}>◆ AVISO</div>
         Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la Ley Federal de Armas de Fuego y precios DCAM. Por <span style={{ color: PALETTE.text }}>Saulo Flores · {teamName}</span>.
       </div>
@@ -556,9 +555,8 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
         }}>{p.title}</div>
 
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: vp.isDesktop ? 18 : 15.5, color: PALETTE.textDim,
-          lineHeight: 1.55, maxWidth: 560,
+          ...window.amxProsa({ fontSize: vp.isDesktop ? 18 : 16, lineHeight: 1.55 }),
+          maxWidth: 560,
           marginBottom: 18,
           // altura fija de 2 líneas
           height: vp.isDesktop ? 48 : 42,
@@ -1031,7 +1029,7 @@ function ArsenalHubScreen({ onNav }) {
   return (
     <div style={{ ...max, padding: `8px ${PAD}px 90px` }}>
       <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px' }}>Arsenal</div>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.textDim, lineHeight: 1.5 }}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
+      <div style={window.amxProsa({ fontSize: 15, color: P.textDim, lineHeight: 1.5 })}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
 
       <Hdr icon="◆">Armería</Hdr>
       <div style={grid(2)}>
