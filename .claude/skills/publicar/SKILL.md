@@ -53,7 +53,7 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
   Usa un `append` con JSON inválido, que comprueba `env.DB` antes de parsear el cuerpo
   (así que no escribe nada):
   ```bash
-  curl -s -X POST https://armado.mx/api/append/ratings -d 'x'       # json_invalido = OK
+  curl -s -X POST https://armado.mx/api/append/reviewsQueue -d 'x'  # json_invalido = OK
   curl -s -X PUT  https://armado.mx/api/admin/state/pages -d '{}'   # no_autenticado = OK
   ```
   `sin_backend` = se perdió el binding D1. `admin_auth_no_configurado` = se perdieron
@@ -64,6 +64,12 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
   mismo, así que un fallo se ve sin arriesgar producción.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-08: **la sonda del backend caduca si cambian los APPEND_DOMAINS.** Usaba
+  `/api/append/ratings`, y al retirar el dominio `ratings` (opiniones tipo Steam)
+  pasó a responder `dominio_invalido` — que NO distingue si D1 sigue vinculada.
+  Ahora sonda `reviewsQueue`. Si algún día cambian los dominios de append, actualiza
+  esta línea y la de CLAUDE.md: una sonda que ya no prueba nada es peor que ninguna,
+  porque da confianza falsa.
 - 2026-06: un deploy fallido NO publica el sitio aunque suban los assets.
 - 2026-06: preview por-rama (`<hash>.pages.dev`) tiene origen distinto → localStorage
   no persiste ahí; validar en armado.mx.
