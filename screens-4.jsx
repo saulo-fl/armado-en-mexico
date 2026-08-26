@@ -24,20 +24,6 @@ function TraumaStock({ stock }) {
   );
 }
 
-// ── Aviso "no requiere permiso SEDENA"
-function SinPermisoTag({ small }) {
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      fontFamily: 'Courier Prime, monospace', fontSize: small ? 10 : 11, fontWeight: 700,
-      letterSpacing: '0.1em', textTransform: 'uppercase',
-      padding: small ? '3px 7px' : '4px 9px',
-      color: PALETTE.amber, border: `1px solid ${PALETTE.amber}`,
-      whiteSpace: 'nowrap',
-    }}>◎ No requiere permiso SEDENA</span>
-  );
-}
-
 // ── Ficha de producto traumático
 function TraumaFicha({ p, vp }) {
   const url = window.traumaticaUrl(p.handle);
@@ -371,11 +357,7 @@ function HomeTraumaBanner({ onNav }) {
       {/* Encabezado de sección */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, marginBottom: vp.isDesktop ? 26 : 14, flexWrap: 'wrap', padding: `0 ${PAD}px` }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>◉ Defensa menos letal</span>
-            <SinPermisoTag small />
-          </div>
-          <h2 style={{ margin: '8px 0 0', fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 26 : 21, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Armas Traumáticas</h2>
+          <h2 style={{ margin: 0, fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 26 : 21, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Armas Traumáticas</h2>
         </div>
         <button onClick={() => onNav('traumaticas')} style={{
           background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
