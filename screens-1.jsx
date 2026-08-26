@@ -464,44 +464,6 @@ function VisitedCard({ arma, rank, onClick }) {
 }
 window.VisitedCard = VisitedCard;
 
-function RatedCard({ arma, onClick }) {
-  const rating = window.Store ? window.Store.getRating(arma.id) : { avg: 0, count: 0 };
-  return (
-    <div onClick={onClick} style={{
-      background: PALETTE.bgCard,
-      border: `1px solid ${PALETTE.border}`,
-      cursor: 'pointer', position: 'relative',
-      overflow: 'hidden',
-      height: '100%', display: 'flex', flexDirection: 'row'
-    }}>
-      <div style={{
-        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
-        background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        borderRight: `1px solid ${PALETTE.border}`
-      }}>
-        <img src={arma.img} alt={arma.nombre}
-        style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
-        onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-        {rating.count > 0 &&
-        <div style={{
-          position: 'absolute', bottom: 8, right: 8,
-          background: PALETTE.amber, color: '#000',
-          fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 700, fontSize: 15,
-          padding: '3px 8px',
-          display: 'flex', alignItems: 'center', gap: 4
-        }}>
-            <span>★</span>{rating.avg.toFixed(1)}
-          </div>
-        }
-      </div>
-      <window.ArmaCardBody arma={arma} />
-    </div>);
-
-}
-window.RatedCard = RatedCard;
 
 // ════════════════════════════════════════════════════════════════
 // PROMO SLIDER — banner editable arriba de la Home

@@ -6,7 +6,7 @@ const { useState, useEffect, useMemo, useRef } = React;
 const ADMIN_PALETTE = window.PALETTE || {
   bg: '#0d0f0c', bgElev: '#161a14', bgCard: '#1c211a',
   border: '#2a2f24', amber: '#c9a227', military: '#4a5d3a',
-  red: '#a83a2a', blue: '#5a7a9a',
+  red: '#a83a2a', blue: '#5a7a9a', green: '#4FAE5C',
   text: '#e8e6e0', textDim: '#a8a59c', textMuted: '#6a685e',
 };
 const P = ADMIN_PALETTE;
@@ -114,6 +114,8 @@ function AdminShell({ onLogout, children, tab, setTab, stats }) {
   const tabs = [
     { id: 'queue',      label: 'COLA',         badge: stats.pending },
     { id: 'suggests',   label: 'SUGERENCIAS',  badge: stats.suggestions },
+    { id: 'reviews',    label: 'RESEÑAS',      badge: stats.reviews },
+    { id: 'reports',    label: 'DENUNCIAS',    badge: stats.reports },
     { id: 'catalog',    label: 'CATÁLOGO',     badge: null },
     { id: 'manuales',   label: 'INVENTARIOS',  badge: stats.manuales || null },
     { id: 'favorites',  label: 'FAVORITOS',    badge: null },
@@ -1277,21 +1279,16 @@ function AdminApp() {
   const [authed, setAuthed] = useState(window.Store.isLoggedIn());
   const [tab, setTab] = useState('queue');
   const [editing, setEditing] = useState(null);
-  const [stats, setStats] = useState({
+  const leerStats = () => ({
     pending: window.Store.getPending().length,
     suggestions: window.Store.getSuggestions().length,
     manuales: window.Store.getManuales().length,
+    reviews: window.Store.getReviewQueue().length,
+    reports: window.Store.getReports().length,
   });
+  const [stats, setStats] = useState(leerStats);
 
-  useEffect(() => {
-    return window.Store.onChange(() => {
-      setStats({
-        pending: window.Store.getPending().length,
-        suggestions: window.Store.getSuggestions().length,
-        manuales: window.Store.getManuales().length,
-      });
-    });
-  }, []);
+  useEffect(() => window.Store.onChange(() => setStats(leerStats())), []);
 
   if (!authed) return <AdminLogin onLogin={() => setAuthed(true)} />;
 
@@ -1302,6 +1299,8 @@ function AdminApp() {
     >
       {tab === 'queue'    && <QueueTab onEdit={(p, mode) => setEditing({ arma: p, mode, source: p })} />}
       {tab === 'suggests' && <SuggestionsTab />}
+      {tab === 'reviews'  && <ReviewsTab />}
+      {tab === 'reports'  && <ReportsTab />}
       {tab === 'catalog'  && <CatalogTab onEdit={(a, mode) => setEditing({ arma: a, mode, source: null })} />}
       {tab === 'manuales' && <ManualesTab />}
       {tab === 'favorites'&& <FavoritesTab />}
@@ -1427,6 +1426,156 @@ function SuggestionsTab() {
   );
 }
 window.SuggestionsTab = SuggestionsTab;
+
+// ════════════════════════════════════════════════════════════════
+// RESEÑAS — moderación previa. NADA se publica sin pasar por aquí.
+// Aprobar mueve la reseña al dominio público `reviews` RETIRANDO el correo
+// (lo hace Store.approveReview); rechazar la archiva en `rejected` con su
+// motivo, como las propuestas de arma — no se borra, para poder revisar una
+// apelación después.
+// ════════════════════════════════════════════════════════════════
+function ReviewsTab() {
+  const [cola, setCola] = useState(window.Store.getReviewQueue());
+  const [publicadas, setPublicadas] = useState(window.Store.getReviews());
+  const [verPub, setVerPub] = useState(false);
+  const refresh = () => { setCola(window.Store.getReviewQueue()); setPublicadas(window.Store.getReviews()); };
+  useEffect(() => window.Store.onChange(refresh), []);
+
+  const aprobar = (r) => {
+    if (!confirm(`¿Publicar la reseña de ${r.autor || 'anónimo'}?`)) return;
+    window.Store.approveReview(r.id); refresh();
+  };
+  const rechazar = (r) => {
+    const motivo = prompt('Motivo del rechazo (se guarda en el archivo):', '');
+    if (motivo === null) return;
+    window.Store.rejectReview(r.id, motivo); refresh();
+  };
+  const retirar = (r) => {
+    if (!confirm('¿Retirar esta reseña ya publicada?')) return;
+    window.Store.unpublishReview(r.id); refresh();
+  };
+
+  const Pulgar = ({ ok }) => (
+    <span style={{
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700,
+      letterSpacing: '0.1em', padding: '2px 7px',
+      color: '#000', background: ok ? P.green : P.red,
+    }}>{ok ? 'RECOMIENDA' : 'NO RECOMIENDA'}</span>
+  );
+
+  const Ficha = ({ r, acciones }) => (
+    <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, padding: 14, marginBottom: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 9 }}>
+        <Pulgar ok={!!r.recomienda} />
+        <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 13, color: P.text, letterSpacing: '0.06em' }}>
+          {r.entidadNombre || `${r.tipo} #${r.entidadId}`}
+        </span>
+        <span style={{ flex: 1 }} />
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textDim }}>
+          {String(r.submittedAt || '').slice(0, 10)}
+        </span>
+      </div>
+      <div style={{
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.text,
+        lineHeight: 1.65, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere',
+        borderLeft: `2px solid ${P.border}`, paddingLeft: 10, marginBottom: 9
+      }}>{r.texto}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.textDim }}>
+          {r.autor || 'sin nombre'}{r.email ? ` · ${r.email}` : ''} · {String(r.texto || '').length} car.
+        </span>
+        <span style={{ flex: 1 }} />
+        {acciones}
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <SectionHead title="Reseñas por revisar" sub={`${cola.length} esperando · nada se publica sin aprobarse aquí`} action={
+        <button onClick={() => setVerPub((v) => !v)} style={btnGhost}>
+          {verPub ? '▼ Ocultar publicadas' : `▶ Ver publicadas (${publicadas.length})`}
+        </button>
+      }/>
+      <p style={txtMuted}>
+        Comprueba que cumple las normas de la comunidad (/soporte) antes de publicar.
+        Al aprobar se retira el correo del autor: no viaja nunca al dominio público.
+      </p>
+
+      {cola.length === 0
+        ? <p style={txtMuted}>No hay reseñas pendientes.</p>
+        : cola.map((r) =>
+            <Ficha key={r.id} r={r} acciones={
+              <React.Fragment>
+                <button onClick={() => rechazar(r)} style={btnDanger}>Rechazar</button>
+                <button onClick={() => aprobar(r)} style={btnPrimary}>Publicar</button>
+              </React.Fragment>
+            } />)}
+
+      {verPub &&
+        <div style={{ marginTop: 22 }}>
+          <SectionHead title="Publicadas" sub={`${publicadas.length} visibles en las fichas`} />
+          {publicadas.length === 0
+            ? <p style={txtMuted}>Todavía no hay ninguna publicada.</p>
+            : publicadas.map((r) =>
+                <Ficha key={r.id} r={r} acciones={
+                  <button onClick={() => retirar(r)} style={btnDanger}>Retirar</button>
+                } />)}
+        </div>}
+    </div>
+  );
+}
+window.ReviewsTab = ReviewsTab;
+
+// ════════════════════════════════════════════════════════════════
+// DENUNCIAS — lo que reporta la gente desde /soporte. Solo lectura:
+// la acción real (retirar la reseña) se hace en la pestaña de RESEÑAS.
+// ════════════════════════════════════════════════════════════════
+function ReportsTab() {
+  const [lista, setLista] = useState(window.Store.getReports());
+  const refresh = () => setLista(window.Store.getReports());
+  useEffect(() => window.Store.onChange(refresh), []);
+
+  return (
+    <div>
+      <SectionHead title="Denuncias de contenido" sub={`${lista.length} sin resolver`} />
+      <p style={txtMuted}>
+        Para retirar una reseña denunciada, búscala en RESEÑAS → Ver publicadas → Retirar.
+      </p>
+      {lista.length === 0
+        ? <p style={txtMuted}>No hay denuncias.</p>
+        : lista.map((d) =>
+            <div key={d.id} style={{ background: P.bgCard, border: `1px solid ${P.border}`, padding: 14, marginBottom: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 8 }}>
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700,
+                  letterSpacing: '0.1em', padding: '2px 7px', color: '#000', background: P.amber,
+                }}>{String(d.motivo || 'otro').toUpperCase()}</span>
+                <span style={{ flex: 1 }} />
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textDim }}>
+                  {String(d.submittedAt || '').slice(0, 10)}
+                </span>
+              </div>
+              {d.reviewId &&
+                <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.textDim, marginBottom: 6 }}>
+                  Señala: {d.reviewId}
+                </div>}
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.text,
+                lineHeight: 1.65, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', marginBottom: 9
+              }}>{d.detalle}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.textDim }}>
+                  {d.email || 'sin correo de contacto'}
+                </span>
+                <span style={{ flex: 1 }} />
+                <button onClick={() => window.Store.resolveReport(d.id)} style={btnSecondary}>Marcar resuelta</button>
+              </div>
+            </div>)}
+    </div>
+  );
+}
+window.ReportsTab = ReportsTab;
 
 // ════════════════════════════════════════════════════════════════
 // BULK IMPORT (CSV) — añadir/modificar masivamente con hojas de datos

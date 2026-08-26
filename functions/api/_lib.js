@@ -5,11 +5,23 @@
 // NOTA: el dominio 'admin' (contraseña/sesión) NUNCA viaja al servidor.
 export const ALL_DOMAINS = [
   'armas', 'pages', 'promos', 'favorites', 'appConfig', 'manuales',
-  'priceHist', 'suggestions', 'pending', 'rejected', 'visits', 'ratings',
+  'priceHist', 'suggestions', 'pending', 'rejected', 'visits',
+  'reviews', 'reviewsQueue', 'reports',
 ];
 
 // Dominios con escritura PÚBLICA por "append" (el servidor hace el merge atómico).
-export const APPEND_DOMAINS = ['suggestions', 'pending', 'ratings', 'visits'];
+// 'reviews' NO está: las reseñas aprobadas solo las escribe el admin al moderar.
+// Si estuviera aquí, cualquiera publicaría texto sin pasar por la cola.
+export const APPEND_DOMAINS = ['suggestions', 'pending', 'visits', 'reviewsQueue', 'reports'];
+
+// Una reseña sin cuerpo no puede influir en el agregado: el texto es lo que el
+// moderador juzga. El máximo es MUY inferior a los 5000 del saneador genérico
+// porque el dominio 'reviews' viaja entero en cada GET /api/state, en cada carga
+// de página, a todos los visitantes.
+// ponytail: agregado en cliente sobre el blob completo. Si esto crece, la salida
+// es una tabla fila-por-reseña con COUNT, no subir el tope.
+export const RESENA_MIN = 100;
+export const RESENA_MAX = 1200;
 
 // Límite de tamaño del cuerpo (anti-abuso). 1 MB cubre de sobra cualquier dominio.
 export const MAX_BODY = 1_000_000;
@@ -57,14 +69,37 @@ export function mergeAppend(domain, current, item) {
     // descarta los más viejos.
     return recortarPorBytes(arr.slice(0, 1000), MAX_DOMINIO);
   }
-  if (domain === 'ratings') {
-    const out = (current && typeof current === 'object') ? { ...current } : {};
-    const armaId = String(parseInt(item.armaId, 10));
-    const stars = Math.max(1, Math.min(5, Math.round(Number(item.stars) || 0)));
-    if (!armaId || armaId === 'NaN' || !stars) return out;
-    const prev = out[armaId] || { sum: 0, count: 0 };
-    out[armaId] = { sum: (prev.sum || 0) + stars, count: (prev.count || 0) + 1 };
-    return out;
+  if (domain === 'reviewsQueue') {
+    // Validación en el SERVIDOR, no solo en el formulario: este endpoint es
+    // público y se puede llamar con curl. Una reseña que no cumpla se descarta
+    // en silencio (el cliente ya validó; aquí solo cerramos el hueco).
+    const arr = Array.isArray(current) ? current.slice() : [];
+    const texto = typeof item.texto === 'string' ? item.texto.trim() : '';
+    const entidadId = parseInt(item.entidadId, 10);
+    if (typeof item.recomienda !== 'boolean') return arr;
+    if (texto.length < RESENA_MIN || texto.length > RESENA_MAX) return arr;
+    if (!Number.isFinite(entidadId)) return arr;
+    if (!TIPOS_RESENA.includes(item.tipo)) return arr;
+    const clean = sanitizeItem({
+      tipo: item.tipo, entidadId, recomienda: item.recomienda, texto,
+      autor: String(item.autor || '').slice(0, 60),
+      email: String(item.email || '').slice(0, 160),
+      entidadNombre: String(item.entidadNombre || '').slice(0, 120),
+    });
+    clean.id = 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    clean.submittedAt = new Date().toISOString();
+    clean.status = 'pending';
+    arr.unshift(clean);
+    return recortarPorBytes(arr.slice(0, 1000), MAX_DOMINIO);
+  }
+  if (domain === 'reports') {
+    const arr = Array.isArray(current) ? current.slice() : [];
+    const clean = sanitizeItem(item);
+    clean.id = 'd_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    clean.submittedAt = new Date().toISOString();
+    clean.status = 'pending';
+    arr.unshift(clean);
+    return recortarPorBytes(arr.slice(0, 1000), MAX_DOMINIO);
   }
   if (domain === 'visits') {
     const out = (current && typeof current === 'object') ? { ...current } : {};
@@ -83,6 +118,10 @@ export function mergeAppend(domain, current, item) {
   }
   return current;
 }
+
+// Tipos de entidad que aceptan reseña. Cerrado a propósito: un `tipo` libre
+// dejaría crear cubos arbitrarios en el mismo blob.
+const TIPOS_RESENA = ['arma', 'accesorio', 'municion', 'campo', 'curso'];
 
 // Recorta items enviados por el público. Los topes son POR BYTES SERIALIZADOS,
 // no por número de elementos: recortar un array a 100 no sirve de nada si cada

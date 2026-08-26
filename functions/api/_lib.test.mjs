@@ -7,7 +7,7 @@
 // entero en cada carga de página. Sin esta prueba, subir un tope o tocar
 // sanitizeItem rompe la protección en silencio.
 import assert from 'node:assert/strict';
-import { mergeAppend } from './_lib.js';
+import { mergeAppend, RESENA_MIN, RESENA_MAX } from './_lib.js';
 
 const pesa = (v) => JSON.stringify(v).length;
 let n = 0;
@@ -69,14 +69,31 @@ const ok = (msg) => { n++; console.log('  ok', msg); };
   ok(`visits saturado en las 179 armas = ${bytes} bytes, bajo el limite de 2 MB`);
 }
 
-// ── ratings sigue siendo agregado, sin identidad ────────────────────────────
+// ── Reseñas: el mínimo de texto se impone en el SERVIDOR ─────────────
+// El formulario ya valida, pero /api/append/reviewsQueue es público y se puede
+// llamar con curl. Sin esta comprobación el mínimo de 100 caracteres es
+// decorativo y la cola se llena de "ok" de tres letras.
 {
-  let r = {};
-  r = mergeAppend('ratings', r, { armaId: 7, stars: 5, submitterEmail: 'a@b.c' });
-  r = mergeAppend('ratings', r, { armaId: 7, stars: 3 });
-  assert.deepEqual(r['7'], { sum: 8, count: 2 }, 'suma y cuenta');
-  assert.ok(!JSON.stringify(r).includes('a@b.c'), 'ratings no debe guardar datos de la persona');
-  ok('ratings agrega sin conservar identidad');
+  const base = { tipo: 'arma', entidadId: 47, recomienda: true, autor: 'Ana', email: 'a@b.c' };
+  const largo = 'x'.repeat(RESENA_MIN);
+
+  assert.equal(mergeAppend('reviewsQueue', [], { ...base, texto: 'muy buena' }).length, 0,
+    'un texto por debajo del minimo no entra');
+  assert.equal(mergeAppend('reviewsQueue', [], { ...base, texto: 'x'.repeat(RESENA_MAX + 1) }).length, 0,
+    'un texto por encima del maximo no entra');
+  assert.equal(mergeAppend('reviewsQueue', [], { ...base, texto: largo, recomienda: 'si' }).length, 0,
+    'recomienda tiene que ser booleano, no la cadena "si"');
+  assert.equal(mergeAppend('reviewsQueue', [], { ...base, texto: largo, tipo: 'inventado' }).length, 0,
+    'el tipo de entidad esta cerrado a una lista');
+  assert.equal(mergeAppend('reviewsQueue', [], { ...base, texto: largo, entidadId: 'abc' }).length, 0,
+    'entidadId tiene que ser un numero');
+  ok('reviewsQueue rechaza lo que no cumple sin tocar la cola');
+
+  const out = mergeAppend('reviewsQueue', [], { ...base, texto: largo, status: 'approved', id: 'falso' });
+  assert.equal(out.length, 1, 'una resena valida si entra');
+  assert.equal(out[0].status, 'pending', 'el status lo fija el servidor, no el cliente');
+  assert.notEqual(out[0].id, 'falso', 'el id lo fija el servidor');
+  ok('una resena valida entra siempre como pendiente');
 }
 
 console.log(`\n✔ ${n} comprobaciones OK`);
