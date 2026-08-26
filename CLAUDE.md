@@ -70,7 +70,7 @@ sí distingue es un `append` con JSON inválido, que llega a comprobar `env.DB` 
 de parsear el cuerpo, así que no escribe nada:
 
 ```bash
-curl -s -X POST https://armado.mx/api/append/ratings -d 'x'       # -> {"error":"json_invalido"}
+curl -s -X POST https://armado.mx/api/append/reviewsQueue -d 'x'  # -> {"error":"json_invalido"}
 curl -s -X PUT  https://armado.mx/api/admin/state/pages -d '{}'   # -> {"error":"no_autenticado"}
 ```
 
