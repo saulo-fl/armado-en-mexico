@@ -15,6 +15,7 @@ window.TRAUMATICAS = [
     effect: 'glow',
     tagline: 'Para quienes buscan empezar con armas traumáticas',
     features: [
+      'No requiere permiso de la SEDENA',
       'Calibre .50',
       '13 joules de impacto',
       'Cargador Interno (6 tiros)',
@@ -52,6 +53,7 @@ window.TRAUMATICAS = [
     effect: 'pulse',
     tagline: 'La mayor tecnología que asemeja un arma real con cargadores extraíbles',
     features: [
+      'No requiere permiso de la SEDENA',
       'Calibre .68',
       '19 joules de impacto',
       'Cargador Extraíble (6 tiros)',
@@ -91,6 +93,7 @@ window.TRAUMATICAS = [
     effect: 'fire',
     tagline: 'Máxima potencia para detener cualquier amenaza que invada tu hogar',
     features: [
+      'No requiere permiso de la SEDENA',
       'Calibre .68',
       '40 joules de impacto',
       'Cargador Interno (16 tiros)',
