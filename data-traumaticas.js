@@ -34,6 +34,7 @@ window.TRAUMATICAS = [
       ['Peso', '0.68 kg'],
     ],
     destacados: [
+      'No requiere permiso de la SEDENA',
       'Cargador de carga rápida · 6 tiros calibre .50',
       'Munición de pimienta, goma o polvo',
       'Incluye 10 bolitas de goma, 10 de pimienta y limpiador',
@@ -72,6 +73,7 @@ window.TRAUMATICAS = [
       ['Miras', 'Fibra óptica'],
     ],
     destacados: [
+      'No requiere permiso de la SEDENA',
       'Sistema Response-Ready Trigger (patent pending)',
       'Cargador extraíble de 6 disparos · drop-free',
       'Miras de fibra óptica + riel Picatinny',
@@ -115,6 +117,7 @@ window.TRAUMATICAS = [
       ['Acción', 'Pump manual'],
     ],
     destacados: [
+      'No requiere permiso de la SEDENA',
       'Acción pump · cargador tubular de 16 rondas',
       '530 fps · ~40 J de impacto contundente',
       'Rieles Picatinny y M-LOK · cañón metálico',

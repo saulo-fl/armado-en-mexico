@@ -318,6 +318,17 @@ curl -s https://armado.mx/api/state | grep -c "sede Monterrey"   # debe dar 0
   (mín/media/máx): en la mayoría son dos frases. Es el contenido con más valor
   divulgativo y de GEO de toda la ficha, y el que menos peso tiene. Pedido
   explícito de Saulo (25-ago-2026) para una sesión dedicada.
+- **`TopNav` sigue desbordando por debajo de ~1140px** y mete scroll horizontal en TODO
+  el sitio. El 26-ago-2026 se retiró el rótulo `ENCICLOPEDIA TÁCTICA · ED. 2026`, que
+  liberó unos 280px —antes reventaba en casi cualquier escritorio—, pero **no bastó**:
+  medido a 992px, la barra necesita 1125px. El reparto es logo 40 + padding 56 + gap 24
+  + `marginLeft` 12 + 982px de enlaces.
+  Recortar padding y `letterSpacing` da ~126px: alcanza por los pelos y se vuelve a romper
+  en cuanto se añada un enlace. La salida de verdad es un breakpoint que compacte la barra
+  (o mueva enlaces al desplegable «Más») por debajo de 1200px.
+  **Ojo con el atajo**: `overflowX: 'auto'` en el contenedor de enlaces quita el desborde
+  pero **recorta el desplegable de «Más»**, que es `position: absolute` dentro de ese mismo
+  div. Habría que sacarlo del flujo primero.
 - Añadir una CSP en `_headers` (ya es posible: no queda JS inline transpilado).
 - Servir imágenes en varios tamaños (`srcset`) para móvil; hoy son WebP uniformes de máx 1400px que las fichas muestran con `object-fit: contain`.
 - Sincronizar `shopify/armado-en-mexico.catalog.json` (36 armas) con el catálogo real
@@ -329,9 +340,6 @@ curl -s https://armado.mx/api/state | grep -c "sede Monterrey"   # debe dar 0
   blanco opaco (otras ya traen alfa) y sobre el hero oscuro de la ficha el blanco se lee
   como un error. Es problema de assets, no de CSS: cualquier truco de mezcla que "quite"
   el blanco rompe las que ya son transparentes.
-- **`TopNav` desborda a lo ancho alrededor de los 1200px** y mete scroll horizontal en
-  TODO el sitio: el rótulo `ENCICLOPEDIA TÁCTICA · ED. 2026` no cabe junto a los enlaces.
-  Está en `ui.jsx`; se arregla ocultándolo o dejándolo encoger por debajo de cierto ancho.
 
 Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en builds de
 producción · `imagenes/` a WebP · URLs legibles por tipo y modelo · prerender estático
