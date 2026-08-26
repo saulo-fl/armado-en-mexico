@@ -1,5 +1,5 @@
 // Armado en México — Pantallas de MUNICIONES (cartuchos)
-// Card, sección de Home (grid por calibre), catálogo con filtros y ficha de detalle
+// Card, sección de Home (carrusel de calibres de entrada), catálogo con filtros y ficha
 // con precio + historial de inventarios (mismo patrón que armas/accesorios).
 // Expone en window: MunicionCard, HomeMunicionesSection, MunicionesScreen, MunicionFicha
 
@@ -21,6 +21,8 @@ const MUN_CARTUCHO = {
   '.38 Super': '38super.webp', '9mm Parabellum': '9mm.webp', '.40 S&W': '40sw.webp',
   '12 GA': '12ga.webp', '20 GA': '20ga.webp', '.410 Bore': '410.webp',
   '5.56x45mm': '556.webp', '7.62x39mm': '762x39.webp', '7.62x51mm': '762x51.webp',
+  '.243 Win': '243win.webp', '.270 Win': '270win.webp', '.308 Win': '308win.webp',
+  '.30-06 Sprg': '3006.webp', '.300 Win Mag': '300wm.webp',
 };
 function munCartucho(cal) {
   return MUN_CARTUCHO[cal] ? ('imagenes/cartuchos/' + MUN_CARTUCHO[cal]) : '';
@@ -58,6 +60,9 @@ function MunicionCard({ mun, onClick }) {
         background: `radial-gradient(circle at 50% 50%, ${P.bgElev} 0%, ${P.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative', borderRight: `1px solid ${P.border}`, overflow: 'hidden',
+        // El padding superior reserva la banda del badge de calibre (absolute, top 6):
+        // sin el, el panel es tan estrecho que la foto centrada se le mete debajo.
+        boxSizing: 'border-box', padding: '28px 6px 8px',
       }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)` }} />
         {cart && !imgError ? (
@@ -135,7 +140,12 @@ function HomeMunicionesSection({ onNav }) {
   if (!total) return null;
   const counts = {};
   (window.MUNICIONES || []).forEach(m => { counts[m.calibre] = (counts[m.calibre] || 0) + 1; });
-  const visible = cats.filter(c => counts[c.id]);
+  const conStock = cats.filter(c => counts[c.id]);
+  // Home: solo los calibres de entrada. El resto vive detras de «Ver todas».
+  // No hay .22 rimfire en los inventarios DCAM/OTCA: cierra el .308 Win (hay Aguila).
+  const DESTACADOS = ['.380', '9mm', '12 GA', '.308 Win'];
+  const destacados = DESTACADOS.flatMap(p => conStock.filter(c => c.id.startsWith(p)));
+  const visible = destacados.length ? destacados : conStock;
 
   return (
     <div style={{ marginBottom: 20, maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto' }}>
@@ -152,14 +162,11 @@ function HomeMunicionesSection({ onNav }) {
         </div>
       </div>
 
-      <div style={{
-        padding: `0 ${PAD}px`, display: 'grid',
-        gridTemplateColumns: vp.isDesktop ? 'repeat(5, 1fr)' : '1fr 1fr', gap: 10,
-      }}>
-        {visible.map(c => {
+      <window.HCarousel items={visible} itemWidth={vp.isDesktop ? 220 : 165} padX={PAD}
+        renderItem={(c) => {
           const cart = munCartucho(c.id);
           return (
-            <button key={c.id} onClick={() => onNav && onNav('municiones', { categoria: c.id })} style={{
+            <button onClick={() => onNav && onNav('municiones', { categoria: c.id })} style={{
               background: P.bgCard, border: `1px solid ${P.border}`,
               padding: 0, cursor: 'pointer', textAlign: 'left',
               position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
@@ -193,8 +200,7 @@ function HomeMunicionesSection({ onNav }) {
               </div>
             </button>
           );
-        })}
-      </div>
+        }} />
     </div>
   );
 }

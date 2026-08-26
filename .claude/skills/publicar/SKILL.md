@@ -70,9 +70,10 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
   hasta el final y no retrocede, así que un patrón con texto tras el `*` no coincide
   con nada (ya corregido: los archivos van listados uno a uno, y `build-prerender.mjs`
   falla si un `<script>` se queda sin regla); y (2) **el ajuste «Browser Cache TTL» de
-  la zona `armado.mx` está en 4 h y eleva cualquier `max-age` menor** que mande el
+  la zona `armado.mx` estaba en 4 h y eleva cualquier `max-age` menor** que mande el
   origen — pisa a `_headers` y solo se arregla en el dashboard, poniéndolo en «Respect
-  Existing Headers». **Sigue pendiente.**
+  Existing Headers». **Resuelto el 26-ago-2026**, pero es el primer sospechoso si vuelve
+  a servirse código viejo: no se ve desde el repo.
   Para distinguir origen de zona, mide los dos:
   ```bash
   curl -sI https://armado-en-mexico.pages.dev/app.js | grep -i cache-control  # el origen
