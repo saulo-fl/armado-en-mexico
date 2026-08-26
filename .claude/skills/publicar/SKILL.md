@@ -64,6 +64,23 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
   mismo, así que un fallo se ve sin arriesgar producción.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-08: **un deploy correcto puede no llegar al usuario, y no es culpa del deploy.**
+  Dos capas encadenadas servían JavaScript viejo hasta 4 h después de publicar:
+  (1) en `_headers`, `/*.js` NUNCA aplicó — el splat de Pages matchea codiciosamente
+  hasta el final y no retrocede, así que un patrón con texto tras el `*` no coincide
+  con nada (ya corregido: los archivos van listados uno a uno, y `build-prerender.mjs`
+  falla si un `<script>` se queda sin regla); y (2) **el ajuste «Browser Cache TTL» de
+  la zona `armado.mx` está en 4 h y eleva cualquier `max-age` menor** que mande el
+  origen — pisa a `_headers` y solo se arregla en el dashboard, poniéndolo en «Respect
+  Existing Headers». **Sigue pendiente.**
+  Para distinguir origen de zona, mide los dos:
+  ```bash
+  curl -sI https://armado-en-mexico.pages.dev/app.js | grep -i cache-control  # el origen
+  curl -sI https://armado.mx/app.js                  | grep -i cache-control  # con la zona
+  ```
+  Si difieren, el problema NO está en el repo. Y no midas la caché en un preview de
+  rama: `*.pages.dev` antepone su propio default a toda respuesta, así que las
+  cabeceras no se parecen a las de producción.
 - 2026-08: **la sonda del backend caduca si cambian los APPEND_DOMAINS.** Usaba
   `/api/append/ratings`, y al retirar el dominio `ratings` (opiniones tipo Steam)
   pasó a responder `dominio_invalido` — que NO distingue si D1 sigue vinculada.
