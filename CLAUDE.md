@@ -40,7 +40,7 @@ merges se hacen por la API y tu `origin/main` local se queda viejo).
 
 ```bash
 npm install                 # una vez
-npm run build               # .jsx -> .js  +  prerender de las 294 páginas
+npm run build               # .jsx -> .js  +  prerender de las 295 páginas
 npx serve .                 # o cualquier servidor HTTP: los .jsx no cargan desde file://
 node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
 ```
@@ -48,28 +48,32 @@ node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada co
 Antes de publicar, la skill **`verificar-app`**. Al tocar UI, **`fidelidad-diseno`**.
 Al cerrar algo no trivial, **`mejorar-tooling`**.
 
-### PENDIENTE EN EL DASHBOARD — «Browser Cache TTL» pisa el `_headers`
+### RESUELTO (26-ago-2026) — «Browser Cache TTL» de la zona pisaba el `_headers`
 
-**Un deploy tarda 4 horas en llegar a quien ya visitó el sitio.** El ajuste
-**Caching → Configuration → Browser Cache TTL** de la zona `armado.mx` está en **4 h**,
-y ese ajuste **eleva cualquier `max-age` menor** que envíe el origen, en todo tipo de
-archivo que Cloudflare cachea (`.js`, `.png`, `.txt`…). Los `.js` salen de Pages con
-`max-age=0, must-revalidate` y llegan al navegador con `max-age=14400`.
+**Se quedó aquí porque la trampa se repite.** Durante meses un deploy tardaba 4 horas en
+llegar a quien ya había visitado el sitio: el ajuste **Caching → Configuration → Browser
+Cache TTL** de la zona `armado.mx` estaba en **4 h**, y ese ajuste **eleva cualquier
+`max-age` menor** que envíe el origen, en todo tipo de archivo que Cloudflare cachea
+(`.js`, `.png`, `.txt`…). Los `.js` salían de Pages con `max-age=0, must-revalidate` y
+llegaban al navegador con `max-age=14400`.
 
-**Arreglo (1 clic, nadie lo puede hacer desde el repo):** poner ese ajuste en
-**«Respect Existing Headers»**. Entonces manda `_headers`, que ya es correcto.
+**Ya está en «Respect Existing Headers»**, así que manda `_headers`. Si alguna vez vuelve a
+servirse código viejo, este ajuste es el primer sospechoso — no se puede tocar desde el
+repo, solo desde el dashboard.
 
-Se aisló comparando el origen con la zona — la sonda que lo demuestra:
+Se aisló comparando el origen con la zona — la sonda, que sigue siendo la forma de
+distinguir un problema de repo de uno de zona:
 
 ```bash
-curl -sI https://armado-en-mexico.pages.dev/app.js | grep -i cache-control  # max-age=0      ← origen OK
-curl -sI https://armado.mx/app.js                  | grep -i cache-control  # max-age=14400  ← lo pisa la zona
+curl -sI https://armado-en-mexico.pages.dev/app.js | grep -i cache-control  # el origen
+curl -sI https://armado.mx/app.js                  | grep -i cache-control  # con la zona delante
+# Si DIFIEREN, el problema no está en el repo. Hoy coinciden: max-age=0, must-revalidate.
 ```
 
-Por qué solo se nota en algunos ficheros: el ajuste **sube** los TTL bajos, nunca baja
-los altos, y solo toca lo que Cloudflare cachea. Por eso `imagenes/` (`max-age=31536000`)
-e `inventarios/` (`86400`) pasan intactos, el HTML y `.xml`/`.webmanifest` también (no son
-cacheables por defecto), y en cambio `robots.txt` sí sale reescrito a 14400.
+Por qué entonces solo se notaba en algunos ficheros: el ajuste **subía** los TTL bajos,
+nunca bajaba los altos, y solo tocaba lo que Cloudflare cachea. Por eso `imagenes/` (`max-age=31536000`)
+e `inventarios/` (`86400`) pasaban intactos, el HTML y `.xml`/`.webmanifest` también (no son
+cacheables por defecto), y en cambio `robots.txt` sí salía reescrito a 14400.
 
 ### Verificar un despliegue
 
@@ -144,7 +148,7 @@ Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que correspon
 ## Prerender: un .html real por URL (`build-prerender.mjs`)
 
 `npm run build` hace dos cosas: **`build:js`** (Babel) y **`build:html`**
-(`build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 294 — con su
+(`build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 295 — con su
 `<title>`, `description`, `canonical`, Open Graph, JSON-LD y el contenido **en HTML
 crudo** dentro de `#app-root`.
 
@@ -161,7 +165,7 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
 - El script **falla ruidosamente** si `index.html` cambia de forma (busca el cálculo
   de `APP_BASE`, el `<base>`, el `<title>`, la `description` y `#app-root`). Si tocas
   esas líneas, actualiza las marcas del script — es a propósito: mejor romper el
-  build que publicar 294 páginas mal generadas.
+  build que publicar 295 páginas mal generadas.
 
 **Dos trampas ya resueltas — no las reintroduzcas:**
 
