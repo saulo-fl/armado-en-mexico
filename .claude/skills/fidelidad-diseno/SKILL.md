@@ -97,8 +97,11 @@ anuncia solo.
   count)` devuelve `{label, color, hay}` con la escala tipo Steam (Extremadamente
   positivas / Mayormente positivas / Variadas / Mayormente negativas / Extremadamente
   negativas). Umbrales de votos en `RATING_MIN` y `RATING_EXTREMO` al principio del
-  helper: son 5 y 20, **más bajos que los 10 y 500 de Steam** porque con el tráfico de
-  este catálogo nada llegaría a 10 y la sección quedaría muerta. Recalibrar ahí. La
+  helper: son **1 y 20**, muy por debajo de los 10 y 500 de Steam, porque con el
+  tráfico de este catálogo nada llegaría a 10 y la sección quedaría muerta. La
+  etiqueta sale desde el primer voto; lo que sigue reservado al volumen son los
+  extremos, para que un único 5★ diga "Mayormente positivas" y no "Extremadamente".
+  Recalibrar ahí cuando haya votos de verdad. La
   usan `RatingBlock` (ficha) y `ArmaCardBody` (todas las tarjetas: `ArmaCard`,
   `FavCard`, `VisitedCard`, `RatedCard` comparten ese cuerpo).
 - Las barras de la valoración usan **`StatsBar`**, que ya pinta el número. No

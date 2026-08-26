@@ -1419,17 +1419,20 @@ window.PriceChart = PriceChart;
 // los extremos ("Extremadamente…") se reservan para el volumen alto. Aquí la
 // escala es 1-5 estrellas, así que el corte va sobre el promedio, anclado en
 // los rangos publicados de Trustpilot (4,3 ≈ 80% de Steam; 3,8 ≈ 70%).
-// Los umbrales de VOTOS son más bajos que los de Steam (que pide 10 y 500) a
-// propósito: con el tráfico de este catálogo casi ninguna arma llegaría a 10 y
-// la sección quedaría muerta — es la crítica nº1 documentada de ese sistema.
+// Los umbrales de VOTOS son mucho más bajos que los de Steam (que pide 10 y 500)
+// a propósito: con el tráfico de este catálogo nada llegaría a 10 y la sección
+// quedaría permanentemente muerta — es la crítica nº1 documentada de ese sistema.
+// La etiqueta sale desde el PRIMER voto (decisión de Saulo, 25-ago-2026); lo que
+// sigue reservado al volumen son los extremos, para que un único 5★ diga
+// "Mayormente positivas" y no "Extremadamente positivas".
 // Recalibrar AQUÍ cuando haya volumen real.
 // ──────────────────────────────────────────────────────────────
-const RATING_MIN = 5;       // votos mínimos para mostrar etiqueta
+const RATING_MIN = 1;       // votos mínimos para mostrar etiqueta
 const RATING_EXTREMO = 20;  // votos para desbloquear "Extremadamente…"
 
 function amxRatingLabel(avg, count) {
   if (!count || count < RATING_MIN) {
-    return { label: 'Sin valoraciones suficientes', color: PALETTE.textMuted, hay: false };
+    return { label: 'Sin valoraciones', color: PALETTE.textMuted, hay: false };
   }
   if (avg >= 4.5 && count >= RATING_EXTREMO) return { label: 'Extremadamente positivas', color: PALETTE.green, hay: true };
   if (avg >= 4.0) return { label: 'Mayormente positivas', color: PALETTE.green, hay: true };
