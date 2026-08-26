@@ -1,6 +1,16 @@
 # Cabeceras para Cloudflare Pages — seguridad + caché
 # (sin CSP todavía: ya no hay Babel inline — los .jsx se precompilan —, así que
 #  añadir una CSP es posible; queda pendiente de definir las fuentes permitidas)
+#
+# ── OJO CON LOS PATRONES ──────────────────────────────────────────────────
+# El splat (`*`) de Pages **matchea codiciosamente hasta el final de la URL y no
+# retrocede**, así que un patrón con texto DESPUÉS del asterisco no coincide con
+# nada. `/*.js` y `/*.html` estuvieron aquí desde ago-2026 sin aplicarse jamás:
+# los .js caían al default de Pages (`max-age=14400`) y se servía la app vieja
+# durante 4 h tras cada deploy. Comprobado en producción el 26-ago-2026.
+# Regla: el `*` va SIEMPRE al final. Si añades una regla, verifícala con
+#   curl -sI https://armado.mx/<ruta> | grep -i cache-control
+# antes de darla por buena — una regla muerta no da error, solo no hace nada.
 
 /*
   X-Content-Type-Options: nosniff
@@ -8,18 +18,12 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Permissions-Policy: geolocation=(), camera=(), microphone=()
-
-# HTML: caché corta para poder hotfixear (no hay fingerprint de archivos)
-/*.html
-  Cache-Control: public, max-age=600
-
-# Código sin fingerprint: revalidar para no servir versiones viejas tras un deploy
-/*.js
-  Cache-Control: public, max-age=0, must-revalidate
-/*.jsx
+  # Código y HTML sin fingerprint: revalidar SIEMPRE, o un deploy tarda 4 h en
+  # llegar a quien ya visitó el sitio. Las reglas de abajo devuelven la caché
+  # larga a lo que sí es inmutable.
   Cache-Control: public, max-age=0, must-revalidate
 
-# Assets estáticos: caché larga
+# Assets estáticos: caché larga (su contenido no cambia bajo el mismo nombre)
 /imagenes/*
   Cache-Control: public, max-age=31536000
 /inventarios/*
