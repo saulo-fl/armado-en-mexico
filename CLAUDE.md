@@ -236,6 +236,22 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 
 ## Mejoras futuras opcionales (NO hacer ahora)
 
+- **Prefiltro de reseñas con IA.** Hoy toda reseña espera revisión humana en
+  Admin → RESEÑAS. La evolución natural es que un modelo la contraste antes contra
+  las normas de la comunidad (`/soporte`) y la marque `ok` / `dudosa` / `rechazar`
+  con su motivo, para que el humano revise solo lo dudoso. Encaja como llamada a la
+  API de Claude dentro de la Function de `append`, o como tarea programada sobre la
+  cola. **La decisión de publicar sigue siendo humana**: la IA ordena la cola, no la
+  sustituye. Pedido explícito de Saulo (25-ago-2026).
+- **Reseñas a tabla fila-por-reseña.** El dominio `reviews` viaja ENTERO en cada
+  `GET /api/state`, o sea en cada carga de página de cada visitante. Por eso el tope
+  de 1200 caracteres por reseña (`RESENA_MAX` en `functions/api/_lib.js`). Si el
+  volumen crece, la salida es una tabla en D1 con paginación por entidad, no subir
+  el tope.
+- **Rate limiting en `/api/append/*`.** No hay ninguno, ni captcha ni identidad. Con
+  reseñas de texto libre, la cola de moderación se puede inundar. Mitigación actual:
+  nada se publica sin aprobación humana, así que el daño se queda en el panel.
+
 - **Engrosar la sección «Historia» de cada arma con investigación real.** Hoy
   `arma.historia` sale del builder de `data.js` y mide 58/118/982 caracteres
   (mín/media/máx): en la mayoría son dos frases. Es el contenido con más valor

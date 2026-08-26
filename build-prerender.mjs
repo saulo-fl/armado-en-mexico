@@ -292,6 +292,8 @@ const FIJAS = [
     desc: 'Requisitos y pasos para la posesión legal de un arma de fuego en México conforme a la Ley Federal de Armas de Fuego y Explosivos.' },
   { ruta: 'traumaticas', titulo: 'Armas traumáticas — defensa menos letal sin permiso SEDENA', enSitemap: true,
     desc: 'Dispositivos de defensa menos letal accionados por CO₂: no son armas de fuego y no requieren permiso ante la SEDENA.' },
+  { ruta: 'soporte', titulo: 'Soporte y normas de la comunidad', enSitemap: true,
+    desc: 'Qué se puede publicar en las reseñas, cómo denunciar contenido y cómo se modera. Catálogo divulgativo: aquí no se compran ni se venden armas.' },
   { ruta: 'preguntas', titulo: 'Preguntas frecuentes sobre armas legales en México', enSitemap: true,
     desc: 'Dudas habituales sobre licencias, calibres permitidos, portación y trámite ante la SEDENA.' },
   { ruta: 'campos', titulo: 'Campos de tiro y clubes en México', enSitemap: true,

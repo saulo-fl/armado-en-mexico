@@ -93,17 +93,27 @@ anuncia solo.
   tramos. Las etiquetas de precio viven en una **banda superior reservada**
   (`PT = 32`) y las fechas en la inferior, fuera del área del trazo — por eso ningún
   número puede quedar tapado por una línea. Llevan además halo (`paintOrder: stroke`).
-- **Calificación de la comunidad = etiqueta, no cifra.** `window.amxRatingLabel(avg,
-  count)` devuelve `{label, color, hay}` con la escala tipo Steam (Extremadamente
-  positivas / Mayormente positivas / Variadas / Mayormente negativas / Extremadamente
-  negativas). Umbrales de votos en `RATING_MIN` y `RATING_EXTREMO` al principio del
-  helper: son **1 y 20**, muy por debajo de los 10 y 500 de Steam, porque con el
-  tráfico de este catálogo nada llegaría a 10 y la sección quedaría muerta. La
-  etiqueta sale desde el primer voto; lo que sigue reservado al volumen son los
-  extremos, para que un único 5★ diga "Mayormente positivas" y no "Extremadamente".
-  Recalibrar ahí cuando haya votos de verdad. La
-  usan `RatingBlock` (ficha) y `ArmaCardBody` (todas las tarjetas: `ArmaCard`,
-  `FavCard`, `VisitedCard`, `RatedCard` comparten ese cuerpo).
+- **Opiniones, no estrellas** (ago-2026, sustituyen al `StarRating`, que ya no
+  existe). Modelo Steam: `¿Recomiendas esta arma?` pulgar sí/no **+ reseña escrita
+  de 100 caracteres mínimo**, que es lo que da derecho a contar en el agregado.
+  `window.amxOpinionLabel(up, down)` devuelve `{label, color, hay, pct, total}` con
+  los cortes **reales** de Steam sobre el % de recomendaciones (95/70/40/20).
+  `OPINION_EXTREMO = 20` es el único umbral de volumen: la etiqueta sale desde la
+  primera opinión, pero "Extremadamente…" exige 20, para que una sola persona no
+  fije la reputación de un arma. La usan `OpinionBlock` (ficha) y `ArmaCardBody`
+  (todas las tarjetas: `ArmaCard`, `FavCard` y `VisitedCard` comparten ese cuerpo).
+- **La etiqueta va ARRIBA, junto al precio** (`Opiniones: Mayormente positivas`, en
+  Courier 12.5), no en el bloque del final. La pregunta "¿vale la pena?" se responde
+  al lado del precio. Abajo solo queda el formulario para opinar.
+- **Nada se publica sin moderar.** Dos dominios a propósito: `reviewsQueue`
+  (privado, con el correo) y `reviews` (público, sin correo). Un único dominio con
+  un flag `approved` filtrado en cliente publicaría el texto sin moderar en una URL
+  abierta — ver el comentario de `functions/api/state.js`. El mínimo de 100
+  caracteres se valida **también en el servidor** (`mergeAppend`), porque
+  `/api/append/*` es público; hay test en `functions/api/_lib.test.mjs`.
+- **Los pulgares son SVG de trazo** (`window.ThumbIcon`), como los iconos del
+  `BottomNav`. Nunca emoji: renderizan distinto por plataforma y son un tell de UI
+  generada.
 - Las barras de la valoración usan **`StatsBar`**, que ya pinta el número. No
   reimplementes una barra plana: había una duplicada y se eliminó. Una barra sin
   cifra no informa.
@@ -112,6 +122,18 @@ anuncia solo.
   por cartucho. Lo usan la tarjeta y la ficha.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-08: **una pantalla nueva son 8 puntos de alta, no 1.** `SCREEN_TO_PATH`,
+  `titles`, `isInternal`, `currentNavId`, **la rama de `navTab`**, la rama del
+  switch de `app.jsx`, el item de menú (`moreItems` de `TopNav` + `MenuScreen`), la
+  entrada en `FIJAS` de `build-prerender.mjs` **y una línea en `.gitignore`** para su
+  `.html` generado (la lista es explícita, fichero a fichero: sin eso se commitea un
+  artefacto de build). La trampa que más cuesta ver es `navTab`: es una cadena
+  `if/else if` **sin default**, así que sin su rama el enlace funciona en móvil (que
+  usa `navigate`) y es un botón muerto en escritorio.
+- 2026-08: **`ProductScreen` no escuchaba `Store.onChange`.** Cualquier dato que
+  llegue en la hidratación de `/api/state` (las opiniones, por ejemplo) se pintaba
+  vacío hasta que el usuario navegaba y volvía. Solo `HomeScreen` estaba suscrita. Si
+  añades a una ficha algo que venga del backend, suscríbela.
 - 2026-08: **editar `data.js` NO basta para ver el cambio.** `Store.init()` siembra el
   catálogo entero en `localStorage['amx_armas_v2']` en la primera visita y a partir de
   ahí **el localStorage gana sobre `data.js`**. Para verificar un cambio de datos hay

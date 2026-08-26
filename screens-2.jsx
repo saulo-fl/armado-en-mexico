@@ -31,6 +31,11 @@ function ProdSection({ pad, gap, band, children }) {
 
 function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
   const vp = window.useViewport();
+  // Las opiniones llegan en la hidratacion desde /api/state, DESPUES del primer
+  // render. Sin esta suscripcion la etiqueta de arriba se quedaba vacia hasta
+  // que el usuario navegaba a otra pantalla y volvia.
+  const [, forceProd] = useState2(0);
+  useEffect(() => window.Store && window.Store.onChange(() => forceProd((x) => x + 1)), []);
   const arma = window.findArma(armaId);
   const [showSuggest, setShowSuggest] = useState2(false);
 
@@ -98,6 +103,8 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
   const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
   const muns = window.getMunicionesParaArma ? window.getMunicionesParaArma(arma) : [];
+  const opin = window.Store ? window.Store.getOpiniones('arma', arma.id) : { up: 0, down: 0, total: 0, lista: [] };
+  const etOpin = window.amxOpinionLabel(opin.up, opin.down);
 
   // Valoración: 'retroceso' se invierte (barra larga = poco retroceso), por eso
   // la etiqueta dice "control" — con el número a la vista, "Retroceso 52" se
@@ -252,6 +259,16 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {/* ── 5 · PRECIO DE REFERENCIA + 6 · HISTORIAL ───────────────────── */}
       <ProdSection pad={PAD} gap={SEC}>
         <SectionHeader>Precio de referencia</SectionHeader>
+        {/* Lo que opina la comunidad, en una línea: la pregunta "¿vale la pena?"
+            se responde junto al precio, no al final de la página. */}
+        {etOpin.hay &&
+          <div style={{
+            fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: PALETTE.textMuted, marginTop: -6, marginBottom: 9
+          }}>
+            Opiniones: <span style={{ color: etOpin.color, fontWeight: 700 }}>{etOpin.label}</span>
+          </div>}
         <div style={{
           background: 'linear-gradient(180deg, #262420, #211F1B)',
           border: `1px solid ${PALETTE.amber}`,
@@ -561,7 +578,8 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* CALIFICACIÓN DE LA COMUNIDAD */}
       <ProdSection pad={PAD} gap={SEC}>
-        <RatingBlock armaId={arma.id} />
+        <OpinionBlock tipo="arma" entidadId={arma.id} entidadNombre={arma.nombre}
+          nombreTipo="arma" onNav={onNav} />
       </ProdSection>
 
       {/* RELACIONADAS */}
@@ -647,83 +665,223 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 window.ProductScreen = ProductScreen;
 
 // ════════════════════════════════════════════════════════════════
-// RATING BLOCK — lo que opina la comunidad de un arma.
-// Manda la ETIQUETA (patrón Steam: "Mayormente positivas"), no la cifra: un
-// 4.2 no le dice nada a nadie de un vistazo. El promedio y el conteo quedan
-// debajo, en una sola línea, para quien quiera el dato exacto.
-// La escala vive en window.amxRatingLabel (ui.jsx), que también usan las
-// tarjetas de arma.
+// OPINION BLOCK — "¿Recomiendas esta arma?" (modelo Steam)
+// Sustituye a las estrellas de 1-5 (ago-2026). Una opinión SIN reseña no
+// existe: el texto es lo que el moderador juzga y lo que da derecho a contar
+// en el agregado. Nada se publica sin aprobación — ver la pantalla de Soporte.
+// `nombreTipo` es la palabra de la pregunta, para reutilizar el bloque tal cual
+// en las fichas de accesorio, munición, campo y curso.
 // ════════════════════════════════════════════════════════════════
-function RatingBlock({ armaId }) {
+const RESENA_MIN = 100, RESENA_MAX = 1200;
+
+function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
+  const vp = window.useViewport();
   const [, force] = useState2(0);
   useEffect(() => window.Store && window.Store.onChange(() => force((x) => x + 1)), []);
-  const rating = window.Store ? window.Store.getRating(armaId) : { avg: 0, count: 0 };
-  const userR = window.Store ? window.Store.getUserRating(armaId) : 0;
-  const [thanks, setThanks] = useState2(false);
-  const et = window.amxRatingLabel(rating.avg, rating.count);
 
-  const onRate = (n) => {
-    window.Store && window.Store.addRating(armaId, n);
-    setThanks(true);
-    setTimeout(() => setThanks(false), 1800);
+  const yaOpino = (() => {
+    try { return !!localStorage.getItem('amx_op_' + tipo + '_' + entidadId); } catch (e) { return false; }
+  })();
+  const [enviado, setEnviado] = useState2(yaOpino);
+  const [rec, setRec] = useState2(null);          // null | true | false
+  const [f, setF] = useState2({ texto: '', autor: '', email: '' });
+  const set = (k, v) => setF((p) => Object.assign({}, p, { [k]: v }));
+
+  const op = window.Store ? window.Store.getOpiniones(tipo, entidadId) : { up: 0, down: 0, total: 0, lista: [] };
+  const et = window.amxOpinionLabel(op.up, op.down);
+
+  const largo = f.texto.trim().length;
+  const correoOk = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(f.email.trim());
+  const listo = rec !== null && largo >= RESENA_MIN && largo <= RESENA_MAX &&
+    f.autor.trim().length >= 2 && correoOk;
+
+  const enviar = () => {
+    if (!listo || !window.Store) return;
+    const ok = window.Store.addReview({
+      tipo, entidadId, entidadNombre, recomienda: rec,
+      texto: f.texto, autor: f.autor, email: f.email,
+    });
+    if (!ok) return;
+    try { localStorage.setItem('amx_op_' + tipo + '_' + entidadId, '1'); } catch (e) {}
+    setEnviado(true);
+  };
+
+  // Botón de pulgar. El anillo de foco va en el propio botón (aquí no hay
+  // clip-path, así que no hace falta el wrapper .amx-cut).
+  const Pulgar = ({ up, activo, onClick }) => {
+    const col = up ? PALETTE.green : PALETTE.redHi;
+    return (
+      <button type="button" onClick={onClick}
+        aria-pressed={activo}
+        style={{
+          flex: '1 1 0', minWidth: 0, minHeight: 64,
+          background: activo ? col : 'transparent',
+          color: activo ? '#000' : col,
+          border: `1.5px solid ${activo ? col : PALETTE.border}`,
+          cursor: 'pointer', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', gap: 10,
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          letterSpacing: '0.14em', textTransform: 'uppercase',
+          transition: 'background 0.15s, border-color 0.15s, color 0.15s'
+        }}>
+        <window.ThumbIcon up={up} size={24} />
+        {up ? 'Sí' : 'No'}
+      </button>
+    );
   };
 
   return (
     <React.Fragment>
       <SectionHeader>Calificación de la comunidad</SectionHeader>
+
       <div style={{
         background: PALETTE.bgCard,
         border: `1px solid ${PALETTE.border}`,
-        padding: '16px 18px',
-        position: 'relative',
-        display: 'flex', flexDirection: 'column', gap: 14
+        padding: vp.isDesktop ? '18px 20px' : '15px 16px',
+        position: 'relative'
       }}>
-        <TacticalCorners size={10} color={et.color} />
+        <TacticalCorners size={10} color={enviado ? PALETTE.green : PALETTE.amber} />
 
-        <div>
-          <div style={{
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19,
-            color: et.color, textTransform: 'uppercase',
-            letterSpacing: '0.1em', lineHeight: 1.2
-          }}>{et.label}</div>
-          {rating.count > 0 &&
+        {enviado ?
+          <div>
             <div style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              flexWrap: 'wrap', marginTop: 9
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16,
+              color: PALETTE.green, textTransform: 'uppercase',
+              letterSpacing: '0.1em', marginBottom: 8
+            }}>✓ Tu opinión entró en revisión</div>
+            <div style={{
+              fontFamily: 'Courier Prime, monospace', fontSize: 14,
+              color: PALETTE.textDim, lineHeight: 1.6
             }}>
-              <window.StarRating value={rating.avg} size="sm" showCount={false} />
-              <span style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 13.5,
-                color: PALETTE.textMuted, letterSpacing: '0.06em', fontVariantNumeric: 'tabular-nums'
-              }}>
-                {rating.avg.toFixed(1)} · {rating.count} {rating.count === 1 ? 'valoración' : 'valoraciones'}
-              </span>
-            </div>}
-        </div>
-
-        {/* Acción del usuario */}
-        <div style={{ borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 13 }}>
-          <div style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
-            color: PALETTE.textMuted, letterSpacing: '0.16em',
-            textTransform: 'uppercase', marginBottom: 9
-          }}>{userR ? 'Tu valoración' : rating.count === 0 ? 'Sé el primero en calificar' : 'Califica esta arma'}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <window.StarRating value={userR} count={0} interactive
-              onRate={onRate} size="lg" showCount={false} />
-            {thanks &&
-              <span style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 15,
-                color: PALETTE.amber, letterSpacing: '0.08em', fontWeight: 700,
-                animation: 'slideUp 0.25s'
-              }}>✓ ¡Gracias!</span>}
+              Se publicará cuando se compruebe que cumple las{' '}
+              <button type="button" onClick={() => onNav && onNav('soporte')} style={{
+                background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                font: 'inherit', color: PALETTE.amber,
+                borderBottom: `1px solid ${PALETTE.amber}`
+              }}>normas de la comunidad</button>.
+            </div>
           </div>
-        </div>
+        :
+          <div>
+            <div style={{
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+              fontSize: vp.isDesktop ? 19 : 17, color: PALETTE.text,
+              textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12
+            }}>¿Recomiendas {nombreTipo === 'munición' ? 'esta' : nombreTipo === 'arma' ? 'esta' : 'este'} {nombreTipo}?</div>
+
+            <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+              <Pulgar up activo={rec === true} onClick={() => setRec(true)} />
+              <Pulgar up={false} activo={rec === false} onClick={() => setRec(false)} />
+            </div>
+
+            <label style={{
+              display: 'block',
+              fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+              color: PALETTE.textMuted, letterSpacing: '0.15em',
+              textTransform: 'uppercase', marginBottom: 5
+            }}>Tu reseña <span style={{ color: PALETTE.amber }}>*</span></label>
+            <textarea value={f.texto} onChange={(e) => set('texto', e.target.value)}
+              rows={4} maxLength={RESENA_MAX}
+              placeholder="Cuenta tu experiencia con calma: qué tal se maneja, para qué la usas, qué te sorprendió."
+              style={Object.assign(sInpStyle(), { marginBottom: 4 })} />
+            <div style={{
+              fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+              color: largo >= RESENA_MIN ? PALETTE.green : PALETTE.textMuted,
+              letterSpacing: '0.06em', marginBottom: 12
+            }}>
+              {largo >= RESENA_MIN
+                ? `✓ ${largo} caracteres`
+                : `${largo} / ${RESENA_MIN} mínimo — una reseña más corta no puede contar en la calificación`}
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
+              columnGap: 12
+            }}>
+              {sfld('Nombre', 'autor', f, set, { required: true, placeholder: 'Como quieres firmar' })}
+              {sfld('Correo (no se publica)', 'email', f, set, { required: true, type: 'email', placeholder: 'para contactarte si hace falta' })}
+            </div>
+
+            <div style={{
+              borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 12, marginTop: 2,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: 12, flexWrap: 'wrap'
+            }}>
+              <div style={{
+                fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+                color: PALETTE.textMuted, lineHeight: 1.55, flex: '1 1 240px'
+              }}>
+                Toda reseña se revisa antes de publicarse.{' '}
+                <button type="button" onClick={() => onNav && onNav('soporte')} style={{
+                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                  font: 'inherit', color: PALETTE.amber,
+                  borderBottom: `1px solid ${PALETTE.amber}`
+                }}>Normas de la comunidad →</button>
+              </div>
+              <button type="button" onClick={enviar} disabled={!listo} style={{
+                background: listo ? PALETTE.amber : 'transparent',
+                color: listo ? '#000' : PALETTE.textMuted,
+                border: `1.5px solid ${listo ? PALETTE.amber : PALETTE.border}`,
+                padding: '0 22px', minHeight: 48,
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                cursor: listo ? 'pointer' : 'not-allowed'
+              }}>Publicar opinión</button>
+            </div>
+          </div>}
       </div>
+
+      {op.total > 0 &&
+        <div style={{ marginTop: 10 }}>
+          <window.Disclosure title={`Leer opiniones (${op.total})`}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {op.lista.slice(0, 20).map((r, i) =>
+                <div key={r.id || i} style={{
+                  paddingBottom: 14,
+                  borderBottom: i < Math.min(op.lista.length, 20) - 1 ? `1px solid ${PALETTE.border}` : 'none'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+                    <span style={{ color: r.recomienda ? PALETTE.green : PALETTE.redHi, display: 'flex' }}>
+                      <window.ThumbIcon up={!!r.recomienda} size={17} />
+                    </span>
+                    <span style={{
+                      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12.5,
+                      color: r.recomienda ? PALETTE.green : PALETTE.redHi,
+                      letterSpacing: '0.12em', textTransform: 'uppercase'
+                    }}>{r.recomienda ? 'La recomienda' : 'No la recomienda'}</span>
+                    <span style={{ flex: 1 }} />
+                    <span style={{
+                      fontFamily: 'Courier Prime, monospace', fontSize: 12,
+                      color: PALETTE.textMuted, letterSpacing: '0.06em'
+                    }}>{amxFmtManualDate(String(r.submittedAt || '').slice(0, 10))}</span>
+                  </div>
+                  <div style={{
+                    fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
+                    color: PALETTE.text, lineHeight: 1.65, marginBottom: 6,
+                    whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'
+                  }}>{r.texto}</div>
+                  <div style={{
+                    fontFamily: 'Courier Prime, monospace', fontSize: 13,
+                    color: PALETTE.textMuted, letterSpacing: '0.08em'
+                  }}>— {r.autor || 'Anónimo'}</div>
+                </div>
+              )}
+            </div>
+          </window.Disclosure>
+        </div>}
+
+      {et.hay &&
+        <div style={{
+          fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+          color: PALETTE.textMuted, letterSpacing: '0.08em', marginTop: 10
+        }}>
+          {op.up} de {op.total} {op.total === 1 ? 'persona la recomienda' : 'personas la recomiendan'} ({et.pct} %)
+        </div>}
     </React.Fragment>);
 
 }
-window.RatingBlock = RatingBlock;
+window.OpinionBlock = OpinionBlock;
 
 // ════════════════════════════════════════════════════════════════
 // YOUTUBE BLOCK — embed de video de Armas M&S (si existe)
@@ -1689,6 +1847,260 @@ window.AboutScreen = AboutScreen;
 // ════════════════════════════════════════════════════════════════
 // FAQ
 // ════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════
+// SOPORTE — normas de la comunidad, denuncias y moderación
+// Existe porque la app acepta texto libre de desconocidos (las reseñas). Las
+// normas están adaptadas de las de Steam, recortadas a lo que aquí hay: no hay
+// Workshop, ni grupos, ni perfiles — hay reseñas y denuncias.
+// ════════════════════════════════════════════════════════════════
+function SoporteScreen({ onNav }) {
+  const vp = window.useViewport();
+  const padX = vp.isDesktop ? 28 : 16;
+  const [den, setDen] = useState2({ reviewId: '', motivo: 'ilegal', detalle: '', email: '' });
+  const [denEnviada, setDenEnviada] = useState2(false);
+  const setD = (k, v) => setDen((p) => Object.assign({}, p, { [k]: v }));
+
+  const MOTIVOS = [
+    { value: 'ilegal', label: 'Compraventa u otra actividad ilegal' },
+    { value: 'irrespetuoso', label: 'Insultos, acoso o amenazas' },
+    { value: 'fuera-de-tema', label: 'Fuera de tema o mensaje repetido' },
+    { value: 'comercial', label: 'Publicidad o contenido comercial' },
+    { value: 'manipulacion', label: 'Manipulación de la calificación' },
+    { value: 'datos', label: 'Datos personales de alguien' },
+    { value: 'otro', label: 'Otro' },
+  ];
+  const denListo = den.detalle.trim().length >= 20;
+  const enviarDenuncia = () => {
+    if (!denListo || !window.Store) return;
+    window.Store.addReport(den);
+    setDenEnviada(true);
+  };
+
+  const Regla = ({ children }) => (
+    <div style={{
+      fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
+      color: PALETTE.text, lineHeight: 1.6, padding: '6px 0',
+      display: 'flex', gap: 9, alignItems: 'flex-start'
+    }}>
+      <span style={{ color: PALETTE.amber, flexShrink: 0 }}>▸</span>
+      <span>{children}</span>
+    </div>
+  );
+
+  return (
+    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+
+      <div style={{ padding: '20px 0', textAlign: 'center', borderBottom: `1px solid ${PALETTE.border}`, marginBottom: 18 }}>
+        <div style={{
+          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber,
+          letterSpacing: '0.2em', marginBottom: 6
+        }}>◈ SOPORTE</div>
+        <div style={{
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23,
+          color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.1
+        }}>Normas de la comunidad</div>
+        <div style={{
+          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim,
+          lineHeight: 1.6, marginTop: 10, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto'
+        }}>
+          Las reseñas las escriben personas y las lee cualquiera. Estas normas dicen qué
+          se puede publicar aquí, cómo denunciar lo que no cumple y qué pasa cuando se
+          incumplen.
+        </div>
+      </div>
+
+      {/* Lo primero, no enterrado en una lista: el uso que NO se tolera. */}
+      <div style={{
+        background: 'rgba(168,58,42,0.08)',
+        border: `1px solid ${PALETTE.redHi}`,
+        borderLeft: `4px solid ${PALETTE.redHi}`,
+        padding: 14, marginBottom: 22
+      }}>
+        <div style={{
+          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.redHi,
+          letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 700
+        }}>▲ Prohibido usar esta app para comprar o vender</div>
+        <div style={{
+          fontFamily: 'Courier Prime, monospace', fontSize: 15, color: PALETTE.text, lineHeight: 1.7
+        }}>
+          Armado en México es un catálogo <b>divulgativo</b>. Aquí no se comercializan
+          armas de fuego, municiones ni accesorios, y no somos intermediarios de ninguna
+          venta.
+          <div style={{ marginTop: 10 }}>
+            Cualquier intento de usar las reseñas —o cualquier otro canal de esta
+            aplicación— para <b>ofrecer, solicitar o intermediar la compraventa de armas,
+            municiones o accesorios fuera de los canales legales</b> (DCAM y OTCA, con la
+            autorización correspondiente de la SEDENA) conllevará el <b>bloqueo inmediato</b> y
+            el <b>reporte a las autoridades competentes</b>, junto con la información
+            asociada al envío.
+          </div>
+          <div style={{ marginTop: 10, color: PALETTE.textDim }}>
+            Lo mismo aplica a pedir o dar instrucciones para modificar un arma de forma
+            ilegal, alterar matrículas, o eludir el trámite ante la SEDENA.
+          </div>
+        </div>
+      </div>
+
+      <SectionHeader>Qué se puede publicar</SectionHeader>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 26 }}>
+
+        <window.Disclosure title="Respeto hacia las demás personas" defaultOpen>
+          <div>
+            <Regla>Nada de insultos, acoso ni burlas hacia otros usuarios, marcas, tiendas o autoridades.</Regla>
+            <Regla>Nada de amenazas ni de incitación a la violencia, ni en broma.</Regla>
+            <Regla>Nada de provocar peleas ni de discriminar por origen, género, religión, orientación o cualquier otra condición.</Regla>
+            <Regla>Nada de acusaciones públicas contra personas concretas.</Regla>
+            <Regla>Nada de publicar datos personales de nadie: nombres completos, domicilios, teléfonos, matrículas ni fotos de terceros.</Regla>
+          </div>
+        </window.Disclosure>
+
+        <window.Disclosure title="La reseña va sobre el producto">
+          <div>
+            <Regla>Escribe sobre el arma, el accesorio, la munición o el lugar que estás reseñando: cómo se comporta, para qué sirve, qué te sorprendió.</Regla>
+            <Regla>No uses las reseñas para hacer preguntas de trámite: para eso están las <b>preguntas frecuentes</b> y la <b>guía legal</b>.</Regla>
+            <Regla>No repitas la misma reseña en varias fichas.</Regla>
+            <Regla>Si un dato del catálogo está mal, no lo denuncies en una reseña: usa el botón <b>Sugerir cambios</b> de la ficha, que va directo a corregirlo.</Regla>
+          </div>
+        </window.Disclosure>
+
+        <window.Disclosure title="Nada comercial">
+          <div>
+            <Regla>Sin anuncios, sin promociones y sin enlaces a tiendas, propias o ajenas.</Regla>
+            <Regla>Sin ofertas de compra, venta, permuta o renta de nada.</Regla>
+            <Regla>Sin rifas, sorteos ni captación de clientes.</Regla>
+            <Regla>Si tienes una relación comercial con lo que reseñas —lo vendes, lo distribuyes, te lo regalaron— <b>dilo en la reseña</b>.</Regla>
+          </div>
+        </window.Disclosure>
+
+        <window.Disclosure title="No manipular la calificación">
+          <div>
+            <Regla>Una opinión por persona y por ficha.</Regla>
+            <Regla>Nada de enviar varias reseñas para inflar o hundir una calificación.</Regla>
+            <Regla>Nada de pagar, cobrar ni presionar a nadie por escribir una reseña.</Regla>
+            <Regla>Nada de campañas coordinadas contra un modelo, una marca o una tienda.</Regla>
+          </div>
+        </window.Disclosure>
+
+      </div>
+
+      <SectionHeader>Cómo se revisan las reseñas</SectionHeader>
+      <div style={{
+        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+        padding: '14px 16px', marginBottom: 26, position: 'relative'
+      }}>
+        <TacticalCorners size={10} color={PALETTE.amber} />
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim, lineHeight: 1.7 }}>
+          <b style={{ color: PALETTE.text }}>Toda reseña se revisa antes de publicarse.</b> Al enviarla
+          entra en una cola y no aparece en la ficha hasta que alguien comprueba que
+          cumple estas normas. Puede tardar; que no se vea al instante no significa que
+          se haya rechazado.
+          <div style={{ marginTop: 10 }}>
+            Pedimos un mínimo de {RESENA_MIN} caracteres a propósito: una opinión sin
+            argumento no ayuda a nadie a decidir, y es lo que da derecho a que tu voto
+            cuente en la calificación.
+          </div>
+          <div style={{ marginTop: 10 }}>
+            Tu <b>correo no se publica nunca</b>: se guarda solo para poder contactarte si
+            hay un problema con tu reseña, y se descarta al aprobarla.
+          </div>
+        </div>
+      </div>
+
+      <SectionHeader>Qué pasa si se incumplen</SectionHeader>
+      <div style={{ marginBottom: 26 }}>
+        {[
+          ['01', 'No se publica', 'Si la reseña no cumple las normas, no llega a la ficha. Si dejaste correo, te avisamos del motivo.'],
+          ['02', 'Se retira lo ya publicado', 'Una reseña publicada puede retirarse después si se detecta —o se denuncia— que incumple.'],
+          ['03', 'Se restringe la participación', 'Quien incumple de forma repetida deja de poder publicar reseñas.'],
+          ['04', 'Bloqueo y reporte', 'En los casos graves —compraventa ilegal, amenazas, explotación de menores— el bloqueo es inmediato y se reporta a las autoridades competentes con la información del envío.'],
+        ].map(([n, tit, desc]) =>
+          <div key={n} style={{ display: 'flex', gap: 13, padding: '11px 0', borderBottom: `1px solid ${PALETTE.border}` }}>
+            <div style={{
+              width: 32, height: 32, flexShrink: 0,
+              border: `1px solid ${PALETTE.amber}`, color: PALETTE.amber,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'Courier Prime, monospace', fontSize: 14, fontWeight: 700
+            }}>{n}</div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{
+                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14.5,
+                color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4
+              }}>{tit}</div>
+              <div style={{
+                fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim, lineHeight: 1.6
+              }}>{desc}</div>
+            </div>
+          </div>
+        )}
+        <div style={{
+          fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim,
+          lineHeight: 1.65, marginTop: 12
+        }}>
+          <b style={{ color: PALETTE.text }}>¿Crees que nos equivocamos?</b> Denúncialo con el
+          formulario de abajo indicando qué reseña era y por qué crees que sí cumplía.
+          Moderar es un juicio y a veces sale mal; se revisa de nuevo.
+        </div>
+      </div>
+
+      <SectionHeader>Denunciar contenido</SectionHeader>
+      <div style={{
+        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+        padding: '15px 16px', position: 'relative'
+      }}>
+        <TacticalCorners size={10} color={denEnviada ? PALETTE.green : PALETTE.amber} />
+        {denEnviada ?
+          <div>
+            <div style={{
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16,
+              color: PALETTE.green, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8
+            }}>✓ Denuncia recibida</div>
+            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim, lineHeight: 1.6 }}>
+              La revisaremos. Si dejaste correo, te contamos en qué quedó.
+            </div>
+          </div>
+        :
+          <div>
+            <div style={{
+              fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim,
+              lineHeight: 1.65, marginBottom: 14
+            }}>
+              Si ves una reseña que incumple estas normas, cuéntanoslo. No hace falta que
+              respondas a quien la escribió: eso solo alarga el problema.
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', columnGap: 12 }}>
+              {sfld('Qué reseña', 'reviewId', den, setD, { placeholder: 'Ficha y autor, o el texto que empieza por…', span: 2 })}
+              {sfld('Motivo', 'motivo', den, setD, { select: MOTIVOS })}
+              {sfld('Tu correo (opcional)', 'email', den, setD, { type: 'email', placeholder: 'para contarte en qué quedó' })}
+              {sfld('Qué pasa con ella', 'detalle', den, setD, { ta: true, rows: 3, required: true, span: 2, placeholder: 'Explica brevemente por qué incumple.' })}
+            </div>
+            <button type="button" onClick={enviarDenuncia} disabled={!denListo} style={{
+              width: '100%', marginTop: 4,
+              background: denListo ? PALETTE.amber : 'transparent',
+              color: denListo ? '#000' : PALETTE.textMuted,
+              border: `1.5px solid ${denListo ? PALETTE.amber : PALETTE.border}`,
+              padding: '13px', minHeight: 48,
+              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              cursor: denListo ? 'pointer' : 'not-allowed'
+            }}>Enviar denuncia</button>
+          </div>}
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
+        {[['legal', '§ Guía legal completa'], ['faq', '? Preguntas frecuentes']].map(([id, txt]) =>
+          <button key={id} type="button" onClick={() => onNav && onNav(id)} style={{
+            flex: '1 1 200px', background: 'transparent', color: PALETTE.amber,
+            border: `1.5px dashed ${PALETTE.border}`, padding: '12px', minHeight: 48,
+            fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 13.5,
+            letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
+          }}>{txt} →</button>
+        )}
+      </div>
+    </div>);
+
+}
+window.SoporteScreen = SoporteScreen;
+
 function FAQScreen() {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
@@ -1802,6 +2214,7 @@ function MenuScreen({ onNav, onTutorial }) {
   { id: 'campos', icon: '◎', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados · suscripción próximamente' },
   { id: 'cursos', icon: '✦', title: 'Cursos', desc: 'Formación: manejo seguro, tiro defensivo y más' },
   { id: 'legal', icon: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
+  { id: 'soporte', icon: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
   { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
   { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
   { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },

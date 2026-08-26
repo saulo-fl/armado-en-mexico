@@ -14,7 +14,9 @@
     promos:      'amx_promos_v2',
     suggestions: 'amx_suggestions_v2',
     favorites:   'amx_favorites_v2',
-    ratings:     'amx_ratings_v2',
+    reviews:     'amx_reviews_v1',
+    reviewsQueue:'amx_reviewsq_v1',
+    reports:     'amx_reports_v1',
     appConfig:   'amx_appconfig_v2',
     manuales:    'amx_manuales_v2',
   };
@@ -183,7 +185,8 @@
     armas: K.armas, pages: K.pages, promos: K.promos, favorites: K.favorites,
     appConfig: K.appConfig, manuales: K.manuales, priceHist: K.priceHist,
     suggestions: K.suggestions, pending: K.pending, rejected: K.rejected,
-    visits: K.visits, ratings: K.ratings,
+    visits: K.visits,
+    reviews: K.reviews, reviewsQueue: K.reviewsQueue, reports: K.reports,
   };
   const SYNCABLE = Object.keys(DOMAIN_K);
 
@@ -277,7 +280,9 @@
       if (!localStorage.getItem(K.suggestions)) write(K.suggestions, []);
       if (!localStorage.getItem(K.admin)) write(K.admin, { password: DEFAULT_PW, loggedIn: false });
       if (!localStorage.getItem(K.favorites)) write(K.favorites, []);
-      if (!localStorage.getItem(K.ratings)) write(K.ratings, {});
+      if (!localStorage.getItem(K.reviews)) write(K.reviews, []);
+      if (!localStorage.getItem(K.reviewsQueue)) write(K.reviewsQueue, []);
+      if (!localStorage.getItem(K.reports)) write(K.reports, []);
       if (!localStorage.getItem(K.appConfig)) write(K.appConfig, DEFAULT_APP_CONFIG);
     },
 
@@ -327,59 +332,120 @@
       return this.getFavorites().map(id => armas.find(a => a.id === id)).filter(Boolean);
     },
 
-    // ─── RATINGS (1-5 estrellas por arma) ──────────────────
-    getAllRatings() { return read(K.ratings, {}); },
-    getRating(armaId) {
-      const r = read(K.ratings, {})[armaId];
-      if (!r || !r.count) return { avg: 0, count: 0 };
-      return { avg: r.sum / r.count, count: r.count };
+    // ─── OPINIONES (recomienda sí/no + reseña escrita) ─────
+    // Sustituyen a las estrellas de 1-5 (retiradas en ago-2026). Una opinión
+    // SIN reseña no existe: el texto es lo que el moderador juzga y lo que da
+    // derecho a contar en el agregado.
+    //
+    // Dos dominios a propósito:
+    //   reviews       → aprobadas. PÚBLICO, sin correo. De aquí sale el agregado.
+    //   reviewsQueue  → pendientes. PRIVADO (ver functions/api/state.js).
+    // Un solo dominio con un flag `approved` filtrado en cliente publicaría el
+    // texto sin moderar en una URL abierta.
+    getReviews() { return read(K.reviews, []); },
+    getReviewsFor(tipo, entidadId) {
+      const id = Number(entidadId);
+      return read(K.reviews, []).filter((r) => r.tipo === tipo && Number(r.entidadId) === id);
     },
-    addRating(armaId, stars) {
-      stars = Math.max(1, Math.min(5, Math.round(Number(stars) || 0)));
-      if (!stars) return;
-      const ratings = read(K.ratings, {});
-      const userKey = 'amx_rated_' + armaId;
-      const prev = Number(localStorage.getItem(userKey)) || 0;
-      if (!ratings[armaId]) ratings[armaId] = { sum: 0, count: 0 };
-      if (prev) {
-        // actualizar: quitar voto anterior, sumar nuevo
-        ratings[armaId].sum += (stars - prev);
-      } else {
-        ratings[armaId].sum += stars;
-        ratings[armaId].count += 1;
-      }
-      try { localStorage.setItem(userKey, String(stars)); } catch(e) {}
-      write(K.ratings, ratings);
+    // { up, down, total, lista } — lista de más reciente a más antigua.
+    getOpiniones(tipo, entidadId) {
+      const lista = this.getReviewsFor(tipo, entidadId)
+        .slice()
+        .sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+      const up = lista.filter((r) => r.recomienda === true).length;
+      return { up, down: lista.length - up, total: lista.length, lista };
+    },
+    // Envía a la cola de moderación. Devuelve false si no cumple el mínimo
+    // (el servidor vuelve a comprobarlo: ver mergeAppend en functions/api/_lib.js).
+    addReview(rev) {
+      const texto = String((rev && rev.texto) || '').trim();
+      if (texto.length < 100 || texto.length > 1200) return false;
+      if (typeof rev.recomienda !== 'boolean') return false;
+      const item = {
+        tipo: rev.tipo, entidadId: Number(rev.entidadId),
+        entidadNombre: String(rev.entidadNombre || ''),
+        recomienda: rev.recomienda, texto: texto,
+        autor: String(rev.autor || '').trim(),
+        email: String(rev.email || '').trim(),
+      };
+      // La copia local es solo para que el admin de ESTE navegador la vea sin
+      // esperar a hidratar; la del servidor es la buena y lleva otro id.
+      const cola = read(K.reviewsQueue, []);
+      cola.unshift(Object.assign({
+        id: 'r_' + Date.now(), submittedAt: new Date().toISOString(), status: 'pending',
+      }, item));
+      write(K.reviewsQueue, cola.slice(0, 500));
       Store._notify();
-      // escritura pública: el server incrementa sum/count de forma atómica.
-      // Solo el PRIMER voto de este navegador cuenta en el server (evita doble
-      // conteo al re-votar; el ajuste de un re-voto queda en el cache local).
-      if (!prev) publicAppend('ratings', { armaId: Number(armaId), stars });
+      publicAppend('reviewsQueue', item);
+      return true;
     },
-    getUserRating(armaId) {
-      try {
-        const v = localStorage.getItem('amx_rated_' + armaId);
-        return v ? Number(v) : 0;
-      } catch(e) { return 0; }
-    },
-    getTopRated(n = 10, minCount = 1) {
-      const ratings = read(K.ratings, {});
-      const armas = this.getArmas();
-      return armas
-        .map(a => ({ a, r: ratings[a.id] || { sum: 0, count: 0 } }))
-        .filter(x => x.r.count >= minCount)
-        .map(x => ({ a: x.a, avg: x.r.sum / x.r.count, count: x.r.count }))
-        .sort((x, y) => y.avg - x.avg || y.count - x.count)
-        .slice(0, n)
-        .map(x => x.a);
-    },
-    // Para admin: setear ratings manualmente (por ejemplo para seed)
-    setRating(armaId, sum, count) {
-      const ratings = read(K.ratings, {});
-      ratings[armaId] = { sum: Number(sum) || 0, count: Number(count) || 0 };
-      write(K.ratings, ratings);
+    getReviewQueue() { return read(K.reviewsQueue, []); },
+    // Moderación (admin). Publicar RETIRA el correo: nunca cruza al dominio
+    // público, igual que hace approvePending con submitterEmail.
+    approveReview(id) {
+      const cola = read(K.reviewsQueue, []);
+      const rev = cola.find((r) => r.id === id);
+      if (!rev) return false;
+      write(K.reviewsQueue, cola.filter((r) => r.id !== id));
+      adminSync('reviewsQueue');
+      const { email, status, ...publica } = rev;
+      publica.approvedAt = new Date().toISOString();
+      const pub = read(K.reviews, []);
+      pub.unshift(publica);
+      write(K.reviews, pub);
+      adminSync('reviews');
       Store._notify();
-      adminSync('ratings');
+      return true;
+    },
+    rejectReview(id, motivo) {
+      const cola = read(K.reviewsQueue, []);
+      const rev = cola.find((r) => r.id === id);
+      if (!rev) return false;
+      write(K.reviewsQueue, cola.filter((r) => r.id !== id));
+      adminSync('reviewsQueue');
+      const rej = read(K.rejected, []);
+      rej.unshift(Object.assign({}, rev, {
+        status: 'rejected', rejectionReason: motivo || '', rejectedAt: new Date().toISOString(),
+      }));
+      write(K.rejected, rej);
+      adminSync('rejected');
+      Store._notify();
+      return true;
+    },
+    // Retira una reseña YA publicada (p. ej. tras una denuncia fundada).
+    unpublishReview(id) {
+      const pub = read(K.reviews, []);
+      if (!pub.some((r) => r.id === id)) return false;
+      write(K.reviews, pub.filter((r) => r.id !== id));
+      adminSync('reviews');
+      Store._notify();
+      return true;
+    },
+
+    // ─── DENUNCIAS DE CONTENIDO ────────────────────────────
+    addReport(rep) {
+      const item = {
+        reviewId: String(rep.reviewId || ''),
+        motivo: String(rep.motivo || ''),
+        detalle: String(rep.detalle || '').slice(0, 1200),
+        email: String(rep.email || '').trim(),
+      };
+      const arr = read(K.reports, []);
+      arr.unshift(Object.assign({
+        id: 'd_' + Date.now(), submittedAt: new Date().toISOString(), status: 'pending',
+      }, item));
+      write(K.reports, arr.slice(0, 500));
+      Store._notify();
+      publicAppend('reports', item);
+      return true;
+    },
+    getReports() { return read(K.reports, []); },
+    resolveReport(id) {
+      const arr = read(K.reports, []);
+      write(K.reports, arr.filter((r) => r.id !== id));
+      adminSync('reports');
+      Store._notify();
+      return true;
     },
 
     // ─── APP CONFIG (logo y branding) ───────────────────────
@@ -639,7 +705,8 @@
         promos: this.getPromos(),
         suggestions: this.getSuggestions(),
         favorites: this.getFavorites(),
-        ratings: this.getAllRatings(),
+        reviews: this.getReviews(),
+        reviewsQueue: this.getReviewQueue(),
         appConfig: this.getAppConfig(),
         exportedAt: new Date().toISOString(),
       };
@@ -654,7 +721,8 @@
       if (Array.isArray(data.promos)) this.savePromos(data.promos);
       if (Array.isArray(data.suggestions)) this.saveSuggestions(data.suggestions);
       if (Array.isArray(data.favorites)) this.setFavorites(data.favorites);
-      if (data.ratings && typeof data.ratings === 'object') { write(K.ratings, data.ratings); Store._notify(); }
+      if (Array.isArray(data.reviews)) { write(K.reviews, data.reviews); Store._notify(); }
+      if (Array.isArray(data.reviewsQueue)) { write(K.reviewsQueue, data.reviewsQueue); Store._notify(); }
       if (data.appConfig) this.setAppConfig(data.appConfig);
     },
 
