@@ -74,7 +74,7 @@ Canvas de referencia: https://claude.ai/code/artifact/5bfe4baa-8106-44a4-b122-1f
 
 ## Ficha de arma — estructura vigente (rediseño ago-2026, PR #45)
 Orden fijo: **identidad → foto HERO → datos clave → valoración → precio → historial
-→ munición → accesorios → desplegables → vídeo → calificación → misma categoría →
+→ munición → accesorios → desplegables → vídeo → opinión → armas similares →
 sugerir cambios**. No lo reordenes sin motivo: el `AvailBadge` y `legalTit` van
 arriba a propósito, para responder "¿puedo comprarla?" antes del pliegue, y
 «Sugerir cambios» cierra la página (es la última acción, no una interrupción).

@@ -58,8 +58,8 @@
         background: 'rgba(192,57,43,0.10)',
         border: `1px solid ${P.redHi || '#E4574B'}`,
         color: P.text,
-        fontFamily: 'Courier Prime, monospace',
-        fontSize: 14.5, letterSpacing: '0.06em',
+        ...window.amxProsa({ fontSize: 14.5, lineHeight: 1.4 }),
+        letterSpacing: '0.03em',
         padding: '7px 12px',
       }}>
         <span style={{ color: P.redHi || '#E4574B', fontWeight: 700 }}>✕</span>{children}

@@ -281,9 +281,14 @@ curl -s https://armado.mx/api/state | grep -c "sede Monterrey"   # debe dar 0
   de 1200 caracteres por reseña (`RESENA_MAX` en `functions/api/_lib.js`). Si el
   volumen crece, la salida es una tabla en D1 con paginación por entidad, no subir
   el tope.
-- **Rate limiting en `/api/append/*`.** No hay ninguno, ni captcha ni identidad. Con
-  reseñas de texto libre, la cola de moderación se puede inundar. Mitigación actual:
-  nada se publica sin aprobación humana, así que el daño se queda en el panel.
+- **CAPTCHA + rate limiting en `/api/append/*`.** No hay ninguno de los dos, ni
+  identidad. Con reseñas de texto libre, la cola de moderación se puede inundar.
+  Mitigación actual: nada se publica sin aprobación humana, así que el daño se queda
+  en el panel. La vía natural es **Cloudflare Turnstile** (el sitio ya vive en
+  Cloudflare Pages): widget en `OpinionBlock`, `SuggestChangesModal` y la denuncia de
+  `SoporteScreen`, y verificación del token dentro de la Function de `append` **antes**
+  de tocar D1 — mismo sitio donde ya se valida el mínimo de caracteres. Pedido
+  explícito de Saulo (26-ago-2026) al rediseñar el bloque de opinión.
 
 - **Engrosar la sección «Historia» de cada arma con investigación real.** Hoy
   `arma.historia` sale del builder de `data.js` y mide 58/118/982 caracteres

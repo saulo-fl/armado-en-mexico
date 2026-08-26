@@ -276,7 +276,7 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
         <div style={{
           marginTop: 12, background: P.bgCard, border: `1px solid ${P.border}`,
           borderLeft: `3px solid ${P.amber}`, padding: '11px 14px',
-          fontFamily: 'Courier Prime, monospace', fontSize: 15, color: P.textDim, lineHeight: 1.6,
+          ...window.amxProsa({ fontSize: 16, color: P.textDim, lineHeight: 1.6 }),
         }}>
           Cartuchos de adquisición legal a través de la <b style={{ color: P.text }}>DCAM</b> (nacional) y la <b style={{ color: P.text }}>OTCA</b> (Monterrey).
           Información con fines de transparencia; <b style={{ color: P.text }}>no los comercializamos</b>.
@@ -584,7 +584,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                       </div>
                     </div>
                   ))}
-                  <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted, marginTop: 4, lineHeight: 1.5 }}>
+                  <div style={window.amxProsa({ fontSize: 13, color: P.textMuted, marginTop: 4, lineHeight: 1.5 })}>
                     ⚠ Dato <b style={{ color: P.textDim }}>histórico</b> por sucursal, no en tiempo real: la disponibilidad actual puede variar.
                   </div>
                 </div>

@@ -162,10 +162,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           margin: '0 0 8px'
         }}>{arma.nombre}</h1>
 
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 15.5, color: PALETTE.textDim, marginBottom: 12
-        }}>{arma.mecanismo}</div>
+        <div style={window.amxProsa({ fontSize: 16.5, marginBottom: 12 })}>{arma.mecanismo}</div>
 
         {/* la pregunta que trae al visitante, resuelta antes del pliegue */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
@@ -242,12 +239,11 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               return <window.StatsBar key={s.k} label={s.l} value={v} color={barColor} />;
             })}
           </div>
-          <div style={{
+          <div style={window.amxProsa({
             borderTop: `1px dashed ${PALETTE.border}`,
             marginTop: 4, paddingTop: 10, paddingBottom: 10,
-            fontFamily: 'Courier Prime, monospace', fontSize: 13,
-            color: PALETTE.textMuted, lineHeight: 1.6
-          }}>
+            fontSize: 14.5, color: PALETTE.textMuted, lineHeight: 1.6
+          })}>
             <b style={{ color: PALETTE.textDim }}>Estimación por familia</b> · todas las armas
             de tipo {arma.tipo} en calibre {arma.calibre} comparten estos valores. Derivan de las
             especificaciones técnicas y sirven para comparar entre modelos, no para medir un
@@ -530,10 +526,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                 color: availMeta?.color || PALETTE.text,
                 textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7
               }}>{arma.legalTit}</div>
-              <div style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 15,
-                color: PALETTE.textDim, lineHeight: 1.6, marginBottom: 14
-              }}>{arma.legalDesc}</div>
+              <div style={window.amxProsa({ fontSize: 16, marginBottom: 14 })}>{arma.legalDesc}</div>
 
               {arma.disponibilidad && arma.disponibilidad.length > 0 &&
                 <div style={{ marginBottom: 14 }}>
@@ -543,11 +536,10 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     textTransform: 'uppercase', marginBottom: 6
                   }}>Disponibilidad</div>
                   {arma.disponibilidad.map((d, i) =>
-                    <div key={i} style={{
-                      fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
-                      color: PALETTE.text, padding: '5px 0',
-                      display: 'flex', alignItems: 'center', gap: 8
-                    }}>
+                    <div key={i} style={window.amxProsa({
+                      fontSize: 15.5, color: PALETTE.text, padding: '5px 0',
+                      lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 8
+                    })}>
                       <span style={{ color: ORANGE }}>▸</span>{d}
                     </div>)}
                 </div>}
@@ -564,10 +556,9 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
           {arma.historia &&
             <window.Disclosure title="Historia">
-              <div style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 15,
-                color: PALETTE.text, lineHeight: 1.75
-              }}>{arma.historia}</div>
+              <div style={window.amxProsa({
+                fontSize: 16.5, color: PALETTE.text, lineHeight: 1.75
+              })}>{arma.historia}</div>
             </window.Disclosure>}
 
         </div>
@@ -585,7 +576,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {/* RELACIONADAS */}
       {related.length > 0 &&
         <div style={{ padding: `${SEC}px ${PAD}px 0` }}>
-          <SectionHeader>Misma categoría</SectionHeader>
+          <SectionHeader>Armas similares</SectionHeader>
           <div className="amx-hscroll" style={{
             display: vp.isDesktop ? 'grid' : 'flex',
             gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : undefined,
@@ -730,10 +721,13 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
     );
   };
 
+  // El formulario permanece plegado hasta que hay voto: `rec` ya distingue "no ha
+  // votado" (null) de "votó", así que el gate no necesita estado propio. Sin esto
+  // media pantalla de ficha la ocupaba un formulario que casi nadie va a usar.
+  const hayVoto = rec !== null;
+
   return (
     <React.Fragment>
-      <SectionHeader>Calificación de la comunidad</SectionHeader>
-
       <div style={{
         background: PALETTE.bgCard,
         border: `1px solid ${PALETTE.border}`,
@@ -749,10 +743,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
               color: PALETTE.green, textTransform: 'uppercase',
               letterSpacing: '0.1em', marginBottom: 8
             }}>✓ Tu opinión entró en revisión</div>
-            <div style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 14,
-              color: PALETTE.textDim, lineHeight: 1.6
-            }}>
+            <div style={window.amxProsa({ fontSize: 15, lineHeight: 1.6 })}>
               Se publicará cuando se compruebe que cumple las{' '}
               <button type="button" onClick={() => onNav && onNav('soporte')} style={{
                 background: 'none', border: 'none', padding: 0, cursor: 'pointer',
@@ -769,66 +760,66 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
               textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12
             }}>¿Recomiendas {nombreTipo === 'munición' ? 'esta' : nombreTipo === 'arma' ? 'esta' : 'este'} {nombreTipo}?</div>
 
-            <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            <div style={{ display: 'flex', gap: 10, marginBottom: hayVoto ? 16 : 0 }}>
               <Pulgar up activo={rec === true} onClick={() => setRec(true)} />
               <Pulgar up={false} activo={rec === false} onClick={() => setRec(false)} />
             </div>
 
-            <label style={{
-              display: 'block',
-              fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
-              color: PALETTE.textMuted, letterSpacing: '0.15em',
-              textTransform: 'uppercase', marginBottom: 5
-            }}>Tu reseña <span style={{ color: PALETTE.amber }}>*</span></label>
-            <textarea value={f.texto} onChange={(e) => set('texto', e.target.value)}
-              rows={4} maxLength={RESENA_MAX}
-              placeholder="Cuenta tu experiencia con calma: qué tal se maneja, para qué la usas, qué te sorprendió."
-              style={Object.assign(sInpStyle(), { marginBottom: 4 })} />
-            <div style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
-              color: largo >= RESENA_MIN ? PALETTE.green : PALETTE.textMuted,
-              letterSpacing: '0.06em', marginBottom: 12
-            }}>
-              {largo >= RESENA_MIN
-                ? `✓ ${largo} caracteres`
-                : `${largo} / ${RESENA_MIN} mínimo — una reseña más corta no puede contar en la calificación`}
-            </div>
-
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
-              columnGap: 12
-            }}>
-              {sfld('Nombre', 'autor', f, set, { required: true, placeholder: 'Como quieres firmar' })}
-              {sfld('Correo (no se publica)', 'email', f, set, { required: true, type: 'email', placeholder: 'para contactarte si hace falta' })}
-            </div>
-
-            <div style={{
-              borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 12, marginTop: 2,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              gap: 12, flexWrap: 'wrap'
-            }}>
-              <div style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
-                color: PALETTE.textMuted, lineHeight: 1.55, flex: '1 1 240px'
-              }}>
-                Toda reseña se revisa antes de publicarse.{' '}
-                <button type="button" onClick={() => onNav && onNav('soporte')} style={{
-                  background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                  font: 'inherit', color: PALETTE.amber,
-                  borderBottom: `1px solid ${PALETTE.amber}`
-                }}>Normas de la comunidad →</button>
+            {hayVoto &&
+            <React.Fragment>
+              <label style={sLblStyle()}>Tu reseña <span style={{ color: PALETTE.amber }}>*</span></label>
+              <textarea value={f.texto} onChange={(e) => set('texto', e.target.value)}
+                rows={4} maxLength={RESENA_MAX}
+                placeholder="Cuenta tu experiencia con calma: qué tal se maneja, para qué la usas, qué te sorprendió."
+                style={Object.assign(sInpStyle(), { marginBottom: 4 })} />
+              <div style={window.amxProsa({
+                fontSize: 13.5, lineHeight: 1.5, marginBottom: 12,
+                color: largo >= RESENA_MIN ? PALETTE.green : PALETTE.textMuted
+              })}>
+                {largo >= RESENA_MIN
+                  ? `✓ ${largo} caracteres`
+                  : `${largo} / ${RESENA_MIN} mínimo — una reseña más corta no puede contar en la calificación`}
               </div>
-              <button type="button" onClick={enviar} disabled={!listo} style={{
-                background: listo ? PALETTE.amber : 'transparent',
-                color: listo ? '#000' : PALETTE.textMuted,
-                border: `1.5px solid ${listo ? PALETTE.amber : PALETTE.border}`,
-                padding: '0 22px', minHeight: 48,
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
-                letterSpacing: '0.14em', textTransform: 'uppercase',
-                cursor: listo ? 'pointer' : 'not-allowed'
-              }}>Publicar opinión</button>
-            </div>
+
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
+                columnGap: 12
+              }}>
+                {sfld('Nombre / Apodo', 'autor', f, set, { required: true, placeholder: 'Como quieres firmar' })}
+                {sfld('Correo electrónico', 'email', f, set, {
+                  required: true, type: 'email', placeholder: 'tucorreo@ejemplo.com',
+                  hint: 'No se publica. Solo para contactarte si hace falta.'
+                })}
+              </div>
+
+              <div style={{
+                borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 12, marginTop: 2,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                gap: 12, flexWrap: 'wrap'
+              }}>
+                <div style={window.amxProsa({
+                  fontSize: 13.5, lineHeight: 1.55,
+                  color: PALETTE.textMuted, flex: '1 1 240px'
+                })}>
+                  Toda reseña se revisa antes de publicarse.{' '}
+                  <button type="button" onClick={() => onNav && onNav('soporte')} style={{
+                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                    font: 'inherit', color: PALETTE.amber,
+                    borderBottom: `1px solid ${PALETTE.amber}`
+                  }}>Normas de la comunidad →</button>
+                </div>
+                <button type="button" onClick={enviar} disabled={!listo} style={{
+                  background: listo ? PALETTE.amber : 'transparent',
+                  color: listo ? '#000' : PALETTE.textMuted,
+                  border: `1.5px solid ${listo ? PALETTE.amber : PALETTE.border}`,
+                  padding: '0 22px', minHeight: 48,
+                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                  letterSpacing: '0.14em', textTransform: 'uppercase',
+                  cursor: listo ? 'pointer' : 'not-allowed'
+                }}>Publicar opinión</button>
+              </div>
+            </React.Fragment>}
           </div>}
       </div>
 
@@ -856,11 +847,10 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                       color: PALETTE.textMuted, letterSpacing: '0.06em'
                     }}>{amxFmtManualDate(String(r.submittedAt || '').slice(0, 10))}</span>
                   </div>
-                  <div style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
-                    color: PALETTE.text, lineHeight: 1.65, marginBottom: 6,
+                  <div style={window.amxProsa({
+                    fontSize: 16, color: PALETTE.text, lineHeight: 1.65, marginBottom: 6,
                     whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'
-                  }}>{r.texto}</div>
+                  })}>{r.texto}</div>
                   <div style={{
                     fontFamily: 'Courier Prime, monospace', fontSize: 13,
                     color: PALETTE.textMuted, letterSpacing: '0.08em'
@@ -1051,7 +1041,7 @@ function SuggestChangesModal({ arma, onClose }) {
         <div style={{ padding: 28, textAlign: 'center' }}>
             <div style={{ fontSize: 50.5, color: PALETTE.amber, lineHeight: 1, marginBottom: 12 }}>✓</div>
             <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6, marginBottom: 20 }}>Tu sugerencia entró en la cola. El curador revisará la información y, si procede, aplicará el cambio.</div>
+            <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.6, marginBottom: 20 })}>Tu sugerencia entró en la cola. Revisaremos la información y, si procede, aplicaremos el cambio.</div>
             <button onClick={onClose} style={{
             background: PALETTE.amber, color: '#000', border: 'none',
             padding: '10px 20px',
@@ -1079,13 +1069,12 @@ function SuggestChangesModal({ arma, onClose }) {
             {sfld('Fuente / referencia (URL, doc, etc.)', 'source', f, set, { placeholder: 'https://... o "publicación oficial XYZ"' })}
             {sfld('Comentarios adicionales', 'notes', f, set, { ta: true, rows: 2 })}
 
-            <div style={{
+            <div style={window.amxProsa({
             background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
             padding: 10, marginTop: 8,
-            fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textMuted,
-            lineHeight: 1.5
-          }}>
-              <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu sugerencia va a la cola del curador. No se aplica al instante; se revisa, se valida con la fuente y luego se publica.
+            fontSize: 14, color: PALETTE.textMuted, lineHeight: 1.55
+          })}>
+              <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu sugerencia va a la cola de revisión. No se aplica al instante; se revisa, se valida con la fuente y luego se publica.
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
@@ -1112,13 +1101,7 @@ function SuggestChangesModal({ arma, onClose }) {
 function sfld(label, k, f, set, p = {}) {
   return (
     <div style={{ marginBottom: 12, gridColumn: p.span === 2 ? '1 / -1' : 'auto' }}>
-      <label style={{
-        display: 'block',
-        fontFamily: 'Courier Prime, monospace',
-        fontSize: 13, color: PALETTE.textMuted,
-        letterSpacing: '0.15em', textTransform: 'uppercase',
-        marginBottom: 4
-      }}>{label} {p.required && <span style={{ color: PALETTE.amber }}>*</span>}</label>
+      <label style={sLblStyle()}>{label} {p.required && <span style={{ color: PALETTE.amber }}>*</span>}</label>
       {p.ta ?
       <textarea value={f[k]} onChange={(e) => set(k, e.target.value)}
       rows={p.rows || 3} placeholder={p.placeholder} style={sInpStyle()} /> :
@@ -1130,20 +1113,37 @@ function sfld(label, k, f, set, p = {}) {
       <input type={p.type || 'text'} value={f[k]} onChange={(e) => set(k, e.target.value)}
       placeholder={p.placeholder} style={sInpStyle()} />
       }
+      {p.hint &&
+      <div style={window.amxProsa({
+        fontSize: 13, lineHeight: 1.45, color: PALETTE.textMuted, marginTop: 4
+      })}>{p.hint}</div>}
     </div>);
 
 }
+// Etiqueta de campo: versalita con tracking (el lenguaje de la app) pero en Open
+// Sans, que a este cuerpo se lee bastante mejor que la mono. El 600 compensa el
+// peso que Open Sans pierde en mayúsculas pequeñas.
+function sLblStyle() {
+  return window.amxProsa({
+    display: 'block',
+    fontSize: 12.5, fontWeight: 600, lineHeight: 1.4,
+    color: PALETTE.textMuted,
+    letterSpacing: '0.13em', textTransform: 'uppercase',
+    marginBottom: 5
+  });
+}
 function sInpStyle() {
-  return {
+  return window.amxProsa({
     width: '100%',
     background: PALETTE.bg,
     border: `1px solid ${PALETTE.border}`,
     color: PALETTE.text,
-    padding: '8px 10px',
-    fontFamily: 'Courier Prime, monospace',
-    fontSize: 13, outline: 'none',
-    resize: 'vertical', lineHeight: 1.5
-  };
+    padding: '10px 12px',
+    // 16px NO es decorativo: por debajo de eso iOS hace zoom al enfocar el campo.
+    // El estilo inline pisa la regla de index.html, así que el piso va aquí.
+    fontSize: 16, outline: 'none',
+    resize: 'vertical', lineHeight: 1.55
+  });
 }
 window.SuggestChangesModal = SuggestChangesModal;
 
@@ -1444,12 +1444,9 @@ function LegalScreen({ onNav }) {
           textTransform: 'uppercase',
           letterSpacing: '0.04em', lineHeight: 1.1
         }}>{title}</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 14.5, color: PALETTE.textDim,
-          marginTop: 10, maxWidth: 480, marginInline: 'auto',
-          lineHeight: 1.5
-        }}>{intro}</div>
+        <div style={window.amxProsa({
+          fontSize: 16, marginTop: 10, maxWidth: 520, marginInline: 'auto', lineHeight: 1.6
+        })}>{intro}</div>
       </div>
 
       {/* DISCLAIMER OFICIAL — visible al principio */}
@@ -1467,11 +1464,7 @@ function LegalScreen({ onNav }) {
           marginBottom: 6,
           fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 15.5, color: PALETTE.text,
-          lineHeight: 1.65
-        }}>
+        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
           Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM.
         </div>
       </div>
@@ -1493,11 +1486,7 @@ function LegalScreen({ onNav }) {
             textTransform: 'uppercase', letterSpacing: '0.08em',
             marginBottom: 4
           }}>{d.label}</div>
-            <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 14.5, color: PALETTE.textDim,
-            lineHeight: 1.55
-          }}>{d.desc}</div>
+            <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{d.desc}</div>
           </div>
         )}
         {/* 4ª categoría — Armas traumáticas (sin licencia) */}
@@ -1514,11 +1503,7 @@ function LegalScreen({ onNav }) {
             textTransform: 'uppercase', letterSpacing: '0.08em',
             marginBottom: 4
           }}>Sin Licencia</div>
-          <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 14.5, color: PALETTE.textDim,
-            lineHeight: 1.55
-          }}>Armas traumáticas. No letales impulsadas por aire comprimido, menores a 140 Joules de potencia.</div>
+          <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>Armas traumáticas. No letales impulsadas por aire comprimido, menores a 140 Joules de potencia.</div>
         </div>
       </div>
 
@@ -1533,13 +1518,12 @@ function LegalScreen({ onNav }) {
       }}>
         <TacticalCorners size={10} color={PALETTE.amber} />
         {requisitos.map((r, i) =>
-        <div key={i} style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 15.5, color: PALETTE.text,
+        <div key={i} style={window.amxProsa({
+          fontSize: 16, color: PALETTE.text, lineHeight: 1.5,
           padding: '7px 0',
           borderBottom: i < requisitos.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
           display: 'flex', alignItems: 'center', gap: 10
-        }}>
+        })}>
             <span style={{
             width: 18, height: 18,
             border: `1px solid ${PALETTE.amber}`,
@@ -1582,11 +1566,7 @@ function LegalScreen({ onNav }) {
               letterSpacing: '0.05em',
               marginBottom: 4
             }}>{s.t}</div>
-              <div style={{
-              fontFamily: 'Courier Prime, monospace',
-              fontSize: 14.5, color: PALETTE.textDim,
-              lineHeight: 1.55
-            }}>{s.d}</div>
+              <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{s.d}</div>
             </div>
           </div>
         )}
@@ -1706,11 +1686,7 @@ function AboutScreen() {
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
         }}>▲ NO SOMOS GOBIERNO · FINES INFORMATIVOS</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 15.5, color: PALETTE.text,
-          lineHeight: 1.7
-        }}>
+        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
           Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No tramitamos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.
         </div>
       </div>
@@ -1722,10 +1698,10 @@ function AboutScreen() {
         padding: vp.isDesktop ? '20px 22px' : '16px', marginBottom: 18,
       }}>
         {decl.parrafos.map((t, i) => (
-          <p key={i} style={{
-            margin: i === 0 ? 0 : '14px 0 0', fontFamily: 'Open Sans, sans-serif',
-            fontSize: 17.5, color: i === 0 ? PALETTE.text : PALETTE.textDim, lineHeight: 1.7, textWrap: 'pretty',
-          }}>{t}</p>
+          <p key={i} style={window.amxProsa({
+            margin: i === 0 ? 0 : '14px 0 0',
+            fontSize: 17.5, color: i === 0 ? PALETTE.text : PALETTE.textDim,
+          })}>{t}</p>
         ))}
         <div style={{
           marginTop: 18, paddingTop: 12, borderTop: `1px dashed ${PALETTE.border}`,
@@ -1742,11 +1718,7 @@ function AboutScreen() {
         position: 'relative'
       }}>
         <TacticalCorners size={10} color={PALETTE.amber} />
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 15.5, color: PALETTE.text,
-          lineHeight: 1.7
-        }}>{mision}</div>
+        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>{mision}</div>
       </div>
 
       {/* 4 ▸ DIFERENCIA — ARMADO EN MÉXICO vs ARMAS M&S */}
@@ -1819,16 +1791,10 @@ function AboutScreen() {
             letterSpacing: '0.04em',
             lineHeight: 1.1
           }}>{autor}</div>
-          <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 15.5, color: PALETTE.amber,
-            marginTop: 6, lineHeight: 1.5
-          }}>Co-Fundador de Armas M&amp;S<br />Creador de Armado en México</div>
-          <div style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 14.5, color: PALETTE.textDim,
-            lineHeight: 1.65, marginTop: 10
-          }}>{bio}</div>
+          <div style={window.amxProsa({
+            fontSize: 16, color: PALETTE.amber, marginTop: 6, lineHeight: 1.5
+          })}>Co-Fundador de Armas M&amp;S<br />Creador de Armado en México</div>
+          <div style={window.amxProsa({ fontSize: 16, marginTop: 10, lineHeight: 1.65 })}>{bio}</div>
         </div>
       </div>
 
@@ -1877,11 +1843,10 @@ function SoporteScreen({ onNav }) {
   };
 
   const Regla = ({ children }) => (
-    <div style={{
-      fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
-      color: PALETTE.text, lineHeight: 1.6, padding: '6px 0',
+    <div style={window.amxProsa({
+      fontSize: 16, color: PALETTE.text, lineHeight: 1.6, padding: '6px 0',
       display: 'flex', gap: 9, alignItems: 'flex-start'
-    }}>
+    })}>
       <span style={{ color: PALETTE.amber, flexShrink: 0 }}>▸</span>
       <span>{children}</span>
     </div>
@@ -1899,10 +1864,10 @@ function SoporteScreen({ onNav }) {
           fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23,
           color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.1
         }}>Normas de la comunidad</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim,
-          lineHeight: 1.6, marginTop: 10, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto'
-        }}>
+        <div style={window.amxProsa({
+          fontSize: 16, lineHeight: 1.6,
+          marginTop: 10, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto'
+        })}>
           Las reseñas las escriben personas y las lee cualquiera. Estas normas dicen qué
           se puede publicar aquí, cómo denunciar lo que no cumple y qué pasa cuando se
           incumplen.
@@ -1920,9 +1885,7 @@ function SoporteScreen({ onNav }) {
           fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 700
         }}>▲ Prohibido usar esta app para comprar o vender</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 15, color: PALETTE.text, lineHeight: 1.7
-        }}>
+        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
           Armado en México es un catálogo <b>divulgativo</b>. Aquí no se comercializan
           armas de fuego, municiones ni accesorios, y no somos intermediarios de ninguna
           venta.
@@ -1989,7 +1952,7 @@ function SoporteScreen({ onNav }) {
         padding: '14px 16px', marginBottom: 26, position: 'relative'
       }}>
         <TacticalCorners size={10} color={PALETTE.amber} />
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim, lineHeight: 1.7 }}>
+        <div style={window.amxProsa({ fontSize: 16 })}>
           <b style={{ color: PALETTE.text }}>Toda reseña se revisa antes de publicarse.</b> Al enviarla
           entra en una cola y no aparece en la ficha hasta que alguien comprueba que
           cumple estas normas. Puede tardar; que no se vea al instante no significa que
@@ -2026,16 +1989,11 @@ function SoporteScreen({ onNav }) {
                 fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14.5,
                 color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4
               }}>{tit}</div>
-              <div style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim, lineHeight: 1.6
-              }}>{desc}</div>
+              <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{desc}</div>
             </div>
           </div>
         )}
-        <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim,
-          lineHeight: 1.65, marginTop: 12
-        }}>
+        <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.65, marginTop: 12 })}>
           <b style={{ color: PALETTE.text }}>¿Crees que nos equivocamos?</b> Denúncialo con el
           formulario de abajo indicando qué reseña era y por qué crees que sí cumplía.
           Moderar es un juicio y a veces sale mal; se revisa de nuevo.
@@ -2054,16 +2012,13 @@ function SoporteScreen({ onNav }) {
               fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16,
               color: PALETTE.green, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8
             }}>✓ Denuncia recibida</div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textDim, lineHeight: 1.6 }}>
+            <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>
               La revisaremos. Si dejaste correo, te contamos en qué quedó.
             </div>
           </div>
         :
           <div>
-            <div style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textDim,
-              lineHeight: 1.65, marginBottom: 14
-            }}>
+            <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.65, marginBottom: 14 })}>
               Si ves una reseña que incumple estas normas, cuéntanoslo. No hace falta que
               respondas a quien la escribió: eso solo alarga el problema.
             </div>
@@ -2143,11 +2098,7 @@ function FAQScreen() {
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 15.5, color: PALETTE.text,
-          lineHeight: 1.65
-        }}>
+        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
           Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
           <br /><br />
           Armas M&amp;S no presta servicios jurídicos.
@@ -2183,14 +2134,12 @@ function FAQScreen() {
             }}>{open === i ? '−' : '+'}</span>
             </button>
             {open === i &&
-          <div style={{
+          <div style={window.amxProsa({
             padding: '0 14px 14px',
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 15.5, color: PALETTE.textDim,
-            lineHeight: 1.65,
+            fontSize: 16.5,
             borderTop: `1px dashed ${PALETTE.border}`,
             paddingTop: 12
-          }}>{f.a}</div>
+          })}>{f.a}</div>
           }
           </div>
         )}
@@ -2218,7 +2167,7 @@ function MenuScreen({ onNav, onTutorial }) {
   { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
   { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
   { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
-  { id: 'submit', icon: '＋', title: 'Proponer arma', desc: 'Envía un arma al curador para revisión' }];
+  { id: 'submit', icon: '＋', title: 'Proponer arma', desc: 'Envía un arma para revisión' }];
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
@@ -2250,28 +2199,27 @@ function MenuScreen({ onNav, onTutorial }) {
               textTransform: 'uppercase',
               letterSpacing: '0.06em'
             }}>{it.title}</div>
-              <div style={{
-              fontFamily: 'Courier Prime, monospace',
-              fontSize: 14.5, color: PALETTE.textMuted,
-              marginTop: 2
-            }}>{it.desc}</div>
+              <div style={window.amxProsa({
+                fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.45, marginTop: 2
+              })}>{it.desc}</div>
             </div>
             <span style={{ color: PALETTE.amber, fontSize: 20.5}}>›</span>
           </button>
         )}
       </div>
 
-      <div style={{
+      <div style={window.amxProsa({
         marginTop: 30,
         padding: '14px',
         background: PALETTE.bgElev,
         border: `1px dashed ${PALETTE.border}`,
-        fontFamily: 'Courier Prime, monospace',
-        fontSize: 14.5, color: PALETTE.textMuted,
-        lineHeight: 1.6
-      }}>
-        <div style={{ color: PALETTE.amber, fontWeight: 700, letterSpacing: '0.15em', marginBottom: 4, fontSize: 13}}>◆ ARMADO·MX</div>
-        Catálogo divulgativo. Edición 2026. Curado por Saulo Flores · Armas M&amp;S.
+        fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6
+      })}>
+        <div style={{
+          fontFamily: 'Courier Prime, monospace', color: PALETTE.amber, fontWeight: 700,
+          letterSpacing: '0.15em', marginBottom: 4, fontSize: 13
+        }}>◆ ARMADO·MX</div>
+        Catálogo divulgativo. Edición 2026. Contenido editado por Saulo Flores · Armas M&amp;S.
       </div>
     </div>);
 
@@ -2335,11 +2283,7 @@ function SubmitScreen({ onNav }) {
           fontSize: 26, color: PALETTE.text, textTransform: 'uppercase',
           lineHeight: 1.1, letterSpacing: '0.02em', marginBottom: 14
         }}>¡Gracias por contribuir!</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 17, color: PALETTE.textDim,
-          lineHeight: 1.7, marginBottom: 28
-        }}>
+        <div style={window.amxProsa({ fontSize: 17, marginBottom: 28 })}>
           Tu propuesta entró en la cola de revisión. Saulo Flores revisará la información,
           podrá enriquecerla con datos técnicos adicionales, y publicarla en el catálogo cuando esté lista.
           {f.submitterEmail && <div style={{ marginTop: 10, color: PALETTE.amber }}>
@@ -2367,23 +2311,17 @@ function SubmitScreen({ onNav }) {
 
   const fld = (label, k, props = {}) =>
   <div style={{ marginBottom: 14, gridColumn: props.span === 2 ? '1 / -1' : 'auto' }}>
-      <label style={{
-      display: 'block',
-      fontFamily: 'Courier Prime, monospace',
-      fontSize: 13, color: PALETTE.textMuted,
-      letterSpacing: '0.15em', textTransform: 'uppercase',
-      marginBottom: 5
-    }}>{label} {props.required && <span style={{ color: PALETTE.amber }}>*</span>}</label>
+      <label style={sLblStyle()}>{label} {props.required && <span style={{ color: PALETTE.amber }}>*</span>}</label>
       {props.ta ?
     <textarea value={f[k]} onChange={(e) => set(k, e.target.value)}
-    rows={props.rows || 3} style={inpStyleS()} placeholder={props.placeholder} /> :
+    rows={props.rows || 3} style={sInpStyle()} placeholder={props.placeholder} /> :
     props.select ?
-    <select value={f[k]} onChange={(e) => set(k, e.target.value)} style={inpStyleS()}>
+    <select value={f[k]} onChange={(e) => set(k, e.target.value)} style={sInpStyle()}>
           {props.select.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select> :
 
     <input type={props.type || 'text'} value={f[k]} onChange={(e) => set(k, e.target.value)}
-    style={inpStyleS()} placeholder={props.placeholder} />
+    style={sInpStyle()} placeholder={props.placeholder} />
     }
     </div>;
 
@@ -2406,18 +2344,16 @@ function SubmitScreen({ onNav }) {
           fontSize: 28, color: PALETTE.text, textTransform: 'uppercase',
           lineHeight: 1, letterSpacing: '0.04em', marginBottom: 10
         }}>Proponer un arma</div>
-        <div style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 15.5, color: PALETTE.textDim,
-          lineHeight: 1.6, maxWidth: 540, margin: '0 auto'
-        }}>¿Tienes información de un arma que falta en el catálogo? Compártela. El curador revisará tu envío y lo publicará si cumple los criterios divulgativos.</div>
+        <div style={window.amxProsa({
+          fontSize: 16.5, lineHeight: 1.6, maxWidth: 540, margin: '0 auto'
+        })}>¿Tienes información de un arma que falta en el catálogo? Compártela. Revisaremos tu envío y lo publicaremos si cumple los criterios divulgativos.</div>
       </div>
 
       <SectionHeader>Sobre ti</SectionHeader>
       <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, padding: 18, marginBottom: 24, display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', gap: '0 16px' }}>
         {fld('Tu nombre', 'submitterName', { required: true, placeholder: 'Cómo apareces en los créditos' })}
         {fld('Correo (opcional)', 'submitterEmail', { type: 'email', placeholder: 'Para avisarte cuando se publique' })}
-        {fld('Comentario al curador (opcional)', 'submitterMessage', { ta: true, rows: 2, span: 2, placeholder: 'Cualquier nota: fuentes, dudas, contexto...' })}
+        {fld('Comentario (opcional)', 'submitterMessage', { ta: true, rows: 2, span: 2, placeholder: 'Cualquier nota: fuentes, dudas, contexto...' })}
       </div>
 
       <SectionHeader>Datos del arma</SectionHeader>
@@ -2446,13 +2382,12 @@ function SubmitScreen({ onNav }) {
         {fld('Historia / contexto', 'historia', { ta: true, rows: 5, placeholder: 'Datos históricos, fabricante, usos notables, año de introducción al mercado mexicano...', span: 2 })}
       </div>
 
-      <div style={{
+      <div style={window.amxProsa({
         background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
         padding: 14, marginBottom: 22,
-        fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textMuted,
-        lineHeight: 1.6
-      }}>
-        <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu envío no se publica automáticamente. Pasa primero por la revisión del curador. Pueden completarse datos faltantes (precio, ficha legal, ref. DCAM), corregir errores y enriquecerlo con fotografía oficial.
+        fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6
+      })}>
+        <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu envío no se publica automáticamente. Pasa primero por la revisión. Pueden completarse datos faltantes (precio, ficha legal, ref. DCAM), corregir errores y enriquecerlo con fotografía oficial.
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
@@ -2474,19 +2409,6 @@ function SubmitScreen({ onNav }) {
       </div>
     </form>);
 
-}
-
-function inpStyleS() {
-  return {
-    width: '100%',
-    background: PALETTE.bg,
-    border: `1px solid ${PALETTE.border}`,
-    color: PALETTE.text,
-    padding: '9px 11px',
-    fontFamily: 'Courier Prime, monospace',
-    fontSize: 14, outline: 'none',
-    resize: 'vertical', lineHeight: 1.4
-  };
 }
 
 window.SubmitScreen = SubmitScreen;

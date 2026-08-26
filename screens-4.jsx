@@ -228,7 +228,7 @@ function TraumaticasScreen({ onNav }) {
       <div style={{
         marginTop: 24, padding: '14px 16px',
         background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
-        fontFamily: 'Courier Prime, monospace', fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6,
+        ...window.amxProsa({ fontSize: 16, color: PALETTE.textMuted, lineHeight: 1.6 }),
       }}>
         <span style={{ color: PALETTE.amber, fontWeight: 700 }}>◆ También en tienda:</span> cargadores, municiones cal. .50/.68 (goma, pimienta, polvo), tanques de CO₂ y fundas. Consulta el catálogo completo en armasmys.com.
       </div>
