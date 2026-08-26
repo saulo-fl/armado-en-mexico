@@ -267,6 +267,10 @@ function ArmaCardBody({ arma }) {
   const enStock = exD != null || exO != null;
   // precio exacto compacto: "$9,870.04 MXN" → "$9,870"
   const priceShort = (arma.priceExact || '').replace(/\.\d{2}\s*MXN\s*$/, '');
+  // Resumen de la comunidad: en la tarjeta va SOLO la etiqueta. El promedio y
+  // el conteo viven en la ficha; aquí no caben sin apretar el resto.
+  const rt = window.Store ? window.Store.getRating(arma.id) : null;
+  const etRating = (rt && window.amxRatingLabel) ? window.amxRatingLabel(rt.avg, rt.count) : null;
   return (
     <div style={{ padding: '10px 12px 12px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
@@ -315,6 +319,14 @@ function ArmaCardBody({ arma }) {
           ? <>● {exD != null && <>{exD} DCAM</>}{exD != null && exO != null && ' · '}{exO != null && <>{exO} OTCA</>}</>
           : '✕ AGOTADO'}
       </div>
+      {etRating && etRating.hay &&
+        <div style={{
+          fontFamily: 'Courier Prime, monospace',
+          fontSize: 12, color: etRating.color,
+          letterSpacing: '0.08em', textTransform: 'uppercase',
+          marginBottom: 8,
+          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>{etRating.label}</div>}
       {/* legalidad + precio */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
         <AvailBadge avail={arma.avail} compact />
@@ -511,6 +523,29 @@ window.AppHeader = AppHeader;
 // BOTTOM NAV — navegación inferior
 // ──────────────────────────────────────────────────────────────
 function BottomNav({ current, onNav, compareCount }) {
+  const navRef = React.useRef(null);
+
+  // La barra fija de la ficha y CompareFloat se apoyan JUSTO encima de este nav.
+  // Antes ambas llevaban un `76px` a mano y el nav mide ~74 (y ya incluye el
+  // safe-area en su propio padding): quedaba una rendija de 2px por la que se
+  // veía pasar el contenido, y parecía la app rota. Publicamos la altura real
+  // medida y que se apoyen en ella.
+  React.useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    const raiz = document.documentElement;
+    const publicar = () => raiz.style.setProperty('--amx-nav-h', el.offsetHeight + 'px');
+    publicar();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', publicar);
+      return () => window.removeEventListener('resize', publicar);
+    }
+    const ro = new ResizeObserver(publicar);
+    ro.observe(el);
+    // Al desmontar (paso a escritorio) se retira: sin nav, el fallback manda.
+    return () => { ro.disconnect(); raiz.style.removeProperty('--amx-nav-h'); };
+  }, []);
+
   // Iconos SVG de trazo (1.75) — los glifos de fuente (◈▤⇄§☰) renderizan
   // distinto por plataforma; el SVG es consistente y escala limpio.
   const NavIcon = ({ id }) => {
@@ -535,7 +570,7 @@ function BottomNav({ current, onNav, compareCount }) {
     { id: 'menu',    label: 'MÁS' },
   ];
   return (
-    <div style={{
+    <div ref={navRef} style={{
       position: 'sticky', bottom: 0, zIndex: 50,
       background: 'rgba(26,26,26,0.96)',
       backdropFilter: 'blur(12px)',
@@ -950,7 +985,9 @@ function CompareFloat({ ids, onOpen, onClear }) {
   if (!ids || !ids.length) return null;
   return (
     <div style={{
-      position: 'fixed', bottom: 'calc(76px + env(safe-area-inset-bottom))', left: '50%', transform: 'translateX(-50%)',
+      // --amx-nav-h la publica BottomNav (ya incluye el safe-area). El +8 es
+      // aire deliberado: esto flota, no se solda al nav como la barra de precio.
+      position: 'fixed', bottom: 'calc(var(--amx-nav-h, 74px) + 8px)', left: '50%', transform: 'translateX(-50%)',
       width: 'calc(100% - 24px)', maxWidth: 360,
       background: PALETTE.bgElev,
       border: `1px solid ${PALETTE.amber}`,
@@ -1170,28 +1207,31 @@ window.HCarousel = HCarousel;
 // (ponerlo en el summary se traga el marcador y rompe el click en Safari
 // viejo). El list-style:none va en el <style> de index.html.
 // ──────────────────────────────────────────────────────────────
-function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.amber, children }) {
+function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.amber, compact = false, children }) {
   const [open, setOpen] = React.useState(!!defaultOpen);
+  // `compact` = pie de nota: sin fondo ni barrita de acento y con el título en
+  // mono pequeño. El padding se compensa para no bajar de 44px de área táctil.
   return (
     <details
       open={open}
       onToggle={(e) => setOpen(e.currentTarget.open)}
       style={{
-        background: PALETTE.bgCard,
+        background: compact ? 'transparent' : PALETTE.bgCard,
         border: `1px solid ${open ? accent : PALETTE.border}`,
         transition: 'border-color 0.18s'
       }}>
-      <summary style={{ padding: '12px 14px', cursor: 'pointer', listStyle: 'none' }}>
+      <summary style={{ padding: compact ? '11px 12px' : '12px 14px', cursor: 'pointer', listStyle: 'none' }}>
         <span style={{
-          display: 'flex', alignItems: 'center', gap: 11,
-          minHeight: 24 /* + padding = 48px de área táctil */
+          display: 'flex', alignItems: 'center', gap: compact ? 8 : 11,
+          minHeight: compact ? 22 : 24 /* + padding = 44-48px de área táctil */
         }}>
-          <span aria-hidden="true" style={{
-            width: 3, height: 15, flexShrink: 0,
-            background: open ? accent : PALETTE.borderHi,
-            boxShadow: open ? `0 0 6px ${accent}66` : 'none',
-            transition: 'background 0.18s'
-          }} />
+          {!compact &&
+            <span aria-hidden="true" style={{
+              width: 3, height: 15, flexShrink: 0,
+              background: open ? accent : PALETTE.borderHi,
+              boxShadow: open ? `0 0 6px ${accent}66` : 'none',
+              transition: 'background 0.18s'
+            }} />}
           <span style={{ flex: 1, minWidth: 0 }}>
             {eyebrow &&
               <span style={{
@@ -1202,19 +1242,21 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
               }}>{eyebrow}</span>}
             <span style={{
               display: 'block',
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 15,
-              color: open ? accent : PALETTE.text,
-              textTransform: 'uppercase', letterSpacing: '0.11em', lineHeight: 1.25
+              fontFamily: compact ? 'Courier Prime, monospace' : 'Montserrat, sans-serif',
+              fontWeight: compact ? 400 : 600, fontSize: compact ? 12.5 : 15,
+              color: open ? accent : (compact ? PALETTE.textMuted : PALETTE.text),
+              textTransform: 'uppercase',
+              letterSpacing: compact ? '0.16em' : '0.11em', lineHeight: 1.25
             }}>{title}</span>
           </span>
           <span aria-hidden="true" style={{
             color: accent, fontFamily: 'Courier Prime, monospace',
-            fontSize: 21, lineHeight: 1, flexShrink: 0, width: 14, textAlign: 'center'
+            fontSize: compact ? 16 : 21, lineHeight: 1, flexShrink: 0, width: 14, textAlign: 'center'
           }}>{open ? '−' : '+'}</span>
         </span>
       </summary>
       <div style={{
-        padding: '13px 14px 15px',
+        padding: compact ? '10px 12px 12px' : '13px 14px 15px',
         borderTop: `1px dashed ${PALETTE.border}`
       }}>{children}</div>
     </details>
@@ -1277,7 +1319,10 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
 
   if (pts.length < 2) return null;
 
-  const PL = 10, PR = 10, PT = 26, PB = 24;
+  // PT reserva una BANDA SUPERIOR para las etiquetas de precio y PB una banda
+  // inferior para las fechas. El trazo vive entre y0 e y1, así que ningún
+  // número puede quedar tapado por una línea: es imposible por construcción.
+  const PL = 10, PR = 10, PT = 32, PB = 24;
   const x0 = PL, x1 = Math.max(PL + 40, w - PR);
   const y0 = PT, y1 = height - PB;
   const tMin = pts[0].t, tMax = pts[pts.length - 1].t;
@@ -1294,15 +1339,29 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
   const linea = xy.map((c, i) => `${i ? 'L' : 'M'}${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
   const area = `${linea} L${xy[xy.length - 1].x.toFixed(1)},${y1} L${xy[0].x.toFixed(1)},${y1} Z`;
 
+  // Color POR TRAMO: verde si el precio bajó entre esos dos inventarios, rojo
+  // si subió. El color no es el único canal — el <desc>, el pie de la sección
+  // y la lista de precios dicen lo mismo en texto (WCAG 1.4.1).
+  const colorTramo = (a, b) => (b.v < a.v ? PALETTE.green : b.v > a.v ? PALETTE.redHi : PALETTE.textMuted);
+  const tramos = xy.slice(1).map((c, i) => ({
+    d: `M${xy[i].x.toFixed(1)},${xy[i].y.toFixed(1)} L${c.x.toFixed(1)},${c.y.toFixed(1)}`,
+    color: colorTramo(xy[i].p, c.p)
+  }));
+  const bajadas = tramos.filter((t) => t.color === PALETTE.green).length;
+  const subidas = tramos.filter((t) => t.color === PALETTE.redHi).length;
+
   const ini = pts[0], fin = pts[pts.length - 1];
   const deltaPct = ini.v ? ((fin.v - ini.v) / ini.v) * 100 : 0;
+  const colorFin = fin.v < ini.v ? PALETTE.green : fin.v > ini.v ? PALETTE.redHi : color;
+  const plural = (n, s1, s2) => `${n} ${n === 1 ? s1 : s2}`;
   const resumen = `${pts.length} registros entre ${amxFechaCorta(ini.date)} y ${amxFechaCorta(fin.date)}: ` +
-    `de ${ini.price} a ${fin.price}, ${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)}%.`;
+    `de ${ini.price} a ${fin.price}, ${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)}%. ` +
+    `${plural(bajadas, 'bajada', 'bajadas')} y ${plural(subidas, 'subida', 'subidas')} entre inventarios consecutivos.`;
 
-  // Etiqueta de valor pegada a su propio punto; si el punto está arriba del
-  // todo, la etiqueta baja para no salirse del lienzo.
-  const etiqY = (y) => (y - 10 < y0 - 4 ? y + 17 : y - 10);
   const MONO = 'Courier Prime, monospace';
+  // Halo del color del fondo: cinturón por si una etiqueta se acercara al trazo.
+  // paintOrder va por `style` porque es CSS, no un atributo de React.
+  const HALO = { paintOrder: 'stroke', fontVariantNumeric: 'tabular-nums' };
 
   return (
     <div ref={wrapRef} style={{ width: '100%' }}>
@@ -1313,36 +1372,70 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
         <title id={`pcT${uid}`}>Historial de precio de referencia</title>
         <desc id={`pcD${uid}`}>{resumen}</desc>
         <defs>
+          {/* área NEUTRA: el color lo ponen los tramos, no el relleno */}
           <linearGradient id={`pcG${uid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity="0.28" />
-            <stop offset="100%" stopColor={color} stopOpacity="0" />
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.08" />
+            <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
           </linearGradient>
         </defs>
         <line x1={x0} y1={y1} x2={x1} y2={y1} stroke={PALETTE.border} strokeWidth="1" />
         <path d={area} fill={`url(#pcG${uid})`} />
-        <path d={linea} fill="none" stroke={color} strokeWidth="2"
-          strokeLinejoin="round" strokeLinecap="round" />
+        {tramos.map((t, i) =>
+          <path key={i} d={t.d} fill="none" stroke={t.color} strokeWidth="2.5"
+            strokeLinejoin="round" strokeLinecap="round" />
+        )}
         {xy.map((c, i) => {
           const ext = i === 0 || i === xy.length - 1;
+          // cada punto toma el color del tramo que LLEGA a él (el primero, el que sale)
+          const cc = tramos[Math.max(0, i - 1)].color;
           return (
             <circle key={i} cx={c.x} cy={c.y} r={ext ? 4.5 : 3}
-              fill={ext ? color : PALETTE.bg} stroke={color} strokeWidth="2" />
+              fill={ext ? cc : PALETTE.bg} stroke={cc} strokeWidth="2" />
           );
         })}
-        <text x={x0} y={etiqY(xy[0].y)} textAnchor="start"
+        <text x={x0} y={15} textAnchor="start"
           fontFamily={MONO} fontSize="13" fill={PALETTE.textDim}
-          style={{ fontVariantNumeric: 'tabular-nums' }}>{String(ini.price).replace(' MXN', '')}</text>
-        <text x={x1} y={etiqY(xy[xy.length - 1].y)} textAnchor="end"
-          fontFamily={MONO} fontSize="13" fontWeight="700" fill={color}
-          style={{ fontVariantNumeric: 'tabular-nums' }}>{String(fin.price).replace(' MXN', '')}</text>
+          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{String(ini.price).replace(' MXN', '')}</text>
+        <text x={x1} y={15} textAnchor="end"
+          fontFamily={MONO} fontSize="13" fontWeight="700" fill={colorFin}
+          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{String(fin.price).replace(' MXN', '')}</text>
         <text x={x0} y={height - 7} textAnchor="start"
           fontFamily={MONO} fontSize="12" fill={PALETTE.textMuted}
-          letterSpacing="0.1em">{amxFechaCorta(ini.date).toUpperCase()}</text>
+          letterSpacing="0.1em"
+          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{amxFechaCorta(ini.date).toUpperCase()}</text>
         <text x={x1} y={height - 7} textAnchor="end"
           fontFamily={MONO} fontSize="12" fill={PALETTE.textMuted}
-          letterSpacing="0.1em">{amxFechaCorta(fin.date).toUpperCase()}</text>
+          letterSpacing="0.1em"
+          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{amxFechaCorta(fin.date).toUpperCase()}</text>
       </svg>
     </div>
   );
 }
 window.PriceChart = PriceChart;
+
+// ──────────────────────────────────────────────────────────────
+// RATING LABEL — resumen cualitativo de la valoración (patrón Steam)
+// Steam elige la etiqueta con el % de reseñas positivas MÁS un mínimo de votos:
+// los extremos ("Extremadamente…") se reservan para el volumen alto. Aquí la
+// escala es 1-5 estrellas, así que el corte va sobre el promedio, anclado en
+// los rangos publicados de Trustpilot (4,3 ≈ 80% de Steam; 3,8 ≈ 70%).
+// Los umbrales de VOTOS son más bajos que los de Steam (que pide 10 y 500) a
+// propósito: con el tráfico de este catálogo casi ninguna arma llegaría a 10 y
+// la sección quedaría muerta — es la crítica nº1 documentada de ese sistema.
+// Recalibrar AQUÍ cuando haya volumen real.
+// ──────────────────────────────────────────────────────────────
+const RATING_MIN = 5;       // votos mínimos para mostrar etiqueta
+const RATING_EXTREMO = 20;  // votos para desbloquear "Extremadamente…"
+
+function amxRatingLabel(avg, count) {
+  if (!count || count < RATING_MIN) {
+    return { label: 'Sin valoraciones suficientes', color: PALETTE.textMuted, hay: false };
+  }
+  if (avg >= 4.5 && count >= RATING_EXTREMO) return { label: 'Extremadamente positivas', color: PALETTE.green, hay: true };
+  if (avg >= 4.0) return { label: 'Mayormente positivas', color: PALETTE.green, hay: true };
+  if (avg >= 3.0) return { label: 'Variadas', color: PALETTE.textDim, hay: true };
+  if (avg >= 2.0) return { label: 'Mayormente negativas', color: PALETTE.redHi, hay: true };
+  if (count >= RATING_EXTREMO) return { label: 'Extremadamente negativas', color: PALETTE.redHi, hay: true };
+  return { label: 'Mayormente negativas', color: PALETTE.redHi, hay: true };
+}
+window.amxRatingLabel = amxRatingLabel;

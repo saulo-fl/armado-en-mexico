@@ -1,7 +1,7 @@
 # Backend compartido — Cloudflare Pages Functions + D1
 
 La app sigue siendo estática (HTML + JSX en el navegador). El "backend" añade una
-capa **opcional y no intrusiva** para que la curaduría del admin deje de vivir solo
+capa **opcional y no intrusiva** para que lo editado en el admin deje de vivir solo
 en `localStorage` y se comparta entre todos los visitantes.
 
 - **Sin backend** (GitHub Pages, `file://`, o antes de aprovisionar): la app funciona
@@ -74,7 +74,7 @@ La escritura de admin se protege con **Cloudflare Access**, igual que `admin.htm
 ### Sembrado inicial
 
 La D1 arranca vacía → `GET /api/state` devuelve `{}` → la app usa sus _seeds_. Para subir la
-curaduría existente de un navegador (la del admin) por primera vez:
+contenido ya editado en un navegador (el del admin) por primera vez:
 
 - Abre **`/admin.html` → Configuración → Backend compartido → «Sincronizar todo al servidor»**.
   Sube todos los dominios locales a D1 de una vez. A partir de ahí, cada cambio se sincroniza solo.

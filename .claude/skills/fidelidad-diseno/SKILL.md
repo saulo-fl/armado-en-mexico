@@ -28,6 +28,13 @@ description: Guía de fidelidad estética para "Armado en México" — mantén e
 - Si tocas `data-*.js`, sube el cache-busting `?v=` (ver skill `publicar`).
 - Mobile-first (hay `BottomNav` y `useViewport`); áreas táctiles ≥40px; contraste ok.
 - Mantén el rendimiento (las tarjetas usan `contentVisibility`).
+- **VOCABULARIO PROHIBIDO: «dossier» y «curaduría»** (y sus variantes) en cualquier
+  parte del proyecto — app pública, panel admin, documentación y comentarios. Son
+  jerga de IA, no lenguaje natural: nadie llama «dossier» a la historia de un arma.
+  Di «historia», «selección», «contenido editado», «catálogo». Misma familia de
+  problema que el copy de relleno («Descubre el fascinante mundo de…»): suena a
+  máquina. Comprobación: `grep -riE 'dossier|curadur' --include='*.jsx' --include='*.md'`
+  debe dar 0.
 
 ## Rediseño móvil 2026 (canvas aprobado — tokens vigentes)
 Canvas de referencia: https://claude.ai/code/artifact/5bfe4baa-8106-44a4-b122-1f49a622905e
@@ -47,8 +54,14 @@ Canvas de referencia: https://claude.ai/code/artifact/5bfe4baa-8106-44a4-b122-1f
 - **Tarjetas de arma:** muestran existencias por sucursal (`● 36 DCAM · 18 OTCA` /
   `✕ AGOTADO`) y precio exacto compacto bajo la escala $$$$$ (solo lectura de
   getArmaExistencias/getArmaExistenciasOTCA — sin tocar store).
-- **Ficha móvil:** barra fija de acción (precio + comparar) a `bottom: calc(76px +
-  safe-area)` — mismo hueco que CompareFloat; se oculta si hay comparación activa.
+- **Ficha móvil:** barra fija de acción (precio + comparar) apoyada en
+  `bottom: calc(var(--amx-nav-h, 74px) - 1px)`; se oculta si hay comparación activa.
+  **`--amx-nav-h` la publica `BottomNav` midiéndose con `ResizeObserver`** (y ya
+  incluye el safe-area en su propio padding — no lo sumes otra vez). Antes eran dos
+  literales `76px` a mano contra un nav que mide ~74: quedaba una rendija de 2px por
+  la que se veía pasar el contenido y parecía la app rota. El `-1px` superpone los
+  dos bordes en una sola línea. `CompareFloat` usa la misma variable con `+8px`,
+  porque eso flota y no se solda.
 - `index.html`: foco visible 2px + offset y `prefers-reduced-motion` ya globales.
 
 ## Decisiones de producto ya tomadas (respétalas)
@@ -61,15 +74,33 @@ Canvas de referencia: https://claude.ai/code/artifact/5bfe4baa-8106-44a4-b122-1f
 
 ## Ficha de arma — estructura vigente (rediseño ago-2026, PR #45)
 Orden fijo: **identidad → foto HERO → datos clave → valoración → precio → historial
-→ munición → accesorios → dossier**. No lo reordenes sin motivo: el `AvailBadge` y
-`legalTit` van arriba a propósito, para responder "¿puedo comprarla?" antes del
-pliegue. **Ya no hay tabs**: ficha técnica, usos, legalidad e historia son cuatro
-`<details>` (`window.Disclosure`).
+→ munición → accesorios → desplegables → vídeo → calificación → misma categoría →
+sugerir cambios**. No lo reordenes sin motivo: el `AvailBadge` y `legalTit` van
+arriba a propósito, para responder "¿puedo comprarla?" antes del pliegue, y
+«Sugerir cambios» cierra la página (es la última acción, no una interrupción).
+**Ya no hay tabs**: ficha técnica, usos, legalidad e **Historia** son cuatro
+`<details>` (`window.Disclosure`) **sin encabezado de sección** — cada uno se
+anuncia solo.
 - Separación entre secciones = **espacio** (52px escritorio / 34px móvil) + banda de
   fondo, nunca una línea gris. El helper `ProdSection` de `screens-2.jsx`.
-- Primitivas nuevas en `ui.jsx`: **`Disclosure`** (desplegable), **`PriceChart`**
-  (gráfica de precios), **`amxPrecioNum`** / **`amxFechaCorta`** (helpers), y
-  `CUT_TR_SM` ya está expuesto en `window`.
+- Primitivas nuevas en `ui.jsx`: **`Disclosure`** (desplegable; con `compact` se pinta
+  como pie de nota — sin fondo ni barrita de acento, título en mono 12.5),
+  **`PriceChart`** (gráfica de precios), **`amxPrecioNum`** / **`amxFechaCorta`** /
+  **`amxRatingLabel`** (helpers), y `CUT_TR_SM` ya está expuesto en `window`.
+- **`PriceChart` colorea POR TRAMO**: verde si el precio bajó entre esos dos
+  inventarios, rojo si subió, gris si no cambió. El relleno bajo la línea es
+  **neutro** (blanco 8%) a propósito: si también fuera de color competiría con los
+  tramos. Las etiquetas de precio viven en una **banda superior reservada**
+  (`PT = 32`) y las fechas en la inferior, fuera del área del trazo — por eso ningún
+  número puede quedar tapado por una línea. Llevan además halo (`paintOrder: stroke`).
+- **Calificación de la comunidad = etiqueta, no cifra.** `window.amxRatingLabel(avg,
+  count)` devuelve `{label, color, hay}` con la escala tipo Steam (Extremadamente
+  positivas / Mayormente positivas / Variadas / Mayormente negativas / Extremadamente
+  negativas). Umbrales de votos en `RATING_MIN` y `RATING_EXTREMO` al principio del
+  helper: son 5 y 20, **más bajos que los 10 y 500 de Steam** porque con el tráfico de
+  este catálogo nada llegaría a 10 y la sección quedaría muerta. Recalibrar ahí. La
+  usan `RatingBlock` (ficha) y `ArmaCardBody` (todas las tarjetas: `ArmaCard`,
+  `FavCard`, `VisitedCard`, `RatedCard` comparten ese cuerpo).
 - Las barras de la valoración usan **`StatsBar`**, que ya pinta el número. No
   reimplementes una barra plana: había una duplicada y se eliminó. Una barra sin
   cifra no informa.
@@ -78,6 +109,21 @@ pliegue. **Ya no hay tabs**: ficha técnica, usos, legalidad e historia son cuat
   por cartucho. Lo usan la tarjeta y la ficha.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-08: **editar `data.js` NO basta para ver el cambio.** `Store.init()` siembra el
+  catálogo entero en `localStorage['amx_armas_v2']` en la primera visita y a partir de
+  ahí **el localStorage gana sobre `data.js`**. Para verificar un cambio de datos hay
+  que limpiar localStorage; para propagarlo a visitantes que ya entraron, sembrar D1
+  desde *Admin → Configuración → Sincronizar todo al servidor*. El prerender y los
+  visitantes nuevos sí lo ven al instante. Y aparte, sin subir el `?v=` de los
+  `data-*.js` en `index.html`/`admin.html` el navegador sirve la copia cacheada.
+- 2026-08: **`NUM` no es global.** En `screens-2.jsx`, `const NUM = { fontVariantNumeric }`
+  vive DENTRO de `ProductScreen`: los componentes hermanos (`RatingBlock`, `YouTubeBlock`)
+  no lo ven. Babel transpila igual y el `ReferenceError` solo sale en runtime. `PALETTE`,
+  `SectionHeader` y `TacticalCorners` sí son globales (declaraciones de nivel superior de
+  scripts clásicos, compartidas entre archivos).
+- 2026-08: **las cuatro tarjetas de arma comparten cuerpo.** `ArmaCard`, `FavCard`,
+  `VisitedCard` y `RatedCard` delegan en `window.ArmaCardBody`: un cambio ahí las toca
+  todas. (De paso: `FavCard` declaraba un `getRating` que no usaba — código muerto.)
 - 2026-08: **un helper de layout definido DENTRO de un componente remonta su subárbol
   en cada render** — React lo ve como un tipo de componente nuevo. Con `<details>`
   dentro, eso los cierra solos al redimensionar (`useViewport` re-renderiza). Por eso

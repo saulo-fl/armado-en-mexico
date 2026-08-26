@@ -1,7 +1,7 @@
 // Armado en México — utilidades compartidas de la API (Cloudflare Pages Functions)
 // Archivos con prefijo "_" NO se convierten en rutas: este módulo solo se importa.
 
-// Dominios de curaduría que se sincronizan (mismo nombre que las claves de store.js).
+// Dominios de contenido editable que se sincronizan (mismo nombre que las claves de store.js).
 // NOTA: el dominio 'admin' (contraseña/sesión) NUNCA viaja al servidor.
 export const ALL_DOMAINS = [
   'armas', 'pages', 'promos', 'favorites', 'appConfig', 'manuales',

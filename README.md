@@ -8,14 +8,14 @@ App 100% estática del lado del cliente — no requiere backend ni build step.
 | Página | URL en Pages | Descripción |
 |---|---|---|
 | `index.html` | `/` | App principal — catálogo, comparador, legalidad, calibres, campos, cursos. Responsive escritorio + móvil. |
-| `admin.html` | `/admin.html` | Panel de administración — curaduría del catálogo, cola de propuestas, favoritos. |
+| `admin.html` | `/admin.html` | Panel de administración — edición del catálogo, cola de propuestas, favoritos. |
 | `shopify-demo.html` | `/shopify-demo.html` | Demo de la sección embebible para armasmys.com (la versión instalable real está en `shopify/`). |
 
 ## Estructura
 
 ```
 index.html            ← app principal (monta React)
-admin.html            ← backend de curaduría
+admin.html            ← panel de edición
 shopify-demo.html     ← demo de la sección Shopify
 data.js / data-extra.js  ← catálogo seed (111 armas) y datos auxiliares
 store.js              ← persistencia (localStorage) compartida app ↔ admin

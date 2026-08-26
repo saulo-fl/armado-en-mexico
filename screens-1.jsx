@@ -87,7 +87,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
 
       {/* 2 ▸ Carrusel: Favoritos de Armas M&S */}
       <CarouselSection
-        eyebrow="◆ CURADURÍA DEL EQUIPO"
+        eyebrow="◆ SELECCIÓN DEL EQUIPO"
         title={`Favoritos de ${teamName}`}
         items={favoritos}
         fallbackItems={sugerencias(0)}
@@ -390,7 +390,6 @@ window.CarouselSection = CarouselSection;
 // CARDS para los tres carruseles
 // ════════════════════════════════════════════════════════════════
 function FavCard({ arma, rank, onClick }) {
-  const rating = window.Store ? window.Store.getRating(arma.id) : { avg: 0, count: 0 };
   return (
     <div onClick={onClick} style={{
       background: PALETTE.bgCard,
