@@ -17,6 +17,7 @@ const SCREEN_TO_PATH = {
   calibres: 'calibres', campos: 'campos', cursos: 'cursos',
   compare: 'comparar', legal: 'legalidad', about: 'acerca',
   faq: 'preguntas', menu: 'mas', submit: 'proponer', traumaticas: 'traumaticas',
+  soporte: 'soporte',
   municiones: 'municiones',
 };
 const PATH_TO_SCREEN = Object.keys(SCREEN_TO_PATH).reduce((m, s) => {
@@ -281,6 +282,7 @@ function App() {
     else if (id === 'legal') setScreen('legal');
     else if (id === 'about') setScreen('about');
     else if (id === 'faq') setScreen('faq');
+    else if (id === 'soporte') setScreen('soporte');
     else if (id === 'submit') setScreen('submit');
     else if (id === 'compare') setScreen('compare');
     else if (id === 'catalog') { setCatalogFilter(null); setScreen('catalog'); }
@@ -315,17 +317,18 @@ function App() {
     accesorios: 'Accesorios', accesorio: 'Ficha',
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
-    about: 'Acerca', faq: 'FAQ', menu: 'Más',
+    about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
     submit: 'Proponer arma',
     calibres: 'Calibres', campos: 'Campos de tiro', cursos: 'Cursos',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'submit', 'calibres', 'campos', 'cursos', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'soporte', 'submit', 'calibres', 'campos', 'cursos', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
     legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
     calibres: 'menu', campos: 'menu', cursos: 'menu', traumaticas: 'menu',
+    soporte: 'menu',
     municiones: 'menu', municion: 'menu',
     accesorios: 'accesorios', accesorio: 'accesorios',
     product: history[history.length-1]?.screen === 'compare' ? 'compare' : 'catalog',
@@ -362,6 +365,8 @@ function App() {
     content = <window.AboutScreen />;
   } else if (screen === 'faq') {
     content = <window.FAQScreen />;
+  } else if (screen === 'soporte') {
+    content = <window.SoporteScreen onNav={navTab} />;
   } else if (screen === 'menu') {
     content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
   } else if (screen === 'submit') {

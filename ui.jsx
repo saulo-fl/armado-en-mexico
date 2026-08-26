@@ -59,6 +59,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
     { id: 'calibres', label: 'Calibres' },
     { id: 'campos',   label: 'Campos de tiro' },
     { id: 'cursos',   label: 'Cursos' },
+    { id: 'soporte',  label: 'Soporte y normas' },
   ];
   const items = [
     { id: 'home',    label: 'INICIO' },
@@ -267,10 +268,10 @@ function ArmaCardBody({ arma }) {
   const enStock = exD != null || exO != null;
   // precio exacto compacto: "$9,870.04 MXN" → "$9,870"
   const priceShort = (arma.priceExact || '').replace(/\.\d{2}\s*MXN\s*$/, '');
-  // Resumen de la comunidad: en la tarjeta va SOLO la etiqueta. El promedio y
+  // Resumen de la comunidad: en la tarjeta va SOLO la etiqueta. El porcentaje y
   // el conteo viven en la ficha; aquí no caben sin apretar el resto.
-  const rt = window.Store ? window.Store.getRating(arma.id) : null;
-  const etRating = (rt && window.amxRatingLabel) ? window.amxRatingLabel(rt.avg, rt.count) : null;
+  const op = window.Store ? window.Store.getOpiniones('arma', arma.id) : null;
+  const etRating = op ? window.amxOpinionLabel(op.up, op.down) : null;
   return (
     <div style={{ padding: '10px 12px 12px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
@@ -1024,78 +1025,6 @@ function CompareFloat({ ids, onOpen, onClear }) {
 }
 window.CompareFloat = CompareFloat;
 
-// ──────────────────────────────────────────────────────────────
-// STAR RATING — widget e-commerce 1-5 ⭐
-// ──────────────────────────────────────────────────────────────
-let __starUid = 0;
-function StarRating({ value = 0, count = 0, interactive = false, onRate, size = 'sm', showCount = true, label }) {
-  const [hover, setHover] = React.useState(0);
-  const [uid] = React.useState(() => 'sr' + (++__starUid));
-  const PX = { xs: 13, sm: 16, md: 20, lg: 28 }[size] || 16;
-  const v = hover || value || 0;
-  const onClick = (n) => { if (interactive && typeof onRate === 'function') onRate(n); };
-  return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, userSelect: 'none' }}
-      onMouseLeave={() => interactive && setHover(0)}>
-      <div style={{ display: 'inline-flex', gap: 1 }}>
-        {[1, 2, 3, 4, 5].map(n => {
-          // fill 0..1 based on v
-          const fill = Math.max(0, Math.min(1, v - (n - 1)));
-          const gradId = uid + '_' + n;
-          const star = (
-            <svg width={PX} height={PX} viewBox="0 0 24 24" style={{ display: 'block' }}>
-              <defs>
-                <linearGradient id={gradId} x1="0" x2="1" y1="0" y2="0">
-                  <stop offset={(fill * 100) + '%'} stopColor="#F5C518" />
-                  <stop offset={(fill * 100) + '%'} stopColor="rgba(245,197,24,0.18)" />
-                </linearGradient>
-              </defs>
-              <path d="M12 2.3l2.95 6.0 6.61.96-4.78 4.66 1.13 6.6L12 17.4l-5.91 3.12 1.13-6.6L2.44 9.26l6.61-.96L12 2.3z"
-                fill={`url(#${gradId})`}
-                stroke="#F5C518" strokeWidth="0.9" strokeLinejoin="round" />
-            </svg>
-          );
-          return interactive ? (
-            <button key={n}
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onClick(n); }}
-              onMouseEnter={() => setHover(n)}
-              aria-label={`${n} estrella${n > 1 ? 's' : ''}`}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                padding: 2, lineHeight: 0,
-                touchAction: 'manipulation',
-              }}>{star}</button>
-          ) : (
-            <span key={n} style={{ display: 'inline-block', padding: '0 0.5px', lineHeight: 0 }}>{star}</span>
-          );
-        })}
-      </div>
-      {showCount && (
-        <span style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: Math.max(11, PX - 5),
-          color: PALETTE.textMuted,
-          letterSpacing: '0.04em',
-          whiteSpace: 'nowrap',
-        }}>
-          {count > 0
-            ? <>{value.toFixed(1)} <span style={{ opacity: 0.6 }}>({count})</span></>
-            : (interactive ? 'Sé el primero' : 'Sin calificar')}
-        </span>
-      )}
-      {label && (
-        <span style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: Math.max(11, PX - 5),
-          color: PALETTE.textDim,
-          letterSpacing: '0.04em',
-        }}>{label}</span>
-      )}
-    </div>
-  );
-}
-window.StarRating = StarRating;
 
 // ──────────────────────────────────────────────────────────────
 // HORIZONTAL CAROUSEL — carrusel moderno: swipe táctil + arrastre con mouse + snap + flechas
@@ -1414,31 +1343,45 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
 window.PriceChart = PriceChart;
 
 // ──────────────────────────────────────────────────────────────
-// RATING LABEL — resumen cualitativo de la valoración (patrón Steam)
-// Steam elige la etiqueta con el % de reseñas positivas MÁS un mínimo de votos:
-// los extremos ("Extremadamente…") se reservan para el volumen alto. Aquí la
-// escala es 1-5 estrellas, así que el corte va sobre el promedio, anclado en
-// los rangos publicados de Trustpilot (4,3 ≈ 80% de Steam; 3,8 ≈ 70%).
-// Los umbrales de VOTOS son mucho más bajos que los de Steam (que pide 10 y 500)
-// a propósito: con el tráfico de este catálogo nada llegaría a 10 y la sección
-// quedaría permanentemente muerta — es la crítica nº1 documentada de ese sistema.
-// La etiqueta sale desde el PRIMER voto (decisión de Saulo, 25-ago-2026); lo que
-// sigue reservado al volumen son los extremos, para que un único 5★ diga
-// "Mayormente positivas" y no "Extremadamente positivas".
+// OPINION LABEL — resumen de la comunidad (patrón Steam)
+// Ahora hay PORCENTAJE REAL de recomendaciones (up / total), así que se usan
+// los cortes auténticos de Steam — verificados contra su endpoint público
+// appreviews — y no el mapeo aproximado desde estrellas que hubo antes.
+//
+// Los umbrales de VOLUMEN sí se apartan de Steam (que pide 10 opiniones para
+// etiquetar y 500 para los extremos): con el tráfico de este catálogo nada
+// llegaría a 10 y la sección quedaría permanentemente muerta — es la crítica
+// nº1 documentada de ese sistema. La etiqueta sale desde la PRIMERA opinión;
+// lo que sigue reservado al volumen son los extremos, para que una sola
+// persona no declare un arma "Extremadamente positiva".
 // Recalibrar AQUÍ cuando haya volumen real.
 // ──────────────────────────────────────────────────────────────
-const RATING_MIN = 1;       // votos mínimos para mostrar etiqueta
-const RATING_EXTREMO = 20;  // votos para desbloquear "Extremadamente…"
+const OPINION_EXTREMO = 20;  // opiniones para desbloquear "Extremadamente…"
 
-function amxRatingLabel(avg, count) {
-  if (!count || count < RATING_MIN) {
-    return { label: 'Sin valoraciones', color: PALETTE.textMuted, hay: false };
-  }
-  if (avg >= 4.5 && count >= RATING_EXTREMO) return { label: 'Extremadamente positivas', color: PALETTE.green, hay: true };
-  if (avg >= 4.0) return { label: 'Mayormente positivas', color: PALETTE.green, hay: true };
-  if (avg >= 3.0) return { label: 'Variadas', color: PALETTE.textDim, hay: true };
-  if (avg >= 2.0) return { label: 'Mayormente negativas', color: PALETTE.redHi, hay: true };
-  if (count >= RATING_EXTREMO) return { label: 'Extremadamente negativas', color: PALETTE.redHi, hay: true };
-  return { label: 'Mayormente negativas', color: PALETTE.redHi, hay: true };
+function amxOpinionLabel(up, down) {
+  const total = (up || 0) + (down || 0);
+  if (!total) return { label: 'Sin opiniones', color: PALETTE.textMuted, hay: false, pct: 0, total: 0 };
+  const pct = Math.round((up / total) * 100);
+  const base = { hay: true, pct: pct, total: total };
+  if (pct >= 95 && total >= OPINION_EXTREMO) return { ...base, label: 'Extremadamente positivas', color: PALETTE.green };
+  if (pct >= 70) return { ...base, label: 'Mayormente positivas', color: PALETTE.green };
+  if (pct >= 40) return { ...base, label: 'Variadas', color: PALETTE.textDim };
+  if (pct >= 20) return { ...base, label: 'Mayormente negativas', color: PALETTE.redHi };
+  if (total >= OPINION_EXTREMO) return { ...base, label: 'Extremadamente negativas', color: PALETTE.redHi };
+  return { ...base, label: 'Mayormente negativas', color: PALETTE.redHi };
 }
-window.amxRatingLabel = amxRatingLabel;
+window.amxOpinionLabel = amxOpinionLabel;
+
+// Pulgar arriba / abajo en SVG de trazo, como los iconos de BottomNav. Nada de
+// emoji: renderizan distinto por plataforma y son un tell de UI generada.
+function ThumbIcon({ up = true, size = 22 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+      style={{ display: 'block', transform: up ? 'none' : 'rotate(180deg)' }}>
+      <path d="M6.5 10.5h-2a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2z" />
+      <path d="M6.5 10.5 11 3.2a2.2 2.2 0 0 1 2 2.6l-.8 3.4h5.3a2 2 0 0 1 2 2.4l-1.2 6a2 2 0 0 1-2 1.5H6.5z" />
+    </svg>
+  );
+}
+window.ThumbIcon = ThumbIcon;
