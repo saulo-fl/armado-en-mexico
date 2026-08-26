@@ -370,6 +370,39 @@ Disallow: /shopify-demo.html
 Sitemap: ${SITIO}/sitemap.xml
 `, 'utf8');
 
+// ─── 7b. Guardia de caché ───────────────────────────────────────────────────
+// Todo .js servido por el sitio DEBE tener su regla en `_headers`, o Pages lo
+// sirve con su default de `max-age=14400` y el navegador ejecuta la versión
+// vieja hasta 4 h después del deploy. Ya pasó (ago-2026): `/*.js` parecía
+// cubrirlo, pero el splat de Pages nunca coincide con un patrón que lleve texto
+// tras el asterisco, así que la regla estaba muerta y nadie se enteró — una
+// regla muerta no rompe el build, solo deja de hacer nada.
+// Por eso los archivos van uno a uno en `_headers` y esto comprueba la lista:
+// añadir un <script> sin su regla rompe el build, en vez de degradar el sitio
+// en silencio dentro de tres meses.
+// El \r\n importa: git materializa `_headers` con CRLF en Windows y con LF en
+// el build de Cloudflare. Sin normalizar, en local fallaba denunciando los 19
+// archivos a la vez — un guardia que grita siempre se acaba ignorando.
+const reglasCache = readFileSync(join(RAIZ, '_headers'), 'utf8').replace(/\r\n/g, '\n');
+const scriptsLocales = new Set();
+for (const html of ['index.html', 'admin.html']) {
+  const src = readFileSync(join(RAIZ, html), 'utf8');
+  for (const m of src.matchAll(/<script[^>]+src="([^"]+\.js)(?:\?[^"]*)?"/g)) {
+    if (!/^https?:/.test(m[1])) scriptsLocales.add(m[1].replace(/^\.?\//, ''));
+  }
+}
+const sinRegla = [...scriptsLocales].filter((f) => !reglasCache.includes('\n/' + f + '\n'));
+if (sinRegla.length) {
+  throw new Error(
+    'build-prerender: estos scripts no tienen regla de caché en `_headers`:\n'
+    + sinRegla.map((f) => '  /' + f).join('\n')
+    + '\n\nSin ella Cloudflare Pages los sirve con max-age=14400, y un deploy tarda\n'
+    + '4 h en llegar a quien ya visitó el sitio. Añade a `_headers`:\n\n'
+    + sinRegla.map((f) => '/' + f + '\n  Cache-Control: public, max-age=0, must-revalidate').join('\n')
+    + '\n\nOJO: la ruta va literal, sin comodines — `/*.js` NO coincide con nada.'
+  );
+}
+
 // ─── 8. Resumen ─────────────────────────────────────────────────────────────
 console.log(`prerender: ${paginas.length} páginas`
   + ` (${ARMAS.length} armas · ${ACCESORIOS.length} accesorios · ${MUNICIONES.length} municiones`

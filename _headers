@@ -2,15 +2,28 @@
 # (sin CSP todavía: ya no hay Babel inline — los .jsx se precompilan —, así que
 #  añadir una CSP es posible; queda pendiente de definir las fuentes permitidas)
 #
-# ── OJO CON LOS PATRONES ──────────────────────────────────────────────────
-# El splat (`*`) de Pages **matchea codiciosamente hasta el final de la URL y no
-# retrocede**, así que un patrón con texto DESPUÉS del asterisco no coincide con
-# nada. `/*.js` y `/*.html` estuvieron aquí desde ago-2026 sin aplicarse jamás:
-# los .js caían al default de Pages (`max-age=14400`) y se servía la app vieja
-# durante 4 h tras cada deploy. Comprobado en producción el 26-ago-2026.
-# Regla: el `*` va SIEMPRE al final. Si añades una regla, verifícala con
-#   curl -sI https://armado.mx/<ruta> | grep -i cache-control
-# antes de darla por buena — una regla muerta no da error, solo no hace nada.
+# ── DOS TRAMPAS YA PAGADAS · NO LAS REINTRODUZCAS ────────────────────────────
+#
+# 1. El splat (`*`) matchea codiciosamente hasta el final de la URL y NO
+#    retrocede: un patrón con texto DESPUÉS del asterisco no coincide con nada.
+#    `/*.js` y `/*.html` vivieron aquí desde ago-2026 sin aplicarse nunca, así
+#    que los .js caían al default de Pages (`max-age=14400`) y el sitio seguía
+#    ejecutando la app vieja durante 4 h tras cada deploy. Por eso los archivos
+#    de código van listados UNO A UNO: es la única forma que matchea.
+#
+# 2. NO se sabe qué gana si dos patrones que solapan definen ambos un
+#    Cache-Control, y por eso el de código NO se pone en `/*`: lo taparía todo,
+#    `imagenes/` incluido, y ahí hay 5.7 MB que deben cachearse un año. La lista
+#    explícita de abajo no solapa con nada, así que no depende de esa respuesta.
+#    (Medir la precedencia en un preview NO funciona: en `*.pages.dev` toda
+#    respuesta llega con el default de Pages antepuesto —`max-age=0,
+#    must-revalidate, public, max-age=31536000`— tanto si `/*` define
+#    Cache-Control como si no. En armado.mx la zona lo normaliza y sale limpio.
+#    Comprobado el 26-ago-2026 desplegando las dos variantes.)
+#
+# Una regla muerta NO rompe el build: simplemente no hace nada. Si añades una,
+# verifícala:  curl -sI https://armado.mx/<ruta> | grep -i cache-control
+# El guardia de build-prerender.mjs comprueba que ningún <script> quede fuera.
 
 /*
   X-Content-Type-Options: nosniff
@@ -18,12 +31,51 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   Permissions-Policy: geolocation=(), camera=(), microphone=()
-  # Código y HTML sin fingerprint: revalidar SIEMPRE, o un deploy tarda 4 h en
-  # llegar a quien ya visitó el sitio. Las reglas de abajo devuelven la caché
-  # larga a lo que sí es inmutable.
+
+# ── Código sin fingerprint: revalidar SIEMPRE ────────────────────────────────
+# Sin esto, un deploy tarda 4 h en llegar a quien ya visitó el sitio. Las
+# respuestas son 304 de unos cientos de bytes gracias al ETag, no descargas.
+# El HTML no hace falta: Pages ya lo sirve con max-age=0, must-revalidate.
+/app.js
+  Cache-Control: public, max-age=0, must-revalidate
+/admin.js
+  Cache-Control: public, max-age=0, must-revalidate
+/store.js
+  Cache-Control: public, max-age=0, must-revalidate
+/ui.js
+  Cache-Control: public, max-age=0, must-revalidate
+/tweaks-panel.js
+  Cache-Control: public, max-age=0, must-revalidate
+/dev-viewport.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-1.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-2.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-3.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-4.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-accesorios.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-municiones.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-tutorial.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-extra.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-traumaticas.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-precios.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-accesorios.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-municiones.js
   Cache-Control: public, max-age=0, must-revalidate
 
-# Assets estáticos: caché larga (su contenido no cambia bajo el mismo nombre)
+# ── Assets inmutables bajo su nombre: caché larga ────────────────────────────
 /imagenes/*
   Cache-Control: public, max-age=31536000
 /inventarios/*
