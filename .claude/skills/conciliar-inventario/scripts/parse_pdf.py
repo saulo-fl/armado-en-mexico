@@ -10,7 +10,7 @@ Uso:  python3 parse_pdf.py <ruta.pdf> [--json salida.json]
   Por item: texto(desc) -> entero(existencia) -> "$ numero"(precio).
 """
 import sys, re, json
-from collections import defaultdict
+from collections import defaultdict, Counter
 import fitz  # PyMuPDF
 
 PRICE = re.compile(r'^\d{1,3}(?:,\d{3})*\.\d{2}$')
@@ -23,24 +23,45 @@ def is_hdr(t):
     return any(t.startswith(h) for h in DCAM_HDR) or re.match(r'^\d{1,2}/\d{1,2}/\d{4}$', t.strip())
 
 
+INT = re.compile(r'[\d,]+')  # la EXISTENCIA puede traer coma: "3,500"
+
+
+def _rows(page):
+    """(precios, existencias, descripciones) de una pagina, por posicion."""
+    d = defaultdict(list)
+    for w in page.get_text("words"):
+        d[(w[5], w[6])].append(w)
+    L = []
+    for v in d.values():
+        x0 = min(t[0] for t in v)
+        y = (min(t[1] for t in v) + max(t[3] for t in v)) / 2
+        L.append((y, x0, " ".join(t[4] for t in sorted(v, key=lambda t: t[0]))))
+    prices = [(y, t) for y, x, t in L if x > 505 and PRICE.match(t.strip())]
+    qtys = [(y, t) for y, x, t in L if 440 < x < 500 and INT.fullmatch(t.strip())]
+    descs = [(y, t) for y, x, t in L if x < 200 and not is_hdr(t) and t.strip()]
+    return prices, qtys, descs
+
+
 def parse_dcam(doc):
+    # El nombre corto se imprime a un desplazamiento vertical FIJO respecto del
+    # precio, pero ese offset cambia entre layouts (0.0 en el PDF de 2025-10,
+    # +1.6 en los de 2026). Se calibra con la moda del documento en vez de
+    # fijarlo: asi el "mas cercano" no se lleva una linea de descripcion larga
+    # que se derrame justo sobre el renglon del precio.
+    pages = [_rows(page) for page in doc]
+    off = Counter()
+    for prices, _q, descs in pages:
+        for py, _pt in prices:
+            if descs:
+                off[round(min(descs, key=lambda e: abs(e[0] - py))[0] - py, 1)] += 1
+    dy = off.most_common(1)[0][0] if off else 0.0
+
     recs = []
-    for page in doc:
-        d = defaultdict(list)
-        for w in page.get_text("words"):
-            d[(w[5], w[6])].append(w)
-        L = []
-        for v in d.values():
-            x0 = min(t[0] for t in v)
-            y = (min(t[1] for t in v) + max(t[3] for t in v)) / 2
-            L.append((y, x0, " ".join(t[4] for t in sorted(v, key=lambda t: t[0]))))
-        prices = [(y, t) for y, x, t in L if x > 505 and PRICE.match(t.strip())]
-        qtys = [(y, t) for y, x, t in L if 440 < x < 500 and t.strip().isdigit()]
-        descs = [(y, t) for y, x, t in L if x < 200 and not is_hdr(t) and t.strip()]
+    for prices, qtys, descs in pages:
         for py, pt in prices:
             q = min(qtys, key=lambda e: abs(e[0] - py))[1] if qtys else '0'
-            nm = min(descs, key=lambda e: abs(e[0] - py))[1] if descs else '?'
-            recs.append({"name": nm.strip(), "qty": int(q),
+            nm = min(descs, key=lambda e: abs(e[0] - (py + dy)))[1] if descs else '?'
+            recs.append({"name": nm.strip(), "qty": int(q.replace(",", "")),
                          "priceN": float(pt.replace(",", ""))})
     return recs
 
