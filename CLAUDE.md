@@ -225,6 +225,20 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
 
 ## Reglas importantes
 
+- **⚠️ SI ENTRA ALGUIEN MÁS AL REPO, ACOTA LOS PERMISOS ANTES.** La lista
+  `permissions.allow` de `.claude/settings.json` está calibrada para **un solo
+  desarrollador que es también el dueño de la cuenta de Cloudflare** (Saulo,
+  27-ago-2026). El permiso `Bash(npx wrangler d1 execute:*)` es el que hay que
+  mirar primero: con el comodín, autoriza **cualquier SQL contra cualquier base D1
+  de la cuenta** — `DROP TABLE` incluido — sin preguntar. Es cómodo mientras
+  trabaja una sola persona que puede reparar lo que rompa; deja de serlo en cuanto
+  hay un segundo par de manos, porque el permiso viaja en el repo y aplica a
+  quien lo clone.
+  Al añadir a alguien: sustituye el comodín por lo mínimo que necesite (idealmente
+  solo `resembrar.js`, que ya encapsula el único uso legítimo), o quítalo y deja
+  que el resembrado lo haga quien tenga la cuenta. Revisa la lista entera con el
+  mismo criterio, no solo esa línea.
+
 - **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
 - `.nojekyll` es un resto de la época de GitHub Pages; en Cloudflare no hace nada. Es inofensivo: déjalo.
 - **Los `.jsx` se precompilan** con `npm run build` (Babel CLI, `babel.config.json` con `runtime: "classic"` — obligatorio: React se carga como global UMD, y el runtime `automatic` que Babel 8 trae por defecto emite `import` y rompe la app). Tras editar un `.jsx`, recompila antes de probar.
