@@ -1422,8 +1422,8 @@ function LegalScreen({ onNav }) {
   const pasos = page?.pasos || [
   { t: 'Registro en plataforma SEDENA', d: 'Crear cuenta en el portal oficial de Defensa Nacional y completar perfil con tus datos.' },
   { t: 'Solicitud de licencia', d: 'Pedir Licencia Particular (uso doméstico) o de tiro/cacería según el caso. Pago de derechos.' },
-  { t: 'Cita en la DCAM', d: 'Agendar visita al Campo Militar No. 1 (CDMX) o sede Monterrey. Llevar documentación completa.' },
-  { t: 'Selección y compra', d: 'Elegir arma del catálogo oficial. La DCAM es el único punto legal de adquisición civil de armas de fuego en México.' },
+  { t: 'Cita en la DCAM u OTCA', d: 'Agendar visita a la DCAM, en el Campo Militar No. 1 (CDMX), o a la OTCA, en Monterrey, N.L. Llevar documentación completa.' },
+  { t: 'Selección y compra', d: 'Elegir arma del catálogo oficial. La adquisición civil solo puede hacerse por los canales oficiales: la DCAM o la OTCA.' },
   { t: 'Registro federal del arma', d: 'Toda arma adquirida queda registrada a tu nombre en el Registro Federal de Armas (RFA).' }];
 
   const waPhone = page?.whatsapp_phone || '525555555555';
@@ -1471,7 +1471,7 @@ function LegalScreen({ onNav }) {
           fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
         <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM.
+          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA.
         </div>
       </div>
 
@@ -2067,7 +2067,7 @@ function FAQScreen() {
   const padX = vp.isDesktop ? 28 : 16;
   const [open, setOpen] = useState2(0);
   const faqs = window.Store ? window.Store.getPages().faq : [
-  { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México la única forma legal de adquirir un arma de fuego es a través de la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA).' }];
+  { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México un arma de fuego solo puede adquirirse por los canales oficiales: la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), en el Campo Militar No. 1 de la CDMX, y la OTCA, en Monterrey, N.L.' }];
 
   return (
     <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
@@ -2105,7 +2105,7 @@ function FAQScreen() {
           marginBottom: 6, fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
         <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México es directamente en la DCAM. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
+          Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
           <br /><br />
           Armas M&amp;S no presta servicios jurídicos.
         </div>

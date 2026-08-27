@@ -702,7 +702,7 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
           </FormField>
 
           <FormField label="Disponibilidad (una por línea)" span="2">
-            <textarea value={f.disponibilidad} onChange={(e) => set('disponibilidad', e.target.value)} style={taStyle()} rows={2} placeholder={"DCAM CDMX\nDCAM Monterrey"} />
+            <textarea value={f.disponibilidad} onChange={(e) => set('disponibilidad', e.target.value)} style={taStyle()} rows={2} placeholder={"DCAM CDMX\nOTCA Monterrey"} />
           </FormField>
 
           <FormField label="Precio (texto)">
@@ -1610,7 +1610,7 @@ function BulkImportTab() {
 
   const downloadTemplate = () => {
     const headers = 'id,nombre,marca,tipo,pais,calibre,capacidad,peso,longitud,mecanismo,anio,era,img,avail,availLabel,priceExact,priceLvl,dcamRef,legalTit,legalDesc,disponibilidad,uses,alcance,precision,retroceso,capacidad_stat,manejo,poder,historia';
-    const sample = ',Ejemplo Pistola,Marca X,pistola,México,9mm Parabellum,15+1,750g,185mm,"Semi-auto, striker",2025,moderno,,dcam,Uso civil — DCAM,"$10,000 MXN",2,REF DCAM ABC,Civil — DCAM,Descripción legal,DCAM CDMX;DCAM Monterrey,domicilio;club,60,70,45,75,80,62,Texto de la historia';
+    const sample = ',Ejemplo Pistola,Marca X,pistola,México,9mm Parabellum,15+1,750g,185mm,"Semi-auto, striker",2025,moderno,,dcam,Uso civil — DCAM,"$10,000 MXN",2,REF DCAM ABC,Civil — DCAM,Descripción legal,DCAM CDMX;OTCA Monterrey,domicilio;club,60,70,45,75,80,62,Texto de la historia';
     const blob = new Blob([headers + '\n' + sample], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
