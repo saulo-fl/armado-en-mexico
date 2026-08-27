@@ -23,6 +23,10 @@ Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
   romper la transpilación ni el orden de carga. Complementa `HANDOFF-DISENO.md`.
 - **`publicar`** — flujo git: `fetch` antes de `checkout -B` (gotcha), PR a `main` **y**
   `develop`, cache-busting `?v=` si cambian los `data-*.js`.
+- **`fotos-producto`** — preparar fotos de producto: quitar fondo con alfa, encuadrar a
+  1:1, control de calidad y hoja de aprobación humana. Agente: **`preparador-imagenes`**.
+- **`sincronizar-d1`** — resembrar D1 desde el código tras publicar datos. **No basta con
+  desplegar**: los dominios de D1 pisan a los seeds.
 - **`mejorar-tooling`** — al cerrar una tarea: capturar aprendizajes/edge-cases en las
   skills (automejora). Mantén su inventario al día.
 
@@ -262,37 +266,37 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 *append* hace read-modify-write por petición (suficiente para este tráfico). Migrar
 `reviews`/`visits`/colas a tablas fila-por-item es la evolución natural si crece el volumen.
 
-## PENDIENTE CON PRIORIDAD — «DCAM Monterrey» sigue vivo en producción
+## RESUELTO (27-ago-2026) — «DCAM Monterrey» y por qué tardó dos días
 
-**Es un error de dato legal, no cosmético.** La DCAM está **solo** en el Campo Militar
-No. 1 (CDMX). La sede de Monterrey es de **OTCA**, que es otra institución. El 25-ago-2026
-se corrigió en `data.js` (la ficha de arma) y **se dio por cerrado sin grepear el resto** —
-error de método: el texto vivía en cinco sitios más.
+**Se queda aquí porque el error de método se repite, no el dato.** La DCAM está
+**solo** en el Campo Militar No. 1 (CDMX); la sede de Monterrey es de **OTCA**, otra
+institución. El 25-ago se corrigió en `data.js` y se dio por cerrado **sin grepear el
+resto**: el texto vivía en cuatro archivos más. Al hacerlo bien aparecieron **doce**
+sitios, no cinco, porque había un segundo error encadenado — varias respuestas
+declaraban que la DCAM es el **único** punto legal de adquisición, omitiendo a OTCA,
+que es justo quien surte el catálogo de municiones de esta app: la app se contradecía.
 
-Lo que queda por corregir:
+Los textos están **duplicados** en `store.js` (`DEFAULT_PAGES`) y en `screens-2.jsx`
+(el fallback de la pantalla). Corregir uno solo deja que el otro resucite el error.
+Si vuelves a tocar el trámite o el FAQ, corrige los dos y grepea `store.js *.jsx`
+antes de cerrar.
 
-| Archivo | Qué dice mal |
-|---|---|
-| `store.js:111` | FAQ: «la DCAM… Campo Militar No. 1 de CDMX **y en sede Monterrey**» |
-| `store.js:99` | Paso del trámite: «Agendar visita al Campo Militar No. 1 (CDMX) **o sede Monterrey**» |
-| `screens-2.jsx:1419` | **El mismo texto duplicado** — por eso se escapó. Al corregirlo, corrige los dos. |
-| `admin.jsx:705` | `placeholder` que enseña el dato falso a quien captura armas |
-| `admin.jsx:1613` | Igual, en el CSV de ejemplo |
-
-**Segundo error en el mismo FAQ**, distinto del anterior: dos respuestas declaran que la DCAM
-es el **único** punto legal de adquisición de armas y municiones. Eso omite a **OTCA** — que es
-justo quien surte el catálogo de municiones de esta app, así que la app se contradice a sí misma.
-
-**Corregir el código NO basta, y esta es la parte que se pasa por alto.** El dominio `pages`
-**ya está guardado en D1** con el texto viejo (comprobado el 25-ago-2026: `GET /api/state`
-devuelve `pages` conteniendo «sede Monterrey»). Como `store.js` hidrata desde ahí y eso pisa
-`DEFAULT_PAGES`, editar la semilla solo alcanza a instalaciones nuevas: **todo el que ya visitó
-el sitio seguiría viendo el dato falso**. Tras publicar el fix hay que reguardar las páginas
-desde **Admin → Contenido**, que hace el `PUT /api/admin/state/pages`. Verifica con:
+**Corregir el código NO bastó, y esa es la parte que se pasó por alto dos veces:** el
+dominio `pages` estaba guardado en D1 con el texto viejo, y D1 **pisa** a
+`DEFAULT_PAGES` al hidratar. Ahora hay skill para eso — **`sincronizar-d1`** — que
+resiembra desde el código en vez de desde el navegador. Sonda:
 
 ```bash
 curl -s https://armado.mx/api/state | grep -c "sede Monterrey"   # debe dar 0
 ```
+
+### Lo que ese mismo mecanismo tenía escondido
+
+Al resembrar se descubrió que `armas` llevaba **congelado desde el 25-ago**: servía
+**179 fichas cuando el catálogo tenía 192** — las trece del inventario DCAM del 6-jul
+llevaban siete semanas invisibles —, «DCAM Monterrey» en 117 armas y 113 precios
+viejos. **Publicar no es desplegar.** Después de tocar `data.js` o `DEFAULT_PAGES`,
+resiembra D1 y compruébalo como visitante, no por la API.
 
 ## Mejoras futuras opcionales (NO hacer ahora)
 
@@ -340,10 +344,12 @@ curl -s https://armado.mx/api/state | grep -c "sede Monterrey"   # debe dar 0
 - Revisar 3 municiones indistinguibles entre sí por calibre, marca, bala y grano
   (ids 2002/2034, 2048/2033, 2051/2029): puede ser el mismo producto en dos inventarios
   o un error de conciliación. Requiere los PDFs a la mano.
-- **Recortar el fondo de las fotos de arma a WebP con alfa.** Muchas son recortes sobre
-  blanco opaco (otras ya traen alfa) y sobre el hero oscuro de la ficha el blanco se lee
-  como un error. Es problema de assets, no de CSS: cualquier truco de mezcla que "quite"
-  el blanco rompe las que ya son transparentes.
+- **Fotos de arma con alfa — EN CURSO (skill `fotos-producto`).** Al 27-ago-2026,
+  **24 de 111** tienen alfa; el resto siguen siendo recortes sobre blanco opaco, que
+  sobre el hero oscuro se leen como un error. Hay pipeline, control de calidad y hoja
+  de aprobación; lo que falta es material: de las 61 pistolas, 27 están en resolución
+  inservible y varias apuntan al lado contrario. El estándar acordado es **lateral
+  derecha sobre lienzo 1:1**. Siguiente paso: censo de las 61 y adquisición.
 
 Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en builds de
 producción · `imagenes/` a WebP · URLs legibles por tipo y modelo · prerender estático
