@@ -179,7 +179,7 @@ window.DB = [
     "Pistola de competición premium. Armazón de aluminio, cañón de acero inoxidable. Elección de campeones de IPSC. Versión .380 hecha para el mercado mexicano."),
 
   mk(11, "Glock 25", "Glock", "pistola", "Austria", ".380 ACP", "15+1", "560g", "172mm", "Semi-auto, Safe Action striker", 1995, "dcam", "11022.86", "PISTOLA CAL .380 GLOCK MOD. 25",
-    "imagenes/011_Glock_25.webp",
+    "imagenes/011_Glock_25.webp?v=2",
     "Diseñada específicamente para mercados como México y Brasil donde el 9mm tiene restricciones. Internamente similar a una Glock 19 pero en calibre civil."),
 
   mk(12, "Glock 28", "Glock", "pistola", "Austria", ".380 ACP", "10+1", "496g", "160mm", "Semi-auto, Safe Action striker", 1997, "dcam", "12060.32", "PISTOLA CAL .380 GLOCK MOD. 28",
@@ -187,7 +187,7 @@ window.DB = [
     "Versión subcompacta de la Glock 25 para portación oculta. Una de las Glock más pequeñas en calibre legal para civiles en México."),
 
   mk(13, "Beretta 80x Cheetah", "Beretta", "pistola", "Italia", ".380 ACP", "13+1", "780g", "182mm", "Semi-auto, DA/SA", 2023, "dcam", "13975.69", "PISTOLA CAL .380 BERETTA 80X NEGRO",
-    "imagenes/013_Beretta_80x_Cheetah.webp",
+    "imagenes/013_Beretta_80x_Cheetah.webp?v=2",
     "Renacimiento moderno de la serie 80 de Beretta. Compacta en calibre .380, fabricada en Italia. Ideal para defensa de hogar con elegancia europea."),
 
   mk(14, "Browning 1911-380", "Browning", "pistola", "EE.UU.", ".380 ACP", "8+1", "453g", "190mm", "Semi-auto, SA estilo 1911", 2011, "dcam", "21070.90", "PISTOLA 380 ACP BROWNING 1911-380",
@@ -279,7 +279,7 @@ window.DB = [
     "Compact DA/SA con gatillo Omega intercambiable. Calibre 9mm: restringido a Fuerzas Armadas."),
 
   mk(33, "Canik METE SFX", "Canik", "pistola", "Turquía", "9mm Parabellum", "20+1", "850g", "210mm", "Semi-auto, striker-fired", 2021, "ejercito", "11352.28", "PISTOLA 9 MM CANIK MOD. METE SFX",
-    "imagenes/079_Canik_METE_SFX.webp",
+    "imagenes/079_Canik_METE_SFX.webp?v=2",
     "Pistola turca de competición con gatillo de clase mundial a precio accesible. Calibre 9mm: restringido en México."),
 
   mk(34, "Canik TP9 SF", "Canik", "pistola", "Turquía", "9mm Parabellum", "18+1", "750g", "196mm", "Semi-auto, striker-fired", 2018, "ejercito", "8970.33", "PISTOLA 9 MM CANIK TP9SF MOD. 2",

@@ -152,16 +152,27 @@
   const SEED_IMG = {};
   (window.DB || []).forEach(s => { if (s && s.img) SEED_IMG[s.id] = s.img; });
 
-  // Repara la imagen de un arma guardada cuando está vacía, es un
-  // placeholder SVG, o apunta a una ruta local con extensión vieja
-  // (.jpg/.png) que ya no existe en disco. Devuelve true si la cambió.
+  // Repara la imagen de un arma guardada cuando esta vacia, es un placeholder
+  // SVG, o apunta a una ruta local distinta de la del seed. Devuelve true si la
+  // cambio.
+  //
+  // En las rutas locales MANDA EL SEED, y no es un capricho: el dominio "armas"
+  // vive en D1 y su catalogo pisa a window.DB al hidratar, asi que cambiar una
+  // foto en data.js no llegaria a quien ya haya visitado el sitio. Comparar
+  // contra SEED_IMG hace que cualquier cambio de foto se propague solo. Antes
+  // solo se reparaban las extensiones .jpg/.png de la epoca anterior a WebP, y
+  // un .webp cambiado se quedaba viejo para siempre.
+  //
   // No toca URLs remotas configuradas desde el admin (no empiezan por
-  // "imagenes/"), ni armas que no estén en el seed.
+  // "imagenes/"), ni armas que no esten en el seed.
+  // ponytail: el admin no puede apuntar un arma a otra ruta LOCAL, se le
+  // revertiria al seed. Si hiciera falta, marcar esas ediciones con una
+  // bandera en el propio registro.
   function fixArmaImg(a) {
     if (!a || !SEED_IMG[a.id]) return false;
     const img = a.img;
     const vacia = !img || (typeof img === 'string' && img.startsWith('data:image/svg+xml'));
-    const stale = typeof img === 'string' && /^imagenes\/.+\.(jpe?g|png)$/i.test(img);
+    const stale = typeof img === 'string' && img.startsWith('imagenes/') && img !== SEED_IMG[a.id];
     if (vacia || stale) { a.img = SEED_IMG[a.id]; return true; }
     return false;
   }
