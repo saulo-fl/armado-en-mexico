@@ -3,13 +3,17 @@
 
 const { useState, useMemo, useEffect } = React;
 
-// Foto hero 4:5 por categoría (preferencia: con persona o contexto, no fondo blanco)
+// Foto hero 4:5 por categoría (preferencia: con persona o contexto, no fondo blanco).
+// Copias con nombre propio: estas cinco eran la MISMA foto que la ficha de un arma
+// (008 CZ P-07, 021 Ruger Wrangler, 032 CZ 600, 050 Browning Maxus, 058 Derya MR-S1).
+// Al recortarles el fondo a las fichas, la portada se habría quedado con un arma
+// flotando. Son fotos de escena: NO se les quita el fondo.
 const CATEGORY_HEROS = {
-  pistola:  'imagenes/008_CZ_P-07.webp',           // mano sosteniendo pistola en césped
-  revolver: 'imagenes/021_Ruger_Wrangler.webp',   // revólver Ruger
-  rifle:    'imagenes/032_CZ_600_American.webp',   // cazador apuntando en campo
-  escopeta: 'imagenes/050_Browning_Maxus.webp',   // cazador en escena invernal
-  carabina: 'imagenes/058_Derya_MR-S1.webp',      // tiradora con gafas, fondo negro
+  pistola:  'imagenes/hero-pistola.webp',   // mano sosteniendo pistola en césped
+  revolver: 'imagenes/hero-revolver.webp',  // revólver Ruger
+  rifle:    'imagenes/hero-rifle.webp',     // cazador apuntando en campo
+  escopeta: 'imagenes/hero-escopeta.webp',  // cazador en escena invernal
+  carabina: 'imagenes/hero-carabina.webp',  // tiradora con gafas, fondo negro
 };
 window.CATEGORY_HEROS = CATEGORY_HEROS;
 

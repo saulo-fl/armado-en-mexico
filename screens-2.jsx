@@ -189,10 +189,16 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             backgroundSize: '20px 20px',
             maskImage: 'radial-gradient(circle, black 0%, transparent 70%)'
           }} />
+        {/* El 96% de alto es para las fotos 1:1 del catálogo nuevo. El hero es
+            muy apaisado (1200x380 en escritorio), asi que una foto cuadrada la
+            limita SIEMPRE el alto: con el 75% anterior se renderizaba a 284px y
+            el arma quedaba en 272px de ancho teniendo 1200 disponibles — un 31%
+            mas pequena que con las fotos apaisadas viejas. El maxWidth sigue
+            protegiendo a las pocas apaisadas que quedan. */}
         <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high" style={{
             position: 'absolute', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
-            maxWidth: '85%', maxHeight: '75%',
+            maxWidth: '85%', maxHeight: '96%',
             filter: 'grayscale(0.1) contrast(1.15) drop-shadow(0 8px 24px rgba(0,0,0,0.6))'
           }} onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
       </div>
