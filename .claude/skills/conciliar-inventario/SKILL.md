@@ -101,3 +101,28 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
 - 2026-06: variante representativa puede desaparecer aunque el modelo siga disponible
   (Browning Maxus V.H.→B.G.). No agotar por ausencia del nombre exacto; revalidar por
   marca+modelo.
+- 2026-07 (BUG del parser DCAM, corregido): la EXISTENCIA de municiones trae coma
+  (`3,500`) y `parse_dcam` la filtraba con `isdigit()`. Al no haber candidato en su
+  fila, el vecino más cercano le encajaba la qty de OTRO renglón → **las existencias
+  de municiones del 16-jun quedaron mal** (valores repetidos 540/920/950/235). Ya se
+  usa `[\d,]+` y se corrigieron los registros históricos. Si ves una qty repetida en
+  muchos renglones seguidos, sospecha de esto.
+- 2026-07 (BUG del parser DCAM, corregido): el nombre corto va a un desplazamiento
+  vertical FIJO bajo el precio, pero ese offset **cambia entre layouts** (0.0 en el PDF
+  de 2025-10, +1.6 en los de 2026). Con "la descripción más cercana" una línea larga
+  derramada podía caer sobre el renglón del precio y robarle el nombre: así se perdió
+  el **Tippmann M4-22 Redline** en las conciliaciones de 16 y 18-jun. Ahora el offset se
+  calibra con la moda del propio documento.
+- 2026-07: el encadenado catálogo→PDF_anterior→PDF_nuevo debe emparejar renglones por
+  **(nombre, nº de ocurrencia)**: un mismo nombre corto se repite en el PDF (Huglu Atrox,
+  Arex Delta L, Stribog, Renova, Taurus G3) y emparejar solo por nombre colapsa el grupo
+  y falsea precio y qty.
+- 2026-07: la Δ% uniforme es el mejor autochequeo. En 06-jul el 97 % de las armas cayó
+  en +1.67 % o +0.31 %; los únicos outliers eran regresos legítimos de fichas agotadas.
+  Un Δ raro fuera de esa distribución = mis-map, revísalo antes de aplicar.
+- 2026-07: ACCESORIOS usan **una ficha con historial mixto DCAM+OTCA** (como las armas);
+  MUNICIONES van **separadas por autoridad** (precio por cartucho vs. por caja). No los
+  trates igual.
+- 2026-07: un modelo agotado puede REGRESAR (Taurus TH380/PT59, SIG MCX, Weatherby
+  Vanguard .243). Antes de dar de alta una ficha nueva, contrasta el renglón contra el
+  catálogo COMPLETO, no solo contra las fichas con existencia.
