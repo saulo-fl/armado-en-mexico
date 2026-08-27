@@ -57,3 +57,6 @@ node_modules
 /sitemap.xml
 /robots.txt
 /_redirects
+
+# 4) Temporal del resembrado de D1 (skill sincronizar-d1)
+/.d1-resembrado.sql
