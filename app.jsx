@@ -14,7 +14,7 @@ const { useState: useStateApp, useEffect: useEffectApp, useRef: useRefApp } = Re
 const APP_BASE = (window.APP_BASE || '/').replace(/[^/]*$/, (m) => (m.indexOf('.') >= 0 ? '' : m)) || '/';
 const SCREEN_TO_PATH = {
   home: '', catalog: 'arsenal', accesorios: 'accesorios',
-  calibres: 'calibres', campos: 'campos', cursos: 'cursos',
+  calibres: 'calibres', campos: 'campos', experiencias: 'experiencias',
   compare: 'comparar', legal: 'legalidad', about: 'acerca',
   faq: 'preguntas', menu: 'mas', submit: 'proponer', traumaticas: 'traumaticas',
   soporte: 'soporte',
@@ -111,6 +111,11 @@ function amxParsePath(pathname) {
   const seg = rel.split('/').map((s) => decodeURIComponent(s).toLowerCase());
   const idx = amxSlugIndex();
 
+  // /cursos es el nombre viejo de /experiencias. Se mantiene como alias para no
+  // dejar huerfana una URL ya indexada; el canonico es /experiencias.
+  if (seg.length === 1 && seg[0] === 'cursos') {
+    return Object.assign({}, VACIO, { screen: 'experiencias' });
+  }
   // Pantallas con nombre propio (/arsenal, /calibres…) y el listado de municiones
   if (seg.length === 1 && PATH_TO_SCREEN[seg[0]]) {
     return Object.assign({}, VACIO, { screen: PATH_TO_SCREEN[seg[0]] });
@@ -290,7 +295,7 @@ function App() {
     else if (id === 'municiones') { setCatalogFilter(null); setScreen('municiones'); }
     else if (id === 'calibres') setScreen('calibres');
     else if (id === 'campos') setScreen('campos');
-    else if (id === 'cursos') setScreen('cursos');
+    else if (id === 'experiencias') setScreen('experiencias');
     else if (id === 'traumaticas') setScreen('traumaticas');
     else if (id === 'home') setScreen('home');
   };
@@ -319,15 +324,15 @@ function App() {
     compare: 'Comparador', legal: 'Legalidad',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
     submit: 'Proponer arma',
-    calibres: 'Calibres', campos: 'Campos de tiro', cursos: 'Cursos',
+    calibres: 'Calibres', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'soporte', 'submit', 'calibres', 'campos', 'cursos', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'soporte', 'submit', 'calibres', 'campos', 'experiencias', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
     legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
-    calibres: 'menu', campos: 'menu', cursos: 'menu', traumaticas: 'menu',
+    calibres: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
     soporte: 'menu',
     municiones: 'menu', municion: 'menu',
     accesorios: 'accesorios', accesorio: 'accesorios',
@@ -373,10 +378,15 @@ function App() {
     content = <window.SubmitScreen onNav={navigate} />;
   } else if (screen === 'calibres') {
     content = <window.CalibresScreen onOpenArma={openArma} onNav={navigate} />;
+  // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son
+  // de relleno (ver data-extra.js). CamposScreen y CursosScreen siguen escritas
+  // en screens-3.jsx — para reactivarlas basta con volver a montarlas aqui.
   } else if (screen === 'campos') {
-    content = <window.CamposScreen onNav={navigate} />;
-  } else if (screen === 'cursos') {
-    content = <window.CursosScreen onNav={navigate} />;
+    content = <window.ProximamenteScreen titulo="Campos de tiro"
+      texto="Estamos reuniendo los clubes y polígonos del país con sus disciplinas, distancias y condiciones de acceso. Esta sección se abrirá cuando la información esté verificada." />;
+  } else if (screen === 'experiencias') {
+    content = <window.ProximamenteScreen titulo="Experiencias"
+      texto="Formación y actividades de tiro: manejo seguro, tiro defensivo, precisión y marco legal. Esta sección se abrirá cuando la oferta esté confirmada." />;
   } else if (screen === 'traumaticas') {
     content = <window.TraumaticasScreen onNav={navigate} />;
   } else if (screen === 'accesorios') {

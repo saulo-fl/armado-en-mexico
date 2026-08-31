@@ -116,7 +116,7 @@
         title: 'Conocimiento a la mano',
         rows: [
           { icon: '◉', title: 'Calibres', desc: 'Guía de munición: balística, usos y las armas que lo disparan.' },
-          { icon: '✦', title: 'Cursos', desc: 'Formación: manejo seguro y tiro defensivo.' },
+          { icon: '✦', title: 'Experiencias', desc: 'Formación y actividades de tiro · próximamente.' },
           { icon: '◎', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados · próximamente.' },
           { icon: '§', title: 'Legalidad', desc: 'Cómo es el trámite ante SEDENA y las categorías legales.' },
         ],
