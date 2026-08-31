@@ -25,7 +25,7 @@ kernels sm_120 y en la RTX 5070 el proveedor CUDA cae a CPU en silencio; no se
 pelea. Si algún día hay wheel oficial para Blackwell, basta con cambiar los
 providers de la sesión de rembg.
 """
-import argparse, json, re, shutil, subprocess, sys, time
+import argparse, json, re, shutil, subprocess, sys, time, unicodedata
 from pathlib import Path
 
 import numpy as np
@@ -35,6 +35,10 @@ REPO = Path(__file__).resolve().parents[4]           # .../repo/github-deploy
 PROY = REPO.parents[1]                                # .../Armado en Mexico
 TRABAJO = PROY / "Catalogo de Armas" / "fotos-trabajo"
 ORIGINALES = PROY / "Catalogo de Armas" / "imagenes"
+# Fotos conseguidas de fuera (fabricante, Wikimedia). Se nombran por ID de arma
+# —`<id>.jpg`, o `<id>_loquesea.png`— porque es la unica clave estable: el
+# correlativo NNN de `imagenes/` es del catalogo DCAM y solo llega a 111.
+FUENTE = PROY / "Catalogo de Armas" / "fotos-fuente"
 IMAGENES = REPO / "imagenes"
 
 MODELO = "birefnet-general"
@@ -57,19 +61,55 @@ def catalogo():
 
 
 def slug_archivo(arma):
-    """Nombre de archivo con el patrón del repo: NNN_Marca_Modelo.webp"""
-    limpio = lambda s: re.sub(r"[^A-Za-z0-9.-]+", "_", _sin_tildes(s)).strip("_")
-    return f"{limpio(arma['marca'])}_{limpio(arma['nombre'])}"
+    """Nombre de archivo, derivado SOLO del nombre del modelo.
+
+    El nombre ya lleva la marca dentro en todo el catalogo ("IWI Galil ACE 21N",
+    "Benelli Vinci"), asi que anteponerla daba `IWI_IWI_Galil_ACE_21N`. Y son 192
+    nombres distintos entre 192 armas: no hay colision que el prefijo evite.
+    """
+    return re.sub(r"[^A-Za-z0-9.-]+", "_", _sin_tildes(arma["nombre"])).strip("_")
 
 
 def _sin_tildes(s):
-    tabla = str.maketrans("áéíóúüñÁÉÍÓÚÜÑ", "aeiouunAEIOUUN")
-    return s.translate(tabla)
+    """NFKD tumba CUALQUIER diacritico, no solo los cinco del castellano.
+
+    La tabla anterior no cubria la C con hacek de "Ceska Zbrojovka", asi que la
+    letra se caia entera y el archivo salia como `eska_Zbrojovka_...`.
+    """
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
+def _alfa_de_fabrica(alfa):
+    """¿La foto ya viene recortada de origen, con un alfa en el que confiar?
+
+    Los fabricantes publican PNG ya recortados (Benelli, Weatherby) y ese alfa es
+    MEJOR que el que infiere el modelo: lo hizo un humano con el producto delante.
+    Reinferir sobre el aplanado destruye trabajo — medido el 31-ago-2026 en la
+    Benelli MR1 y la Argo-E, donde rembg RELLENO el hueco del guardamonte y en la
+    ficha, sobre el hero oscuro, quedaba una mancha blanca en mitad del arma.
+
+    Se exige que sea un recorte de verdad, no un canal alfa suelto: el marco tiene
+    que estar mayoritariamente transparente y tiene que quedar arma dentro.
+    """
+    if alfa is None or alfa.ndim != 2:
+        return False
+    b = 4
+    marco = np.concatenate([alfa[:b].ravel(), alfa[-b:].ravel(),
+                            alfa[:, :b].ravel(), alfa[:, -b:].ravel()])
+    marco_libre = float((marco < 16).mean())
+    cuerpo = float((alfa > 128).mean())
+    return marco_libre > 0.90 and 0.02 < cuerpo < 0.92
 
 
 def mejor_origen(arma):
-    """La copia de mayor resolución entre los originales sin procesar y el repo."""
-    cands = []
+    """La copia de mayor resolución entre lo conseguido de fuera y lo que ya hay.
+
+    Las armas 112-192 no tienen foto ninguna: `img` viene vacio y `data.js` les
+    pone un placeholder SVG al cargar. Para esas, `fotos-fuente/<id>.*` es el
+    UNICO origen posible, asi que se mira siempre, tenga o no ruta en el repo.
+    """
+    # Lo descargado de fuera, por id de arma
+    cands = sorted(FUENTE.glob(f"{arma['id']}.*")) + sorted(FUENTE.glob(f"{arma['id']}_*"))
     ruta_repo = str(arma.get("img") or "")
     if ruta_repo.startswith("imagenes/"):
         p = REPO / ruta_repo.split("?")[0]
@@ -395,7 +435,10 @@ def preparar(args):
             plano = aplanar(im)
             rgb_orig = np.array(plano)
             alfa_previo = np.array(im.convert("RGBA"))[:, :, 3] if im.mode in ("RGBA", "LA", "P") else None
-            alfa = mascara(plano)
+            # Si la foto YA viene recortada de fabrica, ese alfa gana: es mejor que
+            # el que infiere el modelo y sale gratis. Ver _alfa_de_fabrica().
+            de_fabrica = _alfa_de_fabrica(alfa_previo)
+            alfa = alfa_previo if de_fabrica else mascara(plano)
 
         # ORDEN FIJO: decontaminar -> recortar -> escalar -> comprimir
         rgb = decontaminar(rgb_orig, alfa, color_fondo(rgb_orig))
@@ -416,10 +459,13 @@ def preparar(args):
                         "origen_px": px, "archivo": dst.name,
                         "actual": arma.get("img", ""), "traia_alfa": alfa_previo is not None
                         and bool((alfa_previo < 250).any()),
+                        "alfa_de_fabrica": de_fabrica,
                         "metricas": m, "color": color, "notas": notas,
                         "segundos": round(time.time() - t0, 1)})
         print(f"{etq}: {color.upper()} {final.size[0]}x{final.size[1]} "
-              f"{m['peso_kb']}KB {round(time.time()-t0,1)}s" + (f"  <- {'; '.join(notas)}" if notas else ""))
+              f"{m['peso_kb']}KB {round(time.time()-t0,1)}s"
+              + ("  [alfa de fabrica]" if de_fabrica else "")
+              + (f"  <- {'; '.join(notas)}" if notas else ""))
 
     (TRABAJO / "informe.json").write_text(json.dumps(informe, ensure_ascii=False, indent=1), "utf-8")
     hoja(informe)
@@ -438,6 +484,31 @@ def _ficha(a):
 # Subcomando: aplicar
 # ─────────────────────────────────────────────────────────────────────────────
 
+def _poner_img(datajs, arma_id, ruta):
+    """Rellena el hueco `img` del mk(<arma_id>, ...) de data.js.
+
+    `img` es el 15o argumento posicional de mk() y en las armas sin foto viene
+    como un `""` en su propia linea, justo detras del dcamRef. Se busca ESE, sin
+    salir del bloque del arma: si aparece otro `mk(` antes, se aborta en vez de
+    escribir en la ficha de al lado.
+
+    Devuelve (texto, ok). El que llama DEBE verificar despues contra data.js
+    cargado en node — un reemplazo posicional no se comprueba a ojo.
+    """
+    lineas = datajs.split("\n")
+    ini = next((n for n, l in enumerate(lineas) if re.search(rf"\bmk\(\s*{arma_id}\s*,", l)), None)
+    if ini is None:
+        return datajs, False
+    for n in range(ini, min(ini + 8, len(lineas))):
+        if n > ini and re.search(r"\bmk\(\s*\d+\s*,", lineas[n]):
+            return datajs, False                      # nos salimos del arma
+        if lineas[n].strip() == '"",':
+            sangria = lineas[n][:len(lineas[n]) - len(lineas[n].lstrip())]
+            lineas[n] = f'{sangria}"{ruta}",'
+            return "\n".join(lineas), True
+    return datajs, False
+
+
 def aplicar(args):
     informe = json.loads((TRABAJO / "informe.json").read_text("utf-8"))
     porid = {r["id"]: r for r in informe}
@@ -452,7 +523,7 @@ def aplicar(args):
         return 0
 
     datajs = (REPO / "data.js").read_text("utf-8")
-    copiadas, parches = [], 0
+    copiadas, altas, parches = [], [], 0
     for i in ids:
         r = porid.get(i)
         if not r or r["estado"] != "PROCESADA":
@@ -460,7 +531,21 @@ def aplicar(args):
             continue
         actual = str(r.get("actual") or "")
         if not actual.startswith("imagenes/"):
-            print(f"  #{i}: alta nueva todavia no soportada (hoy tiene placeholder)")
+            # Alta nueva: el arma no tenia foto (data.js le pone el placeholder SVG
+            # al cargar, porque su `img` viene vacio). Se le da ruta propia y se
+            # rellena el hueco `img` de su mk(), que es el 15o argumento.
+            nueva = f"imagenes/{r['archivo']}"
+            destino = REPO / nueva
+            if destino.exists():
+                print(f"  #{i}: {nueva} ya existe, no piso nada — revisa a mano")
+                continue
+            datajs, ok = _poner_img(datajs, i, nueva)
+            if not ok:
+                print(f"  #{i}: no encuentro el hueco img de su mk() en data.js")
+                continue
+            shutil.copy2(TRABAJO / "3-final" / r["archivo"], destino)
+            copiadas.append(destino.name)
+            altas.append((i, nueva))
             continue
         destino = REPO / actual.split("?")[0]
         shutil.copy2(TRABAJO / "3-final" / r["archivo"], destino)
@@ -482,6 +567,24 @@ def aplicar(args):
             print(f"  #{i}: no encuentro {antiguo} en data.js")
 
     (REPO / "data.js").write_text(datajs, "utf-8")
+
+    # Las altas se escriben por posicion de argumento. Eso NO se da por bueno sin
+    # comprobarlo: se recarga data.js en node y se mira que cada arma tenga
+    # exactamente la ruta que le tocaba. Si una no cuadra, el `img` se fue a la
+    # ficha equivocada y hay que revertir a mano — por eso aborta ruidosamente.
+    if altas:
+        db = {a["id"]: a for a in catalogo()}
+        malas = [(i, ruta, str(db.get(i, {}).get("img") or ""))
+                 for i, ruta in altas if str(db.get(i, {}).get("img") or "") != ruta]
+        if malas:
+            print("\n!! ALTAS MAL ESCRITAS — data.js quedo tocado, REVISA con git diff:")
+            for i, esperada, real in malas:
+                print(f"   #{i}: esperaba {esperada!r}, data.js dice {real!r}")
+            return 1
+        print(f"\naltas verificadas contra data.js: {len(altas)}")
+        for i, ruta in altas:
+            print(f"   #{i} {db[i]['nombre']} -> {ruta}")
+
     print("")
     print(f"copiadas {len(copiadas)}: {', '.join(copiadas)}")
     print(f"rutas versionadas en data.js: {parches}")
