@@ -991,8 +991,13 @@ function ArsenalHubScreen({ onNav }) {
 
       <Hdr icon="◆">Armería</Hdr>
       <div style={grid(2)}>
-        <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" img="imagenes/armeria-dcam.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
-        <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" img="imagenes/armeria-otca.svg" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
+        {/* Fotos reales de las dos sedes (31-ago-2026). Son 680x382 y 680x510, y la
+            tarjeta es 4:5 con cover: el recorte efectivo queda en 305x382 y 408x510,
+            por debajo del minimo de 640x800 de PLACEHOLDERS.md. Se nota en pantalla
+            retina. Entran igual mientras el objetivo sea quitar placeholders; hay que
+            resustituirlas cuando haya foto vertical de cada sede. */}
+        <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
+        <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
       </div>
 
       <Hdr icon="●">Disponibilidad</Hdr>
