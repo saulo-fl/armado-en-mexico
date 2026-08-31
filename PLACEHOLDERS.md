@@ -80,8 +80,11 @@ fotos dedicadas con persona/contexto.
 - **Aspecto:** `4 / 5` (vertical).
 - **Resolución recomendada:** **1000×1250** (mín. 640×800).
 - **Lista (5):** Pistolas · Revólveres · Rifles · Escopetas · Carabinas.
-- *(Hoy reutilizan: 008 CZ P-07, 021 Ruger Wrangler, 032 CZ 600, 050 Browning Maxus,
-  058 Derya MR-S1.)*
+- *Ya NO reutilizan fotos de ficha:* desde el 27-ago-2026 `CATEGORY_HEROS` apunta a
+  `imagenes/hero-<tipo>.webp`, cinco archivos propios. Verificado el 31-ago. Importa
+  porque mientras compartían archivo con una ficha, recortar esa arma dejaba la
+  portada de su categoría con un arma flotando sobre el degradado. **Si vuelves a
+  apuntar un hero a una foto de arma, esa trampa vuelve.**
 
 ---
 
@@ -101,14 +104,46 @@ fotos dedicadas con persona/contexto.
 
 ---
 
+## 🔴 PRIORIDAD ALTA — fotos de arma (censo del 31-ago-2026)
+
+Esta sección decía «ya cubierto, 111 fotos reales» y por eso el hueco pasó
+desapercibido: el catálogo tiene **192 armas**, no 111. Números medidos, no
+estimados (`fotos.py verificar` y el censo de `data.js`):
+
+| Estado | Nº | Qué necesita |
+|---|---|---|
+| Con alfa, listas | 36 | nada |
+| Recorte hecho pero rechazado por contenido | 15 | **conseguir otra foto** |
+| Origen por debajo de 900 px | 59 | **conseguir otra foto** |
+| Sin foto ninguna (placeholder SVG rayado) | **81** | **conseguir foto** |
+| Pendiente de verificar el catálogo del fabricante | 1 | Armsan P612 (#91) |
+
+Las 15 rechazadas por contenido lo fueron por motivos que ninguna métrica ve y
+conviene tener presentes al buscar sustitutas: fotos de escena o con una persona
+sosteniendo el arma, tintes de color (la Ruger LCP salía azul y la CZ P-10 C
+dorada), el arma cortada por el borde del encuadre, un cargador suelto flotando
+al lado, y dos «Retay Masai Mara» que en realidad son la culata y el guardamanos
+sueltos, no el arma.
+
+Las 81 sin foto son los **ids 112-192**, las altas del inventario de OTCA
+Monterrey. Hoy la ficha les dibuja el marcador rayado `armaPlaceholder`. Por
+marca: Beretta 11, Benelli 10, Weatherby 10, Taurus 9, Winchester 7, Glock 4,
+Optimum Arms 4, IWI 3, Browning 3 — doce marcas cubren unas 65 de las 81, y
+todas publican foto de producto en su catálogo.
+
+**53 de esas 81 son arma larga** (33 escopetas, 20 rifles), que es el caso donde
+el semáforo estaba mal calibrado hasta el 31-ago (ver bitácora de la skill
+`fotos-producto`).
+
+Estándar: **lateral sobre lienzo 1:1 con alfa**, cañón a la derecha salvo que el
+fabricante solo publique del otro lado. Alto máx. en ficha: 240px escritorio /
+150px móvil, sobre el hero oscuro `#2C2C2C → #1A1A1A` — por eso el fondo blanco
+opaco se lee como un error y hace falta el alfa.
+
+---
+
 ## ⚪ YA CUBIERTO — sin acción necesaria (referencia)
 
-- **Armas de fuego (111):** fotos reales `imagenes/001…111`. El placeholder SVG
-  (`armaPlaceholder`) solo aparece si una foto falla al cargar o en una propuesta
-  sin foto. *Mejora opcional:* la ficha de producto (vista "gunsmith") está pensada
-  para **PNG con fondo transparente** ("▢ PNG SIN FONDO"); hoy son jpg/png/webp con
-  fondo, mostradas con `contain`. Recortarlas sin fondo es una mejora futura, no un
-  hueco. (Alto máx. en ficha: 240px escritorio / 150px móvil.)
 - **Cartuchos (19):** completos en `imagenes/cartuchos/` (PNG vertical, escala real).
 - **Armas traumáticas (3):** usan fotos reales del CDN de Shopify (HDP 50, Secure 68P,
   HDX 68). No requieren diseño local.
@@ -121,13 +156,20 @@ fotos dedicadas con persona/contexto.
 
 | # | Set | Cantidad | Aspecto | Resolución sugerida |
 |---|-----|----------|---------|---------------------|
+| 0 | **Fotos de arma que faltan** | **155** | 1:1 con alfa | ≥900 px de lado |
 | 1 | ~~Campos de tiro~~ **CONGELADO** | 6 | 16:9 | 1600×900 |
 | 2 | ~~Experiencias~~ **CONGELADO** | 6 | 16:9 | 1600×900 |
 | 3 | Categorías (tipo) | 5 | 4:5 | 1000×1250 |
 | 4 | Banner promo (opcional) | 1–3 | banner ancho | 2000×800 |
+| 5 | Accesorios | 36 | 1:1 con alfa | ≥900 px de lado |
 
-**Total prioritario hoy: 5 imágenes** (las 5 de categorías) + banner opcional. Los 12
-de campos y experiencias quedan fuera mientras esas secciones estén congeladas.
+**El grueso del trabajo es el set 0**, y no es de diseño sino de **adquisición**: 81
+armas sin foto + 74 con foto inservible. El pipeline de recorte ya existe y está
+calibrado (skill `fotos-producto`); lo que no existe es nada que consiga las fotos.
+`fotos.py` solo procesa lo que ya está en disco — `mejor_origen()` mira en el repo y
+en `Catalogo de Armas/imagenes/`, y nada más.
+
+Los 12 de campos y experiencias quedan fuera mientras esas secciones estén congeladas.
 
 ### Convenciones de la app
 - Tema oscuro (`#1A1A1A`); las fotos llevan un tinte/gradiente oscuro encimado.
