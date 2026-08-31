@@ -443,3 +443,67 @@ function CursoMiniCard({ curso, onClick }) {
   );
 }
 window.CursoMiniCard = CursoMiniCard;
+
+// ═══════════════════════════════════════════════════════════════════════
+// PRÓXIMAMENTE — Campos de tiro y Experiencias, congeladas hasta el lanzamiento
+//
+// Sus datos son de relleno (ver la cabecera de data-extra.js) y publicarlos
+// restaría credibilidad al resto del catálogo, que sí está conciliado contra
+// inventarios oficiales. Las pantallas reales (CamposScreen, CursosScreen) se
+// conservan intactas justo arriba: al lanzar se reconectan en el switch de
+// app.jsx y estos dos componentes dejan de usarse. Ver PLACEHOLDERS.md.
+// ═══════════════════════════════════════════════════════════════════════
+function ProximamenteScreen({ titulo, texto }) {
+  const vp = window.useViewport();
+  const padX = vp.isDesktop ? 28 : 16;
+  return (
+    <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{
+        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26,
+        color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05,
+      }}>{titulo}</div>
+      <div style={{
+        fontFamily: 'Courier Prime, monospace', fontSize: 15, color: PALETTE.amber,
+        letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: 8,
+      }}>Próximamente</div>
+
+      <div style={{
+        marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+        padding: vp.isDesktop ? '34px 30px' : '26px 18px', textAlign: 'center',
+      }}>
+        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.55, lineHeight: 1 }}>?</div>
+        <div style={{
+          fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim,
+          lineHeight: 1.55, maxWidth: 560, margin: '16px auto 0',
+        }}>{texto}</div>
+      </div>
+    </div>
+  );
+}
+window.ProximamenteScreen = ProximamenteScreen;
+
+// Tarjeta de relleno del carrusel de la home. Reusa StripePlaceholder para que
+// el hueco de la foto sea el mismo que tendrá la tarjeta real. Sin onClick y
+// sin cursor: pointer — no debe leerse como algo pulsable.
+function ProximamenteCard() {
+  return (
+    <div style={{
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+      overflow: 'hidden', height: '100%', cursor: 'default',
+    }}>
+      <StripePlaceholder ratio="16 / 9">
+        <span style={{
+          fontFamily: 'Courier Prime, monospace', fontSize: 42, color: PALETTE.amber,
+          opacity: 0.45, lineHeight: 1,
+        }}>?</span>
+      </StripePlaceholder>
+      <div style={{ padding: '11px 12px' }}>
+        <div style={{
+          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.textMuted,
+          textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.15,
+        }}>Próximamente</div>
+      </div>
+    </div>
+  );
+}
+window.ProximamenteCard = ProximamenteCard;

@@ -239,6 +239,13 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
   que el resembrado lo haga quien tenga la cuenta. Revisa la lista entera con el
   mismo criterio, no solo esa línea.
 
+- **Campos de tiro y Experiencias están CONGELADAS** (27-ago-2026) para poder publicar:
+  sus datos son de relleno y la app sirve una pantalla «Próximamente» en `/campos`,
+  `/experiencias` y `/cursos` (alias vivo del nombre viejo). No están enlazadas desde
+  ningún sitio y salen del sitemap con `noindex`. **Las pantallas reales siguen escritas
+  en `screens-3.jsx`**: los cinco pasos para reactivarlas están en `PLACEHOLDERS.md`.
+  No produzcas las 12 fotos 16:9 de esas secciones mientras siga así.
+
 - **No renombres archivos ni rutas**: `index.html`, `admin.html` y `shopify-demo.html` cargan los `.js`/`.jsx` y `imagenes/` por ruta relativa. `data-precios.js` debe cargarse antes que `store.js`, y los PDFs viven en `inventarios/` (referenciados por ruta relativa).
 - `.nojekyll` es un resto de la época de GitHub Pages; en Cloudflare no hace nada. Es inofensivo: déjalo.
 - **Los `.jsx` se precompilan** con `npm run build` (Babel CLI, `babel.config.json` con `runtime: "classic"` — obligatorio: React se carga como global UMD, y el runtime `automatic` que Babel 8 trae por defecto emite `import` y rompe la app). Tras editar un `.jsx`, recompila antes de probar.
