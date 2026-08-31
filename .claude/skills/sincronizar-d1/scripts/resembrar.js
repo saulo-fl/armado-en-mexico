@@ -137,8 +137,15 @@ stmts.push(`DELETE FROM state WHERE domain='${tmp}';`);
 fs.writeFileSync(TMP, stmts.join('\n'));
 try {
   console.log(`\nescribiendo ${stmts.length} sentencias...`);
-  execFileSync('npx', ['wrangler', 'd1', 'execute', 'armado-en-mexico', '--remote', '--file', TMP],
-               { stdio: 'inherit', shell: process.platform === 'win32' });
+  // OJO con la ruta: en Windows hace falta shell:true para encontrar npx, y con
+  // shell:true Node junta los argumentos con espacios y los reparsea el shell.
+  // La ruta del proyecto lleva un espacio ("Armado en Mexico"), asi que pasar TMP
+  // absoluto partia el argumento en dos y wrangler fallaba sin decir por que:
+  // execFileSync solo devolvia status 1 con stdout y stderr en null. El mismo SQL
+  // ejecutado a mano entraba sin problema. Se pasa el NOMBRE y se fija cwd.
+  execFileSync('npx', ['wrangler', 'd1', 'execute', 'armado-en-mexico', '--remote',
+                       '--file', path.basename(TMP)],
+               { stdio: 'inherit', cwd: ROOT, shell: process.platform === 'win32' });
 } finally {
   fs.unlinkSync(TMP);
 }
