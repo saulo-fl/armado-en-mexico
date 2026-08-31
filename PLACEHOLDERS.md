@@ -15,7 +15,27 @@ o ajusta con `contain` según el caso.
 Estos NO tienen imagen real; la app dibuja un marcador rayado con texto. Son los
 que más se notan.
 
-### 1. Campos de tiro — 6 imágenes · **16:9**
+> ## ⚠️ CONGELADAS (27-ago-2026) — NO produzcas estas 12 imágenes
+>
+> **Campos de tiro** y **Experiencias** (antes «Cursos») están desconectadas hasta
+> el lanzamiento: sus datos son de relleno y la app sirve una pantalla
+> «Próximamente». Las 12 fotos 16:9 de los sets 1 y 2 **no se usarían**.
+>
+> **Para reactivarlas**, todo el trabajo sigue en el repo:
+> 1. `app.jsx` — volver a montar `CamposScreen` / `CursosScreen` en el switch
+>    (hoy montan `ProximamenteScreen`).
+> 2. `screens-1.jsx` — devolver `window.CAMPOS` / `window.CURSOS` a los
+>    `CarouselSection` con su botón «Ver todos →», en vez de `ProximamenteCard`.
+> 3. `ui.jsx` y `screens-2.jsx` — quitar `proximamente: true` de las entradas de
+>    menú y el «(Próximamente)» del rótulo.
+> 4. `screens-tutorial.jsx` — quitar el «· próximamente» de la fila Experiencias.
+> 5. `build-prerender.mjs` — quitar `noindex` y volver a `enSitemap: true`, y
+>    decidir entonces qué hacer con `/cursos` (hoy es un alias vivo de
+>    `/experiencias`, que es la ruta canónica).
+>
+> Las pantallas, las tarjetas y los datos siguen escritos: no hay que rehacer nada.
+
+### 1. Campos de tiro — 6 imágenes · **16:9** — CONGELADO
 - **Dónde:** pantalla "Campos de tiro" (tarjeta grande) y carrusel de la Home
   (tarjeta chica). `screens-3.jsx` (`StripePlaceholder`, "▢ FOTO DEL CAMPO").
 - **Qué va:** foto real de la instalación / línea de tiro / polígono (con contexto,
@@ -30,8 +50,8 @@ que más se notan.
   5. Tiro Deportivo Puebla — Puebla (Indoor)
   6. Campo Táctico Querétaro — Querétaro (Outdoor)
 
-### 2. Cursos — 6 imágenes · **16:9**
-- **Dónde:** pantalla "Cursos" (tarjeta grande) y carrusel de la Home.
+### 2. Experiencias (antes «Cursos») — 6 imágenes · **16:9** — CONGELADO
+- **Dónde:** pantalla "Experiencias" (tarjeta grande) y carrusel de la Home.
   `screens-3.jsx` (`StripePlaceholder`, "▢ FOTO DEL CURSO").
 - **Qué va:** foto representativa del curso (instrucción, clase, tirador en práctica,
   mesa de limpieza, aula, etc.).
@@ -101,12 +121,13 @@ fotos dedicadas con persona/contexto.
 
 | # | Set | Cantidad | Aspecto | Resolución sugerida |
 |---|-----|----------|---------|---------------------|
-| 1 | Campos de tiro | 6 | 16:9 | 1600×900 |
-| 2 | Cursos | 6 | 16:9 | 1600×900 |
+| 1 | ~~Campos de tiro~~ **CONGELADO** | 6 | 16:9 | 1600×900 |
+| 2 | ~~Experiencias~~ **CONGELADO** | 6 | 16:9 | 1600×900 |
 | 3 | Categorías (tipo) | 5 | 4:5 | 1000×1250 |
 | 4 | Banner promo (opcional) | 1–3 | banner ancho | 2000×800 |
 
-**Total prioritario: 17 imágenes** (6 campos + 6 cursos + 5 categorías) + banner opcional.
+**Total prioritario hoy: 5 imágenes** (las 5 de categorías) + banner opcional. Los 12
+de campos y experiencias quedan fuera mientras esas secciones estén congeladas.
 
 ### Convenciones de la app
 - Tema oscuro (`#1A1A1A`); las fotos llevan un tinte/gradiente oscuro encimado.

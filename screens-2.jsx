@@ -2166,8 +2166,9 @@ function MenuScreen({ onNav, onTutorial }) {
   { id: 'accesorios', icon: '▫', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
   { id: 'municiones', icon: '◉', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
   { id: 'calibres', icon: '◉', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
-  { id: 'campos', icon: '◎', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados · suscripción próximamente' },
-  { id: 'cursos', icon: '✦', title: 'Cursos', desc: 'Formación: manejo seguro, tiro defensivo y más' },
+  // Congeladas hasta el lanzamiento: visibles pero sin navegar. Ver PLACEHOLDERS.md.
+  { id: 'campos', icon: '◎', title: 'Campos de tiro (Próximamente)', desc: 'Clubes y polígonos aliados', proximamente: true },
+  { id: 'experiencias', icon: '✦', title: 'Experiencias (Próximamente)', desc: 'Formación y actividades de tiro', proximamente: true },
   { id: 'legal', icon: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
   { id: 'soporte', icon: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
   { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
@@ -2184,11 +2185,13 @@ function MenuScreen({ onNav, onTutorial }) {
       }}>☰ MÁS</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {items.map((it) =>
-        <button key={it.id} onClick={() => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)} style={{
+        <button key={it.id} disabled={it.proximamente}
+          onClick={it.proximamente ? undefined : () => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)} style={{
           background: it.accent ? `linear-gradient(135deg, ${PALETTE.bgCard} 0%, ${PALETTE.bgElev} 100%)` : PALETTE.bgCard,
           border: `1px solid ${it.accent ? PALETTE.amber : PALETTE.border}`,
           padding: '14px',
-          cursor: 'pointer',
+          cursor: it.proximamente ? 'default' : 'pointer',
+          opacity: it.proximamente ? 0.55 : 1,
           textAlign: 'left',
           display: 'flex', alignItems: 'center', gap: 14
         }}>

@@ -17,6 +17,19 @@ const CATEGORY_HEROS = {
 };
 window.CATEGORY_HEROS = CATEGORY_HEROS;
 
+// Secciones congeladas (Campos de tiro, Experiencias): cuatro tarjetas de
+// relleno idénticas — llenan el ancho del carrusel sin repetir de más — y la
+// etiqueta que sustituye al «Ver todos →» en la cabecera de la sección.
+const PROXIMAMENTE_ITEMS = [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }, { id: 'p4' }];
+function ProximamenteTag() {
+  return (
+    <span style={{
+      fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.amber,
+      letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+    }}>(Próximamente)</span>
+  );
+}
+
 // precio numérico (MXN) a partir de priceExact "$10,061.26 MXN"
 const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^\d.]/g, '')) || 0;
 
@@ -125,33 +138,21 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <CaliberMiniCard cal={c} onClick={() => onNav('calibres')} />
         } />
 
-      {/* 6 ▸ Campos de tiro */}
+      {/* 6 y 7 ▸ Campos de tiro y Experiencias — CONGELADAS hasta el lanzamiento.
+          Anuncian la sección sin dejar llegar a ella: el «Ver todos →» es ahora
+          una etiqueta, y las tarjetas no son window.CAMPOS/CURSOS (datos de
+          relleno) sino ProximamenteCard. Para reactivarlas, ver PLACEHOLDERS.md. */}
       <CarouselSection
         title="Campos de tiro"
-        action={
-        <button onClick={() => onNav('campos')} style={{
-          background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase'
-        }}>Ver todos →</button>
-        }
-        items={(window.CAMPOS || [])}
-        renderItem={(c) =>
-        <CampoMiniCard campo={c} onClick={() => onNav('campos')} />
-        } />
+        action={<ProximamenteTag />}
+        items={PROXIMAMENTE_ITEMS}
+        renderItem={() => <window.ProximamenteCard />} />
 
-      {/* 7 ▸ Cursos */}
       <CarouselSection
-        title="Cursos"
-        action={
-        <button onClick={() => onNav('cursos')} style={{
-          background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase'
-        }}>Ver todos →</button>
-        }
-        items={(window.CURSOS || [])}
-        renderItem={(c) =>
-        <CursoMiniCard curso={c} onClick={() => onNav('cursos')} />
-        } />
+        title="Experiencias"
+        action={<ProximamenteTag />}
+        items={PROXIMAMENTE_ITEMS}
+        renderItem={() => <window.ProximamenteCard />} />
 
       {/* 8 ▸ Categorías rápidas (legacy) */}
       <div style={{ ...containerMax, padding: `8px ${PAD}px 0` }}>

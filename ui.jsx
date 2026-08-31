@@ -57,8 +57,9 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
   const moreItems = [
     { id: 'traumaticas', label: 'Armas traumáticas' },
     { id: 'calibres', label: 'Calibres' },
-    { id: 'campos',   label: 'Campos de tiro' },
-    { id: 'cursos',   label: 'Cursos' },
+    // Congeladas hasta el lanzamiento: se anuncian, no se entra. Ver PLACEHOLDERS.md.
+    { id: 'campos',   label: 'Campos de tiro (Próximamente)', proximamente: true },
+    { id: 'experiencias', label: 'Experiencias (Próximamente)', proximamente: true },
     { id: 'soporte',  label: 'Soporte y normas' },
   ];
   const items = [
@@ -143,17 +144,18 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                     {moreItems.map(mi => {
                       const miActive = current === mi.id;
                       return (
-                        <button key={mi.id} onClick={() => { onNav(mi.id); setMoreOpen(false); }} style={{
+                        <button key={mi.id} disabled={mi.proximamente}
+                          onClick={mi.proximamente ? undefined : () => { onNav(mi.id); setMoreOpen(false); }} style={{
                           display: 'block', width: '100%', textAlign: 'left',
                           background: miActive ? 'rgba(245,197,24,0.10)' : 'none',
-                          border: 'none', cursor: 'pointer', padding: '10px 12px',
+                          border: 'none', cursor: mi.proximamente ? 'default' : 'pointer', padding: '10px 12px',
                           fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600,
                           letterSpacing: '0.08em', textTransform: 'uppercase',
-                          color: miActive ? PALETTE.amber : PALETTE.text,
+                          color: mi.proximamente ? PALETTE.textMuted : (miActive ? PALETTE.amber : PALETTE.text),
                           transition: 'background 0.12s, color 0.12s',
                         }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(245,197,24,0.10)'; e.currentTarget.style.color = PALETTE.amber; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = miActive ? 'rgba(245,197,24,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? PALETTE.amber : PALETTE.text; }}>
+                          onMouseEnter={e => { if (mi.proximamente) return; e.currentTarget.style.background = 'rgba(245,197,24,0.10)'; e.currentTarget.style.color = PALETTE.amber; }}
+                          onMouseLeave={e => { if (mi.proximamente) return; e.currentTarget.style.background = miActive ? 'rgba(245,197,24,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? PALETTE.amber : PALETTE.text; }}>
                           {mi.label}
                         </button>
                       );

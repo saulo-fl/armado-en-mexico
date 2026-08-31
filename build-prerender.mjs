@@ -296,10 +296,18 @@ const FIJAS = [
     desc: 'Qué se puede publicar en las reseñas, cómo denunciar contenido y cómo se modera. Catálogo divulgativo: aquí no se compran ni se venden armas.' },
   { ruta: 'preguntas', titulo: 'Preguntas frecuentes sobre armas legales en México', enSitemap: true,
     desc: 'Dudas habituales sobre licencias, calibres permitidos, portación y trámite ante la SEDENA.' },
-  { ruta: 'campos', titulo: 'Campos de tiro y clubes en México', enSitemap: true,
-    desc: 'Clubes de tiro y polígonos en México, con disciplinas, distancias y modalidad.' },
-  { ruta: 'cursos', titulo: 'Cursos de manejo y tiro', enSitemap: true,
-    desc: 'Formación en manejo seguro, tiro defensivo, precisión y marco legal.' },
+  // CONGELADAS hasta el lanzamiento: la app sirve una pantalla «Próximamente».
+  // Siguen existiendo para no dar 404 a quien tenga el enlace, pero salen del
+  // indice. /cursos es el nombre viejo de /experiencias y se mantiene vivo
+  // porque ya estaba indexado; la app lo resuelve a Experiencias. NO se les
+  // pone canonical cruzado: con noindex en las tres no tendria efecto, y el
+  // canonico se decide al reactivarlas. Ver PLACEHOLDERS.md.
+  { ruta: 'campos', titulo: 'Campos de tiro y clubes en México', enSitemap: false, noindex: true,
+    desc: 'Clubes de tiro y polígonos en México. Sección en preparación.' },
+  { ruta: 'experiencias', titulo: 'Experiencias', enSitemap: false, noindex: true,
+    desc: 'Formación y actividades de tiro. Sección en preparación.' },
+  { ruta: 'cursos', titulo: 'Experiencias', enSitemap: false, noindex: true,
+    desc: 'Formación y actividades de tiro. Sección en preparación.' },
   { ruta: 'acerca', titulo: 'Acerca de Armado en México', enSitemap: true,
     desc: 'Quiénes somos, con qué fuentes trabajamos y por qué esta enciclopedia es divulgativa y sin fines de lucro.' },
   // Sin valor de búsqueda: existen para no dar 404, pero fuera del índice.
