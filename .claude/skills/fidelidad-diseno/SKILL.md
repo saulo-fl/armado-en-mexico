@@ -1,29 +1,62 @@
 ---
 name: fidelidad-diseno
-description: Guía de fidelidad estética para "Armado en México" — mantén el look táctico/tecnológico (HUD/mira/terminal militar) y evita romperlo. Úsalo SIEMPRE que agregues o modifiques UI (pantallas .jsx, tarjetas, filtros, ui.jsx): paleta, tipografías, primitivas, patrones de tarjeta, y las reglas de "no romper" (transpilar, orden de carga, integrity de unpkg). Complementa HANDOFF-DISENO.md.
+description: Guía de fidelidad estética para "Armado en México" — memoria viva de las decisiones de diseño ya tomadas y de las trampas conocidas. Úsalo SIEMPRE que agregues o modifiques UI (pantallas .jsx, tarjetas, filtros, ui.jsx): decisiones de producto, estructura de la ficha, vocabulario prohibido, reglas de "no romper" y la bitácora de aprendizajes. El sistema visual y la dirección de arte viven en DESIGN.md; esta skill guarda lo aprendido a golpes.
 ---
 
 # Fidelidad de diseño — Armado en México
 
+> **La dirección de arte y el sistema visual están en [`DESIGN.md`](../../../DESIGN.md)**
+> (superficies, escalas, tipografía, prohibiciones). Esta skill es la otra mitad: lo que ya
+> se decidió, lo que no se toca, y las trampas que costaron una sesión descubrir.
+> Si las dos se contradicen, gana `DESIGN.md`.
+>
+> `HANDOFF-DISENO.md` está obsoleto — es solo un puntero. No lo uses como fuente.
+
+## Estado del rediseño (ago-2026)
+
+El sitio arrastra un problema medido: el borde `#3A3A3A` sobre tarjeta `#2C2C2C` da **1.23:1**
+y la tarjeta sobre el fondo da **1.25:1**. Las dos señales que definen una tarjeta son
+invisibles, y por eso el sitio se lee «cuadrado»: el ojo solo puede ver la geometría.
+
+**Superficies antes que efectos.** Añadir biseles o retículas sobre una base plana da un
+sitio ruidoso *y* plano. Comprobar siempre con:
+
+```
+node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
+```
+
+Para rediseñar, delega en el agente `disenador-oficial`. Para mover una primitiva de inline
+a CSS, la skill `migrar-a-css`.
+
 ## ADN visual (tokens en `ui.jsx` → `PALETTE`, expuesto en `window.PALETTE`)
 - Tema oscuro: `bg #1A1A1A`, superficies `#2C2C2C`, bordes `#3A3A3A`/`#555`.
-- Acento **ámbar `#F5C518`**. Texto `#FFF` / `#B5B5B5` / `#7A7A7A`.
+- Acento **ámbar `#F5C518`**. Texto `#FFF` / `#B5B5B5` / `#9A9A9A`.
 - Autoridades: DCAM ámbar `#F5C518`, OTCA verde `#4FAE5C`, ejército rojo `#C0392B`.
-- Tipos (Google Fonts en `index.html`): **Montserrat** (títulos MAYÚSCULAS + letter-spacing),
-  **Courier Prime** (mono, datos/etiquetas), Open Sans (cuerpo).
+- Tipos vigentes hoy (Google Fonts en `index.html`): Montserrat, Courier Prime, Open Sans,
+  Playfair Display. **`DESIGN.md` §5.3 los sustituye** por Archivo + JetBrains Mono +
+  Share Tech Mono; al tocar tipografía, sustituye, nunca sumes — ya son 4 familias y 13 archivos.
 - Primitivas reutilizables (`ui.jsx`): `TacticalCorners`, `FilterChip`, `FilterSelect`,
   `PriceRange`, `AvailBadge`, `PriceLevel`, `SectionHeader`, `ArmaCard`, `BottomNav`,
   `HCarousel`, `CountryFlag`. Reúsalas; no reinventes estilos por pantalla.
+- **Trabaja por primitivas, no por pantallas.** Las ~15 de `ui.jsx` propagan a las 322
+  páginas; las pantallas solo las componen.
 
-## Cómo mantener el estilo (y no que se sienta "cuadrado")
-- Prefiere cortes/biseles, retículas/ticks HUD, glow ámbar en hover/foco, gradientes
-  sutiles y jerarquía variada de tarjetas antes que más rectángulos de 1px.
-- Los estilos son objetos `style` inline en JS + un `<style>` en `index.html` (ahí van
-  los pseudo-elementos, p. ej. las manijas del slider `.amx-price-range`).
+## Dónde vive cada estilo
+- La **piel** (hover, foco, pseudo-elementos, media queries, animación, superficies) va al
+  `<style>` de `index.html` con clases `amx-`. El **layout** y lo que depende de datos se
+  queda inline. Una propiedad vive en un sitio **o** en el otro, nunca en los dos: si se
+  comparte, el inline gana por especificidad y empieza la guerra de `!important`.
+- Lo dinámico viaja como custom property: `style={{'--estado': color}}`. Precedente en el
+  repo: `BottomNav` publica `--amx-nav-h`.
+- Hay **1238 objetos `style={{`** en los `.jsx`. Migrarlos todos está descartado; se migra
+  la piel de las primitivas, con `migrar-a-css`.
 - Centraliza tokens/utilidades nuevas en `ui.jsx` / `index.html`, no dispersos.
 
 ## Reglas de "NO romper" (críticas)
-- Sin build step: cada `.jsx` DEBE transpilar (usa skill `verificar-app`).
+- **Sí hay build step** (`npm run build` → Babel CLI + prerender, corre en Cloudflare Pages;
+  los `.js` no se versionan). Cada `.jsx` DEBE compilar: `npm run build:js` o skill
+  `verificar-app`. *(Lo de «transpilación en el navegador con Babel standalone» que decía
+  el viejo handoff dejó de ser cierto; no hay limitación técnica para escribir buen CSS.)*
 - No cambies el orden de carga de scripts en `index.html` ni los `integrity` de unpkg.
 - Si tocas `data-*.js`, sube el cache-busting `?v=` (ver skill `publicar`).
 - Mobile-first (hay `BottomNav` y `useViewport`); áreas táctiles ≥40px; contraste ok.
