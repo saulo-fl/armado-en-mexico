@@ -12,13 +12,18 @@ un degradado oscuro (`#2C2C2C → #1A1A1A`): el blanco se lee como un error. No
 tiene salida por CSS — cualquier truco de mezcla que «quite» el blanco rompe las
 que ya traen alfa. Es problema de assets.
 
-Estado al 27-ago-2026: **24 de 111 fotos con alfa**. El resto, pendiente.
+Estado al 31-ago-2026: **36 de 192 armas con alfa**. Y el cuello de botella no es
+el recorte: **81 armas no tienen foto ninguna** (ids 112-192, las altas de OTCA)
+y otras 74 tienen una inservible. `fotos.py` solo procesa lo que ya está en
+disco; conseguir las fotos no lo hace nadie todavía. Censo en `PLACEHOLDERS.md`.
 
 ## Uso
 
 ```bash
 uv run .claude/skills/fotos-producto/scripts/fotos.py preparar --tipo pistola
-uv run .claude/skills/fotos-producto/scripts/fotos.py preparar --tipo pistola --solo 13,33,11
+# --solo manda sobre --tipo: una tanda puede cruzar tipos en UNA corrida, que es
+# lo que hay que hacer, porque informe.json se reescribe entero en cada llamada.
+uv run .claude/skills/fotos-producto/scripts/fotos.py preparar --solo 24,50,58,62,78
 uv run .claude/skills/fotos-producto/scripts/fotos.py aplicar --aprobar 13,33,11
 uv run .claude/skills/fotos-producto/scripts/fotos.py aplicar --decisiones decisiones.json
 uv run .claude/skills/fotos-producto/scripts/fotos.py verificar --tipo pistola
@@ -34,14 +39,20 @@ Carpeta de trabajo **fuera del repo**, en `Catalogo de Armas/fotos-trabajo/`:
 
 ## El estándar acordado
 
-**Lateral derecha sobre lienzo 1:1.** Cañón a la derecha, de perfil, arma
-centrada con margen uniforme. Es la foto que los fabricantes publican de serie,
-así que es conseguible para casi todo el catálogo.
+**Lateral sobre lienzo 1:1.** De perfil, arma centrada con margen uniforme.
+Cañón a la derecha **cuando exista esa foto**.
 
-La orientación **no se corrige con proceso**: espejar una foto invierte las
+La orientación **nunca se corrige con proceso**: espejar una foto invierte las
 inscripciones y el lado de la ventana de expulsión, que en una ficha divulgativa
-es un error de dato. Y una vista 3/4 no se obtiene rotando una lateral. Si la
-foto no cumple, se busca otra — el script las detecta y las bloquea.
+es un error de dato. Y una vista 3/4 no se obtiene rotando una lateral. Eso no
+se negocia.
+
+Lo que sí cambió (31-ago-2026, decisión de Saulo): apuntar a la izquierda
+**avisa, no bloquea**. Hay fabricantes que solo publican de ese lado — las seis
+Mendoza RM22 son foto oficial de 5906×1329 y las seis miran a la izquierda; no
+existe una lateral derecha oficial que buscar. Si el fabricante tiene lateral
+derecha se usa esa; si no, entra así. **Lo decide el humano en la hoja**, no el
+script: el script solo lo marca en ámbar.
 
 ## Cinco cosas que NO se tocan
 
@@ -72,21 +83,34 @@ foto no cumple, se busca otra — el script las detecta y las bloquea.
 Once métricas sobre la máscara y el RGB. **Rojo** no se propone aprobar; solo
 ámbar se propone marcado; todo verde se preselecciona.
 
-Rojo: `huecos_internos = 0` (una pistola sin hueco de guardamonte es una máscara
-rellenada) · `mordida` fuera de [0.93, 1.10] · `canon = izquierda` · `halo < -25`
-(borde ennegrecido) o `> 120` · `alpha_pct` fuera de [12, 92] ·
-`borde_recortado > 0.5%` · `resolucion < 900`.
+Rojo: `huecos_internos = 0` (un arma sin hueco de guardamonte es una máscara
+rellenada) · `mordida < 0.93` · `halo < -25` (borde ennegrecido) o `> 120` ·
+`llenado < 20%` · `alpha_pct > 92` · `borde_recortado > 0.5%` ·
+`fondo_sigma > 25` · `resolucion < 900`.
 
-Ámbar: `fondo_sigma > 12` (**es una foto de escena, no de producto**) ·
-`dureza_borde` fuera de [0.8, 6] · `halo > 18` · `peso > 140 KB`.
+Ámbar: `canon = izquierda` · `fondo_sigma > 12` (fondo con textura) ·
+`huecos_rel < 1%` · `dureza_borde` fuera de [0.8, 6] · `halo > 18` ·
+`peso > 140 KB` · `luminancia_sujeto < 45`.
+
+**Dos umbrales se miden contra el arma, no contra el lienzo** (recalibrado el
+31-ago; ver bitácora). `llenado` es el % del *bbox del arma* que es arma, y
+`huecos_rel` el % *del arma* que es hueco. Medido sobre el lienzo, ambos miden el
+aspecto del arma en vez de la calidad del recorte, y toda arma larga salía roja.
 
 **El halo alto avisa, no bloquea.** Un objeto oscuro sobre fondo claro tiene un
 borde antialias intrínsecamente más claro que el objeto: es muestreo, no un
 defecto. Recortes impecables marcan +68.
 
-Lo que las métricas **no** ven, y por eso la revisión humana no es opcional: que
-la foto sea del modelo o la variante equivocada, y que un recorte técnicamente
-perfecto lo sea sobre una foto de escena.
+**Ya no existe la rama `mordida > 1.10`.** Desde el 31-ago numerador y
+denominador salen del mismo conjunto, así que la razón está acotada a 1 por
+construcción. «La máscara dejó fondo» lo cubren `alpha_pct > 92` y `llenado`.
+
+Lo que las métricas **no** ven, y por eso la revisión humana no es opcional —
+todos estos casos son reales, del lote del 31-ago: que la foto sea de otro modelo
+o de otra variante · **tintes de color** (la Ruger LCP salía azul entera y la CZ
+P-10 C dorada, con métricas impecables) · que el sujeto **no sea el arma** (dos
+«Retay Masai Mara» eran la culata y el guardamanos sueltos) · un cargador suelto
+flotando al lado del arma · un recorte técnicamente perfecto sobre una escena.
 
 ## Antes de tocar una foto de arma: ¿es hero de categoría?
 

@@ -243,15 +243,15 @@ window.DB = [
     "Pistola full-size 9mm brasileña con mira tipo Glock. Calibre de uso restringido en México — únicamente Fuerzas Armadas y corporaciones autorizadas."),
 
   mk(24, "Taurus GX4", "Taurus", "pistola", "Brasil", "9mm Parabellum", "11+1", "530g", "158mm", "Semi-auto, striker-fired", 2021, "ejercito", "8625.71", "PISTOLA CAL 9mm TAURUS GX4",
-    "imagenes/070_Taurus_GX4.webp",
+    "imagenes/070_Taurus_GX4.webp?v=2",
     "Pistola compacta 9mm de Taurus para portar oculto. Calibre 9mm: uso reservado a Fuerzas Armadas en México."),
 
   mk(25, "Taurus GX4 XL", "Taurus", "pistola", "Brasil", "9mm Parabellum", "13+1", "570g", "175mm", "Semi-auto, striker-fired", 2022, "ejercito", "9674.78", "PISTOLA CAL 9mm TAURUS GX4XL",
-    "imagenes/071_Taurus_GX4_XL.webp",
+    "imagenes/071_Taurus_GX4_XL.webp?v=2",
     "Versión de cañón largo de la GX4. Mayor velocidad de boca y mejor control. Restringida en México por su calibre 9mm."),
 
   mk(26, "Taurus GX4 Carry", "Taurus", "pistola", "Brasil", "9mm Parabellum", "13+1", "552g", "171mm", "Semi-auto, striker-fired", 2023, "ejercito", "8192.49", "PISTOLA F.C. TAURUS GX4 CARRY CAL 9MM",
-    "imagenes/072_Taurus_GX4_Carry.webp",
+    "imagenes/072_Taurus_GX4_Carry.webp?v=2",
     "Variante portación con cañón intermedio. Calibre 9mm restringido a Fuerzas Armadas."),
 
   mk(27, "Taurus PT92", "Taurus", "pistola", "Brasil", "9mm Parabellum", "17+1", "975g", "217mm", "Semi-auto, DA/SA full-size", 1983, "ejercito", "10804.94", "PISTOLA F.C. TAURUS PT 92 AF-D CAL 9 MM",
@@ -356,27 +356,27 @@ window.DB = [
   //  RIFLES .22 LR — USO CIVIL
   // ═══════════════════════════════════════════════════════════
   mk(50, "Mendoza RM22-6000 Nogal", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2700g", "1010mm", "Semi-auto, culata de nogal", 2015, "dcam", "8348.94", "RIFLE 22 MENDOZA RM22-6000 NOGAL",
-    "imagenes/023_Mendoza_RM22-6000_Nogal.webp",
+    "imagenes/023_Mendoza_RM22-6000_Nogal.webp?v=2",
     "Rifle deportivo mexicano de Productos Mendoza. Acción semi-automática .22 LR con culata de nogal tradicional. Ideal para tiro deportivo y caza menor."),
 
   mk(51, "Mendoza RM22-6000 Black", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2700g", "1010mm", "Semi-auto, sintético negro", 2017, "dcam", "9760.66", "RIFLE 22 MENDOZA RM22-6000 A.",
-    "imagenes/024_Mendoza_RM22-6000_Black.webp",
+    "imagenes/024_Mendoza_RM22-6000_Black.webp?v=2",
     "Versión con culata sintética del RM22-6000. Resistente al clima, ideal para campo."),
 
   mk(52, "Mendoza RM22-6000 Squad", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2750g", "1010mm", "Semi-auto, presentación táctica", 2019, "dcam", "9760.66", "RIFLE 22 MENDOZA RM22-6000 A. SQUAD",
-    "imagenes/025_Mendoza_RM22-6000_Squad.webp",
+    "imagenes/025_Mendoza_RM22-6000_Squad.webp?v=2",
     "Edición con apariencia táctica del RM22-6000. Calibre .22 LR de libre adquisición civil."),
 
   mk(53, "Mendoza RM22-6000 Safari", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2750g", "1010mm", "Semi-auto, camo safari", 2020, "dcam", "9760.66", "RIFLE 22 MENDOZA RM22-6000 A. SAFARI",
-    "imagenes/026_Mendoza_RM22-6000_Safari.webp",
+    "imagenes/026_Mendoza_RM22-6000_Safari.webp?v=2",
     "Acabado camuflaje safari. Ideal para cacería menor y plinking."),
 
   mk(54, "Mendoza RM22-3000 Ergonómico", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2850g", "1020mm", "Semi-auto, culata ergonómica", 2021, "dcam", "10833.88", "RIFLE 22 MENDOZA RM22-3000 ERG",
-    "imagenes/027_Mendoza_RM22-3000_Ergonomico.webp",
+    "imagenes/027_Mendoza_RM22-3000_Ergonomico.webp?v=2",
     "Línea ergonómica de Mendoza con empuñadura pistola. Mayor comodidad para sesiones largas."),
 
   mk(55, "Mendoza RM22-1000", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2500g", "990mm", "Semi-auto, entrada de gama", 2014, "dcam", "5965.69", "RIFLE SEMI CAL 22 RM22-1000",
-    "imagenes/028_Mendoza_RM22-1000.webp",
+    "imagenes/028_Mendoza_RM22-1000.webp?v=2",
     "El rifle .22 más económico del catálogo. Excelente para iniciarse en el tiro deportivo. Fabricado en México."),
 
   mk(56, "Mendoza Centenario", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2700g", "1010mm", "Semi-auto edición conmemorativa", 2011, "dcam", "7028.28", "RIFLE SEMI CAL .22 MENDOZA CENTENARIO",
@@ -391,7 +391,7 @@ window.DB = [
   //  RIFLES DE CACERÍA — USO CIVIL
   // ═══════════════════════════════════════════════════════════
   mk(58, "CZ 600 Alpha .243", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".243 Winchester", "5", "2900g", "1080mm", "Cerrojo bolt-action", 2022, "dcam", "19156.97", "RIFLE CESKA Z. CZ 600 ALPHA CAL .243",
-    "imagenes/031_CZ_600_Alpha_.243.webp",
+    "imagenes/031_CZ_600_Alpha_.243.webp?v=2",
     "Nueva generación de rifles de cerrojo CZ. .243 Win: popular para venado y jabalí en México."),
 
   mk(59, "CZ 600 American", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".308 Winchester", "5", "3100g", "1110mm", "Cerrojo bolt-action", 2023, "dcam", "22603.20", "RIFLE CESKA CZ 600 AMERICAN",
@@ -407,7 +407,7 @@ window.DB = [
     "Línea de entrada de Weatherby. .243 Win: calibre versátil para varmint y venado mediano."),
 
   mk(62, "Weatherby Vanguard .300", "Weatherby", "rifle", "EE.UU.", ".300 Win Mag", "3+1", "3300g", "1120mm", "Cerrojo bolt-action magnum", 2010, "dcam", "24375.71", "RIFLE CRJ WEATHERBY VANGUARD CAL .300",
-    "imagenes/035_Weatherby_Vanguard_.300.webp",
+    "imagenes/035_Weatherby_Vanguard_.300.webp?v=2",
     ".300 Winchester Magnum es calibre premium para caza mayor a larga distancia. Excelente para borrego cimarrón."),
 
   mk(63, "Weatherby Vanguard 7mm", "Weatherby", "rifle", "EE.UU.", "7mm Rem Mag", "3+1", "3300g", "1120mm", "Cerrojo bolt-action magnum", 2010, "dcam", "24375.71", "RIFLE CRJ WEATHERBY VANGUARD CAL 7MM",
@@ -474,7 +474,7 @@ window.DB = [
     "Fusil de asalto modular checo. Adoptado por varias fuerzas armadas. Exclusivo de Fuerzas Armadas en México."),
 
   mk(78, "IWI ARAD 5.56", "IWI", "carabina", "Israel", "5.56x45mm", "30", "3200g", "780mm", "Semi-auto, plataforma AR", 2022, "ejercito", "46106.46", "FUSIL 5.56X45MM IWI ARAD",
-    "imagenes/108_IWI_ARAD_5.56.webp",
+    "imagenes/108_IWI_ARAD_5.56.webp?v=2",
     "Nueva carabina israelí compatible con accesorios AR-15. Exclusiva militar."),
 
   mk(79, "IWI ARAD 7", "IWI", "carabina", "Israel", "7.62x51mm", "20", "3800g", "920mm", "Semi-auto, plataforma AR-10", 2023, "ejercito", "43077.85", "FUSIL 7.62x51 MM IWI ARAD 7",
