@@ -90,11 +90,25 @@ perfecta en disco y verse mal en su sitio.
 
 ## Permisos y consentimiento
 
-Los comandos están declarados en `.claude/settings.json`. Si el clasificador del
-entorno te bloquea algo (pasó el 31-ago-2026 con `gh pr merge`, con el merge por
-git y hasta con un `git ls-remote` de solo lectura): **para y pide el permiso al
-usuario con el comando exacto**. No busques una tercera vía para colar la misma
-acción.
+**Entra al repo UNA vez, y luego comandos pelados.** No encadenes
+`cd ... && git push`: las reglas de permiso casan por prefijo del comando, así
+que con el `cd &&` delante `Bash(git push:*)` no casa y salta el prompt igual.
+El directorio de trabajo persiste entre llamadas:
+
+```bash
+cd "<ruta>/repo/github-deploy"     # una llamada, sola
+npm run build                       # y a partir de aquí, pelados
+git push -u origin <rama>
+```
+
+Esto es lo que convirtió el flujo del 31-ago-2026 en un ir y venir de prompts.
+
+La lista vive en el `.claude/settings.local.json` de la **raíz del proyecto**
+(`Armado en Mexico`), no en el `.claude/settings.json` del repo: la raíz es el
+cwd de la sesión y el repo es una subcarpeta. Si el clasificador del entorno te
+bloquea algo igualmente (pasó con `gh pr merge`, con el merge por git y hasta
+con un `git ls-remote` de solo lectura): **para y pide el permiso al usuario con
+el comando exacto**. No busques una tercera vía para colar la misma acción.
 
 Y aparte de los permisos: **esto es producción**. Mergear a `main` se pide
 explícitamente aunque el flujo esté autorizado, salvo que el usuario ya haya

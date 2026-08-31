@@ -59,13 +59,27 @@ Después de mergear, el preview de `develop` tarda 1-2 min.
 - **No añadas un `_redirects`.** CLAUDE.md lo prohíbe expresamente: ya provocó
   un bucle infinito una vez.
 
-## Permisos
+## Permisos: entra al repo UNA vez, y luego comandos pelados
 
-Los comandos de este flujo están declarados en `.claude/settings.json`. Si aun
-así algo te lo bloquea el clasificador del entorno (pasó el 31-ago-2026 con
-`gh pr merge`, con el merge por git **y** con un `git ls-remote` de solo
-lectura): **para y pídeselo al usuario con el comando exacto**. No busques una
-tercera vía para colar la misma acción.
+**No encadenes `cd ... && git push`.** Las reglas de permiso casan por prefijo
+del comando: con el `cd &&` delante, `Bash(git push:*)` no casa y salta el
+prompt igual. El directorio de trabajo persiste entre llamadas, así que:
+
+```bash
+cd "<ruta>/repo/github-deploy"     # una llamada, sola
+git status --short                  # y a partir de aquí, pelados
+npm run build
+git push -u origin <rama>
+```
+
+Esto es lo que convirtió el flujo del 31-ago-2026 en un ir y venir de prompts.
+
+La lista de permisos vive en el `.claude/settings.local.json` de la **raíz del
+proyecto** (`Armado en Mexico`), no en el `.claude/settings.json` del repo: la
+raíz es el cwd de la sesión y el repo es una subcarpeta. Si algo aun así te lo
+bloquea el clasificador del entorno (pasó con `gh pr merge`, con el merge por
+git **y** con un `git ls-remote` de solo lectura): **para y pídeselo al usuario
+con el comando exacto**. No busques una tercera vía para colar la misma acción.
 
 ## Entrega SIEMPRE
 
