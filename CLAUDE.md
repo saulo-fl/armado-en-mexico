@@ -19,8 +19,12 @@ Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
   formatos) y `auditar.js` (verificación de integridad).
 - **`verificar-app`** — antes de commitear: transpila los `.jsx` + carga los
   `data-*.js` + valida invariantes. Orden: `node .claude/skills/conciliar-inventario/scripts/auditar.js`.
-- **`fidelidad-diseno`** — al tocar UI: mantener el look táctico/tecnológico y no
-  romper la transpilación ni el orden de carga. Complementa `HANDOFF-DISENO.md`.
+- **`fidelidad-diseno`** — al tocar UI: decisiones de producto ya tomadas, estructura de
+  la ficha, vocabulario prohibido y la bitácora de trampas descubiertas. Incluye
+  `contraste.mjs` (audita la `PALETTE` viva contra los umbrales WCAG).
+- **`migrar-a-css`** — pasar una primitiva de estilos inline a `className` + CSS sin
+  romper nada: qué va a cada sitio, el puente de custom properties, y las trampas de
+  `_headers` y del guardia del build.
 - **`publicar`** — flujo git: `fetch` antes de `checkout -B` (gotcha), PR a `main` **y**
   `develop`, cache-busting `?v=` si cambian los `data-*.js`.
 - **`fotos-producto`** — preparar fotos de producto: quitar fondo con alfa, encuadrar a
@@ -34,7 +38,13 @@ Agentes delegables: **`deploy-main`** (publicar en producción, con resembrado d
 sondas de verificación) · **`deploy-develop`** (llevar a `develop` para ver el preview,
 sin tocar producción) · **`conciliador-inventario`** (conciliación completa) ·
 **`preparador-imagenes`** (fotos de arma con alfa) · **`revisor-armado`** (auditoría de
-datos + fidelidad de diseño).
+datos + fidelidad de diseño) · **`disenador-oficial`** (rediseño y custodia del sistema
+visual) · **`auditor-a11y-perf`** (contraste, foco, áreas táctiles, peso, coste de scroll).
+
+**Diseño:** el brief vigente es **`DESIGN.md`** — stack real, diagnóstico medido,
+dirección de arte «Documento Oficial Mexicano + instrumentación» y prohibiciones
+explícitas. `HANDOFF-DISENO.md` quedó **obsoleto** (describía un stack inexistente) y hoy
+es solo un puntero: no lo uses como fuente.
 
 **Los dos agentes de deploy están separados a propósito**: `develop` es el ensayo y no
 necesita ni resembrar D1 ni verificar armado.mx; `main` es producción y no está hecho

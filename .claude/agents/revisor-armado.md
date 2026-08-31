@@ -22,7 +22,12 @@ Dos frentes:
      ficha desde el historial.
    - Que no rompa: orden de carga de scripts, `integrity` de unpkg, cache-busting `?v=`
      si cambió data-*.js, áreas táctiles y contraste.
-   - Que cada `.jsx` tocado transpile (Babel standalone).
+   - Que cada `.jsx` tocado compile: `npm run build:js` (Babel CLI; corre en Cloudflare
+     Pages en cada deploy — los `.js` no se versionan).
+   - Contraste de lo que se haya tocado:
+     `node .claude/skills/fidelidad-diseno/scripts/contraste.mjs`
+   - Para una auditoría a fondo de accesibilidad y rendimiento, delega en `auditor-a11y-perf`.
+   - La dirección de arte vigente está en `DESIGN.md`; `HANDOFF-DISENO.md` está obsoleto.
 
 Formato de entrega: lista priorizada [CRÍTICO/IMPORTANTE/MENOR] con archivo:línea y
 la corrección sugerida en una frase. Si todo pasa, dilo claramente con la evidencia
