@@ -30,10 +30,20 @@ Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
 - **`mejorar-tooling`** — al cerrar una tarea: capturar aprendizajes/edge-cases en las
   skills (automejora). Mantén su inventario al día.
 
-Agentes delegables: **`conciliador-inventario`** (conciliación completa) y
-**`revisor-armado`** (auditoría de datos + fidelidad de diseño). **Regla:** cualquier
-cambio de datos o UI se **verifica con `auditar.js`** y respeta `fidelidad-diseno`
-antes de publicar. Al terminar algo no trivial, aplica `mejorar-tooling`.
+Agentes delegables: **`deploy-main`** (publicar en producción, con resembrado de D1 y
+sondas de verificación) · **`deploy-develop`** (llevar a `develop` para ver el preview,
+sin tocar producción) · **`conciliador-inventario`** (conciliación completa) ·
+**`preparador-imagenes`** (fotos de arma con alfa) · **`revisor-armado`** (auditoría de
+datos + fidelidad de diseño).
+
+**Los dos agentes de deploy están separados a propósito**: `develop` es el ensayo y no
+necesita ni resembrar D1 ni verificar armado.mx; `main` es producción y no está hecho
+hasta que D1 esté resembrado y las sondas den lo que deben. Mezclarlos era la vía por la
+que se daba por publicado algo que ningún visitante veía.
+
+**Regla:** cualquier cambio de datos o UI se **verifica con `auditar.js`** y respeta
+`fidelidad-diseno` antes de publicar. Al terminar algo no trivial, aplica
+`mejorar-tooling`.
 
 ## Cómo se trabaja aquí
 
@@ -238,6 +248,26 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
   solo `resembrar.js`, que ya encapsula el único uso legítimo), o quítalo y deja
   que el resembrado lo haga quien tenga la cuenta. Revisa la lista entera con el
   mismo criterio, no solo esa línea.
+
+  **Los agentes `deploy-main` y `deploy-develop` necesitan el flujo de git y `gh`
+  en esa lista** (`git add/commit/merge/rebase/push`, `gh pr create/merge`, más
+  `git ls-remote` y `git checkout`). Sin esos permisos el flujo se corta a mitad:
+  el 31-ago-2026 se quedó una rama empujada con el PR abierto y sin mergear, y
+  hasta un `git ls-remote` de solo lectura resultó bloqueado.
+
+  Al añadirlos, las dos entradas que hay que mirar con el mismo ojo que
+  `wrangler` son `Bash(git push:*)` y `Bash(git rebase:*)`: entre las dos se
+  puede reescribir la historia de `main`. Conviene acompañarlas de un bloque
+  `permissions.deny` con `git push --force` / `-f` / `--delete`, `git reset
+  --hard` y `git clean -fdx` — pero **ese deny no es hermético y no debe darte
+  confianza**: la coincidencia es por prefijo del comando, así que no cubre
+  variantes como `git push origin +main` ni `--force-with-lease`. Es una red para
+  el descuido, no una barrera contra la intención.
+
+  **Nota para Claude:** editar `.claude/settings.json` está bloqueado por el
+  clasificador del entorno, y está bien que lo esté — es el archivo que te da
+  permisos a ti. Propón el contenido y que lo aplique el usuario; no busques otra
+  vía para escribirlo.
 
 - **Campos de tiro y Experiencias están CONGELADAS** (27-ago-2026) para poder publicar:
   sus datos son de relleno y la app sirve una pantalla «Próximamente» en `/campos`,
