@@ -55,7 +55,7 @@ function StripePlaceholder({ label, ratio = '16 / 9', children }) {
     }}>
       {children || (
         <span style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
           color: PALETTE.textMuted, letterSpacing: '0.18em',
           textTransform: 'uppercase', textAlign: 'center', padding: '0 10px',
         }}>{label}</span>
@@ -69,10 +69,14 @@ window.StripePlaceholder = StripePlaceholder;
 function MiniBadge({ children, color = PALETTE.amber, solid = false }) {
   return (
     <span style={{
-      fontFamily: 'Courier Prime, monospace', fontSize: 13, fontWeight: 700,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700,
       letterSpacing: '0.12em', textTransform: 'uppercase',
       padding: '3px 7px',
-      color: solid ? '#1A1A1A' : color,
+      // El badge sólido pintaba el texto en '#173A32' fijo. Su único llamador
+      // (CampoCard, el estatus destacado) le pasa color=PALETTE.amber, que HOY
+      // vale ese mismo #173A32: verde sobre verde, 1.00:1, invisible. Se corrige
+      // aquí y no en el llamador porque es el relleno el que decide su tinta.
+      color: solid ? PALETTE.sobreMarca : color,   // 10.83:1 sobre el verde de marca
       background: solid ? color : 'transparent',
       border: `1px solid ${color}`,
       whiteSpace: 'nowrap',
@@ -95,7 +99,7 @@ function CalibresScreen({ onOpenArma, onNav }) {
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* encabezado */}
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Guía de calibres</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Guía de calibres</div>
       <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
         Conoce los calibres presentes en el catálogo: su uso típico, balística aproximada y las armas que los emplean. Cifras divulgativas, varían según marca y munición.
       </div>
@@ -108,10 +112,10 @@ function CalibresScreen({ onOpenArma, onNav }) {
             <button key={cl} onClick={() => setClase(cl)} style={{
               flexShrink: 0,
               background: active ? PALETTE.amber : 'transparent',
-              color: active ? '#1A1A1A' : PALETTE.textDim,
+              color: active ? '#173A32' : PALETTE.textDim,
               border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
               padding: '7px 14px', cursor: 'pointer',
-              fontFamily: 'Courier Prime, monospace', fontSize: 15.5,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
               letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700,
             }}>{cl}</button>
           );
@@ -156,7 +160,7 @@ function CartuchoSlot({ cal, vp }) {
         : <span style={{
             position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%) rotate(180deg)',
             writingMode: 'vertical-rl',
-            fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.textMuted,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.textMuted,
             letterSpacing: '0.2em', textTransform: 'uppercase', whiteSpace: 'nowrap',
           }}>▢ Cartucho · {cal.id}</span>}
     </div>
@@ -167,8 +171,8 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
   const armas = armasPorCalibre(cal.id);
   const stat = (k, v) => (
     <div style={{ flex: 1, minWidth: 90 }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 16, color: PALETTE.text }}>{v}</div>
+      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16, color: PALETTE.text }}>{v}</div>
     </div>
   );
   return (
@@ -176,11 +180,11 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
       <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '18px 20px' : '14px' }}>
         {/* título + sistema */}
         <div>
-          <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{cal.sistema}</div>
-          <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 25 : 21, color: PALETTE.text, letterSpacing: '0.01em' }}>{cal.id}</span>
+          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{cal.sistema}</div>
+          <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 25 : 21, color: PALETTE.text, letterSpacing: '0.01em' }}>{cal.id}</span>
         </div>
         {/* uso */}
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
         {/* desc */}
         <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
         {/* balística */}
@@ -193,7 +197,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
         {/* armas que lo usan */}
         {armas.length > 0 && (
           <div style={{ marginTop: 14 }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>Armas que lo usan</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>Armas que lo usan</div>
             <DragScroll style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
               {armas.map((a) => (
                 <button key={a.id} onClick={() => onOpenArma(a.id)} style={{
@@ -208,8 +212,8 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
                       : <div style={{ width: '100%', height: '100%', background: `repeating-linear-gradient(135deg, ${PALETTE.bgElev} 0 8px, ${PALETTE.bgCard} 8px 16px)` }} />}
                   </div>
                   <div style={{ padding: '6px 7px' }}>
-                    <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{a.marca}</div>
-                    <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, fontWeight: 600, color: PALETTE.text, lineHeight: 1.15, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
+                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{a.marca}</div>
+                    <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 13, fontWeight: 600, color: PALETTE.text, lineHeight: 1.15, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
                   </div>
                 </button>
               ))}
@@ -231,7 +235,7 @@ function CamposScreen({ onNav }) {
   const campos = window.CAMPOS || [];
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 10 }}>Campos de tiro</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 10 }}>Campos de tiro</div>
 
       {/* banner suscripción a futuro */}
       <div style={{
@@ -240,15 +244,17 @@ function CamposScreen({ onNav }) {
         marginBottom: 20, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap',
       }}>
         <div style={{ flex: 1, minWidth: 220 }}>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Suscripción próximamente</div>
+          <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Suscripción próximamente</div>
           <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 4 }}>
             Pronto podrás suscribirte para acceder a campos y clubes de tiro aliados con beneficios y reservación. Estos son ejemplos de lo que vendrá.
           </div>
         </div>
         <button onClick={() => onNav && onNav('submit')} style={{
-          flexShrink: 0, background: PALETTE.amber, color: '#1A1A1A', border: 'none',
+          // El texto era '#173A32' sobre PALETTE.amber, que hoy ES #173A32:
+          // 1.00:1, el botón salía en blanco. Sobre verde de marca → sobreMarca.
+          flexShrink: 0, background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',   // 10.83:1
           padding: '11px 18px', cursor: 'pointer',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.12em', textTransform: 'uppercase',
         }}>Avísame</button>
       </div>
@@ -268,15 +274,15 @@ function CampoCard({ campo, vp }) {
     <div style={{ background: PALETTE.bgCard, border: `1px solid ${destacado ? PALETTE.amber : PALETTE.border}` }}>
       <StripePlaceholder label={`Foto · ${campo.ciudad}`} ratio="16 / 9">
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CAMPO</div>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: PALETTE.textDim, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{campo.entorno}</div>
+          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CAMPO</div>
+          <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 14, color: PALETTE.textDim, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{campo.entorno}</div>
         </div>
       </StripePlaceholder>
       <div style={{ padding: '14px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15 }}>{campo.nombre}</div>
+          <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15 }}>{campo.nombre}</div>
         </div>
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 5 }}>◉ {campo.ciudad}, {campo.estado}</div>
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 5 }}>◉ {campo.ciudad}, {campo.estado}</div>
         {/* disciplinas */}
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
           {campo.disciplinas.map((d) => <MiniBadge key={d} color={PALETTE.border === d ? PALETTE.amber : PALETTE.textDim}>{d}</MiniBadge>)}
@@ -284,12 +290,12 @@ function CampoCard({ campo, vp }) {
         {/* meta */}
         <div style={{ display: 'flex', gap: 14, marginTop: 12, paddingTop: 10, borderTop: `1px solid ${PALETTE.border}` }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Distancias</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.distancias}</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Distancias</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.distancias}</div>
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Acceso</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.plan}</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Acceso</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{campo.plan}</div>
           </div>
         </div>
         <div style={{ marginTop: 12 }}>
@@ -311,7 +317,7 @@ function CursosScreen({ onNav }) {
   const cursos = window.CURSOS || [];
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Cursos</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Cursos</div>
       <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
         Aprende antes de decidir. Catálogo de formación con instructores certificados, del manejo seguro al tiro defensivo y de precisión. Contenido de muestra.
       </div>
@@ -329,34 +335,34 @@ function CursoCard({ curso, onNav, vp }) {
     <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${col}`, display: 'flex', flexDirection: 'column' }}>
       <StripePlaceholder label={`Foto · ${curso.titulo}`} ratio="16 / 9">
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CURSO</div>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, color: PALETTE.textDim, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{curso.modalidad}</div>
+          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CURSO</div>
+          <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 14, color: PALETTE.textDim, marginTop: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{curso.modalidad}</div>
         </div>
       </StripePlaceholder>
       <div style={{ padding: '14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
           <MiniBadge color={col}>{curso.nivel}</MiniBadge>
-          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.08em' }}>{curso.modalidad}</span>
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.08em' }}>{curso.modalidad}</span>
         </div>
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 18, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.1, marginTop: 12 }}>{curso.titulo}</div>
+        <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.1, marginTop: 12 }}>{curso.titulo}</div>
         <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 8, flex: 1 }}>{curso.desc}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
           <div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Duración</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{curso.duracion}</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Duración</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600, color: PALETTE.text, marginTop: 2 }}>{curso.duracion}</div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Inversión</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 15, fontWeight: 700, color: PALETTE.amber, marginTop: 2 }}>{curso.precio}</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Inversión</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 15, fontWeight: 700, color: PALETTE.amber, marginTop: 2 }}>{curso.precio}</div>
           </div>
         </div>
         <button onClick={() => onNav && onNav('submit')} style={{
           marginTop: 12, width: '100%', background: 'transparent', color: PALETTE.amber,
           border: `1.5px solid ${PALETTE.amber}`, padding: '10px', cursor: 'pointer',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.12em', textTransform: 'uppercase',
         }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = PALETTE.amber; e.currentTarget.style.color = '#1A1A1A'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = PALETTE.amber; e.currentTarget.style.color = '#173A32'; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = PALETTE.amber; }}>
           Me interesa
         </button>
@@ -378,10 +384,10 @@ function CaliberMiniCard({ cal, onClick }) {
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
       <div style={{ padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{cal.sistema}</div>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 8, lineHeight: 1 }}>{cal.id}</div>
+      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{cal.sistema}</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 8, lineHeight: 1 }}>{cal.id}</div>
       <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
-      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
+      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
       </div>
       {/* CARTUCHO SLOT — PNG vertical del cartucho a escala REAL (altura ∝ mm), anclado al piso */}
       <div style={{
@@ -408,11 +414,11 @@ function CampoMiniCard({ campo, onClick }) {
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = destacado ? PALETTE.amber : PALETTE.border}>
       <StripePlaceholder label="Foto" ratio="16 / 9">
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: PALETTE.textDim, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{campo.entorno}</div>
+        <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 13, color: PALETTE.textDim, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{campo.entorno}</div>
       </StripePlaceholder>
       <div style={{ padding: '11px 12px' }}>
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{campo.nombre}</div>
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.amber, letterSpacing: '0.05em', marginTop: 4 }}>◉ {campo.ciudad}</div>
+        <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{campo.nombre}</div>
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: PALETTE.amber, letterSpacing: '0.05em', marginTop: 4 }}>◉ {campo.ciudad}</div>
       </div>
     </div>
   );
@@ -429,14 +435,14 @@ function CursoMiniCard({ curso, onClick }) {
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
       onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
       <StripePlaceholder label="Foto" ratio="16 / 9">
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: PALETTE.textDim, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{curso.modalidad}</div>
+        <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 13, color: PALETTE.textDim, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{curso.modalidad}</div>
       </StripePlaceholder>
       <div style={{ padding: '11px 14px 14px', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <MiniBadge color={col}>{curso.nivel}</MiniBadge>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, marginTop: 10, flex: 1 }}>{curso.titulo}</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.15, marginTop: 10, flex: 1 }}>{curso.titulo}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textMuted, letterSpacing: '0.06em' }}>{curso.duracion}</span>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.amber, letterSpacing: '0.08em' }}>Ver →</span>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: PALETTE.textMuted, letterSpacing: '0.06em' }}>{curso.duracion}</span>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: PALETTE.amber, letterSpacing: '0.08em' }}>Ver →</span>
       </div>
       </div>
     </div>
@@ -456,22 +462,35 @@ window.CursoMiniCard = CursoMiniCard;
 function ProximamenteScreen({ titulo, texto }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
+  // El header móvil ya no pinta el título de pantalla: este bloque (título +
+  // antetítulo) es el único encabezado, así que en móvil ocupa el centro que
+  // dejó el header. En escritorio/tablet TopNav tampoco pinta título y el
+  // encabezado se queda al margen izquierdo, alineado con el resto de la columna.
+  const alinea = vp.isMobile ? 'center' : 'left';
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{
-        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26,
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26,
         color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05,
+        textAlign: alinea,
       }}>{titulo}</div>
       <div style={{
-        fontFamily: 'Courier Prime, monospace', fontSize: 15, color: PALETTE.amber,
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 15, color: PALETTE.amber,
         letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: 8,
+        textAlign: alinea,
       }}>Próximamente</div>
 
+      {/* Panel informativo, NO un control: cursor por defecto y sin onClick para
+          que no se lea como algo pulsable (los datos de esta sección están
+          congelados, no hay adónde ir). */}
       <div style={{
         marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
-        padding: vp.isDesktop ? '34px 30px' : '26px 18px', textAlign: 'center',
+        padding: vp.isDesktop ? '34px 30px' : '26px 18px', textAlign: 'center', cursor: 'default',
       }}>
-        <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.55, lineHeight: 1 }}>?</div>
+        {/* El glifo es decoración, pero aun así debe verse: a opacity 0.55 el
+            verde resolvía a #7D908A sobre la tarjeta #FAF9F5 = 3.20:1, justo en
+            el filo del mínimo gráfico. A 0.6 resuelve a #728680 = 3.67:1. */}
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.6, lineHeight: 1 }} aria-hidden="true">?</div>
         <div style={{
           fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim,
           lineHeight: 1.55, maxWidth: 560, margin: '16px auto 0',
@@ -492,14 +511,17 @@ function ProximamenteCard() {
       overflow: 'hidden', height: '100%', cursor: 'default',
     }}>
       <StripePlaceholder ratio="16 / 9">
-        <span style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 42, color: PALETTE.amber,
-          opacity: 0.45, lineHeight: 1,
+        {/* A opacity 0.45 el verde de marca resolvía a #94A39D sobre el hueco
+            #FAF9F5 de StripePlaceholder: 2.50:1, por debajo del 3:1 que exige
+            un elemento gráfico. A 0.6 resuelve a #728680 = 3.67:1. */}
+        <span aria-hidden="true" style={{
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 42, color: PALETTE.amber,
+          opacity: 0.6, lineHeight: 1,
         }}>?</span>
       </StripePlaceholder>
       <div style={{ padding: '11px 12px' }}>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.textMuted,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.textMuted,
           textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.15,
         }}>Próximamente</div>
       </div>

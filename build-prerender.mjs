@@ -378,36 +378,76 @@ Disallow: /shopify-demo.html
 Sitemap: ${SITIO}/sitemap.xml
 `, 'utf8');
 
-// ─── 7b. Guardia de caché ───────────────────────────────────────────────────
-// Todo .js servido por el sitio DEBE tener su regla en `_headers`, o Pages lo
-// sirve con su default de `max-age=14400` y el navegador ejecuta la versión
-// vieja hasta 4 h después del deploy. Ya pasó (ago-2026): `/*.js` parecía
-// cubrirlo, pero el splat de Pages nunca coincide con un patrón que lleve texto
-// tras el asterisco, así que la regla estaba muerta y nadie se enteró — una
-// regla muerta no rompe el build, solo deja de hacer nada.
-// Por eso los archivos van uno a uno en `_headers` y esto comprueba la lista:
-// añadir un <script> sin su regla rompe el build, en vez de degradar el sitio
-// en silencio dentro de tres meses.
+// ─── 7b. Guardias de caché ──────────────────────────────────────────────────
+// Dos formas distintas de que un deploy no llegue al visitante, las dos mudas.
+//
+// (a) REGLA EN `_headers`. Todo .js/.css servido por el sitio DEBE tener la
+// suya, o Pages lo sirve con su default de `max-age=14400` y el navegador
+// ejecuta la versión vieja hasta 4 h después del deploy. Ya pasó (ago-2026):
+// `/*.js` parecía cubrirlo, pero el splat de Pages nunca coincide con un patrón
+// que lleve texto tras el asterisco, así que la regla estaba muerta y nadie se
+// enteró — una regla muerta no rompe el build, solo deja de hacer nada.
+// Por eso los archivos van uno a uno en `_headers` y esto comprueba la lista.
+//
+// (b) SUFIJO `?v=` EN EL HTML. La regla de (a) solo consigue que el navegador
+// revalide; no invalida lo que ya tiene guardado. Un móvil con el `ui.js` del
+// tema anterior en su caché (o detrás de un proxy, o con la pestaña dormida) lo
+// sigue ejecutando y mezcla el HTML nuevo con el JavaScript viejo. Ocurrió con
+// el rediseño de ago-2026: llegaba el HTML nuevo y el JS seguía pintando el
+// acento beige #DDD5C4, que sobre el lienzo crema da 1.27:1 — invisible.
+// Cambiar la URL es lo único que fuerza una descarga de verdad.
+//
 // El \r\n importa: git materializa `_headers` con CRLF en Windows y con LF en
 // el build de Cloudflare. Sin normalizar, en local fallaba denunciando los 19
 // archivos a la vez — un guardia que grita siempre se acaba ignorando.
 const reglasCache = readFileSync(join(RAIZ, '_headers'), 'utf8').replace(/\r\n/g, '\n');
 const scriptsLocales = new Set();
-for (const html of ['index.html', 'admin.html']) {
+const sinVersion = [];
+// shopify-demo.html también carga código del sitio; fuera de esta lista sus
+// <script> se saltaban los dos guardias.
+for (const html of ['index.html', 'admin.html', 'shopify-demo.html']) {
   const src = readFileSync(join(RAIZ, html), 'utf8');
-  for (const m of src.matchAll(/<script[^>]+src="([^"]+\.js)(?:\?[^"]*)?"/g)) {
-    if (!/^https?:/.test(m[1])) scriptsLocales.add(m[1].replace(/^\.?\//, ''));
+  // Grupo 1 = ruta sin query (lo que se busca en `_headers`); grupo 2 = la query
+  // tal cual, que es donde se comprueba el ?v=.
+  const refs = [
+    ...src.matchAll(/<script[^>]+src="([^"?]+\.js)(\?[^"]*)?"/g),
+    // Las hojas de estilo tienen exactamente el mismo problema que los scripts y
+    // hasta ago-2026 no se vigilaban: un .css sin regla NO rompía el build, se
+    // colaba en silencio y se quedaba a merced del TTL de la zona.
+    ...src.matchAll(/<link[^>]+href="([^"?]+\.css)(\?[^"]*)?"/g),
+  ];
+  for (const m of refs) {
+    if (/^https?:/.test(m[1])) continue;   // unpkg / Google Fonts: versión en la propia URL
+    scriptsLocales.add(m[1].replace(/^\.?\//, ''));
+    if (!/[?&]v=/.test(m[2] || '')) sinVersion.push(`${html}  →  ${m[1]}`);
   }
 }
+
 const sinRegla = [...scriptsLocales].filter((f) => !reglasCache.includes('\n/' + f + '\n'));
 if (sinRegla.length) {
   throw new Error(
-    'build-prerender: estos scripts no tienen regla de caché en `_headers`:\n'
+    'build-prerender: estos archivos no tienen regla de caché en `_headers`:\n'
     + sinRegla.map((f) => '  /' + f).join('\n')
     + '\n\nSin ella Cloudflare Pages los sirve con max-age=14400, y un deploy tarda\n'
     + '4 h en llegar a quien ya visitó el sitio. Añade a `_headers`:\n\n'
     + sinRegla.map((f) => '/' + f + '\n  Cache-Control: public, max-age=0, must-revalidate').join('\n')
     + '\n\nOJO: la ruta va literal, sin comodines — `/*.js` NO coincide con nada.'
+  );
+}
+
+if (sinVersion.length) {
+  throw new Error(
+    'build-prerender: estos recursos locales se cargan sin sufijo `?v=`:\n'
+    + sinVersion.map((f) => '  ' + f).join('\n')
+    + '\n\nSin `?v=` el deploy NO llega a quien ya tiene el archivo cacheado: su\n'
+    + 'navegador reutiliza la copia vieja y mezcla el HTML nuevo con el JS/CSS\n'
+    + 'anterior. Así se rompió el rediseño en móvil (ago-2026): HTML nuevo + ui.js\n'
+    + 'viejo, que seguía pintando el acento #DDD5C4 — 1.27:1 sobre el lienzo crema,\n'
+    + 'texto invisible. La regla de `_headers` hace revalidar, no descargar: no basta.\n\n'
+    + 'Pon la fecha del deploy en el HTML, p. ej.:\n\n'
+    + sinVersion.map((f) => '  ' + f.split('→')[1].trim() + '?v=AAAAMMDD').join('\n')
+    + '\n\nLos data-*.js llevan su propia versión y solo cambian cuando cambian los\n'
+    + 'datos; el resto del código se sube de golpe en cada rediseño.'
   );
 }
 

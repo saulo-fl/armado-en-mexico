@@ -15,10 +15,10 @@
         flexShrink: 0,
         width: 46, height: 46,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        background: accent ? 'rgba(245,197,24,0.12)' : P.bg,
+        background: accent ? 'rgba(221,213,196,0.12)' : P.bg,
         border: `1px solid ${accent ? P.amber : P.border}`,
         color: P.amber,
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 26.5,
         borderRadius: 6,
       }}>{icon}</span>
@@ -38,7 +38,7 @@
         <IconTile icon={icon} accent={accent} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 15,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 15,
             color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em',
           }}>{title}</div>
           <div style={{
@@ -56,13 +56,13 @@
       <span style={{
         display: 'inline-flex', alignItems: 'center', gap: 6,
         background: 'rgba(192,57,43,0.10)',
-        border: `1px solid ${P.redHi || '#E4574B'}`,
+        border: `1px solid ${P.redHi || '#F29C8C'}`,
         color: P.text,
         ...window.amxProsa({ fontSize: 14.5, lineHeight: 1.4 }),
         letterSpacing: '0.03em',
         padding: '7px 12px',
       }}>
-        <span style={{ color: P.redHi || '#E4574B', fontWeight: 700 }}>✕</span>{children}
+        <span style={{ color: P.redHi || '#F29C8C', fontWeight: 700 }}>✕</span>{children}
       </span>
     );
   }
@@ -132,9 +132,9 @@
             width: vp.isDesktop ? 150 : 128, height: vp.isDesktop ? 150 : 128, margin: '0 auto',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: `1px solid ${P.amber}`, borderRadius: 12,
-            background: 'rgba(245,197,24,0.06)',
-            fontFamily: 'Courier Prime, monospace', fontSize: vp.isDesktop ? 77 : 65, color: P.amber,
-            boxShadow: '0 0 0 1px rgba(245,197,24,0.18), 0 10px 30px rgba(0,0,0,0.45)',
+            background: 'rgba(221,213,196,0.06)',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: vp.isDesktop ? 77 : 65, color: P.amber,
+            boxShadow: '0 0 0 1px rgba(221,213,196,0.18), 0 10px 30px rgba(0,0,0,0.45)',
           }}>◎</div>
         ),
       },
@@ -149,8 +149,8 @@
             width: vp.isDesktop ? 110 : 96, height: vp.isDesktop ? 110 : 96, margin: '0 auto',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             border: `2px solid ${P.amber}`, borderRadius: '50%',
-            color: P.amber, fontSize: vp.isDesktop ? 62.5 : 53, fontFamily: 'Courier Prime, monospace',
-            boxShadow: '0 0 0 6px rgba(245,197,24,0.08)',
+            color: P.amber, fontSize: vp.isDesktop ? 62.5 : 53, fontFamily: 'JetBrains Mono, monospace',
+            boxShadow: '0 0 0 6px rgba(221,213,196,0.08)',
           }}>✓</div>
         ),
       },
@@ -233,8 +233,8 @@
           .tut-grid::before {
             content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0;
             background-image:
-              linear-gradient(rgba(245,197,24,0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(245,197,24,0.03) 1px, transparent 1px);
+              linear-gradient(rgba(221,213,196,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(221,213,196,0.03) 1px, transparent 1px);
             background-size: 44px 44px;
             -webkit-mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
             mask-image: radial-gradient(ellipse at center, black 25%, transparent 78%);
@@ -257,7 +257,7 @@
           </div>
           <button onClick={finish} style={{
             background: 'none', border: 'none', cursor: 'pointer',
-            color: P.textMuted, fontFamily: 'Courier Prime, monospace',
+            color: P.textMuted, fontFamily: 'JetBrains Mono, monospace',
             fontSize: 13, letterSpacing: '0.14em', textTransform: 'uppercase',
             padding: '4px 2px', whiteSpace: 'nowrap',
           }}>{last ? '' : 'Saltar ✕'}</button>
@@ -285,7 +285,7 @@
 
             {/* Eyebrow */}
             <div style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
               color: P.amber, letterSpacing: '0.2em', textTransform: 'uppercase',
               marginBottom: 10, textAlign: s.rows ? 'left' : 'center',
             }}>{s.eyebrow}</div>
@@ -293,7 +293,7 @@
             {/* Título */}
             <h2 style={{
               margin: 0,
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 800,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 800,
               fontSize: vp.isDesktop ? 34 : 27, color: P.text,
               textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05,
               textAlign: s.rows ? 'left' : 'center',
@@ -319,7 +319,7 @@
             {s.tagline && (
               <div style={{
                 marginTop: 20, textAlign: 'center',
-                fontFamily: 'Courier Prime, monospace', fontSize: 15,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 15,
                 color: P.amber, letterSpacing: '0.08em',
               }}>{s.tagline}</div>
             )}
@@ -336,20 +336,20 @@
             background: 'none', border: 'none',
             cursor: idx === 0 ? 'default' : 'pointer',
             visibility: idx === 0 ? 'hidden' : 'visible',
-            color: P.textDim, fontFamily: 'Montserrat, sans-serif', fontWeight: 600,
+            color: P.textDim, fontFamily: 'Archivo, sans-serif', fontWeight: 600,
             fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase',
             padding: '10px 6px',
           }}>‹ Atrás</button>
 
           <div style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.textMuted,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.textMuted,
             letterSpacing: '0.1em',
           }}>{String(idx + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}</div>
 
           <button onClick={() => (last ? finish() : goNext())} style={{
             background: P.amber, color: '#000', border: 'none',
             cursor: 'pointer',
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700,
             fontSize: 14, letterSpacing: '0.12em', textTransform: 'uppercase',
             padding: '12px 22px', borderRadius: 4,
             transition: 'filter 0.2s ease, transform 0.1s ease',

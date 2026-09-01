@@ -218,5 +218,7 @@ anuncia solo.
   playwright-core con `executablePath:'/opt/pw-browsers/chromium'` y `page.route`
   ruteando unpkg a copias locales (npm react@18.3.1 trae `umd/`). El tutorial de
   bienvenida cubre la home la primera vez — clic en SALTAR antes de capturar.
-- 2026-06: fotos de armería son placeholders SVG (`imagenes/armeria-*.svg`) por falta
-  de red; cuando lleguen fotos reales, apuntar a `.jpg`.
+- 2026-06 → **RESUELTO ago-2026**: las fotos de armería eran placeholders SVG por falta de
+  red. Ya son fotos reales (`imagenes/armeria-dcam.webp` / `armeria-otca.webp`, usadas por
+  `ArsenalPhotoCard` en `screens-1.jsx`) y los `.svg` se borraron. Si una foto de sección
+  se sustituye, **borra el placeholder**: quedaron dos huérfanos dos meses.

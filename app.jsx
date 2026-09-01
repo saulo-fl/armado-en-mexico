@@ -158,22 +158,16 @@ function App() {
     faction: 'amarillo', hudIntensity: 'standard', typeface: 'stencil',
   });
   useEffectApp(() => {
-    const FACTIONS = {
-      amarillo: { accent: '#F5C518', deep: '#D4A910' },  // Amarillo Táctica (marca)
-      oro:      { accent: '#D4A910', deep: '#A98A0C' },  // oro intenso
-      alerta:   { accent: '#C0392B', deep: '#A93226' },  // Rojo Alerta
-      acero:    { accent: '#9AA3AD', deep: '#6B7178' },  // acero neutro
-    };
-    const p = FACTIONS[tw.faction] || FACTIONS.amarillo;
-    window.GUN_ACCENT = p.accent;
-    window.GUN_ACCENT_DEEP = p.deep;
-    if (window.PALETTE) {
-      window.PALETTE.amber = p.accent;
-      window.PALETTE.amberDim = p.deep;
-    }
+    // NO se vuelve a escribir PALETTE en runtime. El selector de «facción» venía
+    // del tema oscuro y pisaba PALETTE.amber con un beige (#DDD5C4) calibrado
+    // contra el fondo VERDE de entonces. Al invertir el tema a lienzo crema ese
+    // beige pasó a medir 1.27:1 — invisible — y como la mutación ocurría en un
+    // efecto, el acento salía verde en el primer paint y beige a partir del
+    // segundo render. Afectaba a los ~260 usos de PALETTE.amber del sitio.
+    // La paleta la define ui.jsx y no la reescribe nadie.
     document.body.dataset.hud = tw.hudIntensity || 'standard';
     document.body.dataset.type = tw.typeface || 'stencil';
-  }, [tw.faction, tw.hudIntensity, tw.typeface]);
+  }, [tw.hudIntensity, tw.typeface]);
 
   // Navegación — estado inicial leído de la URL (deep-links)
   const _init = amxParsePath(window.location.pathname);
@@ -400,7 +394,10 @@ function App() {
   }
 
   return (
-    <div style={{
+    // amx-v2 expone los tokens y las utilidades de estilo.css a TODA la app.
+    // Antes envolvía solo la ficha, y el resultado era una pantalla a medio
+    // migrar: bloques con la paleta nueva junto a bloques con la vieja.
+    <div className="amx-v2" style={{
       width: '100%', minHeight: '100vh',
       background: PALETTE.bg,
       color: PALETTE.text,
@@ -413,14 +410,20 @@ function App() {
           title={titles[screen]}
           back={isInternal}
           onBack={goBack}
+          onHome={() => navTab('home')}
           right={pickerSlot !== null ? (
             <span style={{
-              fontFamily: 'Courier Prime, monospace',
-              fontSize: 13, color: PALETTE.amber,
+              fontFamily: 'JetBrains Mono, monospace',
+              fontSize: 13,
+              // Iba en PALETTE.amber, que es el VERDE de marca: sobre el header
+              // verde daba 1.68:1 y su borde 1.28:1 — invisible. Ahora que la
+              // barra no lleva titulo, esta insignia es medio contenido.
+              color: PALETTE.sobreMarca,
               letterSpacing: '0.15em',
-              background: 'rgba(245,197,24,0.12)',
-              border: `1px solid ${PALETTE.amber}`,
-              padding: '3px 6px',
+              background: 'rgba(250,249,245,0.12)',
+              border: '1px solid rgba(250,249,245,.35)',
+              borderRadius: 4,
+              padding: '4px 7px',
             }}>SLOT {pickerSlot === 0 ? 'A' : 'B'}</span>
           ) : null}
         />
@@ -438,7 +441,7 @@ function App() {
           position: 'sticky', top: 64, zIndex: 40,
           background: PALETTE.amber, color: '#000',
           padding: '8px 28px',
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 15.5, letterSpacing: '0.15em',
           textTransform: 'uppercase',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -475,10 +478,10 @@ function App() {
           position: 'fixed', bottom: 24, right: 24,
           background: PALETTE.amber, color: '#000', border: 'none',
           padding: '12px 18px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.15em', textTransform: 'uppercase',
           cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,197,24,0.4)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(221,213,196,0.4)',
           zIndex: 50,
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
@@ -505,10 +508,10 @@ function App() {
           <window.TweakSection label="Acento · marca">
             <window.TweakColor
               label="Color"
-              value={({amarillo:'#F5C518',oro:'#D4A910',alerta:'#C0392B',acero:'#9AA3AD'})[tw.faction] || '#F5C518'}
-              options={['#F5C518','#D4A910','#C0392B','#9AA3AD']}
+              value={({amarillo:'#DDD5C4',oro:'#B0A894',alerta:'#C0392B',acero:'#9AA3AD'})[tw.faction] || '#DDD5C4'}
+              options={['#DDD5C4','#B0A894','#C0392B','#9AA3AD']}
               onChange={(hex) => {
-                const map = { '#F5C518':'amarillo', '#D4A910':'oro', '#C0392B':'alerta', '#9AA3AD':'acero' };
+                const map = { '#DDD5C4':'amarillo', '#B0A894':'oro', '#C0392B':'alerta', '#9AA3AD':'acero' };
                 setTweak('faction', map[hex] || 'amarillo');
               }}
             />

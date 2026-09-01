@@ -44,6 +44,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /ui.js
   Cache-Control: public, max-age=0, must-revalidate
+/estilo.css
+  Cache-Control: public, max-age=0, must-revalidate
 /tweaks-panel.js
   Cache-Control: public, max-age=0, must-revalidate
 /dev-viewport.js

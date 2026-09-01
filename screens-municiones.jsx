@@ -46,38 +46,38 @@ function MunicionCard({ mun, onClick }) {
   const cart = munCartucho(mun.calibre);
   return (
     <div onClick={onClick} style={{
-      position: 'relative', background: P.bgCard, border: `1px solid ${P.border}`,
-      cursor: 'pointer', transition: 'border-color 0.18s', overflow: 'hidden',
+      position: 'relative', background: window.CLARO.panel,
+      borderRadius: window.CLARO.radio, boxShadow: window.CLARO.sombra,
+      cursor: 'pointer', overflow: 'hidden',
       height: '100%', display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto', containIntrinsicSize: 'auto 150px',
-    }}
-    onMouseEnter={e => e.currentTarget.style.borderColor = P.amber}
-    onMouseLeave={e => e.currentTarget.style.borderColor = P.border}>
-      <window.TacticalCorners size={8} color={P.amber} />
+    }} className="amx-card">
       {/* cartucho */}
       <div style={{
         width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
-        background: `radial-gradient(circle at 50% 50%, ${P.bgElev} 0%, ${P.bg} 100%)`,
+        background: `radial-gradient(circle at 50% 50%, ${window.CLARO.panelHi} 0%, ${P.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', borderRight: `1px solid ${P.border}`, overflow: 'hidden',
+        position: 'relative', borderRight: `1px solid ${window.CLARO.hair}`, overflow: 'hidden',
         // El padding superior reserva la banda del badge de calibre (absolute, top 6):
         // sin el, el panel es tan estrecho que la foto centrada se le mete debajo.
         boxSizing: 'border-box', padding: '28px 6px 8px',
       }}>
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)` }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
         {cart && !imgError ? (
           <img src={cart} alt={mun.calibre} loading="lazy" decoding="async" onError={() => setImgError(true)}
             style={{ maxHeight: '82%', maxWidth: '60%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
         ) : (
           <span style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 18, color: P.amber,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 18, color: window.CLARO.tinta2,
             opacity: 0.85, position: 'relative', zIndex: 1, letterSpacing: '0.06em',
           }}>◉</span>
         )}
         <span style={{
           position: 'absolute', top: 6, left: 6,
-          fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
-          color: '#000', background: P.amber, padding: '2px 5px',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
+          // Badge de calibre sobre CLARO.tinta2 (#59605C): el negro daba 3.25:1.
+          // Crema sobre ese gris-verde: 5.62:1.
+          color: P.sobreMarca, background: window.CLARO.tinta2, padding: '2px 5px',
           letterSpacing: '0.08em', whiteSpace: 'nowrap',
         }}>{mun.calibre}</span>
       </div>
@@ -86,22 +86,22 @@ function MunicionCard({ mun, onClick }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
           {window.CountryFlag && <window.CountryFlag pais={mun.pais} height={12} />}
           <span style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.amber,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2,
             letterSpacing: '0.12em', textTransform: 'uppercase',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{mun.marca}</span>
         </div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 16,
-          color: P.text, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16,
+          color: window.CLARO.tinta, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
           letterSpacing: '0.02em', height: 38,
           display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden',
         }}>{mun.nombre}</div>
         <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim, marginBottom: 8,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2, marginBottom: 8,
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
-          <span style={{ color: P.textMuted }}>BALA </span>{mun.bala}{mun.grano ? ` · ${mun.grano}` : ''}
+          <span style={{ color: window.CLARO.tinta2 }}>BALA </span>{mun.bala}{mun.grano ? ` · ${mun.grano}` : ''}
         </div>
         {/* La cifra sustituye a la escala $$$··: es estrictamente más informativa
             para quien compara municiones. La unidad sale de munUnidadPrecio. */}
@@ -110,11 +110,11 @@ function MunicionCard({ mun, onClick }) {
           {mun.priceExact ? (
             <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 5, whiteSpace: 'nowrap' }}>
               <span style={{
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
-                color: P.amber, fontVariantNumeric: 'tabular-nums',
+                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
+                color: window.CLARO.tinta2, fontVariantNumeric: 'tabular-nums',
               }}>{String(mun.priceExact).replace(' MXN', '')}</span>
               <span style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: window.CLARO.tinta2,
                 letterSpacing: '0.1em', textTransform: 'uppercase',
               }}>/ {munUnidadPrecio(mun)}</span>
             </span>
@@ -152,13 +152,14 @@ function HomeMunicionesSection({ onNav }) {
       <div style={{ padding: `0 ${PAD}px`, margin: '25px 0 10px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
           <div style={{
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
             textTransform: 'uppercase', letterSpacing: '0.04em', flex: '1 1 auto', minWidth: 0, whiteSpace: 'nowrap',
           }}>Municiones</div>
-          <button onClick={() => onNav && onNav('municiones')} style={{
-            background: 'none', border: 'none', cursor: 'pointer', color: P.amber,
-            fontFamily: 'Courier Prime, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase',
-          }}>Ver todas →</button>
+          {/* Mismo caso que en accesorios: el objeto estaba copiado a mano y en P.amber,
+              que es el VERDE de marca. estiloAccion(false) trae el rojo de accion
+              #A3341F (5.96:1 sobre el lienzo #F3EFE4) y los 44px de area tactil. */}
+          <button onClick={() => onNav && onNav('municiones')}
+            style={window.estiloAccion(false)}>Ver todas →</button>
         </div>
       </div>
 
@@ -179,21 +180,35 @@ function HomeMunicionesSection({ onNav }) {
                 background: `radial-gradient(circle at 50% 42%, ${P.bgElev} 0%, ${P.bg} 100%)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)` }} />
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
                 {cart
                   ? <img src={cart} alt={c.label} loading="lazy" style={{ maxHeight: '62%', maxWidth: '46%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
-                  : <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: vp.isDesktop ? 55 : 48, color: P.amber, opacity: 0.9, position: 'relative', zIndex: 1 }}>{c.icon}</span>}
+                  : <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: vp.isDesktop ? 55 : 48, color: P.amber, opacity: 0.9, position: 'relative', zIndex: 1 }}>{c.icon}</span>}
                 <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${P.amber}`, borderLeft: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
                 <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${P.amber}`, borderRight: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-                <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(26,26,26,0) 45%, rgba(26,26,26,0.55) 72%, rgba(26,26,26,0.94) 100%)`, pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
+                {/* Degradado decorativo: funde el cartucho con la placa. De 0.94 a 0.75
+                    porque ya no sostiene el contraste del texto. */}
+                <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.75) 100%)`, pointerEvents: 'none' }} />
+                {/* PLACA DE LEGIBILIDAD — misma receta que en accesorios. El degradado
+                    solo alcanza su parada final en el ultimo pixel, asi que el fondo bajo
+                    el rotulo cambiaba con la altura del texto. La placa fija 0.94 de verde
+                    bajo todas las lineas: compuesto #1A3D35 → crema 10.37:1, salmon 5.62:1.
+                    Los 12px de fundido caben en el paddingTop de 14. */}
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, bottom: 0, padding: '14px 10px 10px',
+                  background: `linear-gradient(180deg, rgba(23,58,50,0) 0, rgba(23,58,50,0.94) 12px)`,
+                }}>
+                  {/* P.text (#171B19) aqui daba 1.65:1. Crema: 10.37:1. El textShadow
+                      negro se va: sombra oscura bajo texto claro solo emborrona. */}
                   <div style={{
-                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
-                    color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
-                    textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                    fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
+                    color: P.sobreMarca, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
                   }}>{c.label}</div>
+                  {/* Rotulo, no control: la tarjeta entera es el boton y ya pasa de 44px,
+                      asi que toma solo el color de estiloAccion(true) —P.redSobreVerde—
+                      sin su minHeight. P.amber (verde) sobre verde era invisible. 5.62:1. */}
                   <div style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.amber,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.redSobreVerde,
                     letterSpacing: '0.16em', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6,
                   }}>VER <span aria-hidden="true">→</span></div>
                 </div>
@@ -246,15 +261,16 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
 
   const selStyle = {
     background: P.bg, color: P.text, border: `1px solid ${P.border}`,
-    padding: '11px 12px', fontFamily: 'Courier Prime, monospace', fontSize: 14,
+    padding: '11px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
     letterSpacing: '0.04em', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
     flex: '1 1 160px', minWidth: 0,
   };
   const chip = (active) => ({
-    background: active ? P.amber : 'transparent', color: active ? '#000' : P.textDim,
+    // P.amber es el VERDE de marca #173A32: el negro encima daba 1.69:1. Crema 10.83:1.
+    background: active ? P.amber : 'transparent', color: active ? P.sobreMarca : P.textDim,
     border: `1px solid ${active ? P.amber : P.border}`,
     padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
     letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap',
     display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: active ? 700 : 400,
   });
@@ -263,7 +279,7 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
     <div style={{ paddingBottom: 90 }}>
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `20px ${padX}px 0`, boxSizing: 'border-box' }}>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
           color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05,
         }}>Municiones</div>
         <div style={{
@@ -283,7 +299,7 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
           style={{
             width: '100%', boxSizing: 'border-box', background: P.bg, color: P.text,
             border: `1px solid ${P.border}`, padding: '11px 14px', marginBottom: 12,
-            fontFamily: 'Courier Prime, monospace', fontSize: 17, letterSpacing: '0.03em',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 17, letterSpacing: '0.03em',
           }} />
 
         <div className="amx-hscroll" style={{
@@ -319,14 +335,14 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
             <button onClick={clearAll} style={{
               background: 'transparent', color: P.redHi, border: `1px solid ${P.redHi}`,
               padding: '11px 14px', minHeight: 44, boxSizing: 'border-box', cursor: 'pointer',
-              fontFamily: 'Courier Prime, monospace', fontSize: 15, letterSpacing: '0.08em', textTransform: 'uppercase',
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 15, letterSpacing: '0.08em', textTransform: 'uppercase',
             }}>✕ Limpiar</button>
           }
         </div>
 
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.amber,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
           letterSpacing: '0.12em', margin: '16px 0 10px', textTransform: 'uppercase',
         }}>
           <span>▸ {filtered.length} {filtered.length === 1 ? 'CARTUCHO' : 'CARTUCHOS'}</span>
@@ -343,13 +359,13 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
               return (
                 <div key={c.id}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 0 12px' }}>
-                    <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 21.5, color: P.amber, lineHeight: 1 }}>{c.icon}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 21.5, color: P.amber, lineHeight: 1 }}>{c.icon}</span>
                     <h2 style={{
-                      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 18, color: P.text,
+                      fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: P.text,
                       textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0, whiteSpace: 'nowrap',
                     }}>{c.label}</h2>
                     <span style={{ flex: 1, height: 1, background: P.border }} />
-                    <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.textMuted }}>{list.length}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.textMuted }}>{list.length}</span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 14 }}>
                     {list.map(m => <MunicionCard key={m.id} mun={m} onClick={() => onOpenMunicion(m.id)} />)}
@@ -365,7 +381,7 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
         ) : (
           <div style={{
             border: `1px dashed ${P.border}`, padding: '40px 20px', textAlign: 'center',
-            fontFamily: 'Courier Prime, monospace', fontSize: 15.5, color: P.textMuted,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5, color: P.textMuted,
           }}>
             ◇ Sin resultados con estos filtros.
             <button onClick={clearAll} style={{
@@ -391,7 +407,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
 
   if (!mun) {
     return (
-      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'Courier Prime, monospace', color: P.textMuted }}>
+      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace', color: P.textMuted }}>
         Munición no encontrada.
       </div>
     );
@@ -425,13 +441,15 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
         }}>
           <window.TacticalCorners size={14} color={P.amber} thickness={2} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)` }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
           {cart && !imgError
             ? <img src={cart} alt={mun.calibre} onError={() => setImgError(true)} style={{ maxHeight: '78%', maxWidth: '46%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
-            : <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 60, color: P.amber, opacity: 0.85, position: 'relative', zIndex: 1 }}>◉</span>}
+            : <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 60, color: P.amber, opacity: 0.85, position: 'relative', zIndex: 1 }}>◉</span>}
           <span style={{
             position: 'absolute', top: 10, left: 10,
-            fontFamily: 'Courier Prime, monospace', fontSize: 13, color: '#000',
+            // Badge de calibre en la ficha: fondo P.amber = verde de marca #173A32,
+            // con negro encima daba 1.69:1. Crema: 10.83:1.
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.sobreMarca,
             background: P.amber, padding: '3px 7px', letterSpacing: '0.08em', fontWeight: 700,
           }}>{mun.calibre}</span>
         </div>
@@ -440,12 +458,12 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             {window.CountryFlag && <window.CountryFlag pais={mun.pais} height={14} />}
             <span style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.amber,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
               letterSpacing: '0.16em', textTransform: 'uppercase',
             }}>{mun.marca}{mun.pais ? ` · ${mun.pais}` : ''}</span>
           </div>
           <h1 style={{
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 30 : 25,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 30 : 25,
             color: P.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.08, margin: '0 0 12px',
           }}>{mun.nombre}</h1>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -453,7 +471,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: P.bgCard, border: `1px solid ${P.border}`, padding: '3px 9px',
-              fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
               letterSpacing: '0.08em', textTransform: 'uppercase',
             }}><span style={{ color: P.amber }}>◉</span>{mun.calibre}</span>
           </div>
@@ -480,7 +498,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                   <div key={i} style={{
                     display: 'flex', justifyContent: 'space-between', gap: 12, padding: '9px 12px',
                     borderBottom: i < mun.specs.length - 1 ? `1px solid ${P.border}` : 'none',
-                    fontFamily: 'Courier Prime, monospace', fontSize: 15.5,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
                   }}>
                     <span style={{ color: P.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{k}</span>
                     <span style={{ color: P.text, fontWeight: 600, textAlign: 'right' }}>{v}</span>
@@ -496,7 +514,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                 {mun.compatibilidad.map((c, i) => (
                   <span key={i} style={{
                     background: P.bgCard, border: `1px solid ${P.border}`, borderLeft: `2px solid ${P.amber}`,
-                    padding: '6px 10px', fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
+                    padding: '6px 10px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
                     color: P.text, letterSpacing: '0.06em',
                   }}>{c}</span>
                 ))}
@@ -511,23 +529,23 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
             <window.TacticalCorners size={12} color={P.amber} thickness={2} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textMuted,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted,
                 letterSpacing: '0.18em', textTransform: 'uppercase',
               }}>◆ Precio por {munUnidadPrecio(mun)} (con IVA)</span>
               {curAut &&
                 <span title={curAut.nombre} style={{
-                  fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
                   letterSpacing: '0.12em', color: '#000', background: curAut.color, padding: '2px 7px', flexShrink: 0,
                 }}>{curAut.sigla}</span>}
             </div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23, color: P.amber, letterSpacing: '0.02em' }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : mun.priceExact}</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23, color: P.amber, letterSpacing: '0.02em' }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : mun.priceExact}</div>
             {mun.dcamRef &&
-              <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textMuted, marginTop: 4, lineHeight: 1.4 }}>Ref. {curSigla}: {mun.dcamRef}</div>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted, marginTop: 4, lineHeight: 1.4 }}>Ref. {curSigla}: {mun.dcamRef}</div>
             }
             {currentManual && currentManual.url &&
               <a href={currentManual.url} target="_blank" rel="noopener" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9,
-                fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.amber,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
                 textDecoration: 'none', border: `1px solid ${P.amber}`, padding: '9px 12px',
                 minHeight: 40, boxSizing: 'border-box', letterSpacing: '0.04em',
               }}>
@@ -558,15 +576,15 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                     <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                         {b.agotado ? (
-                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#E4574B', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: '#F29C8C', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                         ) : (
                           <React.Fragment>
-                            <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
-                            <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>cartuchos en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: '#6FCB7B' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
+                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>cartuchos en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                           </React.Fragment>
                         )}
                       </div>
-                      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
+                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
                         {b.agotado ? 'No aparece en el último inventario: ' : 'De acuerdo a '}
                         {b.manual && b.manual.url ? (
                           <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: P.amber, textDecoration: 'none', borderBottom: `1px solid ${P.amber}` }}>▦ {b.manual.nombre} ↗</a>
@@ -583,14 +601,14 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                 </div>
               );
             })()}
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim, marginTop: 9 }}>Nivel: <window.PriceLevel lvl={mun.priceLvl} size={13} /></div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim, marginTop: 9 }}>Nivel: <window.PriceLevel lvl={mun.priceLvl} size={13} /></div>
           </div>
 
           {priceHistory.length > 0 &&
             <React.Fragment>
               <window.SectionHeader>Historial de precios</window.SectionHeader>
               <div style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textDim,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textDim,
                 letterSpacing: '0.04em', marginTop: -6, marginBottom: 10, lineHeight: 1.4,
               }}>Según inventarios oficiales DCAM / OTCA</div>
               <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, marginBottom: 16 }}>
@@ -601,8 +619,8 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                     <div key={i} style={{
                       padding: '10px 12px',
                       borderBottom: i < priceHistory.length - 1 ? `1px solid ${P.border}` : 'none',
-                      fontFamily: 'Courier Prime, monospace', fontSize: 15.5,
-                      background: i === 0 ? 'rgba(245,197,24,0.06)' : 'transparent',
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
+                      background: i === 0 ? 'rgba(221,213,196,0.06)' : 'transparent',
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
@@ -610,7 +628,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                           <span style={{ color: P.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
                           {hAut &&
                             <span title={hAut.nombre} style={{
-                              fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
                               letterSpacing: '0.1em', color: '#000', background: hAut.color, padding: '1px 6px', flexShrink: 0,
                             }}>{hAut.sigla}</span>}
                         </div>
@@ -642,7 +660,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                 padding: '12px 14px', marginBottom: 16,
               }}>
                 <div style={{
-                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
                   color: availMeta.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
                 }}>{availMeta.label}</div>
                 <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>

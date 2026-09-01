@@ -1,30 +1,85 @@
 // Armado en México — Componentes UI compartidos
 // Estética: oscuro elegante con detalles tácticos (color palette dark/amber/military)
 
+// ── Paleta «Documento Oficial Mexicano» (DESIGN.md §2) ─────────────────────
+// Cada valor está medido sobre el fondo Y sobre la tarjeta, porque el texto cae
+// sobre las dos. El ratio anotado es el PEOR de los dos casos.
+// Verificar tras cualquier cambio:
+//   node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
+//
+// El error que arrastraba la paleta anterior: la tarjeta daba 1.25:1 contra su
+// fondo y el borde 1.23:1 contra la tarjeta — las dos señales que definen una
+// tarjeta eran invisibles, y por eso el sitio se leía «cuadrado». Aquí la
+// superficie sigue siendo sutil a propósito (1.25:1), pero el borde SÍ se ve
+// (1.72:1) y es él quien define la caja. No subas bgCard sin recalcular: una
+// tarjeta más clara aplasta el contraste del texto que va encima.
+// La app es CLARA. En el mockup el lienzo es crema y el verde es el color de
+// marca: header, navegación, hero de producto y acentos. Tenerlo al revés —toda
+// la app en verde— era el error de fondo del primer intento.
 const PALETTE = {
-  bg:        '#1A1A1A',
-  bgElev:    '#2C2C2C',
-  bgCard:    '#2C2C2C',
-  // gradiente sutil de profundidad para tarjetas (rediseño móvil 2026)
-  bgCardGrad:'linear-gradient(180deg, #2F2F2F, #272727)',
-  border:    '#3A3A3A',
-  borderHi:  '#555555',
-  amber:     '#F5C518',
-  amberDim:  '#D4A910',
-  military:  '#555555',
-  red:       '#C0392B',   // relleno (con texto blanco: 5.4:1)
-  redHi:     '#E4574B',   // texto/borde sobre fondo oscuro (4.8:1 AA; #C0392B solo da 3.2:1)
-  green:     '#4FAE5C',
-  blue:      '#7E8A99',
-  text:      '#FFFFFF',
-  textDim:   '#B5B5B5',
-  textMuted: '#9A9A9A',   // antes #7A7A7A (4.0:1, fallaba AA); ahora 6.1:1
+  bg:        '#F3EFE4',   // lienzo crema
+  bgElev:    '#FAF9F5',   // tarjeta blanca (1.09:1 sobre el lienzo: la define la sombra)
+  bgCard:    '#FAF9F5',
+  bgCardGrad:'linear-gradient(180deg, #FFFFFF, #F7F5EE)',
+  border:    '#D5D6CE',   // hairline
+  borderHi:  '#BFC1B8',
+  amber:     '#173A32',   // el acento es el VERDE DE MARCA — 10.83:1 sobre el lienzo
+  amberDim:  '#2F6B33',
+  military:  '#7C837B',
+  red:       '#C83B32',   // relleno de CTA, con texto claro encima (4.83:1)
+  redHi:     '#A3341F',   // rojo como TEXTO — 5.96:1
+  green:     '#2F6B33',   // 5.59:1
+  blue:      '#4A6B7C',
+  text:      '#171B19',   // tinta — 15.14:1
+  textDim:   '#3E443D',
+  textMuted: '#59605C',   // 5.62:1
+  // Superficies de marca: header, nav y hero. El texto encima va en `text` invertido.
+  marca:     '#173A32',
+  marcaAlt:  '#1E4A40',
+  sobreMarca:'#F3EFE4',   // 10.83:1 sobre marca
+  // Los dos escalones apagados del texto sobre marca. Se USABAN desde el primer
+  // día (TopNav, BottomNav, AppHeader) pero nunca se definieron: resolvían a
+  // undefined, React omitía `color` y el enlace heredaba la tinta #171B19 del
+  // contenedor raíz — negro sobre verde, 1.4:1. De ahí que los enlaces
+  // inactivos de la navegación no se leyeran.
+  sobreMarcaDim:   '#B8C2BA',  // 6.79:1 sobre #173A32 — enlace inactivo
+  sobreMarcaMuted: '#9FACA2',  // 5.27:1 — lo desactivado (Próximamente)
+  // Rojo para overlay oscuro: sobre el verde de marca redHi cae a 1.8:1.
+  redSobreVerde:   '#F29C8C',  // 5.87:1 sobre #173A32
 };
 window.PALETTE = PALETTE;
 
-// Corte biselado (esquina superior derecha) — lenguaje "menos cuadrado" del rediseño
-const CUT_TR = 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)';
-const CUT_TR_SM = 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)';
+// ── Tokens SOBRE SUPERFICIE CLARA ──────────────────────────────────────────
+// El patrón dominante del mockup es tarjeta crema sobre fondo verde (10.83:1),
+// no caja oscura sobre fondo oscuro. Lo que va encima de una tarjeta clara usa
+// estos, no PALETTE, que está calibrada para el fondo verde.
+const CLARO = {
+  // Ahora que el lienzo de la app es crema, la tarjeta sube a blanco para
+  // separarse de él; el crema pasa a ser la fila alterna de las tablas.
+  panel:   '#FAF9F5',   // tarjeta blanca
+  panelHi: '#FFFFFF',
+  zebra:   '#F0ECE1',   // fila alterna sobre blanco
+  tinta:   '#171B19',   // 15.14:1 sobre crema
+  tinta2:  '#59605C',   //  5.62:1
+  hair:    'rgba(23,58,50,.14)',
+  sombra:  '0 1px 2px rgba(23,27,25,.07), 0 8px 20px -12px rgba(23,27,25,.22)',
+  radio:   12,
+  radioSm: 8,
+  // Los estados de PALETTE están calibrados contra el fondo VERDE y sobre crema
+  // se caen a 1.7-2.3:1. Estas son sus variantes para superficie clara.
+  ok:      '#2F6B33',   // 5.59:1 sobre crema (PALETTE.green da 1.74:1 aquí)
+  alerta:  '#A3341F',   // 5.96:1 (PALETTE.redHi da 1.84:1)
+};
+window.CLARO = CLARO;
+
+// El bisel de esquina era el otro rasgo que ataba el sitio al look HUD anterior.
+// DESIGN.md §27 pide lo contrario: «border radius consistente, bordes finos,
+// sombras extremadamente suaves». Se anula el recorte y el redondeo lo pone
+// estilo.css sobre .amx-cut, así los 11 usos existentes pasan a esquina
+// redondeada sin editarlos uno a uno — y de paso el clip-path deja de comerse
+// el anillo de foco, que era un parche permanente.
+const CUT_TR = 'none';
+const CUT_TR_SM = 'none';
 window.CUT_TR = CUT_TR;
 window.CUT_TR_SM = CUT_TR_SM;
 
@@ -49,11 +104,86 @@ function useViewport() {
 window.useViewport = useViewport;
 
 // ──────────────────────────────────────────────────────────────
+// LOGO MARCA — logotipo en SVG inline
+// ──────────────────────────────────────────────────────────────
+// logo.png es 256×256 de paleta indexada SIN canal alfa: sobre el header verde
+// se ve su recuadro y NO se puede recolorear. En SVG la silueta va con
+// fill="currentColor" y hereda el color de la superficie donde caiga.
+// Sobre el verde de marca: silueta en --crema #F3EFE4 (10.83:1) y texto en
+// #FAF9F5 (11.81:1) — el texto un punto más claro para que gane la jerarquía.
+// El recuadro es marco decorativo (opacity .5): no porta información, la
+// información está en la silueta y en el texto.
+function LogoMarca({ size = 28, conTexto = false, src = null }) {
+  const ft = Math.max(12, Math.round(size * 0.43)); // piso tipográfico 12px
+  // `src` = logo subido desde el panel de admin. El SVG de marca es el de
+  // fabrica; si Saulo sube uno propio manda el suyo, y asi la pestana BRANDING
+  // del admin sigue teniendo efecto en vez de escribir un ajuste muerto.
+  if (src) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: Math.round(size * 0.32) }}>
+        <img src={src} alt="Armado en México"
+          style={{ height: size, width: 'auto', objectFit: 'contain', display: 'block' }} />
+        {conTexto && (
+          <span style={{
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: ft,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: PALETTE.sobreMarca, whiteSpace: 'nowrap', lineHeight: 1.05,
+          }}>Armado en México</span>
+        )}
+      </span>
+    );
+  }
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      gap: Math.round(size * 0.29),
+      // currentColor de la silueta. var() con respaldo por si el SVG se usara
+      // fuera del scope .amx-v2, donde --crema no existe.
+      color: 'var(--crema, #F3EFE4)',
+    }}>
+      <svg width={size} height={size} viewBox="0 0 32 32"
+        style={{ display: 'block', flexShrink: 0 }}
+        role={conTexto ? undefined : 'img'}
+        aria-hidden={conTexto ? true : undefined}
+        aria-label={conTexto ? undefined : 'Armado en México'}>
+        <rect x="1" y="1" width="30" height="30" rx="7.5"
+          fill="none" stroke="currentColor" strokeWidth="1.8" opacity="0.5" />
+        {/* Pistola de perfil, cañón a la derecha. Un solo <path> con dos
+            subtrazos y fillRule evenodd: el segundo es el hueco del
+            guardamonte. La g reencuadra la silueta dentro del recuadro sin
+            recalcular las 20 coordenadas a mano. */}
+        <g transform="translate(-0.96,-3.27) scale(1.05)">
+          <path fill="currentColor" fillRule="evenodd" d="
+            M8 9.4 H27.4 V13 H21 V15.8 H18.2
+            C18.8 23.4 11.3 23.8 11.9 16.4
+            L8.6 26.8 Q6.7 28.4 4.9 25.6
+            C5.7 21 6.6 15.8 8 13.2 Z
+            M13.4 16.7 C13.1 20.6 16.9 20.8 16.6 16.7 Z" />
+        </g>
+      </svg>
+      {conTexto && (
+        <span style={{
+          display: 'flex', flexDirection: 'column',
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
+          fontSize: ft, lineHeight: 1.04,
+          letterSpacing: '0.06em', textTransform: 'uppercase',
+          color: '#FAF9F5',
+          whiteSpace: 'nowrap',
+        }}>
+          <span>Armado en</span>
+          <span>México</span>
+        </span>
+      )}
+    </span>
+  );
+}
+window.LogoMarca = LogoMarca;
+
+// ──────────────────────────────────────────────────────────────
 // TOP NAV — barra superior para escritorio/tablet
 // ──────────────────────────────────────────────────────────────
 function TopNav({ current, onNav, compareCount, onSearch }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
-  const navCfg = window.Store ? window.Store.getAppConfig() : { logo: '' };
   const moreItems = [
     { id: 'traumaticas', label: 'Armas traumáticas' },
     { id: 'calibres', label: 'Calibres' },
@@ -74,40 +204,23 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
     { id: 'submit',  label: '＋ PROPONER', accent: true },
   ];
   return (
-    <div style={{
+    <div className="amx-sobre-verde" style={{
       position: 'sticky', top: 0, zIndex: 50,
       height: 64,
-      background: 'rgba(26,26,26,0.95)',
-      backdropFilter: 'blur(10px)',
-      borderBottom: `1px solid ${PALETTE.border}`,
+      background: PALETTE.marca,
+      borderBottom: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex', alignItems: 'center',
       padding: '0 28px', gap: 24,
     }}>
-      <button onClick={() => onNav('home')} style={{
+      {/* El logotipo lo pinta LogoMarca en SVG: logo.png no tiene alfa y sobre
+          el verde arrastraba su propio recuadro. El texto va A LA DERECHA de la
+          silueta, igual que en móvil. */}
+      <button onClick={() => onNav('home')} aria-label="Inicio — Armado en México" style={{
         background: 'none', border: 'none', cursor: 'pointer',
-        fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-        fontSize: 21, color: PALETTE.amber,
-        letterSpacing: '0.1em',
-        display: 'flex', alignItems: 'center', gap: 8,
-        padding: 0,
+        display: 'flex', alignItems: 'center',
+        padding: 0, minHeight: 44, flexShrink: 0,
       }}>
-        {navCfg.logo ? (
-          <img src={navCfg.logo} alt="Armado en México" style={{
-            width: 40, height: 40, objectFit: 'contain',
-            borderRadius: 6, display: 'block',
-          }} />
-        ) : (
-          <React.Fragment>
-            <span style={{
-              display: 'inline-block', width: 18, height: 18,
-              border: `1.5px solid ${PALETTE.amber}`,
-              position: 'relative',
-            }}>
-              <span style={{ position: 'absolute', inset: 3, background: PALETTE.amber }} />
-            </span>
-            ARMADO<span style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.75em', marginLeft: 4 }}>en MX</span>
-          </React.Fragment>
-        )}
+        <LogoMarca size={34} conTexto />
       </button>
       <div style={{
         display: 'flex', gap: 4, marginLeft: 12,
@@ -124,20 +237,20 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                 <button onClick={() => setMoreOpen(o => !o)} style={{
                   background: 'none', border: 'none', cursor: 'pointer',
                   padding: '8px 14px',
-                  fontFamily: 'Montserrat, sans-serif',
+                  fontFamily: 'Archivo, sans-serif',
                   fontSize: 14, fontWeight: 600,
                   letterSpacing: '0.12em', textTransform: 'uppercase',
-                  color: (dActive || moreOpen) ? PALETTE.amber : PALETTE.textDim,
-                  borderBottom: dActive ? `2px solid ${PALETTE.amber}` : '2px solid transparent',
+                  color: (dActive || moreOpen) ? '#DDD5C4' : PALETTE.sobreMarcaDim,
+                  borderBottom: dActive ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
                   whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
                   transition: 'color 0.15s',
                 }}>{it.label} <span style={{ fontSize: 13, transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span></button>
                 {moreOpen && (
-                  <div style={{
+                  <div className="amx-sobre-verde" style={{
                     position: 'absolute', top: '100%', right: 0, minWidth: 200,
-                    background: 'rgba(26,26,26,0.98)', backdropFilter: 'blur(10px)',
-                    border: `1px solid ${PALETTE.border}`,
-                    borderTop: `2px solid ${PALETTE.amber}`,
+                    background: PALETTE.marca,
+                    border: `1px solid ${'rgba(250,249,245,.14)'}`,
+                    borderTop: `2px solid ${'#DDD5C4'}`,
                     boxShadow: '0 12px 30px rgba(0,0,0,0.55)',
                     zIndex: 60, padding: 4,
                   }}>
@@ -147,15 +260,15 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                         <button key={mi.id} disabled={mi.proximamente}
                           onClick={mi.proximamente ? undefined : () => { onNav(mi.id); setMoreOpen(false); }} style={{
                           display: 'block', width: '100%', textAlign: 'left',
-                          background: miActive ? 'rgba(245,197,24,0.10)' : 'none',
+                          background: miActive ? 'rgba(221,213,196,0.10)' : 'none',
                           border: 'none', cursor: mi.proximamente ? 'default' : 'pointer', padding: '10px 12px',
-                          fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600,
+                          fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600,
                           letterSpacing: '0.08em', textTransform: 'uppercase',
-                          color: mi.proximamente ? PALETTE.textMuted : (miActive ? PALETTE.amber : PALETTE.text),
+                          color: mi.proximamente ? PALETTE.sobreMarcaMuted : (miActive ? '#DDD5C4' : PALETTE.sobreMarca),
                           transition: 'background 0.12s, color 0.12s',
                         }}
-                          onMouseEnter={e => { if (mi.proximamente) return; e.currentTarget.style.background = 'rgba(245,197,24,0.10)'; e.currentTarget.style.color = PALETTE.amber; }}
-                          onMouseLeave={e => { if (mi.proximamente) return; e.currentTarget.style.background = miActive ? 'rgba(245,197,24,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? PALETTE.amber : PALETTE.text; }}>
+                          onMouseEnter={e => { if (mi.proximamente) return; e.currentTarget.style.background = 'rgba(221,213,196,0.10)'; e.currentTarget.style.color = '#DDD5C4'; }}
+                          onMouseLeave={e => { if (mi.proximamente) return; e.currentTarget.style.background = miActive ? 'rgba(221,213,196,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? '#DDD5C4' : PALETTE.sobreMarca; }}>
                           {mi.label}
                         </button>
                       );
@@ -167,14 +280,14 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
           }
           return (
             <button key={it.id} onClick={() => onNav(it.id)} style={{
-              background: it.accent ? (active ? PALETTE.amber : 'transparent') : 'none',
-              border: it.accent ? `1px solid ${PALETTE.amber}` : 'none', cursor: 'pointer',
+              background: it.accent ? (active ? '#DDD5C4' : 'transparent') : 'none',
+              border: it.accent ? `1px solid ${'#DDD5C4'}` : 'none', cursor: 'pointer',
               padding: it.accent ? '8px 12px' : '8px 14px',
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Archivo, sans-serif',
               fontSize: 14, fontWeight: 600,
               letterSpacing: '0.12em', textTransform: 'uppercase',
-              color: active ? (it.accent ? '#000' : PALETTE.amber) : (it.accent ? PALETTE.amber : PALETTE.textDim),
-              borderBottom: active && !it.accent ? `2px solid ${PALETTE.amber}` : (it.accent ? `1px solid ${PALETTE.amber}` : '2px solid transparent'),
+              color: active ? (it.accent ? '#000' : '#DDD5C4') : (it.accent ? '#DDD5C4' : PALETTE.sobreMarcaDim),
+              borderBottom: active && !it.accent ? `2px solid ${'#DDD5C4'}` : (it.accent ? `1px solid ${'#DDD5C4'}` : '2px solid transparent'),
               position: 'relative',
               transition: 'color 0.15s',
               marginLeft: it.accent ? 8 : 0,
@@ -184,10 +297,10 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
               {it.badge ? (
                 <span style={{
                   position: 'absolute', top: 2, right: 2,
-                  background: PALETTE.amber, color: '#000',
+                  background: '#DDD5C4', color: '#000',
                   fontSize: 12, fontWeight: 700,
                   padding: '1px 4px', borderRadius: 8,
-                  fontFamily: 'Courier Prime, monospace',
+                  fontFamily: 'JetBrains Mono, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
                 }}>{it.badge}</span>
               ) : null}
@@ -203,8 +316,16 @@ window.TopNav = TopNav;
 // ──────────────────────────────────────────────────────────────
 // AVAILABILITY BADGE — la disponibilidad legal del arma
 // ──────────────────────────────────────────────────────────────
-function AvailBadge({ avail, compact = false }) {
-  const map = {
+// `claro` = va sobre una superficie crema (tarjeta). Los colores de PALETTE
+// están calibrados contra el fondo verde y sobre crema caen a 1.7-2.3:1, así
+// que ahí se usan las variantes oscuras de CLARO.
+function AvailBadge({ avail, compact = false, claro = true }) {
+  const map = claro ? {
+    dcam:      { label: 'CIVIL · DCAM',   short: 'CIVIL',     color: CLARO.ok,     dot: '●' },
+    externo:   { label: 'CIVIL · EXT',    short: 'CIVIL',     color: CLARO.ok,     dot: '●' },
+    seguridad: { label: 'SEGURIDAD',      short: 'SEGURIDAD', color: CLARO.tinta2, dot: '◆' },
+    ejercito:  { label: 'EJÉRCITO',       short: 'EJÉRCITO',  color: CLARO.alerta, dot: '▲' },
+  } : {
     dcam:      { label: 'CIVIL · DCAM',   short: 'CIVIL',     color: PALETTE.green, dot: '●' },
     externo:   { label: 'CIVIL · EXT',    short: 'CIVIL',     color: PALETTE.green, dot: '●' },
     seguridad: { label: 'SEGURIDAD',      short: 'SEGURIDAD', color: PALETTE.amber,    dot: '◆' },
@@ -215,11 +336,11 @@ function AvailBadge({ avail, compact = false }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
       padding: compact ? '3px 8px' : '4px 9px',
-      background: 'rgba(0,0,0,0.55)',
-      border: `1px solid ${m.color}`,
-      clipPath: CUT_TR_SM,
+      background: claro ? 'transparent' : 'rgba(0,0,0,0.55)',
+      border: `1px solid ${claro ? CLARO.hair : m.color}`,
+      borderRadius: CLARO.radioSm,
       color: m.color,
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: '12px', // piso tipográfico 12px (antes 10-11px)
       fontWeight: 600,
       letterSpacing: '0.08em',
@@ -237,16 +358,20 @@ window.AvailBadge = AvailBadge;
 // ──────────────────────────────────────────────────────────────
 // PRICE LEVEL — escala de precio 1-5 con "$" llenos y vacíos
 // ──────────────────────────────────────────────────────────────
-function PriceLevel({ lvl, size = 12 }) {
+function PriceLevel({ lvl, size = 12, claro = true }) {
   const n = Math.max(1, Math.min(5, Number(lvl) || 1));
+  // Sobre crema el verde claro da 1.74:1; sobre el fondo verde el oscuro no se
+  // vería. Cada superficie tiene el suyo.
+  const lleno = claro ? CLARO.ok : '#6FCB7B';
+  const vacio = claro ? 'rgba(47,107,51,0.28)' : 'rgba(111,203,123,0.30)';
   return (
     <span style={{
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: Math.round(size * 1.35), fontWeight: 700,
       letterSpacing: '0.08em', whiteSpace: 'nowrap', lineHeight: 1,
     }}>
-      <span style={{ color: '#4FAE5C' }}>{'$'.repeat(n)}</span>
-      <span style={{ color: 'rgba(79,174,92,0.30)' }}>{'$'.repeat(5 - n)}</span>
+      <span style={{ color: lleno }}>{'$'.repeat(n)}</span>
+      <span style={{ color: vacio }}>{'$'.repeat(5 - n)}</span>
     </span>
   );
 }
@@ -274,16 +399,16 @@ function ArmaCardBody({ arma }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
         <CountryFlag pais={arma.pais} height={12} />
         <span style={{
-          fontFamily: 'Courier Prime, monospace',
-          fontSize: 13, color: PALETTE.amber,
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: 13, color: CLARO.tinta2,
           letterSpacing: '0.12em', textTransform: 'uppercase',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>{arma.marca}</span>
       </div>
       <div style={{
-        fontFamily: 'Montserrat, sans-serif',
+        fontFamily: 'Archivo, sans-serif',
         fontWeight: 600, fontSize: 17,
-        color: PALETTE.text,
+        color: CLARO.tinta,
         textTransform: 'uppercase',
         lineHeight: 1.15,
         marginBottom: 6,
@@ -297,19 +422,19 @@ function ArmaCardBody({ arma }) {
       }}>{arma.nombre}</div>
       {/* calibre */}
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13,
-        color: PALETTE.textDim,
+        color: CLARO.tinta2,
         marginBottom: 8,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>
-        <span style={{ color: PALETTE.textMuted }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}
+        <span style={{ color: CLARO.tinta2 }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}
       </div>
       {/* existencias por sucursal (último inventario de cada sede) */}
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 12,
-        color: enStock ? PALETTE.green : PALETTE.redHi,
+        color: enStock ? CLARO.ok : CLARO.alerta,
         marginBottom: 8,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>
@@ -319,7 +444,7 @@ function ArmaCardBody({ arma }) {
       </div>
       {etRating && etRating.hay &&
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 12, color: etRating.color,
           letterSpacing: '0.08em', textTransform: 'uppercase',
           marginBottom: 8,
@@ -327,12 +452,12 @@ function ArmaCardBody({ arma }) {
         }}>{etRating.label}</div>}
       {/* legalidad + precio */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
-        <AvailBadge avail={arma.avail} compact />
+        <AvailBadge claro avail={arma.avail} compact />
         <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-          <PriceLevel lvl={arma.priceLvl} />
+          <PriceLevel claro lvl={arma.priceLvl} />
           {priceShort && <span style={{
-            fontFamily: 'Courier Prime, monospace',
-            fontSize: 12, color: PALETTE.textDim, lineHeight: 1,
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: 12, color: CLARO.tinta2, lineHeight: 1,
           }}>{priceShort}</span>}
         </span>
       </div>
@@ -345,8 +470,13 @@ window.ArmaCardBody = ArmaCardBody;
 // TACTICAL CORNERS — esquinas tipo mira para enmarcar contenido
 // ──────────────────────────────────────────────────────────────
 function TacticalCorners({ color = PALETTE.amber, size = 10, thickness = 1.5, all = false }) {
-  // Rediseño 2026: 2 esquinas asimétricas (tl+br) por defecto — menos rígido que 4.
-  // `all` conserva el marco completo para los casos que lo pidan explícitamente.
+  // DESIGN.md §28: el HUD es un DETALLE de baja jerarquía, no la estructura.
+  // Antes cada caja del sitio llevaba corchetes en las esquinas, y eso —no el
+  // color— era lo que hacía que el rediseño siguiera pareciendo el diseño viejo
+  // pintado de verde. Ahora no pinta nada salvo que se pida `all` a propósito,
+  // para el puñado de sitios donde el marco aporta algo.
+  // Los 21 usos existentes quedan neutralizados sin tocarlos uno a uno.
+  if (!all) return null;
   const style = (pos) => {
     const s = { position: 'absolute', width: size, height: size, pointerEvents: 'none' };
     if (pos.includes('t')) { s.top = 0; s.borderTop = `${thickness}px solid ${color}`; }
@@ -376,7 +506,7 @@ function StatsBar({ label, value, max = 100, color = PALETTE.amber, compareValue
     <div style={{ marginBottom: 10 }}>
       <div style={{
         display: 'flex', justifyContent: 'space-between',
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 14.5, color: PALETTE.textDim,
         textTransform: 'uppercase', letterSpacing: '0.1em',
         marginBottom: 4,
@@ -432,7 +562,7 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
         boxShadow: `0 0 6px ${accent}66`,
       }} />
       <div style={{
-        fontFamily: 'Montserrat, sans-serif',
+        fontFamily: 'Archivo, sans-serif',
         fontSize: 16, fontWeight: 600,
         color: PALETTE.text,
         textTransform: 'uppercase', letterSpacing: '0.13em',
@@ -446,6 +576,25 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
   );
 }
 window.SectionHeader = SectionHeader;
+
+// El enlace de acción de un SectionHeader («VER TODO», «LIMPIAR»…) se repetía a
+// mano en 9 pantallas, y con el rojo equivocado según dónde cayera: PALETTE.redHi
+// da 5.96:1 sobre crema pero 1.8:1 sobre el verde de marca — invisible. Una sola
+// función decide el rojo por superficie.
+function estiloAccion(sobreVerde) {
+  return {
+    fontFamily: 'JetBrains Mono, monospace',
+    fontSize: 14.5,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    minHeight: 44,   // área táctil mínima
+    color: sobreVerde ? PALETTE.redSobreVerde : PALETTE.redHi,  // 5.87:1 / 5.96:1
+  };
+}
+window.estiloAccion = estiloAccion;
 
 // ──────────────────────────────────────────────────────────────
 // PROSA — estilo de texto de lectura corrida
@@ -470,68 +619,52 @@ window.amxProsa = amxProsa;
 // ──────────────────────────────────────────────────────────────
 // APP HEADER — barra superior con logo + acciones
 // ──────────────────────────────────────────────────────────────
-function AppHeader({ title, back, onBack, right }) {
-  const cfg = window.Store ? window.Store.getAppConfig() : { logo: '', logoText: 'ARMADO en MX' };
+// `title` sigue en la firma aunque YA NO SE PINTA: lo pasan casi todas las
+// pantallas desde app.jsx y quitarlo de ahí es otro lote. El título de pantalla
+// vive SOLO en el cuerpo — aquí duplicaba el que ya pinta cada pantalla, y
+// además nunca quedaba centrado (textAlign left/right según hubiera «volver»).
+function AppHeader({ title, back, onBack, onHome, right }) {
+  // El panel de admin (pestaña BRANDING) sigue guardando cfg.logo. Si Saulo sube
+  // uno propio se respeta; si esta el 'logo.png' de fabrica, manda el SVG de
+  // marca. Sin esto, el admin escribia un ajuste que ya no leia nadie.
+  const cfgH = window.Store ? window.Store.getAppConfig() : null;
+  const logoUsuario = cfgH && cfgH.logo && cfgH.logo !== 'logo.png' ? cfgH.logo : null;
   return (
-    <div style={{
+    <div className="amx-sobre-verde" style={{
       position: 'sticky', top: 0, zIndex: 50,
-      background: 'rgba(26,26,26,0.92)',
-      backdropFilter: 'blur(8px)',
-      borderBottom: `1px solid ${PALETTE.border}`,
+      background: PALETTE.marca,
+      borderBottom: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex', alignItems: 'center',
       padding: '0 14px', gap: 10,
       minHeight: 50,
       paddingTop: 'env(safe-area-inset-top)',
     }}>
-      {back ? (
-        <button onClick={onBack} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.amber, fontSize: 23, padding: 4,
-          fontFamily: 'Courier Prime, monospace',
-        }}>‹</button>
-      ) : (
-        <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
-          fontSize: 17, color: PALETTE.amber,
-          letterSpacing: '0.08em',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          {cfg.logo ? (
-            <img src={cfg.logo} alt="Armado en México" style={{
-              width: 34, height: 34, objectFit: 'contain',
-              borderRadius: 6, display: 'block',
-            }} />
-          ) : (
-            <React.Fragment>
-              <span aria-label="logo placeholder" style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: 28, height: 28,
-                border: `1.5px dashed ${PALETTE.amber}`,
-                borderRadius: 6, color: PALETTE.amber,
-                fontFamily: 'Courier Prime, monospace',
-                fontSize: 13, letterSpacing: '0.1em',
-                background: 'rgba(245,197,24,0.08)',
-              }}>LOGO</span>
-              <span style={{ whiteSpace: 'nowrap' }}>
-                {(cfg.logoText || 'ARMADO en MX').split(/\s+(?=en\s+MX)/i).map((part, i) =>
-                  i === 0
-                    ? <span key="t">{part}</span>
-                    : <span key="s" style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.72em', marginLeft: 4 }}>{part}</span>
-                )}
-              </span>
-            </React.Fragment>
-          )}
-        </div>
-      )}
-      <div style={{
-        flex: 1,
-        fontFamily: 'Montserrat, sans-serif',
-        fontSize: 16, fontWeight: 500,
-        color: PALETTE.text,
-        textTransform: 'uppercase', letterSpacing: '0.12em',
-        textAlign: back ? 'left' : 'right',
-      }}>{title}</div>
-      {right}
+      {/* Los dos lados pesan igual (flex:1 cada uno) para que la marca quede
+          centrada de verdad: antes se centraba en el espacio SOBRANTE, asi que
+          con la insignia SLOT presente se desplazaba a la izquierda. */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+        {back && (
+          <button onClick={onBack} aria-label="Volver" style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: PALETTE.sobreMarca, fontSize: 23,
+            minWidth: 44, minHeight: 44, padding: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'JetBrains Mono, monospace',
+          }}>‹</button>
+        )}
+      </div>
+
+      {/* El logo ya no es excluyente con «volver»: en pantalla interna la barra
+          se quedaba sin marca. Y vuelve a ser pulsable — quitado el titulo, es
+          lo unico de la barra y es donde se toca para volver al inicio. */}
+      <button onClick={onHome} aria-label="Inicio — Armado en México" style={{
+        background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', minHeight: 44, flexShrink: 0,
+      }}>
+        <LogoMarca size={28} conTexto={!back} src={logoUsuario} />
+      </button>
+
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>{right}</div>
     </div>
   );
 }
@@ -590,9 +723,8 @@ function BottomNav({ current, onNav, compareCount }) {
   return (
     <div ref={navRef} style={{
       position: 'sticky', bottom: 0, zIndex: 50,
-      background: 'rgba(26,26,26,0.96)',
-      backdropFilter: 'blur(12px)',
-      borderTop: `1px solid ${PALETTE.border}`,
+      background: PALETTE.marca,
+      borderTop: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex',
       padding: '6px 4px 10px',
       paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
@@ -604,14 +736,14 @@ function BottomNav({ current, onNav, compareCount }) {
             flex: 1, background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             padding: '8px 4px', gap: 4, minHeight: 48,
-            color: active ? PALETTE.amber : PALETTE.textDim,
+            color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
             position: 'relative',
           }}>
             {active && (
               <span style={{
                 position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                width: 18, height: 2, background: PALETTE.amber,
-                boxShadow: `0 0 6px ${PALETTE.amber}`,
+                width: 18, height: 2, background: '#DDD5C4',
+                boxShadow: `0 0 6px ${'#DDD5C4'}`,
               }} />
             )}
             <span style={{ lineHeight: 1, position: 'relative' }}>
@@ -619,16 +751,16 @@ function BottomNav({ current, onNav, compareCount }) {
               {it.badge ? (
                 <span style={{
                   position: 'absolute', top: -4, right: -10,
-                  background: PALETTE.amber, color: '#000',
+                  background: '#DDD5C4', color: '#000',
                   fontSize: 12, fontWeight: 700,
                   borderRadius: 8, padding: '1px 4px',
-                  fontFamily: 'Courier Prime, monospace',
+                  fontFamily: 'JetBrains Mono, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
                 }}>{it.badge}</span>
               ) : null}
             </span>
             <span style={{
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Archivo, sans-serif',
               fontSize: 12, fontWeight: active ? 600 : 500,
               letterSpacing: '0.07em',
             }}>{it.label}</span>
@@ -646,42 +778,36 @@ window.BottomNav = BottomNav;
 function ArmaCard({ arma, onClick, onCompare, inCompare }) {
   const [imgError, setImgError] = React.useState(false);
   return (
-    <div onClick={onClick} style={{
+    // Tarjeta CLARA sobre el fondo verde: el patrón del mockup. Sin borde de
+    // 1px ni corchetes — la define la superficie y una sombra suave (§27).
+    <div onClick={onClick} className="amx-card" style={{
       position: 'relative',
-      background: PALETTE.bgCardGrad,
-      border: `1px solid ${PALETTE.border}`,
+      background: CLARO.panel,
+      borderRadius: CLARO.radio,
+      boxShadow: CLARO.sombra,
       cursor: 'pointer',
-      transition: 'border-color 0.18s',
       overflow: 'hidden',
       height: '100%',
       display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto',
       containIntrinsicSize: 'auto 170px',
-    }}
-    onMouseEnter={e => e.currentTarget.style.borderColor = PALETTE.amber}
-    onMouseLeave={e => e.currentTarget.style.borderColor = PALETTE.border}
-    >
-      <TacticalCorners size={8} color={PALETTE.amber} />
-      {/* imagen · columna izquierda */}
+    }}>
+      {/* imagen · columna izquierda, sobre blanco como una ficha de producto */}
       <div style={{
         width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
-        background: `radial-gradient(circle at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
+        background: CLARO.panelHi,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
-        borderRight: `1px solid ${PALETTE.border}`,
+        borderRight: `1px solid ${CLARO.hair}`,
         overflow: 'hidden',
       }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)`,
-        }} />
         {!imgError ? (
           <img src={arma.img} alt={arma.nombre}
             loading="lazy" decoding="async"
             onError={() => setImgError(true)}
             style={{
               maxWidth: '88%', maxHeight: '88%', objectFit: 'contain',
-              filter: 'grayscale(0.25) contrast(1.1)',
+              
               position: 'relative', zIndex: 1,
             }} />
         ) : (
@@ -702,7 +828,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
           color: inCompare ? '#000' : PALETTE.textDim,
           border: `1px solid ${inCompare ? PALETTE.amber : PALETTE.border}`,
           padding: '2px 5px',
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, fontWeight: 700,
           cursor: 'pointer',
           letterSpacing: '0.05em',
@@ -724,7 +850,7 @@ function SpecRow({ label, value, accent }) {
       display: 'flex', justifyContent: 'space-between',
       padding: '7px 10px',
       borderBottom: `1px solid ${PALETTE.border}`,
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: 15.5,
     }}>
       <span style={{
@@ -900,7 +1026,7 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
   return (
     <div style={{
       position: 'relative',
-      background: 'linear-gradient(180deg, rgba(28,33,26,0.85) 0%, rgba(26,26,26,0.85) 100%)',
+      background: 'linear-gradient(180deg, rgba(28,33,26,0.85) 0%, rgba(23,58,50,0.85) 100%)',
       border: `1px solid ${PALETTE.border}`,
       padding: '10px 12px 10px 10px',
       display: 'flex',
@@ -936,7 +1062,7 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
         ) : null}
         <span style={{
           display: icon ? 'none' : 'block',
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 19, fontWeight: 700,
           color: PALETTE.amber,
           letterSpacing: 0,
@@ -945,13 +1071,13 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
       {/* TEXT */}
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           textTransform: 'uppercase', letterSpacing: '0.14em',
           marginBottom: 2,
         }}>{label}</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Archivo, sans-serif',
           fontWeight: 600, fontSize: 16,
           color: PALETTE.text,
           letterSpacing: '0.02em',
@@ -977,7 +1103,7 @@ function FilterChip({ children, active, onClick, count }) {
       border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
       padding: '10px 12px', minHeight: 44,
       clipPath: CUT_TR_SM,
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: 14.5, fontWeight: 600,
       letterSpacing: '0.08em', textTransform: 'uppercase',
       cursor: 'pointer',
@@ -1009,26 +1135,26 @@ function CompareFloat({ ids, onOpen, onClear }) {
       width: 'calc(100% - 24px)', maxWidth: 360,
       background: PALETTE.bgElev,
       border: `1px solid ${PALETTE.amber}`,
-      boxShadow: `0 0 0 1px rgba(245,197,24,0.2), 0 8px 24px rgba(0,0,0,0.6)`,
+      boxShadow: `0 0 0 1px rgba(221,213,196,0.2), 0 8px 24px rgba(0,0,0,0.6)`,
       padding: '8px 12px',
       display: 'flex', alignItems: 'center', gap: 8,
       zIndex: 60,
       animation: 'slideUp 0.25s ease',
     }}>
       <span style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 14.5, color: PALETTE.amber,
         letterSpacing: '0.1em', fontWeight: 700,
       }}>⇄ {ids.length}/2</span>
       <span style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 14.5, color: PALETTE.textDim, flex: 1,
       }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
       {ids.length === 2 && (
         <button onClick={onOpen} style={{
           background: PALETTE.amber, color: '#000', border: 'none',
           padding: '5px 10px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
           letterSpacing: '0.1em', textTransform: 'uppercase',
           cursor: 'pointer',
         }}>Ver</button>
@@ -1058,7 +1184,7 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
         background: PALETTE.bgElev,
         border: `1px dashed ${PALETTE.border}`,
         color: PALETTE.textMuted,
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 15.5, letterSpacing: '0.04em',
         textAlign: 'center',
         margin: `0 ${padX}px`,
@@ -1182,13 +1308,13 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
             {eyebrow &&
               <span style={{
                 display: 'block',
-                fontFamily: 'Courier Prime, monospace', fontSize: 12,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
                 color: PALETTE.textMuted, letterSpacing: '0.16em',
                 textTransform: 'uppercase', marginBottom: 2
               }}>{eyebrow}</span>}
             <span style={{
               display: 'block',
-              fontFamily: compact ? 'Courier Prime, monospace' : 'Montserrat, sans-serif',
+              fontFamily: compact ? 'JetBrains Mono, monospace' : 'Archivo, sans-serif',
               fontWeight: compact ? 400 : 600, fontSize: compact ? 12.5 : 15,
               color: open ? accent : (compact ? PALETTE.textMuted : PALETTE.text),
               textTransform: 'uppercase',
@@ -1196,7 +1322,7 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
             }}>{title}</span>
           </span>
           <span aria-hidden="true" style={{
-            color: accent, fontFamily: 'Courier Prime, monospace',
+            color: accent, fontFamily: 'JetBrains Mono, monospace',
             fontSize: compact ? 16 : 21, lineHeight: 1, flexShrink: 0, width: 14, textAlign: 'center'
           }}>{open ? '−' : '+'}</span>
         </span>
@@ -1304,7 +1430,7 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
     `de ${ini.price} a ${fin.price}, ${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)}%. ` +
     `${plural(bajadas, 'bajada', 'bajadas')} y ${plural(subidas, 'subida', 'subidas')} entre inventarios consecutivos.`;
 
-  const MONO = 'Courier Prime, monospace';
+  const MONO = 'JetBrains Mono, monospace';
   // Halo del color del fondo: cinturón por si una etiqueta se acercara al trazo.
   // paintOrder va por `style` porque es CSS, no un atributo de React.
   const HALO = { paintOrder: 'stroke', fontVariantNumeric: 'tabular-nums' };
