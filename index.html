@@ -25,7 +25,7 @@
   })(window.location);
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1A1A1A">
+<meta name="theme-color" content="#173A32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -39,15 +39,18 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<!-- ?v= obligatorio: sin cambiar la URL, un navegador con estilo.css ya en caché
+     sigue pintando el tema anterior sobre el HTML nuevo. Lo vigila build-prerender.mjs. -->
+<link rel="stylesheet" href="estilo.css?v=20260901">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
-    background: #1A1A1A;
-    color: #FFFFFF;
-    font-family: 'Open Sans', system-ui, sans-serif;
+    background: #F3EFE4;
+    color: #171B19;
+    font-family: 'Archivo', system-ui, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -webkit-text-size-adjust: 100%;
@@ -71,8 +74,8 @@
   body::before {
     content: ''; position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(245,197,24,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(245,197,24,0.025) 1px, transparent 1px);
+      linear-gradient(rgba(23,58,50,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(23,58,50,0.035) 1px, transparent 1px);
     background-size: 48px 48px;
     pointer-events: none; z-index: 0;
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
@@ -93,9 +96,9 @@
   /* scrollbar dark (desktop solamente) */
   @media (min-width: 720px) {
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #111111; }
-    ::-webkit-scrollbar-thumb { background: #3A3A3A; border-radius: 0; }
-    ::-webkit-scrollbar-thumb:hover { background: #F5C518; }
+    ::-webkit-scrollbar-track { background: #E4E0D4; }
+    ::-webkit-scrollbar-thumb { background: #C3C5BC; border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: #59605C; }
   }
 
   /* horizontal chips */
@@ -123,12 +126,12 @@
   .amx-price-range::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none; pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; margin-top: 5px; border-radius: 50%;
-    background: #1A1A1A; border: 2px solid #F5C518; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: #173A32; border: 2px solid #DDD5C4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .amx-price-range::-moz-range-thumb {
     pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; border-radius: 50%;
-    background: #1A1A1A; border: 2px solid #F5C518; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: #173A32; border: 2px solid #DDD5C4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
 
   /* Hide bundler error overlay (non-critical img/font load events trigger false positives) */
@@ -140,20 +143,20 @@
   }
 
   /* input placeholder */
-  input::placeholder { color: #7A7A7A; }
+  input::placeholder { color: #7C837B; }
 
   /* focus — anillo visible 2px (accesibilidad).
      OJO: en elementos con clip-path el anillo va en un wrapper sin recorte
      (el clip se traga el outline). */
   button:focus-visible, a:focus-visible, input:focus-visible,
   select:focus-visible, [tabindex]:focus-visible {
-    outline: 2px solid #F5C518; outline-offset: 2px;
+    outline: 2px solid #173A32; outline-offset: 2px;
   }
   button { -webkit-tap-highlight-color: transparent; }
 
   /* Controles con corte biselado: el clip-path se traga el outline, así que
      el anillo de foco lo pinta el envoltorio sin recortar. */
-  .amx-cut:has(:focus-visible) { outline: 2px solid #F5C518; outline-offset: 2px; }
+  .amx-cut:has(:focus-visible) { outline: 2px solid #173A32; outline-offset: 2px; }
 
   /* accesibilidad: respetar la preferencia de menos movimiento */
   @media (prefers-reduced-motion: reduce) {
@@ -166,7 +169,7 @@
   }
 
   /* selección de texto */
-  ::selection { background: rgba(245,197,24,0.4); color: #fff; }
+  ::selection { background: rgba(23,58,50,0.16); color: #171B19; }
 
   /* Safe-area insets para iOS (notch / home indicator) */
   body {
@@ -174,74 +177,22 @@
     padding-right: env(safe-area-inset-right);
   }
 
-  /* ═══════════════════════════════════════════════════════════════
-     TWEAKS — reshape global feel via body data-attrs
-     ═══════════════════════════════════════════════════════════════ */
-
-  /* HUD INTENSITY · Discreta — quita las capas decorativas aria-hidden */
-  body[data-hud="minimal"] .gunsmith [aria-hidden="true"],
-  body[data-hud="minimal"] .gunsmith > div[style*="radial-gradient"] {
-    opacity: 0 !important;
-  }
-  body[data-hud="minimal"] .gunsmith {
-    background: #1A1A1A !important;
-  }
-
-  /* HUD INTENSITY · Máxima — scanlines + glow amplificado */
-  body[data-hud="max"] .gunsmith {
-    box-shadow: inset 0 0 80px rgba(0,0,0,0.7) !important;
-  }
-  body[data-hud="max"] .gunsmith::after {
-    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 9;
-    background-image: repeating-linear-gradient(
-      0deg,
-      rgba(255,255,255,0.025) 0 1px,
-      transparent 1px 3px
-    );
-    mix-blend-mode: overlay;
-  }
-  body[data-hud="max"] .gunsmith::before {
-    content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 8;
-    background:
-      radial-gradient(ellipse at top, rgba(245,197,24,0.06), transparent 60%),
-      radial-gradient(ellipse at bottom, rgba(245,197,24,0.04), transparent 60%);
-  }
-
-  /* TYPEFACE · Editorial — sustituye Montserrat (stencil militar) por Playfair display serif */
-  body[data-type="editorial"] *[style*="Montserrat"] {
-    font-family: 'Playfair Display', Georgia, serif !important;
-    letter-spacing: -0.01em !important;
-    font-weight: 700 !important;
-  }
-  body[data-type="editorial"] *[style*="Courier Prime"] {
-    font-family: 'Open Sans', system-ui, sans-serif !important;
-    letter-spacing: 0.04em !important;
-  }
-
-  /* TYPEFACE · Terminal — todo el sistema en mono retro CRT */
-  body[data-type="terminal"] *[style*="Montserrat"] {
-    font-family: 'Courier Prime', ui-monospace, monospace !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
-  }
-  body[data-type="terminal"] {
-    text-shadow: 0 0 1px rgba(255,255,255,0.06);
-  }
+  /* Retiradas las reglas body[data-hud=…] / body[data-type=…] del tema anterior: apuntaban a .gunsmith, al ámbar rgba(245,197,24,…) y a Montserrat/Courier Prime/Playfair, y nada de eso existe ya en la app. */
 </style>
 </head>
 <body>
 
-<template id="__bundler_thumbnail" data-bg-color="#1A1A1A">
+<template id="__bundler_thumbnail" data-bg-color="#173A32">
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#1A1A1A"/>
-    <g stroke="#F5C518" stroke-width="6" fill="none" opacity="0.5">
+    <rect width="1200" height="800" fill="#173A32"/>
+    <g stroke="#DDD5C4" stroke-width="6" fill="none" opacity="0.5">
       <circle cx="600" cy="400" r="140"/>
       <circle cx="600" cy="400" r="220"/>
       <line x1="600" y1="120" x2="600" y2="680"/>
       <line x1="320" y1="400" x2="880" y2="400"/>
     </g>
-    <circle cx="600" cy="400" r="18" fill="#F5C518"/>
-    <text x="600" y="740" text-anchor="middle" fill="#F5C518"
+    <circle cx="600" cy="400" r="18" fill="#DDD5C4"/>
+    <text x="600" y="740" text-anchor="middle" fill="#DDD5C4"
           font-family="monospace" font-size="44" font-weight="700"
           letter-spacing="8">ARMADO MX</text>
   </svg>
@@ -249,18 +200,18 @@
 
 <div id="app-root"></div>
 
-<!-- Splash de carga (se desvanece al montar React) -->
-<div id="amx-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:200;background:#1A1A1A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.35s ease;">
+<!-- Splash de carga (se desvanece al montar React). Tinta sobreMarca #F3EFE4 sobre la marca #173A32 = 10.83:1 (medido). -->
+<div id="amx-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:200;background:#173A32;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.35s ease;">
   <svg width="88" height="88" viewBox="0 0 88 88" style="animation:amxSpin 6s linear infinite;">
-    <g stroke="#F5C518" stroke-width="1.5" fill="none" opacity="0.7">
+    <g stroke="#F3EFE4" stroke-width="1.5" fill="none" opacity="0.7">
       <circle cx="44" cy="44" r="18"></circle>
       <circle cx="44" cy="44" r="30"></circle>
       <line x1="44" y1="6" x2="44" y2="82"></line>
       <line x1="6" y1="44" x2="82" y2="44"></line>
     </g>
-    <circle cx="44" cy="44" r="2.5" fill="#F5C518"></circle>
+    <circle cx="44" cy="44" r="2.5" fill="#F3EFE4"></circle>
   </svg>
-  <div style="font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.3em;color:#F5C518;">CARGANDO ARSENAL…</div>
+  <div style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:0.3em;color:#F3EFE4;">CARGANDO ARSENAL…</div>
   <style>@keyframes amxSpin { to { transform: rotate(360deg); } }</style>
 </div>
 
@@ -292,14 +243,19 @@
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
 
-<!-- Data + Store + UI + screens + app -->
+<!-- Data + Store + UI + screens + app.
+     TODO src local lleva ?v=: el rediseño entero vive en estos archivos y sin cambiar
+     la URL un móvil que ya los tiene cacheados mezcla HTML nuevo con JS viejo (ago-2026:
+     seguía usando el acento #DDD5C4, 1.27:1 sobre el lienzo crema — invisible).
+     Los ?v= de los data-*.js van por su lado: cambian cuando cambian los datos.
+     El build falla si alguno se queda sin ?v= (guardia 7b de build-prerender.mjs). -->
 <script src="data.js?v=20260831b"></script>
 <script src="data-extra.js?v=20260827c"></script>
 <script src="data-traumaticas.js?v=20260827c"></script>
 <script src="data-precios.js?v=20260827c"></script>
 <script src="data-accesorios.js?v=20260827c"></script>
 <script src="data-municiones.js?v=20260827c"></script>
-<script src="store.js"></script>
+<script src="store.js?v=20260901"></script>
 <script>
 // Tweak defaults — the host rewrites this JSON in place when the user changes a tweak.
 window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -308,16 +264,16 @@ window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "typeface": "stencil"
 }/*EDITMODE-END*/;
 </script>
-<script src="tweaks-panel.js"></script>
-<script src="ui.js"></script>
-<script src="screens-1.js"></script>
-<script src="screens-2.js"></script>
-<script src="screens-3.js"></script>
-<script src="screens-4.js"></script>
-<script src="screens-accesorios.js"></script>
-<script src="screens-municiones.js"></script>
-<script src="screens-tutorial.js"></script>
-<script src="app.js"></script>
+<script src="tweaks-panel.js?v=20260901"></script>
+<script src="ui.js?v=20260901"></script>
+<script src="screens-1.js?v=20260901"></script>
+<script src="screens-2.js?v=20260901"></script>
+<script src="screens-3.js?v=20260901"></script>
+<script src="screens-4.js?v=20260901"></script>
+<script src="screens-accesorios.js?v=20260901"></script>
+<script src="screens-municiones.js?v=20260901"></script>
+<script src="screens-tutorial.js?v=20260901"></script>
+<script src="app.js?v=20260901"></script>
 
 <!-- Mount -->
 <script>
@@ -348,6 +304,6 @@ root.render(React.createElement(window.App));
 
 
 <!-- DEV: alternador de viewport escritorio/móvil (compartido por las 3 ramas) -->
-<script defer src="dev-viewport.js"></script>
+<script defer src="dev-viewport.js?v=20260901"></script>
 </body>
 </html>

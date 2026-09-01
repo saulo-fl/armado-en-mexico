@@ -16,6 +16,58 @@ function amxFmtManualDate(f) {
 // Sección de la ficha. Vive FUERA de ProductScreen a propósito: definida
 // dentro, React la trataría como un componente nuevo en cada render y
 // remontaría el subárbol — lo que cerraría los <details> abiertos.
+// ──────────────────────────────────────────────────────────────
+// TABS de la ficha (DESIGN.md §11) — variante B de la comparación.
+// Envuelve los paneles sin reescribir su contenido: cada hijo <Panel label="X">
+// aporta su rótulo y el resto va igual que en la variante de desplegables.
+// Vive fuera de ProductScreen a propósito: un componente definido dentro de
+// otro remonta su subárbol en cada render (la trampa que ya documenta
+// fidelidad-diseno con ProdSection).
+// ──────────────────────────────────────────────────────────────
+function Panel({ children }) { return <React.Fragment>{children}</React.Fragment>; }
+
+function FichaTabs({ children }) {
+  const paneles = React.Children.toArray(children).filter(Boolean);
+  const [act, setAct] = React.useState(0);
+  const refs = React.useRef([]);
+  if (!paneles.length) return null;
+  const activo = Math.min(act, paneles.length - 1);
+
+  // Flechas entre pestañas: lo que espera un lector de pantalla en un tablist.
+  function onKey(e) {
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const n = (activo + d + paneles.length) % paneles.length;
+    setAct(n);
+    if (refs.current[n]) refs.current[n].focus();
+  }
+
+  return (
+    <div>
+      <div className="tabs-bar" role="tablist" onKeyDown={onKey}>
+        {paneles.map((p, i) => (
+          <button
+            key={i}
+            ref={(el) => { refs.current[i] = el; }}
+            role="tab"
+            id={'tab-' + i}
+            aria-selected={i === activo}
+            aria-controls={'panel-' + i}
+            tabIndex={i === activo ? 0 : -1}
+            className={'tab' + (i === activo ? ' is-act' : '')}
+            onClick={() => setAct(i)}>
+            {p.props.label}
+          </button>
+        ))}
+      </div>
+      <div className="tab-panel" role="tabpanel" id={'panel-' + activo} aria-labelledby={'tab-' + activo}>
+        {paneles[activo]}
+      </div>
+    </div>
+  );
+}
+
 function ProdSection({ pad, gap, band, children }) {
   return (
     <section style={{
@@ -131,7 +183,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         border: `1.5px solid ${PALETTE.amber}`,
         clipPath: CUT_TR,
         padding: '12px 22px', minHeight: 48,
-        fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
         letterSpacing: '0.15em', textTransform: 'uppercase',
         cursor: 'pointer'
       }}>{inCmp ? '✓ AÑADIDA' : '⇄ Comparar'}</button>
@@ -144,23 +196,24 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* ── 1 · IDENTIDAD — quién es el arma, antes de enseñarla ───────── */}
       <div style={{ padding: `${vp.isDesktop ? 26 : 18}px ${PAD}px ${vp.isDesktop ? 16 : 12}px` }}>
-        <div style={{
+        <div className="t-dato" style={{
           display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-          fontFamily: 'Courier Prime, monospace', fontSize: 14,
-          color: ORANGE, letterSpacing: '0.18em', textTransform: 'uppercase',
-          marginBottom: 6
+          fontSize: 12.5, letterSpacing: '0.16em', textTransform: 'uppercase',
+          marginBottom: 8
         }}>
           <CountryFlag pais={arma.pais} height={12} />
           <span>{arma.marca} · {arma.pais} · {arma.anio}</span>
+          {/* Código de expediente: el guiño burocrático de DESIGN.md §29,
+              sin iconografía oficial. Derivado del id, no inventado. */}
+          <span className="sello">AR-{String(arma.id).padStart(4, '0')}</span>
         </div>
 
-        <h1 style={{
-          fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26,
-          color: PALETTE.text, textTransform: 'uppercase',
-          lineHeight: 1.04, letterSpacing: '0.02em',
+        <h1 className="t-titulo" style={{
+          fontSize: vp.isDesktop ? 36 : 27,
           margin: '0 0 8px'
         }}>{arma.nombre}</h1>
+
+        <hr className="tricolor" style={{ width: 84, marginBottom: 12 }} />
 
         <div style={window.amxProsa({ fontSize: 16.5, marginBottom: 12 })}>{arma.mecanismo}</div>
 
@@ -168,7 +221,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <AvailBadge avail={arma.avail} />
           <span style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 14,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
             color: availMeta?.color || PALETTE.textDim, letterSpacing: '0.04em'
           }}>{arma.legalTit}</span>
         </div>
@@ -205,16 +258,25 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* ── 3 · DATOS CLAVE ────────────────────────────────────────────── */}
       <ProdSection pad={PAD} gap={vp.isDesktop ? 26 : 20}>
+        {/* Panel CREMA (DESIGN.md §27 y el mockup): la ficha técnica se lee
+            sobre papel, no sobre otra caja verde. Las divisiones son hairlines,
+            no un grid de bordes de 1px. */}
         <div style={{
             display: 'grid',
             gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
-            gap: 1, background: PALETTE.border,
-            border: `1px solid ${PALETTE.border}`
+            background: CLARO.panel,
+            borderRadius: CLARO.radio,
+            boxShadow: CLARO.sombra,
+            overflow: 'hidden'
           }}>
-          {quick.map((q) =>
-            <div key={q.l} style={{ background: PALETTE.bgCard, padding: '13px 14px' }}>
-              <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
-              <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, lineHeight: 1.1, ...NUM }}>{q.v}</div>
+          {quick.map((q, i) =>
+            <div key={q.l} style={{
+              padding: '14px 16px',
+              borderRight: `1px solid ${CLARO.hair}`,
+              borderBottom: `1px solid ${CLARO.hair}`,
+            }}>
+              <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 10.5, fontWeight: 600, color: CLARO.tinta2, letterSpacing: '0.13em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
+              <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: CLARO.tinta, lineHeight: 1.1, ...NUM }}>{q.v}</div>
             </div>
           )}
         </div>
@@ -265,7 +327,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             se responde junto al precio, no al final de la página. */}
         {etOpin.hay &&
           <div style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
             letterSpacing: '0.14em', textTransform: 'uppercase',
             color: PALETTE.textMuted, marginTop: -6, marginBottom: 9
           }}>
@@ -281,12 +343,12 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <span style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 13,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
               color: PALETTE.textMuted, letterSpacing: '0.18em', textTransform: 'uppercase'
             }}>◆ Precio actual · con IVA</span>
             {curAut &&
               <span title={curAut.nombre} style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
                 letterSpacing: '0.12em', color: '#000', background: curAut.color,
                 padding: '2px 7px', flexShrink: 0
               }}>{curAut.sigla}</span>}
@@ -294,13 +356,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
           <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
             <span style={{
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700,
               fontSize: vp.isDesktop ? 30 : 25, color: PALETTE.amber,
               letterSpacing: '0.01em', ...NUM
             }}>{precioActual}</span>
             {currentManual &&
               <span style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 13,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
                 color: PALETTE.textMuted, letterSpacing: '0.06em'
               }}>{amxFmtManualDate(currentManual.fecha)}</span>}
           </div>
@@ -320,12 +382,12 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                       padding: '7px 12px'
                     }}>
                     <span style={{
-                      fontFamily: 'Courier Prime, monospace', fontSize: 12.5, fontWeight: 700,
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, fontWeight: 700,
                       color: PALETTE.textDim, letterSpacing: '0.14em'
                     }}>{b.sigla}</span>
                     {b.agotado
-                      ? <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: col, letterSpacing: '0.08em' }}>AGOTADO</span>
-                      : <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: col, ...NUM }}>{Number(b.qty).toLocaleString('es-MX')}</span>}
+                      ? <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: col, letterSpacing: '0.08em' }}>AGOTADO</span>
+                      : <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16, color: col, ...NUM }}>{Number(b.qty).toLocaleString('es-MX')}</span>}
                   </span>);
               })}
             </div>}
@@ -337,7 +399,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             pequeños, sin fondo ni barrita de acento. */}
         <div style={{ marginTop: 10 }}>
           <window.Disclosure title="Detalle de la fuente" compact>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
               <div style={{ marginBottom: 10 }}>
                 <span style={{ color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: 12 }}>Ref. {curSigla}</span>
                 <div style={{ color: PALETTE.text }}>{arma.dcamRef}</div>
@@ -367,7 +429,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               {currentManual && currentManual.url &&
                 <a href={currentManual.url} target="_blank" rel="noopener" style={{
                   display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 12,
-                  fontFamily: 'Courier Prime, monospace', fontSize: 13.5,
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5,
                   color: PALETTE.amber, textDecoration: 'none',
                   border: `1px solid ${PALETTE.amber}`,
                   padding: '10px 13px', minHeight: 44, boxSizing: 'border-box', letterSpacing: '0.04em'
@@ -401,13 +463,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                   borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 10
                 }}>
                   <span style={{
-                    fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                    fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
                     color: deltaPct <= 0 ? PALETTE.green : PALETTE.redHi, ...NUM
                   }}>
                     {deltaPct <= 0 ? '▼' : '▲'} {deltaPct > 0 ? '+' : '−'}{Math.abs(deltaPct).toFixed(1)} %
                   </span>
                   <span style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
                     color: PALETTE.textMuted, letterSpacing: '0.04em'
                   }}>{fechasHist.length} inventarios oficiales DCAM / OTCA</span>
                 </div>
@@ -422,7 +484,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     <div key={i} style={{
                       padding: i === 0 ? '0 0 10px' : '10px 0',
                       borderBottom: i < arr.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
-                      fontFamily: 'Courier Prime, monospace', fontSize: 15
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 15
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
@@ -433,7 +495,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                           <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500, ...NUM }}>{h.price}</span>
                           {hAut &&
                             <span title={hAut.nombre} style={{
-                              fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
                               letterSpacing: '0.1em', color: '#000', background: hAut.color,
                               padding: '1px 6px', flexShrink: 0
                             }}>{hAut.sigla}</span>}
@@ -484,26 +546,37 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />} />
         </ProdSection>}
 
-      {/* ── 9-12 · DESPLEGABLES — todo el texto sigue en el DOM, sin saturar.
-             Sin encabezado de sección: cada <details> ya se anuncia solo. ─── */}
+      {/* ── 9-12 · TABS (DESIGN.md §11) — variante B de la comparación.
+             GALERÍA no está: hoy cada arma tiene una sola foto. Cuando haya
+             varias imágenes por ficha, entra como quinto Panel y ya. ─────── */}
       <ProdSection pad={PAD} gap={SEC}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <FichaTabs>
 
-          <window.Disclosure title="Ficha técnica completa">
-            <div style={{ position: 'relative' }}>
-              <SpecRow label="Calibre" value={arma.calibre} accent={PALETTE.amber} />
-              <SpecRow label="Capacidad" value={arma.capacidad} />
-              <SpecRow label="Peso" value={arma.peso} />
-              <SpecRow label="Longitud" value={arma.longitud} />
-              <SpecRow label="Mecanismo" value={arma.mecanismo} />
-              <SpecRow label="Origen" value={arma.pais} />
-              <SpecRow label="Año intro." value={arma.anio} />
-              <SpecRow label="Tipo" value={arma.tipo.toUpperCase()} />
+          <Panel label="Especificaciones">
+            {/* Tabla, no cajas: DESIGN.md §11. Los campos salen de `arma`, no
+                se escriben uno a uno en el JSX. Añadir una spec = una línea. */}
+            <div className="p-claro" style={{ overflowX: 'auto' }}>
+              <table className="specs">
+                <tbody>
+                  {[
+                    ['Calibre',    arma.calibre],
+                    ['Capacidad',  arma.capacidad],
+                    ['Peso',       arma.peso],
+                    ['Longitud',   arma.longitud],
+                    ['Mecanismo',  arma.mecanismo],
+                    ['Origen',     arma.pais],
+                    ['Año intro.', arma.anio],
+                    ['Tipo',       arma.tipo && arma.tipo.toUpperCase()],
+                  ].filter(([, v]) => v != null && v !== '').map(([k, v]) => (
+                    <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </window.Disclosure>
+          </Panel>
 
           {arma.uses && arma.uses.length > 0 &&
-            <window.Disclosure title="Usos recomendados">
+            <Panel label="Usos">
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {arma.uses.map((u) => {
                   const meta = window.CATEGORIES.uso.find((x) => x.id === u);
@@ -513,7 +586,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                       border: `1px solid ${PALETTE.border}`,
                       clipPath: window.CUT_TR_SM,
                       padding: '7px 11px',
-                      fontFamily: 'Courier Prime, monospace',
+                      fontFamily: 'JetBrains Mono, monospace',
                       fontSize: 14, color: PALETTE.text,
                       letterSpacing: '0.08em', textTransform: 'uppercase',
                       display: 'inline-flex', alignItems: 'center', gap: 6
@@ -523,12 +596,12 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     </span>);
                 })}
               </div>
-            </window.Disclosure>}
+            </Panel>}
 
-          <window.Disclosure title="Estatus legal en México">
+          <Panel label="Legalidad">
             <div>
               <div style={{
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
                 color: availMeta?.color || PALETTE.text,
                 textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7
               }}>{arma.legalTit}</div>
@@ -537,7 +610,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               {arma.disponibilidad && arma.disponibilidad.length > 0 &&
                 <div style={{ marginBottom: 14 }}>
                   <div style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 12,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
                     color: PALETTE.textMuted, letterSpacing: '0.16em',
                     textTransform: 'uppercase', marginBottom: 6
                   }}>Disponibilidad</div>
@@ -554,20 +627,20 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                 width: '100%', background: 'transparent',
                 border: `1.5px dashed ${PALETTE.border}`, color: PALETTE.amber,
                 padding: '12px', minHeight: 48,
-                fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600,
+                fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600,
                 letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
               }}>§ Guía legal completa →</button>
             </div>
-          </window.Disclosure>
+          </Panel>
 
           {arma.historia &&
-            <window.Disclosure title="Historia">
+            <Panel label="Historia">
               <div style={window.amxProsa({
                 fontSize: 16.5, color: PALETTE.text, lineHeight: 1.75
               })}>{arma.historia}</div>
-            </window.Disclosure>}
+            </Panel>}
 
-        </div>
+        </FichaTabs>
       </ProdSection>
 
       {/* VIDEO YOUTUBE (sólo si hay) */}
@@ -607,7 +680,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             width: '100%', background: 'transparent', color: PALETTE.amber,
             border: `1.5px dashed ${PALETTE.amber}`,
             padding: '14px', minHeight: 48,
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
             letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
           }}>Sugerir cambios</button>
       </ProdSection>
@@ -625,20 +698,22 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           // El -1px superpone los dos bordes en una sola línea: si se apoya justo
           // encima queda una rendija por la que se ve pasar el contenido.
           bottom: 'calc(var(--amx-nav-h, 74px) - 1px)',
-          background: 'rgba(26,26,26,0.97)',
-          backdropFilter: 'blur(10px)',
+          // Blanco sólido sobre el lienzo claro. Sin backdrop-filter: es el
+          // asesino nº1 del scroll en móvil y aquí no aportaba nada.
+          background: CLARO.panelHi,
           borderTop: `1px solid ${PALETTE.border}`,
+          boxShadow: '0 -6px 18px -12px rgba(23,27,25,.28)',
           padding: '10px 16px',
           display: 'flex', alignItems: 'center', gap: 12,
           zIndex: 55
         }}>
           <div style={{ minWidth: 0 }}>
             <div style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 12,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
               color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase'
             }}>Precio actual</div>
             <div style={{
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 18,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 18,
               color: PALETTE.amber, whiteSpace: 'nowrap', ...NUM
             }}>{String(precioActual).replace(' MXN', '')}</div>
           </div>
@@ -650,9 +725,9 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               border: `1.5px solid ${PALETTE.amber}`,
               clipPath: CUT_TR,
               minHeight: 46, padding: '0 20px',
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
               letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-              boxShadow: inCmp ? 'none' : '0 0 16px rgba(245,197,24,0.25)'
+              boxShadow: inCmp ? 'none' : '0 0 16px rgba(221,213,196,0.25)'
             }}>{inCmp ? '✓ Añadida' : '⇄ Comparar'}</button>
           </span>
         </div>}
@@ -717,7 +792,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
           border: `1.5px solid ${activo ? col : PALETTE.border}`,
           cursor: 'pointer', display: 'flex', alignItems: 'center',
           justifyContent: 'center', gap: 10,
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.14em', textTransform: 'uppercase',
           transition: 'background 0.15s, border-color 0.15s, color 0.15s'
         }}>
@@ -745,7 +820,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
         {enviado ?
           <div>
             <div style={{
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16,
               color: PALETTE.green, textTransform: 'uppercase',
               letterSpacing: '0.1em', marginBottom: 8
             }}>✓ Tu opinión entró en revisión</div>
@@ -761,7 +836,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
         :
           <div>
             <div style={{
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700,
               fontSize: vp.isDesktop ? 19 : 17, color: PALETTE.text,
               textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12
             }}>¿Recomiendas {nombreTipo === 'munición' ? 'esta' : nombreTipo === 'arma' ? 'esta' : 'este'} {nombreTipo}?</div>
@@ -820,7 +895,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                   color: listo ? '#000' : PALETTE.textMuted,
                   border: `1.5px solid ${listo ? PALETTE.amber : PALETTE.border}`,
                   padding: '0 22px', minHeight: 48,
-                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
                   letterSpacing: '0.14em', textTransform: 'uppercase',
                   cursor: listo ? 'pointer' : 'not-allowed'
                 }}>Publicar opinión</button>
@@ -843,13 +918,13 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                       <window.ThumbIcon up={!!r.recomienda} size={17} />
                     </span>
                     <span style={{
-                      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 12.5,
+                      fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 12.5,
                       color: r.recomienda ? PALETTE.green : PALETTE.redHi,
                       letterSpacing: '0.12em', textTransform: 'uppercase'
                     }}>{r.recomienda ? 'La recomienda' : 'No la recomienda'}</span>
                     <span style={{ flex: 1 }} />
                     <span style={{
-                      fontFamily: 'Courier Prime, monospace', fontSize: 12,
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
                       color: PALETTE.textMuted, letterSpacing: '0.06em'
                     }}>{amxFmtManualDate(String(r.submittedAt || '').slice(0, 10))}</span>
                   </div>
@@ -858,7 +933,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                     whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'
                   })}>{r.texto}</div>
                   <div style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 13,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
                     color: PALETTE.textMuted, letterSpacing: '0.08em'
                   }}>— {r.autor || 'Anónimo'}</div>
                 </div>
@@ -869,7 +944,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
 
       {et.hay &&
         <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
           color: PALETTE.textMuted, letterSpacing: '0.08em', marginTop: 10
         }}>
           {op.up} de {op.total} {op.total === 1 ? 'persona la recomienda' : 'personas la recomiendan'} ({et.pct} %)
@@ -895,7 +970,7 @@ function YouTubeBlock({ arma, padX = 16 }) {
       <SectionHeader action={
       <a href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noopener noreferrer"
       style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, color: PALETTE.textMuted,
         letterSpacing: '0.1em', textDecoration: 'none'
       }}>
@@ -960,14 +1035,19 @@ function YouTubeBlock({ arma, padX = 16 }) {
             {/* canal info bottom-left */}
             <div style={{
             position: 'absolute', bottom: 10, left: 12,
-            fontFamily: 'Courier Prime, monospace',
+            fontFamily: 'JetBrains Mono, monospace',
             fontSize: 15.5, color: '#fff',
             letterSpacing: '0.08em',
             textShadow: '0 2px 6px rgba(0,0,0,0.8)',
             display: 'flex', alignItems: 'center', gap: 6
           }}>
+              {/* Los siete rellenos `background: PALETTE.amber` de este archivo
+                  llevaban el texto en '#000': cuando «amber» era ámbar el negro
+                  encima funcionaba, pero hoy amber ES el verde de marca #173A32
+                  y el negro encima daba 1.69:1 — CTAs ilegibles. Sobre verde el
+                  texto va en sobreMarca #F3EFE4 (10.83:1). Vale para los siete. */}
               <span style={{
-              background: PALETTE.amber, color: '#000',
+              background: PALETTE.amber, color: PALETTE.sobreMarca,
               padding: '2px 6px', fontWeight: 700, fontSize: 13,
               letterSpacing: '0.1em'
             }}>YOUTUBE</span>
@@ -975,7 +1055,7 @@ function YouTubeBlock({ arma, padX = 16 }) {
             </div>
             <div style={{
             position: 'absolute', top: 10, right: 12,
-            fontFamily: 'Courier Prime, monospace',
+            fontFamily: 'JetBrains Mono, monospace',
             fontSize: 13, color: '#fff', opacity: 0.85,
             letterSpacing: '0.12em',
             background: 'rgba(0,0,0,0.5)',
@@ -1033,8 +1113,8 @@ function SuggestChangesModal({ arma, onClose }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
         }}>
           <div>
-            <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em' }}>✎ SUGERIR CAMBIO</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase' }}>{arma.nombre}</div>
+            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em' }}>✎ SUGERIR CAMBIO</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase' }}>{arma.nombre}</div>
           </div>
           <button onClick={onClose} style={{
             background: 'none', border: `1px solid ${PALETTE.border}`,
@@ -1046,12 +1126,12 @@ function SuggestChangesModal({ arma, onClose }) {
         {sent ?
         <div style={{ padding: 28, textAlign: 'center' }}>
             <div style={{ fontSize: 50.5, color: PALETTE.amber, lineHeight: 1, marginBottom: 12 }}>✓</div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
             <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.6, marginBottom: 20 })}>Tu sugerencia entró en la cola. Revisaremos la información y, si procede, aplicaremos el cambio.</div>
             <button onClick={onClose} style={{
-            background: PALETTE.amber, color: '#000', border: 'none',
+            background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
             padding: '10px 20px',
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
             letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
           }}>Cerrar</button>
           </div> :
@@ -1088,13 +1168,13 @@ function SuggestChangesModal({ arma, onClose }) {
               background: 'transparent', color: PALETTE.textDim,
               border: `1px solid ${PALETTE.border}`,
               padding: '10px 18px',
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 14,
               letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
             }}>Cancelar</button>
               <button type="submit" style={{
-              background: PALETTE.amber, color: '#000', border: 'none',
+              background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
               padding: '10px 20px',
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
               letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
             }}>✓ Enviar sugerencia</button>
             </div>
@@ -1165,7 +1245,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
     return (
       <div style={{
         padding: '60px 24px', textAlign: 'center',
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         color: PALETTE.textMuted
       }}>
         <div style={{ fontSize: 57.5, color: PALETTE.border, marginBottom: 16 }}>⇄</div>
@@ -1174,9 +1254,9 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
           Selecciona armas desde el catálogo<br />tocando el botón ⇄ en cada tarjeta.
         </div>
         <button onClick={() => onNav('catalog')} style={{
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
           padding: '10px 22px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.15em', textTransform: 'uppercase',
           cursor: 'pointer'
         }}>Ir al Arsenal</button>
@@ -1189,7 +1269,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
     <div style={{ paddingBottom: 90, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{
         padding: `${vp.isDesktop ? 22 : 14}px ${padX}px 10px`,
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, color: PALETTE.amber,
         letterSpacing: '0.2em', textTransform: 'uppercase',
         textAlign: 'center'
@@ -1236,7 +1316,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
               }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{
-                    fontFamily: 'Courier Prime, monospace',
+                    fontFamily: 'JetBrains Mono, monospace',
                     fontSize: 15.5, color: winner === 'a' ? PALETTE.amber : PALETTE.text,
                     fontWeight: 700
                   }}>{va}</div>
@@ -1254,14 +1334,14 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
                     </div>
                   </div>
                   <div style={{
-                  fontFamily: 'Courier Prime, monospace',
+                  fontFamily: 'JetBrains Mono, monospace',
                   fontSize: 13, color: PALETTE.textMuted,
                   textAlign: 'center', letterSpacing: '0.1em',
                   textTransform: 'uppercase'
                 }}>{stat.l}</div>
                   <div>
                     <div style={{
-                    fontFamily: 'Courier Prime, monospace',
+                    fontFamily: 'JetBrains Mono, monospace',
                     fontSize: 15.5, color: winner === 'b' ? PALETTE.amber : PALETTE.text,
                     fontWeight: 700
                   }}>{vb}</div>
@@ -1304,7 +1384,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
             display: 'grid', gridTemplateColumns: '1fr 80px 1fr',
             borderBottom: `1px solid ${PALETTE.border}`,
             padding: '8px 10px', alignItems: 'center', gap: 8,
-            fontFamily: 'Courier Prime, monospace',
+            fontFamily: 'JetBrains Mono, monospace',
             fontSize: 14.5}}>
                 <div style={{ color: PALETTE.text, textAlign: 'right', lineHeight: 1.3 }}>{row.av}</div>
                 <div style={{
@@ -1330,7 +1410,7 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
         cursor: 'pointer',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         gap: 6,
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         color: PALETTE.textMuted
       }}>
         <div style={{ fontSize: 38.5, color: PALETTE.border }}>+</div>
@@ -1354,7 +1434,7 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
         marginBottom: 4
       }}>
         <span style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 12, color: PALETTE.amber,
           letterSpacing: '0.2em'
         }}>◆ SLOT {side}</span>
@@ -1376,20 +1456,20 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
         }} onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
       </div>
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 12, color: PALETTE.amber,
         letterSpacing: '0.1em', textTransform: 'uppercase',
         marginBottom: 2
       }}>{arma.marca}</div>
       <div style={{
-        fontFamily: 'Montserrat, sans-serif',
+        fontFamily: 'Archivo, sans-serif',
         fontSize: 15, fontWeight: 600,
         color: PALETTE.text,
         textTransform: 'uppercase',
         lineHeight: 1.1, marginBottom: 4
       }}>{arma.nombre}</div>
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, color: PALETTE.textDim,
         marginBottom: 6
       }}>{arma.calibre.replace(' Parabellum', '').replace('Winchester', 'Win')}</div>
@@ -1399,7 +1479,7 @@ function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
         background: 'transparent', border: `1px solid ${PALETTE.border}`,
         color: PALETTE.text,
         padding: '5px',
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, letterSpacing: '0.1em',
         cursor: 'pointer', textTransform: 'uppercase'
       }}>Ver ficha →</button>
@@ -1439,12 +1519,12 @@ function LegalScreen({ onNav }) {
         marginBottom: 18
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', marginBottom: 6
         }}>{eyebrow}</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Archivo, sans-serif',
           fontWeight: 700, fontSize: 23,
           color: PALETTE.text,
           textTransform: 'uppercase',
@@ -1464,7 +1544,7 @@ function LegalScreen({ onNav }) {
         marginBottom: 22
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6,
@@ -1485,27 +1565,38 @@ function LegalScreen({ onNav }) {
           borderLeft: `4px solid ${d.color}`,
           padding: '12px 14px'
         }}>
+            {/* El rótulo iba en d.color (data.js), pensado para el tema oscuro
+                anterior: sobre la tarjeta clara #FAF9F5 el amarillo #F5C518 daba
+                1.55:1 y el verde #4FAE5C 2.64:1 — el nombre de la categoría, que
+                es la información de la tarjeta, no se leía. El color sigue
+                identificando la categoría en la barra lateral (decorativa y
+                redundante con el texto); el texto va en tinta, 15.14:1. */}
             <div style={{
-            fontFamily: 'Montserrat, sans-serif',
+            fontFamily: 'Archivo, sans-serif',
             fontWeight: 700, fontSize: 15,
-            color: d.color,
+            color: PALETTE.text,
             textTransform: 'uppercase', letterSpacing: '0.08em',
             marginBottom: 4
           }}>{d.label}</div>
             <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{d.desc}</div>
           </div>
         )}
-        {/* 4ª categoría — Armas traumáticas (sin licencia) */}
+        {/* 4ª categoría — Armas traumáticas (sin licencia).
+            Iba en '#FFFFFF' copiando el patrón del tema oscuro: sobre la tarjeta
+            #FAF9F5 el título daba 1.05:1 y la barra lateral otro tanto — la
+            tarjeta entera parecía vacía. Es la única categoría que sí vendemos,
+            así que su identificador es el verde de marca (11.81:1 sobre la
+            tarjeta) y el título va en tinta como sus tres hermanas. */}
         <div style={{
           background: PALETTE.bgCard,
           border: `1px solid ${PALETTE.border}`,
-          borderLeft: `4px solid #FFFFFF`,
+          borderLeft: `4px solid ${PALETTE.amber}`,
           padding: '12px 14px'
         }}>
           <div style={{
-            fontFamily: 'Montserrat, sans-serif',
+            fontFamily: 'Archivo, sans-serif',
             fontWeight: 700, fontSize: 15,
-            color: '#FFFFFF',
+            color: PALETTE.text,
             textTransform: 'uppercase', letterSpacing: '0.08em',
             marginBottom: 4
           }}>Sin Licencia</div>
@@ -1557,7 +1648,7 @@ function LegalScreen({ onNav }) {
             background: PALETTE.bgElev,
             border: `1.5px solid ${PALETTE.amber}`,
             color: PALETTE.amber,
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700,
             fontSize: 16,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             flexShrink: 0,
@@ -1565,7 +1656,7 @@ function LegalScreen({ onNav }) {
           }}>{String(i + 1).padStart(2, '0')}</div>
             <div>
               <div style={{
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Archivo, sans-serif',
               fontWeight: 600, fontSize: 15,
               color: PALETTE.text,
               textTransform: 'uppercase',
@@ -1589,13 +1680,13 @@ function LegalScreen({ onNav }) {
       }}>
         <TacticalCorners size={14} color={PALETTE.amber} thickness={2} />
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6
         }}>▸ ABOGADO EXTERNO · ASESORÍA INDEPENDIENTE</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Archivo, sans-serif',
           fontWeight: 700, fontSize: 19,
           color: PALETTE.text,
           textTransform: 'uppercase',
@@ -1603,12 +1694,12 @@ function LegalScreen({ onNav }) {
           marginBottom: 8
         }}>Acompañamiento legal<br />con abogado especializado</div>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 14.5, color: PALETTE.textDim,
           lineHeight: 1.6, marginBottom: 10
         }}>{waPitch}</div>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.textMuted,
           lineHeight: 1.55, marginBottom: 14,
           paddingTop: 8,
@@ -1619,10 +1710,10 @@ function LegalScreen({ onNav }) {
         <a href={`https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`}
         target="_blank" rel="noopener" style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: PALETTE.amber, color: '#000',
+          background: PALETTE.amber, color: PALETTE.sobreMarca,
           textDecoration: 'none',
           padding: '12px 16px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.15em', textTransform: 'uppercase'
         }}>
           <span>Contactar al abogado</span>
@@ -1666,12 +1757,12 @@ function AboutScreen() {
           <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 14 }} />
         </div>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', marginBottom: 6
         }}>{eyebrow}</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Archivo, sans-serif',
           fontWeight: 700, fontSize: 26,
           color: PALETTE.text,
           textTransform: 'uppercase',
@@ -1687,7 +1778,7 @@ function AboutScreen() {
         padding: 14, marginBottom: 18
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
@@ -1711,7 +1802,7 @@ function AboutScreen() {
         ))}
         <div style={{
           marginTop: 18, paddingTop: 12, borderTop: `1px dashed ${PALETTE.border}`,
-          fontFamily: 'Courier Prime, monospace', fontSize: 14, color: PALETTE.textMuted, letterSpacing: '0.04em',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: PALETTE.textMuted, letterSpacing: '0.04em',
         }}>Armado en México · ¡Protege lo que amas!</div>
       </div>
 
@@ -1736,7 +1827,7 @@ function AboutScreen() {
         <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
           </div>
           <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
             Una <span style={{ color: PALETTE.text }}>enciclopedia libre</span> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
@@ -1747,7 +1838,7 @@ function AboutScreen() {
             <div style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <img src="imagenes/logo-main.png" alt="Armas M&amp;S" style={{ width: '90%', height: 'auto', display: 'block' }} />
             </div>
-            <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
+            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
           </div>
           <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
             Un <span style={{ color: PALETTE.text }}>proyecto digital de e-commerce</span> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
@@ -1778,7 +1869,7 @@ function AboutScreen() {
           style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.15) contrast(1.05)' }} /> :
 
           <div style={{
-            fontFamily: 'Courier Prime, monospace',
+            fontFamily: 'JetBrains Mono, monospace',
             fontSize: 13, color: PALETTE.textMuted,
             letterSpacing: '0.15em', textAlign: 'center',
             padding: 8, lineHeight: 1.5
@@ -1791,7 +1882,7 @@ function AboutScreen() {
 
         <div style={{ flex: 1, minWidth: 200 }}>
           <div style={{
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700,
             fontSize: 23, color: PALETTE.text,
             textTransform: 'uppercase',
             letterSpacing: '0.04em',
@@ -1807,7 +1898,7 @@ function AboutScreen() {
       <div style={{
         textAlign: 'center',
         padding: '16px',
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, color: PALETTE.textMuted,
         letterSpacing: '0.15em'
       }}>━━━ EDICIÓN 2026 · v1.0 ━━━</div>
@@ -1863,11 +1954,11 @@ function SoporteScreen({ onNav }) {
 
       <div style={{ padding: '20px 0', textAlign: 'center', borderBottom: `1px solid ${PALETTE.border}`, marginBottom: 18 }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.amber,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', marginBottom: 6
         }}>◈ SOPORTE</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23,
           color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.1
         }}>Normas de la comunidad</div>
         <div style={window.amxProsa({
@@ -1888,7 +1979,7 @@ function SoporteScreen({ onNav }) {
         padding: 14, marginBottom: 22
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: PALETTE.redHi,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 700
         }}>▲ Prohibido usar esta app para comprar o vender</div>
         <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
@@ -1988,11 +2079,11 @@ function SoporteScreen({ onNav }) {
               width: 32, height: 32, flexShrink: 0,
               border: `1px solid ${PALETTE.amber}`, color: PALETTE.amber,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'Courier Prime, monospace', fontSize: 14, fontWeight: 700
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700
             }}>{n}</div>
             <div style={{ minWidth: 0 }}>
               <div style={{
-                fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14.5,
+                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14.5,
                 color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4
               }}>{tit}</div>
               <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{desc}</div>
@@ -2015,7 +2106,7 @@ function SoporteScreen({ onNav }) {
         {denEnviada ?
           <div>
             <div style={{
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16,
               color: PALETTE.green, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8
             }}>✓ Denuncia recibida</div>
             <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>
@@ -2040,7 +2131,7 @@ function SoporteScreen({ onNav }) {
               color: denListo ? '#000' : PALETTE.textMuted,
               border: `1.5px solid ${denListo ? PALETTE.amber : PALETTE.border}`,
               padding: '13px', minHeight: 48,
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 14,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
               letterSpacing: '0.14em', textTransform: 'uppercase',
               cursor: denListo ? 'pointer' : 'not-allowed'
             }}>Enviar denuncia</button>
@@ -2052,7 +2143,7 @@ function SoporteScreen({ onNav }) {
           <button key={id} type="button" onClick={() => onNav && onNav(id)} style={{
             flex: '1 1 200px', background: 'transparent', color: PALETTE.amber,
             border: `1.5px dashed ${PALETTE.border}`, padding: '12px', minHeight: 48,
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 13.5,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 13.5,
             letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
           }}>{txt} →</button>
         )}
@@ -2071,19 +2162,23 @@ function FAQScreen() {
 
   return (
     <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      {/* El header móvil ya no pinta el título de pantalla: este bloque es el
+          único encabezado y se centra en móvil para ocupar el sitio que dejó.
+          En escritorio/tablet pasa a la izquierda —TopNav tampoco pinta título—
+          para arrancar al margen de la columna de lectura de abajo. */}
       <div style={{
         padding: '20px 0',
-        textAlign: 'center',
+        textAlign: vp.isMobile ? 'center' : 'left',
         borderBottom: `1px solid ${PALETTE.border}`,
         marginBottom: 18
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.2em', marginBottom: 6
         }}>? PREGUNTAS FRECUENTES</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Archivo, sans-serif',
           fontWeight: 700, fontSize: 23,
           color: PALETTE.text,
           textTransform: 'uppercase',
@@ -2099,7 +2194,7 @@ function FAQScreen() {
         padding: 14, marginBottom: 18
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.redHi,
           letterSpacing: '0.2em', textTransform: 'uppercase',
           marginBottom: 6, fontWeight: 700
@@ -2125,7 +2220,7 @@ function FAQScreen() {
             gap: 10, textAlign: 'left'
           }}>
               <span style={{
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Archivo, sans-serif',
               fontWeight: 600, fontSize: 15,
               color: open === i ? PALETTE.amber : PALETTE.text,
               textTransform: 'uppercase',
@@ -2135,7 +2230,7 @@ function FAQScreen() {
             }}>{f.q}</span>
               <span style={{
               color: PALETTE.amber,
-              fontFamily: 'Courier Prime, monospace',
+              fontFamily: 'JetBrains Mono, monospace',
               fontSize: 19, flexShrink: 0
             }}>{open === i ? '−' : '+'}</span>
             </button>
@@ -2178,10 +2273,13 @@ function MenuScreen({ onNav, onTutorial }) {
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      {/* Único encabezado de la pantalla desde que el header móvil dejó de
+          pintar título: centrado en móvil, al margen en escritorio/tablet. */}
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, color: PALETTE.amber,
-        letterSpacing: '0.2em', marginBottom: 14
+        letterSpacing: '0.2em', marginBottom: 14,
+        textAlign: vp.isMobile ? 'center' : 'left'
       }}>☰ MÁS</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {items.map((it) =>
@@ -2198,11 +2296,11 @@ function MenuScreen({ onNav, onTutorial }) {
             <span style={{
             fontSize: 27.5, color: PALETTE.amber,
             width: 30, textAlign: 'center',
-            fontFamily: 'Courier Prime, monospace'
+            fontFamily: 'JetBrains Mono, monospace'
           }}>{it.icon}</span>
             <div style={{ flex: 1 }}>
               <div style={{
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Archivo, sans-serif',
               fontWeight: 600, fontSize: 16,
               color: PALETTE.text,
               textTransform: 'uppercase',
@@ -2225,7 +2323,7 @@ function MenuScreen({ onNav, onTutorial }) {
         fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6
       })}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace', color: PALETTE.amber, fontWeight: 700,
+          fontFamily: 'JetBrains Mono, monospace', color: PALETTE.amber, fontWeight: 700,
           letterSpacing: '0.15em', marginBottom: 4, fontSize: 13
         }}>◆ ARMADO·MX</div>
         Catálogo divulgativo. Edición 2026. Contenido editado por Saulo Flores · Armas M&amp;S.
@@ -2283,12 +2381,12 @@ function SubmitScreen({ onNav }) {
           fontSize: 67, color: PALETTE.amber, marginBottom: 20, lineHeight: 1
         }}>✓</div>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 14.5, color: PALETTE.amber,
           letterSpacing: '0.25em', marginBottom: 10
         }}>◆ ENVÍO RECIBIDO</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: 26, color: PALETTE.text, textTransform: 'uppercase',
           lineHeight: 1.1, letterSpacing: '0.02em', marginBottom: 14
         }}>¡Gracias por contribuir!</div>
@@ -2300,9 +2398,9 @@ function SubmitScreen({ onNav }) {
           </div>}
         </div>
         <button onClick={() => onNav('home')} style={{
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
           padding: '12px 24px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',
           cursor: 'pointer', marginRight: 8
         }}>Volver al inicio</button>
@@ -2310,7 +2408,7 @@ function SubmitScreen({ onNav }) {
           background: 'transparent', color: PALETTE.text,
           border: `1px solid ${PALETTE.border}`,
           padding: '12px 24px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',
           cursor: 'pointer'
         }}>Enviar otra</button>
@@ -2344,12 +2442,12 @@ function SubmitScreen({ onNav }) {
         marginBottom: 22
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.25em', marginBottom: 8
         }}>＋ COLABORA</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: 28, color: PALETTE.text, textTransform: 'uppercase',
           lineHeight: 1, letterSpacing: '0.04em', marginBottom: 10
         }}>Proponer un arma</div>
@@ -2404,14 +2502,14 @@ function SubmitScreen({ onNav }) {
           background: 'transparent', color: PALETTE.textDim,
           border: `1px solid ${PALETTE.border}`,
           padding: '12px 22px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 14,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 14,
           letterSpacing: '0.15em', textTransform: 'uppercase',
           cursor: 'pointer'
         }}>Cancelar</button>
         <button type="submit" style={{
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
           padding: '12px 26px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',
           cursor: 'pointer'
         }}>＋ Enviar propuesta</button>

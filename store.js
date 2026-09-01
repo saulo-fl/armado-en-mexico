@@ -44,8 +44,8 @@
       cta: 'Explorar arsenal',
       ctaTarget: 'catalog',
       bgImage: '',
-      bgColor: '#0d0f0c',
-      accent: '#c9a227',
+      bgColor: '#12302A',
+      accent: '#DDD5C4',
     },
     {
       id: 'p3',
@@ -55,8 +55,8 @@
       cta: 'Proponer arma',
       ctaTarget: 'submit',
       bgImage: '',
-      bgColor: '#1c211a',
-      accent: '#c9a227',
+      bgColor: '#173A32',
+      accent: '#DDD5C4',
     },
   ];
 
