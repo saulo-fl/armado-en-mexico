@@ -1,24 +1,35 @@
 // Armado en México — Componentes UI compartidos
 // Estética: oscuro elegante con detalles tácticos (color palette dark/amber/military)
 
+// ── Paleta «Documento Oficial Mexicano» (DESIGN.md §2) ─────────────────────
+// Cada valor está medido sobre el fondo Y sobre la tarjeta, porque el texto cae
+// sobre las dos. El ratio anotado es el PEOR de los dos casos.
+// Verificar tras cualquier cambio:
+//   node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
+//
+// El error que arrastraba la paleta anterior: la tarjeta daba 1.25:1 contra su
+// fondo y el borde 1.23:1 contra la tarjeta — las dos señales que definen una
+// tarjeta eran invisibles, y por eso el sitio se leía «cuadrado». Aquí la
+// superficie sigue siendo sutil a propósito (1.25:1), pero el borde SÍ se ve
+// (1.72:1) y es él quien define la caja. No subas bgCard sin recalcular: una
+// tarjeta más clara aplasta el contraste del texto que va encima.
 const PALETTE = {
-  bg:        '#1A1A1A',
-  bgElev:    '#2C2C2C',
-  bgCard:    '#2C2C2C',
-  // gradiente sutil de profundidad para tarjetas (rediseño móvil 2026)
-  bgCardGrad:'linear-gradient(180deg, #2F2F2F, #272727)',
-  border:    '#3A3A3A',
-  borderHi:  '#555555',
-  amber:     '#F5C518',
-  amberDim:  '#D4A910',
-  military:  '#555555',
-  red:       '#C0392B',   // relleno (con texto blanco: 5.4:1)
-  redHi:     '#E4574B',   // texto/borde sobre fondo oscuro (4.8:1 AA; #C0392B solo da 3.2:1)
-  green:     '#4FAE5C',
-  blue:      '#7E8A99',
-  text:      '#FFFFFF',
-  textDim:   '#B5B5B5',
-  textMuted: '#9A9A9A',   // antes #7A7A7A (4.0:1, fallaba AA); ahora 6.1:1
+  bg:        '#173A32',   // verde profundo
+  bgElev:    '#1E4A40',
+  bgCard:    '#1E4A40',
+  bgCardGrad:'linear-gradient(180deg, #215045, #1C463C)',
+  border:    '#3F6E62',   // 1.72:1 sobre la tarjeta — es lo que la dibuja
+  borderHi:  '#4A7A6D',   // 2.04:1
+  amber:     '#DDD5C4',   // el acento ya no es cálido: beige de papel. 6.82:1
+  amberDim:  '#B0A894',
+  military:  '#6E7A73',
+  red:       '#C83B32',   // RELLENO con texto claro encima; como texto da 2.45:1
+  redHi:     '#F29C8C',   // texto/borde de estado — 4.70:1
+  green:     '#6FCB7B',   // 4.98:1 (el #4FAE5C original se queda en 4.47 y falla)
+  blue:      '#8FA39C',
+  text:      '#F3EFE4',   // crema — 8.67:1
+  textDim:   '#DDD5C4',   // beige — 6.82:1
+  textMuted: '#B2B8AF',   // 4.92:1 (a #A9AFA6 se le cae a 4.44 sobre tarjeta)
 };
 window.PALETTE = PALETTE;
 
@@ -77,7 +88,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
     <div style={{
       position: 'sticky', top: 0, zIndex: 50,
       height: 64,
-      background: 'rgba(26,26,26,0.95)',
+      background: 'rgba(23,58,50,0.95)',
       backdropFilter: 'blur(10px)',
       borderBottom: `1px solid ${PALETTE.border}`,
       display: 'flex', alignItems: 'center',
@@ -85,7 +96,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
     }}>
       <button onClick={() => onNav('home')} style={{
         background: 'none', border: 'none', cursor: 'pointer',
-        fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700,
         fontSize: 21, color: PALETTE.amber,
         letterSpacing: '0.1em',
         display: 'flex', alignItems: 'center', gap: 8,
@@ -124,7 +135,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                 <button onClick={() => setMoreOpen(o => !o)} style={{
                   background: 'none', border: 'none', cursor: 'pointer',
                   padding: '8px 14px',
-                  fontFamily: 'Montserrat, sans-serif',
+                  fontFamily: 'Archivo, sans-serif',
                   fontSize: 14, fontWeight: 600,
                   letterSpacing: '0.12em', textTransform: 'uppercase',
                   color: (dActive || moreOpen) ? PALETTE.amber : PALETTE.textDim,
@@ -135,7 +146,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                 {moreOpen && (
                   <div style={{
                     position: 'absolute', top: '100%', right: 0, minWidth: 200,
-                    background: 'rgba(26,26,26,0.98)', backdropFilter: 'blur(10px)',
+                    background: 'rgba(23,58,50,0.98)', backdropFilter: 'blur(10px)',
                     border: `1px solid ${PALETTE.border}`,
                     borderTop: `2px solid ${PALETTE.amber}`,
                     boxShadow: '0 12px 30px rgba(0,0,0,0.55)',
@@ -147,15 +158,15 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                         <button key={mi.id} disabled={mi.proximamente}
                           onClick={mi.proximamente ? undefined : () => { onNav(mi.id); setMoreOpen(false); }} style={{
                           display: 'block', width: '100%', textAlign: 'left',
-                          background: miActive ? 'rgba(245,197,24,0.10)' : 'none',
+                          background: miActive ? 'rgba(221,213,196,0.10)' : 'none',
                           border: 'none', cursor: mi.proximamente ? 'default' : 'pointer', padding: '10px 12px',
-                          fontFamily: 'Montserrat, sans-serif', fontSize: 14, fontWeight: 600,
+                          fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600,
                           letterSpacing: '0.08em', textTransform: 'uppercase',
                           color: mi.proximamente ? PALETTE.textMuted : (miActive ? PALETTE.amber : PALETTE.text),
                           transition: 'background 0.12s, color 0.12s',
                         }}
-                          onMouseEnter={e => { if (mi.proximamente) return; e.currentTarget.style.background = 'rgba(245,197,24,0.10)'; e.currentTarget.style.color = PALETTE.amber; }}
-                          onMouseLeave={e => { if (mi.proximamente) return; e.currentTarget.style.background = miActive ? 'rgba(245,197,24,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? PALETTE.amber : PALETTE.text; }}>
+                          onMouseEnter={e => { if (mi.proximamente) return; e.currentTarget.style.background = 'rgba(221,213,196,0.10)'; e.currentTarget.style.color = PALETTE.amber; }}
+                          onMouseLeave={e => { if (mi.proximamente) return; e.currentTarget.style.background = miActive ? 'rgba(221,213,196,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? PALETTE.amber : PALETTE.text; }}>
                           {mi.label}
                         </button>
                       );
@@ -170,7 +181,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
               background: it.accent ? (active ? PALETTE.amber : 'transparent') : 'none',
               border: it.accent ? `1px solid ${PALETTE.amber}` : 'none', cursor: 'pointer',
               padding: it.accent ? '8px 12px' : '8px 14px',
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Archivo, sans-serif',
               fontSize: 14, fontWeight: 600,
               letterSpacing: '0.12em', textTransform: 'uppercase',
               color: active ? (it.accent ? '#000' : PALETTE.amber) : (it.accent ? PALETTE.amber : PALETTE.textDim),
@@ -187,7 +198,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                   background: PALETTE.amber, color: '#000',
                   fontSize: 12, fontWeight: 700,
                   padding: '1px 4px', borderRadius: 8,
-                  fontFamily: 'Courier Prime, monospace',
+                  fontFamily: 'JetBrains Mono, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
                 }}>{it.badge}</span>
               ) : null}
@@ -219,7 +230,7 @@ function AvailBadge({ avail, compact = false }) {
       border: `1px solid ${m.color}`,
       clipPath: CUT_TR_SM,
       color: m.color,
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: '12px', // piso tipográfico 12px (antes 10-11px)
       fontWeight: 600,
       letterSpacing: '0.08em',
@@ -241,11 +252,11 @@ function PriceLevel({ lvl, size = 12 }) {
   const n = Math.max(1, Math.min(5, Number(lvl) || 1));
   return (
     <span style={{
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: Math.round(size * 1.35), fontWeight: 700,
       letterSpacing: '0.08em', whiteSpace: 'nowrap', lineHeight: 1,
     }}>
-      <span style={{ color: '#4FAE5C' }}>{'$'.repeat(n)}</span>
+      <span style={{ color: '#6FCB7B' }}>{'$'.repeat(n)}</span>
       <span style={{ color: 'rgba(79,174,92,0.30)' }}>{'$'.repeat(5 - n)}</span>
     </span>
   );
@@ -274,14 +285,14 @@ function ArmaCardBody({ arma }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
         <CountryFlag pais={arma.pais} height={12} />
         <span style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           letterSpacing: '0.12em', textTransform: 'uppercase',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>{arma.marca}</span>
       </div>
       <div style={{
-        fontFamily: 'Montserrat, sans-serif',
+        fontFamily: 'Archivo, sans-serif',
         fontWeight: 600, fontSize: 17,
         color: PALETTE.text,
         textTransform: 'uppercase',
@@ -297,7 +308,7 @@ function ArmaCardBody({ arma }) {
       }}>{arma.nombre}</div>
       {/* calibre */}
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13,
         color: PALETTE.textDim,
         marginBottom: 8,
@@ -307,7 +318,7 @@ function ArmaCardBody({ arma }) {
       </div>
       {/* existencias por sucursal (último inventario de cada sede) */}
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 12,
         color: enStock ? PALETTE.green : PALETTE.redHi,
         marginBottom: 8,
@@ -319,7 +330,7 @@ function ArmaCardBody({ arma }) {
       </div>
       {etRating && etRating.hay &&
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 12, color: etRating.color,
           letterSpacing: '0.08em', textTransform: 'uppercase',
           marginBottom: 8,
@@ -331,7 +342,7 @@ function ArmaCardBody({ arma }) {
         <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
           <PriceLevel lvl={arma.priceLvl} />
           {priceShort && <span style={{
-            fontFamily: 'Courier Prime, monospace',
+            fontFamily: 'JetBrains Mono, monospace',
             fontSize: 12, color: PALETTE.textDim, lineHeight: 1,
           }}>{priceShort}</span>}
         </span>
@@ -376,7 +387,7 @@ function StatsBar({ label, value, max = 100, color = PALETTE.amber, compareValue
     <div style={{ marginBottom: 10 }}>
       <div style={{
         display: 'flex', justifyContent: 'space-between',
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 14.5, color: PALETTE.textDim,
         textTransform: 'uppercase', letterSpacing: '0.1em',
         marginBottom: 4,
@@ -432,7 +443,7 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
         boxShadow: `0 0 6px ${accent}66`,
       }} />
       <div style={{
-        fontFamily: 'Montserrat, sans-serif',
+        fontFamily: 'Archivo, sans-serif',
         fontSize: 16, fontWeight: 600,
         color: PALETTE.text,
         textTransform: 'uppercase', letterSpacing: '0.13em',
@@ -475,7 +486,7 @@ function AppHeader({ title, back, onBack, right }) {
   return (
     <div style={{
       position: 'sticky', top: 0, zIndex: 50,
-      background: 'rgba(26,26,26,0.92)',
+      background: 'rgba(23,58,50,0.92)',
       backdropFilter: 'blur(8px)',
       borderBottom: `1px solid ${PALETTE.border}`,
       display: 'flex', alignItems: 'center',
@@ -487,11 +498,11 @@ function AppHeader({ title, back, onBack, right }) {
         <button onClick={onBack} style={{
           background: 'none', border: 'none', cursor: 'pointer',
           color: PALETTE.amber, fontSize: 23, padding: 4,
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
         }}>‹</button>
       ) : (
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: 17, color: PALETTE.amber,
           letterSpacing: '0.08em',
           display: 'flex', alignItems: 'center', gap: 8,
@@ -508,9 +519,9 @@ function AppHeader({ title, back, onBack, right }) {
                 width: 28, height: 28,
                 border: `1.5px dashed ${PALETTE.amber}`,
                 borderRadius: 6, color: PALETTE.amber,
-                fontFamily: 'Courier Prime, monospace',
+                fontFamily: 'JetBrains Mono, monospace',
                 fontSize: 13, letterSpacing: '0.1em',
-                background: 'rgba(245,197,24,0.08)',
+                background: 'rgba(221,213,196,0.08)',
               }}>LOGO</span>
               <span style={{ whiteSpace: 'nowrap' }}>
                 {(cfg.logoText || 'ARMADO en MX').split(/\s+(?=en\s+MX)/i).map((part, i) =>
@@ -525,7 +536,7 @@ function AppHeader({ title, back, onBack, right }) {
       )}
       <div style={{
         flex: 1,
-        fontFamily: 'Montserrat, sans-serif',
+        fontFamily: 'Archivo, sans-serif',
         fontSize: 16, fontWeight: 500,
         color: PALETTE.text,
         textTransform: 'uppercase', letterSpacing: '0.12em',
@@ -590,7 +601,7 @@ function BottomNav({ current, onNav, compareCount }) {
   return (
     <div ref={navRef} style={{
       position: 'sticky', bottom: 0, zIndex: 50,
-      background: 'rgba(26,26,26,0.96)',
+      background: 'rgba(23,58,50,0.96)',
       backdropFilter: 'blur(12px)',
       borderTop: `1px solid ${PALETTE.border}`,
       display: 'flex',
@@ -622,13 +633,13 @@ function BottomNav({ current, onNav, compareCount }) {
                   background: PALETTE.amber, color: '#000',
                   fontSize: 12, fontWeight: 700,
                   borderRadius: 8, padding: '1px 4px',
-                  fontFamily: 'Courier Prime, monospace',
+                  fontFamily: 'JetBrains Mono, monospace',
                   minWidth: 12, textAlign: 'center', lineHeight: 1.2,
                 }}>{it.badge}</span>
               ) : null}
             </span>
             <span style={{
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Archivo, sans-serif',
               fontSize: 12, fontWeight: active ? 600 : 500,
               letterSpacing: '0.07em',
             }}>{it.label}</span>
@@ -673,7 +684,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
       }}>
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)`,
+          backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)`,
         }} />
         {!imgError ? (
           <img src={arma.img} alt={arma.nombre}
@@ -702,7 +713,7 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
           color: inCompare ? '#000' : PALETTE.textDim,
           border: `1px solid ${inCompare ? PALETTE.amber : PALETTE.border}`,
           padding: '2px 5px',
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, fontWeight: 700,
           cursor: 'pointer',
           letterSpacing: '0.05em',
@@ -724,7 +735,7 @@ function SpecRow({ label, value, accent }) {
       display: 'flex', justifyContent: 'space-between',
       padding: '7px 10px',
       borderBottom: `1px solid ${PALETTE.border}`,
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: 15.5,
     }}>
       <span style={{
@@ -900,7 +911,7 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
   return (
     <div style={{
       position: 'relative',
-      background: 'linear-gradient(180deg, rgba(28,33,26,0.85) 0%, rgba(26,26,26,0.85) 100%)',
+      background: 'linear-gradient(180deg, rgba(28,33,26,0.85) 0%, rgba(23,58,50,0.85) 100%)',
       border: `1px solid ${PALETTE.border}`,
       padding: '10px 12px 10px 10px',
       display: 'flex',
@@ -936,7 +947,7 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
         ) : null}
         <span style={{
           display: icon ? 'none' : 'block',
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 19, fontWeight: 700,
           color: PALETTE.amber,
           letterSpacing: 0,
@@ -945,13 +956,13 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
       {/* TEXT */}
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 13, color: PALETTE.amber,
           textTransform: 'uppercase', letterSpacing: '0.14em',
           marginBottom: 2,
         }}>{label}</div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Archivo, sans-serif',
           fontWeight: 600, fontSize: 16,
           color: PALETTE.text,
           letterSpacing: '0.02em',
@@ -977,7 +988,7 @@ function FilterChip({ children, active, onClick, count }) {
       border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
       padding: '10px 12px', minHeight: 44,
       clipPath: CUT_TR_SM,
-      fontFamily: 'Courier Prime, monospace',
+      fontFamily: 'JetBrains Mono, monospace',
       fontSize: 14.5, fontWeight: 600,
       letterSpacing: '0.08em', textTransform: 'uppercase',
       cursor: 'pointer',
@@ -1009,26 +1020,26 @@ function CompareFloat({ ids, onOpen, onClear }) {
       width: 'calc(100% - 24px)', maxWidth: 360,
       background: PALETTE.bgElev,
       border: `1px solid ${PALETTE.amber}`,
-      boxShadow: `0 0 0 1px rgba(245,197,24,0.2), 0 8px 24px rgba(0,0,0,0.6)`,
+      boxShadow: `0 0 0 1px rgba(221,213,196,0.2), 0 8px 24px rgba(0,0,0,0.6)`,
       padding: '8px 12px',
       display: 'flex', alignItems: 'center', gap: 8,
       zIndex: 60,
       animation: 'slideUp 0.25s ease',
     }}>
       <span style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 14.5, color: PALETTE.amber,
         letterSpacing: '0.1em', fontWeight: 700,
       }}>⇄ {ids.length}/2</span>
       <span style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 14.5, color: PALETTE.textDim, flex: 1,
       }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
       {ids.length === 2 && (
         <button onClick={onOpen} style={{
           background: PALETTE.amber, color: '#000', border: 'none',
           padding: '5px 10px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 13,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
           letterSpacing: '0.1em', textTransform: 'uppercase',
           cursor: 'pointer',
         }}>Ver</button>
@@ -1058,7 +1069,7 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
         background: PALETTE.bgElev,
         border: `1px dashed ${PALETTE.border}`,
         color: PALETTE.textMuted,
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 15.5, letterSpacing: '0.04em',
         textAlign: 'center',
         margin: `0 ${padX}px`,
@@ -1182,13 +1193,13 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
             {eyebrow &&
               <span style={{
                 display: 'block',
-                fontFamily: 'Courier Prime, monospace', fontSize: 12,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
                 color: PALETTE.textMuted, letterSpacing: '0.16em',
                 textTransform: 'uppercase', marginBottom: 2
               }}>{eyebrow}</span>}
             <span style={{
               display: 'block',
-              fontFamily: compact ? 'Courier Prime, monospace' : 'Montserrat, sans-serif',
+              fontFamily: compact ? 'JetBrains Mono, monospace' : 'Archivo, sans-serif',
               fontWeight: compact ? 400 : 600, fontSize: compact ? 12.5 : 15,
               color: open ? accent : (compact ? PALETTE.textMuted : PALETTE.text),
               textTransform: 'uppercase',
@@ -1196,7 +1207,7 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
             }}>{title}</span>
           </span>
           <span aria-hidden="true" style={{
-            color: accent, fontFamily: 'Courier Prime, monospace',
+            color: accent, fontFamily: 'JetBrains Mono, monospace',
             fontSize: compact ? 16 : 21, lineHeight: 1, flexShrink: 0, width: 14, textAlign: 'center'
           }}>{open ? '−' : '+'}</span>
         </span>
@@ -1304,7 +1315,7 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
     `de ${ini.price} a ${fin.price}, ${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)}%. ` +
     `${plural(bajadas, 'bajada', 'bajadas')} y ${plural(subidas, 'subida', 'subidas')} entre inventarios consecutivos.`;
 
-  const MONO = 'Courier Prime, monospace';
+  const MONO = 'JetBrains Mono, monospace';
   // Halo del color del fondo: cinturón por si una etiqueta se acercara al trazo.
   // paintOrder va por `style` porque es CSS, no un atributo de React.
   const HALO = { paintOrder: 'stroke', fontVariantNumeric: 'tabular-nums' };

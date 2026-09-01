@@ -24,7 +24,7 @@ const PROXIMAMENTE_ITEMS = [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }, { id: 'p4'
 function ProximamenteTag() {
   return (
     <span style={{
-      fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: PALETTE.amber,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber,
       letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
     }}>(Próximamente)</span>
   );
@@ -86,7 +86,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
             aria-label="Buscar arma"
             style={{
               flex: 1, background: 'none', border: 'none', outline: 'none', color: PALETTE.text,
-              fontFamily: 'Courier Prime, monospace', fontSize: 15.5
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5
             }} />
           {homeQuery &&
             <button onClick={() => setHomeQuery('')} aria-label="Limpiar búsqueda" style={{
@@ -95,7 +95,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           }
           <button onClick={doHomeSearch} style={{
             background: PALETTE.amber, border: 'none', cursor: 'pointer', color: '#000',
-            fontFamily: 'Courier Prime, monospace', fontSize: 13, fontWeight: 700,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700,
             letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 16px', whiteSpace: 'nowrap',
             clipPath: CUT_TR, minHeight: 44
           }}>Buscar</button>
@@ -130,7 +130,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         action={
         <button onClick={() => onNav('calibres')} style={{
           background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase'
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase'
         }}>Ver guía →</button>
         }
         items={(window.CALIBRES || [])}
@@ -160,7 +160,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <button onClick={() => onNav('catalog')} style={{
           background: 'none', border: 'none', cursor: 'pointer',
           color: PALETTE.amber,
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 14.5, letterSpacing: '0.12em',
           textTransform: 'uppercase'
         }}>Ver Todas →</button>
@@ -201,7 +201,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                   {/* tinte para integrar con el dark theme */}
                   <div style={{
                     position: 'absolute', inset: 0,
-                    background: `linear-gradient(180deg, rgba(26,26,26,0.05) 0%, rgba(26,26,26,0.35) 55%, rgba(26,26,26,0.92) 100%)`,
+                    background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.35) 55%, rgba(23,58,50,0.92) 100%)`,
                     pointerEvents: 'none'
                   }} />
                   {/* corner ticks */}
@@ -224,7 +224,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                     position: 'absolute', left: 10, right: 10, bottom: 10
                   }}>
                     <div style={{
-                      fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+                      fontFamily: 'Archivo, sans-serif', fontWeight: 700,
                       fontSize: vp.isDesktop ? 17 : 16,
                       color: PALETTE.text,
                       textTransform: 'uppercase', letterSpacing: '0.06em',
@@ -232,7 +232,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                       textShadow: '0 1px 2px rgba(0,0,0,0.6)'
                     }}>{c.label}</div>
                     <div style={{
-                      fontFamily: 'Courier Prime, monospace',
+                      fontFamily: 'JetBrains Mono, monospace',
                       fontSize: 13, color: PALETTE.amber,
                       letterSpacing: '0.18em',
                       marginTop: 4,
@@ -280,16 +280,16 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
               }}>
                 <div>
                   <div style={{
-                    fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 15,
+                    fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 15,
                     color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em'
                   }}>{d.label}</div>
                   <div style={{
-                    fontFamily: 'Courier Prime, monospace', fontSize: 13,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
                     color: PALETTE.textMuted, marginTop: 2, lineHeight: 1.4
                   }}>{d.desc}</div>
                 </div>
                 <div style={{
-                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+                  fontFamily: 'Archivo, sans-serif', fontWeight: 700,
                   fontSize: 19, color: d.color, marginLeft: 10
                 }}>{count}</div>
               </button>);
@@ -312,7 +312,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         boxSizing: 'border-box'
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace', color: PALETTE.amber, fontWeight: 700,
+          fontFamily: 'JetBrains Mono, monospace', color: PALETTE.amber, fontWeight: 700,
           letterSpacing: '0.15em', marginBottom: 4, fontSize: 13}}>◆ AVISO</div>
         Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la Ley Federal de Armas de Fuego y precios DCAM.
       </div>
@@ -335,7 +335,7 @@ function CarouselSection({ title, items, renderItem, emptyText, action, fallback
       <div style={{ padding: `0 ${PAD}px`, margin: '25px 0 10px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
           <div style={{
-            fontFamily: 'Montserrat, sans-serif',
+            fontFamily: 'Archivo, sans-serif',
             fontWeight: 700, fontSize: 21,
             color: PALETTE.text,
             textTransform: 'uppercase',
@@ -377,7 +377,7 @@ function FavCard({ arma, onClick }) {
       <div style={{
         position: 'absolute', top: 0, left: 0, zIndex: 2,
         background: PALETTE.amber, color: '#000',
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, fontWeight: 700,
         letterSpacing: '0.1em',
         padding: '3px 8px'
@@ -493,7 +493,7 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
         textAlign: 'center'
       }}>
         <div style={{
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 14.5, color: accent,
           letterSpacing: '0.25em', textTransform: 'uppercase',
           marginBottom: 10,
@@ -502,7 +502,7 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
         }}>{p.eyebrow || ' '}</div>
 
         <div style={{
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Archivo, sans-serif',
           fontSize: vp.isDesktop ? 38 : 25,
           fontWeight: 700, color: PALETTE.text,
           textTransform: 'uppercase',
@@ -533,7 +533,7 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
         <button onClick={() => onNav(p.ctaTarget || 'catalog')} style={{
           background: accent, color: '#000', border: 'none',
           padding: vp.isDesktop ? '12px 24px' : '10px 20px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: vp.isDesktop ? 15 : 14,
           letterSpacing: '0.18em', textTransform: 'uppercase',
           cursor: 'pointer',
@@ -559,7 +559,7 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
             <button onClick={(e) => {e.stopPropagation();setIdx((i) => (i - 1 + promos.length) % promos.length);}}
           style={promoBtnStyle()}>‹</button>
             <span style={{
-            fontFamily: 'Courier Prime, monospace',
+            fontFamily: 'JetBrains Mono, monospace',
             fontSize: 14.5, color: PALETTE.text,
             letterSpacing: '0.15em', margin: '0 4px',
             minWidth: 28, textAlign: 'center'
@@ -726,7 +726,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             placeholder="Nombre, marca, calibre, país..." style={{
               flex: 1, background: 'none', border: 'none', outline: 'none',
               color: PALETTE.text,
-              fontFamily: 'Courier Prime, monospace',
+              fontFamily: 'JetBrains Mono, monospace',
               fontSize: 15.5}} />
           {(query || activeCount > 0) &&
             <button onClick={clearAll} style={{
@@ -763,7 +763,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             background: 'none', border: `1px dashed ${PALETTE.border}`,
             color: PALETTE.textDim,
             padding: '4px 10px',
-            fontFamily: 'Courier Prime, monospace',
+            fontFamily: 'JetBrains Mono, monospace',
             fontSize: 13, letterSpacing: '0.12em',
             textTransform: 'uppercase', cursor: 'pointer',
             width: '100%'
@@ -796,7 +796,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       <div style={{
         ...innerMax,
         padding: `10px ${padX}px 6px`,
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 14.5, color: PALETTE.textDim,
         letterSpacing: '0.1em',
         display: 'flex', justifyContent: 'space-between'
@@ -822,7 +822,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         <div style={{
           gridColumn: '1/-1',
           textAlign: 'center', padding: '40px 20px',
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 15.5, color: PALETTE.textMuted
         }}>
             <div style={{ fontSize: 38.5, color: PALETTE.border, marginBottom: 10 }}>◯</div>
@@ -844,8 +844,8 @@ function PriceRange({ min, max, lo, hi, step, capped, onChange }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
-        <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {hiLabel}</span>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {hiLabel}</span>
       </div>
       <div style={{ position: 'relative', height: 28 }}>
         <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: P.border }} />
@@ -866,7 +866,7 @@ function FilterSelect({ label, value, onChange, options }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <span style={{
-        fontFamily: 'Courier Prime, monospace', fontSize: 12, color: PALETTE.textMuted,
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.textMuted,
         letterSpacing: '0.14em', textTransform: 'uppercase',
       }}>{label}</span>
       <div style={{ position: 'relative' }}>
@@ -875,7 +875,7 @@ function FilterSelect({ label, value, onChange, options }) {
           background: PALETTE.bg, color: active ? PALETTE.amber : PALETTE.text,
           border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
           padding: '10px 28px 10px 10px', borderRadius: 0, cursor: 'pointer', outline: 'none',
-          fontFamily: 'Courier Prime, monospace', fontSize: 14, letterSpacing: '0.02em',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 14, letterSpacing: '0.02em',
         }}>
           {options.map((o) => (
             <option key={String(o.value)} value={o.value} style={{ background: PALETTE.bgElev, color: PALETTE.text }}>{o.label}</option>
@@ -894,7 +894,7 @@ function FilterRow({ label, children }) {
   return (
     <div style={{ marginBottom: 6 }}>
       <div style={{
-        fontFamily: 'Courier Prime, monospace',
+        fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, color: PALETTE.textMuted,
         letterSpacing: '0.15em', textTransform: 'uppercase',
         marginBottom: 4
@@ -928,13 +928,13 @@ function ArsenalPhotoCard({ label, sub, img, color, onClick }) {
         {showImg
           ? <img src={img} alt={label} loading="lazy" onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'contrast(1.06) saturate(0.92) brightness(0.92)', display: 'block' }} />
           : <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.borderHi, fontSize: 30 }}>▦</div>}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(26,26,26,0.05) 0%, rgba(26,26,26,0.42) 55%, rgba(26,26,26,0.94) 100%)`, pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.42) 55%, rgba(23,58,50,0.94) 100%)`, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${ac}`, borderLeft: `1.5px solid ${ac}`, opacity: 0.8 }} />
         <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${ac}`, borderRight: `1.5px solid ${ac}`, opacity: 0.8 }} />
         <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
-          <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 16, color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{label}</div>
-          {sub && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: ac, marginTop: 3, letterSpacing: '0.08em', textShadow: '0 1px 2px rgba(0,0,0,0.7)' }}>{sub}</div>}
-          {!showImg && img && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textMuted, marginTop: 2 }}>foto pendiente</div>}
+          <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16, color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{label}</div>
+          {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: ac, marginTop: 3, letterSpacing: '0.08em', textShadow: '0 1px 2px rgba(0,0,0,0.7)' }}>{sub}</div>}
+          {!showImg && img && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textMuted, marginTop: 2 }}>foto pendiente</div>}
         </div>
       </div>
     </button>
@@ -961,7 +961,7 @@ function ArsenalHubScreen({ onNav }) {
   const Hdr = ({ icon, children }) => (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 10,
-      fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.amber,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.amber,
       letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600, margin: '22px 0 8px',
     }}>
       <span>{icon} {children}</span>
@@ -977,16 +977,16 @@ function ArsenalHubScreen({ onNav }) {
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-        {sub && <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.textMuted, marginTop: 2, lineHeight: 1.4 }}>{sub}</div>}
+        <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
+        {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textMuted, marginTop: 2, lineHeight: 1.4 }}>{sub}</div>}
       </div>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 18, color: color || P.amber, flexShrink: 0 }}>{count}</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: color || P.amber, flexShrink: 0 }}>{count}</div>
     </button>
   );
 
   return (
     <div style={{ ...max, padding: `8px ${PAD}px 90px` }}>
-      <div style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px' }}>Arsenal</div>
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px' }}>Arsenal</div>
       <div style={window.amxProsa({ fontSize: 15, color: P.textDim, lineHeight: 1.5 })}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
 
       <Hdr icon="◆">Armería</Hdr>
@@ -1031,7 +1031,7 @@ function ArsenalHubScreen({ onNav }) {
 
       <button onClick={() => onNav('category', { mode: 'all' })} style={{
         marginTop: 18, background: 'none', border: `1px dashed ${P.border}`, color: P.textDim,
-        padding: '11px', fontFamily: 'Courier Prime, monospace', fontSize: 13, letterSpacing: '0.12em',
+        padding: '11px', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, letterSpacing: '0.12em',
         textTransform: 'uppercase', cursor: 'pointer', width: '100%',
       }}>▤ Ver todas las armas ({DB.length})</button>
     </div>

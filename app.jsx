@@ -158,11 +158,14 @@ function App() {
     faction: 'amarillo', hudIntensity: 'standard', typeface: 'stencil',
   });
   useEffectApp(() => {
+    // Las claves se conservan aunque los nombres ya no describan el color: son
+    // las que hay guardadas en el localStorage de quien ya visitó el sitio.
+    // Todos los acentos miden >=4.5:1 sobre el fondo y sobre la tarjeta.
     const FACTIONS = {
-      amarillo: { accent: '#F5C518', deep: '#D4A910' },  // Amarillo Táctica (marca)
-      oro:      { accent: '#D4A910', deep: '#A98A0C' },  // oro intenso
-      alerta:   { accent: '#C0392B', deep: '#A93226' },  // Rojo Alerta
-      acero:    { accent: '#9AA3AD', deep: '#6B7178' },  // acero neutro
+      amarillo: { accent: '#DDD5C4', deep: '#B0A894' },  // papel (marca)
+      oro:      { accent: '#D8C9A0', deep: '#B0A894' },  // papel envejecido
+      alerta:   { accent: '#F29C8C', deep: '#C83B32' },  // alerta
+      acero:    { accent: '#A8BDB4', deep: '#8FA39C' },  // acero verdoso
     };
     const p = FACTIONS[tw.faction] || FACTIONS.amarillo;
     window.GUN_ACCENT = p.accent;
@@ -400,7 +403,10 @@ function App() {
   }
 
   return (
-    <div style={{
+    // amx-v2 expone los tokens y las utilidades de estilo.css a TODA la app.
+    // Antes envolvía solo la ficha, y el resultado era una pantalla a medio
+    // migrar: bloques con la paleta nueva junto a bloques con la vieja.
+    <div className="amx-v2" style={{
       width: '100%', minHeight: '100vh',
       background: PALETTE.bg,
       color: PALETTE.text,
@@ -415,10 +421,10 @@ function App() {
           onBack={goBack}
           right={pickerSlot !== null ? (
             <span style={{
-              fontFamily: 'Courier Prime, monospace',
+              fontFamily: 'JetBrains Mono, monospace',
               fontSize: 13, color: PALETTE.amber,
               letterSpacing: '0.15em',
-              background: 'rgba(245,197,24,0.12)',
+              background: 'rgba(221,213,196,0.12)',
               border: `1px solid ${PALETTE.amber}`,
               padding: '3px 6px',
             }}>SLOT {pickerSlot === 0 ? 'A' : 'B'}</span>
@@ -438,7 +444,7 @@ function App() {
           position: 'sticky', top: 64, zIndex: 40,
           background: PALETTE.amber, color: '#000',
           padding: '8px 28px',
-          fontFamily: 'Courier Prime, monospace',
+          fontFamily: 'JetBrains Mono, monospace',
           fontSize: 15.5, letterSpacing: '0.15em',
           textTransform: 'uppercase',
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -475,10 +481,10 @@ function App() {
           position: 'fixed', bottom: 24, right: 24,
           background: PALETTE.amber, color: '#000', border: 'none',
           padding: '12px 18px',
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.15em', textTransform: 'uppercase',
           cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(245,197,24,0.4)',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(221,213,196,0.4)',
           zIndex: 50,
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
@@ -505,10 +511,10 @@ function App() {
           <window.TweakSection label="Acento · marca">
             <window.TweakColor
               label="Color"
-              value={({amarillo:'#F5C518',oro:'#D4A910',alerta:'#C0392B',acero:'#9AA3AD'})[tw.faction] || '#F5C518'}
-              options={['#F5C518','#D4A910','#C0392B','#9AA3AD']}
+              value={({amarillo:'#DDD5C4',oro:'#B0A894',alerta:'#C0392B',acero:'#9AA3AD'})[tw.faction] || '#DDD5C4'}
+              options={['#DDD5C4','#B0A894','#C0392B','#9AA3AD']}
               onChange={(hex) => {
-                const map = { '#F5C518':'amarillo', '#D4A910':'oro', '#C0392B':'alerta', '#9AA3AD':'acero' };
+                const map = { '#DDD5C4':'amarillo', '#B0A894':'oro', '#C0392B':'alerta', '#9AA3AD':'acero' };
                 setTweak('faction', map[hex] || 'amarillo');
               }}
             />

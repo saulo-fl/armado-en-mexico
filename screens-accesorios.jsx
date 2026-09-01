@@ -31,7 +31,7 @@ function AccNoImage({ compact }) {
         <line x1="4" y1="3.4" x2="20" y2="20.6"/>
       </svg>
       <span style={{
-        fontFamily: 'Courier Prime, monospace', fontSize: compact ? 10.5 : 12.5,
+        fontFamily: 'JetBrains Mono, monospace', fontSize: compact ? 10.5 : 12.5,
         color: P.textMuted, letterSpacing: '0.05em', lineHeight: 1.45,
       }}>Sin imagen disponible{compact ? '' : ' por el momento'}</span>
     </div>
@@ -71,7 +71,7 @@ function AccesorioCard({ acc, onClick }) {
       }}>
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)`,
+          backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)`,
         }} />
         {window.isRealImage(acc.img) && !imgError ? (
           <img src={acc.img} alt={acc.nombre}
@@ -82,7 +82,7 @@ function AccesorioCard({ acc, onClick }) {
         )}
         <span style={{
           position: 'absolute', top: 6, left: 6,
-          fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 600,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600,
           color: P.textDim, background: 'rgba(0,0,0,0.6)', padding: '2px 5px',
           letterSpacing: '0.1em', textTransform: 'uppercase', borderLeft: `2px solid ${P.amber}`,
         }}>{cat.icon} {cat.label.split(' ')[0]}</span>
@@ -92,19 +92,19 @@ function AccesorioCard({ acc, onClick }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
           {window.CountryFlag && <window.CountryFlag pais={acc.pais} height={12} />}
           <span style={{
-            fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.amber,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.amber,
             letterSpacing: '0.12em', textTransform: 'uppercase',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{acc.marca}</span>
         </div>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 600, fontSize: 16,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16,
           color: P.text, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
           letterSpacing: '0.02em', height: 38,
           display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden',
         }}>{acc.nombre}</div>
         <div style={{
-          fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim, marginBottom: 8,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim, marginBottom: 8,
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
           <span style={{ color: P.textMuted }}>CAT </span>{cat.label}
@@ -138,12 +138,12 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
       <div style={{ padding: `0 ${PAD}px`, margin: '25px 0 10px' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
           <div style={{
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
             textTransform: 'uppercase', letterSpacing: '0.04em', flex: '1 1 auto', minWidth: 0, whiteSpace: 'nowrap',
           }}>Accesorios DCAM</div>
           <button onClick={() => onNav && onNav('accesorios')} style={{
             background: 'none', border: 'none', cursor: 'pointer', color: P.amber,
-            fontFamily: 'Courier Prime, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase',
           }}>Ver todos →</button>
         </div>
       </div>
@@ -169,10 +169,10 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {/* scanline */}
-              <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)` }} />
+              <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
               {/* glyph de categoría */}
               <span style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: vp.isDesktop ? 62.5 : 55,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: vp.isDesktop ? 62.5 : 55,
                 color: P.amber, opacity: 0.92, position: 'relative', zIndex: 1, lineHeight: 1,
                 textShadow: '0 2px 8px rgba(0,0,0,0.5)',
               }}>{c.icon}</span>
@@ -180,15 +180,15 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
               <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${P.amber}`, borderLeft: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
               <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${P.amber}`, borderRight: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
               {/* gradient inferior + label */}
-              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(26,26,26,0) 45%, rgba(26,26,26,0.55) 72%, rgba(26,26,26,0.94) 100%)`, pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.94) 100%)`, pointerEvents: 'none' }} />
               <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
                 <div style={{
-                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
+                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
                   color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
                   textShadow: '0 1px 2px rgba(0,0,0,0.6)',
                 }}>{c.label}</div>
                 <div style={{
-                  fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.amber,
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.amber,
                   letterSpacing: '0.16em', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6,
                 }}>VER <span aria-hidden="true">→</span></div>
               </div>
@@ -241,7 +241,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
 
   const selStyle = {
     background: P.bg, color: P.text, border: `1px solid ${P.border}`,
-    padding: '11px 12px', fontFamily: 'Courier Prime, monospace', fontSize: 14,
+    padding: '11px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
     letterSpacing: '0.04em', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
     flex: '1 1 160px', minWidth: 0,
   };
@@ -250,7 +250,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
     color: active ? '#000' : P.textDim,
     border: `1px solid ${active ? P.amber : P.border}`,
     padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    fontFamily: 'Courier Prime, monospace', fontSize: 12.5,
+    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
     letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap',
     display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: active ? 700 : 400,
   });
@@ -260,7 +260,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
       {/* Encabezado + encuadre legal */}
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `20px ${padX}px 0`, boxSizing: 'border-box' }}>
         <div style={{
-          fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
           color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05,
         }}>Accesorios DCAM</div>
         <div style={{
@@ -281,7 +281,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
           style={{
             width: '100%', boxSizing: 'border-box', background: P.bg, color: P.text,
             border: `1px solid ${P.border}`, padding: '11px 14px', marginBottom: 12,
-            fontFamily: 'Courier Prime, monospace', fontSize: 17, letterSpacing: '0.03em',
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 17, letterSpacing: '0.03em',
           }} />
 
         {/* categorías (chips con swipe táctil, sin barra) */}
@@ -319,7 +319,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
             <button onClick={clearAll} style={{
               background: 'transparent', color: P.redHi, border: `1px solid ${P.redHi}`,
               padding: '11px 14px', minHeight: 44, boxSizing: 'border-box', cursor: 'pointer',
-              fontFamily: 'Courier Prime, monospace',
+              fontFamily: 'JetBrains Mono, monospace',
               fontSize: 15, letterSpacing: '0.08em', textTransform: 'uppercase',
             }}>✕ Limpiar</button>
           }
@@ -328,7 +328,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
         {/* contador */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.amber,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
           letterSpacing: '0.12em', margin: '16px 0 10px', textTransform: 'uppercase',
         }}>
           <span>▸ {filtered.length} {filtered.length === 1 ? 'ACCESORIO' : 'ACCESORIOS'}</span>
@@ -346,13 +346,13 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
               return (
                 <div key={c.id}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 0 12px' }}>
-                    <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 21.5, color: P.amber, lineHeight: 1 }}>{c.icon}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 21.5, color: P.amber, lineHeight: 1 }}>{c.icon}</span>
                     <h2 style={{
-                      fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 18, color: P.text,
+                      fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: P.text,
                       textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0, whiteSpace: 'nowrap',
                     }}>{c.label}</h2>
                     <span style={{ flex: 1, height: 1, background: P.border }} />
-                    <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.textMuted }}>{list.length}</span>
+                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.textMuted }}>{list.length}</span>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 14 }}>
                     {list.map(a => <AccesorioCard key={a.id} acc={a} onClick={() => onOpenAccesorio(a.id)} />)}
@@ -368,7 +368,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
         ) : (
           <div style={{
             border: `1px dashed ${P.border}`, padding: '40px 20px', textAlign: 'center',
-            fontFamily: 'Courier Prime, monospace', fontSize: 15.5, color: P.textMuted,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5, color: P.textMuted,
           }}>
             ◇ Sin resultados con estos filtros.
             <button onClick={clearAll} style={{
@@ -394,7 +394,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
 
   if (!acc) {
     return (
-      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'Courier Prime, monospace', color: P.textMuted }}>
+      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace', color: P.textMuted }}>
         Accesorio no encontrado.
       </div>
     );
@@ -429,7 +429,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
         }}>
           <window.TacticalCorners size={14} color={P.amber} thickness={2} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(245,197,24,0.03) 3px 4px)` }} />
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
           {window.isRealImage(acc.img) && !imgError ? (
             <img src={acc.img} alt={acc.nombre} onError={() => setImgError(true)}
               style={{ maxWidth: '82%', maxHeight: '82%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
@@ -438,7 +438,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
           )}
           <span style={{
             position: 'absolute', top: 10, left: 10,
-            fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
             background: 'rgba(0,0,0,0.6)', padding: '3px 7px', letterSpacing: '0.1em',
             textTransform: 'uppercase', borderLeft: `2px solid ${P.amber}`,
           }}>{cat.icon} {cat.label}</span>
@@ -448,12 +448,12 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             {window.CountryFlag && <window.CountryFlag pais={acc.pais} height={14} />}
             <span style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.amber,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
               letterSpacing: '0.16em', textTransform: 'uppercase',
             }}>{acc.marca}{acc.pais ? ` · ${acc.pais}` : ''}</span>
           </div>
           <h1 style={{
-            fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 30 : 25,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 30 : 25,
             color: P.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.08, margin: '0 0 12px',
           }}>{acc.nombre}</h1>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
@@ -461,7 +461,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <span style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: P.bgCard, border: `1px solid ${P.border}`, padding: '3px 9px',
-              fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
               letterSpacing: '0.08em', textTransform: 'uppercase',
             }}><span style={{ color: P.amber }}>{cat.icon}</span>{cat.label}</span>
           </div>
@@ -491,7 +491,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                     display: 'flex', justifyContent: 'space-between', gap: 12,
                     padding: '9px 12px',
                     borderBottom: i < acc.specs.length - 1 ? `1px solid ${P.border}` : 'none',
-                    fontFamily: 'Courier Prime, monospace', fontSize: 15.5,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
                   }}>
                     <span style={{ color: P.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{k}</span>
                     <span style={{ color: P.text, fontWeight: 600, textAlign: 'right' }}>{v}</span>
@@ -508,7 +508,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                 {acc.compatibilidad.map((c, i) => (
                   <span key={i} style={{
                     background: P.bgCard, border: `1px solid ${P.border}`, borderLeft: `2px solid ${P.amber}`,
-                    padding: '6px 10px', fontFamily: 'Courier Prime, monospace', fontSize: 14.5,
+                    padding: '6px 10px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
                     color: P.text, letterSpacing: '0.06em',
                   }}>{c}</span>
                 ))}
@@ -527,30 +527,30 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <window.TacticalCorners size={12} color={P.amber} thickness={2} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <span style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textMuted,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted,
                 letterSpacing: '0.18em', textTransform: 'uppercase',
               }}>◆ Precio Actual (con IVA)</span>
               {curAut &&
                 <span title={curAut.nombre} style={{
-                  fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
                   letterSpacing: '0.12em', color: '#000', background: curAut.color,
                   padding: '2px 7px', flexShrink: 0,
                 }}>{curAut.sigla}</span>}
             </div>
             <div style={{
-              fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 23,
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23,
               color: P.amber, letterSpacing: '0.02em',
             }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : acc.priceExact}</div>
             {acc.dcamRef &&
               <div style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textMuted,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted,
                 marginTop: 4, lineHeight: 1.4,
               }}>Ref. {curSigla}: {acc.dcamRef}</div>
             }
             {currentManual && currentManual.url &&
               <a href={currentManual.url} target="_blank" rel="noopener" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9,
-                fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.amber,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
                 textDecoration: 'none', border: `1px solid ${P.amber}`, padding: '9px 12px',
                 minHeight: 40, boxSizing: 'border-box', letterSpacing: '0.04em',
               }}>
@@ -581,15 +581,15 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                     <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                         {b.agotado ? (
-                          <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, fontWeight: 700, color: '#E4574B', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: '#F29C8C', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                         ) : (
                           <React.Fragment>
-                            <span style={{ fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 19, color: '#4FAE5C' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
-                            <span style={{ fontFamily: 'Courier Prime, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>disponibles en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: '#6FCB7B' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
+                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>disponibles en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                           </React.Fragment>
                         )}
                       </div>
-                      <div style={{ fontFamily: 'Courier Prime, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
+                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
                         {b.agotado ? 'No aparece en el último inventario: ' : 'De acuerdo a '}
                         {b.manual && b.manual.url ? (
                           <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: P.amber, textDecoration: 'none', borderBottom: `1px solid ${P.amber}` }}>▦ {b.manual.nombre} ↗</a>
@@ -607,7 +607,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
               );
             })()}
             <div style={{
-              fontFamily: 'Courier Prime, monospace', fontSize: 13, color: P.textDim, marginTop: 9,
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim, marginTop: 9,
             }}>Nivel: <window.PriceLevel lvl={acc.priceLvl} size={13} /></div>
           </div>
 
@@ -616,7 +616,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <React.Fragment>
               <window.SectionHeader>Historial de precios</window.SectionHeader>
               <div style={{
-                fontFamily: 'Courier Prime, monospace', fontSize: 12, color: P.textDim,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textDim,
                 letterSpacing: '0.04em', marginTop: -6, marginBottom: 10, lineHeight: 1.4,
               }}>Según inventarios oficiales DCAM / OTCA</div>
               <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, marginBottom: 16 }}>
@@ -627,8 +627,8 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                     <div key={i} style={{
                       padding: '10px 12px',
                       borderBottom: i < priceHistory.length - 1 ? `1px solid ${P.border}` : 'none',
-                      fontFamily: 'Courier Prime, monospace', fontSize: 15.5,
-                      background: i === 0 ? 'rgba(245,197,24,0.06)' : 'transparent',
+                      fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
+                      background: i === 0 ? 'rgba(221,213,196,0.06)' : 'transparent',
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
@@ -638,7 +638,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                           <span style={{ color: P.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
                           {hAut &&
                             <span title={hAut.nombre} style={{
-                              fontFamily: 'Courier Prime, monospace', fontSize: 12, fontWeight: 700,
+                              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
                               letterSpacing: '0.1em', color: '#000', background: hAut.color,
                               padding: '1px 6px', flexShrink: 0,
                             }}>{hAut.sigla}</span>}
@@ -678,7 +678,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                 padding: '12px 14px', marginBottom: 16,
               }}>
                 <div style={{
-                  fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
+                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
                   color: availMeta.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
                 }}>{availMeta.label}</div>
                 <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>

@@ -25,7 +25,7 @@
   })(window.location);
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1A1A1A">
+<meta name="theme-color" content="#173A32">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -39,10 +39,6 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&family=Courier+Prime:wght@400;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-<!-- Estilo «Documento Oficial Mexicano» (DESIGN.md). Convive con el actual: todo
-     va scoped bajo .amx-v2. Si gana la comparación, estas dos familias sustituyen
-     a Montserrat + Open Sans + Playfair, no se suman. -->
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="estilo.css">
 
@@ -50,9 +46,9 @@
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
-    background: #1A1A1A;
-    color: #FFFFFF;
-    font-family: 'Open Sans', system-ui, sans-serif;
+    background: #173A32;
+    color: #F3EFE4;
+    font-family: 'Archivo', system-ui, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     -webkit-text-size-adjust: 100%;
@@ -76,8 +72,8 @@
   body::before {
     content: ''; position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(245,197,24,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(245,197,24,0.025) 1px, transparent 1px);
+      linear-gradient(rgba(221,213,196,0.030) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(221,213,196,0.030) 1px, transparent 1px);
     background-size: 48px 48px;
     pointer-events: none; z-index: 0;
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
@@ -98,9 +94,9 @@
   /* scrollbar dark (desktop solamente) */
   @media (min-width: 720px) {
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #111111; }
-    ::-webkit-scrollbar-thumb { background: #3A3A3A; border-radius: 0; }
-    ::-webkit-scrollbar-thumb:hover { background: #F5C518; }
+    ::-webkit-scrollbar-track { background: #12302A; }
+    ::-webkit-scrollbar-thumb { background: #3F6E62; border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: #DDD5C4; }
   }
 
   /* horizontal chips */
@@ -128,12 +124,12 @@
   .amx-price-range::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none; pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; margin-top: 5px; border-radius: 50%;
-    background: #1A1A1A; border: 2px solid #F5C518; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: #173A32; border: 2px solid #DDD5C4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .amx-price-range::-moz-range-thumb {
     pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; border-radius: 50%;
-    background: #1A1A1A; border: 2px solid #F5C518; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: #173A32; border: 2px solid #DDD5C4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
 
   /* Hide bundler error overlay (non-critical img/font load events trigger false positives) */
@@ -145,20 +141,20 @@
   }
 
   /* input placeholder */
-  input::placeholder { color: #7A7A7A; }
+  input::placeholder { color: #B2B8AF; }
 
   /* focus — anillo visible 2px (accesibilidad).
      OJO: en elementos con clip-path el anillo va en un wrapper sin recorte
      (el clip se traga el outline). */
   button:focus-visible, a:focus-visible, input:focus-visible,
   select:focus-visible, [tabindex]:focus-visible {
-    outline: 2px solid #F5C518; outline-offset: 2px;
+    outline: 2px solid #DDD5C4; outline-offset: 2px;
   }
   button { -webkit-tap-highlight-color: transparent; }
 
   /* Controles con corte biselado: el clip-path se traga el outline, así que
      el anillo de foco lo pinta el envoltorio sin recortar. */
-  .amx-cut:has(:focus-visible) { outline: 2px solid #F5C518; outline-offset: 2px; }
+  .amx-cut:has(:focus-visible) { outline: 2px solid #DDD5C4; outline-offset: 2px; }
 
   /* accesibilidad: respetar la preferencia de menos movimiento */
   @media (prefers-reduced-motion: reduce) {
@@ -171,7 +167,7 @@
   }
 
   /* selección de texto */
-  ::selection { background: rgba(245,197,24,0.4); color: #fff; }
+  ::selection { background: rgba(221,213,196,0.35); color: #173A32; }
 
   /* Safe-area insets para iOS (notch / home indicator) */
   body {
@@ -189,7 +185,7 @@
     opacity: 0 !important;
   }
   body[data-hud="minimal"] .gunsmith {
-    background: #1A1A1A !important;
+    background: #173A32 !important;
   }
 
   /* HUD INTENSITY · Máxima — scanlines + glow amplificado */
@@ -236,17 +232,17 @@
 </head>
 <body>
 
-<template id="__bundler_thumbnail" data-bg-color="#1A1A1A">
+<template id="__bundler_thumbnail" data-bg-color="#173A32">
   <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1200" height="800" fill="#1A1A1A"/>
-    <g stroke="#F5C518" stroke-width="6" fill="none" opacity="0.5">
+    <rect width="1200" height="800" fill="#173A32"/>
+    <g stroke="#DDD5C4" stroke-width="6" fill="none" opacity="0.5">
       <circle cx="600" cy="400" r="140"/>
       <circle cx="600" cy="400" r="220"/>
       <line x1="600" y1="120" x2="600" y2="680"/>
       <line x1="320" y1="400" x2="880" y2="400"/>
     </g>
-    <circle cx="600" cy="400" r="18" fill="#F5C518"/>
-    <text x="600" y="740" text-anchor="middle" fill="#F5C518"
+    <circle cx="600" cy="400" r="18" fill="#DDD5C4"/>
+    <text x="600" y="740" text-anchor="middle" fill="#DDD5C4"
           font-family="monospace" font-size="44" font-weight="700"
           letter-spacing="8">ARMADO MX</text>
   </svg>
@@ -255,17 +251,17 @@
 <div id="app-root"></div>
 
 <!-- Splash de carga (se desvanece al montar React) -->
-<div id="amx-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:200;background:#1A1A1A;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.35s ease;">
+<div id="amx-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:200;background:#173A32;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.35s ease;">
   <svg width="88" height="88" viewBox="0 0 88 88" style="animation:amxSpin 6s linear infinite;">
-    <g stroke="#F5C518" stroke-width="1.5" fill="none" opacity="0.7">
+    <g stroke="#DDD5C4" stroke-width="1.5" fill="none" opacity="0.7">
       <circle cx="44" cy="44" r="18"></circle>
       <circle cx="44" cy="44" r="30"></circle>
       <line x1="44" y1="6" x2="44" y2="82"></line>
       <line x1="6" y1="44" x2="82" y2="44"></line>
     </g>
-    <circle cx="44" cy="44" r="2.5" fill="#F5C518"></circle>
+    <circle cx="44" cy="44" r="2.5" fill="#DDD5C4"></circle>
   </svg>
-  <div style="font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.3em;color:#F5C518;">CARGANDO ARSENAL…</div>
+  <div style="font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:0.3em;color:#DDD5C4;">CARGANDO ARSENAL…</div>
   <style>@keyframes amxSpin { to { transform: rotate(360deg); } }</style>
 </div>
 
