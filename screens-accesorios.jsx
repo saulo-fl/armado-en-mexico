@@ -80,7 +80,7 @@ function AccesorioCard({ acc, onClick }) {
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600,
-          color: window.CLARO.tinta2, background: 'rgba(0,0,0,0.6)', padding: '2px 5px',
+          color: window.CLARO.tinta2, background: 'rgba(250,249,245,0.92)', padding: '2px 6px', borderRadius: 4,
           letterSpacing: '0.1em', textTransform: 'uppercase', borderLeft: `2px solid ${window.CLARO.tinta2}`,
         }}>{cat.icon} {cat.label.split(' ')[0]}</span>
       </div>
@@ -436,7 +436,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
           <span style={{
             position: 'absolute', top: 10, left: 10,
             fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
-            background: 'rgba(0,0,0,0.6)', padding: '3px 7px', letterSpacing: '0.1em',
+            background: 'rgba(250,249,245,0.92)', color: window.CLARO.tinta2, padding: '3px 8px', borderRadius: 4, letterSpacing: '0.1em',
             textTransform: 'uppercase', borderLeft: `2px solid ${P.amber}`,
           }}>{cat.icon} {cat.label}</span>
         </div>
