@@ -12,14 +12,14 @@ description: Guía de fidelidad estética para "Armado en México" — memoria v
 >
 > `HANDOFF-DISENO.md` está obsoleto — es solo un puntero. No lo uses como fuente.
 
-## Estado del rediseño (ago-2026)
+## Estado del rediseño — RESUELTO (31-ago-2026)
 
-El sitio arrastra un problema medido: el borde `#3A3A3A` sobre tarjeta `#2C2C2C` da **1.23:1**
-y la tarjeta sobre el fondo da **1.25:1**. Las dos señales que definen una tarjeta son
-invisibles, y por eso el sitio se lee «cuadrado»: el ojo solo puede ver la geometría.
+El tema claro «Documento Oficial Mexicano» está en producción. El problema que motivó el
+rediseño —borde y tarjeta a 1.23:1 y 1.25:1, invisibles, que hacían que el sitio se leyera
+«cuadrado»— quedó cerrado al invertir el tema.
 
-**Superficies antes que efectos.** Añadir biseles o retículas sobre una base plana da un
-sitio ruidoso *y* plano. Comprobar siempre con:
+**Superficies antes que efectos**, que sigue siendo la regla: añadir biseles o retículas
+sobre una base plana da un sitio ruidoso *y* plano. Comprobar siempre con:
 
 ```
 node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
@@ -29,15 +29,33 @@ Para rediseñar, delega en el agente `disenador-oficial`. Para mover una primiti
 a CSS, la skill `migrar-a-css`.
 
 ## ADN visual (tokens en `ui.jsx` → `PALETTE`, expuesto en `window.PALETTE`)
-- Tema oscuro: `bg #1A1A1A`, superficies `#2C2C2C`, bordes `#3A3A3A`/`#555`.
-- Acento **ámbar `#F5C518`**. Texto `#FFF` / `#B5B5B5` / `#9A9A9A`.
-- Autoridades: DCAM ámbar `#F5C518`, OTCA verde `#4FAE5C`, ejército rojo `#C0392B`.
-- Tipos vigentes hoy (Google Fonts en `index.html`): Montserrat, Courier Prime, Open Sans,
-  Playfair Display. **`DESIGN.md` §5.3 los sustituye** por Archivo + JetBrains Mono +
-  Share Tech Mono; al tocar tipografía, sustituye, nunca sumes — ya son 4 familias y 13 archivos.
-- Primitivas reutilizables (`ui.jsx`): `TacticalCorners`, `FilterChip`, `FilterSelect`,
-  `PriceRange`, `AvailBadge`, `PriceLevel`, `SectionHeader`, `ArmaCard`, `BottomNav`,
-  `HCarousel`, `CountryFlag`. Reúsalas; no reinventes estilos por pantalla.
+
+> **La app es CLARA.** El lienzo es crema y el verde es el color de MARCA: header,
+> navegación y acentos. Tenerlo al revés —toda la app en verde— fue el error del primer
+> intento de rediseño, y ninguna corrección de detalle lo acercaba al mockup.
+
+- `bg #F3EFE4` lienzo crema · `bgCard`/`bgElev #FAF9F5` tarjeta blanca · `border #D5D6CE`.
+- **El acento ES el verde de marca**: `amber #173A32` (10.83:1 sobre el lienzo). El nombre
+  del token es herencia del tema anterior; el valor no.
+- Texto `#171B19` / `textDim #3E443D` / `textMuted #59605C`.
+- Rojo: `red #C83B32` **solo como relleno** con texto claro encima; `redHi #A3341F` es el
+  rojo **como texto** (5.96:1). Nunca los intercambies.
+- Superficies de marca: `marca #173A32`, `marcaAlt #1E4A40`, y encima `sobreMarca #F3EFE4`,
+  `sobreMarcaDim #B8C2BA`, `sobreMarcaMuted #9FACA2`.
+- Sobre superficie clara usa `window.CLARO` (`ok #2F6B33`, `alerta #A3341F`): los estados de
+  `PALETTE` están calibrados contra el verde y sobre crema caen a 1.7-2.3:1.
+- Tipografía: **Archivo + JetBrains Mono**, y solo esas dos. Al tocar tipografía sustituye,
+  nunca sumes.
+- **NADIE reescribe `PALETTE` en runtime.** Hubo un `useEffect` en `app.jsx` que la mutaba
+  con el acento de un selector de «facción»: el color salía bien en el primer paint y mal a
+  partir del segundo render, y ninguna auditoría estática lo veía. Si vuelve a aparecer una
+  asignación a `PALETTE.*` fuera de `ui.jsx`, es un bug.
+- Primitivas reutilizables (`ui.jsx`): `FilterChip`, `FilterSelect`, `PriceRange`,
+  `AvailBadge`, `PriceLevel`, `SectionHeader`, `ArmaCard`, `BottomNav`, `HCarousel`,
+  `CountryFlag`, `LogoMarca`. Reúsalas; no reinventes estilos por pantalla.
+  (`TacticalCorners` y `CUT_TR` siguen existiendo pero **ya no pintan**: eran el esqueleto
+  HUD del tema anterior y era lo que ataba el sitio al diseño viejo por mucho que cambiara
+  el color.)
 - **Trabaja por primitivas, no por pantallas.** Las ~15 de `ui.jsx` propagan a las 322
   páginas; las pantallas solo las componen.
 
@@ -69,19 +87,23 @@ a CSS, la skill `migrar-a-css`.
   máquina. Comprobación: `grep -riE 'dossier|curadur' --include='*.jsx' --include='*.md'`
   debe dar 0.
 
-## Rediseño móvil 2026 (canvas aprobado — tokens vigentes)
-Canvas de referencia: https://claude.ai/code/artifact/5bfe4baa-8106-44a4-b122-1f49a622905e
-- **Contraste AA sobre #1A1A1A:** `textMuted = #9A9A9A` (nunca volver a #7A7A7A);
-  rojo para TEXTO/BORDE = `PALETTE.redHi #E4574B`; `PALETTE.red #C0392B` queda SOLO
-  como relleno con texto blanco.
-- **Piso tipográfico 12px** en todo texto informativo (badges, etiquetas, nav).
-- **Áreas táctiles:** botones ≥44-48px, chips ≥44px, filas de nav ≥48px.
-- **Lenguaje "menos cuadrado":** corte biselado `window.CUT_TR` (clip-path esquina
-  sup-der) en CTAs/badges/chips; `TacticalCorners` ahora pinta 2 esquinas (tl+br)
-  por defecto (`all` para las 4); tarjetas con `PALETTE.bgCardGrad`; separadores
-  `linear-gradient(90deg, border, transparent)` (SectionHeader/Hdr ya lo hacen).
-- **OJO clip-path + foco:** el clip se traga el `outline` — el anillo de foco va en
-  un wrapper sin recorte si el elemento lleva corte.
+## Rediseño móvil 2026 — parcialmente DEROGADO por el tema claro
+
+> Lo de esta sección se decidió sobre el tema OSCURO. Los valores de color y el lenguaje
+> «menos cuadrado» ya no aplican; lo que sigue vigente está marcado. Se conserva porque
+> varias decisiones de layout siguen en pie y porque explica por qué el código tiene lo que
+> tiene.
+
+- ~~Contraste AA sobre `#1A1A1A`, `textMuted #9A9A9A`, `redHi #E4574B`~~ — **derogado**:
+  la paleta viva está en «ADN visual», arriba.
+- **VIGENTE · Piso tipográfico 12px** en todo texto informativo (badges, etiquetas, nav).
+- **VIGENTE · Áreas táctiles:** botones ≥44-48px, chips ≥44px, filas de nav ≥48px.
+- ~~Lenguaje «menos cuadrado»: `CUT_TR`, `TacticalCorners`, `bgCardGrad`~~ — **derogado**:
+  ese esqueleto HUD era lo que ataba el sitio al diseño viejo. `CUT_TR` vale `'none'`,
+  `TacticalCorners` no pinta y `bgCardGrad` no lo usa nadie. Hoy: radios, sombras suaves
+  y superficies.
+- **VIGENTE · OJO clip-path + foco:** el clip se traga el `outline` — el anillo de foco va
+  en un wrapper sin recorte si el elemento lleva corte.
 - **Nav inferior:** iconos SVG de trazo 1.75 (componente `NavIcon` en BottomNav);
   no volver a glifos de fuente (◈▤⇄§☰ renderizan distinto por plataforma).
 - **Tarjetas de arma:** muestran existencias por sucursal (`● 36 DCAM · 18 OTCA` /
