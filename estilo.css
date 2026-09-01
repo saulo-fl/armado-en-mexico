@@ -37,8 +37,12 @@
   --sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
 
-  background: var(--verde);
-  color: var(--crema);
+  /* La app es CLARA: el lienzo es crema y el verde es color de MARCA (banda,
+     sello, acentos). Esto pintaba verde con texto crema — resto del tema
+     oscuro que el inline de app.jsx:411-412 ya tapaba. El CSS ya no lo
+     contradice. */
+  background: var(--crema);
+  color: var(--tinta);
   font-family: var(--sans);
 }
 
@@ -52,14 +56,6 @@
   letter-spacing: .045em;
   line-height: 1.1;
   text-wrap: balance;
-}
-.amx-v2 .t-etiqueta {
-  font-family: var(--sans);
-  font-size: 10.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .13em;
-  color: var(--tinta-2);
 }
 .amx-v2 .t-dato {
   font-family: var(--mono);
@@ -75,13 +71,7 @@
   border-radius: var(--radio);
   box-shadow: var(--sombra);
 }
-.amx-v2 .p-blanco { background: var(--blanco); }
-.amx-v2 .p-oscuro {
-  background: var(--verde-2);
-  color: var(--crema);
-  border-radius: var(--radio);
-  box-shadow: inset 0 1px 0 var(--hair-osc);
-}
+/* Retiradas .p-blanco, .p-oscuro y .t-etiqueta: cero usos en jsx/html. */
 
 /* Sello de expediente — el guiño burocrático de §29, sin iconografía oficial */
 .amx-v2 .sello {
@@ -159,9 +149,9 @@
   outline-offset: 2px;
   border-radius: var(--radio-sm);
 }
-.amx-v2 .p-claro :focus-visible { outline-color: var(--rojo-txt); }
-.amx-v2 .p-oscuro :focus-visible,
-.amx-v2 > :focus-visible { outline-color: var(--beige); }
+/* El anillo por defecto (--rojo-txt, 4.51:1 sobre crema) sirve en todo el
+   lienzo claro. El beige aquí era del tema oscuro: sobre crema da 1.27:1.
+   La única superficie oscura que queda es la banda de marca, más abajo. */
 
 @media (prefers-reduced-motion: reduce) {
   .amx-v2 * { transition: none !important; animation: none !important; }
@@ -173,7 +163,7 @@
   display: flex;
   gap: 0;
   overflow-x: auto;
-  border-bottom: 1px solid var(--hair-osc);
+  border-bottom: 1px solid var(--hair);   /* la barra vive sobre superficie clara */
   scrollbar-width: none;
 }
 .amx-v2 .tabs-bar::-webkit-scrollbar { display: none; }
@@ -183,7 +173,7 @@
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
-  color: var(--beige);
+  color: var(--gris);            /* 6.13:1 sobre #FAF9F5. Antes --beige: 1.27:1, invisible */
   font-family: var(--sans);
   font-size: 11.5px;
   font-weight: 600;
@@ -195,9 +185,9 @@
   white-space: nowrap;
   transition: color .16s, border-color .16s;
 }
-.amx-v2 .tab:hover { color: var(--blanco); }
+.amx-v2 .tab:hover { color: var(--tinta); }
 .amx-v2 .tab.is-act {
-  color: var(--blanco);
+  color: var(--tinta);                /* 16.51:1 sobre #FAF9F5 */
   border-bottom-color: var(--rojo);   /* el rojo como marca de posición, no como texto */
 }
 .amx-v2 .tab-panel { padding-top: var(--e4); }
@@ -223,4 +213,95 @@
 
 @media (prefers-reduced-motion: reduce) {
   .amx-v2 .amx-card:hover { transform: none; }
+}
+
+/* ── Banda de marca: el verde a todo el ancho, cerrado en curva ──────────── */
+
+.amx-v2 .amx-banda-marca {
+  background: var(--verde);
+  color: var(--crema);
+  /* padding-bottom mayor que el resto: el buscador tiene que respirar antes
+     de que empiece la curva, si no el pill parece pegado al borde. */
+  padding: var(--e4) var(--e4) var(--e5);
+  border-bottom-left-radius: 22px;
+  border-bottom-right-radius: 22px;
+}
+/* Sobre el verde el anillo rojo del foco da 2.45:1: aquí va en crema. */
+.amx-v2 .amx-banda-marca :focus-visible { outline-color: var(--crema); }
+
+/* ── Buscador de cristal sobre la banda verde ────────────────────────────── */
+
+/* Cristal SIMULADO: dos capas de blanco translúcido + un inset highlight.
+   NADA de backdrop-filter — DESIGN.md §6 lo veta en cualquier cosa que haga
+   scroll, y en móvil es el efecto que más caro sale de repintar. */
+.amx-v2 .amx-buscador {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: 48px;                  /* área táctil, con holgura sobre los 44 */
+  padding: 0 var(--e4);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(250,249,245,.16), rgba(250,249,245,.06));
+  border: 1px solid rgba(250,249,245,.24);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 2px 10px -4px rgba(0,0,0,.28);
+  color: var(--crema);
+}
+/* Texto en crema: 10.83:1 sobre el verde plano y 6.69:1 en el punto más claro
+   del cristal (#3B5951, donde el overlay .16 pesa más). */
+.amx-v2 .amx-buscador input,
+.amx-v2 input.amx-buscador {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: none;
+  border: 0;
+  color: var(--crema);
+  font-family: var(--sans);
+  font-size: 15px;
+  outline-offset: 4px;               /* el anillo de foco no muerde el pill */
+}
+/* Placeholder a .76, no a .62: compuesto sobre el punto más claro del cristal,
+   .62 cae a 3.68:1 y no pasa. A .76 da 4.66:1 ahí y 6.98:1 sobre el verde
+   plano, y sigue leyéndose más apagado que lo que el usuario escribe. */
+.amx-v2 .amx-buscador input::placeholder,
+.amx-v2 input.amx-buscador::placeholder {
+  color: rgba(243, 239, 228, .76);
+  opacity: 1;                        /* Firefox le baja la opacidad por su cuenta */
+}
+
+/* ── Enlace de acción: el rojo como TEXTO, nunca como relleno ────────────── */
+
+.amx-v2 .amx-accion,
+.amx-v2 .amx-accion-verde {
+  font-family: var(--mono);
+  font-size: 14.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  min-height: 44px;                  /* área táctil aunque el texto sea una línea */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  text-decoration: none;
+}
+.amx-v2 .amx-accion       { color: #A3341F; }   /* 5.96:1 sobre el lienzo crema */
+.amx-v2 .amx-accion-verde { color: #F29C8C; }   /* 5.87:1 sobre el verde #173A32 */
+.amx-v2 .amx-accion:hover,
+.amx-v2 .amx-accion-verde:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* El rojo del anillo por defecto sobre verde da 2.45:1: en la variante verde
+   el foco reusa el mismo salmón del texto. */
+.amx-v2 .amx-accion-verde:focus-visible { outline-color: #F29C8C; }
+
+/* ── Foco sobre las superficies verdes de marca ───────────────────────────── */
+/* El anillo global usa --rojo-txt, que sobre el verde de marca mide 2.40:1 y
+   no llega al 3:1 que pide WCAG 2.4.11 para el indicador de foco. En header,
+   nav y desplegable el anillo va en crema (10.83:1). */
+.amx-v2 .amx-sobre-verde :focus-visible {
+  outline: 2px solid var(--crema);
+  outline-offset: 2px;
 }

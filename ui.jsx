@@ -37,6 +37,15 @@ const PALETTE = {
   marca:     '#173A32',
   marcaAlt:  '#1E4A40',
   sobreMarca:'#F3EFE4',   // 10.83:1 sobre marca
+  // Los dos escalones apagados del texto sobre marca. Se USABAN desde el primer
+  // día (TopNav, BottomNav, AppHeader) pero nunca se definieron: resolvían a
+  // undefined, React omitía `color` y el enlace heredaba la tinta #171B19 del
+  // contenedor raíz — negro sobre verde, 1.4:1. De ahí que los enlaces
+  // inactivos de la navegación no se leyeran.
+  sobreMarcaDim:   '#B8C2BA',  // 6.79:1 sobre #173A32 — enlace inactivo
+  sobreMarcaMuted: '#9FACA2',  // 5.27:1 — lo desactivado (Próximamente)
+  // Rojo para overlay oscuro: sobre el verde de marca redHi cae a 1.8:1.
+  redSobreVerde:   '#F29C8C',  // 5.87:1 sobre #173A32
 };
 window.PALETTE = PALETTE;
 
@@ -95,11 +104,86 @@ function useViewport() {
 window.useViewport = useViewport;
 
 // ──────────────────────────────────────────────────────────────
+// LOGO MARCA — logotipo en SVG inline
+// ──────────────────────────────────────────────────────────────
+// logo.png es 256×256 de paleta indexada SIN canal alfa: sobre el header verde
+// se ve su recuadro y NO se puede recolorear. En SVG la silueta va con
+// fill="currentColor" y hereda el color de la superficie donde caiga.
+// Sobre el verde de marca: silueta en --crema #F3EFE4 (10.83:1) y texto en
+// #FAF9F5 (11.81:1) — el texto un punto más claro para que gane la jerarquía.
+// El recuadro es marco decorativo (opacity .5): no porta información, la
+// información está en la silueta y en el texto.
+function LogoMarca({ size = 28, conTexto = false, src = null }) {
+  const ft = Math.max(12, Math.round(size * 0.43)); // piso tipográfico 12px
+  // `src` = logo subido desde el panel de admin. El SVG de marca es el de
+  // fabrica; si Saulo sube uno propio manda el suyo, y asi la pestana BRANDING
+  // del admin sigue teniendo efecto en vez de escribir un ajuste muerto.
+  if (src) {
+    return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: Math.round(size * 0.32) }}>
+        <img src={src} alt="Armado en México"
+          style={{ height: size, width: 'auto', objectFit: 'contain', display: 'block' }} />
+        {conTexto && (
+          <span style={{
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: ft,
+            letterSpacing: '0.09em', textTransform: 'uppercase',
+            color: PALETTE.sobreMarca, whiteSpace: 'nowrap', lineHeight: 1.05,
+          }}>Armado en México</span>
+        )}
+      </span>
+    );
+  }
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center',
+      gap: Math.round(size * 0.29),
+      // currentColor de la silueta. var() con respaldo por si el SVG se usara
+      // fuera del scope .amx-v2, donde --crema no existe.
+      color: 'var(--crema, #F3EFE4)',
+    }}>
+      <svg width={size} height={size} viewBox="0 0 32 32"
+        style={{ display: 'block', flexShrink: 0 }}
+        role={conTexto ? undefined : 'img'}
+        aria-hidden={conTexto ? true : undefined}
+        aria-label={conTexto ? undefined : 'Armado en México'}>
+        <rect x="1" y="1" width="30" height="30" rx="7.5"
+          fill="none" stroke="currentColor" strokeWidth="1.8" opacity="0.5" />
+        {/* Pistola de perfil, cañón a la derecha. Un solo <path> con dos
+            subtrazos y fillRule evenodd: el segundo es el hueco del
+            guardamonte. La g reencuadra la silueta dentro del recuadro sin
+            recalcular las 20 coordenadas a mano. */}
+        <g transform="translate(-0.96,-3.27) scale(1.05)">
+          <path fill="currentColor" fillRule="evenodd" d="
+            M8 9.4 H27.4 V13 H21 V15.8 H18.2
+            C18.8 23.4 11.3 23.8 11.9 16.4
+            L8.6 26.8 Q6.7 28.4 4.9 25.6
+            C5.7 21 6.6 15.8 8 13.2 Z
+            M13.4 16.7 C13.1 20.6 16.9 20.8 16.6 16.7 Z" />
+        </g>
+      </svg>
+      {conTexto && (
+        <span style={{
+          display: 'flex', flexDirection: 'column',
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
+          fontSize: ft, lineHeight: 1.04,
+          letterSpacing: '0.06em', textTransform: 'uppercase',
+          color: '#FAF9F5',
+          whiteSpace: 'nowrap',
+        }}>
+          <span>Armado en</span>
+          <span>México</span>
+        </span>
+      )}
+    </span>
+  );
+}
+window.LogoMarca = LogoMarca;
+
+// ──────────────────────────────────────────────────────────────
 // TOP NAV — barra superior para escritorio/tablet
 // ──────────────────────────────────────────────────────────────
 function TopNav({ current, onNav, compareCount, onSearch }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
-  const navCfg = window.Store ? window.Store.getAppConfig() : { logo: '' };
   const moreItems = [
     { id: 'traumaticas', label: 'Armas traumáticas' },
     { id: 'calibres', label: 'Calibres' },
@@ -120,40 +204,23 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
     { id: 'submit',  label: '＋ PROPONER', accent: true },
   ];
   return (
-    <div style={{
+    <div className="amx-sobre-verde" style={{
       position: 'sticky', top: 0, zIndex: 50,
       height: 64,
-      background: 'rgba(23,58,50,0.95)',
-      backdropFilter: 'blur(10px)',
+      background: PALETTE.marca,
       borderBottom: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex', alignItems: 'center',
       padding: '0 28px', gap: 24,
     }}>
-      <button onClick={() => onNav('home')} style={{
+      {/* El logotipo lo pinta LogoMarca en SVG: logo.png no tiene alfa y sobre
+          el verde arrastraba su propio recuadro. El texto va A LA DERECHA de la
+          silueta, igual que en móvil. */}
+      <button onClick={() => onNav('home')} aria-label="Inicio — Armado en México" style={{
         background: 'none', border: 'none', cursor: 'pointer',
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-        fontSize: 21, color: '#DDD5C4',
-        letterSpacing: '0.1em',
-        display: 'flex', alignItems: 'center', gap: 8,
-        padding: 0,
+        display: 'flex', alignItems: 'center',
+        padding: 0, minHeight: 44, flexShrink: 0,
       }}>
-        {navCfg.logo ? (
-          <img src={navCfg.logo} alt="Armado en México" style={{
-            width: 40, height: 40, objectFit: 'contain',
-            borderRadius: 6, display: 'block',
-          }} />
-        ) : (
-          <React.Fragment>
-            <span style={{
-              display: 'inline-block', width: 18, height: 18,
-              border: `1.5px solid ${'#DDD5C4'}`,
-              position: 'relative',
-            }}>
-              <span style={{ position: 'absolute', inset: 3, background: '#DDD5C4' }} />
-            </span>
-            ARMADO<span style={{ color: PALETTE.sobreMarcaDim, fontWeight: 400, fontSize: '0.75em', marginLeft: 4 }}>en MX</span>
-          </React.Fragment>
-        )}
+        <LogoMarca size={34} conTexto />
       </button>
       <div style={{
         display: 'flex', gap: 4, marginLeft: 12,
@@ -179,9 +246,9 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                   transition: 'color 0.15s',
                 }}>{it.label} <span style={{ fontSize: 13, transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span></button>
                 {moreOpen && (
-                  <div style={{
+                  <div className="amx-sobre-verde" style={{
                     position: 'absolute', top: '100%', right: 0, minWidth: 200,
-                    background: 'rgba(23,58,50,0.98)', backdropFilter: 'blur(10px)',
+                    background: PALETTE.marca,
                     border: `1px solid ${'rgba(250,249,245,.14)'}`,
                     borderTop: `2px solid ${'#DDD5C4'}`,
                     boxShadow: '0 12px 30px rgba(0,0,0,0.55)',
@@ -510,6 +577,25 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
 }
 window.SectionHeader = SectionHeader;
 
+// El enlace de acción de un SectionHeader («VER TODO», «LIMPIAR»…) se repetía a
+// mano en 9 pantallas, y con el rojo equivocado según dónde cayera: PALETTE.redHi
+// da 5.96:1 sobre crema pero 1.8:1 sobre el verde de marca — invisible. Una sola
+// función decide el rojo por superficie.
+function estiloAccion(sobreVerde) {
+  return {
+    fontFamily: 'JetBrains Mono, monospace',
+    fontSize: 14.5,
+    letterSpacing: '0.12em',
+    textTransform: 'uppercase',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    minHeight: 44,   // área táctil mínima
+    color: sobreVerde ? PALETTE.redSobreVerde : PALETTE.redHi,  // 5.87:1 / 5.96:1
+  };
+}
+window.estiloAccion = estiloAccion;
+
 // ──────────────────────────────────────────────────────────────
 // PROSA — estilo de texto de lectura corrida
 // ──────────────────────────────────────────────────────────────
@@ -533,68 +619,52 @@ window.amxProsa = amxProsa;
 // ──────────────────────────────────────────────────────────────
 // APP HEADER — barra superior con logo + acciones
 // ──────────────────────────────────────────────────────────────
-function AppHeader({ title, back, onBack, right }) {
-  const cfg = window.Store ? window.Store.getAppConfig() : { logo: '', logoText: 'ARMADO en MX' };
+// `title` sigue en la firma aunque YA NO SE PINTA: lo pasan casi todas las
+// pantallas desde app.jsx y quitarlo de ahí es otro lote. El título de pantalla
+// vive SOLO en el cuerpo — aquí duplicaba el que ya pinta cada pantalla, y
+// además nunca quedaba centrado (textAlign left/right según hubiera «volver»).
+function AppHeader({ title, back, onBack, onHome, right }) {
+  // El panel de admin (pestaña BRANDING) sigue guardando cfg.logo. Si Saulo sube
+  // uno propio se respeta; si esta el 'logo.png' de fabrica, manda el SVG de
+  // marca. Sin esto, el admin escribia un ajuste que ya no leia nadie.
+  const cfgH = window.Store ? window.Store.getAppConfig() : null;
+  const logoUsuario = cfgH && cfgH.logo && cfgH.logo !== 'logo.png' ? cfgH.logo : null;
   return (
-    <div style={{
+    <div className="amx-sobre-verde" style={{
       position: 'sticky', top: 0, zIndex: 50,
-      background: 'rgba(23,58,50,0.92)',
-      backdropFilter: 'blur(8px)',
+      background: PALETTE.marca,
       borderBottom: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex', alignItems: 'center',
       padding: '0 14px', gap: 10,
       minHeight: 50,
       paddingTop: 'env(safe-area-inset-top)',
     }}>
-      {back ? (
-        <button onClick={onBack} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: '#DDD5C4', fontSize: 23, padding: 4,
-          fontFamily: 'JetBrains Mono, monospace',
-        }}>‹</button>
-      ) : (
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-          fontSize: 17, color: '#DDD5C4',
-          letterSpacing: '0.08em',
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
-          {cfg.logo ? (
-            <img src={cfg.logo} alt="Armado en México" style={{
-              width: 34, height: 34, objectFit: 'contain',
-              borderRadius: 6, display: 'block',
-            }} />
-          ) : (
-            <React.Fragment>
-              <span aria-label="logo placeholder" style={{
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                width: 28, height: 28,
-                border: `1.5px dashed ${'#DDD5C4'}`,
-                borderRadius: 6, color: '#DDD5C4',
-                fontFamily: 'JetBrains Mono, monospace',
-                fontSize: 13, letterSpacing: '0.1em',
-                background: 'rgba(221,213,196,0.08)',
-              }}>LOGO</span>
-              <span style={{ whiteSpace: 'nowrap' }}>
-                {(cfg.logoText || 'ARMADO en MX').split(/\s+(?=en\s+MX)/i).map((part, i) =>
-                  i === 0
-                    ? <span key="t">{part}</span>
-                    : <span key="s" style={{ color: PALETTE.sobreMarcaDim, fontWeight: 400, fontSize: '0.72em', marginLeft: 4 }}>{part}</span>
-                )}
-              </span>
-            </React.Fragment>
-          )}
-        </div>
-      )}
-      <div style={{
-        flex: 1,
-        fontFamily: 'Archivo, sans-serif',
-        fontSize: 16, fontWeight: 500,
-        color: PALETTE.sobreMarca,
-        textTransform: 'uppercase', letterSpacing: '0.12em',
-        textAlign: back ? 'left' : 'right',
-      }}>{title}</div>
-      {right}
+      {/* Los dos lados pesan igual (flex:1 cada uno) para que la marca quede
+          centrada de verdad: antes se centraba en el espacio SOBRANTE, asi que
+          con la insignia SLOT presente se desplazaba a la izquierda. */}
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+        {back && (
+          <button onClick={onBack} aria-label="Volver" style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: PALETTE.sobreMarca, fontSize: 23,
+            minWidth: 44, minHeight: 44, padding: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'JetBrains Mono, monospace',
+          }}>‹</button>
+        )}
+      </div>
+
+      {/* El logo ya no es excluyente con «volver»: en pantalla interna la barra
+          se quedaba sin marca. Y vuelve a ser pulsable — quitado el titulo, es
+          lo unico de la barra y es donde se toca para volver al inicio. */}
+      <button onClick={onHome} aria-label="Inicio — Armado en México" style={{
+        background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', minHeight: 44, flexShrink: 0,
+      }}>
+        <LogoMarca size={28} conTexto={!back} src={logoUsuario} />
+      </button>
+
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>{right}</div>
     </div>
   );
 }
@@ -653,8 +723,7 @@ function BottomNav({ current, onNav, compareCount }) {
   return (
     <div ref={navRef} style={{
       position: 'sticky', bottom: 0, zIndex: 50,
-      background: 'rgba(23,58,50,0.96)',
-      backdropFilter: 'blur(12px)',
+      background: PALETTE.marca,
       borderTop: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex',
       padding: '6px 4px 10px',

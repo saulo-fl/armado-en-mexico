@@ -21,11 +21,19 @@ window.CATEGORY_HEROS = CATEGORY_HEROS;
 // relleno idénticas — llenan el ancho del carrusel sin repetir de más — y la
 // etiqueta que sustituye al «Ver todos →» en la cabecera de la sección.
 const PROXIMAMENTE_ITEMS = [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }, { id: 'p4' }];
+// Ocupa el sitio del «Ver todos →» pero NO es un enlace. Ahora que los enlaces
+// de acción son rojos (estiloAccion), el verde de marca ya lo diferencia solo:
+// se queda en PALETTE.marca —10.83:1 sobre el lienzo crema, el mismo hex que el
+// antiguo PALETTE.amber— y se nombra por lo que es. Sobre superficie verde habría
+// que usar PALETTE.sobreMarcaMuted, pero este tag siempre cae sobre el lienzo.
+// Sin aria-hidden a propósito: «(Próximamente)» es la ÚNICA señal de que la
+// sección está congelada, y ocultarla al lector de pantalla borra esa información.
 function ProximamenteTag() {
   return (
     <span style={{
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber,
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.marca,
       letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+      cursor: 'default',   // refuerza que no se pincha, aunque esté donde iba el enlace
     }}>(Próximamente)</span>
   );
 }
@@ -48,11 +56,15 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   // el panel de admin sigue editándolo.
   const promos = useMemo(() => window.Store ? window.Store.getPromos() : [], [forceRender]);
 
-  // Arma destacada (DESIGN.md §5.1). Determinista: la primera favorita, y si no
-  // hay, la primera del catálogo. Sin aleatoriedad, para que el prerender y el
-  // cliente pinten lo mismo.
+  // Arma destacada (DESIGN.md §5.1). FIJA en la CZ P-09 (id 31,
+  // imagenes/077_CZ_P-09.webp): es la pieza que la portada del mockup enseña, y
+  // no debe cambiar según los favoritos que tenga el visitante.
+  // Si ese id desapareciera del catálogo se cae al cálculo determinista anterior
+  // —primera favorita, y si no la primera del catálogo— para no dejar el hueco.
   const destacada = useMemo(() => {
     const db = window.DB || [];
+    const fija = db.find((a) => a.id === 31);
+    if (fija) return fija;
     const favs = window.Store ? (window.Store.getFavoritos ? window.Store.getFavoritos() : []) : [];
     const favId = Array.isArray(favs) && favs.length ? (favs[0] && (favs[0].id != null ? favs[0].id : favs[0])) : null;
     return (favId != null && db.find((a) => a.id === favId)) || db[0] || null;
@@ -80,36 +92,38 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   return (
     <div style={{ paddingBottom: 24 }}>
       {/* 1 ▸ BUSCADOR — DESIGN.md §5. El slider promocional se retiró: el
-             mockup abre con búsqueda y una pieza destacada, no con un carrusel. */}
-      <div style={{ ...containerMax, padding: `14px ${PAD}px 4px` }}>
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: window.CLARO.panel,
-          borderRadius: 999,
-          boxShadow: window.CLARO.sombra,
-          padding: '0 6px 0 16px', minHeight: 48
-        }}>
-          <span aria-hidden="true" style={{ color: window.CLARO.tinta2, fontSize: 17, lineHeight: 1 }}>⌕</span>
-          <input value={homeQuery}
-            onChange={(e) => setHomeQuery(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') doHomeSearch(); }}
-            placeholder="Buscar armas, calibres, marcas…"
-            aria-label="Buscar armas, calibres, marcas"
-            style={{
-              flex: 1, background: 'none', border: 'none', outline: 'none',
-              color: window.CLARO.tinta, minWidth: 0,
-              fontFamily: 'Archivo, sans-serif', fontSize: 15
-            }} />
-          {homeQuery &&
-            <button onClick={() => setHomeQuery('')} aria-label="Limpiar búsqueda" style={{
-              background: 'none', border: 'none', cursor: 'pointer', color: window.CLARO.tinta2, fontSize: 16
-            }}>✕</button>
-          }
-          <button onClick={doHomeSearch} aria-label="Buscar" style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            color: window.CLARO.tinta, fontSize: 18,
-            width: 44, minHeight: 44, borderRadius: 999
-          }}>⌕</button>
+             mockup abre con búsqueda y una pieza destacada, no con un carrusel.
+             La banda verde va a TODO el ancho: queda FUERA de containerMax y el
+             ancho lo limita el div de dentro. Así la curva de .amx-banda-marca
+             cierra de borde a borde y el corte de color cae justo entre el
+             buscador y el bloque de Arma destacada. El padding —incluido el
+             inferior, mayor— lo pone la clase; por eso aquí no hay ninguno. */}
+      <div className="amx-banda-marca">
+        <div style={containerMax}>
+          {/* Píldora de cristal. Icono, input y placeholder heredan `color:
+              var(--crema)` de .amx-buscador: 10.83:1 sobre el verde plano y
+              6.69:1 en el punto más claro del cristal (medido en estilo.css).
+              Los <button> no heredan color, así que va explícito. */}
+          <div className="amx-buscador">
+            <span aria-hidden="true" style={{ fontSize: 17, lineHeight: 1 }}>⌕</span>
+            <input value={homeQuery}
+              onChange={(e) => setHomeQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') doHomeSearch(); }}
+              placeholder="Buscar armas, calibres, marcas…"
+              aria-label="Buscar armas, calibres, marcas" />
+            {homeQuery &&
+              <button onClick={() => setHomeQuery('')} aria-label="Limpiar búsqueda" style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: PALETTE.sobreMarca, fontSize: 16,
+                width: 44, minHeight: 44, borderRadius: 999
+              }}>✕</button>
+            }
+            <button onClick={doHomeSearch} aria-label="Buscar" style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: PALETTE.sobreMarca, fontSize: 18,
+              width: 44, minHeight: 44, borderRadius: 999
+            }}>⌕</button>
+          </div>
         </div>
       </div>
 
@@ -122,19 +136,24 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           color: PALETTE.textDim, marginBottom: 10
         }}>Arma destacada</div>
 
+        {/* La tarjeta va en VERDE (marcaAlt #1E4A40) para destacar sobre una
+            página que es toda clara. Todo el texto de dentro se invierte; el
+            rótulo «ARMA DESTACADA» de arriba se queda fuera, sobre el lienzo. */}
         <div style={{
-          background: window.CLARO.panel, borderRadius: window.CLARO.radio,
+          background: PALETTE.marcaAlt, borderRadius: window.CLARO.radio,
           boxShadow: window.CLARO.sombra, overflow: 'hidden'
         }}>
           <div style={{ display: 'flex', gap: 12, padding: '16px 16px 0' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
                 fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22,
-                color: window.CLARO.tinta, lineHeight: 1.1, marginBottom: 2
+                color: PALETTE.sobreMarca,  // #F3EFE4 — 8.67:1 sobre #1E4A40
+                lineHeight: 1.1, marginBottom: 2
               }}>{destacada.nombre}</div>
               <div style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
-                color: window.CLARO.tinta2, marginBottom: 12
+                color: '#DDD5C4',          // 6.82:1 sobre #1E4A40
+                marginBottom: 12
               }}>{destacada.calibre}</div>
 
               {[['✦', destacada.mecanismo], ['⌖', destacada.pais],
@@ -142,9 +161,10 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                 .filter(([, v]) => v).map(([ic, v]) =>
                 <div key={v} style={{
                   display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
-                  fontFamily: 'Archivo, sans-serif', fontSize: 13.5, color: window.CLARO.tinta
+                  fontFamily: 'Archivo, sans-serif', fontSize: 13.5,
+                  color: '#C6CEC6'         // specs — 6.19:1 sobre #1E4A40
                 }}>
-                  <span aria-hidden="true" style={{ color: window.CLARO.tinta2, fontSize: 12 }}>{ic}</span>
+                  <span aria-hidden="true" style={{ fontSize: 12 }}>{ic}</span>
                   <span>{v}</span>
                 </div>)}
             </div>
@@ -156,13 +176,25 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
               <img src={destacada.img} alt={destacada.nombre}
                 loading="lazy" decoding="async"
                 onError={(e) => { e.currentTarget.src = window.armaPlaceholder(destacada); }}
-                style={{ maxWidth: '100%', maxHeight: 130, objectFit: 'contain' }} />
+                style={{
+                  maxWidth: '100%', maxHeight: 130, objectFit: 'contain',
+                  // La foto tiene canal alfa: drop-shadow proyecta la silueta real
+                  // del arma; box-shadow dibujaría la caja del <img>.
+                  filter: 'drop-shadow(0 14px 18px rgba(23,27,25,.42))'
+                }} />
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: 10, padding: 16 }}>
+            {/* .btn-claro trae tinta #171B19 y borde --hair, ambos calibrados
+                para superficie clara: sobre este verde la tinta cae a 1.6:1.
+                Se invierte aquí, solo en este botón, sin tocar la clase. */}
             <button onClick={() => onOpenArma(destacada.id)} className="btn btn-claro"
-              style={{ flex: 1 }}>Ver detalles</button>
+              style={{
+                flex: 1,
+                color: PALETTE.sobreMarca,            // 8.67:1 sobre #1E4A40
+                borderColor: 'rgba(250,249,245,.28)'
+              }}>Ver detalles</button>
             {/* HomeScreen no recibe la prop de comparar (compareIds vive en App),
                 así que esto lleva al comparador en vez de añadir en silencio. */}
             <button onClick={() => onNav('compare')}
@@ -197,42 +229,22 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
       <CarouselSection
         title="Calibres"
         action={
-        <button onClick={() => onNav('calibres')} style={{
-          background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.amber,
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase'
-        }}>Ver guía →</button>
+        // El estilo del enlace de acción sale de estiloAccion: rojo #A3341F
+        // (5.96:1 sobre el lienzo) y área táctil de 44px. Antes iba a mano en
+        // PALETTE.amber, que es el VERDE de marca y no distinguía enlace de rótulo.
+        <button onClick={() => onNav('calibres')} style={window.estiloAccion(false)}>Ver guía →</button>
         }
         items={(window.CALIBRES || [])}
         renderItem={(c) =>
         <CaliberMiniCard cal={c} onClick={() => onNav('calibres')} />
         } />
 
-      {/* 6 y 7 ▸ Campos de tiro y Experiencias — CONGELADAS hasta el lanzamiento.
-          Anuncian la sección sin dejar llegar a ella: el «Ver todos →» es ahora
-          una etiqueta, y las tarjetas no son window.CAMPOS/CURSOS (datos de
-          relleno) sino ProximamenteCard. Para reactivarlas, ver PLACEHOLDERS.md. */}
-      <CarouselSection
-        title="Campos de tiro"
-        action={<ProximamenteTag />}
-        items={PROXIMAMENTE_ITEMS}
-        renderItem={() => <window.ProximamenteCard />} />
-
-      <CarouselSection
-        title="Experiencias"
-        action={<ProximamenteTag />}
-        items={PROXIMAMENTE_ITEMS}
-        renderItem={() => <window.ProximamenteCard />} />
-
       {/* 8 ▸ Categorías rápidas (legacy) */}
       <div style={{ ...containerMax, padding: `8px ${PAD}px 0` }}>
         <SectionHeader action={
-        <button onClick={() => onNav('catalog')} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.amber,
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 14.5, letterSpacing: '0.12em',
-          textTransform: 'uppercase'
-        }}>Ver Todas →</button>
+        // Mismo enlace de acción que «Ver guía»: rojo por estiloAccion, no el
+        // verde de marca.
+        <button onClick={() => onNav('catalog')} style={window.estiloAccion(false)}>Ver Todas →</button>
         }>Categorías</SectionHeader>
 
         <div style={{
@@ -267,10 +279,13 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                       display: 'block'
                     }} />
                   )}
-                  {/* tinte para integrar con el dark theme */}
+                  {/* Tinte de marca. La parada final baja de 0.92 a 0.75: a 0.92
+                      la foto desaparecía bajo el verde y aun así el rótulo iba en
+                      tinta casi negra encima — ilegible a cualquier opacidad. El
+                      arreglo es doble: menos tinte Y texto claro (abajo). */}
                   <div style={{
                     position: 'absolute', inset: 0,
-                    background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.35) 55%, rgba(23,58,50,0.92) 100%)`,
+                    background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.35) 55%, rgba(23,58,50,0.75) 100%)`,
                     pointerEvents: 'none'
                   }} />
                   {/* corner ticks */}
@@ -288,21 +303,30 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                     borderRight: `1.5px solid ${PALETTE.amber}`,
                     opacity: 0.75
                   }} />
-                  {/* label overlay */}
+                  {/* Rótulo sobre el tinte. Medido contra el PEOR fondo posible:
+                      foto blanca (tope real 235 tras el filtro brightness .92)
+                      bajo el tinte 0.75, que compone #4C6660.
+                        node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
+                      #F3EFE4 → 5.41:1 · #E7E0D0 → 4.73:1.
+                      El #DDD5C4 que usa el resto de la app se queda en 4.26:1 aquí
+                      —este tinte es más flojo que el de las fichas—, así que el
+                      contador sube un escalón. Sobre foto oscura ambos suben. */}
                   <div style={{
                     position: 'absolute', left: 10, right: 10, bottom: 10
                   }}>
                     <div style={{
                       fontFamily: 'Archivo, sans-serif', fontWeight: 700,
                       fontSize: vp.isDesktop ? 17 : 16,
-                      color: PALETTE.text,
+                      color: PALETTE.sobreMarca,   // #F3EFE4 — 5.41:1
                       textTransform: 'uppercase', letterSpacing: '0.06em',
-                      lineHeight: 1,
-                      textShadow: '0 1px 2px rgba(0,0,0,0.6)'
+                      lineHeight: 1
+                      // Sin textShadow: la sombra negra era el parche del texto
+                      // oscuro sobre foto. El texto ya es claro y la sombra solo
+                      // le ensuciaba el borde.
                     }}>{c.label}</div>
                     <div style={{
                       fontFamily: 'JetBrains Mono, monospace',
-                      fontSize: 13, color: PALETTE.amber,
+                      fontSize: 13, color: '#E7E0D0',   // contador — 4.73:1
                       letterSpacing: '0.18em',
                       marginTop: 4,
                       display: 'flex', alignItems: 'center', gap: 6
@@ -369,6 +393,25 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
 
       {/* 9 ▸ Armas traumáticas (defensa menos letal) — al final del feed de inicio */}
       <window.HomeTraumaBanner onNav={onNav} />
+
+      {/* 6 y 7 ▸ Campos de tiro y Experiencias — CONGELADAS hasta el lanzamiento.
+          Anuncian la sección sin dejar llegar a ella: el «Ver todos →» es ahora
+          una etiqueta, y las tarjetas no son window.CAMPOS/CURSOS (datos de
+          relleno) sino ProximamenteCard. Para reactivarlas, ver PLACEHOLDERS.md.
+          Van al FINAL del inicio: lo que todavía no existe no puede ocupar el
+          sitio del catálogo real. Son autocontenidas —no leen nada del scope del
+          componente— así que mover el bloque no arrastra dependencias. */}
+      <CarouselSection
+        title="Campos de tiro"
+        action={<ProximamenteTag />}
+        items={PROXIMAMENTE_ITEMS}
+        renderItem={() => <window.ProximamenteCard />} />
+
+      <CarouselSection
+        title="Experiencias"
+        action={<ProximamenteTag />}
+        items={PROXIMAMENTE_ITEMS}
+        renderItem={() => <window.ProximamenteCard />} />
 
       {/* 7 ▸ Disclaimer */}
       <div style={{
@@ -980,7 +1023,12 @@ window.CatalogScreen = CatalogScreen;
 // ARSENAL HUB — al entrar al arsenal se elige una categoría (no lista plana)
 // ════════════════════════════════════════════════════════════════
 // Tarjeta con foto (fondo de imagen + overlay) para el hub del arsenal
-function ArsenalPhotoCard({ label, sub, img, color, onClick }) {
+// `color` es el acento DECORATIVO de las esquinas. No sirve para el subtítulo:
+// su valor por defecto era P.amber (#173A32), el mismo verde del tinte, y el
+// subtítulo de DCAM —que no pasa color— quedaba invisible. Y el #4FAE5C que sí
+// pasa OTCA da 2.42:1 sobre el tinte: tampoco llegaba. El texto va siempre en la
+// pareja crema, y quien necesite otro tono lo pide por `subColor`, no por `color`.
+function ArsenalPhotoCard({ label, sub, img, color, subColor, onClick }) {
   const P = PALETTE;
   const [err, setErr] = useState(false);
   const showImg = img && !err;
@@ -997,13 +1045,20 @@ function ArsenalPhotoCard({ label, sub, img, color, onClick }) {
         {showImg
           ? <img src={img} alt={label} loading="lazy" onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'contrast(1.06) saturate(0.92) brightness(0.92)', display: 'block' }} />
           : <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.borderHi, fontSize: 30 }}>▦</div>}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.42) 55%, rgba(23,58,50,0.94) 100%)`, pointerEvents: 'none' }} />
+        {/* 0.94 tapaba la foto entera. A 0.78 se ve la armería y el texto claro
+            de abajo sigue midiendo por encima de 4.5:1 (ver comentario del bloque). */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.42) 55%, rgba(23,58,50,0.78) 100%)`, pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${ac}`, borderLeft: `1.5px solid ${ac}`, opacity: 0.8 }} />
         <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${ac}`, borderRight: `1.5px solid ${ac}`, opacity: 0.8 }} />
+        {/* Medido contra el peor fondo: foto blanca (tope 235 tras brightness .92)
+            bajo el tinte 0.78 → compone #46615B. #F3EFE4 da 5.86:1 y #DDD5C4 da
+            4.61:1. Fuera los textShadow negros: eran el parche del texto oscuro. */}
         <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
-          <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16, color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>{label}</div>
-          {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: ac, marginTop: 3, letterSpacing: '0.08em', textShadow: '0 1px 2px rgba(0,0,0,0.7)' }}>{sub}</div>}
-          {!showImg && img && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textMuted, marginTop: 2 }}>foto pendiente</div>}
+          <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16, color: P.sobreMarca, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05 }}>{label}</div>
+          {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: subColor || '#DDD5C4', marginTop: 3, letterSpacing: '0.08em' }}>{sub}</div>}
+          {/* Mismo caso: este aviso también cae bajo el tinte (el overlay se pinta
+              aunque no haya foto). P.textMuted #59605C daba ~1.1:1 ahí. */}
+          {!showImg && img && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#DDD5C4', marginTop: 2 }}>foto pendiente</div>}
         </div>
       </div>
     </button>
@@ -1055,7 +1110,10 @@ function ArsenalHubScreen({ onNav }) {
 
   return (
     <div style={{ ...max, padding: `8px ${PAD}px 90px` }}>
-      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px' }}>Arsenal</div>
+      {/* Único encabezado de la pantalla: el header móvil ya no pinta título y
+          TopNav tampoco en escritorio. No se borra; en móvil se centra para que
+          ocupe el sitio del título que había en la barra. */}
+      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px', textAlign: vp.isMobile ? 'center' : 'left' }}>Arsenal</div>
       <div style={window.amxProsa({ fontSize: 15, color: P.textDim, lineHeight: 1.5 })}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
 
       <Hdr icon="◆">Armería</Hdr>

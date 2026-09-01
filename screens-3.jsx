@@ -72,7 +72,11 @@ function MiniBadge({ children, color = PALETTE.amber, solid = false }) {
       fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700,
       letterSpacing: '0.12em', textTransform: 'uppercase',
       padding: '3px 7px',
-      color: solid ? '#173A32' : color,
+      // El badge sólido pintaba el texto en '#173A32' fijo. Su único llamador
+      // (CampoCard, el estatus destacado) le pasa color=PALETTE.amber, que HOY
+      // vale ese mismo #173A32: verde sobre verde, 1.00:1, invisible. Se corrige
+      // aquí y no en el llamador porque es el relleno el que decide su tinta.
+      color: solid ? PALETTE.sobreMarca : color,   // 10.83:1 sobre el verde de marca
       background: solid ? color : 'transparent',
       border: `1px solid ${color}`,
       whiteSpace: 'nowrap',
@@ -246,7 +250,9 @@ function CamposScreen({ onNav }) {
           </div>
         </div>
         <button onClick={() => onNav && onNav('submit')} style={{
-          flexShrink: 0, background: PALETTE.amber, color: '#173A32', border: 'none',
+          // El texto era '#173A32' sobre PALETTE.amber, que hoy ES #173A32:
+          // 1.00:1, el botón salía en blanco. Sobre verde de marca → sobreMarca.
+          flexShrink: 0, background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',   // 10.83:1
           padding: '11px 18px', cursor: 'pointer',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.12em', textTransform: 'uppercase',
@@ -456,22 +462,35 @@ window.CursoMiniCard = CursoMiniCard;
 function ProximamenteScreen({ titulo, texto }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
+  // El header móvil ya no pinta el título de pantalla: este bloque (título +
+  // antetítulo) es el único encabezado, así que en móvil ocupa el centro que
+  // dejó el header. En escritorio/tablet TopNav tampoco pinta título y el
+  // encabezado se queda al margen izquierdo, alineado con el resto de la columna.
+  const alinea = vp.isMobile ? 'center' : 'left';
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{
         fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26,
         color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05,
+        textAlign: alinea,
       }}>{titulo}</div>
       <div style={{
         fontFamily: 'JetBrains Mono, monospace', fontSize: 15, color: PALETTE.amber,
         letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: 8,
+        textAlign: alinea,
       }}>Próximamente</div>
 
+      {/* Panel informativo, NO un control: cursor por defecto y sin onClick para
+          que no se lea como algo pulsable (los datos de esta sección están
+          congelados, no hay adónde ir). */}
       <div style={{
         marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
-        padding: vp.isDesktop ? '34px 30px' : '26px 18px', textAlign: 'center',
+        padding: vp.isDesktop ? '34px 30px' : '26px 18px', textAlign: 'center', cursor: 'default',
       }}>
-        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.55, lineHeight: 1 }}>?</div>
+        {/* El glifo es decoración, pero aun así debe verse: a opacity 0.55 el
+            verde resolvía a #7D908A sobre la tarjeta #FAF9F5 = 3.20:1, justo en
+            el filo del mínimo gráfico. A 0.6 resuelve a #728680 = 3.67:1. */}
+        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.6, lineHeight: 1 }} aria-hidden="true">?</div>
         <div style={{
           fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim,
           lineHeight: 1.55, maxWidth: 560, margin: '16px auto 0',
@@ -492,9 +511,12 @@ function ProximamenteCard() {
       overflow: 'hidden', height: '100%', cursor: 'default',
     }}>
       <StripePlaceholder ratio="16 / 9">
-        <span style={{
+        {/* A opacity 0.45 el verde de marca resolvía a #94A39D sobre el hueco
+            #FAF9F5 de StripePlaceholder: 2.50:1, por debajo del 3:1 que exige
+            un elemento gráfico. A 0.6 resuelve a #728680 = 3.67:1. */}
+        <span aria-hidden="true" style={{
           fontFamily: 'JetBrains Mono, monospace', fontSize: 42, color: PALETTE.amber,
-          opacity: 0.45, lineHeight: 1,
+          opacity: 0.6, lineHeight: 1,
         }}>?</span>
       </StripePlaceholder>
       <div style={{ padding: '11px 12px' }}>

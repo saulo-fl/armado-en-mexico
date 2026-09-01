@@ -158,25 +158,16 @@ function App() {
     faction: 'amarillo', hudIntensity: 'standard', typeface: 'stencil',
   });
   useEffectApp(() => {
-    // Las claves se conservan aunque los nombres ya no describan el color: son
-    // las que hay guardadas en el localStorage de quien ya visitó el sitio.
-    // Todos los acentos miden >=4.5:1 sobre el fondo y sobre la tarjeta.
-    const FACTIONS = {
-      amarillo: { accent: '#DDD5C4', deep: '#B0A894' },  // papel (marca)
-      oro:      { accent: '#D8C9A0', deep: '#B0A894' },  // papel envejecido
-      alerta:   { accent: '#F29C8C', deep: '#C83B32' },  // alerta
-      acero:    { accent: '#A8BDB4', deep: '#8FA39C' },  // acero verdoso
-    };
-    const p = FACTIONS[tw.faction] || FACTIONS.amarillo;
-    window.GUN_ACCENT = p.accent;
-    window.GUN_ACCENT_DEEP = p.deep;
-    if (window.PALETTE) {
-      window.PALETTE.amber = p.accent;
-      window.PALETTE.amberDim = p.deep;
-    }
+    // NO se vuelve a escribir PALETTE en runtime. El selector de «facción» venía
+    // del tema oscuro y pisaba PALETTE.amber con un beige (#DDD5C4) calibrado
+    // contra el fondo VERDE de entonces. Al invertir el tema a lienzo crema ese
+    // beige pasó a medir 1.27:1 — invisible — y como la mutación ocurría en un
+    // efecto, el acento salía verde en el primer paint y beige a partir del
+    // segundo render. Afectaba a los ~260 usos de PALETTE.amber del sitio.
+    // La paleta la define ui.jsx y no la reescribe nadie.
     document.body.dataset.hud = tw.hudIntensity || 'standard';
     document.body.dataset.type = tw.typeface || 'stencil';
-  }, [tw.faction, tw.hudIntensity, tw.typeface]);
+  }, [tw.hudIntensity, tw.typeface]);
 
   // Navegación — estado inicial leído de la URL (deep-links)
   const _init = amxParsePath(window.location.pathname);
@@ -419,14 +410,20 @@ function App() {
           title={titles[screen]}
           back={isInternal}
           onBack={goBack}
+          onHome={() => navTab('home')}
           right={pickerSlot !== null ? (
             <span style={{
               fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 13, color: PALETTE.amber,
+              fontSize: 13,
+              // Iba en PALETTE.amber, que es el VERDE de marca: sobre el header
+              // verde daba 1.68:1 y su borde 1.28:1 — invisible. Ahora que la
+              // barra no lleva titulo, esta insignia es medio contenido.
+              color: PALETTE.sobreMarca,
               letterSpacing: '0.15em',
-              background: 'rgba(221,213,196,0.12)',
-              border: `1px solid ${PALETTE.amber}`,
-              padding: '3px 6px',
+              background: 'rgba(250,249,245,0.12)',
+              border: '1px solid rgba(250,249,245,.35)',
+              borderRadius: 4,
+              padding: '4px 7px',
             }}>SLOT {pickerSlot === 0 ? 'A' : 'B'}</span>
           ) : null}
         />

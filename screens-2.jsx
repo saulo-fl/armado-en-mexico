@@ -1041,8 +1041,13 @@ function YouTubeBlock({ arma, padX = 16 }) {
             textShadow: '0 2px 6px rgba(0,0,0,0.8)',
             display: 'flex', alignItems: 'center', gap: 6
           }}>
+              {/* Los siete rellenos `background: PALETTE.amber` de este archivo
+                  llevaban el texto en '#000': cuando «amber» era ámbar el negro
+                  encima funcionaba, pero hoy amber ES el verde de marca #173A32
+                  y el negro encima daba 1.69:1 — CTAs ilegibles. Sobre verde el
+                  texto va en sobreMarca #F3EFE4 (10.83:1). Vale para los siete. */}
               <span style={{
-              background: PALETTE.amber, color: '#000',
+              background: PALETTE.amber, color: PALETTE.sobreMarca,
               padding: '2px 6px', fontWeight: 700, fontSize: 13,
               letterSpacing: '0.1em'
             }}>YOUTUBE</span>
@@ -1124,7 +1129,7 @@ function SuggestChangesModal({ arma, onClose }) {
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
             <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.6, marginBottom: 20 })}>Tu sugerencia entró en la cola. Revisaremos la información y, si procede, aplicaremos el cambio.</div>
             <button onClick={onClose} style={{
-            background: PALETTE.amber, color: '#000', border: 'none',
+            background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
             padding: '10px 20px',
             fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
             letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
@@ -1167,7 +1172,7 @@ function SuggestChangesModal({ arma, onClose }) {
               letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
             }}>Cancelar</button>
               <button type="submit" style={{
-              background: PALETTE.amber, color: '#000', border: 'none',
+              background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
               padding: '10px 20px',
               fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
               letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
@@ -1249,7 +1254,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
           Selecciona armas desde el catálogo<br />tocando el botón ⇄ en cada tarjeta.
         </div>
         <button onClick={() => onNav('catalog')} style={{
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
           padding: '10px 22px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.15em', textTransform: 'uppercase',
@@ -1560,27 +1565,38 @@ function LegalScreen({ onNav }) {
           borderLeft: `4px solid ${d.color}`,
           padding: '12px 14px'
         }}>
+            {/* El rótulo iba en d.color (data.js), pensado para el tema oscuro
+                anterior: sobre la tarjeta clara #FAF9F5 el amarillo #F5C518 daba
+                1.55:1 y el verde #4FAE5C 2.64:1 — el nombre de la categoría, que
+                es la información de la tarjeta, no se leía. El color sigue
+                identificando la categoría en la barra lateral (decorativa y
+                redundante con el texto); el texto va en tinta, 15.14:1. */}
             <div style={{
             fontFamily: 'Archivo, sans-serif',
             fontWeight: 700, fontSize: 15,
-            color: d.color,
+            color: PALETTE.text,
             textTransform: 'uppercase', letterSpacing: '0.08em',
             marginBottom: 4
           }}>{d.label}</div>
             <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{d.desc}</div>
           </div>
         )}
-        {/* 4ª categoría — Armas traumáticas (sin licencia) */}
+        {/* 4ª categoría — Armas traumáticas (sin licencia).
+            Iba en '#FFFFFF' copiando el patrón del tema oscuro: sobre la tarjeta
+            #FAF9F5 el título daba 1.05:1 y la barra lateral otro tanto — la
+            tarjeta entera parecía vacía. Es la única categoría que sí vendemos,
+            así que su identificador es el verde de marca (11.81:1 sobre la
+            tarjeta) y el título va en tinta como sus tres hermanas. */}
         <div style={{
           background: PALETTE.bgCard,
           border: `1px solid ${PALETTE.border}`,
-          borderLeft: `4px solid #FFFFFF`,
+          borderLeft: `4px solid ${PALETTE.amber}`,
           padding: '12px 14px'
         }}>
           <div style={{
             fontFamily: 'Archivo, sans-serif',
             fontWeight: 700, fontSize: 15,
-            color: '#FFFFFF',
+            color: PALETTE.text,
             textTransform: 'uppercase', letterSpacing: '0.08em',
             marginBottom: 4
           }}>Sin Licencia</div>
@@ -1694,7 +1710,7 @@ function LegalScreen({ onNav }) {
         <a href={`https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`}
         target="_blank" rel="noopener" style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: PALETTE.amber, color: '#000',
+          background: PALETTE.amber, color: PALETTE.sobreMarca,
           textDecoration: 'none',
           padding: '12px 16px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
@@ -2146,9 +2162,13 @@ function FAQScreen() {
 
   return (
     <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      {/* El header móvil ya no pinta el título de pantalla: este bloque es el
+          único encabezado y se centra en móvil para ocupar el sitio que dejó.
+          En escritorio/tablet pasa a la izquierda —TopNav tampoco pinta título—
+          para arrancar al margen de la columna de lectura de abajo. */}
       <div style={{
         padding: '20px 0',
-        textAlign: 'center',
+        textAlign: vp.isMobile ? 'center' : 'left',
         borderBottom: `1px solid ${PALETTE.border}`,
         marginBottom: 18
       }}>
@@ -2253,10 +2273,13 @@ function MenuScreen({ onNav, onTutorial }) {
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      {/* Único encabezado de la pantalla desde que el header móvil dejó de
+          pintar título: centrado en móvil, al margen en escritorio/tablet. */}
       <div style={{
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, color: PALETTE.amber,
-        letterSpacing: '0.2em', marginBottom: 14
+        letterSpacing: '0.2em', marginBottom: 14,
+        textAlign: vp.isMobile ? 'center' : 'left'
       }}>☰ MÁS</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {items.map((it) =>
@@ -2375,7 +2398,7 @@ function SubmitScreen({ onNav }) {
           </div>}
         </div>
         <button onClick={() => onNav('home')} style={{
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
           padding: '12px 24px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -2484,7 +2507,7 @@ function SubmitScreen({ onNav }) {
           cursor: 'pointer'
         }}>Cancelar</button>
         <button type="submit" style={{
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
           padding: '12px 26px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',

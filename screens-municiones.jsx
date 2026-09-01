@@ -75,7 +75,9 @@ function MunicionCard({ mun, onClick }) {
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-          color: '#000', background: window.CLARO.tinta2, padding: '2px 5px',
+          // Badge de calibre sobre CLARO.tinta2 (#59605C): el negro daba 3.25:1.
+          // Crema sobre ese gris-verde: 5.62:1.
+          color: P.sobreMarca, background: window.CLARO.tinta2, padding: '2px 5px',
           letterSpacing: '0.08em', whiteSpace: 'nowrap',
         }}>{mun.calibre}</span>
       </div>
@@ -153,10 +155,11 @@ function HomeMunicionesSection({ onNav }) {
             fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
             textTransform: 'uppercase', letterSpacing: '0.04em', flex: '1 1 auto', minWidth: 0, whiteSpace: 'nowrap',
           }}>Municiones</div>
-          <button onClick={() => onNav && onNav('municiones')} style={{
-            background: 'none', border: 'none', cursor: 'pointer', color: P.amber,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase',
-          }}>Ver todas →</button>
+          {/* Mismo caso que en accesorios: el objeto estaba copiado a mano y en P.amber,
+              que es el VERDE de marca. estiloAccion(false) trae el rojo de accion
+              #A3341F (5.96:1 sobre el lienzo #F3EFE4) y los 44px de area tactil. */}
+          <button onClick={() => onNav && onNav('municiones')}
+            style={window.estiloAccion(false)}>Ver todas →</button>
         </div>
       </div>
 
@@ -183,15 +186,29 @@ function HomeMunicionesSection({ onNav }) {
                   : <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: vp.isDesktop ? 55 : 48, color: P.amber, opacity: 0.9, position: 'relative', zIndex: 1 }}>{c.icon}</span>}
                 <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${P.amber}`, borderLeft: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
                 <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${P.amber}`, borderRight: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-                <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.94) 100%)`, pointerEvents: 'none' }} />
-                <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
+                {/* Degradado decorativo: funde el cartucho con la placa. De 0.94 a 0.75
+                    porque ya no sostiene el contraste del texto. */}
+                <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.75) 100%)`, pointerEvents: 'none' }} />
+                {/* PLACA DE LEGIBILIDAD — misma receta que en accesorios. El degradado
+                    solo alcanza su parada final en el ultimo pixel, asi que el fondo bajo
+                    el rotulo cambiaba con la altura del texto. La placa fija 0.94 de verde
+                    bajo todas las lineas: compuesto #1A3D35 → crema 10.37:1, salmon 5.62:1.
+                    Los 12px de fundido caben en el paddingTop de 14. */}
+                <div style={{
+                  position: 'absolute', left: 0, right: 0, bottom: 0, padding: '14px 10px 10px',
+                  background: `linear-gradient(180deg, rgba(23,58,50,0) 0, rgba(23,58,50,0.94) 12px)`,
+                }}>
+                  {/* P.text (#171B19) aqui daba 1.65:1. Crema: 10.37:1. El textShadow
+                      negro se va: sombra oscura bajo texto claro solo emborrona. */}
                   <div style={{
                     fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
-                    color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
-                    textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                    color: P.sobreMarca, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
                   }}>{c.label}</div>
+                  {/* Rotulo, no control: la tarjeta entera es el boton y ya pasa de 44px,
+                      asi que toma solo el color de estiloAccion(true) —P.redSobreVerde—
+                      sin su minHeight. P.amber (verde) sobre verde era invisible. 5.62:1. */}
                   <div style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.amber,
+                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.redSobreVerde,
                     letterSpacing: '0.16em', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6,
                   }}>VER <span aria-hidden="true">→</span></div>
                 </div>
@@ -249,7 +266,8 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
     flex: '1 1 160px', minWidth: 0,
   };
   const chip = (active) => ({
-    background: active ? P.amber : 'transparent', color: active ? '#000' : P.textDim,
+    // P.amber es el VERDE de marca #173A32: el negro encima daba 1.69:1. Crema 10.83:1.
+    background: active ? P.amber : 'transparent', color: active ? P.sobreMarca : P.textDim,
     border: `1px solid ${active ? P.amber : P.border}`,
     padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
     fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
@@ -429,7 +447,9 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
             : <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 60, color: P.amber, opacity: 0.85, position: 'relative', zIndex: 1 }}>◉</span>}
           <span style={{
             position: 'absolute', top: 10, left: 10,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: '#000',
+            // Badge de calibre en la ficha: fondo P.amber = verde de marca #173A32,
+            // con negro encima daba 1.69:1. Crema: 10.83:1.
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.sobreMarca,
             background: P.amber, padding: '3px 7px', letterSpacing: '0.08em', fontWeight: 700,
           }}>{mun.calibre}</span>
         </div>

@@ -138,10 +138,12 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
             fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
             textTransform: 'uppercase', letterSpacing: '0.04em', flex: '1 1 auto', minWidth: 0, whiteSpace: 'nowrap',
           }}>Accesorios DCAM</div>
-          <button onClick={() => onNav && onNav('accesorios')} style={{
-            background: 'none', border: 'none', cursor: 'pointer', color: P.amber,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, letterSpacing: '0.12em', textTransform: 'uppercase',
-          }}>Ver todos →</button>
+          {/* El estilo estaba copiado a mano y en P.amber, que es el VERDE de marca:
+              contrasta de sobra sobre el lienzo (10.83:1) pero compite con el titulo
+              y no es el color de accion del sistema. estiloAccion(false) trae el rojo
+              #A3341F (5.96:1 sobre #F3EFE4) y el area tactil de 44px. */}
+          <button onClick={() => onNav && onNav('accesorios')}
+            style={window.estiloAccion(false)}>Ver todos →</button>
         </div>
       </div>
 
@@ -176,16 +178,34 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
               {/* corner ticks */}
               <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${P.amber}`, borderLeft: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
               <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${P.amber}`, borderRight: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-              {/* gradient inferior + label */}
-              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.94) 100%)`, pointerEvents: 'none' }} />
-              <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
+              {/* Degradado decorativo: solo funde la foto/glifo con la placa de abajo.
+                  Baja de 0.94 a 0.75 — ya no tiene que sostener contraste de texto. */}
+              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.75) 100%)`, pointerEvents: 'none' }} />
+              {/* PLACA DE LEGIBILIDAD. Antes el rotulo se apoyaba en el degradado, que
+                  solo llega a su parada final en el ultimo pixel: la etiqueta de
+                  categoria (1-3 lineas segun ancho: «Portacargadores y cananas») caia
+                  en la rampa, sobre verde a ~0.66 → crema 4.12:1. La placa fija 0.94 de
+                  verde bajo TODAS las lineas. Compuesto real (0.94 sobre el degradado a
+                  0.75 sobre el lienzo) = #1A3D35: crema 10.37:1, salmon 5.62:1.
+                  El fundido de 12px cabe dentro del paddingTop de 14, asi que ninguna
+                  linea de texto se apoya en la rampa. */}
+              <div style={{
+                position: 'absolute', left: 0, right: 0, bottom: 0, padding: '14px 10px 10px',
+                background: `linear-gradient(180deg, rgba(23,58,50,0) 0, rgba(23,58,50,0.94) 12px)`,
+              }}>
+                {/* P.text (#171B19) sobre este verde daba 1.65:1. Crema: 10.37:1.
+                    Fuera el textShadow negro: era para texto oscuro, bajo texto claro
+                    solo ensucia el borde de la letra. */}
                 <div style={{
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
-                  color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
-                  textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                  color: P.sobreMarca, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
                 }}>{c.label}</div>
+                {/* Rotulo de accion, no un control aparte: la tarjeta entera es el boton
+                    y ya mide >=44px, asi que toma solo el color de estiloAccion(true)
+                    —P.redSobreVerde— sin su minHeight, que aqui hincharia la placa.
+                    P.amber (verde de marca) sobre este verde era invisible. 5.62:1. */}
                 <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.amber,
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.redSobreVerde,
                   letterSpacing: '0.16em', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6,
                 }}>VER <span aria-hidden="true">→</span></div>
               </div>
@@ -243,8 +263,10 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
     flex: '1 1 160px', minWidth: 0,
   };
   const chip = (active) => ({
+    // Activo = fondo P.amber, que es el VERDE de marca #173A32, no un ambar:
+    // el negro encima daba 1.69:1. Crema sobre el verde: 10.83:1.
     background: active ? P.amber : 'transparent',
-    color: active ? '#000' : P.textDim,
+    color: active ? P.sobreMarca : P.textDim,
     border: `1px solid ${active ? P.amber : P.border}`,
     padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
     fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
