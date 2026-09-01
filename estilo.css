@@ -1,0 +1,168 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Armado en México — sistema visual «Documento Oficial Mexicano»
+   Brief: DESIGN.md · Paleta auditada con .claude/skills/fidelidad-diseno/scripts/contraste.mjs
+
+   TODO va scoped bajo .amx-v2 a propósito: mientras se compara contra el
+   estilo actual, el resto de la app no debe cambiar ni un píxel.
+   Si este estilo gana, se quita el scope y se borran los inline que sustituye.
+
+   REGLA: una propiedad vive aquí O vive inline, nunca en las dos. El inline
+   gana por especificidad y empieza la guerra de !important.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 {
+  /* ── Color (DESIGN.md §2, con las tres correcciones de contraste de §5.1) ── */
+  --verde:      #173A32;   /* fondo */
+  --verde-2:    #2C6457;   /* superficie oscura elevada — corregido de #245247 (1.41:1) */
+  --crema:      #F3EFE4;   /* la tarjeta por defecto — 10.83:1 sobre verde */
+  --blanco:     #FAF9F5;   /* panel destacado */
+  --beige:      #DDD5C4;   /* fila alterna, SOLO con hairline (1.27:1) */
+  --rojo:       #C83B32;   /* relleno de CTA, con texto claro encima */
+  --rojo-txt:   #C63A32;   /* rojo como texto/borde — 4.51:1 sobre crema */
+  --negro:      #171B19;
+  --gris:       #59605C;   /* 5.62:1 sobre crema */
+
+  --tinta:      var(--negro);
+  --tinta-2:    var(--gris);
+  --hair:       rgba(23, 58, 50, .14);   /* hairline sobre superficie clara */
+  --hair-osc:   rgba(250, 249, 245, .10);/* hairline sobre superficie oscura */
+  --sombra:     0 1px 2px rgba(23,27,25,.06), 0 6px 16px -10px rgba(23,27,25,.14);
+
+  /* ── Espaciado: 6 valores (DESIGN.md §5.2). Antes había 36 sueltos ── */
+  --e1: 4px; --e2: 8px; --e3: 12px; --e4: 20px; --e5: 32px; --e6: 52px;
+
+  --radio:    10px;   /* §27: border radius consistente, bordes finos */
+  --radio-sm:  6px;
+
+  --sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+
+  background: var(--verde);
+  color: var(--crema);
+  font-family: var(--sans);
+}
+
+/* ── Tipografía ─────────────────────────────────────────────────────────── */
+
+.amx-v2 .t-titulo {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-stretch: 85%;                 /* Archivo es variable: condensa sin otra familia */
+  text-transform: uppercase;
+  letter-spacing: .045em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+.amx-v2 .t-etiqueta {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .13em;
+  color: var(--tinta-2);
+}
+.amx-v2 .t-dato {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;  /* lo que hace que un calibre se lea como instrumento */
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── Superficies ────────────────────────────────────────────────────────── */
+
+.amx-v2 .p-claro {
+  background: var(--crema);
+  color: var(--tinta);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra);
+}
+.amx-v2 .p-blanco { background: var(--blanco); }
+.amx-v2 .p-oscuro {
+  background: var(--verde-2);
+  color: var(--crema);
+  border-radius: var(--radio);
+  box-shadow: inset 0 1px 0 var(--hair-osc);
+}
+
+/* Sello de expediente — el guiño burocrático de §29, sin iconografía oficial */
+.amx-v2 .sello {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+  border: 1px solid var(--hair);
+  border-radius: var(--radio-sm);
+  padding: 3px 7px;
+  display: inline-block;
+}
+
+/* Línea tricolor: identidad mexicana sin escudo ni emblema (§29) */
+.amx-v2 .tricolor {
+  height: 3px;
+  border: 0;
+  margin: 0;
+  background: linear-gradient(90deg,
+    var(--verde-2) 0 33.3%, var(--beige) 33.3% 66.6%, var(--rojo) 66.6%);
+  border-radius: 2px;
+}
+
+/* ── Tabla de especificaciones (§11) ────────────────────────────────────── */
+
+.amx-v2 .specs { width: 100%; border-collapse: collapse; }
+.amx-v2 .specs th,
+.amx-v2 .specs td { padding: 11px var(--e3); text-align: left; }
+.amx-v2 .specs th {
+  font-family: var(--sans);
+  font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .13em;
+  color: var(--tinta-2);
+  width: 42%;
+}
+.amx-v2 .specs td {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--tinta);
+}
+/* zebra: beige sobre crema es 1.27:1, invisible solo — necesita el hairline */
+.amx-v2 .specs tr { border-bottom: 1px solid var(--hair); }
+.amx-v2 .specs tr:nth-child(even) { background: var(--beige); }
+.amx-v2 .specs tr:last-child { border-bottom: 0; }
+
+/* ── Botones ────────────────────────────────────────────────────────────── */
+
+.amx-v2 .btn {
+  font-family: var(--sans);
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .1em;
+  padding: 0 var(--e4);
+  min-height: 44px;                  /* área táctil, no negociable */
+  border-radius: var(--radio-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background .16s, border-color .16s;
+}
+/* El rojo como RELLENO con texto claro. Como texto sobre verde da 2.45:1 */
+.amx-v2 .btn-rojo { background: var(--rojo); color: var(--blanco); }
+.amx-v2 .btn-rojo:hover { background: #B8342C; }
+.amx-v2 .btn-claro {
+  background: transparent; color: var(--tinta);
+  border-color: var(--hair);
+}
+.amx-v2 .btn-claro:hover { background: rgba(23,58,50,.06); }
+
+/* ── Foco: no negociable, y clip-path se lo come si no se compensa ──────── */
+
+.amx-v2 :focus-visible {
+  outline: 2px solid var(--rojo-txt);
+  outline-offset: 2px;
+  border-radius: var(--radio-sm);
+}
+.amx-v2 .p-claro :focus-visible { outline-color: var(--rojo-txt); }
+.amx-v2 .p-oscuro :focus-visible,
+.amx-v2 > :focus-visible { outline-color: var(--beige); }
+
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 * { transition: none !important; animation: none !important; }
+}

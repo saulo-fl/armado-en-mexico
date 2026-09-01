@@ -398,11 +398,17 @@ for (const html of ['index.html', 'admin.html']) {
   for (const m of src.matchAll(/<script[^>]+src="([^"]+\.js)(?:\?[^"]*)?"/g)) {
     if (!/^https?:/.test(m[1])) scriptsLocales.add(m[1].replace(/^\.?\//, ''));
   }
+  // Las hojas de estilo tienen exactamente el mismo problema que los scripts y
+  // hasta ago-2026 no se vigilaban: un .css sin regla NO rompía el build, se
+  // colaba en silencio y se quedaba a merced del TTL de la zona.
+  for (const m of src.matchAll(/<link[^>]+href="([^"]+\.css)(?:\?[^"]*)?"/g)) {
+    if (!/^https?:/.test(m[1])) scriptsLocales.add(m[1].replace(/^\.?\//, ''));
+  }
 }
 const sinRegla = [...scriptsLocales].filter((f) => !reglasCache.includes('\n/' + f + '\n'));
 if (sinRegla.length) {
   throw new Error(
-    'build-prerender: estos scripts no tienen regla de caché en `_headers`:\n'
+    'build-prerender: estos archivos no tienen regla de caché en `_headers`:\n'
     + sinRegla.map((f) => '  /' + f).join('\n')
     + '\n\nSin ella Cloudflare Pages los sirve con max-age=14400, y un deploy tarda\n'
     + '4 h en llegar a quien ya visitó el sitio. Añade a `_headers`:\n\n'
