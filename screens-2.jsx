@@ -139,28 +139,29 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   );
 
   return (
-    <div style={{ paddingBottom: 90 }}>
+    <div className="amx-v2" style={{ paddingBottom: 90 }}>
      <div style={containerMax}>
 
       {/* ── 1 · IDENTIDAD — quién es el arma, antes de enseñarla ───────── */}
       <div style={{ padding: `${vp.isDesktop ? 26 : 18}px ${PAD}px ${vp.isDesktop ? 16 : 12}px` }}>
-        <div style={{
+        <div className="t-dato" style={{
           display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-          fontFamily: 'Courier Prime, monospace', fontSize: 14,
-          color: ORANGE, letterSpacing: '0.18em', textTransform: 'uppercase',
-          marginBottom: 6
+          fontSize: 12.5, letterSpacing: '0.16em', textTransform: 'uppercase',
+          marginBottom: 8
         }}>
           <CountryFlag pais={arma.pais} height={12} />
           <span>{arma.marca} · {arma.pais} · {arma.anio}</span>
+          {/* Código de expediente: el guiño burocrático de DESIGN.md §29,
+              sin iconografía oficial. Derivado del id, no inventado. */}
+          <span className="sello">AR-{String(arma.id).padStart(4, '0')}</span>
         </div>
 
-        <h1 style={{
-          fontFamily: 'Montserrat, sans-serif',
-          fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26,
-          color: PALETTE.text, textTransform: 'uppercase',
-          lineHeight: 1.04, letterSpacing: '0.02em',
+        <h1 className="t-titulo" style={{
+          fontSize: vp.isDesktop ? 36 : 27,
           margin: '0 0 8px'
         }}>{arma.nombre}</h1>
+
+        <hr className="tricolor" style={{ width: 84, marginBottom: 12 }} />
 
         <div style={window.amxProsa({ fontSize: 16.5, marginBottom: 12 })}>{arma.mecanismo}</div>
 
@@ -490,15 +491,25 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
           <window.Disclosure title="Ficha técnica completa">
-            <div style={{ position: 'relative' }}>
-              <SpecRow label="Calibre" value={arma.calibre} accent={PALETTE.amber} />
-              <SpecRow label="Capacidad" value={arma.capacidad} />
-              <SpecRow label="Peso" value={arma.peso} />
-              <SpecRow label="Longitud" value={arma.longitud} />
-              <SpecRow label="Mecanismo" value={arma.mecanismo} />
-              <SpecRow label="Origen" value={arma.pais} />
-              <SpecRow label="Año intro." value={arma.anio} />
-              <SpecRow label="Tipo" value={arma.tipo.toUpperCase()} />
+            {/* Tabla, no cajas: DESIGN.md §11. Los campos salen de `arma`, no
+                se escriben uno a uno en el JSX. Añadir una spec = una línea. */}
+            <div className="p-claro" style={{ overflowX: 'auto' }}>
+              <table className="specs">
+                <tbody>
+                  {[
+                    ['Calibre',    arma.calibre],
+                    ['Capacidad',  arma.capacidad],
+                    ['Peso',       arma.peso],
+                    ['Longitud',   arma.longitud],
+                    ['Mecanismo',  arma.mecanismo],
+                    ['Origen',     arma.pais],
+                    ['Año intro.', arma.anio],
+                    ['Tipo',       arma.tipo && arma.tipo.toUpperCase()],
+                  ].filter(([, v]) => v != null && v !== '').map(([k, v]) => (
+                    <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </window.Disclosure>
 
