@@ -166,3 +166,38 @@
 @media (prefers-reduced-motion: reduce) {
   .amx-v2 * { transition: none !important; animation: none !important; }
 }
+
+/* ── Tabs de la ficha (DESIGN.md §11) — solo en la rama claude/ficha-tabs ── */
+
+.amx-v2 .tabs-bar {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--hair-osc);
+  scrollbar-width: none;
+}
+.amx-v2 .tabs-bar::-webkit-scrollbar { display: none; }
+
+.amx-v2 .tab {
+  flex: 0 0 auto;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--beige);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  padding: 0 var(--e4);
+  min-height: 46px;              /* área táctil */
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .16s, border-color .16s;
+}
+.amx-v2 .tab:hover { color: var(--blanco); }
+.amx-v2 .tab.is-act {
+  color: var(--blanco);
+  border-bottom-color: var(--rojo);   /* el rojo como marca de posición, no como texto */
+}
+.amx-v2 .tab-panel { padding-top: var(--e4); }

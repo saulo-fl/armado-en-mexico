@@ -16,6 +16,58 @@ function amxFmtManualDate(f) {
 // Sección de la ficha. Vive FUERA de ProductScreen a propósito: definida
 // dentro, React la trataría como un componente nuevo en cada render y
 // remontaría el subárbol — lo que cerraría los <details> abiertos.
+// ──────────────────────────────────────────────────────────────
+// TABS de la ficha (DESIGN.md §11) — variante B de la comparación.
+// Envuelve los paneles sin reescribir su contenido: cada hijo <Panel label="X">
+// aporta su rótulo y el resto va igual que en la variante de desplegables.
+// Vive fuera de ProductScreen a propósito: un componente definido dentro de
+// otro remonta su subárbol en cada render (la trampa que ya documenta
+// fidelidad-diseno con ProdSection).
+// ──────────────────────────────────────────────────────────────
+function Panel({ children }) { return <React.Fragment>{children}</React.Fragment>; }
+
+function FichaTabs({ children }) {
+  const paneles = React.Children.toArray(children).filter(Boolean);
+  const [act, setAct] = React.useState(0);
+  const refs = React.useRef([]);
+  if (!paneles.length) return null;
+  const activo = Math.min(act, paneles.length - 1);
+
+  // Flechas entre pestañas: lo que espera un lector de pantalla en un tablist.
+  function onKey(e) {
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const n = (activo + d + paneles.length) % paneles.length;
+    setAct(n);
+    if (refs.current[n]) refs.current[n].focus();
+  }
+
+  return (
+    <div>
+      <div className="tabs-bar" role="tablist" onKeyDown={onKey}>
+        {paneles.map((p, i) => (
+          <button
+            key={i}
+            ref={(el) => { refs.current[i] = el; }}
+            role="tab"
+            id={'tab-' + i}
+            aria-selected={i === activo}
+            aria-controls={'panel-' + i}
+            tabIndex={i === activo ? 0 : -1}
+            className={'tab' + (i === activo ? ' is-act' : '')}
+            onClick={() => setAct(i)}>
+            {p.props.label}
+          </button>
+        ))}
+      </div>
+      <div className="tab-panel" role="tabpanel" id={'panel-' + activo} aria-labelledby={'tab-' + activo}>
+        {paneles[activo]}
+      </div>
+    </div>
+  );
+}
+
 function ProdSection({ pad, gap, band, children }) {
   return (
     <section style={{
@@ -485,12 +537,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />} />
         </ProdSection>}
 
-      {/* ── 9-12 · DESPLEGABLES — todo el texto sigue en el DOM, sin saturar.
-             Sin encabezado de sección: cada <details> ya se anuncia solo. ─── */}
+      {/* ── 9-12 · TABS (DESIGN.md §11) — variante B de la comparación.
+             GALERÍA no está: hoy cada arma tiene una sola foto. Cuando haya
+             varias imágenes por ficha, entra como quinto Panel y ya. ─────── */}
       <ProdSection pad={PAD} gap={SEC}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <FichaTabs>
 
-          <window.Disclosure title="Ficha técnica completa">
+          <Panel label="Especificaciones">
             {/* Tabla, no cajas: DESIGN.md §11. Los campos salen de `arma`, no
                 se escriben uno a uno en el JSX. Añadir una spec = una línea. */}
             <div className="p-claro" style={{ overflowX: 'auto' }}>
@@ -511,10 +564,10 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                 </tbody>
               </table>
             </div>
-          </window.Disclosure>
+          </Panel>
 
           {arma.uses && arma.uses.length > 0 &&
-            <window.Disclosure title="Usos recomendados">
+            <Panel label="Usos">
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {arma.uses.map((u) => {
                   const meta = window.CATEGORIES.uso.find((x) => x.id === u);
@@ -534,9 +587,9 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     </span>);
                 })}
               </div>
-            </window.Disclosure>}
+            </Panel>}
 
-          <window.Disclosure title="Estatus legal en México">
+          <Panel label="Legalidad">
             <div>
               <div style={{
                 fontFamily: 'Montserrat, sans-serif', fontWeight: 700, fontSize: 15,
@@ -569,16 +622,16 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                 letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
               }}>§ Guía legal completa →</button>
             </div>
-          </window.Disclosure>
+          </Panel>
 
           {arma.historia &&
-            <window.Disclosure title="Historia">
+            <Panel label="Historia">
               <div style={window.amxProsa({
                 fontSize: 16.5, color: PALETTE.text, lineHeight: 1.75
               })}>{arma.historia}</div>
-            </window.Disclosure>}
+            </Panel>}
 
-        </div>
+        </FichaTabs>
       </ProdSection>
 
       {/* VIDEO YOUTUBE (sólo si hay) */}
