@@ -33,9 +33,35 @@ const PALETTE = {
 };
 window.PALETTE = PALETTE;
 
-// Corte biselado (esquina superior derecha) — lenguaje "menos cuadrado" del rediseño
-const CUT_TR = 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%)';
-const CUT_TR_SM = 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%)';
+// ── Tokens SOBRE SUPERFICIE CLARA ──────────────────────────────────────────
+// El patrón dominante del mockup es tarjeta crema sobre fondo verde (10.83:1),
+// no caja oscura sobre fondo oscuro. Lo que va encima de una tarjeta clara usa
+// estos, no PALETTE, que está calibrada para el fondo verde.
+const CLARO = {
+  panel:   '#F3EFE4',   // crema
+  panelHi: '#FAF9F5',   // blanco
+  zebra:   '#DDD5C4',   // fila alterna (con hairline; sola da 1.27:1)
+  tinta:   '#171B19',   // 15.14:1 sobre crema
+  tinta2:  '#59605C',   //  5.62:1
+  hair:    'rgba(23,58,50,.14)',
+  sombra:  '0 1px 2px rgba(23,27,25,.07), 0 8px 20px -12px rgba(23,27,25,.22)',
+  radio:   12,
+  radioSm: 8,
+  // Los estados de PALETTE están calibrados contra el fondo VERDE y sobre crema
+  // se caen a 1.7-2.3:1. Estas son sus variantes para superficie clara.
+  ok:      '#2F6B33',   // 5.59:1 sobre crema (PALETTE.green da 1.74:1 aquí)
+  alerta:  '#A3341F',   // 5.96:1 (PALETTE.redHi da 1.84:1)
+};
+window.CLARO = CLARO;
+
+// El bisel de esquina era el otro rasgo que ataba el sitio al look HUD anterior.
+// DESIGN.md §27 pide lo contrario: «border radius consistente, bordes finos,
+// sombras extremadamente suaves». Se anula el recorte y el redondeo lo pone
+// estilo.css sobre .amx-cut, así los 11 usos existentes pasan a esquina
+// redondeada sin editarlos uno a uno — y de paso el clip-path deja de comerse
+// el anillo de foco, que era un parche permanente.
+const CUT_TR = 'none';
+const CUT_TR_SM = 'none';
 window.CUT_TR = CUT_TR;
 window.CUT_TR_SM = CUT_TR_SM;
 
@@ -214,8 +240,16 @@ window.TopNav = TopNav;
 // ──────────────────────────────────────────────────────────────
 // AVAILABILITY BADGE — la disponibilidad legal del arma
 // ──────────────────────────────────────────────────────────────
-function AvailBadge({ avail, compact = false }) {
-  const map = {
+// `claro` = va sobre una superficie crema (tarjeta). Los colores de PALETTE
+// están calibrados contra el fondo verde y sobre crema caen a 1.7-2.3:1, así
+// que ahí se usan las variantes oscuras de CLARO.
+function AvailBadge({ avail, compact = false, claro = false }) {
+  const map = claro ? {
+    dcam:      { label: 'CIVIL · DCAM',   short: 'CIVIL',     color: CLARO.ok,     dot: '●' },
+    externo:   { label: 'CIVIL · EXT',    short: 'CIVIL',     color: CLARO.ok,     dot: '●' },
+    seguridad: { label: 'SEGURIDAD',      short: 'SEGURIDAD', color: CLARO.tinta2, dot: '◆' },
+    ejercito:  { label: 'EJÉRCITO',       short: 'EJÉRCITO',  color: CLARO.alerta, dot: '▲' },
+  } : {
     dcam:      { label: 'CIVIL · DCAM',   short: 'CIVIL',     color: PALETTE.green, dot: '●' },
     externo:   { label: 'CIVIL · EXT',    short: 'CIVIL',     color: PALETTE.green, dot: '●' },
     seguridad: { label: 'SEGURIDAD',      short: 'SEGURIDAD', color: PALETTE.amber,    dot: '◆' },
@@ -226,9 +260,9 @@ function AvailBadge({ avail, compact = false }) {
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 5,
       padding: compact ? '3px 8px' : '4px 9px',
-      background: 'rgba(0,0,0,0.55)',
-      border: `1px solid ${m.color}`,
-      clipPath: CUT_TR_SM,
+      background: claro ? 'transparent' : 'rgba(0,0,0,0.55)',
+      border: `1px solid ${claro ? CLARO.hair : m.color}`,
+      borderRadius: CLARO.radioSm,
       color: m.color,
       fontFamily: 'JetBrains Mono, monospace',
       fontSize: '12px', // piso tipográfico 12px (antes 10-11px)
@@ -248,16 +282,20 @@ window.AvailBadge = AvailBadge;
 // ──────────────────────────────────────────────────────────────
 // PRICE LEVEL — escala de precio 1-5 con "$" llenos y vacíos
 // ──────────────────────────────────────────────────────────────
-function PriceLevel({ lvl, size = 12 }) {
+function PriceLevel({ lvl, size = 12, claro = false }) {
   const n = Math.max(1, Math.min(5, Number(lvl) || 1));
+  // Sobre crema el verde claro da 1.74:1; sobre el fondo verde el oscuro no se
+  // vería. Cada superficie tiene el suyo.
+  const lleno = claro ? CLARO.ok : '#6FCB7B';
+  const vacio = claro ? 'rgba(47,107,51,0.28)' : 'rgba(111,203,123,0.30)';
   return (
     <span style={{
       fontFamily: 'JetBrains Mono, monospace',
       fontSize: Math.round(size * 1.35), fontWeight: 700,
       letterSpacing: '0.08em', whiteSpace: 'nowrap', lineHeight: 1,
     }}>
-      <span style={{ color: '#6FCB7B' }}>{'$'.repeat(n)}</span>
-      <span style={{ color: 'rgba(79,174,92,0.30)' }}>{'$'.repeat(5 - n)}</span>
+      <span style={{ color: lleno }}>{'$'.repeat(n)}</span>
+      <span style={{ color: vacio }}>{'$'.repeat(5 - n)}</span>
     </span>
   );
 }
@@ -286,7 +324,7 @@ function ArmaCardBody({ arma }) {
         <CountryFlag pais={arma.pais} height={12} />
         <span style={{
           fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
+          fontSize: 13, color: CLARO.tinta2,
           letterSpacing: '0.12em', textTransform: 'uppercase',
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>{arma.marca}</span>
@@ -294,7 +332,7 @@ function ArmaCardBody({ arma }) {
       <div style={{
         fontFamily: 'Archivo, sans-serif',
         fontWeight: 600, fontSize: 17,
-        color: PALETTE.text,
+        color: CLARO.tinta,
         textTransform: 'uppercase',
         lineHeight: 1.15,
         marginBottom: 6,
@@ -310,17 +348,17 @@ function ArmaCardBody({ arma }) {
       <div style={{
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13,
-        color: PALETTE.textDim,
+        color: CLARO.tinta2,
         marginBottom: 8,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>
-        <span style={{ color: PALETTE.textMuted }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}
+        <span style={{ color: CLARO.tinta2 }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}
       </div>
       {/* existencias por sucursal (último inventario de cada sede) */}
       <div style={{
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: 12,
-        color: enStock ? PALETTE.green : PALETTE.redHi,
+        color: enStock ? CLARO.ok : CLARO.alerta,
         marginBottom: 8,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
       }}>
@@ -338,12 +376,12 @@ function ArmaCardBody({ arma }) {
         }}>{etRating.label}</div>}
       {/* legalidad + precio */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
-        <AvailBadge avail={arma.avail} compact />
+        <AvailBadge claro avail={arma.avail} compact />
         <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-          <PriceLevel lvl={arma.priceLvl} />
+          <PriceLevel claro lvl={arma.priceLvl} />
           {priceShort && <span style={{
             fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 12, color: PALETTE.textDim, lineHeight: 1,
+            fontSize: 12, color: CLARO.tinta2, lineHeight: 1,
           }}>{priceShort}</span>}
         </span>
       </div>
@@ -356,8 +394,13 @@ window.ArmaCardBody = ArmaCardBody;
 // TACTICAL CORNERS — esquinas tipo mira para enmarcar contenido
 // ──────────────────────────────────────────────────────────────
 function TacticalCorners({ color = PALETTE.amber, size = 10, thickness = 1.5, all = false }) {
-  // Rediseño 2026: 2 esquinas asimétricas (tl+br) por defecto — menos rígido que 4.
-  // `all` conserva el marco completo para los casos que lo pidan explícitamente.
+  // DESIGN.md §28: el HUD es un DETALLE de baja jerarquía, no la estructura.
+  // Antes cada caja del sitio llevaba corchetes en las esquinas, y eso —no el
+  // color— era lo que hacía que el rediseño siguiera pareciendo el diseño viejo
+  // pintado de verde. Ahora no pinta nada salvo que se pida `all` a propósito,
+  // para el puñado de sitios donde el marco aporta algo.
+  // Los 21 usos existentes quedan neutralizados sin tocarlos uno a uno.
+  if (!all) return null;
   const style = (pos) => {
     const s = { position: 'absolute', width: size, height: size, pointerEvents: 'none' };
     if (pos.includes('t')) { s.top = 0; s.borderTop = `${thickness}px solid ${color}`; }
@@ -657,42 +700,36 @@ window.BottomNav = BottomNav;
 function ArmaCard({ arma, onClick, onCompare, inCompare }) {
   const [imgError, setImgError] = React.useState(false);
   return (
-    <div onClick={onClick} style={{
+    // Tarjeta CLARA sobre el fondo verde: el patrón del mockup. Sin borde de
+    // 1px ni corchetes — la define la superficie y una sombra suave (§27).
+    <div onClick={onClick} className="amx-card" style={{
       position: 'relative',
-      background: PALETTE.bgCardGrad,
-      border: `1px solid ${PALETTE.border}`,
+      background: CLARO.panel,
+      borderRadius: CLARO.radio,
+      boxShadow: CLARO.sombra,
       cursor: 'pointer',
-      transition: 'border-color 0.18s',
       overflow: 'hidden',
       height: '100%',
       display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto',
       containIntrinsicSize: 'auto 170px',
-    }}
-    onMouseEnter={e => e.currentTarget.style.borderColor = PALETTE.amber}
-    onMouseLeave={e => e.currentTarget.style.borderColor = PALETTE.border}
-    >
-      <TacticalCorners size={8} color={PALETTE.amber} />
-      {/* imagen · columna izquierda */}
+    }}>
+      {/* imagen · columna izquierda, sobre blanco como una ficha de producto */}
       <div style={{
         width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
-        background: `radial-gradient(circle at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
+        background: CLARO.panelHi,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
-        borderRight: `1px solid ${PALETTE.border}`,
+        borderRight: `1px solid ${CLARO.hair}`,
         overflow: 'hidden',
       }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)`,
-        }} />
         {!imgError ? (
           <img src={arma.img} alt={arma.nombre}
             loading="lazy" decoding="async"
             onError={() => setImgError(true)}
             style={{
               maxWidth: '88%', maxHeight: '88%', objectFit: 'contain',
-              filter: 'grayscale(0.25) contrast(1.1)',
+              
               position: 'relative', zIndex: 1,
             }} />
         ) : (

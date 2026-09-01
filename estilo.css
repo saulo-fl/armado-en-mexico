@@ -201,3 +201,26 @@
   border-bottom-color: var(--rojo);   /* el rojo como marca de posición, no como texto */
 }
 .amx-v2 .tab-panel { padding-top: var(--e4); }
+
+/* ── Tarjeta clara: el patrón dominante del mockup ───────────────────────── */
+
+.amx-v2 .amx-card {
+  transition: box-shadow .18s, transform .18s;
+}
+.amx-v2 .amx-card:hover {
+  box-shadow: 0 2px 4px rgba(23,27,25,.10), 0 14px 28px -14px rgba(23,27,25,.34);
+  transform: translateY(-2px);
+}
+.amx-v2 .amx-card:has(:focus-visible) {
+  outline: 2px solid var(--rojo-txt);
+  outline-offset: 2px;
+}
+
+/* CUT_TR quedó en 'none': el redondeo lo pone aquí, así los 11 usos del bisel
+   pasan a esquina suave sin editarlos. Y el foco deja de recortarse. */
+.amx-v2 .amx-cut,
+.amx-v2 [style*="clip-path"] { border-radius: 8px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-card:hover { transform: none; }
+}
