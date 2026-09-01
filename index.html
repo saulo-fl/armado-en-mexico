@@ -46,8 +46,8 @@
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
-    background: #173A32;
-    color: #F3EFE4;
+    background: #F3EFE4;
+    color: #171B19;
     font-family: 'Archivo', system-ui, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -72,8 +72,8 @@
   body::before {
     content: ''; position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(221,213,196,0.030) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(221,213,196,0.030) 1px, transparent 1px);
+      linear-gradient(rgba(23,58,50,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(23,58,50,0.035) 1px, transparent 1px);
     background-size: 48px 48px;
     pointer-events: none; z-index: 0;
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
@@ -94,9 +94,9 @@
   /* scrollbar dark (desktop solamente) */
   @media (min-width: 720px) {
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #12302A; }
-    ::-webkit-scrollbar-thumb { background: #3F6E62; border-radius: 0; }
-    ::-webkit-scrollbar-thumb:hover { background: #DDD5C4; }
+    ::-webkit-scrollbar-track { background: #E4E0D4; }
+    ::-webkit-scrollbar-thumb { background: #C3C5BC; border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: #59605C; }
   }
 
   /* horizontal chips */
@@ -141,20 +141,20 @@
   }
 
   /* input placeholder */
-  input::placeholder { color: #B2B8AF; }
+  input::placeholder { color: #7C837B; }
 
   /* focus — anillo visible 2px (accesibilidad).
      OJO: en elementos con clip-path el anillo va en un wrapper sin recorte
      (el clip se traga el outline). */
   button:focus-visible, a:focus-visible, input:focus-visible,
   select:focus-visible, [tabindex]:focus-visible {
-    outline: 2px solid #DDD5C4; outline-offset: 2px;
+    outline: 2px solid #173A32; outline-offset: 2px;
   }
   button { -webkit-tap-highlight-color: transparent; }
 
   /* Controles con corte biselado: el clip-path se traga el outline, así que
      el anillo de foco lo pinta el envoltorio sin recortar. */
-  .amx-cut:has(:focus-visible) { outline: 2px solid #DDD5C4; outline-offset: 2px; }
+  .amx-cut:has(:focus-visible) { outline: 2px solid #173A32; outline-offset: 2px; }
 
   /* accesibilidad: respetar la preferencia de menos movimiento */
   @media (prefers-reduced-motion: reduce) {
@@ -167,7 +167,7 @@
   }
 
   /* selección de texto */
-  ::selection { background: rgba(221,213,196,0.35); color: #173A32; }
+  ::selection { background: rgba(23,58,50,0.16); color: #171B19; }
 
   /* Safe-area insets para iOS (notch / home indicator) */
   body {

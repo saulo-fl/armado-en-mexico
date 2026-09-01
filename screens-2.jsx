@@ -698,9 +698,11 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           // El -1px superpone los dos bordes en una sola línea: si se apoya justo
           // encima queda una rendija por la que se ve pasar el contenido.
           bottom: 'calc(var(--amx-nav-h, 74px) - 1px)',
-          background: 'rgba(23,58,50,0.97)',
-          backdropFilter: 'blur(10px)',
+          // Blanco sólido sobre el lienzo claro. Sin backdrop-filter: es el
+          // asesino nº1 del scroll en móvil y aquí no aportaba nada.
+          background: CLARO.panelHi,
           borderTop: `1px solid ${PALETTE.border}`,
+          boxShadow: '0 -6px 18px -12px rgba(23,27,25,.28)',
           padding: '10px 16px',
           display: 'flex', alignItems: 'center', gap: 12,
           zIndex: 55

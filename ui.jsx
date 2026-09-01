@@ -13,23 +13,30 @@
 // superficie sigue siendo sutil a propósito (1.25:1), pero el borde SÍ se ve
 // (1.72:1) y es él quien define la caja. No subas bgCard sin recalcular: una
 // tarjeta más clara aplasta el contraste del texto que va encima.
+// La app es CLARA. En el mockup el lienzo es crema y el verde es el color de
+// marca: header, navegación, hero de producto y acentos. Tenerlo al revés —toda
+// la app en verde— era el error de fondo del primer intento.
 const PALETTE = {
-  bg:        '#173A32',   // verde profundo
-  bgElev:    '#1E4A40',
-  bgCard:    '#1E4A40',
-  bgCardGrad:'linear-gradient(180deg, #215045, #1C463C)',
-  border:    '#3F6E62',   // 1.72:1 sobre la tarjeta — es lo que la dibuja
-  borderHi:  '#4A7A6D',   // 2.04:1
-  amber:     '#DDD5C4',   // el acento ya no es cálido: beige de papel. 6.82:1
-  amberDim:  '#B0A894',
-  military:  '#6E7A73',
-  red:       '#C83B32',   // RELLENO con texto claro encima; como texto da 2.45:1
-  redHi:     '#F29C8C',   // texto/borde de estado — 4.70:1
-  green:     '#6FCB7B',   // 4.98:1 (el #4FAE5C original se queda en 4.47 y falla)
-  blue:      '#8FA39C',
-  text:      '#F3EFE4',   // crema — 8.67:1
-  textDim:   '#DDD5C4',   // beige — 6.82:1
-  textMuted: '#B2B8AF',   // 4.92:1 (a #A9AFA6 se le cae a 4.44 sobre tarjeta)
+  bg:        '#F3EFE4',   // lienzo crema
+  bgElev:    '#FAF9F5',   // tarjeta blanca (1.09:1 sobre el lienzo: la define la sombra)
+  bgCard:    '#FAF9F5',
+  bgCardGrad:'linear-gradient(180deg, #FFFFFF, #F7F5EE)',
+  border:    '#D5D6CE',   // hairline
+  borderHi:  '#BFC1B8',
+  amber:     '#173A32',   // el acento es el VERDE DE MARCA — 10.83:1 sobre el lienzo
+  amberDim:  '#2F6B33',
+  military:  '#7C837B',
+  red:       '#C83B32',   // relleno de CTA, con texto claro encima (4.83:1)
+  redHi:     '#A3341F',   // rojo como TEXTO — 5.96:1
+  green:     '#2F6B33',   // 5.59:1
+  blue:      '#4A6B7C',
+  text:      '#171B19',   // tinta — 15.14:1
+  textDim:   '#3E443D',
+  textMuted: '#59605C',   // 5.62:1
+  // Superficies de marca: header, nav y hero. El texto encima va en `text` invertido.
+  marca:     '#173A32',
+  marcaAlt:  '#1E4A40',
+  sobreMarca:'#F3EFE4',   // 10.83:1 sobre marca
 };
 window.PALETTE = PALETTE;
 
@@ -38,9 +45,11 @@ window.PALETTE = PALETTE;
 // no caja oscura sobre fondo oscuro. Lo que va encima de una tarjeta clara usa
 // estos, no PALETTE, que está calibrada para el fondo verde.
 const CLARO = {
-  panel:   '#F3EFE4',   // crema
-  panelHi: '#FAF9F5',   // blanco
-  zebra:   '#DDD5C4',   // fila alterna (con hairline; sola da 1.27:1)
+  // Ahora que el lienzo de la app es crema, la tarjeta sube a blanco para
+  // separarse de él; el crema pasa a ser la fila alterna de las tablas.
+  panel:   '#FAF9F5',   // tarjeta blanca
+  panelHi: '#FFFFFF',
+  zebra:   '#F0ECE1',   // fila alterna sobre blanco
   tinta:   '#171B19',   // 15.14:1 sobre crema
   tinta2:  '#59605C',   //  5.62:1
   hair:    'rgba(23,58,50,.14)',
@@ -116,14 +125,14 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
       height: 64,
       background: 'rgba(23,58,50,0.95)',
       backdropFilter: 'blur(10px)',
-      borderBottom: `1px solid ${PALETTE.border}`,
+      borderBottom: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex', alignItems: 'center',
       padding: '0 28px', gap: 24,
     }}>
       <button onClick={() => onNav('home')} style={{
         background: 'none', border: 'none', cursor: 'pointer',
         fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-        fontSize: 21, color: PALETTE.amber,
+        fontSize: 21, color: '#DDD5C4',
         letterSpacing: '0.1em',
         display: 'flex', alignItems: 'center', gap: 8,
         padding: 0,
@@ -137,12 +146,12 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
           <React.Fragment>
             <span style={{
               display: 'inline-block', width: 18, height: 18,
-              border: `1.5px solid ${PALETTE.amber}`,
+              border: `1.5px solid ${'#DDD5C4'}`,
               position: 'relative',
             }}>
-              <span style={{ position: 'absolute', inset: 3, background: PALETTE.amber }} />
+              <span style={{ position: 'absolute', inset: 3, background: '#DDD5C4' }} />
             </span>
-            ARMADO<span style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.75em', marginLeft: 4 }}>en MX</span>
+            ARMADO<span style={{ color: PALETTE.sobreMarcaDim, fontWeight: 400, fontSize: '0.75em', marginLeft: 4 }}>en MX</span>
           </React.Fragment>
         )}
       </button>
@@ -164,8 +173,8 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                   fontFamily: 'Archivo, sans-serif',
                   fontSize: 14, fontWeight: 600,
                   letterSpacing: '0.12em', textTransform: 'uppercase',
-                  color: (dActive || moreOpen) ? PALETTE.amber : PALETTE.textDim,
-                  borderBottom: dActive ? `2px solid ${PALETTE.amber}` : '2px solid transparent',
+                  color: (dActive || moreOpen) ? '#DDD5C4' : PALETTE.sobreMarcaDim,
+                  borderBottom: dActive ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
                   whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
                   transition: 'color 0.15s',
                 }}>{it.label} <span style={{ fontSize: 13, transform: moreOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>▾</span></button>
@@ -173,8 +182,8 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                   <div style={{
                     position: 'absolute', top: '100%', right: 0, minWidth: 200,
                     background: 'rgba(23,58,50,0.98)', backdropFilter: 'blur(10px)',
-                    border: `1px solid ${PALETTE.border}`,
-                    borderTop: `2px solid ${PALETTE.amber}`,
+                    border: `1px solid ${'rgba(250,249,245,.14)'}`,
+                    borderTop: `2px solid ${'#DDD5C4'}`,
                     boxShadow: '0 12px 30px rgba(0,0,0,0.55)',
                     zIndex: 60, padding: 4,
                   }}>
@@ -188,11 +197,11 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                           border: 'none', cursor: mi.proximamente ? 'default' : 'pointer', padding: '10px 12px',
                           fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600,
                           letterSpacing: '0.08em', textTransform: 'uppercase',
-                          color: mi.proximamente ? PALETTE.textMuted : (miActive ? PALETTE.amber : PALETTE.text),
+                          color: mi.proximamente ? PALETTE.sobreMarcaMuted : (miActive ? '#DDD5C4' : PALETTE.sobreMarca),
                           transition: 'background 0.12s, color 0.12s',
                         }}
-                          onMouseEnter={e => { if (mi.proximamente) return; e.currentTarget.style.background = 'rgba(221,213,196,0.10)'; e.currentTarget.style.color = PALETTE.amber; }}
-                          onMouseLeave={e => { if (mi.proximamente) return; e.currentTarget.style.background = miActive ? 'rgba(221,213,196,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? PALETTE.amber : PALETTE.text; }}>
+                          onMouseEnter={e => { if (mi.proximamente) return; e.currentTarget.style.background = 'rgba(221,213,196,0.10)'; e.currentTarget.style.color = '#DDD5C4'; }}
+                          onMouseLeave={e => { if (mi.proximamente) return; e.currentTarget.style.background = miActive ? 'rgba(221,213,196,0.10)' : 'transparent'; e.currentTarget.style.color = miActive ? '#DDD5C4' : PALETTE.sobreMarca; }}>
                           {mi.label}
                         </button>
                       );
@@ -204,14 +213,14 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
           }
           return (
             <button key={it.id} onClick={() => onNav(it.id)} style={{
-              background: it.accent ? (active ? PALETTE.amber : 'transparent') : 'none',
-              border: it.accent ? `1px solid ${PALETTE.amber}` : 'none', cursor: 'pointer',
+              background: it.accent ? (active ? '#DDD5C4' : 'transparent') : 'none',
+              border: it.accent ? `1px solid ${'#DDD5C4'}` : 'none', cursor: 'pointer',
               padding: it.accent ? '8px 12px' : '8px 14px',
               fontFamily: 'Archivo, sans-serif',
               fontSize: 14, fontWeight: 600,
               letterSpacing: '0.12em', textTransform: 'uppercase',
-              color: active ? (it.accent ? '#000' : PALETTE.amber) : (it.accent ? PALETTE.amber : PALETTE.textDim),
-              borderBottom: active && !it.accent ? `2px solid ${PALETTE.amber}` : (it.accent ? `1px solid ${PALETTE.amber}` : '2px solid transparent'),
+              color: active ? (it.accent ? '#000' : '#DDD5C4') : (it.accent ? '#DDD5C4' : PALETTE.sobreMarcaDim),
+              borderBottom: active && !it.accent ? `2px solid ${'#DDD5C4'}` : (it.accent ? `1px solid ${'#DDD5C4'}` : '2px solid transparent'),
               position: 'relative',
               transition: 'color 0.15s',
               marginLeft: it.accent ? 8 : 0,
@@ -221,7 +230,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
               {it.badge ? (
                 <span style={{
                   position: 'absolute', top: 2, right: 2,
-                  background: PALETTE.amber, color: '#000',
+                  background: '#DDD5C4', color: '#000',
                   fontSize: 12, fontWeight: 700,
                   padding: '1px 4px', borderRadius: 8,
                   fontFamily: 'JetBrains Mono, monospace',
@@ -243,7 +252,7 @@ window.TopNav = TopNav;
 // `claro` = va sobre una superficie crema (tarjeta). Los colores de PALETTE
 // están calibrados contra el fondo verde y sobre crema caen a 1.7-2.3:1, así
 // que ahí se usan las variantes oscuras de CLARO.
-function AvailBadge({ avail, compact = false, claro = false }) {
+function AvailBadge({ avail, compact = false, claro = true }) {
   const map = claro ? {
     dcam:      { label: 'CIVIL · DCAM',   short: 'CIVIL',     color: CLARO.ok,     dot: '●' },
     externo:   { label: 'CIVIL · EXT',    short: 'CIVIL',     color: CLARO.ok,     dot: '●' },
@@ -282,7 +291,7 @@ window.AvailBadge = AvailBadge;
 // ──────────────────────────────────────────────────────────────
 // PRICE LEVEL — escala de precio 1-5 con "$" llenos y vacíos
 // ──────────────────────────────────────────────────────────────
-function PriceLevel({ lvl, size = 12, claro = false }) {
+function PriceLevel({ lvl, size = 12, claro = true }) {
   const n = Math.max(1, Math.min(5, Number(lvl) || 1));
   // Sobre crema el verde claro da 1.74:1; sobre el fondo verde el oscuro no se
   // vería. Cada superficie tiene el suyo.
@@ -531,7 +540,7 @@ function AppHeader({ title, back, onBack, right }) {
       position: 'sticky', top: 0, zIndex: 50,
       background: 'rgba(23,58,50,0.92)',
       backdropFilter: 'blur(8px)',
-      borderBottom: `1px solid ${PALETTE.border}`,
+      borderBottom: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex', alignItems: 'center',
       padding: '0 14px', gap: 10,
       minHeight: 50,
@@ -540,13 +549,13 @@ function AppHeader({ title, back, onBack, right }) {
       {back ? (
         <button onClick={onBack} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.amber, fontSize: 23, padding: 4,
+          color: '#DDD5C4', fontSize: 23, padding: 4,
           fontFamily: 'JetBrains Mono, monospace',
         }}>‹</button>
       ) : (
         <div style={{
           fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-          fontSize: 17, color: PALETTE.amber,
+          fontSize: 17, color: '#DDD5C4',
           letterSpacing: '0.08em',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
@@ -560,8 +569,8 @@ function AppHeader({ title, back, onBack, right }) {
               <span aria-label="logo placeholder" style={{
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 width: 28, height: 28,
-                border: `1.5px dashed ${PALETTE.amber}`,
-                borderRadius: 6, color: PALETTE.amber,
+                border: `1.5px dashed ${'#DDD5C4'}`,
+                borderRadius: 6, color: '#DDD5C4',
                 fontFamily: 'JetBrains Mono, monospace',
                 fontSize: 13, letterSpacing: '0.1em',
                 background: 'rgba(221,213,196,0.08)',
@@ -570,7 +579,7 @@ function AppHeader({ title, back, onBack, right }) {
                 {(cfg.logoText || 'ARMADO en MX').split(/\s+(?=en\s+MX)/i).map((part, i) =>
                   i === 0
                     ? <span key="t">{part}</span>
-                    : <span key="s" style={{ color: PALETTE.textDim, fontWeight: 400, fontSize: '0.72em', marginLeft: 4 }}>{part}</span>
+                    : <span key="s" style={{ color: PALETTE.sobreMarcaDim, fontWeight: 400, fontSize: '0.72em', marginLeft: 4 }}>{part}</span>
                 )}
               </span>
             </React.Fragment>
@@ -581,7 +590,7 @@ function AppHeader({ title, back, onBack, right }) {
         flex: 1,
         fontFamily: 'Archivo, sans-serif',
         fontSize: 16, fontWeight: 500,
-        color: PALETTE.text,
+        color: PALETTE.sobreMarca,
         textTransform: 'uppercase', letterSpacing: '0.12em',
         textAlign: back ? 'left' : 'right',
       }}>{title}</div>
@@ -646,7 +655,7 @@ function BottomNav({ current, onNav, compareCount }) {
       position: 'sticky', bottom: 0, zIndex: 50,
       background: 'rgba(23,58,50,0.96)',
       backdropFilter: 'blur(12px)',
-      borderTop: `1px solid ${PALETTE.border}`,
+      borderTop: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex',
       padding: '6px 4px 10px',
       paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
@@ -658,14 +667,14 @@ function BottomNav({ current, onNav, compareCount }) {
             flex: 1, background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
             padding: '8px 4px', gap: 4, minHeight: 48,
-            color: active ? PALETTE.amber : PALETTE.textDim,
+            color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
             position: 'relative',
           }}>
             {active && (
               <span style={{
                 position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                width: 18, height: 2, background: PALETTE.amber,
-                boxShadow: `0 0 6px ${PALETTE.amber}`,
+                width: 18, height: 2, background: '#DDD5C4',
+                boxShadow: `0 0 6px ${'#DDD5C4'}`,
               }} />
             )}
             <span style={{ lineHeight: 1, position: 'relative' }}>
@@ -673,7 +682,7 @@ function BottomNav({ current, onNav, compareCount }) {
               {it.badge ? (
                 <span style={{
                   position: 'absolute', top: -4, right: -10,
-                  background: PALETTE.amber, color: '#000',
+                  background: '#DDD5C4', color: '#000',
                   fontSize: 12, fontWeight: 700,
                   borderRadius: 8, padding: '1px 4px',
                   fontFamily: 'JetBrains Mono, monospace',
