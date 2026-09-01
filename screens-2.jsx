@@ -258,16 +258,25 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* ── 3 · DATOS CLAVE ────────────────────────────────────────────── */}
       <ProdSection pad={PAD} gap={vp.isDesktop ? 26 : 20}>
+        {/* Panel CREMA (DESIGN.md §27 y el mockup): la ficha técnica se lee
+            sobre papel, no sobre otra caja verde. Las divisiones son hairlines,
+            no un grid de bordes de 1px. */}
         <div style={{
             display: 'grid',
             gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
-            gap: 1, background: PALETTE.border,
-            border: `1px solid ${PALETTE.border}`
+            background: CLARO.panel,
+            borderRadius: CLARO.radio,
+            boxShadow: CLARO.sombra,
+            overflow: 'hidden'
           }}>
-          {quick.map((q) =>
-            <div key={q.l} style={{ background: PALETTE.bgCard, padding: '13px 14px' }}>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
-              <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, lineHeight: 1.1, ...NUM }}>{q.v}</div>
+          {quick.map((q, i) =>
+            <div key={q.l} style={{
+              padding: '14px 16px',
+              borderRight: `1px solid ${CLARO.hair}`,
+              borderBottom: `1px solid ${CLARO.hair}`,
+            }}>
+              <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 10.5, fontWeight: 600, color: CLARO.tinta2, letterSpacing: '0.13em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
+              <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: CLARO.tinta, lineHeight: 1.1, ...NUM }}>{q.v}</div>
             </div>
           )}
         </div>

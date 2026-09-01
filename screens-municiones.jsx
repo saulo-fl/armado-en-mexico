@@ -46,20 +46,18 @@ function MunicionCard({ mun, onClick }) {
   const cart = munCartucho(mun.calibre);
   return (
     <div onClick={onClick} style={{
-      position: 'relative', background: P.bgCard, border: `1px solid ${P.border}`,
-      cursor: 'pointer', transition: 'border-color 0.18s', overflow: 'hidden',
+      position: 'relative', background: window.CLARO.panel,
+      borderRadius: window.CLARO.radio, boxShadow: window.CLARO.sombra,
+      cursor: 'pointer', overflow: 'hidden',
       height: '100%', display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto', containIntrinsicSize: 'auto 150px',
-    }}
-    onMouseEnter={e => e.currentTarget.style.borderColor = P.amber}
-    onMouseLeave={e => e.currentTarget.style.borderColor = P.border}>
-      <window.TacticalCorners size={8} color={P.amber} />
+    }} className="amx-card">
       {/* cartucho */}
       <div style={{
         width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
-        background: `radial-gradient(circle at 50% 50%, ${P.bgElev} 0%, ${P.bg} 100%)`,
+        background: `radial-gradient(circle at 50% 50%, ${window.CLARO.panelHi} 0%, ${P.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', borderRight: `1px solid ${P.border}`, overflow: 'hidden',
+        position: 'relative', borderRight: `1px solid ${window.CLARO.hair}`, overflow: 'hidden',
         // El padding superior reserva la banda del badge de calibre (absolute, top 6):
         // sin el, el panel es tan estrecho que la foto centrada se le mete debajo.
         boxSizing: 'border-box', padding: '28px 6px 8px',
@@ -70,14 +68,14 @@ function MunicionCard({ mun, onClick }) {
             style={{ maxHeight: '82%', maxWidth: '60%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
         ) : (
           <span style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 18, color: P.amber,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 18, color: window.CLARO.tinta2,
             opacity: 0.85, position: 'relative', zIndex: 1, letterSpacing: '0.06em',
           }}>◉</span>
         )}
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-          color: '#000', background: P.amber, padding: '2px 5px',
+          color: '#000', background: window.CLARO.tinta2, padding: '2px 5px',
           letterSpacing: '0.08em', whiteSpace: 'nowrap',
         }}>{mun.calibre}</span>
       </div>
@@ -86,22 +84,22 @@ function MunicionCard({ mun, onClick }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
           {window.CountryFlag && <window.CountryFlag pais={mun.pais} height={12} />}
           <span style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.amber,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2,
             letterSpacing: '0.12em', textTransform: 'uppercase',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{mun.marca}</span>
         </div>
         <div style={{
           fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16,
-          color: P.text, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
+          color: window.CLARO.tinta, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
           letterSpacing: '0.02em', height: 38,
           display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden',
         }}>{mun.nombre}</div>
         <div style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim, marginBottom: 8,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2, marginBottom: 8,
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
-          <span style={{ color: P.textMuted }}>BALA </span>{mun.bala}{mun.grano ? ` · ${mun.grano}` : ''}
+          <span style={{ color: window.CLARO.tinta2 }}>BALA </span>{mun.bala}{mun.grano ? ` · ${mun.grano}` : ''}
         </div>
         {/* La cifra sustituye a la escala $$$··: es estrictamente más informativa
             para quien compara municiones. La unidad sale de munUnidadPrecio. */}
@@ -111,10 +109,10 @@ function MunicionCard({ mun, onClick }) {
             <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 5, whiteSpace: 'nowrap' }}>
               <span style={{
                 fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                color: P.amber, fontVariantNumeric: 'tabular-nums',
+                color: window.CLARO.tinta2, fontVariantNumeric: 'tabular-nums',
               }}>{String(mun.priceExact).replace(' MXN', '')}</span>
               <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textMuted,
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: window.CLARO.tinta2,
                 letterSpacing: '0.1em', textTransform: 'uppercase',
               }}>/ {munUnidadPrecio(mun)}</span>
             </span>

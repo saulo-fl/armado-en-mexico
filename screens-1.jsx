@@ -43,8 +43,20 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const [, forceRender] = useState(0);
   useEffect(() => window.Store && window.Store.onChange(() => forceRender((x) => x + 1)), []);
 
-  // Promo slides (editables desde admin)
+  // Promo slides (editables desde admin). Ya no se pintan en el inicio —el
+  // mockup abre con buscador y arma destacada— pero el dato se conserva porque
+  // el panel de admin sigue editándolo.
   const promos = useMemo(() => window.Store ? window.Store.getPromos() : [], [forceRender]);
+
+  // Arma destacada (DESIGN.md §5.1). Determinista: la primera favorita, y si no
+  // hay, la primera del catálogo. Sin aleatoriedad, para que el prerender y el
+  // cliente pinten lo mismo.
+  const destacada = useMemo(() => {
+    const db = window.DB || [];
+    const favs = window.Store ? (window.Store.getFavoritos ? window.Store.getFavoritos() : []) : [];
+    const favId = Array.isArray(favs) && favs.length ? (favs[0] && (favs[0].id != null ? favs[0].id : favs[0])) : null;
+    return (favId != null && db.find((a) => a.id === favId)) || db[0] || null;
+  }, [forceRender]);
   useEffect(() => {
     if (promos.length < 2) return;
     const t = setInterval(() => setPromoIdx((i) => (i + 1) % promos.length), 6500);
@@ -67,40 +79,97 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
 
   return (
     <div style={{ paddingBottom: 24 }}>
-      {/* 1 ▸ SLIDERS uniformes y centrados */}
-      {promos.length > 0 &&
-      <PromoSlider promos={promos} idx={promoIdx} setIdx={setPromoIdx} onNav={onNav} vp={vp} />
-      }
-
-      {/* 1.5 ▸ Buscador rápido — acceso directo al arsenal desde el inicio */}
-      <div style={{ ...containerMax, padding: `12px ${PAD}px 4px` }}>
+      {/* 1 ▸ BUSCADOR — DESIGN.md §5. El slider promocional se retiró: el
+             mockup abre con búsqueda y una pieza destacada, no con un carrusel. */}
+      <div style={{ ...containerMax, padding: `14px ${PAD}px 4px` }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: PALETTE.bgCard, border: `1px solid ${PALETTE.amber}`, padding: '10px 12px'
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: window.CLARO.panel,
+          borderRadius: 999,
+          boxShadow: window.CLARO.sombra,
+          padding: '0 6px 0 16px', minHeight: 48
         }}>
-          <span style={{ color: PALETTE.amber, fontSize: 18 }}>⌕</span>
+          <span aria-hidden="true" style={{ color: window.CLARO.tinta2, fontSize: 17, lineHeight: 1 }}>⌕</span>
           <input value={homeQuery}
             onChange={(e) => setHomeQuery(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') doHomeSearch(); }}
-            placeholder="Buscar arma · nombre, marca, calibre…"
-            aria-label="Buscar arma"
+            placeholder="Buscar armas, calibres, marcas…"
+            aria-label="Buscar armas, calibres, marcas"
             style={{
-              flex: 1, background: 'none', border: 'none', outline: 'none', color: PALETTE.text,
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5
+              flex: 1, background: 'none', border: 'none', outline: 'none',
+              color: window.CLARO.tinta, minWidth: 0,
+              fontFamily: 'Archivo, sans-serif', fontSize: 15
             }} />
           {homeQuery &&
             <button onClick={() => setHomeQuery('')} aria-label="Limpiar búsqueda" style={{
-              background: 'none', border: 'none', cursor: 'pointer', color: PALETTE.textMuted, fontSize: 16
+              background: 'none', border: 'none', cursor: 'pointer', color: window.CLARO.tinta2, fontSize: 16
             }}>✕</button>
           }
-          <button onClick={doHomeSearch} style={{
-            background: PALETTE.amber, border: 'none', cursor: 'pointer', color: '#000',
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700,
-            letterSpacing: '0.1em', textTransform: 'uppercase', padding: '12px 16px', whiteSpace: 'nowrap',
-            clipPath: CUT_TR, minHeight: 44
-          }}>Buscar</button>
+          <button onClick={doHomeSearch} aria-label="Buscar" style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: window.CLARO.tinta, fontSize: 18,
+            width: 44, minHeight: 44, borderRadius: 999
+          }}>⌕</button>
         </div>
       </div>
+
+      {/* 1.5 ▸ ARMA DESTACADA — DESIGN.md §5.1 */}
+      {destacada &&
+      <div style={{ ...containerMax, padding: `16px ${PAD}px 4px` }}>
+        <div style={{
+          fontFamily: 'Archivo, sans-serif', fontSize: 10.5, fontWeight: 600,
+          letterSpacing: '0.15em', textTransform: 'uppercase',
+          color: PALETTE.textDim, marginBottom: 10
+        }}>Arma destacada</div>
+
+        <div style={{
+          background: window.CLARO.panel, borderRadius: window.CLARO.radio,
+          boxShadow: window.CLARO.sombra, overflow: 'hidden'
+        }}>
+          <div style={{ display: 'flex', gap: 12, padding: '16px 16px 0' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22,
+                color: window.CLARO.tinta, lineHeight: 1.1, marginBottom: 2
+              }}>{destacada.nombre}</div>
+              <div style={{
+                fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
+                color: window.CLARO.tinta2, marginBottom: 12
+              }}>{destacada.calibre}</div>
+
+              {[['✦', destacada.mecanismo], ['⌖', destacada.pais],
+                ['◷', destacada.anio], ['▤', destacada.capacidad && ('Capacidad: ' + destacada.capacidad)]]
+                .filter(([, v]) => v).map(([ic, v]) =>
+                <div key={v} style={{
+                  display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
+                  fontFamily: 'Archivo, sans-serif', fontSize: 13.5, color: window.CLARO.tinta
+                }}>
+                  <span aria-hidden="true" style={{ color: window.CLARO.tinta2, fontSize: 12 }}>{ic}</span>
+                  <span>{v}</span>
+                </div>)}
+            </div>
+
+            <div style={{
+              width: '40%', flexShrink: 0, alignSelf: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <img src={destacada.img} alt={destacada.nombre}
+                loading="lazy" decoding="async"
+                onError={(e) => { e.currentTarget.src = window.armaPlaceholder(destacada); }}
+                style={{ maxWidth: '100%', maxHeight: 130, objectFit: 'contain' }} />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, padding: 16 }}>
+            <button onClick={() => onOpenArma(destacada.id)} className="btn btn-claro"
+              style={{ flex: 1 }}>Ver detalles</button>
+            {/* HomeScreen no recibe la prop de comparar (compareIds vive en App),
+                así que esto lleva al comparador en vez de añadir en silencio. */}
+            <button onClick={() => onNav('compare')}
+              className="btn btn-rojo" style={{ flex: 1 }}>Comparar</button>
+          </div>
+        </div>
+      </div>}
 
       {/* 2 ▸ Carrusel: Favoritos de Armas M&S */}
       <CarouselSection

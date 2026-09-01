@@ -49,25 +49,22 @@ function AccesorioCard({ acc, onClick }) {
   return (
     <div onClick={onClick} style={{
       position: 'relative',
-      background: P.bgCard,
-      border: `1px solid ${P.border}`,
+      background: window.CLARO.panel,
+      borderRadius: window.CLARO.radio,
+      boxShadow: window.CLARO.sombra,
       cursor: 'pointer',
-      transition: 'border-color 0.18s',
       overflow: 'hidden',
       height: '100%',
       display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto',
       containIntrinsicSize: 'auto 150px',
-    }}
-    onMouseEnter={e => e.currentTarget.style.borderColor = P.amber}
-    onMouseLeave={e => e.currentTarget.style.borderColor = P.border}>
-      <window.TacticalCorners size={8} color={P.amber} />
+    }} className="amx-card">
       {/* imagen */}
       <div style={{
         width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
-        background: `radial-gradient(circle at 50% 50%, ${P.bgElev} 0%, ${P.bg} 100%)`,
+        background: `radial-gradient(circle at 50% 50%, ${window.CLARO.panelHi} 0%, ${P.bg} 100%)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', borderRight: `1px solid ${P.border}`, overflow: 'hidden',
+        position: 'relative', borderRight: `1px solid ${window.CLARO.hair}`, overflow: 'hidden',
       }}>
         <div style={{
           position: 'absolute', inset: 0,
@@ -83,8 +80,8 @@ function AccesorioCard({ acc, onClick }) {
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600,
-          color: P.textDim, background: 'rgba(0,0,0,0.6)', padding: '2px 5px',
-          letterSpacing: '0.1em', textTransform: 'uppercase', borderLeft: `2px solid ${P.amber}`,
+          color: window.CLARO.tinta2, background: 'rgba(0,0,0,0.6)', padding: '2px 5px',
+          letterSpacing: '0.1em', textTransform: 'uppercase', borderLeft: `2px solid ${window.CLARO.tinta2}`,
         }}>{cat.icon} {cat.label.split(' ')[0]}</span>
       </div>
       {/* body */}
@@ -92,22 +89,22 @@ function AccesorioCard({ acc, onClick }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
           {window.CountryFlag && <window.CountryFlag pais={acc.pais} height={12} />}
           <span style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.amber,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2,
             letterSpacing: '0.12em', textTransform: 'uppercase',
             whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
           }}>{acc.marca}</span>
         </div>
         <div style={{
           fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16,
-          color: P.text, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
+          color: window.CLARO.tinta, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
           letterSpacing: '0.02em', height: 38,
           display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden',
         }}>{acc.nombre}</div>
         <div style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim, marginBottom: 8,
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2, marginBottom: 8,
           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
         }}>
-          <span style={{ color: P.textMuted }}>CAT </span>{cat.label}
+          <span style={{ color: window.CLARO.tinta2 }}>CAT </span>{cat.label}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
           <window.AvailBadge avail={acc.avail} compact />
