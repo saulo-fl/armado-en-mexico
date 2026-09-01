@@ -21,6 +21,24 @@ window.CATEGORY_HEROS = CATEGORY_HEROS;
 // relleno idénticas — llenan el ancho del carrusel sin repetir de más — y la
 // etiqueta que sustituye al «Ver todos →» en la cabecera de la sección.
 const PROXIMAMENTE_ITEMS = [{ id: 'p1' }, { id: 'p2' }, { id: 'p3' }, { id: 'p4' }];
+
+// Fotos reales para las secciones congeladas: un «Próximamente» con cuatro
+// huecos vacíos se lee como un fallo de carga. Vienen difuminadas, desaturadas
+// y con el contraste bajado desde el pipeline (no con filter de CSS: estas
+// tarjetas viven en un carrusel y un blur en runtime se repinta al hacer
+// scroll). Pesan 3-7 KB cada una. Al reactivar la sección, estas listas se
+// sustituyen por window.CAMPOS / window.CURSOS — ver PLACEHOLDERS.md.
+const FOTOS_CAMPOS = [
+  'imagenes/proximamente-campo-1.webp',
+  'imagenes/proximamente-campo-2.webp',
+  'imagenes/proximamente-campo-3.webp',
+  'imagenes/proximamente-campo-4.webp',
+];
+const FOTOS_EXPERIENCIAS = [
+  'imagenes/proximamente-exp-1.webp',
+  'imagenes/proximamente-exp-2.webp',
+  'imagenes/proximamente-exp-3.webp',
+];
 // Ocupa el sitio del «Ver todos →» pero NO es un enlace. Ahora que los enlaces
 // de acción son rojos (estiloAccion), el verde de marca ya lo diferencia solo:
 // se queda en PALETTE.marca —10.83:1 sobre el lienzo crema, el mismo hex que el
@@ -404,14 +422,14 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
       <CarouselSection
         title="Campos de tiro"
         action={<ProximamenteTag />}
-        items={PROXIMAMENTE_ITEMS}
-        renderItem={() => <window.ProximamenteCard />} />
+        items={FOTOS_CAMPOS}
+        renderItem={(f) => <window.ProximamenteCard img={f} />} />
 
       <CarouselSection
         title="Experiencias"
         action={<ProximamenteTag />}
-        items={PROXIMAMENTE_ITEMS}
-        renderItem={() => <window.ProximamenteCard />} />
+        items={FOTOS_EXPERIENCIAS}
+        renderItem={(f) => <window.ProximamenteCard img={f} />} />
 
       {/* 7 ▸ Disclaimer */}
       <div style={{
