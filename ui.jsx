@@ -1049,70 +1049,15 @@ window.ArmaCard = ArmaCard;
 // MUERTA porque las tarjetas declaraban `boxShadow` inline.
 // ══════════════════════════════════════════════════════════════
 
-// Siluetas por tipo de arma, para las 62 de 192 (32 %) que no tienen
-// fotografía. Son los trazos que `window.armaPlaceholder` dibujó en su día y
-// que quedaron detrás de `void SIL` (data.js) cuando ese placeholder pasó al
-// aviso de cámara: mismo viewBox '0 0 480 200'. No se importan de allí porque
-// viven dentro del cuerpo de esa función; la copia de data.js sigue muerta y
-// borrarla es limpieza de repo, fuera del alcance de esta fase.
-const ARMA_SILUETAS = {
-  pistola: `
-    <rect x='150' y='90' width='140' height='15' />
-    <rect x='282' y='95' width='16' height='5' />
-    <path d='M 220,100 L 220,118 L 246,118 L 246,100' stroke-width='1.5' fill='none' />
-    <path d='M 180,105 L 230,105 L 220,170 L 175,170 Z' />
-    <rect x='185' y='110' width='35' height='2' opacity='0.4' />
-    <rect x='188' y='130' width='28' height='32' opacity='0.6' />
-  `,
-  revolver: `
-    <rect x='160' y='90' width='110' height='12' />
-    <rect x='262' y='93' width='14' height='4' />
-    <circle cx='205' cy='115' r='22' />
-    <circle cx='205' cy='115' r='14' fill='black' opacity='0.4' />
-    <path d='M 210,118 L 210,135 L 230,135 L 230,118' stroke-width='1.5' fill='none' />
-    <path d='M 188,128 L 222,128 L 215,180 L 175,180 Z' />
-  `,
-  rifle: `
-    <rect x='90' y='98' width='280' height='6' />
-    <rect x='365' y='100' width='14' height='4' />
-    <path d='M 200,100 L 200,118 L 226,118 L 226,100' stroke-width='1.5' fill='none' />
-    <path d='M 180,104 L 240,104 L 230,140 L 200,140 Z' />
-    <path d='M 90,104 L 200,104 L 195,128 L 90,128 Z' />
-    <line x1='100' y1='110' x2='195' y2='110' stroke-width='0.6' opacity='0.4' />
-    <line x1='100' y1='122' x2='195' y2='122' stroke-width='0.6' opacity='0.4' />
-    <rect x='220' y='118' width='14' height='22' />
-    <rect x='230' y='90' width='18' height='6' />
-    <rect x='200' y='94' width='30' height='8' />
-  `,
-  escopeta: `
-    <rect x='180' y='94' width='270' height='5' />
-    <rect x='180' y='102' width='270' height='5' />
-    <rect x='443' y='96' width='10' height='3' />
-    <rect x='443' y='104' width='10' height='3' />
-    <path d='M 196,108 L 196,124 L 220,124 L 220,108' stroke-width='1.4' fill='none' />
-    <path d='M 30,98 L 198,98 L 198,108 L 30,124 Z' />
-    <line x1='40' y1='105' x2='190' y2='105' stroke-width='0.7' opacity='0.4' />
-    <line x1='40' y1='115' x2='190' y2='115' stroke-width='0.7' opacity='0.4' />
-    <path d='M 150,110 L 162,110 L 162,138 L 142,138 Z' />
-  `,
-  carabina: `
-    <rect x='350' y='95' width='45' height='5' />
-    <rect x='388' y='91' width='14' height='13' />
-    <rect x='180' y='90' width='180' height='14' />
-    <rect x='155' y='86' width='12' height='5' />
-    <path d='M 178,108 L 178,124 L 206,124 L 206,108' stroke-width='1.4' fill='none' />
-    <path d='M 168,108 L 184,108 L 178,148 L 154,148 Z' />
-    <path d='M 100,98 L 165,98 L 165,116 L 100,116 Z' />
-    <line x1='105' y1='102' x2='160' y2='102' stroke-width='0.6' opacity='0.4' />
-    <line x1='105' y1='112' x2='160' y2='112' stroke-width='0.6' opacity='0.4' />
-    <rect x='90' y='100' width='12' height='14' />
-    <path d='M 180,124 L 200,124 L 200,160 L 180,160 Z' />
-    <line x1='184' y1='132' x2='196' y2='132' stroke-width='0.6' opacity='0.4' />
-    <line x1='184' y1='140' x2='196' y2='140' stroke-width='0.6' opacity='0.4' />
-    <line x1='184' y1='148' x2='196' y2='148' stroke-width='0.6' opacity='0.4' />
-  `,
-};
-window.ARMA_SILUETAS = ARMA_SILUETAS;
+// Siluetas por tipo de arma, para las 62 de 192 (32 %) que no tienen fotografía.
+// Los cinco tipos que tienen silueta. La forma vive en `imagenes/silueta-*.webp`
+// y se pinta como máscara (ver ArmaPolaroid), así que el color lo pone el CSS y
+// sigue al tema. Aquí vivían esas cinco siluetas como cadenas SVG inyectadas con
+// `dangerouslySetInnerHTML`; Saulo las descartó el 7-sep-2026 por su factura, y
+// los .webp generados las sustituyen. Con ellas se va la única inyección de HTML
+// que tenía la app.
+const SILUETA_TIPOS = ['pistola', 'revolver', 'rifle', 'escopeta', 'carabina'];
+window.SILUETA_TIPOS = SILUETA_TIPOS;
 
 // ¿Esta arma tiene fotografía propia? data.js le asigna el placeholder —una
 // data: URI— a las que no la tienen, así que el prefijo del `src` es la señal
@@ -1135,24 +1080,28 @@ function ArmaPolaroid({ arma }) {
   // fallback sigan teniendo sentido.
   const [falloCarga, setFalloCarga] = React.useState(false);
   const sinFoto = falloCarga || armaSinFoto(arma);
-  const silueta = ARMA_SILUETAS[arma.tipo] || ARMA_SILUETAS.pistola;
+  // `tipo` es un enum cerrado de data.js; el respaldo cubre un dato corrupto.
+  const tipoSil = SILUETA_TIPOS.indexOf(arma.tipo) >= 0 ? arma.tipo : 'pistola';
   return (
     <figure className="amx-polaroid">
       <div className="amx-polaroid-pozo">
         {sinFoto ? (
           <div className="amx-polaroid-vacia">
-            {/* La silueta es gráfico, no texto: 3.38:1 sobre la placa clara y
-                3.34:1 sobre la placa atenuada del tema oscuro — por encima del
-                3:1 de WCAG 1.4.11 en los dos. La leyenda, que sí porta
-                información, va en --tinta-placa: 6.46:1 / 5.36:1.
-                El color va por `style` y no por atributo: `var()` en un atributo
-                de presentación de SVG tiene soporte irregular. */}
-            <svg viewBox="0 0 480 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-              <g style={{ fill: 'var(--silueta)', stroke: 'var(--silueta)' }}
-                strokeWidth="2" strokeLinejoin="round"
-                dangerouslySetInnerHTML={{ __html: silueta }} />
-            </svg>
-            <span className="amx-polaroid-leyenda">Sin fotografía en expediente</span>
+            {/* La silueta se pinta como MÁSCARA, no como imagen: el .webp aporta
+                solo la forma (negro sobre alfa) y el color lo pone
+                `background-color: var(--silueta)`, así que sigue al tema sin
+                duplicar assets. 3.38:1 sobre la placa clara y 3.34:1 sobre la
+                atenuada del tema oscuro — por encima del 3:1 de WCAG 1.4.11 en
+                los dos. La leyenda, que sí porta información, va en
+                --tinta-placa: 6.46:1 / 5.36:1.
+
+                Sustituye a un objeto de cinco cadenas SVG inyectadas con
+                `dangerouslySetInnerHTML`. Saulo las descartó por feas; de paso
+                desaparece la única inyección de HTML de la app. */}
+            <div className="amx-polaroid-silueta" role="img"
+              aria-label={'Silueta de ' + tipoSil + '. Sin fotografía en el expediente.'}
+              style={{ '--silueta-forma': `url(imagenes/silueta-${tipoSil}.webp)` }} />
+            <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>
           </div>
         ) : (
           <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high"

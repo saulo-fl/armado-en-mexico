@@ -161,13 +161,8 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   // Valoración: 'retroceso' se invierte (barra larga = poco retroceso), por eso
   // la etiqueta dice "control" — con el número a la vista, "Retroceso 52" se
   // habría leído justo al revés.
-  const statsKeys = [
-    { k: 'precision', l: 'Precisión' },
-    { k: 'poder', l: 'Daño' },
-    { k: 'alcance', l: 'Alcance' },
-    { k: 'manejo', l: 'Movilidad' },
-    { k: 'capacidad', l: 'Capacidad' },
-    { k: 'retroceso', l: 'Control retroceso', invert: true }];
+  // `statsKeys` vivía aquí para la valoración divulgativa, retirada el
+  // 7-sep-2026. El comparador no lo usaba: lleva su propia lista inline.
   // El rótulo del tipo para la pestaña del folder. En singular y acentuado:
   // `CATEGORIES.tipo` guarda los rótulos en plural y despluralizar «Rifles» y
   // «Revólveres» con la misma regla no sale (uno pierde la «s», el otro «es»).
@@ -217,11 +212,11 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         <div className="amx-folder-cabecera">
           <span className="amx-folder-pestana">{tipoRotulo}</span>
           <span className="amx-folder-rayado" aria-hidden="true" />
-          {/* Código de expediente: el guiño burocrático de DESIGN.md §29, sin
-              iconografía oficial de ninguna institución. Derivado del id, no
-              inventado, y por eso PRODUCT.md lo declara código propio del sitio
-              y no un registro oficial. */}
-          <span className="sello">AR-{String(arma.id).padStart(4, '0')}</span>
+          {/* Aquí iba un folio `AR-####` derivado del id. Saulo lo descartó el
+              7-sep-2026: un código de expediente que no corresponde a ningún
+              registro real es decoración que finge ser dato, y en un sitio cuyo
+              valor es la trazabilidad eso cuesta credibilidad. La pestaña con el
+              tipo sí dice algo verdadero, y se queda. */}
         </div>
 
         <div className="amx-folder">
@@ -283,42 +278,21 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         </div>
       </div>
 
-      {/* ── 4 · VALORACIÓN DIVULGATIVA ─────────────────────────────────── */}
-      <ProdSection pad={PAD} gap={SEC} band>
-        <SectionHeader>Valoración divulgativa</SectionHeader>
-        <div style={{
-          // Panel HUNDIDO sobre la banda elevada: con bgCard (#2C2C2C) sobre la
-          // propia banda (#2C2C2C) la tarjeta desaparecía.
-          background: PALETTE.bg,
-          border: `1px solid ${PALETTE.border}`,
-          padding: vp.isDesktop ? '18px 20px 8px' : '15px 15px 5px',
-          position: 'relative'
-        }}>
-          <TacticalCorners size={10} color={ORANGE} />
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: vp.isDesktop ? 'repeat(2, minmax(0, 1fr))' : '1fr',
-            columnGap: 26
-          }}>
-            {statsKeys.map((s) => {
-              const raw = arma.stats[s.k] || 0;
-              const v = s.invert ? 100 - raw : raw;
-              const barColor = v >= 67 ? PALETTE.green : v >= 34 ? ORANGE : PALETTE.redHi;
-              return <window.StatsBar key={s.k} label={s.l} value={v} color={barColor} />;
-            })}
-          </div>
-          <div style={window.amxProsa({
-            borderTop: `1px dashed ${PALETTE.border}`,
-            marginTop: 4, paddingTop: 10, paddingBottom: 10,
-            fontSize: 14.5, color: PALETTE.textMuted, lineHeight: 1.6
-          })}>
-            <b style={{ color: PALETTE.textDim }}>Estimación por familia</b> · todas las armas
-            de tipo {arma.tipo} en calibre {arma.calibre} comparten estos valores. Derivan de las
-            especificaciones técnicas y sirven para comparar entre modelos, no para medir un
-            ejemplar concreto.
-          </div>
-        </div>
-      </ProdSection>
+      {/* ── VALORACIÓN DIVULGATIVA — RETIRADA (7-sep-2026) ───────────────
+          Aquí iban seis barras —precisión, daño, alcance, movilidad, capacidad
+          y control de retroceso— con su aviso de «estimación por familia».
+
+          Saulo la retiró: los números no salían de mediciones ni de votos
+          verificables, sino de una derivación por tipo y calibre, así que TODAS
+          las armas de una misma familia mostraban exactamente lo mismo. Una
+          barra de 0 a 100 promete una precisión que el dato no tiene, y en un
+          sitio cuyo valor es la trazabilidad —cada precio con su inventario y
+          su fecha, cada afirmación legal con su texto de ley— una cifra sin
+          respaldo cuesta más credibilidad de la que aporta.
+
+          `arma.stats` NO se toca: sigue en data.js y lo sigue usando el
+          comparador, que lleva su propia lista inline. `window.StatsBar` se
+          queda en ui.jsx por lo mismo. Si esto vuelve, que vuelva con fuente. */}
 
       {/* ── 5 · PRECIO DE REFERENCIA + 6 · HISTORIAL ───────────────────── */}
       <ProdSection pad={PAD} gap={SEC}>
