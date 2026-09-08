@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<!-- data-tema fijo: el panel de admin SIEMPRE va en oscuro. Su chasis
+     (#0d0f0c, más abajo) siempre lo fue, y desde que `PALETTE` guarda tokens en
+     vez de hex —admin.jsx la reusa vía `ADMIN_PALETTE = window.PALETTE`— hay
+     que decirle a qué tema pertenece o pintaría la paleta clara sobre el
+     chasis oscuro. Aquí no hay conmutador: no es la app pública. -->
+<html lang="es" data-tema="oscuro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +13,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- estilo.css se carga por los TOKENS: sin él, `var(--acento)` y compañía no
+     resuelven y el panel sale sin color. El ?v= es obligatorio (guardia 7b de
+     build-prerender.mjs). -->
+<link rel="stylesheet" href="estilo.css?v=20260908">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; }
@@ -56,10 +65,10 @@
 
 <script src="data.js?v=20260907"></script>
 <script src="data-precios.js?v=20260827c"></script>
-<script src="store.js?v=20260901"></script>
+<script src="store.js?v=20260908"></script>
 <!-- ui.jsx aporta AvailBadge para los badges en la tabla -->
-<script src="ui.js?v=20260901"></script>
-<script src="admin.js?v=20260901"></script>
+<script src="ui.js?v=20260908"></script>
+<script src="admin.js?v=20260908"></script>
 
 <script>
 const root = ReactDOM.createRoot(document.getElementById('app-root'));
@@ -68,6 +77,6 @@ root.render(React.createElement(window.AdminApp));
 
 
 <!-- DEV: alternador de viewport escritorio/móvil (compartido por las 3 ramas) -->
-<script src="dev-viewport.js?v=20260901"></script>
+<script src="dev-viewport.js?v=20260908"></script>
 </body>
 </html>

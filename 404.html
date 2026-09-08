@@ -3,6 +3,12 @@
 <head>
 <meta charset="utf-8">
 <title>Armado en México</title>
+<!-- Esta página solo redirige, pero el navegador pinta su lienzo antes de
+     seguir. Con `color-scheme` el lienzo por defecto ya sale oscuro en un
+     equipo en modo oscuro y no hay fogonazo blanco camino del index. No lee
+     la preferencia guardada a propósito: no compensa un script para una
+     página que vive milisegundos. -->
+<style>:root { color-scheme: light dark; }</style>
 <script>
   /* GitHub Pages SPA fallback. Cualquier dirección profunda (ej. /calibres,
      /pistolas/glock-19) que el servidor no encuentra como archivo cae aquí; reescribimos

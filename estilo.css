@@ -10,37 +10,116 @@
    gana por especificidad y empieza la guerra de !important.
    ══════════════════════════════════════════════════════════════════════════ */
 
-.amx-v2 {
-  /* ── Color (DESIGN.md §2, con las tres correcciones de contraste de §5.1) ── */
-  --verde:      #173A32;   /* fondo de marca */
-  --verde-2:    #2C6457;   /* superficie oscura elevada — corregido de #245247 (1.41:1) */
-  /* ── Las dos superficies claras ──────────────────────────────────────────
-     El lienzo pasó de crema #F3EFE4 a «papel de oficio frío» #E7EAE4: mismo
-     matiz verde-gris que la marca. Papel sobre lienzo da 1.14:1 — como toda
-     pareja de superficies claras. Las separan --sombra y --hair, no el color. */
-  --lienzo:     #E7EAE4;   /* el lienzo de la app */
-  --papel:      #F7F8F4;   /* la tarjeta por defecto — 1.14:1 sobre el lienzo */
-  --papel-hi:   #FFFFFF;   /* pozo de foto — gemelo de CLARO.panelHi en ui.jsx */
-  /* --crema y --blanco ya NO son superficies: son la TINTA CLARA que va encima
-     del verde de marca (banda, buscador, anillo de foco, relleno rojo). */
-  --crema:      #F3EFE4;   /* tinta sobre verde — 10.83:1 */
-  --blanco:     #FAF9F5;   /* tinta sobre el rojo de relleno */
-  --beige:      #E4E7E0;   /* fila alterna sobre el papel — 1.17:1, SOLO con hairline */
-  --rojo:       #C83B32;   /* relleno de CTA, con texto claro encima */
-  --rojo-txt:   #C63A32;   /* rojo como texto/borde — 4.27:1 sobre el lienzo */
-  --negro:      #171B19;
-  --gris:       #59605C;   /* 5.32:1 sobre el lienzo */
+/* ══════════════════════════════════════════════════════════════════════════
+   LOS TOKENS — la ÚNICA fuente de los colores del sitio (los dos temas)
 
-  --tinta:      var(--negro);
-  --tinta-2:    var(--gris);
-  --hair:       #B6BDB0;   /* hairline sobre superficie clara — 1.59:1 sobre el lienzo */
-  --hair-osc:   rgba(250, 249, 245, .10);/* hairline sobre superficie oscura */
-  /* Tres capas en la TINTA del sitio (23,27,25), no en el verde de marca: un
-     halo cromatico es otro tic reconocible de UI generada, y el detector lo
-     marca como `dark-glow` en cuanto la sombra se tine. Maximo 18px de blur
-     (§6 veta blur > 24px en listas). Gemelo CSS de CLARO.sombra en ui.jsx: si
-     cambia una, cambia la otra. */
-  --sombra:     0 1px 2px rgba(23,27,25,.14), 0 4px 8px -2px rgba(23,27,25,.16), 0 12px 18px -8px rgba(23,27,25,.28);
+   Viven en `:root`, no en `.amx-v2`, porque `PALETTE`/`CLARO` de ui.jsx ya no
+   guardan hex: guardan `var(--token)`. React pasa la `var()` tal cual al
+   atributo `style`, así que los ~1355 usos inline heredan el tema sin tocarlos
+   — pero solo si el token está declarado en un ancestro de CUALQUIER nodo de
+   la app, incluidos los portales y `admin.html`. `:root` es ese ancestro.
+
+   LOS DOS TEMAS SE DECLARAN AQUÍ, en el mismo bloque:
+     --x    = el valor del tema CLARO
+     --d-x  = el valor del tema OSCURO
+   y más abajo dos reglas cortas hacen `--x: var(--d-x)`. Así ningún valor se
+   escribe dos veces (una lista duplicada se desincroniza al primer retoque) y
+   `contraste.mjs` puede auditar LOS DOS TEMAS leyendo un solo bloque.
+
+   Si añades un token, añade su `--d-` y su línea en las DOS reglas de abajo.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ── SUPERFICIES ────────────────────────────────────────────────────────
+     CLARO: entre dos claros el contraste máximo es ~1.2:1 (papel/lienzo =
+     1.14:1). Quien separa las capas es --sombra.
+     OSCURO: la sombra NO separa —no hay luz que ocultar—, así que la jerarquía
+     la hace el SALTO DE SUPERFICIE (papel/lienzo = 1.54:1, un tercio más que
+     en claro) más un hairline visible (--hair sobre --papel = 1.81:1). Es el
+     problema inverso al del tema claro y lleva su propia respuesta. */
+  --lienzo:     #E7EAE4;   --d-lienzo:   #0E1211;  /* lienzo de la app */
+  --papel:      #F7F8F4;   --d-papel:    #2E3733;  /* la tarjeta — 1.14:1 claro / 1.54:1 oscuro */
+  /* La fila alterna va HUNDIDA respecto al papel en los dos temas —más oscura,
+     no más clara—: es lo mismo que hace el tema claro y deja la tinta de
+     estado con más aire (--alerta pasa de 4.40:1 a 5.97:1 sobre ella). */
+  --beige:      #E4E7E0;   --d-beige:    #262E2A;  /* 1.17:1 claro / 1.14:1 oscuro, SOLO con hairline */
+  /* La PLACA FOTOGRÁFICA no se invierte: 87 de las 111 fotos son recortes
+     sobre BLANCO OPACO (CLAUDE.md), y sobre una placa oscura se leen como un
+     rectángulo blanco pegado — «se leen como un error», ya medido en la época
+     en que el sitio era oscuro. Una copia revelada sigue siendo papel: la
+     placa se queda clara en los dos temas, apenas atenuada en oscuro. */
+  --papel-hi:   #FFFFFF;   --d-papel-hi: #E8EBE5;
+  --hair:       #B6BDB0;   --d-hair:     #525E58;  /* 1.59:1 claro / 1.81:1 sobre el papel oscuro */
+  --hair-hi:    #868E84;   --d-hair-hi:  #7C8A83;  /* borde que PORTA estado — 3.17:1 / 3.40:1 (WCAG 1.4.11) */
+  --hair-osc:   rgba(250, 249, 245, .10);          /* hairline sobre superficie de marca — igual en ambos */
+
+  /* ── TINTA ──────────────────────────────────────────────────────────────── */
+  --negro:      #171B19;
+  --gris:       #59605C;
+  --tinta:      var(--negro);   --d-tinta:     #EAEEE8;  /* 14.32:1 / 10.46:1 sobre el papel */
+  --tinta-dim:  #3E443D;        --d-tinta-dim: #C6CDC7;  /*  8.24:1 /  7.58:1 */
+  --tinta-2:    var(--gris);    --d-tinta-2:   #A5AFA8;  /*  5.32:1 /  5.44:1 */
+  /* Tinta SOBRE LA PLACA fotográfica, que no cambia de tema: tampoco cambia. */
+  --tinta-placa: #59605C;                                /*  6.46:1 /  5.36:1 */
+  --silueta:    #868E84;        --d-silueta:   #798177;  /* gráfico sobre la placa — 3.38:1 / 3.34:1 */
+
+  /* ── MARCA ──────────────────────────────────────────────────────────────
+     El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
+     siendo una SUPERFICIE oscura (banda, nav, hero), que es lo que siempre
+     fue, y se distingue del lienzo por hue y por 1.52:1.
+     Lo que sí cambia es su papel de ACENTO: como tinta o borde sobre un fondo
+     oscuro, #173A32 desaparece. Por eso el acento se separa de la superficie
+     en dos tokens y en oscuro toma una variante clara del mismo verde. */
+  --marca:      #173A32;   /* superficie de marca — idéntica en los dos temas */
+  --marca-alt:  #1E4A40;
+  --crema:      #F3EFE4;   /* tinta sobre la marca — 10.83:1 en los dos */
+  --blanco:     #FAF9F5;   /* tinta sobre el rojo de relleno — 4.83:1 */
+  --sobre-marca:       var(--crema);
+  --sobre-marca-dim:   #B8C2BA;   /* enlace inactivo sobre la marca — 6.79:1 */
+  --sobre-marca-muted: #9FACA2;   /* lo desactivado — 5.27:1 */
+  --acento:     #173A32;   --d-acento:  #79C3AB;  /* 10.24:1 / 9.17:1 sobre el lienzo */
+  /* La tinta que va ENCIMA de un relleno de --acento. En claro el acento es
+     verde oscuro y la tinta va clara; en oscuro el acento es verde claro y la
+     tinta va oscura. Este token es lo que sustituye al cálculo de luminancia
+     de `amxTintaSobre` para el único relleno que la app conoce de antemano. */
+  --tinta-sobre-marca: var(--crema);  --d-tinta-sobre-marca: #0E1211;  /* 10.83:1 / 9.17:1 */
+  --verde-2:    #2C6457;   --d-verde-2: #3E8A78;  /* superficie/tira decorativa (tricolor) */
+
+  /* ── ESTADO ──────────────────────────────────────────────────────────────
+     Los tres colores de disponibilidad legal viven en los data-*.js calibrados
+     para superficie CLARA. Aquí están sus gemelos por superficie, siguiendo el
+     precedente de CLARO.ok / CLARO.alerta. `amxColorAvail()` (ui.jsx) traduce
+     el hex del dato a estos tokens. */
+  --ok:         #2F6B33;   --d-ok:        #63C07C;  /* 5.28:1 / 5.47:1 */
+  --seguridad:  #7D6108;   --d-seguridad: #D3AC3F;  /* 5.49:1 / 5.70:1 */
+  --alerta:     #A3341F;   --d-alerta:    #F0907E;  /* 5.63:1 / 5.26:1 */
+  --azul:       #4A6B7C;   --d-azul:      #8FB9CE;  /* 4.69:1 / 5.85:1 */
+  --gris-2:     #7C837B;   --d-gris-2:    #99A39B;  /* gráfico apagado */
+  --rojo:       #C83B32;   /* relleno de CTA con --blanco encima — igual en ambos */
+  --rojo-txt:   #C63A32;   --d-rojo-txt:  #F08D7C;  /* rojo como texto/anillo — 4.27:1 / 8.08:1 */
+  --rojo-sobre-marca: #F29C8C;  /* rojo sobre la marca — 5.87:1 en los dos */
+
+  /* ── SOMBRA Y TINTES ─────────────────────────────────────────────────────
+     Tres capas en la TINTA del sitio (23,27,25), no en el verde de marca: un
+     halo cromático es un tic reconocible de UI generada y el detector lo marca
+     como `dark-glow`. Máximo 18px de blur (§6 veta blur > 24px en listas).
+     En OSCURO la sombra no separa capas —eso lo hace el salto de superficie—
+     pero sigue dando el contacto del borde: se queda, en negro y más opaca. */
+  --sombra:       0 1px 2px rgba(23,27,25,.14), 0 4px 8px -2px rgba(23,27,25,.16), 0 12px 18px -8px rgba(23,27,25,.28);
+  --d-sombra:     0 1px 2px rgba(0,0,0,.46), 0 4px 8px -2px rgba(0,0,0,.40), 0 12px 18px -8px rgba(0,0,0,.56);
+  --sombra-hover:   0 2px 4px rgba(23,27,25,.18), 0 8px 14px -2px rgba(23,27,25,.20), 0 20px 24px -10px rgba(23,27,25,.34);
+  --d-sombra-hover: 0 2px 4px rgba(0,0,0,.52), 0 8px 14px -2px rgba(0,0,0,.46), 0 20px 24px -10px rgba(0,0,0,.62);
+  --papel-grad:   linear-gradient(180deg, #FDFEFC, #F1F4EE);
+  --d-papel-grad: linear-gradient(180deg, #343E39, #29312D);
+  --hover-suave:   rgba(23,58,50,.06);      --d-hover-suave:   rgba(233,237,231,.07);
+  --rejilla:       rgba(23,58,50,.035);     --d-rejilla:       rgba(121,195,171,.055);
+  --seleccion:     rgba(23,58,50,.16);      --d-seleccion:     rgba(121,195,171,.26);
+  --placeholder:   #626963;                 --d-placeholder:   #97A19A;  /* 4.65:1 / 4.61:1 */
+  --barra-track:   #DCE0D8;                 --d-barra-track:   #1A211E;
+  --barra-thumb:   #B6BDB0;                 --d-barra-thumb:   #4A554F;
+  --barra-thumb-hi:#59605C;                 --d-barra-thumb-hi:#8B968F;
 
   /* ── Espaciado: 6 valores (DESIGN.md §5.2). Antes había 36 sueltos ── */
   --e1: 4px; --e2: 8px; --e3: 12px; --e4: 20px; --e5: 32px; --e6: 52px;
@@ -50,11 +129,54 @@
 
   --sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
 
-  /* La app es CLARA: el lienzo es papel de oficio frio y el verde es color de
-     MARCA (banda, sello, acentos). Esto pintaba verde con texto claro — resto del tema
-     oscuro que el inline de app.jsx:411-412 ya tapaba. El CSS ya no lo
-     contradice. */
+/* ── El tema OSCURO ─────────────────────────────────────────────────────────
+   Dos reglas con la MISMA lista de asignaciones y ningún valor propio:
+   1) sin elección explícita manda `prefers-color-scheme` (el `:not` deja pasar
+      la elección «claro», que si no perdería contra la preferencia del SO);
+   2) la elección explícita del usuario, que gana por especificidad y por orden.
+   `color-scheme: dark` es lo que pone en oscuro los controles NATIVOS —barras
+   de scroll, inputs, selects— que ningún token alcanza. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+    --lienzo: var(--d-lienzo);   --papel: var(--d-papel);       --beige: var(--d-beige);
+    --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi);
+    --tinta: var(--d-tinta);     --tinta-dim: var(--d-tinta-dim); --tinta-2: var(--d-tinta-2);
+    --silueta: var(--d-silueta); --acento: var(--d-acento);
+    --tinta-sobre-marca: var(--d-tinta-sobre-marca);            --verde-2: var(--d-verde-2);
+    --ok: var(--d-ok);           --seguridad: var(--d-seguridad); --alerta: var(--d-alerta);
+    --azul: var(--d-azul);       --gris-2: var(--d-gris-2);     --rojo-txt: var(--d-rojo-txt);
+    --sombra: var(--d-sombra);   --sombra-hover: var(--d-sombra-hover);
+    --papel-grad: var(--d-papel-grad);
+    --hover-suave: var(--d-hover-suave); --rejilla: var(--d-rejilla); --seleccion: var(--d-seleccion);
+    --placeholder: var(--d-placeholder);
+    --barra-track: var(--d-barra-track); --barra-thumb: var(--d-barra-thumb);
+    --barra-thumb-hi: var(--d-barra-thumb-hi);
+  }
+}
+:root[data-tema="oscuro"] {
+  color-scheme: dark;
+  --lienzo: var(--d-lienzo);   --papel: var(--d-papel);       --beige: var(--d-beige);
+  --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi);
+  --tinta: var(--d-tinta);     --tinta-dim: var(--d-tinta-dim); --tinta-2: var(--d-tinta-2);
+  --silueta: var(--d-silueta); --acento: var(--d-acento);
+  --tinta-sobre-marca: var(--d-tinta-sobre-marca);            --verde-2: var(--d-verde-2);
+  --ok: var(--d-ok);           --seguridad: var(--d-seguridad); --alerta: var(--d-alerta);
+  --azul: var(--d-azul);       --gris-2: var(--d-gris-2);     --rojo-txt: var(--d-rojo-txt);
+  --sombra: var(--d-sombra);   --sombra-hover: var(--d-sombra-hover);
+  --papel-grad: var(--d-papel-grad);
+  --hover-suave: var(--d-hover-suave); --rejilla: var(--d-rejilla); --seleccion: var(--d-seleccion);
+  --placeholder: var(--d-placeholder);
+  --barra-track: var(--d-barra-track); --barra-thumb: var(--d-barra-thumb);
+  --barra-thumb-hi: var(--d-barra-thumb-hi);
+}
+
+.amx-v2 {
+  /* La app es CLARA por defecto: el lienzo es papel de oficio frío y el verde
+     es color de MARCA (banda, sello, acentos). En oscuro el lienzo baja a
+     #0E1211 y el verde de marca se queda donde está. */
   background: var(--lienzo);
   color: var(--tinta);
   font-family: var(--sans);
@@ -146,12 +268,12 @@
 }
 /* El rojo como RELLENO con texto claro. Como texto sobre verde da 2.45:1 */
 .amx-v2 .btn-rojo { background: var(--rojo); color: var(--blanco); }
-.amx-v2 .btn-rojo:hover { background: #B8342C; }
+.amx-v2 .btn-rojo:hover { filter: brightness(.92); }
 .amx-v2 .btn-claro {
   background: transparent; color: var(--tinta);
   border-color: var(--hair);
 }
-.amx-v2 .btn-claro:hover { background: rgba(23,58,50,.06); }
+.amx-v2 .btn-claro:hover { background: var(--hover-suave); }
 
 /* ── Foco: no negociable, y clip-path se lo come si no se compensa ──────── */
 
@@ -184,7 +306,7 @@
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
-  color: var(--gris);            /* 6.05:1 sobre el papel #F7F8F4. Antes --beige: 1.27:1, invisible */
+  color: var(--tinta-2);         /* 6.05:1 claro / 5.44:1 oscuro sobre el papel. Antes --beige: 1.27:1 */
   font-family: var(--sans);
   font-size: 11.5px;
   font-weight: 600;
@@ -216,7 +338,7 @@
 /* El hover sube un escalón la MISMA sombra de tres capas — no cambia de
    recurso. Tope de 24px de blur (§6); aquí solo se repinta una tarjeta. */
 .amx-v2 .amx-card:hover {
-  box-shadow: 0 2px 4px rgba(23,27,25,.18), 0 8px 14px -2px rgba(23,27,25,.20), 0 20px 24px -10px rgba(23,27,25,.34);
+  box-shadow: var(--sombra-hover);
   transform: translateY(-2px);
 }
 .amx-v2 .amx-card:has(:focus-visible) {
@@ -236,8 +358,8 @@
 /* ── Banda de marca: el verde a todo el ancho, cerrado en curva ──────────── */
 
 .amx-v2 .amx-banda-marca {
-  background: var(--verde);
-  color: var(--crema);
+  background: var(--marca);
+  color: var(--sobre-marca);
   /* padding-bottom mayor que el resto: el buscador tiene que respirar antes
      de que empiece la curva, si no el pill parece pegado al borde. */
   padding: var(--e4) var(--e4) var(--e5);
@@ -245,7 +367,7 @@
   border-bottom-right-radius: 22px;
 }
 /* Sobre el verde el anillo rojo del foco da 2.45:1: aquí va en crema. */
-.amx-v2 .amx-banda-marca :focus-visible { outline-color: var(--crema); }
+.amx-v2 .amx-banda-marca :focus-visible { outline-color: var(--sobre-marca); }
 
 /* ── Buscador de cristal sobre la banda verde ────────────────────────────── */
 
@@ -304,8 +426,8 @@
   gap: var(--e1);
   text-decoration: none;
 }
-.amx-v2 .amx-accion       { color: #A3341F; }   /* 5.63:1 sobre el lienzo #E7EAE4 */
-.amx-v2 .amx-accion-verde { color: #F29C8C; }   /* 5.87:1 sobre el verde #173A32 */
+.amx-v2 .amx-accion       { color: var(--alerta); }  /* 5.63:1 claro / 8.08:1 oscuro sobre el lienzo */
+.amx-v2 .amx-accion-verde { color: var(--rojo-sobre-marca); }  /* 5.87:1 sobre la marca, en los dos temas */
 .amx-v2 .amx-accion:hover,
 .amx-v2 .amx-accion-verde:hover {
   text-decoration: underline;
@@ -313,14 +435,14 @@
 }
 /* El rojo del anillo por defecto sobre verde da 2.45:1: en la variante verde
    el foco reusa el mismo salmón del texto. */
-.amx-v2 .amx-accion-verde:focus-visible { outline-color: #F29C8C; }
+.amx-v2 .amx-accion-verde:focus-visible { outline-color: var(--rojo-sobre-marca); }
 
 /* ── Foco sobre las superficies verdes de marca ───────────────────────────── */
 /* El anillo global usa --rojo-txt, que sobre el verde de marca mide 2.40:1 y
    no llega al 3:1 que pide WCAG 2.4.11 para el indicador de foco. En header,
    nav y desplegable el anillo va en crema (10.83:1). */
 .amx-v2 .amx-sobre-verde :focus-visible {
-  outline: 2px solid var(--crema);
+  outline: 2px solid var(--sobre-marca);
   outline-offset: 2px;
 }
 
@@ -491,7 +613,7 @@
   letter-spacing: .18em;
   text-transform: uppercase;
   text-align: center;
-  color: var(--tinta-2);             /* 6.46:1 sobre el pozo blanco */
+  color: var(--tinta-placa);         /* 6.46:1 claro / 5.36:1 oscuro sobre la placa */
 }
 
 /* ── El precio de referencia, bajo la foto ───────────────────────────────
@@ -505,7 +627,7 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: .01em;
   line-height: 1.1;
-  color: var(--verde);               /* 11.67:1 sobre el papel */
+  color: var(--acento);              /* 11.67:1 claro / 5.97:1 oscuro sobre el papel */
 }
 .amx-v2 .amx-precio-ref-fuente {
   margin-top: var(--e1);

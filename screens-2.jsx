@@ -181,7 +181,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       <button onClick={() => toggleCompare(arma.id)} style={{
         width: '100%',
         background: inCmp ? PALETTE.amber : 'transparent',
-        color: inCmp ? '#000' : PALETTE.amber,
+        color: inCmp ? PALETTE.tintaSobreMarca : PALETTE.amber,
         border: `1.5px solid ${PALETTE.amber}`,
         clipPath: CUT_TR,
         padding: '12px 22px', minHeight: 48,
@@ -272,7 +272,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                 <AvailBadge avail={arma.avail} />
                 <span style={{
                   fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
-                  color: availMeta?.color || PALETTE.textDim, letterSpacing: '0.04em'
+                  color: window.amxColorAvail(availMeta?.color) || PALETTE.textDim, letterSpacing: '0.04em'
                 }}>{arma.legalTit}</span>
               </div>
 
@@ -601,7 +601,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             <div>
               <div style={{
                 fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                color: availMeta?.color || PALETTE.text,
+                color: window.amxColorAvail(availMeta?.color) || PALETTE.text,
                 textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7
               }}>{arma.legalTit}</div>
               <div style={window.amxProsa({ fontSize: 16, marginBottom: 14 })}>{arma.legalDesc}</div>
@@ -697,9 +697,11 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           // El -1px superpone los dos bordes en una sola línea: si se apoya justo
           // encima queda una rendija por la que se ve pasar el contenido.
           bottom: 'calc(var(--amx-nav-h, 74px) - 1px)',
-          // Blanco sólido sobre el lienzo claro. Sin backdrop-filter: es el
-          // asesino nº1 del scroll en móvil y aquí no aportaba nada.
-          background: CLARO.panelHi,
+          // Superficie sólida, no placa fotográfica: usa --papel, que SÍ sigue al
+          // tema. Con CLARO.panelHi (la placa, clara en ambos temas) el texto
+          // --tinta-2 de esta barra quedaba gris claro sobre casi blanco.
+          // Sin backdrop-filter: es el asesino nº1 del scroll en móvil.
+          background: CLARO.panel,
           borderTop: `1px solid ${PALETTE.border}`,
           boxShadow: '0 -6px 18px -12px rgba(23,27,25,.28)',
           padding: '10px 16px',
@@ -720,7 +722,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           <span className="amx-cut" style={{ display: 'block' }}>
             <button onClick={() => toggleCompare(arma.id)} style={{
               background: inCmp ? 'transparent' : PALETTE.amber,
-              color: inCmp ? PALETTE.amber : '#000',
+              color: inCmp ? PALETTE.amber : PALETTE.tintaSobreMarca,
               border: `1.5px solid ${PALETTE.amber}`,
               clipPath: CUT_TR,
               minHeight: 46, padding: '0 20px',
@@ -891,7 +893,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                 </div>
                 <button type="button" onClick={enviar} disabled={!listo} style={{
                   background: listo ? PALETTE.amber : 'transparent',
-                  color: listo ? '#000' : PALETTE.textMuted,
+                  color: listo ? PALETTE.tintaSobreMarca : PALETTE.textMuted,
                   border: `1.5px solid ${listo ? PALETTE.amber : PALETTE.border}`,
                   padding: '0 22px', minHeight: 48,
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
@@ -1046,7 +1048,7 @@ function YouTubeBlock({ arma, padX = 16 }) {
                   y el negro encima daba 1.69:1 — CTAs ilegibles. Sobre verde el
                   texto va en sobreMarca #F3EFE4 (10.83:1). Vale para los siete. */}
               <span style={{
-              background: PALETTE.amber, color: PALETTE.sobreMarca,
+              background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
               padding: '2px 6px', fontWeight: 700, fontSize: 13,
               letterSpacing: '0.1em'
             }}>YOUTUBE</span>
@@ -1128,7 +1130,7 @@ function SuggestChangesModal({ arma, onClose }) {
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
             <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.6, marginBottom: 20 })}>Tu sugerencia entró en la cola. Revisaremos la información y, si procede, aplicaremos el cambio.</div>
             <button onClick={onClose} style={{
-            background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+            background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
             padding: '10px 20px',
             fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
             letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
@@ -1171,7 +1173,7 @@ function SuggestChangesModal({ arma, onClose }) {
               letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
             }}>Cancelar</button>
               <button type="submit" style={{
-              background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+              background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
               padding: '10px 20px',
               fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
               letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
@@ -1253,7 +1255,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
           Selecciona armas desde el catálogo<br />tocando el botón ⇄ en cada tarjeta.
         </div>
         <button onClick={() => onNav('catalog')} style={{
-          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '10px 22px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.15em', textTransform: 'uppercase',
@@ -1328,7 +1330,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
                       position: 'absolute', right: 0, top: 0, bottom: 0,
                       width: `${va}%`,
                       background: winner === 'a' ? PALETTE.amber : PALETTE.textMuted,
-                      boxShadow: winner === 'a' ? `0 0 4px ${PALETTE.amber}66` : 'none'
+                      boxShadow: winner === 'a' ? `0 0 4px ${window.amxAlfa(PALETTE.amber, 40)}` : 'none'
                     }} />
                     </div>
                   </div>
@@ -1353,7 +1355,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
                       position: 'absolute', left: 0, top: 0, bottom: 0,
                       width: `${vb}%`,
                       background: winner === 'b' ? PALETTE.amber : PALETTE.textMuted,
-                      boxShadow: winner === 'b' ? `0 0 4px ${PALETTE.amber}66` : 'none'
+                      boxShadow: winner === 'b' ? `0 0 4px ${window.amxAlfa(PALETTE.amber, 40)}` : 'none'
                     }} />
                     </div>
                   </div>
@@ -1559,7 +1561,7 @@ function LegalScreen({ onNav }) {
         {window.CATEGORIES.disponibilidad.map((d) =>
         <div key={d.id} style={{
           background: PALETTE.bgCard,
-          border: `1px solid ${d.color}`,
+          border: `1px solid ${window.amxColorAvail(d.color)}`,
           boxShadow: CLARO.sombra,
           padding: '12px 14px'
         }}>
@@ -1709,7 +1711,7 @@ function LegalScreen({ onNav }) {
         <a href={`https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`}
         target="_blank" rel="noopener" style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: PALETTE.amber, color: PALETTE.sobreMarca,
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
           textDecoration: 'none',
           padding: '12px 16px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
@@ -2125,7 +2127,7 @@ function SoporteScreen({ onNav }) {
             <button type="button" onClick={enviarDenuncia} disabled={!denListo} style={{
               width: '100%', marginTop: 4,
               background: denListo ? PALETTE.amber : 'transparent',
-              color: denListo ? '#000' : PALETTE.textMuted,
+              color: denListo ? PALETTE.tintaSobreMarca : PALETTE.textMuted,
               border: `1.5px solid ${denListo ? PALETTE.amber : PALETTE.border}`,
               padding: '13px', minHeight: 48,
               fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
@@ -2394,7 +2396,7 @@ function SubmitScreen({ onNav }) {
           </div>}
         </div>
         <button onClick={() => onNav('home')} style={{
-          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '12px 24px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -2503,7 +2505,7 @@ function SubmitScreen({ onNav }) {
           cursor: 'pointer'
         }}>Cancelar</button>
         <button type="submit" style={{
-          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '12px 26px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',

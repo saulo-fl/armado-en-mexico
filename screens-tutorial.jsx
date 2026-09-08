@@ -347,7 +347,7 @@
           }}>{String(idx + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}</div>
 
           <button onClick={() => (last ? finish() : goNext())} style={{
-            background: P.amber, color: P.bgCard, border: 'none',
+            background: P.amber, color: P.tintaSobreMarca, border: 'none',
             cursor: 'pointer',
             fontFamily: 'Archivo, sans-serif', fontWeight: 700,
             fontSize: 14, letterSpacing: '0.12em', textTransform: 'uppercase',
