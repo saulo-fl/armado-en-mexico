@@ -606,10 +606,36 @@
   justify-content: center;
   gap: var(--e3);
 }
-.amx-v2 .amx-polaroid-vacia svg { width: 82%; max-height: 56%; }
+/* La silueta del expediente sin foto. El .webp aporta solo la FORMA (negro
+   sobre alfa) y entra como máscara; el color lo pone `background-color`, así
+   que sigue a `--silueta` en los dos temas sin duplicar assets ni recolorear
+   con `filter`. Los cinco archivos tienen proporciones muy distintas —de 1.52
+   la pistola a 4.55 la escopeta—, y por eso `contain` y no `cover`: recortar
+   una silueta la deja sin cañón. */
+.amx-v2 .amx-polaroid-silueta {
+  width: 82%;
+  height: 56%;
+  background-color: var(--silueta);
+  -webkit-mask-image: var(--silueta-forma);
+          mask-image: var(--silueta-forma);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-size: contain;
+          mask-size: contain;
+}
+/* Sin soporte de máscara no se pinta un bloque de color macizo, que sería peor
+   que no tener nada: se cede el sitio y queda la leyenda, que es la que porta
+   la información. */
+@supports not ((-webkit-mask-image: url('')) or (mask-image: url(''))) {
+  .amx-v2 .amx-polaroid-silueta { display: none; }
+}
 .amx-v2 .amx-polaroid-leyenda {
   font-family: var(--mono);
-  font-size: 10px;
+  /* 11px, no 10: es texto funcional —dice por qué no hay foto— y por debajo de
+     ese piso falla en pantallas densas. */
+  font-size: 11px;
   letter-spacing: .18em;
   text-transform: uppercase;
   text-align: center;
