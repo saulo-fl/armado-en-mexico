@@ -84,18 +84,11 @@
    pestaña la absorbió la ficha técnica del folder (§4.3), y la utilidad se
    quedó sin un solo consumidor. */
 
-/* Sello de expediente — el guiño burocrático de §29, sin iconografía oficial */
-.amx-v2 .sello {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--tinta-2);
-  border: 1px solid var(--hair);
-  border-radius: var(--radio-sm);
-  padding: 3px 7px;
-  display: inline-block;
-}
+/* Aquí vivía `.sello`, el folio `AR-####` de la ficha. Retirado el 7-sep-2026
+   por decisión de Saulo: un código de expediente que no corresponde a ningún
+   registro real es decoración que finge ser dato. Se quedó sin un solo
+   consumidor, así que se va con él — y de paso sus 10px, que estaban por
+   debajo del piso de 11px para texto funcional. */
 
 /* Línea tricolor: identidad mexicana sin escudo ni emblema (§29) */
 .amx-v2 .tricolor {
@@ -342,8 +335,8 @@
    así que reusarlo no dibujaría nada; y un recorte se come el anillo de foco,
    que es el parche que §7 obliga a compensar cada vez. Es geometría pura: una
    caja con las dos esquinas de arriba redondeadas que se solapa 1px con el
-   folder para que compartan filo, como la pestaña de un separador. El folio
-   `AR-####` va al otro extremo del canto, con el `.sello` que ya existía. */
+   folder para que compartan filo, como la pestaña de un separador. El resto
+   del canto lo ocupa el rayado a trazos. */
 .amx-v2 .amx-folder-cabecera {
   display: flex;
   align-items: flex-end;
@@ -377,7 +370,8 @@
   margin-bottom: 10px;
   border-bottom: 1px dashed var(--hair);
 }
-.amx-v2 .amx-folder-cabecera .sello { flex: 0 0 auto; margin-bottom: 4px; }
+/* El rayado llega ahora hasta el final del canto: el folio que lo cerraba por
+   la derecha se retiró. */
 
 .amx-v2 .amx-folder {
   position: relative;

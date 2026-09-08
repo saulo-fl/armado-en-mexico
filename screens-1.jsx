@@ -665,7 +665,10 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
 
         {p.cta ?
         <button onClick={() => onNav(p.ctaTarget || 'catalog')} style={{
-          background: accent, color: '#000', border: 'none',
+          // `accent` sale de los datos de promos y por defecto es el verde de
+          // marca, así que el negro fijo daba 1.69:1. La tinta la decide el
+          // relleno, sea el que sea.
+          background: accent, color: window.amxTintaSobre(accent), border: 'none',
           padding: vp.isDesktop ? '12px 24px' : '10px 20px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: vp.isDesktop ? 15 : 14,

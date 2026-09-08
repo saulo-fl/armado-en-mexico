@@ -649,6 +649,37 @@ function amxProsa(o) {
 window.amxProsa = amxProsa;
 
 // ──────────────────────────────────────────────────────────────
+// TINTA SOBRE UN RELLENO — qué color de texto va encima de un fondo dado
+// ──────────────────────────────────────────────────────────────
+// Existe porque el mismo error se repitió tres veces: `color: '#000'` sobre
+// `PALETTE.amber`, que dejó de ser ámbar y hoy es el verde de marca #173A32.
+// Negro sobre ese verde da 1.69:1; en claro, 11.81:1. Los tres botones de
+// «Comparar» —la barra fija del móvil incluida— se leían así.
+//
+// No basta con cambiarlos a mano: en `screens-1` el relleno es `p.accent`, que
+// viene de los datos de promos y puede ser cualquier color. La decisión tiene
+// que depender del fondo, no de lo que recordemos al escribir la línea.
+//
+// El cálculo es el de la luminancia relativa de WCAG, y ya vivía suelto dentro
+// de `TraumaTierCard` (screens-4.jsx) resolviendo este mismo problema para los
+// badges de tier. El pivote 0.18 es donde el contraste contra blanco iguala al
+// contraste contra negro.
+function amxTintaSobre(hex) {
+  const h = String(hex || '').trim();
+  // Sin un hex de 6 dígitos no hay nada que medir: devuelve la tinta clara,
+  // que es la que acierta sobre el verde de marca, el relleno más frecuente.
+  if (!/^#[0-9A-Fa-f]{6}$/.test(h)) return PALETTE.bgCard;
+  const lum = [1, 3, 5]
+    .map((i) => {
+      const v = parseInt(h.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    })
+    .reduce((a, c, i) => a + [0.2126, 0.7152, 0.0722][i] * c, 0);
+  return lum > 0.18 ? PALETTE.text : PALETTE.bgCard;
+}
+window.amxTintaSobre = amxTintaSobre;
+
+// ──────────────────────────────────────────────────────────────
 // APP HEADER — barra superior con logo + acciones
 // ──────────────────────────────────────────────────────────────
 // `title` sigue en la firma aunque YA NO SE PINTA: lo pasan casi todas las
