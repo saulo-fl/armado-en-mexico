@@ -100,7 +100,7 @@ function CalibresScreen({ onOpenArma, onNav }) {
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* encabezado */}
       <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Guía de calibres</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
         Conoce los calibres presentes en el catálogo: su uso típico, balística aproximada y las armas que los emplean. Cifras divulgativas, varían según marca y munición.
       </div>
 
@@ -186,7 +186,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
         {/* uso */}
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
         {/* desc */}
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
         {/* balística */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
           {stat('Velocidad', cal.velocidad)}
@@ -245,7 +245,7 @@ function CamposScreen({ onNav }) {
       }}>
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Suscripción próximamente</div>
-          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 4 }}>
+          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 4 }}>
             Pronto podrás suscribirte para acceder a campos y clubes de tiro aliados con beneficios y reservación. Estos son ejemplos de lo que vendrá.
           </div>
         </div>
@@ -318,7 +318,7 @@ function CursosScreen({ onNav }) {
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Cursos</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
         Aprende antes de decidir. Catálogo de formación con instructores certificados, del manejo seguro al tiro defensivo y de precisión. Contenido de muestra.
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr', gap: 14 }}>
@@ -345,7 +345,7 @@ function CursoCard({ curso, onNav, vp }) {
           <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.08em' }}>{curso.modalidad}</span>
         </div>
         <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.1, marginTop: 12 }}>{curso.titulo}</div>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 8, flex: 1 }}>{curso.desc}</div>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 8, flex: 1 }}>{curso.desc}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
           <div>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Duración</div>
@@ -386,7 +386,7 @@ function CaliberMiniCard({ cal, onClick }) {
       <div style={{ padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
       <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{cal.sistema}</div>
       <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 8, lineHeight: 1 }}>{cal.id}</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
       <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
       </div>
       {/* CARTUCHO SLOT — PNG vertical del cartucho a escala REAL (altura ∝ mm), anclado al piso */}
@@ -492,7 +492,7 @@ function ProximamenteScreen({ titulo, texto }) {
             el filo del mínimo gráfico. A 0.6 resuelve a #728680 = 3.67:1. */}
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.6, lineHeight: 1 }} aria-hidden="true">?</div>
         <div style={{
-          fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim,
+          fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim,
           lineHeight: 1.55, maxWidth: 560, margin: '16px auto 0',
         }}>{texto}</div>
       </div>

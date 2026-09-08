@@ -1847,7 +1847,7 @@ function AboutScreen() {
             <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
           </div>
-          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
+          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
             Una <span style={{ color: PALETTE.text }}>enciclopedia libre</span> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
           </div>
         </div>
@@ -1858,7 +1858,7 @@ function AboutScreen() {
             </div>
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
           </div>
-          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
+          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
             Un <span style={{ color: PALETTE.text }}>proyecto digital de e-commerce</span> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
           </div>
         </div>
