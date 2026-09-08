@@ -1077,8 +1077,22 @@ como instrumentación y no como texto.
 
 ### 5.4 Jerarquía sin bordes
 
-- Barra de estado legal a la izquierda de cada ficha (`border-left: 3px`) por permitida /
-  restringida / permiso especial. Semántica real, una propiedad.
+- **Estado legal en el hairline completo de la tarjeta**, no en una barra lateral. El color de
+  disponibilidad —uso civil / seguridad / exclusivo Ejército— es el `border: 1px solid` de todo
+  el contorno. Semántica real, una propiedad.
+
+  > Esto decía `border-left: 3px` y **se corrigió el 7-sep-2026**, porque se contradecía con §6.
+  > La franja de color en el canto izquierdo de una tarjeta es el tic más reconocible de interfaz
+  > generada por IA — el detector la marca con su propio nombre, `side-tab`, y era el hallazgo más
+  > repetido del sitio: 20 sobre fuente y 41 en todo el repo. El brief se pedía a sí mismo aquello
+  > que en §6 declara señal de trabajo genérico.
+  >
+  > El color no se perdió, se movió: pintando el contorno entero se conserva la misma información
+  > y el mismo color semántico, sin la pestaña. Medido sobre la tarjeta `#F7F8F4`:
+  > **6.02 / 5.49 / 6.42:1**. Y como la separación real la hace la sombra de §5.1b, el borde deja
+  > de ser el recurso principal, que es justo lo que pedía §6.
+  >
+  > **No reintroduzcas la barra lateral.** Si algo necesita distinguirse, es superficie y sombra.
 - Fichas destacadas con `grid-column: span 2` — rompe la cuadrícula sin código nuevo.
 - Par etiqueta/valor: etiqueta a 10-11px en mayúsculas con `letter-spacing: .08em`; valor en mono.
 - **Asimetría sistemática, no aleatoria:** siempre la misma esquina cortada, siempre los mismos
