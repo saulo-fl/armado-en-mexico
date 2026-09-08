@@ -65,6 +65,23 @@
   --tinta-placa: #59605C;                                /*  6.46:1 /  5.36:1 */
   --silueta:    #868E84;        --d-silueta:   #798177;  /* gráfico sobre la placa — 3.38:1 / 3.34:1 */
 
+  /* ── LA COPIA INSTANTÁNEA — tokens DIEGÉTICOS, sin tema ──────────────────
+     La polaroid no es una superficie de la interfaz: es un OBJETO dentro de la
+     ficción del sitio, una copia revelada dejada sobre el folder. Un objeto no
+     cambia de color porque el usuario cambie el tema — una polaroid real es
+     blanca en una habitación a oscuras igual que a plena luz. Lo que cambia es
+     la luz que la rodea, y de eso ya se ocupa `--sombra`.
+
+     Por eso NINGUNO de estos tokens tiene gemelo `--d-`: son los mismos en los
+     dos temas, a propósito. Si añades uno aquí, NO le pongas variante oscura.
+     Sus ratios, por tanto, se miden una sola vez y valen para ambos. */
+  --copia-carton:   #F7F8F4;   /* el cartón de la copia */
+  --copia-placa:    #FFFFFF;   /* el área de imagen, un punto más clara */
+  --copia-filo:     #B6BDB0;   /* el canto del cartón — 1.59:1 sobre él */
+  --copia-tinta:    #171B19;   /* lo escrito en el faldón — 16.31:1 */
+  --copia-tinta-2:  #59605C;   /* la leyenda del expediente — 6.46:1 */
+  --copia-silueta:  #868E84;   /* la silueta — 3.38:1 (WCAG 1.4.11 pide 3:1) */
+
   /* ── MARCA ──────────────────────────────────────────────────────────────
      El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
      siendo una SUPERFICIE oscura (banda, nav, hero), que es lo que siempre
@@ -543,11 +560,16 @@
    Es GEOMETRÍA, no un filtro: §4 pide el estilo ochentero «en el lenguaje
    visual, no mediante filtros de imagen envejecidos». Cero sepia, cero grano,
    cero viñeta, cero `filter`. Lo que la hace polaroid es el FALDÓN inferior
-   ancho, con el nombre del arma escrito en él. */
+   ancho, con el nombre del arma escrito en él.
+
+   NO SIGUE AL TEMA, y es deliberado: es un objeto diegético —una copia dejada
+   sobre el folder—, no una superficie de la interfaz. Va con los tokens
+   `--copia-*`, que no tienen variante oscura. Sobre el lienzo oscuro se lee
+   como lo que es: un papel blanco encima de un escritorio a media luz. */
 .amx-v2 .amx-polaroid {
   margin: 0;
-  background: var(--papel);
-  border: 1px solid var(--hair);
+  background: var(--copia-carton);
+  border: 1px solid var(--copia-filo);
   border-radius: 2px;                /* una copia revelada no tiene esquinas redondeadas */
   padding: 14px;
   box-shadow: var(--sombra);
@@ -561,8 +583,8 @@
   .amx-v2 .amx-polaroid { transform: rotate(-1.2deg); }
 }
 .amx-v2 .amx-polaroid-pozo {
-  background: var(--papel-hi);
-  border: 1px solid var(--hair);
+  background: var(--copia-placa);
+  border: 1px solid var(--copia-filo);
   /* Cuadrado, como el área de imagen de una copia instantánea de verdad — y
      como las fotos 1:1 del catálogo nuevo, que así se ven al tamaño que
      tenían en el hero apaisado en vez de quedar limitadas por el alto. */
@@ -588,7 +610,7 @@
   font-size: 13px;
   letter-spacing: .05em;
   line-height: 1.35;
-  color: var(--tinta);               /* 16.31:1 sobre el papel */
+  color: var(--copia-tinta);         /* 16.31:1 sobre el cartón, en los dos temas */
 }
 
 /* Ficha de expediente SIN fotografía: 62 de las 192 armas (32 %) no tienen.
@@ -615,7 +637,7 @@
 .amx-v2 .amx-polaroid-silueta {
   width: 82%;
   height: 56%;
-  background-color: var(--silueta);
+  background-color: var(--copia-silueta);
   -webkit-mask-image: var(--silueta-forma);
           mask-image: var(--silueta-forma);
   -webkit-mask-repeat: no-repeat;
@@ -639,7 +661,7 @@
   letter-spacing: .18em;
   text-transform: uppercase;
   text-align: center;
-  color: var(--tinta-placa);         /* 6.46:1 claro / 5.36:1 oscuro sobre la placa */
+  color: var(--copia-tinta-2);       /* 6.46:1 sobre la placa, en los dos temas */
 }
 
 /* ── El precio de referencia, bajo la foto ───────────────────────────────

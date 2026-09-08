@@ -190,19 +190,19 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                 </div>)}
             </div>
 
+            {/* La misma copia instantánea de la ficha, no una foto suelta: es
+                la primitiva `ArmaPolaroid`, así que trae su cartón blanco, su
+                faldón con el nombre escrito y —gratis— la variante de
+                expediente sin fotografía si la destacada no tuviera foto.
+                Sobre el verde de marca luce lo que es: un objeto dejado encima.
+                Por ser diegética no cambia con el tema, igual que en la ficha.
+                Sustituye a un <img> con `drop-shadow`, que proyectaba la
+                silueta del arma pero no la leía como pieza de archivo. */}
             <div style={{
-              width: '40%', flexShrink: 0, alignSelf: 'center',
+              width: '40%', maxWidth: 190, flexShrink: 0, alignSelf: 'center',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-              <img src={destacada.img} alt={destacada.nombre}
-                loading="lazy" decoding="async"
-                onError={(e) => { e.currentTarget.src = window.armaPlaceholder(destacada); }}
-                style={{
-                  maxWidth: '100%', maxHeight: 130, objectFit: 'contain',
-                  // La foto tiene canal alfa: drop-shadow proyecta la silueta real
-                  // del arma; box-shadow dibujaría la caja del <img>.
-                  filter: 'drop-shadow(0 14px 18px rgba(23,27,25,.42))'
-                }} />
+              <window.ArmaPolaroid arma={destacada} />
             </div>
           </div>
 
