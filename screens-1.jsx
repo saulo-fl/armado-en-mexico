@@ -177,8 +177,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                 marginBottom: 12
               }}>{destacada.calibre}</div>
 
-              {[['✦', destacada.mecanismo], ['⌖', destacada.pais],
-                ['◷', destacada.anio], ['▤', destacada.capacidad && ('Capacidad: ' + destacada.capacidad)]]
+              {/* Sin país ni año: desde que la polaroid escribe la procedencia
+                  en su faldón, repetirlos aquí era decir dos veces lo mismo a
+                  un palmo de distancia. Quedan el mecanismo y la capacidad, que
+                  la copia no dice. */}
+              {[['✦', destacada.mecanismo],
+                ['▤', destacada.capacidad && ('Capacidad: ' + destacada.capacidad)]]
                 .filter(([, v]) => v).map(([ic, v]) =>
                 <div key={v} style={{
                   display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,

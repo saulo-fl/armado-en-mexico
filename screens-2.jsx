@@ -222,22 +222,21 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         <div className="amx-folder">
           <div className="amx-folder-grid">
 
-            <div className="amx-folder-cab">
-              <div className="t-dato" style={{
-                display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-                fontSize: 12.5, letterSpacing: '0.16em', textTransform: 'uppercase',
-                marginBottom: 8
-              }}>
-                <CountryFlag pais={arma.pais} height={12} />
-                <span>{arma.marca} · {arma.pais} · {arma.anio}</span>
-              </div>
+            {/* La marca, el país y el año se fueron al faldón de la polaroid,
+                escritos donde alguien los anotaría en una copia. Aquí quedaban
+                repetidos a dos columnas de distancia.
 
+                Y la franja tricolor que iba bajo el título se retiró: es la
+                bandera de México y estaba puesta bajo el nombre de armas checas,
+                italianas o brasileñas, así que sugería una nacionalidad falsa.
+                Quien dice el origen ahora es la bandera del país real, en el
+                faldón. §6b lista el tricolor entre lo permitido, pero permitido
+                no es obligatorio y aquí desinformaba. */}
+            <div className="amx-folder-cab">
               <h1 className="t-titulo" style={{
                 fontSize: vp.isDesktop ? 36 : 27,
-                margin: '0 0 10px'
+                margin: '0 0 12px'
               }}>{arma.nombre}</h1>
-
-              <hr className="tricolor" style={{ width: 84, marginBottom: 12 }} />
 
               <div style={window.amxProsa({ fontSize: 16.5, margin: 0 })}>{arma.mecanismo}</div>
             </div>
