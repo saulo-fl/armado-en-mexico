@@ -236,15 +236,14 @@
   display: inline-block;
 }
 
-/* Línea tricolor: identidad mexicana sin escudo ni emblema (§29) */
-.amx-v2 .tricolor {
-  height: 3px;
-  border: 0;
-  margin: 0;
-  background: linear-gradient(90deg,
-    var(--verde-2) 0 33.3%, var(--beige) 33.3% 66.6%, var(--rojo) 66.6%);
-  border-radius: 2px;
-}
+/* Aquí vivía `.tricolor`, la línea verde-blanco-rojo bajo el título de la
+   ficha. Retirada el 8-sep-2026 por decisión de Saulo: es la bandera de México
+   y aparecía bajo el nombre de armas checas, italianas o brasileñas, así que
+   sugería una nacionalidad que el arma no tiene. Quien dice el origen ahora es
+   la bandera del país real, en el faldón de la polaroid.
+   §6b la lista entre lo permitido —y lo sigue estando como recurso gráfico—,
+   pero permitido no es obligatorio: aquí desinformaba. Se fue sin dejar un
+   solo consumidor. */
 
 /* ── Tabla de especificaciones (§11) ────────────────────────────────────── */
 
@@ -605,12 +604,31 @@
   min-height: 34px;
   margin-top: 14px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: center;               /* CENTRADO: así se rotula una copia a mano */
+  justify-content: center;
+  gap: 3px;
+  text-align: center;                /* y también cuando el nombre parte en dos */
   font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: .05em;
   line-height: 1.35;
   color: var(--copia-tinta);         /* 16.31:1 sobre el cartón, en los dos temas */
+}
+.amx-v2 .amx-polaroid-nombre {
+  font-size: 13px;
+  letter-spacing: .05em;
+}
+/* La procedencia, en segunda línea y más discreta: es la anotación al pie de
+   lo escrito, no un rótulo de la interfaz. 6.46:1 sobre el cartón. */
+.amx-v2 .amx-polaroid-datos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  font-size: 11px;                   /* piso de texto funcional */
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--copia-tinta-2);
 }
 
 /* Ficha de expediente SIN fotografía: 62 de las 192 armas (32 %) no tienen.

@@ -1108,7 +1108,20 @@ function ArmaPolaroid({ arma }) {
             onError={() => setFalloCarga(true)} />
         )}
       </div>
-      <figcaption className="amx-polaroid-pie">{arma.nombre}</figcaption>
+      {/* El faldón lleva lo que alguien escribiría a mano en el borde blanco de
+          una copia: el nombre y, debajo, de quién es y de cuándo. Centrado,
+          como se rotula una foto de verdad — no alineado al canto, que es cosa
+          de una interfaz, no de un objeto.
+          La bandera es ahora lo único que dice la nacionalidad del arma: la
+          franja tricolor que había bajo el título se retiró porque, siendo
+          mexicana, hacía parecer mexicana un arma checa o italiana. */}
+      <figcaption className="amx-polaroid-pie">
+        <span className="amx-polaroid-nombre">{arma.nombre}</span>
+        <span className="amx-polaroid-datos">
+          <CountryFlag pais={arma.pais} height={9} />
+          <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
+        </span>
+      </figcaption>
     </figure>
   );
 }
