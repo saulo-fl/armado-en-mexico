@@ -37,10 +37,20 @@ window.CATEGORIES = {
     { id: 'caza',      label: 'Cacería',        icon: '⤧' },
     { id: 'militar',   label: 'Militar / Táctico', icon: '☆' },
   ],
+  // Estos colores se usan como TEXTO sobre superficie clara (el contador de la
+  // home, `legalTit` en la ficha, el título del panel Legalidad), así que tienen
+  // que pasar AA por sí solos. Los originales estaban calibrados para el tema
+  // oscuro y sobre el lienzo claro se caían: #4FAE5C 2.42:1 · #F5C518 1.42:1
+  // (invisible) · #C0392B 4.73:1. Los de ahora, medidos con
+  // .claude/skills/fidelidad-diseno/scripts/contraste.mjs sobre crema #F3EFE4:
+  // 5.59:1 · 5.10:1 · 5.96:1 — y siguen pasando sobre el papel frío #E7EAE4
+  // (5.28 · 4.82 · 5.63) por si la §5.1b cambia de lienzo.
+  // OJO: no son los mismos que `tierColor` de data-traumaticas.js, que sí se usan
+  // como RELLENO con texto encima y allí los valores claros son los correctos.
   disponibilidad: [
-    { id: 'dcam',      label: 'Uso civil',           desc: 'Adquisición directa para civiles en DCAM con registro SEDENA.', color: '#4FAE5C' },
-    { id: 'seguridad', label: 'Policía / Seguridad', desc: 'Restringido a corporaciones de seguridad pública y privada con licencia colectiva.', color: '#F5C518' },
-    { id: 'ejercito',  label: 'Exclusivo Ejército',  desc: 'Uso exclusivo de las Fuerzas Armadas de México.', color: '#C0392B' },
+    { id: 'dcam',      label: 'Uso civil',           desc: 'Adquisición directa para civiles en DCAM con registro SEDENA.', color: '#2F6B33' },
+    { id: 'seguridad', label: 'Policía / Seguridad', desc: 'Restringido a corporaciones de seguridad pública y privada con licencia colectiva.', color: '#7D6108' },
+    { id: 'ejercito',  label: 'Exclusivo Ejército',  desc: 'Uso exclusivo de las Fuerzas Armadas de México.', color: '#A3341F' },
   ],
 };
 

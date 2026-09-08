@@ -45,9 +45,9 @@
       { id: "9x18 Makarov", label: "9x18 Makarov", icon: "▣" },
     ],
     disponibilidad: [
-      { id: 'dcam', label: 'Uso civil', desc: 'Adquisición directa para civiles en DCAM/OTCA con registro SEDENA.', color: '#4FAE5C' },
-      { id: 'seguridad', label: 'Policía / Seguridad', desc: 'Restringido a corporaciones de seguridad o tiradores con licencia de club registrado.', color: '#F5C518' },
-      { id: 'ejercito', label: 'Exclusivo Ejército', desc: 'Uso exclusivo de las Fuerzas Armadas de México.', color: '#C0392B' },
+      { id: 'dcam', label: 'Uso civil', desc: 'Adquisición directa para civiles en DCAM/OTCA con registro SEDENA.', color: '#2F6B33' },
+      { id: 'seguridad', label: 'Policía / Seguridad', desc: 'Restringido a corporaciones de seguridad o tiradores con licencia de club registrado.', color: '#7D6108' },
+      { id: 'ejercito', label: 'Exclusivo Ejército', desc: 'Uso exclusivo de las Fuerzas Armadas de México.', color: '#A3341F' },
     ],
   };
 

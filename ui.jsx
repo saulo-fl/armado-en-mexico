@@ -601,15 +601,20 @@ window.estiloAccion = estiloAccion;
 // ──────────────────────────────────────────────────────────────
 // Avisos, notas, disclaimers, normas, respuestas del FAQ, la historia de un arma,
 // los campos de formulario. Courier Prime va con el look táctico, pero en párrafo
-// cansa y se lee mal: aquí la accesibilidad gana al estilo. Es la misma receta que
-// ya usaba la «Declaración de intenciones» (Open Sans / lh 1.7), ahora compartida.
+// cansa y se lee mal: aquí la accesibilidad gana al estilo.
+//
+// Pedía 'Open Sans', que index.html NO carga: el <link> de fuentes solo trae
+// Archivo y JetBrains Mono. Los 51 usos de esta receta —historia, legal, avisos,
+// FAQ— caían al sans del sistema, así que la prosa del sitio no era de ninguna
+// familia elegida. DESIGN.md §5.3 sustituye Open Sans por Archivo justamente;
+// esto lo pone de acuerdo con la fuente que sí llega al navegador.
 //
 // La mono NO se toca en lo que se escanea en vez de leerse: rótulos HUD en
 // versalitas (§ LEGALIDAD · MX), precios, existencias, fechas, siglas y badges.
 // Esa es la frontera; si dudas, pregúntate si la frase se lee o se mira.
 function amxProsa(o) {
   return Object.assign({
-    fontFamily: 'Open Sans, sans-serif',
+    fontFamily: 'Archivo, system-ui, sans-serif',
     fontSize: 16, lineHeight: 1.7,
     color: PALETTE.textDim, textWrap: 'pretty',
   }, o);
@@ -1152,7 +1157,7 @@ function CompareFloat({ ids, onOpen, onClear }) {
       }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
       {ids.length === 2 && (
         <button onClick={onOpen} style={{
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.bgCard, border: 'none',
           padding: '5px 10px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
           letterSpacing: '0.1em', textTransform: 'uppercase',

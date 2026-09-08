@@ -506,7 +506,7 @@ function FavCard({ arma, onClick }) {
       {/* badge de favorito */}
       <div style={{
         position: 'absolute', top: 0, left: 0, zIndex: 2,
-        background: PALETTE.amber, color: '#000',
+        background: PALETTE.amber, color: PALETTE.bgCard,
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, fontWeight: 700,
         letterSpacing: '0.1em',
