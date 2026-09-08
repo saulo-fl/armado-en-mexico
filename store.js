@@ -171,7 +171,11 @@
   function fixArmaImg(a) {
     if (!a || !SEED_IMG[a.id]) return false;
     const img = a.img;
-    const vacia = !img || (typeof img === 'string' && img.startsWith('data:image/svg+xml'));
+    // «Vacía» es tanto el `data:` URI del placeholder viejo como la silueta de
+    // tipo que `armaPlaceholder` asigna ahora: ninguna es una foto del arma, y
+    // si el seed tiene una de verdad debe ganar.
+    const vacia = !img || (typeof img === 'string' &&
+      (img.startsWith('data:image/svg+xml') || img.indexOf('/silueta-') >= 0));
     const stale = typeof img === 'string' && img.startsWith('imagenes/') && img !== SEED_IMG[a.id];
     if (vacia || stale) { a.img = SEED_IMG[a.id]; return true; }
     return false;

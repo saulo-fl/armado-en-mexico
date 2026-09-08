@@ -161,25 +161,22 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   // Valoración: 'retroceso' se invierte (barra larga = poco retroceso), por eso
   // la etiqueta dice "control" — con el número a la vista, "Retroceso 52" se
   // habría leído justo al revés.
-  const statsKeys = [
-    { k: 'precision', l: 'Precisión' },
-    { k: 'poder', l: 'Daño' },
-    { k: 'alcance', l: 'Alcance' },
-    { k: 'manejo', l: 'Movilidad' },
-    { k: 'capacidad', l: 'Capacidad' },
-    { k: 'retroceso', l: 'Control retroceso', invert: true }];
-  const quick = [
-    { l: 'Calibre', v: arma.calibre },
-    { l: 'Capacidad', v: arma.capacidad },
-    { l: 'Longitud', v: arma.longitud },
-    { l: 'Peso', v: arma.peso }];
+  // `statsKeys` vivía aquí para la valoración divulgativa, retirada el
+  // 7-sep-2026. El comparador no lo usaba: lleva su propia lista inline.
+  // El rótulo del tipo para la pestaña del folder. En singular y acentuado:
+  // `CATEGORIES.tipo` guarda los rótulos en plural y despluralizar «Rifles» y
+  // «Revólveres» con la misma regla no sale (uno pierde la «s», el otro «es»).
+  const TIPO_SINGULAR = {
+    pistola: 'Pistola', revolver: 'Revólver', rifle: 'Rifle',
+    escopeta: 'Escopeta', carabina: 'Carabina' };
+  const tipoRotulo = TIPO_SINGULAR[arma.tipo] || arma.tipo || 'Expediente';
 
   const btnComparar = (
     <span className="amx-cut" style={{ display: vp.isDesktop ? 'inline-block' : 'block' }}>
       <button onClick={() => toggleCompare(arma.id)} style={{
         width: '100%',
         background: inCmp ? PALETTE.amber : 'transparent',
-        color: inCmp ? '#000' : PALETTE.amber,
+        color: inCmp ? PALETTE.tintaSobreMarca : PALETTE.amber,
         border: `1.5px solid ${PALETTE.amber}`,
         clipPath: CUT_TR,
         padding: '12px 22px', minHeight: 48,
@@ -194,132 +191,107 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
     <div style={{ paddingBottom: 90 }}>
      <div style={containerMax}>
 
-      {/* ── 1 · IDENTIDAD — quién es el arma, antes de enseñarla ───────── */}
-      <div style={{ padding: `${vp.isDesktop ? 26 : 18}px ${PAD}px ${vp.isDesktop ? 16 : 12}px` }}>
-        <div className="t-dato" style={{
-          display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-          fontSize: 12.5, letterSpacing: '0.16em', textTransform: 'uppercase',
-          marginBottom: 8
-        }}>
-          <CountryFlag pais={arma.pais} height={12} />
-          <span>{arma.marca} · {arma.pais} · {arma.anio}</span>
-          {/* Código de expediente: el guiño burocrático de DESIGN.md §29,
-              sin iconografía oficial. Derivado del id, no inventado. */}
-          <span className="sello">AR-{String(arma.id).padStart(4, '0')}</span>
+      {/* ── 1 · EL EXPEDIENTE — el elemento firma (DESIGN.md §4.3) ───────
+          «La pagina de arma de cada elemento debe ser preciosa, con un diseño
+           tipo analógico que de la sensación de estar leyendo desde un folder.
+           En escritorio aprovecharemos el ancho de la pagina para tener un
+           folder extendido con la foto del arma del lado izquierdo con un marco
+           de polaroid y su precio de referencia y del lado derecho la ficha
+           tecnica del arma.»
+
+          Sustituye a TRES bloques apilados: la identidad, el hero apaisado de
+          380px y los cuatro «datos clave». Los tres decían lo mismo tres veces
+          —calibre, capacidad, longitud y peso salían en el bloque de datos y
+          otra vez en la pestaña de Especificaciones— y en escritorio dejaban
+          1200px de ancho sin usar, que es justo lo que §4.3 quiere aprovechar.
+
+          El reparto en columnas lo hace estilo.css con una @media a 1024px, no
+          `vp.isDesktop`: aquí solo vive lo que depende del dato. */}
+      <div style={{ padding: `${vp.isDesktop ? 26 : 18}px ${PAD}px 0` }}>
+
+        <div className="amx-folder-cabecera">
+          <span className="amx-folder-pestana">{tipoRotulo}</span>
+          <span className="amx-folder-rayado" aria-hidden="true" />
+          {/* Aquí iba un folio `AR-####` derivado del id. Saulo lo descartó el
+              7-sep-2026: un código de expediente que no corresponde a ningún
+              registro real es decoración que finge ser dato, y en un sitio cuyo
+              valor es la trazabilidad eso cuesta credibilidad. La pestaña con el
+              tipo sí dice algo verdadero, y se queda. */}
         </div>
 
-        <h1 className="t-titulo" style={{
-          fontSize: vp.isDesktop ? 36 : 27,
-          margin: '0 0 8px'
-        }}>{arma.nombre}</h1>
+        <div className="amx-folder">
+          <div className="amx-folder-grid">
 
-        <hr className="tricolor" style={{ width: 84, marginBottom: 12 }} />
+            {/* La marca, el país y el año se fueron al faldón de la polaroid,
+                escritos donde alguien los anotaría en una copia. Aquí quedaban
+                repetidos a dos columnas de distancia.
 
-        <div style={window.amxProsa({ fontSize: 16.5, marginBottom: 12 })}>{arma.mecanismo}</div>
+                Y la franja tricolor que iba bajo el título se retiró: es la
+                bandera de México y estaba puesta bajo el nombre de armas checas,
+                italianas o brasileñas, así que sugería una nacionalidad falsa.
+                Quien dice el origen ahora es la bandera del país real, en el
+                faldón. §6b lista el tricolor entre lo permitido, pero permitido
+                no es obligatorio y aquí desinformaba. */}
+            <div className="amx-folder-cab">
+              <h1 className="t-titulo" style={{
+                fontSize: vp.isDesktop ? 36 : 27,
+                margin: '0 0 12px'
+              }}>{arma.nombre}</h1>
 
-        {/* la pregunta que trae al visitante, resuelta antes del pliegue */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <AvailBadge avail={arma.avail} />
-          <span style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
-            color: availMeta?.color || PALETTE.textDim, letterSpacing: '0.04em'
-          }}>{arma.legalTit}</span>
-        </div>
-      </div>
-
-      {/* ── 2 · HERO — el arma es lo único brillante de la pantalla ────── */}
-      <div style={{
-          position: 'relative',
-          height: vp.isDesktop ? 380 : 240,
-          background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-          borderTop: `1px solid ${PALETTE.border}`,
-          borderBottom: `1px solid ${PALETTE.border}`,
-          overflow: 'hidden'
-        }}>
-        <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: `linear-gradient(90deg, ${PALETTE.border}55 1px, transparent 1px), linear-gradient(0deg, ${PALETTE.border}55 1px, transparent 1px)`,
-            backgroundSize: '20px 20px',
-            maskImage: 'radial-gradient(circle, black 0%, transparent 70%)'
-          }} />
-        {/* El 96% de alto es para las fotos 1:1 del catálogo nuevo. El hero es
-            muy apaisado (1200x380 en escritorio), asi que una foto cuadrada la
-            limita SIEMPRE el alto: con el 75% anterior se renderizaba a 284px y
-            el arma quedaba en 272px de ancho teniendo 1200 disponibles — un 31%
-            mas pequena que con las fotos apaisadas viejas. El maxWidth sigue
-            protegiendo a las pocas apaisadas que quedan. */}
-        <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high" style={{
-            position: 'absolute', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            maxWidth: '85%', maxHeight: '96%',
-            filter: 'grayscale(0.1) contrast(1.15) drop-shadow(0 8px 24px rgba(0,0,0,0.6))'
-          }} onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-      </div>
-
-      {/* ── 3 · DATOS CLAVE ────────────────────────────────────────────── */}
-      <ProdSection pad={PAD} gap={vp.isDesktop ? 26 : 20}>
-        {/* Panel CREMA (DESIGN.md §27 y el mockup): la ficha técnica se lee
-            sobre papel, no sobre otra caja verde. Las divisiones son hairlines,
-            no un grid de bordes de 1px. */}
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
-            background: CLARO.panel,
-            borderRadius: CLARO.radio,
-            border: `1px solid ${CLARO.hair}`,
-            boxShadow: CLARO.sombra,
-            overflow: 'hidden'
-          }}>
-          {quick.map((q, i) =>
-            <div key={q.l} style={{
-              padding: '14px 16px',
-              borderRight: `1px solid ${CLARO.hair}`,
-              borderBottom: `1px solid ${CLARO.hair}`,
-            }}>
-              <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 10.5, fontWeight: 600, color: CLARO.tinta2, letterSpacing: '0.13em', textTransform: 'uppercase', marginBottom: 5 }}>{q.l}</div>
-              <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: CLARO.tinta, lineHeight: 1.1, ...NUM }}>{q.v}</div>
+              <div style={window.amxProsa({ fontSize: 16.5, margin: 0 })}>{arma.mecanismo}</div>
             </div>
-          )}
-        </div>
-        <div style={{ marginTop: 14 }}>{btnComparar}</div>
-      </ProdSection>
 
-      {/* ── 4 · VALORACIÓN DIVULGATIVA ─────────────────────────────────── */}
-      <ProdSection pad={PAD} gap={SEC} band>
-        <SectionHeader>Valoración divulgativa</SectionHeader>
-        <div style={{
-          // Panel HUNDIDO sobre la banda elevada: con bgCard (#2C2C2C) sobre la
-          // propia banda (#2C2C2C) la tarjeta desaparecía.
-          background: PALETTE.bg,
-          border: `1px solid ${PALETTE.border}`,
-          padding: vp.isDesktop ? '18px 20px 8px' : '15px 15px 5px',
-          position: 'relative'
-        }}>
-          <TacticalCorners size={10} color={ORANGE} />
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: vp.isDesktop ? 'repeat(2, minmax(0, 1fr))' : '1fr',
-            columnGap: 26
-          }}>
-            {statsKeys.map((s) => {
-              const raw = arma.stats[s.k] || 0;
-              const v = s.invert ? 100 - raw : raw;
-              const barColor = v >= 67 ? PALETTE.green : v >= 34 ? ORANGE : PALETTE.redHi;
-              return <window.StatsBar key={s.k} label={s.l} value={v} color={barColor} />;
-            })}
-          </div>
-          <div style={window.amxProsa({
-            borderTop: `1px dashed ${PALETTE.border}`,
-            marginTop: 4, paddingTop: 10, paddingBottom: 10,
-            fontSize: 14.5, color: PALETTE.textMuted, lineHeight: 1.6
-          })}>
-            <b style={{ color: PALETTE.textDim }}>Estimación por familia</b> · todas las armas
-            de tipo {arma.tipo} en calibre {arma.calibre} comparten estos valores. Derivan de las
-            especificaciones técnicas y sirven para comparar entre modelos, no para medir un
-            ejemplar concreto.
+            <div className="amx-folder-izq">
+              <window.ArmaPolaroid arma={arma} />
+              {/* El precio bajo la foto, con su procedencia a la vista (§14 y
+                  §6b: todo dato con fuente). Los tres valores ya existían en
+                  esta pantalla — no se inventa ninguno. */}
+              <div className="amx-precio-ref">
+                <div className="amx-precio-ref-cifra">{precioActual}</div>
+                <div className="amx-precio-ref-fuente">
+                  <div>Referencia · {curSigla}</div>
+                  {currentManual && <div>al {amxFmtManualDate(currentManual.fecha)}</div>}
+                </div>
+              </div>
+            </div>
+
+            <div className="amx-folder-der">
+              <window.FichaTecnica arma={arma} />
+
+              {/* la pregunta que trae al visitante, resuelta antes del pliegue */}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+                marginTop: 20
+              }}>
+                <AvailBadge avail={arma.avail} />
+                <span style={{
+                  fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
+                  color: window.amxColorAvail(availMeta?.color) || PALETTE.textDim, letterSpacing: '0.04em'
+                }}>{arma.legalTit}</span>
+              </div>
+
+              <div style={{ marginTop: 14 }}>{btnComparar}</div>
+            </div>
+
           </div>
         </div>
-      </ProdSection>
+      </div>
+
+      {/* ── VALORACIÓN DIVULGATIVA — RETIRADA (7-sep-2026) ───────────────
+          Aquí iban seis barras —precisión, daño, alcance, movilidad, capacidad
+          y control de retroceso— con su aviso de «estimación por familia».
+
+          Saulo la retiró: los números no salían de mediciones ni de votos
+          verificables, sino de una derivación por tipo y calibre, así que TODAS
+          las armas de una misma familia mostraban exactamente lo mismo. Una
+          barra de 0 a 100 promete una precisión que el dato no tiene, y en un
+          sitio cuyo valor es la trazabilidad —cada precio con su inventario y
+          su fecha, cada afirmación legal con su texto de ley— una cifra sin
+          respaldo cuesta más credibilidad de la que aporta.
+
+          `arma.stats` NO se toca: sigue en data.js y lo sigue usando el
+          comparador, que lleva su propia lista inline. `window.StatsBar` se
+          queda en ui.jsx por lo mismo. Si esto vuelve, que vuelva con fuente. */}
 
       {/* ── 5 · PRECIO DE REFERENCIA + 6 · HISTORIAL ───────────────────── */}
       <ProdSection pad={PAD} gap={SEC}>
@@ -567,32 +539,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* ── 9-12 · TABS (DESIGN.md §11) — variante B de la comparación.
              GALERÍA no está: hoy cada arma tiene una sola foto. Cuando haya
-             varias imágenes por ficha, entra como quinto Panel y ya. ─────── */}
+             varias imágenes por ficha, entra como quinto Panel y ya.
+             ESPECIFICACIONES tampoco: la ficha técnica del folder (§4.3) es la
+             misma tabla `.specs` con los mismos campos. `mecanismo` es la prosa
+             bajo el título y `tipo` es la pestaña del folder, así que aquí no
+             se pierde ningún dato — se deja de repetir. ────────────────── */}
       <ProdSection pad={PAD} gap={SEC}>
         <FichaTabs>
-
-          <Panel label="Especificaciones">
-            {/* Tabla, no cajas: DESIGN.md §11. Los campos salen de `arma`, no
-                se escriben uno a uno en el JSX. Añadir una spec = una línea. */}
-            <div className="p-claro" style={{ overflowX: 'auto' }}>
-              <table className="specs">
-                <tbody>
-                  {[
-                    ['Calibre',    arma.calibre],
-                    ['Capacidad',  arma.capacidad],
-                    ['Peso',       arma.peso],
-                    ['Longitud',   arma.longitud],
-                    ['Mecanismo',  arma.mecanismo],
-                    ['Origen',     arma.pais],
-                    ['Año intro.', arma.anio],
-                    ['Tipo',       arma.tipo && arma.tipo.toUpperCase()],
-                  ].filter(([, v]) => v != null && v !== '').map(([k, v]) => (
-                    <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Panel>
 
           {arma.uses && arma.uses.length > 0 &&
             <Panel label="Usos">
@@ -621,7 +574,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             <div>
               <div style={{
                 fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                color: availMeta?.color || PALETTE.text,
+                color: window.amxColorAvail(availMeta?.color) || PALETTE.text,
                 textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7
               }}>{arma.legalTit}</div>
               <div style={window.amxProsa({ fontSize: 16, marginBottom: 14 })}>{arma.legalDesc}</div>
@@ -717,9 +670,11 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           // El -1px superpone los dos bordes en una sola línea: si se apoya justo
           // encima queda una rendija por la que se ve pasar el contenido.
           bottom: 'calc(var(--amx-nav-h, 74px) - 1px)',
-          // Blanco sólido sobre el lienzo claro. Sin backdrop-filter: es el
-          // asesino nº1 del scroll en móvil y aquí no aportaba nada.
-          background: CLARO.panelHi,
+          // Superficie sólida, no placa fotográfica: usa --papel, que SÍ sigue al
+          // tema. Con CLARO.panelHi (la placa, clara en ambos temas) el texto
+          // --tinta-2 de esta barra quedaba gris claro sobre casi blanco.
+          // Sin backdrop-filter: es el asesino nº1 del scroll en móvil.
+          background: CLARO.panel,
           borderTop: `1px solid ${PALETTE.border}`,
           boxShadow: '0 -6px 18px -12px rgba(23,27,25,.28)',
           padding: '10px 16px',
@@ -740,7 +695,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           <span className="amx-cut" style={{ display: 'block' }}>
             <button onClick={() => toggleCompare(arma.id)} style={{
               background: inCmp ? 'transparent' : PALETTE.amber,
-              color: inCmp ? PALETTE.amber : '#000',
+              color: inCmp ? PALETTE.amber : PALETTE.tintaSobreMarca,
               border: `1.5px solid ${PALETTE.amber}`,
               clipPath: CUT_TR,
               minHeight: 46, padding: '0 20px',
@@ -911,7 +866,7 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                 </div>
                 <button type="button" onClick={enviar} disabled={!listo} style={{
                   background: listo ? PALETTE.amber : 'transparent',
-                  color: listo ? '#000' : PALETTE.textMuted,
+                  color: listo ? PALETTE.tintaSobreMarca : PALETTE.textMuted,
                   border: `1.5px solid ${listo ? PALETTE.amber : PALETTE.border}`,
                   padding: '0 22px', minHeight: 48,
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
@@ -1066,7 +1021,7 @@ function YouTubeBlock({ arma, padX = 16 }) {
                   y el negro encima daba 1.69:1 — CTAs ilegibles. Sobre verde el
                   texto va en sobreMarca #F3EFE4 (10.83:1). Vale para los siete. */}
               <span style={{
-              background: PALETTE.amber, color: PALETTE.sobreMarca,
+              background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
               padding: '2px 6px', fontWeight: 700, fontSize: 13,
               letterSpacing: '0.1em'
             }}>YOUTUBE</span>
@@ -1148,7 +1103,7 @@ function SuggestChangesModal({ arma, onClose }) {
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
             <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.6, marginBottom: 20 })}>Tu sugerencia entró en la cola. Revisaremos la información y, si procede, aplicaremos el cambio.</div>
             <button onClick={onClose} style={{
-            background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+            background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
             padding: '10px 20px',
             fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
             letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
@@ -1191,7 +1146,7 @@ function SuggestChangesModal({ arma, onClose }) {
               letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
             }}>Cancelar</button>
               <button type="submit" style={{
-              background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+              background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
               padding: '10px 20px',
               fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
               letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
@@ -1273,7 +1228,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
           Selecciona armas desde el catálogo<br />tocando el botón ⇄ en cada tarjeta.
         </div>
         <button onClick={() => onNav('catalog')} style={{
-          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '10px 22px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.15em', textTransform: 'uppercase',
@@ -1348,7 +1303,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
                       position: 'absolute', right: 0, top: 0, bottom: 0,
                       width: `${va}%`,
                       background: winner === 'a' ? PALETTE.amber : PALETTE.textMuted,
-                      boxShadow: winner === 'a' ? `0 0 4px ${PALETTE.amber}66` : 'none'
+                      boxShadow: winner === 'a' ? `0 0 4px ${window.amxAlfa(PALETTE.amber, 40)}` : 'none'
                     }} />
                     </div>
                   </div>
@@ -1373,7 +1328,7 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
                       position: 'absolute', left: 0, top: 0, bottom: 0,
                       width: `${vb}%`,
                       background: winner === 'b' ? PALETTE.amber : PALETTE.textMuted,
-                      boxShadow: winner === 'b' ? `0 0 4px ${PALETTE.amber}66` : 'none'
+                      boxShadow: winner === 'b' ? `0 0 4px ${window.amxAlfa(PALETTE.amber, 40)}` : 'none'
                     }} />
                     </div>
                   </div>
@@ -1579,7 +1534,7 @@ function LegalScreen({ onNav }) {
         {window.CATEGORIES.disponibilidad.map((d) =>
         <div key={d.id} style={{
           background: PALETTE.bgCard,
-          border: `1px solid ${d.color}`,
+          border: `1px solid ${window.amxColorAvail(d.color)}`,
           boxShadow: CLARO.sombra,
           padding: '12px 14px'
         }}>
@@ -1729,7 +1684,7 @@ function LegalScreen({ onNav }) {
         <a href={`https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`}
         target="_blank" rel="noopener" style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: PALETTE.amber, color: PALETTE.sobreMarca,
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
           textDecoration: 'none',
           padding: '12px 16px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
@@ -2145,7 +2100,7 @@ function SoporteScreen({ onNav }) {
             <button type="button" onClick={enviarDenuncia} disabled={!denListo} style={{
               width: '100%', marginTop: 4,
               background: denListo ? PALETTE.amber : 'transparent',
-              color: denListo ? '#000' : PALETTE.textMuted,
+              color: denListo ? PALETTE.tintaSobreMarca : PALETTE.textMuted,
               border: `1.5px solid ${denListo ? PALETTE.amber : PALETTE.border}`,
               padding: '13px', minHeight: 48,
               fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
@@ -2414,7 +2369,7 @@ function SubmitScreen({ onNav }) {
           </div>}
         </div>
         <button onClick={() => onNav('home')} style={{
-          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '12px 24px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',
@@ -2523,7 +2478,7 @@ function SubmitScreen({ onNav }) {
           cursor: 'pointer'
         }}>Cancelar</button>
         <button type="submit" style={{
-          background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '12px 26px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.18em', textTransform: 'uppercase',

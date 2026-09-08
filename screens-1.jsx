@@ -49,7 +49,10 @@ const FOTOS_EXPERIENCIAS = [
 function ProximamenteTag() {
   return (
     <span style={{
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.marca,
+      // El ACENTO, no la superficie de marca: en oscuro el verde #173A32 sobre
+      // el lienzo da 1.52:1 y este rótulo desaparecía. PALETTE.amber vale lo
+      // mismo (#173A32) en claro y sube a la variante clara en oscuro (9.17:1).
+      fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber,
       letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
       cursor: 'default',   // refuerza que no se pincha, aunque esté donde iba el enlace
     }}>(Próximamente)</span>
@@ -174,8 +177,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                 marginBottom: 12
               }}>{destacada.calibre}</div>
 
-              {[['✦', destacada.mecanismo], ['⌖', destacada.pais],
-                ['◷', destacada.anio], ['▤', destacada.capacidad && ('Capacidad: ' + destacada.capacidad)]]
+              {/* Sin país ni año: desde que la polaroid escribe la procedencia
+                  en su faldón, repetirlos aquí era decir dos veces lo mismo a
+                  un palmo de distancia. Quedan el mecanismo y la capacidad, que
+                  la copia no dice. */}
+              {[['✦', destacada.mecanismo],
+                ['▤', destacada.capacidad && ('Capacidad: ' + destacada.capacidad)]]
                 .filter(([, v]) => v).map(([ic, v]) =>
                 <div key={v} style={{
                   display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
@@ -187,19 +194,19 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                 </div>)}
             </div>
 
+            {/* La misma copia instantánea de la ficha, no una foto suelta: es
+                la primitiva `ArmaPolaroid`, así que trae su cartón blanco, su
+                faldón con el nombre escrito y —gratis— la variante de
+                expediente sin fotografía si la destacada no tuviera foto.
+                Sobre el verde de marca luce lo que es: un objeto dejado encima.
+                Por ser diegética no cambia con el tema, igual que en la ficha.
+                Sustituye a un <img> con `drop-shadow`, que proyectaba la
+                silueta del arma pero no la leía como pieza de archivo. */}
             <div style={{
-              width: '40%', flexShrink: 0, alignSelf: 'center',
+              width: '40%', maxWidth: 190, flexShrink: 0, alignSelf: 'center',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-              <img src={destacada.img} alt={destacada.nombre}
-                loading="lazy" decoding="async"
-                onError={(e) => { e.currentTarget.src = window.armaPlaceholder(destacada); }}
-                style={{
-                  maxWidth: '100%', maxHeight: 130, objectFit: 'contain',
-                  // La foto tiene canal alfa: drop-shadow proyecta la silueta real
-                  // del arma; box-shadow dibujaría la caja del <img>.
-                  filter: 'drop-shadow(0 14px 18px rgba(23,27,25,.42))'
-                }} />
+              <window.ArmaPolaroid arma={destacada} />
             </div>
           </div>
 
@@ -389,7 +396,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                 // izquierda — el tic de UI generada de §6. Ahora es el hairline
                 // ENTERO de la tarjeta: misma informacion, sin la pestaña, y
                 // medido sobre la tarjeta: 6.02 / 5.49 / 6.42:1.
-                border: `1px solid ${d.color}`,
+                border: `1px solid ${window.amxColorAvail(d.color)}`,
                 padding: '10px 12px', cursor: 'pointer', textAlign: 'left',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
@@ -405,7 +412,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                 </div>
                 <div style={{
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-                  fontSize: 19, color: d.color, marginLeft: 10
+                  fontSize: 19, color: window.amxColorAvail(d.color), marginLeft: 10
                 }}>{count}</div>
               </button>);
 
@@ -510,7 +517,7 @@ function FavCard({ arma, onClick }) {
       {/* badge de favorito */}
       <div style={{
         position: 'absolute', top: 0, left: 0, zIndex: 2,
-        background: PALETTE.amber, color: PALETTE.bgCard,
+        background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: 13, fontWeight: 700,
         letterSpacing: '0.1em',
@@ -606,14 +613,14 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
       {p.bgImage &&
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: `linear-gradient(180deg, ${bgColor}cc 0%, ${bgColor}99 60%, ${bgColor}f0 100%), url("${p.bgImage}")`,
+        backgroundImage: `linear-gradient(180deg, ${window.amxAlfa(bgColor, 80)} 0%, ${window.amxAlfa(bgColor, 60)} 60%, ${window.amxAlfa(bgColor, 94)} 100%), url("${p.bgImage}")`,
         backgroundSize: 'cover', backgroundPosition: 'center'
       }} />
       }
       {/* cuadrícula táctica */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: `linear-gradient(${accent}11 1px, transparent 1px), linear-gradient(90deg, ${accent}11 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(${window.amxAlfa(accent, 7)} 1px, transparent 1px), linear-gradient(90deg, ${window.amxAlfa(accent, 7)} 1px, transparent 1px)`,
         backgroundSize: '32px 32px',
         maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 80%)'
       }} />
@@ -1155,7 +1162,7 @@ function ArsenalHubScreen({ onNav }) {
 
       <Hdr icon="●">Disponibilidad</Hdr>
       <div style={grid(1)}>
-        <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color="#4FAE5C" count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
+        <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color={window.CLARO.ok} count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
       </div>
 
       <Hdr icon="◢">Tipo de arma</Hdr>
@@ -1170,8 +1177,8 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Tiro deportivo" sub="Clubes y polígonos" count={usoCount('club')} onClick={() => onNav('category', { mode: 'uso', value: 'club' })} />
         <Card label="Cacería" sub="Caza mayor y menor" count={usoCount('caza')} onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
         <Card label="Defensa del hogar" sub="Uso en domicilio" count={usoCount('domicilio')} onClick={() => onNav('category', { mode: 'uso', value: 'domicilio' })} />
-        <Card label="Seguridad privada" sub="Licencia colectiva" color="#F5C518" count={availCount('seguridad')} onClick={() => onNav('category', { mode: 'avail', value: 'seguridad' })} />
-        <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color="#E4574B" count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
+        <Card label="Seguridad privada" sub="Licencia colectiva" color="var(--seguridad)" count={availCount('seguridad')} onClick={() => onNav('category', { mode: 'avail', value: 'seguridad' })} />
+        <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color={window.CLARO.alerta} count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
       </div>
 
       <Hdr icon="◈">Calibre</Hdr>

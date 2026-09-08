@@ -1,93 +1,180 @@
 // Armado en México — Componentes UI compartidos
 // Estética: oscuro elegante con detalles tácticos (color palette dark/amber/military)
 
-// ── Paleta «Documento Oficial Mexicano» (DESIGN.md §2) ─────────────────────
-// Cada valor está medido sobre el fondo Y sobre la tarjeta, porque el texto cae
-// sobre las dos. El ratio anotado es el PEOR de los dos casos.
-// Verificar tras cualquier cambio:
-//   node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
+// ── Paleta «Documento Oficial Mexicano» (DESIGN.md §2 y §5.1b) ─────────────
 //
-// El error que arrastraba la paleta anterior: la tarjeta daba 1.25:1 contra su
+// ESTOS OBJETOS YA NO GUARDAN HEX: guardan `var(--token)`.
+//
+// Por qué. Hay ~1355 referencias a PALETTE/CLARO/P repartidas por los .jsx, y
+// casi todas acaban como color inline dentro de un objeto `style={{}}`. Un
+// modo oscuro hecho solo con CSS no alcanza a ninguna de ellas, y reescribirlas
+// está descartado (DESIGN.md §2: 1238 objetos `style={{`). React pasa las
+// `var()` TAL CUAL al atributo `style`, así que cambiando estos ~30 valores los
+// 1355 usos heredan el tema sin tocar una sola pantalla. Precedente en el repo:
+// `BottomNav` ya publica `--amx-nav-h` con `setProperty`.
+//
+// LOS VALORES REALES —los dos temas, con sus ratios medidos— VIVEN EN
+// `estilo.css`, en el bloque `:root`. Ahí se cambian, y ahí los audita
+// `node .claude/skills/fidelidad-diseno/scripts/contraste.mjs`, que lee ese
+// bloque y mide LOS DOS TEMAS por separado.
+//
+// TRES TRAMPAS de trabajar con `var()` en vez de hex, ya resueltas:
+//   1. `${color}66` (hex + alfa) produce `var(--x)66`, que es CSS inválido.
+//      Para eso está `amxAlfa(color, pct)`, más abajo.
+//   2. Un `var()` en un ATRIBUTO de presentación de SVG (`fill=`, `stroke=`)
+//      tiene soporte irregular. En SVG va por `style={{ fill: … }}`.
+//   3. Nada puede parsear el hex de un token en JS. El único sitio que lo hacía
+//      —`amxTintaSobre`— tiene ahora su token dedicado (ver más abajo).
+//
+// El error que arrastraba la paleta original: la tarjeta daba 1.25:1 contra su
 // fondo y el borde 1.23:1 contra la tarjeta — las dos señales que definen una
-// tarjeta eran invisibles, y por eso el sitio se leía «cuadrado». Cambiar un
-// claro por otro claro NO arregla eso: tarjeta sobre lienzo da 1.14:1 y NINGÚN
-// par de superficies claras llega al umbral perceptible. Lo que separa las
-// capas aquí es la SOMBRA (CLARO.sombra) más el hairline (§5.1b: «separar por
-// superficie y sombra suave, no por borde de 1px»). No subas bgCard sin
-// recalcular: una tarjeta más clara aplasta el contraste del texto que va encima.
-//
-// El lienzo es «papel de oficio frío» #E7EAE4: mismo matiz verde-gris que la
-// marca, no el crema #F3EFE4 anterior. El crema seguía siendo el warm off-white
-// por defecto de la IA y el detector lo marcaba en las 322 páginas.
-// La app es CLARA. El verde es el color de marca: header, navegación, hero de
-// producto y acentos. Tenerlo al revés —toda la app en verde— era el error de
-// fondo del primer intento.
+// tarjeta eran invisibles, y por eso el sitio se leía «cuadrado». En el tema
+// CLARO eso lo resuelve la SOMBRA (ningún par de superficies claras pasa de
+// ~1.2:1). En el tema OSCURO la sombra no separa —no hay luz que ocultar—, así
+// que ahí lo resuelven el salto de superficie (1.54:1) y un hairline visible.
 const PALETTE = {
-  bg:        '#E7EAE4',   // lienzo «papel de oficio frío»
-  bgElev:    '#F7F8F4',   // tarjeta (1.14:1 sobre el lienzo: la definen sombra + hairline)
-  bgCard:    '#F7F8F4',
-  bgCardGrad:'linear-gradient(180deg, #FDFEFC, #F1F4EE)',
-  border:    '#B6BDB0',   // hairline — 1.59:1 sobre el lienzo (el #D5D6CE previo daba 1.27:1)
-  borderHi:  '#868E84',   // borde/indicador que porta estado — 3.17:1 sobre la tarjeta (WCAG 1.4.11)
-  amber:     '#173A32',   // el acento es el VERDE DE MARCA — 10.24:1 sobre el lienzo
-  amberDim:  '#2F6B33',
-  military:  '#7C837B',
-  red:       '#C83B32',   // relleno de CTA, con texto claro encima (4.83:1)
-  redHi:     '#A3341F',   // rojo como TEXTO — 5.63:1
-  green:     '#2F6B33',   // 5.28:1
-  blue:      '#4A6B7C',   // 4.69:1
-  text:      '#171B19',   // tinta — 14.32:1
-  textDim:   '#3E443D',   // 8.24:1
-  textMuted: '#59605C',   // 5.32:1
-  // Superficies de marca: header, nav y hero. El texto encima va en `text` invertido.
-  marca:     '#173A32',
-  marcaAlt:  '#1E4A40',
-  sobreMarca:'#F3EFE4',   // 10.83:1 sobre marca
-  // Los dos escalones apagados del texto sobre marca. Se USABAN desde el primer
-  // día (TopNav, BottomNav, AppHeader) pero nunca se definieron: resolvían a
-  // undefined, React omitía `color` y el enlace heredaba la tinta #171B19 del
-  // contenedor raíz — negro sobre verde, 1.4:1. De ahí que los enlaces
-  // inactivos de la navegación no se leyeran.
-  sobreMarcaDim:   '#B8C2BA',  // 6.79:1 sobre #173A32 — enlace inactivo
-  sobreMarcaMuted: '#9FACA2',  // 5.27:1 — lo desactivado (Próximamente)
-  // Rojo para overlay oscuro: sobre el verde de marca redHi cae a 1.8:1.
-  redSobreVerde:   '#F29C8C',  // 5.87:1 sobre #173A32
+  bg:        'var(--lienzo)',      // lienzo «papel de oficio frío» / near-black verde
+  bgElev:    'var(--papel)',       // tarjeta
+  bgCard:    'var(--papel)',
+  bgCardGrad:'var(--papel-grad)',
+  border:    'var(--hair)',        // hairline
+  borderHi:  'var(--hair-hi)',     // borde/indicador que PORTA estado (WCAG 1.4.11)
+  amber:     'var(--acento)',      // el acento de marca: verde oscuro en claro, verde claro en oscuro
+  amberDim:  'var(--ok)',
+  military:  'var(--gris-2)',
+  red:       'var(--rojo)',        // relleno de CTA, con texto claro encima
+  redHi:     'var(--alerta)',      // rojo como TEXTO
+  green:     'var(--ok)',
+  blue:      'var(--azul)',
+  text:      'var(--tinta)',
+  textDim:   'var(--tinta-dim)',
+  textMuted: 'var(--tinta-2)',
+  // Superficies de MARCA: header, nav y hero. Son verde oscuro en LOS DOS
+  // temas —el verde de marca no se toca—, así que su tinta tampoco cambia.
+  marca:     'var(--marca)',
+  marcaAlt:  'var(--marca-alt)',
+  sobreMarca:'var(--sobre-marca)',        // 10.83:1 sobre la marca, en ambos temas
+  sobreMarcaDim:   'var(--sobre-marca-dim)',    // 6.79:1 — enlace inactivo
+  sobreMarcaMuted: 'var(--sobre-marca-muted)',  // 5.27:1 — lo desactivado
+  redSobreVerde:   'var(--rojo-sobre-marca)',   // 5.87:1 sobre la marca
+  // LA TINTA QUE VA ENCIMA DE UN RELLENO DE `amber`. No es lo mismo que
+  // `sobreMarca`: la superficie de marca es verde OSCURO en los dos temas, pero
+  // el ACENTO se aclara en oscuro, y entonces la tinta encima tiene que
+  // oscurecerse. Confundir los dos era el fallo que este token cierra: 12 CTAs
+  // pintaban crema sobre un relleno que en oscuro es verde claro (1.4:1).
+  tintaSobreMarca: 'var(--tinta-sobre-marca)',  // 10.83:1 claro / 9.17:1 oscuro
 };
 window.PALETTE = PALETTE;
 
-// ── Tokens SOBRE SUPERFICIE CLARA ──────────────────────────────────────────
-// El patrón dominante del mockup es tarjeta crema sobre fondo verde (10.83:1),
-// no caja oscura sobre fondo oscuro. Lo que va encima de una tarjeta clara usa
-// estos, no PALETTE, que está calibrada para el fondo verde.
+// ── Tokens SOBRE SUPERFICIE DE CONTENIDO ───────────────────────────────────
+// Lo que va encima de una tarjeta usa estos. Mismos tokens que PALETTE donde
+// coinciden: son deliberadamente gemelos, no dos paletas distintas.
 const CLARO = {
-  // La tarjeta se separa del lienzo por sombra + hairline, no por color: entre
-  // dos superficies claras el ratio máximo alcanzable es ~1.2:1.
-  panel:   '#F7F8F4',   // tarjeta
-  panelHi: '#FFFFFF',   // pozo de foto (ficha de producto)
-  zebra:   '#E4E7E0',   // fila alterna sobre la tarjeta — 1.17:1, va con el hairline
-  tinta:   '#171B19',   // 14.32:1 sobre el lienzo
-  tinta2:  '#59605C',   //  5.32:1
-  hair:    '#B6BDB0',   // el MISMO hairline que PALETTE.border, medido: 1.59:1 sobre el lienzo
-  // ── LA SOMBRA — la mitad que hace funcionar el lienzo claro ──────────────
-  // Tres capas: contacto (2px) + media (8px) + ambiente (18px). Ese escalonado
-  // es lo que lee el ojo como «una capa encima de otra» cuando el color de las
-  // dos superficies solo da 1.14:1.
-  // En la TINTA del sitio (23,27,25) —un negro que ya tira a frío—, NO en el
-  // verde de marca: una sombra teñida de color es un halo cromático, otro tic
-  // de UI generada, y el detector lo marca como `dark-glow`.
-  // Máximo 18px de blur: §6 veta blur > 24px en listas porque el coste escala
-  // con el cuadrado del radio, y hay 322 páginas con muchas tarjetas.
-  // Sin anillo `0 0 0 1px`: el hairline lo pone el `border` de la tarjeta, y
-  // duplicarlo daría un doble filo de 2px.
-  sombra:  '0 1px 2px rgba(23,27,25,.14), 0 4px 8px -2px rgba(23,27,25,.16), 0 12px 18px -8px rgba(23,27,25,.28)',
+  panel:   'var(--papel)',     // tarjeta
+  panelHi: 'var(--papel-hi)',  // PLACA FOTOGRÁFICA — clara en los dos temas, ver estilo.css
+  zebra:   'var(--beige)',     // fila alterna — 1.17:1 en ambos, va con el hairline
+  tinta:   'var(--tinta)',
+  tinta2:  'var(--tinta-2)',
+  hair:    'var(--hair)',      // el MISMO hairline que PALETTE.border
+  // ── LA SOMBRA ────────────────────────────────────────────────────────────
+  // Tres capas: contacto (2px) + media (8px) + ambiente (18px). En CLARO ese
+  // escalonado es lo que lee el ojo como «una capa encima de otra» cuando el
+  // color de las dos superficies solo da 1.14:1. En OSCURO ya no es quien
+  // separa las capas —eso lo hace el salto de superficie— pero sigue dando el
+  // contacto del canto, así que se queda, en negro y más opaca.
+  // Máximo 18px de blur: §6 veta blur > 24px en listas.
+  sombra:  'var(--sombra)',
   radio:   12,
   radioSm: 8,
-  // Los estados de PALETTE están calibrados contra el fondo VERDE y sobre el
-  // lienzo claro se caen a 1.7-2.3:1. Estas son sus variantes para superficie clara.
-  ok:      '#2F6B33',   // 5.28:1 sobre el lienzo (PALETTE.green da 1.74:1 aquí)
-  alerta:  '#A3341F',   // 5.63:1 (PALETTE.redHi da 1.84:1)
+  // Los tres colores de disponibilidad legal. Sus gemelos por superficie.
+  ok:      'var(--ok)',        // 5.28:1 claro / 5.47:1 oscuro
+  alerta:  'var(--alerta)',    // 5.63:1 claro / 5.26:1 oscuro
 };
 window.CLARO = CLARO;
+
+// ── amxAlfa — teñir un color que puede ser un token ────────────────────────
+// El idioma de siempre era `${PALETTE.amber}66`: hex + dos dígitos de alfa. Con
+// `var(--acento)` eso produce `var(--acento)66`, CSS inválido, y la declaración
+// entera se descarta en silencio (adiós al degradado del hero de promos).
+// `color-mix` es la única forma de teñir un token sin conocer su valor. El hex
+// se sigue concatenando: los datos de promos traen hex de verdad.
+function amxAlfa(color, pct) {
+  const c = String(color == null ? '' : color).trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(c)) {
+    return c + Math.round(Math.max(0, Math.min(100, pct)) * 2.55).toString(16).padStart(2, '0');
+  }
+  return `color-mix(in srgb, ${c} ${pct}%, transparent)`;
+}
+window.amxAlfa = amxAlfa;
+
+// ── amxTintaSobre — la tinta que se lee sobre un relleno DINÁMICO ──────────
+// Decide claro/oscuro por luminancia relativa (WCAG). El pivote 0.18 es donde
+// el contraste contra blanco iguala al contraste contra negro.
+//
+// SOLO para hex de verdad. El único relleno dinámico de la app es `p.accent`
+// de los datos de promos, que es un hex editable desde el panel de admin.
+// Para el relleno CONOCIDO —el acento de marca— no se calcula nada: lo resuelve
+// el token `--tinta-sobre-marca`, que el CSS define bien en cada tema. Por eso
+// el guard de abajo devuelve ese token y no un color fijo: si aquí llegara un
+// `var(…)` (porque alguien pasó PALETTE.amber), la respuesta correcta sigue
+// siendo la tinta del acento, en el tema que toque. Ningún caso queda resuelto
+// por un color que solo acierta en uno de los dos temas.
+function amxTintaSobre(hex) {
+  const h = String(hex || '').trim();
+  if (!/^#[0-9A-Fa-f]{6}$/.test(h)) return PALETTE.tintaSobreMarca;
+  const lum = [1, 3, 5]
+    .map((i) => {
+      const v = parseInt(h.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    })
+    .reduce((a, c, i) => a + [0.2126, 0.7152, 0.0722][i] * c, 0);
+  // Tinta FIJA a propósito: el relleno es un hex fijo que no sigue al tema, así
+  // que su tinta tampoco puede seguirlo. Son los mismos dos extremos de la
+  // paleta (#171B19 / #F3EFE4), escritos aquí porque no pueden ser tokens.
+  return lum > 0.18 ? '#171B19' : '#F3EFE4';
+}
+window.amxTintaSobre = amxTintaSobre;
+
+// ── amxColorAvail — el color de disponibilidad legal, por superficie ───────
+// Los tres colores viven en los data-*.js (`AVAIL.color`) calibrados para
+// superficie CLARA; sobre fondo oscuro caen a 1.7-2.3:1. Traducirlos a su
+// token es el mismo patrón que ya usaba AvailBadge con CLARO.ok / CLARO.alerta,
+// resuelto una vez en lugar de en cada pantalla. Lo que no reconoce, pasa.
+const AVAIL_TOKEN = {
+  '#2F6B33': 'var(--ok)',         // uso civil
+  '#7D6108': 'var(--seguridad)',  // policía / seguridad
+  '#A3341F': 'var(--alerta)',     // exclusivo Ejército
+};
+function amxColorAvail(hex) {
+  return AVAIL_TOKEN[String(hex || '').toUpperCase()] || hex;
+}
+window.amxColorAvail = amxColorAvail;
+
+// ── EL TEMA — claro · oscuro · seguir al sistema ───────────────────────────
+// El atributo `data-tema` de <html> lo pone el script inline del <head> ANTES
+// del primer pintado (sin él habría fogonazo). Ausente = seguir al sistema, que
+// resuelve el `@media (prefers-color-scheme: dark)` de estilo.css.
+const TEMAS = ['sistema', 'claro', 'oscuro'];
+const TEMA_ROTULO = { sistema: 'Automático', claro: 'Claro', oscuro: 'Oscuro' };
+
+function amxLeerTema() {
+  if (typeof document === 'undefined') return 'sistema';
+  const t = document.documentElement.getAttribute('data-tema');
+  return t === 'claro' || t === 'oscuro' ? t : 'sistema';
+}
+function amxPonerTema(t) {
+  const raiz = document.documentElement;
+  if (t === 'claro' || t === 'oscuro') raiz.setAttribute('data-tema', t);
+  else raiz.removeAttribute('data-tema');
+  // localStorage LANZA en modo privado y con almacenamiento bloqueado: el tema
+  // se aplica igual, solo que no sobrevive a la recarga.
+  try {
+    if (t === 'sistema') localStorage.removeItem('amx-tema');
+    else localStorage.setItem('amx-tema', t);
+  } catch (e) { /* sin persistencia; la sesión actual sí cambia */ }
+}
+window.amxLeerTema = amxLeerTema;
+window.amxPonerTema = amxPonerTema;
 
 // El bisel de esquina era el otro rasgo que ataba el sitio al look HUD anterior.
 // DESIGN.md §27 pide lo contrario: «border radius consistente, bordes finos,
@@ -153,38 +240,29 @@ function LogoMarca({ size = 28, conTexto = false, src = null }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center',
-      gap: Math.round(size * 0.29),
-      // currentColor de la silueta. var() con respaldo por si el SVG se usara
-      // fuera del scope .amx-v2, donde --crema no existe.
-      color: 'var(--crema, #F3EFE4)',
+      gap: Math.round(size * 0.34),
     }}>
-      <svg width={size} height={size} viewBox="0 0 32 32"
-        style={{ display: 'block', flexShrink: 0 }}
-        role={conTexto ? undefined : 'img'}
-        aria-hidden={conTexto ? true : undefined}
-        aria-label={conTexto ? undefined : 'Armado en México'}>
-        <rect x="1" y="1" width="30" height="30" rx="7.5"
-          fill="none" stroke="currentColor" strokeWidth="1.8" opacity="0.5" />
-        {/* Pistola de perfil, cañón a la derecha. Un solo <path> con dos
-            subtrazos y fillRule evenodd: el segundo es el hueco del
-            guardamonte. La g reencuadra la silueta dentro del recuadro sin
-            recalcular las 20 coordenadas a mano. */}
-        <g transform="translate(-0.96,-3.27) scale(1.05)">
-          <path fill="currentColor" fillRule="evenodd" d="
-            M8 9.4 H27.4 V13 H21 V15.8 H18.2
-            C18.8 23.4 11.3 23.8 11.9 16.4
-            L8.6 26.8 Q6.7 28.4 4.9 25.6
-            C5.7 21 6.6 15.8 8 13.2 Z
-            M13.4 16.7 C13.1 20.6 16.9 20.8 16.6 16.7 Z" />
-        </g>
-      </svg>
+      {/* El ISOTIPO REAL de la marca, no un dibujo. Aquí había una pistola en
+          SVG hecha a mano —20 coordenadas inventadas dentro de un recuadro— que
+          no era el logotipo de Armado en México sino un sustituto genérico.
+          `imagenes/isotipo-armado.webp` sale del propio `logo-armado-mx.webp`:
+          es su recuadro y su pistola, recortados del archivo original y sin las
+          palabras, que ahora van al lado. Nada dibujado de nuevo — §6b manda
+          usar los logotipos tal cual. */}
+      <img src="imagenes/isotipo-armado.webp"
+        width={size} height={size}
+        style={{ display: 'block', flexShrink: 0, borderRadius: Math.round(size * 0.22) }}
+        role={conTexto ? 'presentation' : 'img'}
+        alt={conTexto ? '' : 'Armado en México'} />
       {conTexto && (
         <span style={{
           display: 'flex', flexDirection: 'column',
+          // La tipografía del logotipo: Archivo en bold y versalitas, que es la
+          // misma con la que están puestas las palabras dentro del original.
           fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: ft, lineHeight: 1.04,
           letterSpacing: '0.06em', textTransform: 'uppercase',
-          color: '#FAF9F5',
+          color: '#FAF9F5',                 // 11.81:1 sobre el verde de marca
           whiteSpace: 'nowrap',
         }}>
           <span>Armado en</span>
@@ -325,6 +403,7 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
           );
         })}
       </div>
+      <TemaToggle />
     </div>
   );
 }
@@ -550,8 +629,8 @@ function StatsBar({ label, value, max = 100, color = PALETTE.amber, compareValue
         <div style={{
           position: 'absolute', top: 0, bottom: 0, left: 0,
           width: `${pct}%`,
-          background: `linear-gradient(90deg, ${color}aa, ${color})`,
-          boxShadow: `0 0 6px ${color}55`,
+          background: `linear-gradient(90deg, ${amxAlfa(color, 67)}, ${color})`,
+          boxShadow: `0 0 6px ${amxAlfa(color, 33)}`,
         }} />
         {/* segmentos visuales */}
         <div style={{
@@ -576,7 +655,7 @@ function SectionHeader({ children, action, accent = PALETTE.amber }) {
     }}>
       <span style={{
         width: 3, height: 14, background: accent,
-        boxShadow: `0 0 6px ${accent}66`,
+        boxShadow: `0 0 6px ${amxAlfa(accent, 40)}`,
       }} />
       <div style={{
         fontFamily: 'Archivo, sans-serif',
@@ -655,6 +734,67 @@ window.amxProsa = amxProsa;
 // pantallas desde app.jsx y quitarlo de ahí es otro lote. El título de pantalla
 // vive SOLO en el cuerpo — aquí duplicaba el que ya pinta cada pantalla, y
 // además nunca quedaba centrado (textAlign left/right según hubiera «volver»).
+// ──────────────────────────────────────────────────────────────
+// TEMA TOGGLE — claro · oscuro · seguir al sistema
+// ──────────────────────────────────────────────────────────────
+// Un solo botón que cicla los tres estados, no tres controles: en la barra
+// superior no hay sitio para un segmentado, y la barra de escritorio ya
+// desborda por debajo de ~1140px (CLAUDE.md). Este botón cuesta 44px.
+//
+// Los glifos son los de la app (●, ◆, ▲, ◉ ya se usan), no emoji: §6 veta el
+// emoji como icono. ○ claro · ● oscuro · ◐ automático.
+//
+// El `aria-label` dice el estado ACTUAL y la acción SIGUIENTE, porque un botón
+// que cicla no se entiende solo por su glifo. Y como el lector de pantalla no
+// vuelve a leer la etiqueta de un botón que sigue enfocado, el cambio se
+// anuncia por una región `aria-live`.
+const TEMA_GLIFO = { sistema: '◐', claro: '○', oscuro: '●' };
+
+function TemaToggle({ compacto = false }) {
+  const [tema, setTema] = React.useState(() => (window.amxLeerTema ? window.amxLeerTema() : 'sistema'));
+  // Solo para reanunciar: el primer render no debe disparar el aria-live.
+  const [tocado, setTocado] = React.useState(false);
+  const siguiente = TEMAS[(TEMAS.indexOf(tema) + 1) % TEMAS.length];
+  const cambiar = () => {
+    window.amxPonerTema(siguiente);
+    setTema(siguiente);
+    setTocado(true);
+  };
+  const etiqueta = `Tema: ${TEMA_ROTULO[tema].toLowerCase()}. Cambiar a ${TEMA_ROTULO[siguiente].toLowerCase()}`;
+  return (
+    <React.Fragment>
+      <button type="button" onClick={cambiar} aria-label={etiqueta} title={etiqueta} style={{
+        flexShrink: 0,
+        minWidth: 44, minHeight: 44,            // área táctil, no negociable (§7)
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        gap: 7,
+        padding: compacto ? 0 : '0 12px',
+        background: 'rgba(250,249,245,0.10)',
+        border: '1px solid rgba(250,249,245,0.30)',
+        borderRadius: 999,
+        cursor: 'pointer',
+        color: PALETTE.sobreMarca,              // 10.83:1 sobre la marca, en los dos temas
+        fontFamily: 'JetBrains Mono, monospace',
+        fontSize: 15, lineHeight: 1,
+      }}>
+        <span aria-hidden="true">{TEMA_GLIFO[tema]}</span>
+        {!compacto && (
+          <span aria-hidden="true" style={{
+            fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700,
+          }}>{TEMA_ROTULO[tema]}</span>
+        )}
+      </button>
+      {/* Fuera de pantalla pero NO `display:none`: así lo lee el lector y no lo
+          ve nadie. Sin `clip-path`, que aquí se comería nada — no es enfocable. */}
+      <span aria-live="polite" style={{
+        position: 'absolute', width: 1, height: 1, overflow: 'hidden',
+        clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0, padding: 0, margin: -1,
+      }}>{tocado ? `Tema ${TEMA_ROTULO[tema].toLowerCase()}` : ''}</span>
+    </React.Fragment>
+  );
+}
+window.TemaToggle = TemaToggle;
+
 function AppHeader({ title, back, onBack, onHome, right }) {
   // El panel de admin (pestaña BRANDING) sigue guardando cfg.logo. Si Saulo sube
   // uno propio se respeta; si esta el 'logo.png' de fabrica, manda el SVG de
@@ -696,7 +836,10 @@ function AppHeader({ title, back, onBack, onHome, right }) {
         <LogoMarca size={28} conTexto={!back} src={logoUsuario} />
       </button>
 
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>{right}</div>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
+        {right}
+        <TemaToggle compacto />
+      </div>
     </div>
   );
 }
@@ -861,7 +1004,10 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
         style={{
           position: 'absolute', top: 6, right: 6, zIndex: 2,
           background: inCompare ? PALETTE.amber : 'rgba(0,0,0,0.6)',
-          color: inCompare ? '#000' : PALETTE.textDim,
+          // Sobre el relleno de acento la tinta la decide el TEMA: en claro el
+          // acento es verde oscuro, en oscuro es verde claro. El '#000' de antes
+          // daba 1.69:1 ya en claro.
+          color: inCompare ? PALETTE.tintaSobreMarca : PALETTE.textDim,
           border: `1px solid ${inCompare ? PALETTE.amber : PALETTE.border}`,
           padding: '2px 5px',
           fontFamily: 'JetBrains Mono, monospace',
@@ -876,6 +1022,139 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
   );
 }
 window.ArmaCard = ArmaCard;
+
+// ══════════════════════════════════════════════════════════════
+// EL EXPEDIENTE ABIERTO — las dos primitivas de la ficha (DESIGN.md §4.3)
+// «un diseño tipo analógico que dé la sensación de estar leyendo desde un
+//  folder […] la foto del arma del lado izquierdo con un marco de polaroid y
+//  su precio de referencia y del lado derecho la ficha técnica».
+//
+// La POLAROID es GEOMETRÍA, no un filtro: §4 pide que «el estilo ochentero
+// esté en el lenguaje visual, no mediante filtros de imagen envejecidos».
+// Lo que la hace polaroid es el faldón inferior ancho y el nombre escrito en
+// él — cero sepia, cero grano, cero viñeta, cero `filter`.
+//
+// La piel (marco, faldón, giro, pozo, rótulo) vive en estilo.css. Aquí solo
+// queda el dato y la estructura: una propiedad vive en el CSS O inline, nunca
+// en los dos. Precedente de la fase 2: `.amx-card:hover { box-shadow }` estaba
+// MUERTA porque las tarjetas declaraban `boxShadow` inline.
+// ══════════════════════════════════════════════════════════════
+
+// Siluetas por tipo de arma, para las 62 de 192 (32 %) que no tienen fotografía.
+// Los cinco tipos que tienen silueta. La forma vive en `imagenes/silueta-*.webp`
+// y se pinta como máscara (ver ArmaPolaroid), así que el color lo pone el CSS y
+// sigue al tema. Aquí vivían esas cinco siluetas como cadenas SVG inyectadas con
+// `dangerouslySetInnerHTML`; Saulo las descartó el 7-sep-2026 por su factura, y
+// los .webp generados las sustituyen. Con ellas se va la única inyección de HTML
+// que tenía la app.
+const SILUETA_TIPOS = ['pistola', 'revolver', 'rifle', 'escopeta', 'carabina'];
+window.SILUETA_TIPOS = SILUETA_TIPOS;
+
+// ¿Esta arma tiene fotografía propia? `armaPlaceholder` (data.js) le asigna a
+// las que no la tienen la ruta de la silueta de su tipo, así que el `src` es la
+// señal y no hay que consultar el disco.
+// Sigue reconociendo el `data:` URI del placeholder anterior: D1 pisa
+// `window.DB` al hidratar y puede servir registros sembrados antes del cambio.
+function armaSinFoto(arma) {
+  if (!arma || !arma.img) return true;
+  const img = String(arma.img);
+  return img.slice(0, 5) === 'data:' || img.indexOf('/silueta-') >= 0;
+}
+window.armaSinFoto = armaSinFoto;
+
+// ──────────────────────────────────────────────────────────────
+// ARMA POLAROID — la foto del expediente, con su faldón
+// Sin fotografía NO desaparece: se convierte en ficha de expediente sin
+// fotografía —mismo marco, mismo faldón— con la silueta del tipo sobre el
+// papel. Un expediente incompleto es una cosa que existe; un hueco gris no.
+// ──────────────────────────────────────────────────────────────
+function ArmaPolaroid({ arma }) {
+  // El fallback cubre los dos casos: el arma que nunca tuvo foto y el .webp
+  // que existe en `data.js` pero no llega (404, red caída, formato no
+  // soportado). En ambos se ve lo mismo, que es lo que hace que el `alt` y el
+  // fallback sigan teniendo sentido.
+  const [falloCarga, setFalloCarga] = React.useState(false);
+  const sinFoto = falloCarga || armaSinFoto(arma);
+  // `tipo` es un enum cerrado de data.js; el respaldo cubre un dato corrupto.
+  const tipoSil = SILUETA_TIPOS.indexOf(arma.tipo) >= 0 ? arma.tipo : 'pistola';
+  return (
+    <figure className="amx-polaroid">
+      <div className="amx-polaroid-pozo">
+        {sinFoto ? (
+          <div className="amx-polaroid-vacia">
+            {/* La silueta se pinta como MÁSCARA, no como imagen: el .webp aporta
+                solo la forma (negro sobre alfa) y el color lo pone
+                `background-color: var(--silueta)`, así que sigue al tema sin
+                duplicar assets. 3.38:1 sobre la placa clara y 3.34:1 sobre la
+                atenuada del tema oscuro — por encima del 3:1 de WCAG 1.4.11 en
+                los dos. La leyenda, que sí porta información, va en
+                --tinta-placa: 6.46:1 / 5.36:1.
+
+                Sustituye a un objeto de cinco cadenas SVG inyectadas con
+                `dangerouslySetInnerHTML`. Saulo las descartó por feas; de paso
+                desaparece la única inyección de HTML de la app. */}
+            <div className="amx-polaroid-silueta" role="img"
+              aria-label={'Silueta de ' + tipoSil + '. Sin fotografía en el expediente.'}
+              style={{ '--silueta-forma': `url(imagenes/silueta-${tipoSil}.webp)` }} />
+            <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>
+          </div>
+        ) : (
+          <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high"
+            onError={() => setFalloCarga(true)} />
+        )}
+      </div>
+      {/* El faldón lleva lo que alguien escribiría a mano en el borde blanco de
+          una copia: el nombre y, debajo, de quién es y de cuándo. Centrado,
+          como se rotula una foto de verdad — no alineado al canto, que es cosa
+          de una interfaz, no de un objeto.
+          La bandera es ahora lo único que dice la nacionalidad del arma: la
+          franja tricolor que había bajo el título se retiró porque, siendo
+          mexicana, hacía parecer mexicana un arma checa o italiana. */}
+      <figcaption className="amx-polaroid-pie">
+        <span className="amx-polaroid-nombre">{arma.nombre}</span>
+        <span className="amx-polaroid-datos">
+          <CountryFlag pais={arma.pais} height={9} />
+          <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+window.ArmaPolaroid = ArmaPolaroid;
+
+// ──────────────────────────────────────────────────────────────
+// FICHA TÉCNICA — la columna derecha del folder
+// Reusa la tabla `.specs` que ya estaba bien resuelta (zebra + hairline, `th`
+// en versalitas, `td` en mono con tabular-nums). Los seis campos son los que
+// pide §4.3; `mecanismo` va como prosa bajo el título y `tipo` en la pestaña
+// del folder, así que aquí serían una tercera copia.
+// ──────────────────────────────────────────────────────────────
+function FichaTecnica({ arma }) {
+  const filas = [
+    ['Calibre',   arma.calibre],
+    ['Capacidad', arma.capacidad],
+    ['Longitud',  arma.longitud],
+    ['Peso',      arma.peso],
+    ['Origen',    arma.pais],
+    ['Año',       arma.anio],
+  ].filter(([, v]) => v != null && v !== '');
+  return (
+    <div className="amx-ficha">
+      <div className="amx-ficha-rotulo">Ficha técnica</div>
+      <div style={{ overflowX: 'auto' }}>
+        {/* El rótulo es un div, no un `caption`, para que la zebra empiece en
+            la primera fila de datos: el nombre accesible de la tabla lo pone
+            el aria-label, que además dice de qué arma es. */}
+        <table className="specs" aria-label={'Ficha técnica de ' + arma.nombre}>
+          <tbody>
+            {filas.map(([k, v]) => <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+window.FichaTecnica = FichaTecnica;
 
 // ──────────────────────────────────────────────────────────────
 // SPEC ROW — fila de especificación técnica
@@ -1135,7 +1414,7 @@ function FilterChip({ children, active, onClick, count }) {
   return (
     <button onClick={onClick} style={{
       background: active ? PALETTE.amber : 'transparent',
-      color: active ? '#000' : PALETTE.textDim,
+      color: active ? PALETTE.tintaSobreMarca : PALETTE.textDim,   // '#000' daba 1.69:1 sobre el verde
       border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
       padding: '10px 12px', minHeight: 44,
       clipPath: CUT_TR_SM,
@@ -1188,7 +1467,7 @@ function CompareFloat({ ids, onOpen, onClear }) {
       }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
       {ids.length === 2 && (
         <button onClick={onOpen} style={{
-          background: PALETTE.amber, color: PALETTE.bgCard, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '5px 10px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
           letterSpacing: '0.1em', textTransform: 'uppercase',
@@ -1337,7 +1616,7 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
             <span aria-hidden="true" style={{
               width: 3, height: 15, flexShrink: 0,
               background: open ? accent : PALETTE.borderHi,
-              boxShadow: open ? `0 0 6px ${accent}66` : 'none',
+              boxShadow: open ? `0 0 6px ${amxAlfa(accent, 40)}` : 'none',
               transition: 'background 0.18s'
             }} />}
           <span style={{ flex: 1, minWidth: 0 }}>
@@ -1469,7 +1748,12 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
   const MONO = 'JetBrains Mono, monospace';
   // Halo del color del fondo: cinturón por si una etiqueta se acercara al trazo.
   // paintOrder va por `style` porque es CSS, no un atributo de React.
-  const HALO = { paintOrder: 'stroke', fontVariantNumeric: 'tabular-nums' };
+  // Y desde que la paleta son tokens, `fill`/`stroke` van TAMBIÉN por `style`:
+  // `var()` dentro de un atributo de presentación de SVG tiene soporte
+  // irregular, y aquí fallaría en silencio dejando el texto en negro por
+  // defecto sobre el lienzo oscuro.
+  const HALO = { paintOrder: 'stroke', fontVariantNumeric: 'tabular-nums',
+                 stroke: PALETTE.bg, strokeWidth: 3.5 };
 
   return (
     <div ref={wrapRef} style={{ width: '100%' }}>
@@ -1486,10 +1770,10 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
             <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
           </linearGradient>
         </defs>
-        <line x1={x0} y1={y1} x2={x1} y2={y1} stroke={PALETTE.border} strokeWidth="1" />
+        <line x1={x0} y1={y1} x2={x1} y2={y1} style={{ stroke: PALETTE.border }} strokeWidth="1" />
         <path d={area} fill={`url(#pcG${uid})`} />
         {tramos.map((t, i) =>
-          <path key={i} d={t.d} fill="none" stroke={t.color} strokeWidth="2.5"
+          <path key={i} d={t.d} fill="none" style={{ stroke: t.color }} strokeWidth="2.5"
             strokeLinejoin="round" strokeLinecap="round" />
         )}
         {xy.map((c, i) => {
@@ -1498,23 +1782,21 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
           const cc = tramos[Math.max(0, i - 1)].color;
           return (
             <circle key={i} cx={c.x} cy={c.y} r={ext ? 4.5 : 3}
-              fill={ext ? cc : PALETTE.bg} stroke={cc} strokeWidth="2" />
+              style={{ fill: ext ? cc : PALETTE.bg, stroke: cc }} strokeWidth="2" />
           );
         })}
         <text x={x0} y={15} textAnchor="start"
-          fontFamily={MONO} fontSize="13" fill={PALETTE.textDim}
-          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{String(ini.price).replace(' MXN', '')}</text>
+          fontFamily={MONO} fontSize="13"
+          style={{ ...HALO, fill: PALETTE.textDim }}>{String(ini.price).replace(' MXN', '')}</text>
         <text x={x1} y={15} textAnchor="end"
-          fontFamily={MONO} fontSize="13" fontWeight="700" fill={colorFin}
-          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{String(fin.price).replace(' MXN', '')}</text>
+          fontFamily={MONO} fontSize="13" fontWeight="700"
+          style={{ ...HALO, fill: colorFin }}>{String(fin.price).replace(' MXN', '')}</text>
         <text x={x0} y={height - 7} textAnchor="start"
-          fontFamily={MONO} fontSize="12" fill={PALETTE.textMuted}
-          letterSpacing="0.1em"
-          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{amxFechaCorta(ini.date).toUpperCase()}</text>
+          fontFamily={MONO} fontSize="12" letterSpacing="0.1em"
+          style={{ ...HALO, fill: PALETTE.textMuted }}>{amxFechaCorta(ini.date).toUpperCase()}</text>
         <text x={x1} y={height - 7} textAnchor="end"
-          fontFamily={MONO} fontSize="12" fill={PALETTE.textMuted}
-          letterSpacing="0.1em"
-          stroke={PALETTE.bg} strokeWidth="3.5" style={HALO}>{amxFechaCorta(fin.date).toUpperCase()}</text>
+          fontFamily={MONO} fontSize="12" letterSpacing="0.1em"
+          style={{ ...HALO, fill: PALETTE.textMuted }}>{amxFechaCorta(fin.date).toUpperCase()}</text>
       </svg>
     </div>
   );

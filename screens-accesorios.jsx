@@ -17,23 +17,30 @@ function accCatMeta(id) {
 }
 
 // Aviso discreto cuando no hay fotografía real del accesorio
-function AccNoImage({ compact }) {
-  const P = window.PALETTE;
+// Respaldo cuando un accesorio no tiene fotografía propia — hoy, los 36 del
+// catálogo, así que es la vista por defecto y no un caso raro.
+// Era una cámara tachada en SVG dibujada a mano. Saulo retiró los SVG generados
+// el 8-sep-2026: ahora va la SILUETA de la categoría, el mismo lenguaje que las
+// armas. Se pinta como máscara, así que el color lo pone el CSS y sigue al tema.
+function AccNoImage({ acc, compact }) {
+  const forma = window.accesorioPlaceholder ? window.accesorioPlaceholder(acc) : null;
   return (
-    <div role="img" aria-label="Sin imagen disponible por el momento" style={{
-      position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: compact ? 6 : 10,
-      padding: '0 12px', textAlign: 'center',
-    }}>
-      <svg width={compact ? 26 : 38} height={compact ? 26 : 38} viewBox="0 0 24 24" fill="none"
-        stroke={P.borderHi} strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
-        <rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.1"/>
-        <line x1="4" y1="3.4" x2="20" y2="20.6"/>
-      </svg>
+    <div role="img" aria-label={'Sin fotografía en expediente' + (acc && acc.nombre ? ': ' + acc.nombre : '')}
+      style={{
+        position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: compact ? 6 : 10,
+        padding: '0 12px', textAlign: 'center', width: '100%', height: '100%',
+      }}>
+      {forma && (
+        <span className="amx-silueta-acc" aria-hidden="true"
+          style={{ '--silueta-forma': `url(${forma})`, height: compact ? 34 : 52 }} />
+      )}
       <span style={{
-        fontFamily: 'JetBrains Mono, monospace', fontSize: compact ? 10.5 : 12.5,
-        color: P.textMuted, letterSpacing: '0.05em', lineHeight: 1.45,
-      }}>Sin imagen disponible{compact ? '' : ' por el momento'}</span>
+        fontFamily: 'JetBrains Mono, monospace',
+        // 11px es el piso de texto funcional; los 10.5 de antes quedaban debajo.
+        fontSize: compact ? 11 : 12.5,
+        color: 'var(--tinta-2)', letterSpacing: '0.05em', lineHeight: 1.45,
+      }}>Sin fotografía{compact ? '' : ' en expediente'}</span>
     </div>
   );
 }
@@ -76,13 +83,16 @@ function AccesorioCard({ acc, onClick }) {
             loading="lazy" decoding="async" onError={() => setImgError(true)}
             style={{ maxWidth: '88%', maxHeight: '88%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
         ) : (
-          <AccNoImage compact />
+          <AccNoImage acc={acc} compact />
         )}
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600,
-          color: window.CLARO.tinta2, background: 'rgba(250,249,245,0.92)', padding: '2px 6px', borderRadius: 4,
-          letterSpacing: '0.1em', textTransform: 'uppercase', borderLeft: `2px solid ${window.CLARO.tinta2}`,
+          // Va sobre la PLACA fotográfica, clara en los dos temas: la tinta se
+          // fija a --tinta-placa. CLARO.tinta2 se aclara en oscuro y dejaría
+          // gris claro sobre casi blanco.
+          color: 'var(--tinta-placa)', background: 'rgba(250,249,245,0.92)', padding: '2px 6px', borderRadius: 4,
+          letterSpacing: '0.1em', textTransform: 'uppercase', borderLeft: '2px solid var(--tinta-placa)',
         }}>{cat.icon} {cat.label.split(' ')[0]}</span>
       </div>
       {/* body */}
@@ -267,7 +277,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
     // Activo = fondo P.amber, que es el VERDE de marca #173A32, no un ambar:
     // el negro encima daba 1.69:1. Crema sobre el verde: 10.83:1.
     background: active ? P.amber : 'transparent',
-    color: active ? P.sobreMarca : P.textDim,
+    color: active ? P.tintaSobreMarca : P.textDim,
     border: `1px solid ${active ? P.amber : P.border}`,
     padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
     fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
@@ -454,12 +464,14 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <img src={acc.img} alt={acc.nombre} onError={() => setImgError(true)}
               style={{ maxWidth: '82%', maxHeight: '82%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
           ) : (
-            <AccNoImage />
+            <AccNoImage acc={acc} />
           )}
           <span style={{
             position: 'absolute', top: 10, left: 10,
             fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
-            background: 'rgba(250,249,245,0.92)', color: window.CLARO.tinta2, padding: '3px 8px', borderRadius: 4, letterSpacing: '0.1em',
+            // Va sobre la PLACA fotográfica, clara en los dos temas: la tinta
+            // se fija a --tinta-placa (CLARO.tinta2 se aclara en oscuro).
+            background: 'rgba(250,249,245,0.92)', color: 'var(--tinta-placa)', padding: '3px 8px', borderRadius: 4, letterSpacing: '0.1em',
             textTransform: 'uppercase', borderLeft: `2px solid ${P.amber}`,
           }}>{cat.icon} {cat.label}</span>
         </div>
@@ -601,10 +613,10 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                     <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                         {b.agotado ? (
-                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: '#F29C8C', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: window.CLARO.alerta, letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                         ) : (
                           <React.Fragment>
-                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: '#6FCB7B' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
+                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: window.CLARO.ok }}>{Number(b.qty).toLocaleString('es-MX')}</span>
                             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>disponibles en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                           </React.Fragment>
                         )}
@@ -694,12 +706,12 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <React.Fragment>
               <window.SectionHeader>Estatus Legal</window.SectionHeader>
               <div style={{
-                background: P.bgCard, border: `1px solid ${availMeta.color}`, boxShadow: window.CLARO.sombra,
+                background: P.bgCard, border: `1px solid ${window.amxColorAvail(availMeta.color)}`, boxShadow: window.CLARO.sombra,
                 padding: '12px 14px', marginBottom: 16,
               }}>
                 <div style={{
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                  color: availMeta.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
+                  color: window.amxColorAvail(availMeta.color), textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
                 }}>{availMeta.label}</div>
                 <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
                   {availMeta.desc}

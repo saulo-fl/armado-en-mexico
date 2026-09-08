@@ -24,8 +24,14 @@ const MUN_CARTUCHO = {
   '.243 Win': '243win.webp', '.270 Win': '270win.webp', '.308 Win': '308win.webp',
   '.30-06 Sprg': '3006.webp', '.300 Win Mag': '300wm.webp',
 };
+// 19 calibres tienen fotografía real del cartucho. Los que no —11 municiones de
+// 71, en 7 calibres: .22-250, .17 HMR, .30-30, 28 GA, .30 Carbine, 9x18 Makarov
+// y 6mm Rem— caían en cadena vacía y dejaban el hueco sin nada. Ahora reciben la
+// silueta genérica de cartucho, el mismo lenguaje que armas y accesorios.
 function munCartucho(cal) {
-  return MUN_CARTUCHO[cal] ? ('imagenes/cartuchos/' + MUN_CARTUCHO[cal]) : '';
+  return MUN_CARTUCHO[cal]
+    ? ('imagenes/cartuchos/' + MUN_CARTUCHO[cal])
+    : 'imagenes/silueta-municion.webp';
 }
 
 // Unidad del precio de referencia. El inventario cotiza casi todo POR CARTUCHO,
@@ -76,9 +82,11 @@ function MunicionCard({ mun, onClick }) {
         <span style={{
           position: 'absolute', top: 6, left: 6,
           fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-          // Badge de calibre sobre CLARO.tinta2 (#59605C): el negro daba 3.25:1.
-          // Crema sobre ese gris-verde: 5.62:1.
-          color: P.sobreMarca, background: window.CLARO.tinta2, padding: '2px 5px',
+          // Badge de calibre sobre la PLACA fotográfica, que es clara en los dos
+          // temas: su relleno y su tinta tampoco cambian. Crema sobre el
+          // gris-verde --tinta-placa (#59605C): 5.62:1. CLARO.tinta2 no vale
+          // aquí — en oscuro se aclara y dejaría crema sobre gris claro.
+          color: P.sobreMarca, background: 'var(--tinta-placa)', padding: '2px 5px',
           letterSpacing: '0.08em', whiteSpace: 'nowrap',
         }}>{mun.calibre}</span>
       </div>
@@ -268,7 +276,7 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
   };
   const chip = (active) => ({
     // P.amber es el VERDE de marca #173A32: el negro encima daba 1.69:1. Crema 10.83:1.
-    background: active ? P.amber : 'transparent', color: active ? P.sobreMarca : P.textDim,
+    background: active ? P.amber : 'transparent', color: active ? P.tintaSobreMarca : P.textDim,
     border: `1px solid ${active ? P.amber : P.border}`,
     padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
     fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
@@ -450,7 +458,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
             position: 'absolute', top: 10, left: 10,
             // Badge de calibre en la ficha: fondo P.amber = verde de marca #173A32,
             // con negro encima daba 1.69:1. Crema: 10.83:1.
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.sobreMarca,
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.tintaSobreMarca,
             background: P.amber, padding: '3px 7px', letterSpacing: '0.08em', fontWeight: 700,
           }}>{mun.calibre}</span>
         </div>
@@ -577,10 +585,10 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                     <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                         {b.agotado ? (
-                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: '#F29C8C', letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
+                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: window.CLARO.alerta, letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                         ) : (
                           <React.Fragment>
-                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: '#6FCB7B' }}>{Number(b.qty).toLocaleString('es-MX')}</span>
+                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: window.CLARO.ok }}>{Number(b.qty).toLocaleString('es-MX')}</span>
                             <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>cartuchos en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
                           </React.Fragment>
                         )}
@@ -657,12 +665,12 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
             <React.Fragment>
               <window.SectionHeader>Estatus Legal</window.SectionHeader>
               <div style={{
-                background: P.bgCard, border: `1px solid ${availMeta.color}`, boxShadow: window.CLARO.sombra,
+                background: P.bgCard, border: `1px solid ${window.amxColorAvail(availMeta.color)}`, boxShadow: window.CLARO.sombra,
                 padding: '12px 14px', marginBottom: 16,
               }}>
                 <div style={{
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                  color: availMeta.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
+                  color: window.amxColorAvail(availMeta.color), textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
                 }}>{availMeta.label}</div>
                 <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
                   {availMeta.desc} La adquisición de municiones requiere licencia y registro vigentes del arma correspondiente.

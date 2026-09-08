@@ -55,7 +55,7 @@ function TraumaFicha({ p, vp }) {
         // El texto era '#173A32' sobre background PALETTE.amber, que HOY es ese
         // mismo #173A32: 1.00:1, la etiqueta no existía. Resto de cuando «amber»
         // era ámbar. Sobre el verde de marca el texto va en sobreMarca (10.83:1).
-        color: PALETTE.sobreMarca, background: PALETTE.amber, padding: '3px 8px',
+        color: PALETTE.tintaSobreMarca, background: PALETTE.amber, padding: '3px 8px',
       }}>{p.tipo} · cal. {p.specs[0][1]}</div>
     </div>
   );
@@ -127,7 +127,7 @@ function TraumaFicha({ p, vp }) {
             letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none',
             padding: '13px 22px',
             background: ok ? PALETTE.amber : 'transparent',
-            color: ok ? '#173A32' : PALETTE.amber,
+            color: ok ? PALETTE.tintaSobreMarca : PALETTE.amber,
             border: `1.5px solid ${PALETTE.amber}`,
             transition: 'transform 200ms ease, filter 200ms ease',
           }}
@@ -240,14 +240,11 @@ function TraumaTierCard({ p, vp, onNav }) {
   // donde el contraste contra blanco iguala al contraste contra negro.
   // Medido: tinta sobre #F5C518 10.67:1 · tinta sobre #4FAE5C 6.25:1 ·
   //         blanco sobre #C0392B 5.44:1 (luminancias .59 / .33 / .14).
-  const lumTier = (() => {
-    const c = [1, 3, 5].map((i) => {
-      const v = parseInt(p.tierColor.slice(i, i + 2), 16) / 255;
-      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    });
-    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
-  })();
-  const badgeTextDark = lumTier > 0.18;
+  // `p.tierColor` es un hex FIJO de los datos, no un token: no sigue al tema, y
+  // su tinta tampoco puede seguirlo. `amxTintaSobre` (ui.jsx) hace exactamente
+  // este cálculo —vivía duplicado aquí— y devuelve un color fijo para un relleno
+  // fijo. Con `PALETTE.text` el rótulo daba 1.39:1 en oscuro.
+  const tintaTier = window.amxTintaSobre(p.tierColor);
   const fxClass = p.effect === 'glow' ? 'trauma-fx-glow'
     : p.effect === 'pulse' ? 'trauma-fx-pulse'
     : p.effect === 'fire' ? 'trauma-fx-fire' : '';
@@ -262,7 +259,7 @@ function TraumaTierCard({ p, vp, onNav }) {
       {/* Tier badge — pill centrado sobre el borde superior */}
       <div style={{
         position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
-        background: p.tierColor, color: badgeTextDark ? PALETTE.text : '#FFFFFF',
+        background: p.tierColor, color: tintaTier,
         fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 12,
         letterSpacing: '0.02em', padding: '5px 14px', borderRadius: 999, whiteSpace: 'nowrap',
       }}>{p.tier}</div>
@@ -270,7 +267,9 @@ function TraumaTierCard({ p, vp, onNav }) {
       {/* Imagen del producto sobre panel blanco (fotografía de marca) */}
       <div onClick={go} style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-        height: 168, margin: '4px 14px 0', borderRadius: 6, background: '#FFFFFF',
+        // Placa fotográfica: clara en los dos temas (los recortes de producto
+        // vienen sobre blanco opaco). Ver --papel-hi en estilo.css.
+        height: 168, margin: '4px 14px 0', borderRadius: 6, background: window.CLARO.panelHi,
         padding: '10px 16px', overflow: 'hidden',
       }}>
         <img src={p.img} alt={p.nombre} loading="lazy" style={{
