@@ -240,38 +240,29 @@ function LogoMarca({ size = 28, conTexto = false, src = null }) {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center',
-      gap: Math.round(size * 0.29),
-      // currentColor de la silueta. var() con respaldo por si el SVG se usara
-      // fuera del scope .amx-v2, donde --crema no existe.
-      color: 'var(--crema, #F3EFE4)',
+      gap: Math.round(size * 0.34),
     }}>
-      <svg width={size} height={size} viewBox="0 0 32 32"
-        style={{ display: 'block', flexShrink: 0 }}
-        role={conTexto ? undefined : 'img'}
-        aria-hidden={conTexto ? true : undefined}
-        aria-label={conTexto ? undefined : 'Armado en México'}>
-        <rect x="1" y="1" width="30" height="30" rx="7.5"
-          fill="none" stroke="currentColor" strokeWidth="1.8" opacity="0.5" />
-        {/* Pistola de perfil, cañón a la derecha. Un solo <path> con dos
-            subtrazos y fillRule evenodd: el segundo es el hueco del
-            guardamonte. La g reencuadra la silueta dentro del recuadro sin
-            recalcular las 20 coordenadas a mano. */}
-        <g transform="translate(-0.96,-3.27) scale(1.05)">
-          <path fill="currentColor" fillRule="evenodd" d="
-            M8 9.4 H27.4 V13 H21 V15.8 H18.2
-            C18.8 23.4 11.3 23.8 11.9 16.4
-            L8.6 26.8 Q6.7 28.4 4.9 25.6
-            C5.7 21 6.6 15.8 8 13.2 Z
-            M13.4 16.7 C13.1 20.6 16.9 20.8 16.6 16.7 Z" />
-        </g>
-      </svg>
+      {/* El ISOTIPO REAL de la marca, no un dibujo. Aquí había una pistola en
+          SVG hecha a mano —20 coordenadas inventadas dentro de un recuadro— que
+          no era el logotipo de Armado en México sino un sustituto genérico.
+          `imagenes/isotipo-armado.webp` sale del propio `logo-armado-mx.webp`:
+          es su recuadro y su pistola, recortados del archivo original y sin las
+          palabras, que ahora van al lado. Nada dibujado de nuevo — §6b manda
+          usar los logotipos tal cual. */}
+      <img src="imagenes/isotipo-armado.webp"
+        width={size} height={size}
+        style={{ display: 'block', flexShrink: 0, borderRadius: Math.round(size * 0.22) }}
+        role={conTexto ? 'presentation' : 'img'}
+        alt={conTexto ? '' : 'Armado en México'} />
       {conTexto && (
         <span style={{
           display: 'flex', flexDirection: 'column',
+          // La tipografía del logotipo: Archivo en bold y versalitas, que es la
+          // misma con la que están puestas las palabras dentro del original.
           fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: ft, lineHeight: 1.04,
           letterSpacing: '0.06em', textTransform: 'uppercase',
-          color: '#FAF9F5',
+          color: '#FAF9F5',                 // 11.81:1 sobre el verde de marca
           whiteSpace: 'nowrap',
         }}>
           <span>Armado en</span>
@@ -1059,11 +1050,15 @@ window.ArmaCard = ArmaCard;
 const SILUETA_TIPOS = ['pistola', 'revolver', 'rifle', 'escopeta', 'carabina'];
 window.SILUETA_TIPOS = SILUETA_TIPOS;
 
-// ¿Esta arma tiene fotografía propia? data.js le asigna el placeholder —una
-// data: URI— a las que no la tienen, así que el prefijo del `src` es la señal
-// y no hay que consultar el disco.
+// ¿Esta arma tiene fotografía propia? `armaPlaceholder` (data.js) le asigna a
+// las que no la tienen la ruta de la silueta de su tipo, así que el `src` es la
+// señal y no hay que consultar el disco.
+// Sigue reconociendo el `data:` URI del placeholder anterior: D1 pisa
+// `window.DB` al hidratar y puede servir registros sembrados antes del cambio.
 function armaSinFoto(arma) {
-  return !arma || !arma.img || String(arma.img).slice(0, 5) === 'data:';
+  if (!arma || !arma.img) return true;
+  const img = String(arma.img);
+  return img.slice(0, 5) === 'data:' || img.indexOf('/silueta-') >= 0;
 }
 window.armaSinFoto = armaSinFoto;
 

@@ -24,8 +24,14 @@ const MUN_CARTUCHO = {
   '.243 Win': '243win.webp', '.270 Win': '270win.webp', '.308 Win': '308win.webp',
   '.30-06 Sprg': '3006.webp', '.300 Win Mag': '300wm.webp',
 };
+// 19 calibres tienen fotografía real del cartucho. Los que no —11 municiones de
+// 71, en 7 calibres: .22-250, .17 HMR, .30-30, 28 GA, .30 Carbine, 9x18 Makarov
+// y 6mm Rem— caían en cadena vacía y dejaban el hueco sin nada. Ahora reciben la
+// silueta genérica de cartucho, el mismo lenguaje que armas y accesorios.
 function munCartucho(cal) {
-  return MUN_CARTUCHO[cal] ? ('imagenes/cartuchos/' + MUN_CARTUCHO[cal]) : '';
+  return MUN_CARTUCHO[cal]
+    ? ('imagenes/cartuchos/' + MUN_CARTUCHO[cal])
+    : 'imagenes/silueta-municion.webp';
 }
 
 // Unidad del precio de referencia. El inventario cotiza casi todo POR CARTUCHO,

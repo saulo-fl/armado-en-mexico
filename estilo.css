@@ -665,11 +665,31 @@
   -webkit-mask-size: contain;
           mask-size: contain;
 }
+/* La misma silueta, para el respaldo de los accesorios sin fotografía.
+   OJO, no usa las tintas fijas de la copia: el hueco de esta tarjeta NO es una
+   placa lisa sino un `radial-gradient` que va de `--papel-hi` en el centro a
+   `--lienzo` en los bordes, y ese sí sigue al tema. Con la tinta fija de la
+   copia la silueta se apagaba sobre el borde oscuro. `--hair-hi` está calibrado
+   en los dos temas (3.17:1 claro / 3.40:1 oscuro, WCAG 1.4.11 pide 3:1). */
+.amx-v2 .amx-silueta-acc {
+  display: block;
+  width: 78%;
+  background-color: var(--hair-hi);
+  -webkit-mask-image: var(--silueta-forma);
+          mask-image: var(--silueta-forma);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-size: contain;
+          mask-size: contain;
+}
 /* Sin soporte de máscara no se pinta un bloque de color macizo, que sería peor
    que no tener nada: se cede el sitio y queda la leyenda, que es la que porta
    la información. */
 @supports not ((-webkit-mask-image: url('')) or (mask-image: url(''))) {
-  .amx-v2 .amx-polaroid-silueta { display: none; }
+  .amx-v2 .amx-polaroid-silueta,
+  .amx-v2 .amx-silueta-acc { display: none; }
 }
 .amx-v2 .amx-polaroid-leyenda {
   font-family: var(--mono);
