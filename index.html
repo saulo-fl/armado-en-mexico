@@ -3,6 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <script>
+  /* ── TEMA (claro · oscuro · seguir al sistema) ────────────────────────────
+     Lo PRIMERO del documento, y a propósito: si esto corriera después del
+     primer pintado se vería un fogonazo del tema contrario (FOUC). Sin
+     elección explícita no se escribe nada en <html> y manda entonces el
+     `@media (prefers-color-scheme: dark)` de estilo.css.
+     localStorage LANZA en modo privado de Safari y con cookies de terceros
+     bloqueadas: por eso el try/catch, y por eso «sin elección» es también lo
+     que se sirve cuando el almacenamiento no está disponible. */
+  (function () {
+    try {
+      var t = localStorage.getItem('amx-tema');
+      if (t === 'claro' || t === 'oscuro') document.documentElement.setAttribute('data-tema', t);
+    } catch (e) { /* almacenamiento no disponible → se sigue al sistema */ }
+  })();
+</script>
+<script>
   /* Ruteo por URL (cada pantalla tiene su dirección: /calibres, /arsenal…).
      1) Congela la base donde vive la app (raíz en armado.mx). */
   window.APP_BASE = window.location.pathname.replace(/[^/]*$/, '');
@@ -42,17 +58,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- ?v= obligatorio: sin cambiar la URL, un navegador con estilo.css ya en caché
      sigue pintando el tema anterior sobre el HTML nuevo. Lo vigila build-prerender.mjs. -->
-<link rel="stylesheet" href="estilo.css?v=20260901">
+<link rel="stylesheet" href="estilo.css?v=20260908">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
-    /* Lienzo «papel de oficio frio» #E7EAE4 — el mismo matiz verde-gris de la
-       marca. Antes crema #F3EFE4: el warm off-white por defecto. Tinta #171B19
-       encima = 14.32:1 (medido). Este valor viaja a las 322 paginas. */
-    background: #E7EAE4;
-    color: #171B19;
+    /* Lienzo «papel de oficio frio»: #E7EAE4 en claro, #0E1211 en oscuro. Los
+       dos valores viven en los tokens de estilo.css, hoja render-blocking del
+       <head>: cuando el navegador pinta el primer pixel ya sabe que tema toca.
+       Este background viaja a las 322 paginas. */
+    background: var(--lienzo, #E7EAE4);
+    color: var(--tinta, #171B19);
     font-family: 'Archivo', system-ui, sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
@@ -77,8 +94,8 @@
   body::before {
     content: ''; position: fixed; inset: 0;
     background-image:
-      linear-gradient(rgba(23,58,50,0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(23,58,50,0.035) 1px, transparent 1px);
+      linear-gradient(var(--rejilla, rgba(23,58,50,0.035)) 1px, transparent 1px),
+      linear-gradient(90deg, var(--rejilla, rgba(23,58,50,0.035)) 1px, transparent 1px);
     background-size: 48px 48px;
     pointer-events: none; z-index: 0;
     mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
@@ -99,9 +116,9 @@
   /* scrollbar dark (desktop solamente) */
   @media (min-width: 720px) {
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #DCE0D8; }
-    ::-webkit-scrollbar-thumb { background: #B6BDB0; border-radius: 0; }
-    ::-webkit-scrollbar-thumb:hover { background: #59605C; }
+    ::-webkit-scrollbar-track { background: var(--barra-track, #DCE0D8); }
+    ::-webkit-scrollbar-thumb { background: var(--barra-thumb, #B6BDB0); border-radius: 0; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--barra-thumb-hi, #59605C); }
   }
 
   /* horizontal chips */
@@ -129,12 +146,12 @@
   .amx-price-range::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none; pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; margin-top: 5px; border-radius: 50%;
-    background: #173A32; border: 2px solid #F7F8F4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: var(--acento, #173A32); border: 2px solid var(--papel, #F7F8F4); box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .amx-price-range::-moz-range-thumb {
     pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; border-radius: 50%;
-    background: #173A32; border: 2px solid #F7F8F4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: var(--acento, #173A32); border: 2px solid var(--papel, #F7F8F4); box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
 
   /* Hide bundler error overlay (non-critical img/font load events trigger false positives) */
@@ -148,20 +165,20 @@
   /* input placeholder */
   /* El placeholder porta informacion (§7 pide >=4.5:1): #7C837B daba 3.21:1
      sobre el lienzo nuevo. #626963 da 4.65:1 y sigue leyendose mas apagado. */
-  input::placeholder { color: #626963; }
+  input::placeholder { color: var(--placeholder, #626963); }
 
   /* focus — anillo visible 2px (accesibilidad).
      OJO: en elementos con clip-path el anillo va en un wrapper sin recorte
      (el clip se traga el outline). */
   button:focus-visible, a:focus-visible, input:focus-visible,
   select:focus-visible, [tabindex]:focus-visible {
-    outline: 2px solid #173A32; outline-offset: 2px;
+    outline: 2px solid var(--acento, #173A32); outline-offset: 2px;
   }
   button { -webkit-tap-highlight-color: transparent; }
 
   /* Controles con corte biselado: el clip-path se traga el outline, así que
      el anillo de foco lo pinta el envoltorio sin recortar. */
-  .amx-cut:has(:focus-visible) { outline: 2px solid #173A32; outline-offset: 2px; }
+  .amx-cut:has(:focus-visible) { outline: 2px solid var(--acento, #173A32); outline-offset: 2px; }
 
   /* accesibilidad: respetar la preferencia de menos movimiento */
   @media (prefers-reduced-motion: reduce) {
@@ -174,7 +191,7 @@
   }
 
   /* selección de texto */
-  ::selection { background: rgba(23,58,50,0.16); color: #171B19; }
+  ::selection { background: var(--seleccion, rgba(23,58,50,0.16)); color: var(--tinta, #171B19); }
 
   /* Safe-area insets para iOS (notch / home indicator) */
   body {
@@ -205,8 +222,10 @@
 
 <div id="app-root"></div>
 
-<!-- Splash de carga (se desvanece al montar React). Tinta sobreMarca #F3EFE4 sobre la marca #173A32 = 10.83:1 (medido). -->
-<div id="amx-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:200;background:#173A32;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.35s ease;">
+<!-- Splash de carga (se desvanece al montar React). Va sobre la superficie de
+     MARCA, que es #173A32 en los DOS temas: la tinta crema da 10.83:1 en ambos
+     y el splash no cambia al cambiar de tema. -->
+<div id="amx-splash" aria-hidden="true" style="position:fixed;inset:0;z-index:200;background:var(--marca,#173A32);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity 0.35s ease;">
   <svg width="88" height="88" viewBox="0 0 88 88" style="animation:amxSpin 6s linear infinite;">
     <g stroke="#F3EFE4" stroke-width="1.5" fill="none" opacity="0.7">
       <circle cx="44" cy="44" r="18"></circle>
@@ -260,7 +279,7 @@
 <script src="data-precios.js?v=20260827c"></script>
 <script src="data-accesorios.js?v=20260907"></script>
 <script src="data-municiones.js?v=20260907"></script>
-<script src="store.js?v=20260901"></script>
+<script src="store.js?v=20260908"></script>
 <script>
 // Tweak defaults — the host rewrites this JSON in place when the user changes a tweak.
 window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -269,16 +288,16 @@ window.TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "typeface": "stencil"
 }/*EDITMODE-END*/;
 </script>
-<script src="tweaks-panel.js?v=20260901"></script>
-<script src="ui.js?v=20260901"></script>
-<script src="screens-1.js?v=20260901"></script>
-<script src="screens-2.js?v=20260901"></script>
-<script src="screens-3.js?v=20260901"></script>
-<script src="screens-4.js?v=20260901"></script>
-<script src="screens-accesorios.js?v=20260901"></script>
-<script src="screens-municiones.js?v=20260901"></script>
-<script src="screens-tutorial.js?v=20260901"></script>
-<script src="app.js?v=20260901"></script>
+<script src="tweaks-panel.js?v=20260908"></script>
+<script src="ui.js?v=20260908"></script>
+<script src="screens-1.js?v=20260908"></script>
+<script src="screens-2.js?v=20260908"></script>
+<script src="screens-3.js?v=20260908"></script>
+<script src="screens-4.js?v=20260908"></script>
+<script src="screens-accesorios.js?v=20260908"></script>
+<script src="screens-municiones.js?v=20260908"></script>
+<script src="screens-tutorial.js?v=20260908"></script>
+<script src="app.js?v=20260908"></script>
 
 <!-- Mount -->
 <script>
@@ -309,6 +328,6 @@ root.render(React.createElement(window.App));
 
 
 <!-- DEV: alternador de viewport escritorio/móvil (compartido por las 3 ramas) -->
-<script defer src="dev-viewport.js?v=20260901"></script>
+<script defer src="dev-viewport.js?v=20260908"></script>
 </body>
 </html>

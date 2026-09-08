@@ -439,7 +439,7 @@ function App() {
       {!vp.isMobile && pickerSlot !== null && (
         <div style={{
           position: 'sticky', top: 64, zIndex: 40,
-          background: PALETTE.amber, color: PALETTE.bgCard,
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
           padding: '8px 28px',
           fontFamily: 'JetBrains Mono, monospace',
           fontSize: 15.5, letterSpacing: '0.15em',
@@ -479,7 +479,7 @@ function App() {
       {!vp.isMobile && compareIds.length > 0 && screen !== 'compare' && (
         <button onClick={() => setScreen('compare')} style={{
           position: 'fixed', bottom: 24, right: 24,
-          background: PALETTE.amber, color: PALETTE.bgCard, border: 'none',
+          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
           padding: '12px 18px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.15em', textTransform: 'uppercase',

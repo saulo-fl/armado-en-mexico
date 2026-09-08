@@ -112,7 +112,7 @@ function CalibresScreen({ onOpenArma, onNav }) {
             <button key={cl} onClick={() => setClase(cl)} style={{
               flexShrink: 0,
               background: active ? PALETTE.amber : 'transparent',
-              color: active ? '#173A32' : PALETTE.textDim,
+              color: active ? PALETTE.tintaSobreMarca : PALETTE.textDim,
               border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
               padding: '7px 14px', cursor: 'pointer',
               fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
@@ -250,9 +250,10 @@ function CamposScreen({ onNav }) {
           </div>
         </div>
         <button onClick={() => onNav && onNav('submit')} style={{
-          // El texto era '#173A32' sobre PALETTE.amber, que hoy ES #173A32:
-          // 1.00:1, el botón salía en blanco. Sobre verde de marca → sobreMarca.
-          flexShrink: 0, background: PALETTE.amber, color: PALETTE.sobreMarca, border: 'none',   // 10.83:1
+          // El texto era '#173A32' sobre PALETTE.amber, que en claro ES #173A32:
+          // 1.00:1, el botón salía en blanco. La tinta de un relleno de acento
+          // la decide `tintaSobreMarca`, que cambia con el tema.
+          flexShrink: 0, background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',   // 10.83:1 claro / 9.17:1 oscuro
           padding: '11px 18px', cursor: 'pointer',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.12em', textTransform: 'uppercase',
@@ -362,7 +363,7 @@ function CursoCard({ curso, onNav, vp }) {
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
           letterSpacing: '0.12em', textTransform: 'uppercase',
         }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = PALETTE.amber; e.currentTarget.style.color = '#173A32'; }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = PALETTE.amber; e.currentTarget.style.color = PALETTE.tintaSobreMarca; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = PALETTE.amber; }}>
           Me interesa
         </button>
