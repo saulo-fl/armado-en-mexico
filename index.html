@@ -48,7 +48,10 @@
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0;
-    background: #F3EFE4;
+    /* Lienzo «papel de oficio frio» #E7EAE4 — el mismo matiz verde-gris de la
+       marca. Antes crema #F3EFE4: el warm off-white por defecto. Tinta #171B19
+       encima = 14.32:1 (medido). Este valor viaja a las 322 paginas. */
+    background: #E7EAE4;
     color: #171B19;
     font-family: 'Archivo', system-ui, sans-serif;
     min-height: 100vh;
@@ -96,8 +99,8 @@
   /* scrollbar dark (desktop solamente) */
   @media (min-width: 720px) {
     ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #E4E0D4; }
-    ::-webkit-scrollbar-thumb { background: #C3C5BC; border-radius: 0; }
+    ::-webkit-scrollbar-track { background: #DCE0D8; }
+    ::-webkit-scrollbar-thumb { background: #B6BDB0; border-radius: 0; }
     ::-webkit-scrollbar-thumb:hover { background: #59605C; }
   }
 
@@ -126,12 +129,12 @@
   .amx-price-range::-webkit-slider-thumb {
     -webkit-appearance: none; appearance: none; pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; margin-top: 5px; border-radius: 50%;
-    background: #173A32; border: 2px solid #DDD5C4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: #173A32; border: 2px solid #F7F8F4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .amx-price-range::-moz-range-thumb {
     pointer-events: auto; cursor: pointer;
     width: 18px; height: 18px; border-radius: 50%;
-    background: #173A32; border: 2px solid #DDD5C4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    background: #173A32; border: 2px solid #F7F8F4; box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
 
   /* Hide bundler error overlay (non-critical img/font load events trigger false positives) */
@@ -143,7 +146,9 @@
   }
 
   /* input placeholder */
-  input::placeholder { color: #7C837B; }
+  /* El placeholder porta informacion (§7 pide >=4.5:1): #7C837B daba 3.21:1
+     sobre el lienzo nuevo. #626963 da 4.65:1 y sigue leyendose mas apagado. */
+  input::placeholder { color: #626963; }
 
   /* focus — anillo visible 2px (accesibilidad).
      OJO: en elementos con clip-path el anillo va en un wrapper sin recorte
