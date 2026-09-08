@@ -12,21 +12,34 @@
 
 .amx-v2 {
   /* ── Color (DESIGN.md §2, con las tres correcciones de contraste de §5.1) ── */
-  --verde:      #173A32;   /* fondo */
+  --verde:      #173A32;   /* fondo de marca */
   --verde-2:    #2C6457;   /* superficie oscura elevada — corregido de #245247 (1.41:1) */
-  --crema:      #F3EFE4;   /* la tarjeta por defecto — 10.83:1 sobre verde */
-  --blanco:     #FAF9F5;   /* panel destacado */
-  --beige:      #DDD5C4;   /* fila alterna, SOLO con hairline (1.27:1) */
+  /* ── Las dos superficies claras ──────────────────────────────────────────
+     El lienzo pasó de crema #F3EFE4 a «papel de oficio frío» #E7EAE4: mismo
+     matiz verde-gris que la marca. Papel sobre lienzo da 1.14:1 — como toda
+     pareja de superficies claras. Las separan --sombra y --hair, no el color. */
+  --lienzo:     #E7EAE4;   /* el lienzo de la app */
+  --papel:      #F7F8F4;   /* la tarjeta por defecto — 1.14:1 sobre el lienzo */
+  /* --crema y --blanco ya NO son superficies: son la TINTA CLARA que va encima
+     del verde de marca (banda, buscador, anillo de foco, relleno rojo). */
+  --crema:      #F3EFE4;   /* tinta sobre verde — 10.83:1 */
+  --blanco:     #FAF9F5;   /* tinta sobre el rojo de relleno */
+  --beige:      #E4E7E0;   /* fila alterna sobre el papel — 1.17:1, SOLO con hairline */
   --rojo:       #C83B32;   /* relleno de CTA, con texto claro encima */
-  --rojo-txt:   #C63A32;   /* rojo como texto/borde — 4.51:1 sobre crema */
+  --rojo-txt:   #C63A32;   /* rojo como texto/borde — 4.27:1 sobre el lienzo */
   --negro:      #171B19;
-  --gris:       #59605C;   /* 5.62:1 sobre crema */
+  --gris:       #59605C;   /* 5.32:1 sobre el lienzo */
 
   --tinta:      var(--negro);
   --tinta-2:    var(--gris);
-  --hair:       rgba(23, 58, 50, .14);   /* hairline sobre superficie clara */
+  --hair:       #B6BDB0;   /* hairline sobre superficie clara — 1.59:1 sobre el lienzo */
   --hair-osc:   rgba(250, 249, 245, .10);/* hairline sobre superficie oscura */
-  --sombra:     0 1px 2px rgba(23,27,25,.06), 0 6px 16px -10px rgba(23,27,25,.14);
+  /* Tres capas en la TINTA del sitio (23,27,25), no en el verde de marca: un
+     halo cromatico es otro tic reconocible de UI generada, y el detector lo
+     marca como `dark-glow` en cuanto la sombra se tine. Maximo 18px de blur
+     (§6 veta blur > 24px en listas). Gemelo CSS de CLARO.sombra en ui.jsx: si
+     cambia una, cambia la otra. */
+  --sombra:     0 1px 2px rgba(23,27,25,.14), 0 4px 8px -2px rgba(23,27,25,.16), 0 12px 18px -8px rgba(23,27,25,.28);
 
   /* ── Espaciado: 6 valores (DESIGN.md §5.2). Antes había 36 sueltos ── */
   --e1: 4px; --e2: 8px; --e3: 12px; --e4: 20px; --e5: 32px; --e6: 52px;
@@ -37,11 +50,11 @@
   --sans: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
 
-  /* La app es CLARA: el lienzo es crema y el verde es color de MARCA (banda,
-     sello, acentos). Esto pintaba verde con texto crema — resto del tema
+  /* La app es CLARA: el lienzo es papel de oficio frio y el verde es color de
+     MARCA (banda, sello, acentos). Esto pintaba verde con texto claro — resto del tema
      oscuro que el inline de app.jsx:411-412 ya tapaba. El CSS ya no lo
      contradice. */
-  background: var(--crema);
+  background: var(--lienzo);
   color: var(--tinta);
   font-family: var(--sans);
 }
@@ -66,9 +79,10 @@
 /* ── Superficies ────────────────────────────────────────────────────────── */
 
 .amx-v2 .p-claro {
-  background: var(--crema);
+  background: var(--papel);
   color: var(--tinta);
   border-radius: var(--radio);
+  border: 1px solid var(--hair);
   box-shadow: var(--sombra);
 }
 /* Retiradas .p-blanco, .p-oscuro y .t-etiqueta: cero usos en jsx/html. */
@@ -114,7 +128,7 @@
   font-size: 13px;
   color: var(--tinta);
 }
-/* zebra: beige sobre crema es 1.27:1, invisible solo — necesita el hairline */
+/* zebra: --beige sobre el papel es 1.17:1, invisible solo — necesita el hairline */
 .amx-v2 .specs tr { border-bottom: 1px solid var(--hair); }
 .amx-v2 .specs tr:nth-child(even) { background: var(--beige); }
 .amx-v2 .specs tr:last-child { border-bottom: 0; }
@@ -149,8 +163,8 @@
   outline-offset: 2px;
   border-radius: var(--radio-sm);
 }
-/* El anillo por defecto (--rojo-txt, 4.51:1 sobre crema) sirve en todo el
-   lienzo claro. El beige aquí era del tema oscuro: sobre crema da 1.27:1.
+/* El anillo por defecto (--rojo-txt, 4.27:1 sobre el lienzo) sirve en todo el
+   lienzo claro. El beige aquí era del tema oscuro: sobre el lienzo da 1.17:1.
    La única superficie oscura que queda es la banda de marca, más abajo. */
 
 @media (prefers-reduced-motion: reduce) {
@@ -173,7 +187,7 @@
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
-  color: var(--gris);            /* 6.13:1 sobre #FAF9F5. Antes --beige: 1.27:1, invisible */
+  color: var(--gris);            /* 6.05:1 sobre el papel #F7F8F4. Antes --beige: 1.27:1, invisible */
   font-family: var(--sans);
   font-size: 11.5px;
   font-weight: 600;
@@ -187,18 +201,25 @@
 }
 .amx-v2 .tab:hover { color: var(--tinta); }
 .amx-v2 .tab.is-act {
-  color: var(--tinta);                /* 16.51:1 sobre #FAF9F5 */
+  color: var(--tinta);                /* 16.31:1 sobre el papel #F7F8F4 */
   border-bottom-color: var(--rojo);   /* el rojo como marca de posición, no como texto */
 }
 .amx-v2 .tab-panel { padding-top: var(--e4); }
 
 /* ── Tarjeta clara: el patrón dominante del mockup ───────────────────────── */
 
+/* La sombra base vive AQUI, no inline: un `boxShadow` en el objeto style gana
+   siempre por especificidad y dejaba muerta la regla :hover de abajo (el hover
+   solo levantaba, la sombra no se movia). Las tres tarjetas que llevan esta
+   clase (ArmaCard, AccesorioCard, MunicionCard) ya no la declaran inline. */
 .amx-v2 .amx-card {
+  box-shadow: var(--sombra);
   transition: box-shadow .18s, transform .18s;
 }
+/* El hover sube un escalón la MISMA sombra de tres capas — no cambia de
+   recurso. Tope de 24px de blur (§6); aquí solo se repinta una tarjeta. */
 .amx-v2 .amx-card:hover {
-  box-shadow: 0 2px 4px rgba(23,27,25,.10), 0 14px 28px -14px rgba(23,27,25,.34);
+  box-shadow: 0 2px 4px rgba(23,27,25,.18), 0 8px 14px -2px rgba(23,27,25,.20), 0 20px 24px -10px rgba(23,27,25,.34);
   transform: translateY(-2px);
 }
 .amx-v2 .amx-card:has(:focus-visible) {
@@ -286,7 +307,7 @@
   gap: var(--e1);
   text-decoration: none;
 }
-.amx-v2 .amx-accion       { color: #A3341F; }   /* 5.96:1 sobre el lienzo crema */
+.amx-v2 .amx-accion       { color: #A3341F; }   /* 5.63:1 sobre el lienzo #E7EAE4 */
 .amx-v2 .amx-accion-verde { color: #F29C8C; }   /* 5.87:1 sobre el verde #173A32 */
 .amx-v2 .amx-accion:hover,
 .amx-v2 .amx-accion-verde:hover {

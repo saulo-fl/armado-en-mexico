@@ -990,17 +990,59 @@ y es donde hay que usar `--verde-2` corregido.
 
 ### 5.1b Superficies
 
+> Actualizada el 7-sep-2026. La versión anterior describía un stack **oscuro** —verde de fondo
+> y el crema como tarjeta— que dejó de ser cierto cuando la app se invirtió a clara. Estos son
+> los valores que sirve el sitio hoy. Si vuelven a cambiar, se cambian aquí.
+
+**La app es CLARA. El verde es color de MARCA, no fondo de pantalla:** vive en la banda superior,
+el sello, los acentos y la navegación, no bajo el contenido.
+
 ```css
---fondo:    #173A32;  /* verde profundo */
---elevado:  #2C6457;  /* tarjeta oscura — corregido */
---panel:    #F3EFE4;  /* crema: la tarjeta por defecto */
---panel-hi: #FAF9F5;  /* blanco: panel destacado */
---zebra:    #DDD5C4;  /* fila alterna, SOLO con hairline */
---hair: inset 0 1px 0 rgba(255,255,255,.06);
+/* Las dos superficies claras. Viven en estilo.css (.amx-v2) y en el objeto
+   CLARO de ui.jsx — son gemelas: si cambia una, cambia la otra. */
+--lienzo:  #E7EAE4;  /* el lienzo de la app: «papel de oficio frío» */
+--papel:   #F7F8F4;  /* la tarjeta por defecto — 1.14:1 sobre el lienzo */
+--beige:   #E4E7E0;  /* fila alterna sobre el papel — 1.17:1, SOLO con hairline */
+--hair:    #B6BDB0;  /* hairline — 1.59:1 sobre el lienzo */
+           #868E84;  /* borderHi: borde que PORTA estado — 3.17:1 (WCAG 1.4.11) */
+
+/* El verde, como marca */
+--verde:   #173A32;  /* banda, sello, acentos. Tinta clara encima: 10.24:1 */
+--verde-2: #2C6457;  /* superficie oscura elevada, cuando la haya */
+
+/* El crema y el blanco NO son superficies: son TINTA CLARA sobre el verde */
+--crema:   #F3EFE4;  /* texto sobre verde — 10.83:1 */
+--blanco:  #FAF9F5;  /* texto sobre el rojo de relleno */
 ```
 
-Separar por **superficie y sombra suave**, no por borde de 1px (§27 de tu spec dice lo mismo:
-«sombras extremadamente suaves»).
+**Por qué el lienzo no es crema.** El `#F3EFE4` anterior es el *warm off-white* al que llega por
+reflejo cualquier interfaz generada; el detector lo marca como `cream-palette` una vez por página
+—323 veces— y §6 ya vetaba el cream con serif display. El `#E7EAE4` conserva la sensación de papel
+pero en el mismo matiz verde-gris de la marca, y no dispara la regla. Comprobado a mano: la regla
+persigue el tono cálido, no la claridad.
+
+**La regla que gobierna esta sección:** separar por **superficie y sombra**, nunca por un borde de
+1px (§6, y §27 de tu spec: «sombras extremadamente suaves»).
+
+Y el motivo por el que no es negociable: **entre dos superficies claras el contraste máximo
+alcanzable es ~1.2:1.** Papel sobre lienzo da 1.14:1. El color no puede separarlas —da igual qué
+dos claros elijas—, así que quien las separa es la sombra. Elegir otro claro y no tocar la sombra
+reproduce el defecto medido en §2, que es de donde salió todo este brief.
+
+```css
+/* Tres capas escalonadas: contacto + media + ambiente. Ese escalonado es lo que
+   el ojo lee como «una capa encima de otra» cuando el color solo da 1.14:1. */
+--sombra: 0 1px 2px rgba(23,27,25,.14),
+          0 4px 8px -2px rgba(23,27,25,.16),
+          0 12px 18px -8px rgba(23,27,25,.28);
+```
+
+Dos condiciones, las dos aprendidas a golpes:
+
+- **En la tinta del sitio `rgba(23,27,25,…)`, nunca teñida con el verde.** Una sombra de color es
+  un halo cromático: otro tic de interfaz generada. El detector lo marca como `dark-glow`.
+- **Máximo 18px de blur** (24px en hover, y solo ahí). El coste de una sombra escala con el
+  cuadrado del radio, y son 322 páginas con muchas tarjetas.
 
 ### 5.2 Escala de espaciado — 6 valores, no 36
 
@@ -1035,8 +1077,22 @@ como instrumentación y no como texto.
 
 ### 5.4 Jerarquía sin bordes
 
-- Barra de estado legal a la izquierda de cada ficha (`border-left: 3px`) por permitida /
-  restringida / permiso especial. Semántica real, una propiedad.
+- **Estado legal en el hairline completo de la tarjeta**, no en una barra lateral. El color de
+  disponibilidad —uso civil / seguridad / exclusivo Ejército— es el `border: 1px solid` de todo
+  el contorno. Semántica real, una propiedad.
+
+  > Esto decía `border-left: 3px` y **se corrigió el 7-sep-2026**, porque se contradecía con §6.
+  > La franja de color en el canto izquierdo de una tarjeta es el tic más reconocible de interfaz
+  > generada por IA — el detector la marca con su propio nombre, `side-tab`, y era el hallazgo más
+  > repetido del sitio: 20 sobre fuente y 41 en todo el repo. El brief se pedía a sí mismo aquello
+  > que en §6 declara señal de trabajo genérico.
+  >
+  > El color no se perdió, se movió: pintando el contorno entero se conserva la misma información
+  > y el mismo color semántico, sin la pestaña. Medido sobre la tarjeta `#F7F8F4`:
+  > **6.02 / 5.49 / 6.42:1**. Y como la separación real la hace la sombra de §5.1b, el borde deja
+  > de ser el recurso principal, que es justo lo que pedía §6.
+  >
+  > **No reintroduzcas la barra lateral.** Si algo necesita distinguirse, es superficie y sombra.
 - Fichas destacadas con `grid-column: span 2` — rompe la cuadrícula sin código nuevo.
 - Par etiqueta/valor: etiqueta a 10-11px en mayúsculas con `letter-spacing: .08em`; valor en mono.
 - **Asimetría sistemática, no aleatoria:** siempre la misma esquina cortada, siempre los mismos

@@ -62,7 +62,7 @@ function TraumaFicha({ p, vp }) {
 
   return (
     <div style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`,
       display: 'flex', flexDirection: vp.isDesktop ? 'row' : 'column', alignItems: 'stretch',
     }}>
       {photo}
@@ -72,10 +72,10 @@ function TraumaFicha({ p, vp }) {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
           <h3 style={{ margin: 0, fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 30 : 25, color: PALETTE.text, letterSpacing: '0.01em', lineHeight: 1 }}>{p.modelo}</h3>
         </div>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 17, color: PALETTE.textDim, marginTop: 6 }}>{p.nombre}</div>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17, color: PALETTE.textDim, marginTop: 6 }}>{p.nombre}</div>
 
         {/* resumen */}
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 12 }}>{p.resumen}</div>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 12 }}>{p.resumen}</div>
 
         {/* specs */}
         <div style={{
@@ -104,7 +104,7 @@ function TraumaFicha({ p, vp }) {
         {/* destacados */}
         <ul style={{ listStyle: 'none', margin: '16px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
           {p.destacados.map((d) => (
-            <li key={d} style={{ display: 'flex', gap: 9, fontFamily: 'Open Sans, sans-serif', fontSize: 17, color: PALETTE.textDim, lineHeight: 1.5 }}>
+            <li key={d} style={{ display: 'flex', gap: 9, fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17, color: PALETTE.textDim, lineHeight: 1.5 }}>
               <span style={{ color: PALETTE.amber, flexShrink: 0 }}>▸</span>{d}
             </li>
           ))}
@@ -151,23 +151,23 @@ function TraumaLegal({ vp }) {
     <div style={{ marginTop: 28 }}>
       <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>§ Marco legal · México</div>
       <h3 style={{ margin: 0, fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 24 : 20, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Por qué no requieren permiso</h3>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 10, marginBottom: 16, maxWidth: 720 }}>{L.resumen}</div>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 10, marginBottom: 16, maxWidth: 720 }}>{L.resumen}</div>
 
       <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(2, 1fr)' : '1fr', gap: 12 }}>
         {L.puntos.map((pt) => (
-          <div key={pt.tit} style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `3px solid ${PALETTE.amber}`, padding: '14px 16px' }}>
+          <div key={pt.tit} style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, padding: '14px 16px' }}>
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14.5, color: PALETTE.text, marginBottom: 6 }}>{pt.tit}</div>
-            <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.55 }}>{pt.desc}</div>
+            <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.55 }}>{pt.desc}</div>
           </div>
         ))}
       </div>
 
       <div style={{
         marginTop: 16, padding: '12px 16px', background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`, borderLeft: `4px solid ${PALETTE.redHi}`,
+        border: `1px solid ${PALETTE.redHi}`,
       }}>
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.redHi, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>▲ Aviso</div>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6 }}>{L.disclaimer}</div>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6 }}>{L.disclaimer}</div>
       </div>
     </div>
   );
@@ -190,18 +190,18 @@ function TraumaticasScreen({ onNav }) {
           header; en escritorio (y tablet) sigue a la izquierda, donde TopNav
           tampoco pinta título y la columna de lectura arranca al margen. */}
       <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 36 : 27, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.04, marginBottom: 10, textAlign: vp.isMobile ? 'center' : 'left' }}>Armas Traumáticas</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 680, marginBottom: 14 }}>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 680, marginBottom: 14 }}>
         Dispositivos de defensa <strong style={{ color: PALETTE.text }}>NO letal</strong> propulsados por CO₂, en calibre .50 y .68. Disparan munición de pimienta, goma o polvo inerte para detener una amenaza sin recurrir a fuerza letal. Puedes adquirirlos directamente en <strong style={{ color: PALETTE.amber }}>armasmys.com</strong>.
       </div>
 
       {/* CATEGORÍA APARTE — énfasis */}
       <div style={{
         display: 'flex', alignItems: 'flex-start', gap: 12,
-        background: 'rgba(221,213,196,0.07)', border: `1px solid ${PALETTE.amber}`, borderLeft: `4px solid ${PALETTE.amber}`,
+        background: 'rgba(221,213,196,0.07)', border: `1px solid ${PALETTE.amber}`,
         padding: '14px 16px', marginBottom: 18,
       }}>
         <span style={{ color: PALETTE.amber, fontSize: 21.5, lineHeight: 1.2, flexShrink: 0 }}>◎</span>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 17.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
           <strong style={{ color: PALETTE.text }}>Una categoría totalmente distinta del arsenal.</strong> Al no ser armas de fuego, no requieren permiso de la SEDENA y <strong style={{ color: PALETTE.text }}>puedes adquirirlas directamente con nosotros</strong>. Son los <strong style={{ color: PALETTE.amber }}>únicos tres modelos de armamento que comercializamos</strong>; todas las armas de fuego de esta app se muestran solo con fines informativos.
         </div>
       </div>
@@ -253,7 +253,7 @@ function TraumaTierCard({ p, vp, onNav }) {
     : p.effect === 'fire' ? 'trauma-fx-fire' : '';
   return (
     <div className={fxClass} style={{
-      position: 'relative', background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+      position: 'relative', background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
       borderTop: `2px solid ${p.tierColor}`,
       borderRadius: 8, display: 'flex', flexDirection: 'column', paddingTop: 26,
       height: '100%', width: '100%', boxSizing: 'border-box',
@@ -285,7 +285,7 @@ function TraumaTierCard({ p, vp, onNav }) {
           color: PALETTE.text, letterSpacing: '0.01em',
         }}>P2P {p.modelo}</h3>
         <div style={{
-          fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim,
+          fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15.5, color: PALETTE.textDim,
           lineHeight: 1.5, marginTop: 8, textWrap: 'pretty',
         }}>{p.tagline}</div>
       </div>
@@ -300,7 +300,7 @@ function TraumaTierCard({ p, vp, onNav }) {
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 12, fontWeight: 700,
             }}>✓</span>
-            <span style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.45 }}>{f}</span>
+            <span style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15, color: PALETTE.textDim, lineHeight: 1.45 }}>{f}</span>
           </li>
         ))}
       </ul>

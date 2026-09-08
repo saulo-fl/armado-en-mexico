@@ -51,7 +51,8 @@ function AccesorioCard({ acc, onClick }) {
       position: 'relative',
       background: window.CLARO.panel,
       borderRadius: window.CLARO.radio,
-      boxShadow: window.CLARO.sombra,
+      border: `1px solid ${window.CLARO.hair}`,
+      // La sombra la pone .amx-card en estilo.css (ver ui.jsx/ArmaCard).
       cursor: 'pointer',
       overflow: 'hidden',
       height: '100%',
@@ -155,7 +156,7 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
       }}>
         {visible.map(c => (
           <button key={c.id} onClick={() => onNav && onNav('accesorios', { categoria: c.id })} style={{
-            background: P.bgCard, border: `1px solid ${P.border}`,
+            background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
             padding: 0, cursor: 'pointer', textAlign: 'left',
             position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
             transition: 'border-color 0.18s',
@@ -283,8 +284,8 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
           color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05,
         }}>Accesorios DCAM</div>
         <div style={{
-          marginTop: 12, background: P.bgCard, border: `1px solid ${P.border}`,
-          borderLeft: `3px solid ${P.amber}`, padding: '11px 14px',
+          marginTop: 12, background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
+          boxShadow: window.CLARO.sombra, padding: '11px 14px',
           ...window.amxProsa({ fontSize: 16, color: P.textDim, lineHeight: 1.6 }),
         }}>
           Accesorios de adquisición legal a través de la <b style={{ color: P.text }}>DCAM</b> (nacional) y la <b style={{ color: P.text }}>OTCA</b> (Monterrey, catálogo propio).
@@ -486,7 +487,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
           </div>
           {acc.descripcion &&
             <p style={{
-              fontFamily: 'Open Sans, sans-serif', fontSize: 17.5, color: P.textDim,
+              fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17.5, color: P.textDim,
               lineHeight: 1.65, margin: '0 0 6px', textWrap: 'pretty',
             }}>{acc.descripcion}</p>
           }
@@ -504,7 +505,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
           {acc.specs && acc.specs.length > 0 &&
             <React.Fragment>
               <window.SectionHeader>Especificaciones</window.SectionHeader>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, marginBottom: 16 }}>
+              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
                 {acc.specs.map(([k, v], i) => (
                   <div key={i} style={{
                     display: 'flex', justifyContent: 'space-between', gap: 12,
@@ -526,7 +527,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
                 {acc.compatibilidad.map((c, i) => (
                   <span key={i} style={{
-                    background: P.bgCard, border: `1px solid ${P.border}`, borderLeft: `2px solid ${P.amber}`,
+                    background: P.bgCard, border: `1px solid ${P.border}`,
                     padding: '6px 10px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
                     color: P.text, letterSpacing: '0.06em',
                   }}>{c}</span>
@@ -638,7 +639,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textDim,
                 letterSpacing: '0.04em', marginTop: -6, marginBottom: 10, lineHeight: 1.4,
               }}>Según inventarios oficiales DCAM / OTCA</div>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, marginBottom: 16 }}>
+              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
                 {priceHistory.slice().reverse().map((h, i) => {
                   const man = manualById(h.manualId);
                   const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
@@ -693,14 +694,14 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <React.Fragment>
               <window.SectionHeader>Estatus Legal</window.SectionHeader>
               <div style={{
-                background: P.bgCard, border: `1px solid ${availMeta.color}`, borderLeft: `4px solid ${availMeta.color}`,
+                background: P.bgCard, border: `1px solid ${availMeta.color}`, boxShadow: window.CLARO.sombra,
                 padding: '12px 14px', marginBottom: 16,
               }}>
                 <div style={{
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
                   color: availMeta.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
                 }}>{availMeta.label}</div>
-                <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
+                <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
                   {availMeta.desc}
                 </div>
               </div>

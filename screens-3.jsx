@@ -100,7 +100,7 @@ function CalibresScreen({ onOpenArma, onNav }) {
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       {/* encabezado */}
       <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Guía de calibres</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
         Conoce los calibres presentes en el catálogo: su uso típico, balística aproximada y las armas que los emplean. Cifras divulgativas, varían según marca y munición.
       </div>
 
@@ -176,7 +176,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
     </div>
   );
   return (
-    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `3px solid ${PALETTE.amber}`, display: 'flex', alignItems: 'stretch', minHeight: vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop + 28 : CARTUCHO_FICHA_MAXH.mobile + 24 }}>
+    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, display: 'flex', alignItems: 'stretch', minHeight: vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop + 28 : CARTUCHO_FICHA_MAXH.mobile + 24 }}>
       <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '18px 20px' : '14px' }}>
         {/* título + sistema */}
         <div>
@@ -186,7 +186,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
         {/* uso */}
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
         {/* desc */}
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
         {/* balística */}
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
           {stat('Velocidad', cal.velocidad)}
@@ -245,7 +245,7 @@ function CamposScreen({ onNav }) {
       }}>
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Suscripción próximamente</div>
-          <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 4 }}>
+          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 4 }}>
             Pronto podrás suscribirte para acceder a campos y clubes de tiro aliados con beneficios y reservación. Estos son ejemplos de lo que vendrá.
           </div>
         </div>
@@ -318,7 +318,7 @@ function CursosScreen({ onNav }) {
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
       <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Cursos</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 20 }}>
         Aprende antes de decidir. Catálogo de formación con instructores certificados, del manejo seguro al tiro defensivo y de precisión. Contenido de muestra.
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr', gap: 14 }}>
@@ -332,7 +332,7 @@ window.CursosScreen = CursosScreen;
 function CursoCard({ curso, onNav, vp }) {
   const col = NIVEL_COLOR[curso.nivel] || PALETTE.amber;
   return (
-    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${col}`, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${col}`, display: 'flex', flexDirection: 'column' }}>
       <StripePlaceholder label={`Foto · ${curso.titulo}`} ratio="16 / 9">
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CURSO</div>
@@ -345,7 +345,7 @@ function CursoCard({ curso, onNav, vp }) {
           <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.08em' }}>{curso.modalidad}</span>
         </div>
         <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.1, marginTop: 12 }}>{curso.titulo}</div>
-        <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 8, flex: 1 }}>{curso.desc}</div>
+        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.55, marginTop: 8, flex: 1 }}>{curso.desc}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
           <div>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>Duración</div>
@@ -378,7 +378,7 @@ function CaliberMiniCard({ cal, onClick }) {
   const n = armasPorCalibre(cal.id).length;
   return (
     <div onClick={onClick} style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`,
       cursor: 'pointer', overflow: 'hidden', height: '100%', minHeight: CARTUCHO_HOME_MAXH + 22, display: 'flex', alignItems: 'stretch',
     }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
@@ -386,7 +386,7 @@ function CaliberMiniCard({ cal, onClick }) {
       <div style={{ padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
       <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{cal.sistema}</div>
       <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 8, lineHeight: 1 }}>{cal.id}</div>
-      <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
+      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
       <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
       </div>
       {/* CARTUCHO SLOT — PNG vertical del cartucho a escala REAL (altura ∝ mm), anclado al piso */}
@@ -429,7 +429,7 @@ function CursoMiniCard({ curso, onClick }) {
   const col = NIVEL_COLOR[curso.nivel] || PALETTE.amber;
   return (
     <div onClick={onClick} style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${col}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${col}`,
       cursor: 'pointer', overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column',
     }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
@@ -484,7 +484,7 @@ function ProximamenteScreen({ titulo, texto }) {
           que no se lea como algo pulsable (los datos de esta sección están
           congelados, no hay adónde ir). */}
       <div style={{
-        marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+        marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
         padding: vp.isDesktop ? '34px 30px' : '26px 18px', textAlign: 'center', cursor: 'default',
       }}>
         {/* El glifo es decoración, pero aun así debe verse: a opacity 0.55 el
@@ -492,7 +492,7 @@ function ProximamenteScreen({ titulo, texto }) {
             el filo del mínimo gráfico. A 0.6 resuelve a #728680 = 3.67:1. */}
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.6, lineHeight: 1 }} aria-hidden="true">?</div>
         <div style={{
-          fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim,
+          fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim,
           lineHeight: 1.55, maxWidth: 560, margin: '16px auto 0',
         }}>{texto}</div>
       </div>
@@ -507,7 +507,7 @@ window.ProximamenteScreen = ProximamenteScreen;
 function ProximamenteCard({ img }) {
   return (
     <div style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
       overflow: 'hidden', height: '100%', cursor: 'default',
     }}>
       {img ? (

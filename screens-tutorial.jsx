@@ -42,7 +42,7 @@
             color: P.text, textTransform: 'uppercase', letterSpacing: '0.05em',
           }}>{title}</div>
           <div style={{
-            fontFamily: 'Open Sans, sans-serif', fontSize: 15, color: P.textDim,
+            fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15, color: P.textDim,
             lineHeight: 1.5, marginTop: 3, textWrap: 'pretty',
           }}>{desc}</div>
         </div>
@@ -303,7 +303,7 @@
             {s.body && (
               <p style={{
                 margin: '14px 0 0',
-                fontFamily: 'Open Sans, sans-serif', fontSize: vp.isDesktop ? 19 : 18,
+                fontFamily: 'Archivo, system-ui, sans-serif', fontSize: vp.isDesktop ? 19 : 18,
                 color: P.textDim, lineHeight: 1.65, textAlign: 'center', textWrap: 'pretty',
               }}>{s.body}</p>
             )}

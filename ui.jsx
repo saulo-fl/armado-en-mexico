@@ -9,30 +9,36 @@
 //
 // El error que arrastraba la paleta anterior: la tarjeta daba 1.25:1 contra su
 // fondo y el borde 1.23:1 contra la tarjeta — las dos señales que definen una
-// tarjeta eran invisibles, y por eso el sitio se leía «cuadrado». Aquí la
-// superficie sigue siendo sutil a propósito (1.25:1), pero el borde SÍ se ve
-// (1.72:1) y es él quien define la caja. No subas bgCard sin recalcular: una
-// tarjeta más clara aplasta el contraste del texto que va encima.
-// La app es CLARA. En el mockup el lienzo es crema y el verde es el color de
-// marca: header, navegación, hero de producto y acentos. Tenerlo al revés —toda
-// la app en verde— era el error de fondo del primer intento.
+// tarjeta eran invisibles, y por eso el sitio se leía «cuadrado». Cambiar un
+// claro por otro claro NO arregla eso: tarjeta sobre lienzo da 1.14:1 y NINGÚN
+// par de superficies claras llega al umbral perceptible. Lo que separa las
+// capas aquí es la SOMBRA (CLARO.sombra) más el hairline (§5.1b: «separar por
+// superficie y sombra suave, no por borde de 1px»). No subas bgCard sin
+// recalcular: una tarjeta más clara aplasta el contraste del texto que va encima.
+//
+// El lienzo es «papel de oficio frío» #E7EAE4: mismo matiz verde-gris que la
+// marca, no el crema #F3EFE4 anterior. El crema seguía siendo el warm off-white
+// por defecto de la IA y el detector lo marcaba en las 322 páginas.
+// La app es CLARA. El verde es el color de marca: header, navegación, hero de
+// producto y acentos. Tenerlo al revés —toda la app en verde— era el error de
+// fondo del primer intento.
 const PALETTE = {
-  bg:        '#F3EFE4',   // lienzo crema
-  bgElev:    '#FAF9F5',   // tarjeta blanca (1.09:1 sobre el lienzo: la define la sombra)
-  bgCard:    '#FAF9F5',
-  bgCardGrad:'linear-gradient(180deg, #FFFFFF, #F7F5EE)',
-  border:    '#D5D6CE',   // hairline
-  borderHi:  '#BFC1B8',
-  amber:     '#173A32',   // el acento es el VERDE DE MARCA — 10.83:1 sobre el lienzo
+  bg:        '#E7EAE4',   // lienzo «papel de oficio frío»
+  bgElev:    '#F7F8F4',   // tarjeta (1.14:1 sobre el lienzo: la definen sombra + hairline)
+  bgCard:    '#F7F8F4',
+  bgCardGrad:'linear-gradient(180deg, #FDFEFC, #F1F4EE)',
+  border:    '#B6BDB0',   // hairline — 1.59:1 sobre el lienzo (el #D5D6CE previo daba 1.27:1)
+  borderHi:  '#868E84',   // borde/indicador que porta estado — 3.17:1 sobre la tarjeta (WCAG 1.4.11)
+  amber:     '#173A32',   // el acento es el VERDE DE MARCA — 10.24:1 sobre el lienzo
   amberDim:  '#2F6B33',
   military:  '#7C837B',
   red:       '#C83B32',   // relleno de CTA, con texto claro encima (4.83:1)
-  redHi:     '#A3341F',   // rojo como TEXTO — 5.96:1
-  green:     '#2F6B33',   // 5.59:1
-  blue:      '#4A6B7C',
-  text:      '#171B19',   // tinta — 15.14:1
-  textDim:   '#3E443D',
-  textMuted: '#59605C',   // 5.62:1
+  redHi:     '#A3341F',   // rojo como TEXTO — 5.63:1
+  green:     '#2F6B33',   // 5.28:1
+  blue:      '#4A6B7C',   // 4.69:1
+  text:      '#171B19',   // tinta — 14.32:1
+  textDim:   '#3E443D',   // 8.24:1
+  textMuted: '#59605C',   // 5.32:1
   // Superficies de marca: header, nav y hero. El texto encima va en `text` invertido.
   marca:     '#173A32',
   marcaAlt:  '#1E4A40',
@@ -54,21 +60,32 @@ window.PALETTE = PALETTE;
 // no caja oscura sobre fondo oscuro. Lo que va encima de una tarjeta clara usa
 // estos, no PALETTE, que está calibrada para el fondo verde.
 const CLARO = {
-  // Ahora que el lienzo de la app es crema, la tarjeta sube a blanco para
-  // separarse de él; el crema pasa a ser la fila alterna de las tablas.
-  panel:   '#FAF9F5',   // tarjeta blanca
-  panelHi: '#FFFFFF',
-  zebra:   '#F0ECE1',   // fila alterna sobre blanco
-  tinta:   '#171B19',   // 15.14:1 sobre crema
-  tinta2:  '#59605C',   //  5.62:1
-  hair:    'rgba(23,58,50,.14)',
-  sombra:  '0 1px 2px rgba(23,27,25,.07), 0 8px 20px -12px rgba(23,27,25,.22)',
+  // La tarjeta se separa del lienzo por sombra + hairline, no por color: entre
+  // dos superficies claras el ratio máximo alcanzable es ~1.2:1.
+  panel:   '#F7F8F4',   // tarjeta
+  panelHi: '#FFFFFF',   // pozo de foto (ficha de producto)
+  zebra:   '#E4E7E0',   // fila alterna sobre la tarjeta — 1.17:1, va con el hairline
+  tinta:   '#171B19',   // 14.32:1 sobre el lienzo
+  tinta2:  '#59605C',   //  5.32:1
+  hair:    '#B6BDB0',   // el MISMO hairline que PALETTE.border, medido: 1.59:1 sobre el lienzo
+  // ── LA SOMBRA — la mitad que hace funcionar el lienzo claro ──────────────
+  // Tres capas: contacto (2px) + media (8px) + ambiente (18px). Ese escalonado
+  // es lo que lee el ojo como «una capa encima de otra» cuando el color de las
+  // dos superficies solo da 1.14:1.
+  // En la TINTA del sitio (23,27,25) —un negro que ya tira a frío—, NO en el
+  // verde de marca: una sombra teñida de color es un halo cromático, otro tic
+  // de UI generada, y el detector lo marca como `dark-glow`.
+  // Máximo 18px de blur: §6 veta blur > 24px en listas porque el coste escala
+  // con el cuadrado del radio, y hay 322 páginas con muchas tarjetas.
+  // Sin anillo `0 0 0 1px`: el hairline lo pone el `border` de la tarjeta, y
+  // duplicarlo daría un doble filo de 2px.
+  sombra:  '0 1px 2px rgba(23,27,25,.14), 0 4px 8px -2px rgba(23,27,25,.16), 0 12px 18px -8px rgba(23,27,25,.28)',
   radio:   12,
   radioSm: 8,
-  // Los estados de PALETTE están calibrados contra el fondo VERDE y sobre crema
-  // se caen a 1.7-2.3:1. Estas son sus variantes para superficie clara.
-  ok:      '#2F6B33',   // 5.59:1 sobre crema (PALETTE.green da 1.74:1 aquí)
-  alerta:  '#A3341F',   // 5.96:1 (PALETTE.redHi da 1.84:1)
+  // Los estados de PALETTE están calibrados contra el fondo VERDE y sobre el
+  // lienzo claro se caen a 1.7-2.3:1. Estas son sus variantes para superficie clara.
+  ok:      '#2F6B33',   // 5.28:1 sobre el lienzo (PALETTE.green da 1.74:1 aquí)
+  alerta:  '#A3341F',   // 5.63:1 (PALETTE.redHi da 1.84:1)
 };
 window.CLARO = CLARO;
 
@@ -609,6 +626,16 @@ window.estiloAccion = estiloAccion;
 // familia elegida. DESIGN.md §5.3 sustituye Open Sans por Archivo justamente;
 // esto lo pone de acuerdo con la fuente que sí llega al navegador.
 //
+// Arreglar esta función NO bastó, y conviene saber por qué: había otros 25
+// `fontFamily: 'Open Sans'` escritos a mano en screens-2/3/4, accesorios,
+// municiones y tutorial, que no pasaban por aquí. Se cerraron el 7-sep-2026.
+// La lección: comprobar UN archivo compilado y dar por bueno el conjunto es
+// como se coló. Si vuelves a cambiar la familia de la prosa, cámbiala aquí y
+// después `grep -rn "fontFamily: 'Open Sans" *.jsx` para los que se escapen.
+//
+// Usar la receta (`window.amxProsa({...})`) en vez de escribir la familia a
+// mano es lo que evita que esto se repita.
+//
 // La mono NO se toca en lo que se escanea en vez de leerse: rótulos HUD en
 // versalitas (§ LEGALIDAD · MX), precios, existencias, fechas, siglas y badges.
 // Esa es la frontera; si dudas, pregúntate si la frase se lee o se mira.
@@ -783,13 +810,17 @@ window.BottomNav = BottomNav;
 function ArmaCard({ arma, onClick, onCompare, inCompare }) {
   const [imgError, setImgError] = React.useState(false);
   return (
-    // Tarjeta CLARA sobre el fondo verde: el patrón del mockup. Sin borde de
-    // 1px ni corchetes — la define la superficie y una sombra suave (§27).
+    // Tarjeta CLARA sobre el lienzo claro. La superficie sola da 1.14:1 —
+    // invisible—, así que la definen la SOMBRA y el hairline, en ese orden
+    // (§5.1b y §27: «bordes finos, sombras extremadamente suaves»). El borde
+    // no es el recurso principal: sin sombra la tarjeta desaparece.
     <div onClick={onClick} className="amx-card" style={{
       position: 'relative',
       background: CLARO.panel,
       borderRadius: CLARO.radio,
-      boxShadow: CLARO.sombra,
+      border: `1px solid ${CLARO.hair}`,
+      // La sombra la pone .amx-card en estilo.css: aqui, inline, ganaria por
+      // especificidad y anularia el :hover.
       cursor: 'pointer',
       overflow: 'hidden',
       height: '100%',

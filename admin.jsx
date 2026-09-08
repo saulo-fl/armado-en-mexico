@@ -261,7 +261,6 @@ function QueueTab({ onEdit }) {
               <div key={r.id} style={{
                 background: P.bgCard,
                 border: `1px solid ${P.border}`,
-                borderLeft: `3px solid ${P.red}`,
                 padding: '12px 14px',
                 opacity: 0.7,
               }}>
@@ -1964,7 +1963,6 @@ function FavoritesTab() {
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: 8, background: P.bgElev,
                   border: `1px solid ${P.border}`,
-                  borderLeft: `3px solid ${P.amber}`,
                 }}>
                   <span style={{
                     fontFamily: 'Oswald, sans-serif', fontWeight: 700,
@@ -2230,7 +2228,7 @@ function ManualesTab() {
 
       <div style={{
         background: 'rgba(201,162,39,0.06)',
-        border: `1px solid ${P.border}`, borderLeft: `3px solid ${P.amber}`,
+        border: `1px solid ${P.border}`,
         padding: '12px 16px', marginBottom: 22,
         fontSize: 12, color: P.textDim, lineHeight: 1.6,
       }}>
