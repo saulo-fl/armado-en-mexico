@@ -20,6 +20,7 @@
      pareja de superficies claras. Las separan --sombra y --hair, no el color. */
   --lienzo:     #E7EAE4;   /* el lienzo de la app */
   --papel:      #F7F8F4;   /* la tarjeta por defecto — 1.14:1 sobre el lienzo */
+  --papel-hi:   #FFFFFF;   /* pozo de foto — gemelo de CLARO.panelHi en ui.jsx */
   /* --crema y --blanco ya NO son superficies: son la TINTA CLARA que va encima
      del verde de marca (banda, buscador, anillo de foco, relleno rojo). */
   --crema:      #F3EFE4;   /* tinta sobre verde — 10.83:1 */
@@ -78,14 +79,10 @@
 
 /* ── Superficies ────────────────────────────────────────────────────────── */
 
-.amx-v2 .p-claro {
-  background: var(--papel);
-  color: var(--tinta);
-  border-radius: var(--radio);
-  border: 1px solid var(--hair);
-  box-shadow: var(--sombra);
-}
-/* Retiradas .p-blanco, .p-oscuro y .t-etiqueta: cero usos en jsx/html. */
+/* Retiradas .p-blanco, .p-oscuro y .t-etiqueta: cero usos en jsx/html. Y con
+   ellas .p-claro, que envolvía la tabla de la pestaña «Especificaciones»: esa
+   pestaña la absorbió la ficha técnica del folder (§4.3), y la utilidad se
+   quedó sin un solo consumidor. */
 
 /* Sello de expediente — el guiño burocrático de §29, sin iconografía oficial */
 .amx-v2 .sello {
@@ -326,3 +323,220 @@
   outline: 2px solid var(--crema);
   outline-offset: 2px;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL EXPEDIENTE ABIERTO — la ficha de arma (DESIGN.md §4.3)
+
+   «Un diseño tipo analógico que dé la sensación de estar leyendo desde un
+    folder. En escritorio […] un folder extendido con la foto del arma del lado
+    izquierdo con un marco de polaroid y su precio de referencia y del lado
+    derecho la ficha técnica.»
+
+   Las dos columnas son CSS puro, no `vp.isDesktop`: el hook parte de
+   `window.innerWidth` en el primer render y la ficha es la página que más se
+   comparte por enlace. Una @media no puede equivocarse en el primer pintado.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── La pestaña del folder ────────────────────────────────────────────────
+   NO es un clip-path. CUT_TR quedó en 'none' cuando el bisel se retiró (§27),
+   así que reusarlo no dibujaría nada; y un recorte se come el anillo de foco,
+   que es el parche que §7 obliga a compensar cada vez. Es geometría pura: una
+   caja con las dos esquinas de arriba redondeadas que se solapa 1px con el
+   folder para que compartan filo, como la pestaña de un separador. El folio
+   `AR-####` va al otro extremo del canto, con el `.sello` que ya existía. */
+.amx-v2 .amx-folder-cabecera {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--e3);
+  padding-left: var(--e4);
+}
+.amx-v2 .amx-folder-pestana {
+  flex: 0 0 auto;
+  margin-bottom: -1px;               /* el folder tapa su filo inferior */
+  padding: 7px 14px 9px;
+  background: var(--papel);
+  border: 1px solid var(--hair);
+  border-bottom: 0;
+  border-radius: var(--radio) var(--radio) 0 0;
+  box-shadow: var(--sombra);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--tinta-2);             /* 6.05:1 sobre el papel */
+  white-space: nowrap;
+}
+/* El canto superior del folder entre la pestaña y el folio, a trazos: es el
+   rayado de un separador de archivador, no el borde de una caja. */
+.amx-v2 .amx-folder-rayado {
+  flex: 1 1 auto;
+  min-width: var(--e4);
+  align-self: flex-end;
+  height: 0;
+  margin-bottom: 10px;
+  border-bottom: 1px dashed var(--hair);
+}
+.amx-v2 .amx-folder-cabecera .sello { flex: 0 0 auto; margin-bottom: 4px; }
+
+.amx-v2 .amx-folder {
+  position: relative;
+  z-index: 1;                        /* tapa la sombra que la pestaña echa abajo */
+  background: var(--papel);
+  border: 1px solid var(--hair);
+  /* Esquina superior izquierda a escuadra: es donde se apoya la pestaña, y la
+     asimetría es SIEMPRE la misma (§5.4), no aleatoria. */
+  border-radius: 0 var(--radio) var(--radio) var(--radio);
+  box-shadow: var(--sombra);         /* quien separa las capas es la sombra */
+  padding: var(--e4);
+}
+
+/* ── Las dos columnas ───────────────────────────────────────────────────── */
+/* El orden del DOM es cabecera → foto → ficha, que es el orden de lectura en
+   móvil («el folder se cierra»): identidad, polaroid, precio, ficha. En
+   escritorio las áreas reparten eso en dos columnas sin reordenar el DOM, así
+   que el foco por teclado y el lector de pantalla siguen el mismo camino. */
+.amx-v2 .amx-folder-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e4);
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-folder-grid {
+    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "foto cabeza"
+      "foto ficha";
+    column-gap: var(--e6);
+    row-gap: var(--e4);
+    align-items: start;
+  }
+  .amx-v2 .amx-folder-cab { grid-area: cabeza; }
+  .amx-v2 .amx-folder-izq { grid-area: foto; }
+  .amx-v2 .amx-folder-der { grid-area: ficha; }
+}
+
+/* ── La polaroid ─────────────────────────────────────────────────────────
+   Es GEOMETRÍA, no un filtro: §4 pide el estilo ochentero «en el lenguaje
+   visual, no mediante filtros de imagen envejecidos». Cero sepia, cero grano,
+   cero viñeta, cero `filter`. Lo que la hace polaroid es el FALDÓN inferior
+   ancho, con el nombre del arma escrito en él. */
+.amx-v2 .amx-polaroid {
+  margin: 0;
+  background: var(--papel);
+  border: 1px solid var(--hair);
+  border-radius: 2px;                /* una copia revelada no tiene esquinas redondeadas */
+  padding: 14px;
+  box-shadow: var(--sombra);
+}
+@media (min-width: 1024px) {
+  /* Giro ESTÁTICO y mínimo, con `transform` (§6 prohíbe animar otra cosa) —
+     no hay transición ni animación que desactivar. La caja rotada crece unos
+     4px por lado, que caben de sobra en el padding del folder: no provoca
+     scroll horizontal. En móvil no va: a ancho completo el giro se come el
+     ancho útil y desalinea la columna. */
+  .amx-v2 .amx-polaroid { transform: rotate(-1.2deg); }
+}
+.amx-v2 .amx-polaroid-pozo {
+  background: var(--papel-hi);
+  border: 1px solid var(--hair);
+  /* Cuadrado, como el área de imagen de una copia instantánea de verdad — y
+     como las fotos 1:1 del catálogo nuevo, que así se ven al tamaño que
+     tenían en el hero apaisado en vez de quedar limitadas por el alto. */
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.amx-v2 .amx-polaroid-pozo img {
+  max-width: 92%;
+  max-height: 92%;
+  object-fit: contain;
+}
+/* El faldón. Crece si el nombre es largo en vez de recortarlo, así que ninguna
+   ficha se queda con el rótulo cortado. */
+.amx-v2 .amx-polaroid-pie {
+  min-height: 34px;
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .05em;
+  line-height: 1.35;
+  color: var(--tinta);               /* 16.31:1 sobre el papel */
+}
+
+/* Ficha de expediente SIN fotografía: 62 de las 192 armas (32 %) no tienen.
+   La polaroid no desaparece — un hueco gris protagonista se ve peor que el
+   layout que sustituye —: se queda el marco y el faldón, y dentro va la
+   silueta del tipo con su leyenda. */
+.amx-v2 .amx-polaroid-vacia {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: var(--e3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e3);
+}
+.amx-v2 .amx-polaroid-vacia svg { width: 82%; max-height: 56%; }
+.amx-v2 .amx-polaroid-leyenda {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--tinta-2);             /* 6.46:1 sobre el pozo blanco */
+}
+
+/* ── El precio de referencia, bajo la foto ───────────────────────────────
+   §14 y §6b: todo dato con procedencia la lleva visible. La sigla y la fecha
+   salen del inventario fuente, no se inventan. */
+.amx-v2 .amx-precio-ref { margin-top: var(--e4); }
+.amx-v2 .amx-precio-ref-cifra {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 30px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
+  line-height: 1.1;
+  color: var(--verde);               /* 11.67:1 sobre el papel */
+}
+.amx-v2 .amx-precio-ref-fuente {
+  margin-top: var(--e1);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  line-height: 1.7;
+  color: var(--tinta-2);             /* 6.05:1 sobre el papel */
+}
+
+/* ── La ficha técnica ────────────────────────────────────────────────────
+   Reusa la tabla .specs, que ya tenía la zebra con hairline, el `th` en
+   versalitas y el `td` en mono con tabular-nums. Aquí los valores van
+   alineados a la derecha: esa columna de números cuadrados es la
+   «instrumentación» de §3, y es lo que separa esto de una lista cualquiera. */
+.amx-v2 .amx-ficha {
+  background: var(--papel);
+  border: 1px solid var(--hair);
+  border-radius: var(--radio-sm);
+  overflow: hidden;                  /* la zebra de la última fila respeta el radio */
+}
+.amx-v2 .amx-ficha-rotulo {
+  padding: 9px var(--e3);
+  background: var(--beige);
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--tinta-2);             /* 5.17:1 sobre el beige */
+}
+.amx-v2 .amx-ficha .specs td { text-align: right; }
