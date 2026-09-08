@@ -176,7 +176,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
     </div>
   );
   return (
-    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `3px solid ${PALETTE.amber}`, display: 'flex', alignItems: 'stretch', minHeight: vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop + 28 : CARTUCHO_FICHA_MAXH.mobile + 24 }}>
+    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, display: 'flex', alignItems: 'stretch', minHeight: vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop + 28 : CARTUCHO_FICHA_MAXH.mobile + 24 }}>
       <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '18px 20px' : '14px' }}>
         {/* título + sistema */}
         <div>
@@ -332,7 +332,7 @@ window.CursosScreen = CursosScreen;
 function CursoCard({ curso, onNav, vp }) {
   const col = NIVEL_COLOR[curso.nivel] || PALETTE.amber;
   return (
-    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${col}`, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${col}`, display: 'flex', flexDirection: 'column' }}>
       <StripePlaceholder label={`Foto · ${curso.titulo}`} ratio="16 / 9">
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.textMuted, letterSpacing: '0.16em' }}>▢ FOTO DEL CURSO</div>
@@ -378,7 +378,7 @@ function CaliberMiniCard({ cal, onClick }) {
   const n = armasPorCalibre(cal.id).length;
   return (
     <div onClick={onClick} style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`,
       cursor: 'pointer', overflow: 'hidden', height: '100%', minHeight: CARTUCHO_HOME_MAXH + 22, display: 'flex', alignItems: 'stretch',
     }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
@@ -429,7 +429,7 @@ function CursoMiniCard({ curso, onClick }) {
   const col = NIVEL_COLOR[curso.nivel] || PALETTE.amber;
   return (
     <div onClick={onClick} style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${col}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${col}`,
       cursor: 'pointer', overflow: 'hidden', height: '100%', display: 'flex', flexDirection: 'column',
     }}
       onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
@@ -484,7 +484,7 @@ function ProximamenteScreen({ titulo, texto }) {
           que no se lea como algo pulsable (los datos de esta sección están
           congelados, no hay adónde ir). */}
       <div style={{
-        marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+        marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
         padding: vp.isDesktop ? '34px 30px' : '26px 18px', textAlign: 'center', cursor: 'default',
       }}>
         {/* El glifo es decoración, pero aun así debe verse: a opacity 0.55 el
@@ -507,7 +507,7 @@ window.ProximamenteScreen = ProximamenteScreen;
 function ProximamenteCard({ img }) {
   return (
     <div style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
       overflow: 'hidden', height: '100%', cursor: 'default',
     }}>
       {img ? (

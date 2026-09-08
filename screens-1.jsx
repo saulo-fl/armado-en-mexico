@@ -274,7 +274,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
             const hero = CATEGORY_HEROS[c.id];
             return (
               <button key={c.id} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} style={{
-                background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+                background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
                 padding: 0, cursor: 'pointer', textAlign: 'left',
                 position: 'relative', overflow: 'hidden',
                 display: 'block', width: '100%',
@@ -384,8 +384,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
             return (
               <button key={d.id} onClick={() => onNav('category', { mode: 'avail', value: d.id })}
               style={{
-                background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
-                borderLeft: `3px solid ${d.color}`,
+                background: PALETTE.bgCard, boxShadow: window.CLARO.sombra,
+                // El color de disponibilidad legal era una barra de 3px a la
+                // izquierda — el tic de UI generada de §6. Ahora es el hairline
+                // ENTERO de la tarjeta: misma informacion, sin la pestaña, y
+                // medido sobre la tarjeta: 6.02 / 5.49 / 6.42:1.
+                border: `1px solid ${d.color}`,
                 padding: '10px 12px', cursor: 'pointer', textAlign: 'left',
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center'
               }}>
@@ -706,10 +710,14 @@ function PromoSlider({ promos, idx, setIdx, onNav, vp }) {
         }}>
             {promos.map((_, i) =>
           <button key={i} onClick={(e) => {e.stopPropagation();setIdx(i);}} style={{
-            width: i === idx ? 20 : 6, height: 4,
+            // El punto activo se ensancha con transform, no con `width`: animar
+            // width provoca relayout de la fila en cada frame. El hueco queda
+            // fijo en 20px y el inactivo se comprime a 6px con scaleX(.3).
+            width: 20, height: 4,
+            transform: i === idx ? 'none' : 'scaleX(0.3)',
             background: i === idx ? accent : 'rgba(255,255,255,0.25)',
             border: 'none', cursor: 'pointer',
-            transition: 'width 0.25s, background 0.25s',
+            transition: 'transform 0.25s, background 0.25s',
             padding: 0
           }} />
           )}
@@ -1053,7 +1061,7 @@ function ArsenalPhotoCard({ label, sub, img, color, subColor, onClick }) {
   const ac = color || P.amber;
   return (
     <button onClick={onClick} style={{
-      background: P.bgCard, border: `1px solid ${P.border}`, padding: 0, cursor: 'pointer',
+      background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, padding: 0, cursor: 'pointer',
       textAlign: 'left', position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
       transition: 'border-color 0.18s',
     }}
@@ -1112,7 +1120,7 @@ function ArsenalHubScreen({ onNav }) {
   );
   const Card = ({ label, sub, count, color, onClick }) => (
     <button onClick={onClick} style={{
-      background: P.bgCard, border: `1px solid ${P.border}`, borderLeft: `3px solid ${color || P.amber}`,
+      background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
       padding: '12px 14px', cursor: 'pointer', textAlign: 'left', display: 'flex',
       justifyContent: 'space-between', alignItems: 'center', gap: 10, width: '100%', transition: 'border-color 0.18s',
     }}

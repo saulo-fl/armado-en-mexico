@@ -47,7 +47,8 @@ function MunicionCard({ mun, onClick }) {
   return (
     <div onClick={onClick} style={{
       position: 'relative', background: window.CLARO.panel,
-      borderRadius: window.CLARO.radio, boxShadow: window.CLARO.sombra,
+      borderRadius: window.CLARO.radio, border: `1px solid ${window.CLARO.hair}`,
+      // La sombra la pone .amx-card en estilo.css (ver ui.jsx/ArmaCard).
       cursor: 'pointer', overflow: 'hidden',
       height: '100%', display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto', containIntrinsicSize: 'auto 150px',
@@ -168,7 +169,7 @@ function HomeMunicionesSection({ onNav }) {
           const cart = munCartucho(c.id);
           return (
             <button onClick={() => onNav && onNav('municiones', { categoria: c.id })} style={{
-              background: P.bgCard, border: `1px solid ${P.border}`,
+              background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
               padding: 0, cursor: 'pointer', textAlign: 'left',
               position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
               transition: 'border-color 0.18s',
@@ -283,8 +284,8 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
           color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05,
         }}>Municiones</div>
         <div style={{
-          marginTop: 12, background: P.bgCard, border: `1px solid ${P.border}`,
-          borderLeft: `3px solid ${P.amber}`, padding: '11px 14px',
+          marginTop: 12, background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
+          boxShadow: window.CLARO.sombra, padding: '11px 14px',
           ...window.amxProsa({ fontSize: 16, color: P.textDim, lineHeight: 1.6 }),
         }}>
           Cartuchos de adquisición legal a través de la <b style={{ color: P.text }}>DCAM</b> (nacional) y la <b style={{ color: P.text }}>OTCA</b> (Monterrey).
@@ -493,7 +494,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
           {mun.specs && mun.specs.length > 0 &&
             <React.Fragment>
               <window.SectionHeader>Especificaciones</window.SectionHeader>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, marginBottom: 16 }}>
+              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
                 {mun.specs.map(([k, v], i) => (
                   <div key={i} style={{
                     display: 'flex', justifyContent: 'space-between', gap: 12, padding: '9px 12px',
@@ -513,7 +514,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
                 {mun.compatibilidad.map((c, i) => (
                   <span key={i} style={{
-                    background: P.bgCard, border: `1px solid ${P.border}`, borderLeft: `2px solid ${P.amber}`,
+                    background: P.bgCard, border: `1px solid ${P.border}`,
                     padding: '6px 10px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
                     color: P.text, letterSpacing: '0.06em',
                   }}>{c}</span>
@@ -611,7 +612,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textDim,
                 letterSpacing: '0.04em', marginTop: -6, marginBottom: 10, lineHeight: 1.4,
               }}>Según inventarios oficiales DCAM / OTCA</div>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, marginBottom: 16 }}>
+              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
                 {priceHistory.slice().reverse().map((h, i) => {
                   const man = manualById(h.manualId);
                   const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
@@ -656,7 +657,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
             <React.Fragment>
               <window.SectionHeader>Estatus Legal</window.SectionHeader>
               <div style={{
-                background: P.bgCard, border: `1px solid ${availMeta.color}`, borderLeft: `4px solid ${availMeta.color}`,
+                background: P.bgCard, border: `1px solid ${availMeta.color}`, boxShadow: window.CLARO.sombra,
                 padding: '12px 14px', marginBottom: 16,
               }}>
                 <div style={{

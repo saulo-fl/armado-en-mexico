@@ -266,6 +266,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : 'repeat(2, 1fr)',
             background: CLARO.panel,
             borderRadius: CLARO.radio,
+            border: `1px solid ${CLARO.hair}`,
             boxShadow: CLARO.sombra,
             overflow: 'hidden'
           }}>
@@ -345,6 +346,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         <div style={{
           background: CLARO.panel,
           borderRadius: CLARO.radio,
+          border: `1px solid ${CLARO.hair}`,
           boxShadow: CLARO.sombra,
           padding: vp.isDesktop ? '16px 18px' : '14px',
           position: 'relative'
@@ -1556,7 +1558,6 @@ function LegalScreen({ onNav }) {
       <div style={{
         background: 'rgba(168,58,42,0.08)',
         border: `1px solid ${PALETTE.redHi}`,
-        borderLeft: `4px solid ${PALETTE.redHi}`,
         padding: '14px',
         marginBottom: 22
       }}>
@@ -1578,16 +1579,17 @@ function LegalScreen({ onNav }) {
         {window.CATEGORIES.disponibilidad.map((d) =>
         <div key={d.id} style={{
           background: PALETTE.bgCard,
-          border: `1px solid ${PALETTE.border}`,
-          borderLeft: `4px solid ${d.color}`,
+          border: `1px solid ${d.color}`,
+          boxShadow: CLARO.sombra,
           padding: '12px 14px'
         }}>
             {/* El rótulo iba en d.color (data.js), pensado para el tema oscuro
-                anterior: sobre la tarjeta clara #FAF9F5 el amarillo #F5C518 daba
-                1.55:1 y el verde #4FAE5C 2.64:1 — el nombre de la categoría, que
-                es la información de la tarjeta, no se leía. El color sigue
-                identificando la categoría en la barra lateral (decorativa y
-                redundante con el texto); el texto va en tinta, 15.14:1. */}
+                anterior: el nombre de la categoría, que es la información de la
+                tarjeta, no se leía. El texto va en tinta (16.31:1 sobre la
+                tarjeta) y el color de la categoría es ahora el HAIRLINE ENTERO,
+                no una barra de 4px a la izquierda — misma información, sin el
+                tic de la pestaña lateral que veta §6. Medidos sobre la tarjeta:
+                #2F6B33 6.02:1 · #7D6108 5.49:1 · #A3341F 6.42:1. */}
             <div style={{
             fontFamily: 'Archivo, sans-serif',
             fontWeight: 700, fontSize: 15,
@@ -1600,14 +1602,14 @@ function LegalScreen({ onNav }) {
         )}
         {/* 4ª categoría — Armas traumáticas (sin licencia).
             Iba en '#FFFFFF' copiando el patrón del tema oscuro: sobre la tarjeta
-            #FAF9F5 el título daba 1.05:1 y la barra lateral otro tanto — la
-            tarjeta entera parecía vacía. Es la única categoría que sí vendemos,
-            así que su identificador es el verde de marca (11.81:1 sobre la
-            tarjeta) y el título va en tinta como sus tres hermanas. */}
+            el título daba 1.05:1 — la tarjeta entera parecía vacía. Es la única
+            categoría que sí vendemos, así que su identificador es el verde de
+            marca (11.67:1 sobre la tarjeta) en el mismo hairline que usan sus
+            tres hermanas, y el título va en tinta como ellas. */}
         <div style={{
           background: PALETTE.bgCard,
-          border: `1px solid ${PALETTE.border}`,
-          borderLeft: `4px solid ${PALETTE.amber}`,
+          border: `1px solid ${PALETTE.amber}`,
+          boxShadow: CLARO.sombra,
           padding: '12px 14px'
         }}>
           <div style={{
@@ -1791,7 +1793,6 @@ function AboutScreen() {
       <div style={{
         background: 'rgba(168,58,42,0.08)',
         border: `1px solid ${PALETTE.redHi}`,
-        borderLeft: `4px solid ${PALETTE.redHi}`,
         padding: 14, marginBottom: 18
       }}>
         <div style={{
@@ -1808,7 +1809,7 @@ function AboutScreen() {
       {/* 2 ▸ DECLARACIÓN DE INTENCIONES */}
       <SectionHeader>{decl.titulo}</SectionHeader>
       <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `4px solid ${PALETTE.amber}`,
+        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: CLARO.sombra,
         padding: vp.isDesktop ? '20px 22px' : '16px', marginBottom: 18,
       }}>
         {decl.parrafos.map((t, i) => (
@@ -1841,7 +1842,7 @@ function AboutScreen() {
         display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
         gap: 12, marginBottom: 18,
       }}>
-        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
+        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
@@ -1850,7 +1851,7 @@ function AboutScreen() {
             Una <span style={{ color: PALETTE.text }}>enciclopedia libre</span> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
           </div>
         </div>
-        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
+        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
             <div style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
               <img src="imagenes/logo-main.png" alt="Armas M&amp;S" style={{ width: '90%', height: 'auto', display: 'block' }} />
@@ -1992,7 +1993,6 @@ function SoporteScreen({ onNav }) {
       <div style={{
         background: 'rgba(168,58,42,0.08)',
         border: `1px solid ${PALETTE.redHi}`,
-        borderLeft: `4px solid ${PALETTE.redHi}`,
         padding: 14, marginBottom: 22
       }}>
         <div style={{
@@ -2062,7 +2062,7 @@ function SoporteScreen({ onNav }) {
 
       <SectionHeader>Cómo se revisan las reseñas</SectionHeader>
       <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
         padding: '14px 16px', marginBottom: 26, position: 'relative'
       }}>
         <TacticalCorners size={10} color={PALETTE.amber} />
@@ -2116,7 +2116,7 @@ function SoporteScreen({ onNav }) {
 
       <SectionHeader>Denunciar contenido</SectionHeader>
       <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
         padding: '15px 16px', position: 'relative'
       }}>
         <TacticalCorners size={10} color={denEnviada ? PALETTE.green : PALETTE.amber} />
@@ -2207,7 +2207,6 @@ function FAQScreen() {
       <div style={{
         background: 'rgba(168,58,42,0.08)',
         border: `1px solid ${PALETTE.redHi}`,
-        borderLeft: `4px solid ${PALETTE.redHi}`,
         padding: 14, marginBottom: 18
       }}>
         <div style={{
@@ -2474,14 +2473,14 @@ function SubmitScreen({ onNav }) {
       </div>
 
       <SectionHeader>Sobre ti</SectionHeader>
-      <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, padding: 18, marginBottom: 24, display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', gap: '0 16px' }}>
+      <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, padding: 18, marginBottom: 24, display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', gap: '0 16px' }}>
         {fld('Tu nombre', 'submitterName', { required: true, placeholder: 'Cómo apareces en los créditos' })}
         {fld('Correo (opcional)', 'submitterEmail', { type: 'email', placeholder: 'Para avisarte cuando se publique' })}
         {fld('Comentario (opcional)', 'submitterMessage', { ta: true, rows: 2, span: 2, placeholder: 'Cualquier nota: fuentes, dudas, contexto...' })}
       </div>
 
       <SectionHeader>Datos del arma</SectionHeader>
-      <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, padding: 18, marginBottom: 24, display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', gap: '0 16px' }}>
+      <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, padding: 18, marginBottom: 24, display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', gap: '0 16px' }}>
         {fld('Nombre del arma', 'nombre', { required: true, placeholder: 'CZ Shadow 2' })}
         {fld('Marca / fabricante', 'marca', { required: true, placeholder: 'Ceska Zbrojovka' })}
         {fld('Tipo', 'tipo', { select: [

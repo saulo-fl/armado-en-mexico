@@ -62,7 +62,7 @@ function TraumaFicha({ p, vp }) {
 
   return (
     <div style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderTop: `2px solid ${PALETTE.amber}`,
+      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`,
       display: 'flex', flexDirection: vp.isDesktop ? 'row' : 'column', alignItems: 'stretch',
     }}>
       {photo}
@@ -155,7 +155,7 @@ function TraumaLegal({ vp }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(2, 1fr)' : '1fr', gap: 12 }}>
         {L.puntos.map((pt) => (
-          <div key={pt.tit} style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, borderLeft: `3px solid ${PALETTE.amber}`, padding: '14px 16px' }}>
+          <div key={pt.tit} style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, padding: '14px 16px' }}>
             <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14.5, color: PALETTE.text, marginBottom: 6 }}>{pt.tit}</div>
             <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.55 }}>{pt.desc}</div>
           </div>
@@ -164,7 +164,7 @@ function TraumaLegal({ vp }) {
 
       <div style={{
         marginTop: 16, padding: '12px 16px', background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`, borderLeft: `4px solid ${PALETTE.redHi}`,
+        border: `1px solid ${PALETTE.redHi}`,
       }}>
         <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.redHi, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>▲ Aviso</div>
         <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6 }}>{L.disclaimer}</div>
@@ -197,7 +197,7 @@ function TraumaticasScreen({ onNav }) {
       {/* CATEGORÍA APARTE — énfasis */}
       <div style={{
         display: 'flex', alignItems: 'flex-start', gap: 12,
-        background: 'rgba(221,213,196,0.07)', border: `1px solid ${PALETTE.amber}`, borderLeft: `4px solid ${PALETTE.amber}`,
+        background: 'rgba(221,213,196,0.07)', border: `1px solid ${PALETTE.amber}`,
         padding: '14px 16px', marginBottom: 18,
       }}>
         <span style={{ color: PALETTE.amber, fontSize: 21.5, lineHeight: 1.2, flexShrink: 0 }}>◎</span>
@@ -253,7 +253,7 @@ function TraumaTierCard({ p, vp, onNav }) {
     : p.effect === 'fire' ? 'trauma-fx-fire' : '';
   return (
     <div className={fxClass} style={{
-      position: 'relative', background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+      position: 'relative', background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
       borderTop: `2px solid ${p.tierColor}`,
       borderRadius: 8, display: 'flex', flexDirection: 'column', paddingTop: 26,
       height: '100%', width: '100%', boxSizing: 'border-box',
