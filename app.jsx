@@ -439,7 +439,7 @@ function App() {
       {!vp.isMobile && pickerSlot !== null && (
         <div style={{
           position: 'sticky', top: 64, zIndex: 40,
-          background: PALETTE.amber, color: '#000',
+          background: PALETTE.amber, color: PALETTE.bgCard,
           padding: '8px 28px',
           fontFamily: 'JetBrains Mono, monospace',
           fontSize: 15.5, letterSpacing: '0.15em',
@@ -448,7 +448,10 @@ function App() {
         }}>
           <span>◆ MODO SELECCIÓN — Slot {pickerSlot === 0 ? 'A' : 'B'} · elige un arma para añadirla al comparador</span>
           <button onClick={() => { window.cancelPicker && window.cancelPicker(); }} style={{
-            background: 'rgba(0,0,0,0.2)', color: '#000', border: '1px solid #000',
+            // Va DENTRO del banner verde, así que hereda su problema: negro sobre
+            // #173A32 da 1.69:1. En claro sobre el mismo verde, 11.81:1.
+            background: 'rgba(250,249,245,0.14)', color: PALETTE.bgCard,
+            border: '1px solid rgba(250,249,245,0.55)',
             padding: '3px 8px', cursor: 'pointer',
             fontFamily: 'inherit', fontSize: 14.5, letterSpacing: '0.1em',
             textTransform: 'uppercase', fontWeight: 700,
@@ -476,7 +479,7 @@ function App() {
       {!vp.isMobile && compareIds.length > 0 && screen !== 'compare' && (
         <button onClick={() => setScreen('compare')} style={{
           position: 'fixed', bottom: 24, right: 24,
-          background: PALETTE.amber, color: '#000', border: 'none',
+          background: PALETTE.amber, color: PALETTE.bgCard, border: 'none',
           padding: '12px 18px',
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
           letterSpacing: '0.15em', textTransform: 'uppercase',

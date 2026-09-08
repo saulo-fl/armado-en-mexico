@@ -333,9 +333,19 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           }}>
             Opiniones: <span style={{ color: etOpin.color, fontWeight: 700 }}>{etOpin.label}</span>
           </div>}
+        {/* Este panel se quedó en el tema oscuro cuando la app pasó a clara: el
+            fondo seguía siendo casi negro y, como PALETTE.amber dejó de ser ámbar
+            para ser el verde de marca #173A32, el precio —30px, el dato que trae
+            al visitante— daba 1.24:1 sobre él, y sus rótulos 2.40:1. Una caja
+            negra ilegible en mitad de una página clara.
+            El texto ya estaba calibrado para superficie clara (amber 11.81:1 y
+            textMuted 6.13:1 sobre CLARO.panel): lo único que hacía falta era el
+            fondo. Superficie + sombra en vez de borde de 1px, que es lo que piden
+            DESIGN.md §5.1b y §6, con el mismo patrón que ya usa la línea 267. */}
         <div style={{
-          background: 'linear-gradient(180deg, #262420, #211F1B)',
-          border: `1px solid ${PALETTE.amber}`,
+          background: CLARO.panel,
+          borderRadius: CLARO.radio,
+          boxShadow: CLARO.sombra,
           padding: vp.isDesktop ? '16px 18px' : '14px',
           position: 'relative'
         }}>
@@ -376,8 +386,15 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                   <span key={b.sigla + bi}
                     title={b.manual ? b.manual.nombre : ''}
                     style={{
+                      // El chip vivía sobre el fondo casi negro del panel; ahora que
+                      // el panel es claro, ningún relleno claro lo separa (crema
+                      // 1.09:1, zebra 1.12:1). Lo que lo define es el borde de color
+                      // semántico, y en sólido en vez del `55` de antes: verde
+                      // 5.44:1 y rojo 5.80:1 sobre la zebra. Aquí el borde SÍ porta
+                      // información (hay existencias / está agotado), así que no es
+                      // el «borde como recurso principal» que prohíbe §6.
                       display: 'inline-flex', alignItems: 'baseline', gap: 7,
-                      background: PALETTE.bg, border: `1px solid ${col}55`,
+                      background: CLARO.zebra, border: `1px solid ${col}`,
                       clipPath: window.CUT_TR_SM,
                       padding: '7px 12px'
                     }}>

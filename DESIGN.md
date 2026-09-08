@@ -933,28 +933,15 @@ sin parecer una aplicación gubernamental oficial ni una interfaz retro.
 
 ### 4.1 Sitios, apps o piezas que te gustan y por qué
 
-<!-- Pega 3-5 enlaces. Para cada uno, una línea de QUÉ te gusta exactamente.
-     No hace falta que sean de armas ni del género. -->
 
-1.
-2.
-3.
+1.https://midu.dev/cursos En general el estilo de Midudev me gusta mucho, contornos suabes, buen manejo y contraste de colores, colores en sus fichas de Mensual trimestral, anual sin que saturen.
+2.https://www.canirun.ai/ nuevamente una pagina de midudev y es que las funcionalidades que incluye esta web me gustan mucho, no tenemos un uso directo en armado en mexico para varias cosas pero son dignas de estudiarse. Sobre todo que nosotros no tenemos una buena forma de seleccionar que accesorios son de cada arma; en cambio canirun.ai utiliza diferentes metodos para asignar calificaciones y velocidades a cada modelo y cada cuantizacion. Te dejo el REPÖ de la web para que puedas estudiarlo y sacar un metodo directo para los accesorios. Que de hecho debería ser mucho más sencillo ya que lo que debemos buscar que haga match es el nombre del modelo del arma, no solo el calibre. https://github.com/midudev/canirun.ai
 
-### 4.2 Cosas que odiás y no querés ver nunca en armado.mx
-
-<!-- Sé específico y despiadado. Esto vale tanto como lo anterior. -->
-
--
--
--
 
 ### 4.3 El elemento firma
 
-> Una sola cosa memorable que alguien recuerde del sitio. Se gasta la audacia acá y el resto se
-> mantiene sobrio. Ideas del vernáculo por si sirven de disparador: el sello de clase legal, la
-> ficha con folio, la regla de calibres, la marca de agua de documento.
+> La pagina de arma de cada elemento debe ser preciosa, con un diseño tipo analógico que de la sensación de estar leyendo desde un folder. En escritorio aprovecharemos el ancho de la pagina para tener un folder extendido con la foto del arma del lazo izquierdo con un marco de polaroid y su precio de referencia y del lado derecho la ficha tecnica del arma.
 
-<!-- ¿Cuál? -->
 
 ### 4.4 Qué NO se toca
 
