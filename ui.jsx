@@ -877,6 +877,169 @@ function ArmaCard({ arma, onClick, onCompare, inCompare }) {
 }
 window.ArmaCard = ArmaCard;
 
+// ══════════════════════════════════════════════════════════════
+// EL EXPEDIENTE ABIERTO — las dos primitivas de la ficha (DESIGN.md §4.3)
+// «un diseño tipo analógico que dé la sensación de estar leyendo desde un
+//  folder […] la foto del arma del lado izquierdo con un marco de polaroid y
+//  su precio de referencia y del lado derecho la ficha técnica».
+//
+// La POLAROID es GEOMETRÍA, no un filtro: §4 pide que «el estilo ochentero
+// esté en el lenguaje visual, no mediante filtros de imagen envejecidos».
+// Lo que la hace polaroid es el faldón inferior ancho y el nombre escrito en
+// él — cero sepia, cero grano, cero viñeta, cero `filter`.
+//
+// La piel (marco, faldón, giro, pozo, rótulo) vive en estilo.css. Aquí solo
+// queda el dato y la estructura: una propiedad vive en el CSS O inline, nunca
+// en los dos. Precedente de la fase 2: `.amx-card:hover { box-shadow }` estaba
+// MUERTA porque las tarjetas declaraban `boxShadow` inline.
+// ══════════════════════════════════════════════════════════════
+
+// Siluetas por tipo de arma, para las 62 de 192 (32 %) que no tienen
+// fotografía. Son los trazos que `window.armaPlaceholder` dibujó en su día y
+// que quedaron detrás de `void SIL` (data.js) cuando ese placeholder pasó al
+// aviso de cámara: mismo viewBox '0 0 480 200'. No se importan de allí porque
+// viven dentro del cuerpo de esa función; la copia de data.js sigue muerta y
+// borrarla es limpieza de repo, fuera del alcance de esta fase.
+const ARMA_SILUETAS = {
+  pistola: `
+    <rect x='150' y='90' width='140' height='15' />
+    <rect x='282' y='95' width='16' height='5' />
+    <path d='M 220,100 L 220,118 L 246,118 L 246,100' stroke-width='1.5' fill='none' />
+    <path d='M 180,105 L 230,105 L 220,170 L 175,170 Z' />
+    <rect x='185' y='110' width='35' height='2' opacity='0.4' />
+    <rect x='188' y='130' width='28' height='32' opacity='0.6' />
+  `,
+  revolver: `
+    <rect x='160' y='90' width='110' height='12' />
+    <rect x='262' y='93' width='14' height='4' />
+    <circle cx='205' cy='115' r='22' />
+    <circle cx='205' cy='115' r='14' fill='black' opacity='0.4' />
+    <path d='M 210,118 L 210,135 L 230,135 L 230,118' stroke-width='1.5' fill='none' />
+    <path d='M 188,128 L 222,128 L 215,180 L 175,180 Z' />
+  `,
+  rifle: `
+    <rect x='90' y='98' width='280' height='6' />
+    <rect x='365' y='100' width='14' height='4' />
+    <path d='M 200,100 L 200,118 L 226,118 L 226,100' stroke-width='1.5' fill='none' />
+    <path d='M 180,104 L 240,104 L 230,140 L 200,140 Z' />
+    <path d='M 90,104 L 200,104 L 195,128 L 90,128 Z' />
+    <line x1='100' y1='110' x2='195' y2='110' stroke-width='0.6' opacity='0.4' />
+    <line x1='100' y1='122' x2='195' y2='122' stroke-width='0.6' opacity='0.4' />
+    <rect x='220' y='118' width='14' height='22' />
+    <rect x='230' y='90' width='18' height='6' />
+    <rect x='200' y='94' width='30' height='8' />
+  `,
+  escopeta: `
+    <rect x='180' y='94' width='270' height='5' />
+    <rect x='180' y='102' width='270' height='5' />
+    <rect x='443' y='96' width='10' height='3' />
+    <rect x='443' y='104' width='10' height='3' />
+    <path d='M 196,108 L 196,124 L 220,124 L 220,108' stroke-width='1.4' fill='none' />
+    <path d='M 30,98 L 198,98 L 198,108 L 30,124 Z' />
+    <line x1='40' y1='105' x2='190' y2='105' stroke-width='0.7' opacity='0.4' />
+    <line x1='40' y1='115' x2='190' y2='115' stroke-width='0.7' opacity='0.4' />
+    <path d='M 150,110 L 162,110 L 162,138 L 142,138 Z' />
+  `,
+  carabina: `
+    <rect x='350' y='95' width='45' height='5' />
+    <rect x='388' y='91' width='14' height='13' />
+    <rect x='180' y='90' width='180' height='14' />
+    <rect x='155' y='86' width='12' height='5' />
+    <path d='M 178,108 L 178,124 L 206,124 L 206,108' stroke-width='1.4' fill='none' />
+    <path d='M 168,108 L 184,108 L 178,148 L 154,148 Z' />
+    <path d='M 100,98 L 165,98 L 165,116 L 100,116 Z' />
+    <line x1='105' y1='102' x2='160' y2='102' stroke-width='0.6' opacity='0.4' />
+    <line x1='105' y1='112' x2='160' y2='112' stroke-width='0.6' opacity='0.4' />
+    <rect x='90' y='100' width='12' height='14' />
+    <path d='M 180,124 L 200,124 L 200,160 L 180,160 Z' />
+    <line x1='184' y1='132' x2='196' y2='132' stroke-width='0.6' opacity='0.4' />
+    <line x1='184' y1='140' x2='196' y2='140' stroke-width='0.6' opacity='0.4' />
+    <line x1='184' y1='148' x2='196' y2='148' stroke-width='0.6' opacity='0.4' />
+  `,
+};
+window.ARMA_SILUETAS = ARMA_SILUETAS;
+
+// ¿Esta arma tiene fotografía propia? data.js le asigna el placeholder —una
+// data: URI— a las que no la tienen, así que el prefijo del `src` es la señal
+// y no hay que consultar el disco.
+function armaSinFoto(arma) {
+  return !arma || !arma.img || String(arma.img).slice(0, 5) === 'data:';
+}
+window.armaSinFoto = armaSinFoto;
+
+// ──────────────────────────────────────────────────────────────
+// ARMA POLAROID — la foto del expediente, con su faldón
+// Sin fotografía NO desaparece: se convierte en ficha de expediente sin
+// fotografía —mismo marco, mismo faldón— con la silueta del tipo sobre el
+// papel. Un expediente incompleto es una cosa que existe; un hueco gris no.
+// ──────────────────────────────────────────────────────────────
+function ArmaPolaroid({ arma }) {
+  // El fallback cubre los dos casos: el arma que nunca tuvo foto y el .webp
+  // que existe en `data.js` pero no llega (404, red caída, formato no
+  // soportado). En ambos se ve lo mismo, que es lo que hace que el `alt` y el
+  // fallback sigan teniendo sentido.
+  const [falloCarga, setFalloCarga] = React.useState(false);
+  const sinFoto = falloCarga || armaSinFoto(arma);
+  const silueta = ARMA_SILUETAS[arma.tipo] || ARMA_SILUETAS.pistola;
+  return (
+    <figure className="amx-polaroid">
+      <div className="amx-polaroid-pozo">
+        {sinFoto ? (
+          <div className="amx-polaroid-vacia">
+            {/* La silueta es gráfico, no texto: #868E84 sobre el pozo blanco
+                da 3.38:1, por encima del 3:1 de WCAG 1.4.11. La leyenda, que
+                sí porta información, va en #59605C — 6.46:1. */}
+            <svg viewBox="0 0 480 200" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+              <g fill="#868E84" stroke="#868E84" strokeWidth="2" strokeLinejoin="round"
+                dangerouslySetInnerHTML={{ __html: silueta }} />
+            </svg>
+            <span className="amx-polaroid-leyenda">Sin fotografía en expediente</span>
+          </div>
+        ) : (
+          <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high"
+            onError={() => setFalloCarga(true)} />
+        )}
+      </div>
+      <figcaption className="amx-polaroid-pie">{arma.nombre}</figcaption>
+    </figure>
+  );
+}
+window.ArmaPolaroid = ArmaPolaroid;
+
+// ──────────────────────────────────────────────────────────────
+// FICHA TÉCNICA — la columna derecha del folder
+// Reusa la tabla `.specs` que ya estaba bien resuelta (zebra + hairline, `th`
+// en versalitas, `td` en mono con tabular-nums). Los seis campos son los que
+// pide §4.3; `mecanismo` va como prosa bajo el título y `tipo` en la pestaña
+// del folder, así que aquí serían una tercera copia.
+// ──────────────────────────────────────────────────────────────
+function FichaTecnica({ arma }) {
+  const filas = [
+    ['Calibre',   arma.calibre],
+    ['Capacidad', arma.capacidad],
+    ['Longitud',  arma.longitud],
+    ['Peso',      arma.peso],
+    ['Origen',    arma.pais],
+    ['Año',       arma.anio],
+  ].filter(([, v]) => v != null && v !== '');
+  return (
+    <div className="amx-ficha">
+      <div className="amx-ficha-rotulo">Ficha técnica</div>
+      <div style={{ overflowX: 'auto' }}>
+        {/* El rótulo es un div, no un `caption`, para que la zebra empiece en
+            la primera fila de datos: el nombre accesible de la tabla lo pone
+            el aria-label, que además dice de qué arma es. */}
+        <table className="specs" aria-label={'Ficha técnica de ' + arma.nombre}>
+          <tbody>
+            {filas.map(([k, v]) => <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>)}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+window.FichaTecnica = FichaTecnica;
+
 // ──────────────────────────────────────────────────────────────
 // SPEC ROW — fila de especificación técnica
 // ──────────────────────────────────────────────────────────────
