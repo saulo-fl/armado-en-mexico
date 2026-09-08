@@ -17,25 +17,30 @@ function accCatMeta(id) {
 }
 
 // Aviso discreto cuando no hay fotografía real del accesorio
-function AccNoImage({ compact }) {
-  const P = window.PALETTE;
+// Respaldo cuando un accesorio no tiene fotografía propia — hoy, los 36 del
+// catálogo, así que es la vista por defecto y no un caso raro.
+// Era una cámara tachada en SVG dibujada a mano. Saulo retiró los SVG generados
+// el 8-sep-2026: ahora va la SILUETA de la categoría, el mismo lenguaje que las
+// armas. Se pinta como máscara, así que el color lo pone el CSS y sigue al tema.
+function AccNoImage({ acc, compact }) {
+  const forma = window.accesorioPlaceholder ? window.accesorioPlaceholder(acc) : null;
   return (
-    <div role="img" aria-label="Sin imagen disponible por el momento" style={{
-      position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: compact ? 6 : 10,
-      padding: '0 12px', textAlign: 'center',
-    }}>
-      {/* `stroke` por `style` y no por atributo: la paleta son tokens y `var()`
-          dentro de un atributo de presentación de SVG tiene soporte irregular. */}
-      <svg width={compact ? 26 : 38} height={compact ? 26 : 38} viewBox="0 0 24 24" fill="none"
-        style={{ stroke: P.borderHi }} strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
-        <rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3.1"/>
-        <line x1="4" y1="3.4" x2="20" y2="20.6"/>
-      </svg>
+    <div role="img" aria-label={'Sin fotografía en expediente' + (acc && acc.nombre ? ': ' + acc.nombre : '')}
+      style={{
+        position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: compact ? 6 : 10,
+        padding: '0 12px', textAlign: 'center', width: '100%', height: '100%',
+      }}>
+      {forma && (
+        <span className="amx-silueta-acc" aria-hidden="true"
+          style={{ '--silueta-forma': `url(${forma})`, height: compact ? 34 : 52 }} />
+      )}
       <span style={{
-        fontFamily: 'JetBrains Mono, monospace', fontSize: compact ? 10.5 : 12.5,
-        color: P.textMuted, letterSpacing: '0.05em', lineHeight: 1.45,
-      }}>Sin imagen disponible{compact ? '' : ' por el momento'}</span>
+        fontFamily: 'JetBrains Mono, monospace',
+        // 11px es el piso de texto funcional; los 10.5 de antes quedaban debajo.
+        fontSize: compact ? 11 : 12.5,
+        color: 'var(--tinta-2)', letterSpacing: '0.05em', lineHeight: 1.45,
+      }}>Sin fotografía{compact ? '' : ' en expediente'}</span>
     </div>
   );
 }
@@ -78,7 +83,7 @@ function AccesorioCard({ acc, onClick }) {
             loading="lazy" decoding="async" onError={() => setImgError(true)}
             style={{ maxWidth: '88%', maxHeight: '88%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
         ) : (
-          <AccNoImage compact />
+          <AccNoImage acc={acc} compact />
         )}
         <span style={{
           position: 'absolute', top: 6, left: 6,
@@ -459,7 +464,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
             <img src={acc.img} alt={acc.nombre} onError={() => setImgError(true)}
               style={{ maxWidth: '82%', maxHeight: '82%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
           ) : (
-            <AccNoImage />
+            <AccNoImage acc={acc} />
           )}
           <span style={{
             position: 'absolute', top: 10, left: 10,

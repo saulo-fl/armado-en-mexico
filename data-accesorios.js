@@ -102,19 +102,45 @@ window.ACCESORIO_CATEGORIES = {
   ],
 };
 
-// ── Placeholder visual por categoría (SVG, mismo lenguaje táctico) ───────────
+// ── Imagen de respaldo por categoría ─────────────────────────────────────────
+// Los 36 accesorios del catálogo están HOY sin fotografía propia, así que este
+// respaldo se ve en el 100 % de las fichas y tarjetas de accesorio: no es un
+// caso raro, es la vista por defecto.
+//
+// Antes construía aquí un SVG en `data:` URI con fondo #1A1A1A y acentos
+// #F5C518: colores del TEMA OSCURO que el sitio abandonó en agosto. Sobre el
+// lienzo claro era un rectángulo negro con amarillo, y en el modo oscuro nuevo
+// tampoco encajaba porque su negro no es el del tema. Saulo mandó retirar los
+// SVG generados el 8-sep-2026.
+//
+// Ahora devuelve la SILUETA de la categoría, el mismo lenguaje que usan las
+// armas: negro sobre alfa, pintado como máscara, así que el color lo pone el
+// CSS y sigue al tema. Las categorías sin silueta propia caen en la del
+// cargador, que es la más representada (31 de los 36).
+// PENDIENTE (8-sep-2026): faltan por generar `silueta-empunadura` y
+// `silueta-refaccion`. Se agotó el límite de uso de Codex a mitad del lote, así
+// que esas dos categorías van de momento a la silueta más cercana que SÍ existe:
+// empuñaduras y fundas a la pistola —son parte de una— y refacciones, limpieza
+// y bípodes al cargador. Afecta a 3 accesorios de 36 (1 empuñadura, 2
+// refacciones). Cuando se generen, basta añadirlas aquí.
 window.accesorioPlaceholder = function (acc) {
-  const glyph = (window.ACCESORIO_CATEGORIES.categoria.find(c => c.id === acc.categoria) || {}).icon || '◆';
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">` +
-    `<rect width="320" height="240" fill="#1A1A1A"/>` +
-    `<g fill="none" stroke="#F5C518" stroke-opacity="0.16" stroke-width="1">` +
-    `<line x1="160" y1="40" x2="160" y2="200"/><line x1="60" y1="120" x2="260" y2="120"/>` +
-    `<circle cx="160" cy="120" r="58"/></g>` +
-    `<text x="160" y="138" font-family="monospace" font-size="64" fill="#F5C518" fill-opacity="0.85" text-anchor="middle">${glyph}</text>` +
-    `<text x="160" y="206" font-family="monospace" font-size="13" letter-spacing="2" fill="#7A7A7A" text-anchor="middle">DCAM</text>` +
-    `</svg>`;
-  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+  const POR_CATEGORIA = {
+    cargadores: 'cargador', portacargadores: 'cargador', estuches: 'cargador',
+    opticas: 'optica', linternas: 'optica',
+    empunaduras: 'pistola', fundas: 'pistola',
+    refacciones: 'cargador', limpieza: 'cargador', bipodes: 'cargador',
+  };
+  const s = (acc && POR_CATEGORIA[acc.categoria]) || 'cargador';
+  return 'imagenes/silueta-' + s + '.webp';
+};
+
+// ¿Este accesorio tiene fotografía propia? Misma señal que en las armas: si el
+// `src` apunta a una silueta, no es una foto suya. Reconoce también el `data:`
+// del placeholder anterior, porque D1 puede servir registros ya sembrados.
+window.accesorioSinFoto = function (acc) {
+  if (!acc || !acc.img) return true;
+  const img = String(acc.img);
+  return img.slice(0, 5) === 'data:' || img.indexOf('/silueta-') >= 0;
 };
 
 const _accPriceLvl = (p) => p < 2000 ? 1 : p < 8000 ? 2 : p < 25000 ? 3 : p < 60000 ? 4 : 5;

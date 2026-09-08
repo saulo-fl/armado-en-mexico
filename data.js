@@ -901,76 +901,23 @@ window.DB = [
 // ──────────────────────────────────────────────────────────────
 // Placeholder SVG por tipo (silueta táctica detallada)
 // ──────────────────────────────────────────────────────────────
-window.armaPlaceholder = function(arma) {
-  const SIL = {
-    pistola: `
-      <rect x='150' y='90' width='140' height='15' />
-      <rect x='282' y='95' width='16' height='5' />
-      <path d='M 220,100 L 220,118 L 246,118 L 246,100' stroke-width='1.5' fill='none' />
-      <path d='M 180,105 L 230,105 L 220,170 L 175,170 Z' />
-      <rect x='185' y='110' width='35' height='2' opacity='0.4' />
-      <rect x='188' y='130' width='28' height='32' opacity='0.6' />
-    `,
-    revolver: `
-      <rect x='160' y='90' width='110' height='12' />
-      <rect x='262' y='93' width='14' height='4' />
-      <circle cx='205' cy='115' r='22' />
-      <circle cx='205' cy='115' r='14' fill='black' opacity='0.4' />
-      <path d='M 210,118 L 210,135 L 230,135 L 230,118' stroke-width='1.5' fill='none' />
-      <path d='M 188,128 L 222,128 L 215,180 L 175,180 Z' />
-    `,
-    rifle: `
-      <rect x='90' y='98' width='280' height='6' />
-      <rect x='365' y='100' width='14' height='4' />
-      <path d='M 200,100 L 200,118 L 226,118 L 226,100' stroke-width='1.5' fill='none' />
-      <path d='M 180,104 L 240,104 L 230,140 L 200,140 Z' />
-      <path d='M 90,104 L 200,104 L 195,128 L 90,128 Z' />
-      <line x1='100' y1='110' x2='195' y2='110' stroke-width='0.6' opacity='0.4' />
-      <line x1='100' y1='122' x2='195' y2='122' stroke-width='0.6' opacity='0.4' />
-      <rect x='220' y='118' width='14' height='22' />
-      <rect x='230' y='90' width='18' height='6' />
-      <rect x='200' y='94' width='30' height='8' />
-    `,
-    escopeta: `
-      <rect x='180' y='94' width='270' height='5' />
-      <rect x='180' y='102' width='270' height='5' />
-      <rect x='443' y='96' width='10' height='3' />
-      <rect x='443' y='104' width='10' height='3' />
-      <path d='M 196,108 L 196,124 L 220,124 L 220,108' stroke-width='1.4' fill='none' />
-      <path d='M 30,98 L 198,98 L 198,108 L 30,124 Z' />
-      <line x1='40' y1='105' x2='190' y2='105' stroke-width='0.7' opacity='0.4' />
-      <line x1='40' y1='115' x2='190' y2='115' stroke-width='0.7' opacity='0.4' />
-      <path d='M 150,110 L 162,110 L 162,138 L 142,138 Z' />
-    `,
-    carabina: `
-      <rect x='350' y='95' width='45' height='5' />
-      <rect x='388' y='91' width='14' height='13' />
-      <rect x='180' y='90' width='180' height='14' />
-      <rect x='155' y='86' width='12' height='5' />
-      <path d='M 178,108 L 178,124 L 206,124 L 206,108' stroke-width='1.4' fill='none' />
-      <path d='M 168,108 L 184,108 L 178,148 L 154,148 Z' />
-      <path d='M 100,98 L 165,98 L 165,116 L 100,116 Z' />
-      <line x1='105' y1='102' x2='160' y2='102' stroke-width='0.6' opacity='0.4' />
-      <line x1='105' y1='112' x2='160' y2='112' stroke-width='0.6' opacity='0.4' />
-      <rect x='90' y='100' width='12' height='14' />
-      <path d='M 180,124 L 200,124 L 200,160 L 180,160 Z' />
-      <line x1='184' y1='132' x2='196' y2='132' stroke-width='0.6' opacity='0.4' />
-      <line x1='184' y1='140' x2='196' y2='140' stroke-width='0.6' opacity='0.4' />
-      <line x1='184' y1='148' x2='196' y2='148' stroke-width='0.6' opacity='0.4' />
-    `,
-  };
-  // Aviso discreto "sin imagen disponible" (reemplaza la silueta placeholder).
-  void SIL;
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 200' preserveAspectRatio='xMidYMid meet'>
-    <g fill='none' stroke='%23555555' stroke-width='2.5' opacity='0.55' stroke-linejoin='round'>
-      <rect x='206' y='64' width='68' height='52' rx='4'/>
-      <circle cx='240' cy='90' r='13'/>
-      <line x1='210' y1='60' x2='270' y2='120'/>
-    </g>
-    <text x='240' y='148' font-family='Courier New,monospace' font-size='13' fill='%237A7A7A' text-anchor='middle' letter-spacing='1'>Sin imagen disponible</text>
-    <text x='240' y='168' font-family='Courier New,monospace' font-size='13' fill='%237A7A7A' text-anchor='middle' letter-spacing='1'>por el momento</text>
-  </svg>`;
-  return 'data:image/svg+xml;utf8,' + svg.replace(/\n\s+/g, '').replace(/#/g, '%23');
+// Imagen de respaldo de un arma sin fotografía propia (62 de 192).
+// Devuelve la SILUETA del tipo, el mismo asset que usa la polaroid de la ficha,
+// así que el catálogo y el expediente hablan el mismo idioma.
+//
+// Antes construía aquí un SVG en `data:` URI —una cámara tachada con «Sin
+// imagen disponible por el momento»— y arrastraba además cinco siluetas
+// dibujadas a mano que ya nadie leía, muertas tras un `void SIL`. Saulo
+// descartó esos SVG generados el 8-sep-2026; las siluetas de `imagenes/` las
+// sustituyen. Un `data:` URI, además, viajaba entero dentro de cada registro.
+//
+// OJO: `armaSinFoto` (ui.jsx) y `fixArmaImg` (store.js) reconocen esta ruta
+// para saber que un arma no tiene foto propia. Si cambias el nombre del
+// archivo, cámbialo en los tres sitios.
+window.armaPlaceholder = function (arma) {
+  const TIPOS = ['pistola', 'revolver', 'rifle', 'escopeta', 'carabina'];
+  const t = arma && TIPOS.indexOf(arma.tipo) >= 0 ? arma.tipo : 'pistola';
+  return 'imagenes/silueta-' + t + '.webp';
 };
 
 // si un arma no tiene imagen, asigna su placeholder al cargar
