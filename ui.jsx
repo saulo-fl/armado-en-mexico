@@ -626,6 +626,16 @@ window.estiloAccion = estiloAccion;
 // familia elegida. DESIGN.md §5.3 sustituye Open Sans por Archivo justamente;
 // esto lo pone de acuerdo con la fuente que sí llega al navegador.
 //
+// Arreglar esta función NO bastó, y conviene saber por qué: había otros 25
+// `fontFamily: 'Open Sans'` escritos a mano en screens-2/3/4, accesorios,
+// municiones y tutorial, que no pasaban por aquí. Se cerraron el 7-sep-2026.
+// La lección: comprobar UN archivo compilado y dar por bueno el conjunto es
+// como se coló. Si vuelves a cambiar la familia de la prosa, cámbiala aquí y
+// después `grep -rn "fontFamily: 'Open Sans" *.jsx` para los que se escapen.
+//
+// Usar la receta (`window.amxProsa({...})`) en vez de escribir la familia a
+// mano es lo que evita que esto se repita.
+//
 // La mono NO se toca en lo que se escanea en vez de leerse: rótulos HUD en
 // versalitas (§ LEGALIDAD · MX), precios, existencias, fechas, siglas y badges.
 // Esa es la frontera; si dudas, pregúntate si la frase se lee o se mira.

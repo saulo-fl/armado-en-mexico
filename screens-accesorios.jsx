@@ -487,7 +487,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
           </div>
           {acc.descripcion &&
             <p style={{
-              fontFamily: 'Open Sans, sans-serif', fontSize: 17.5, color: P.textDim,
+              fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17.5, color: P.textDim,
               lineHeight: 1.65, margin: '0 0 6px', textWrap: 'pretty',
             }}>{acc.descripcion}</p>
           }
@@ -701,7 +701,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
                   fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
                   color: availMeta.color, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
                 }}>{availMeta.label}</div>
-                <div style={{ fontFamily: 'Open Sans, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
+                <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
                   {availMeta.desc}
                 </div>
               </div>
