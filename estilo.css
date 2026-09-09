@@ -1025,9 +1025,15 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
   gap: var(--e4);
   align-items: center;
-  /* Aquí el folder se estira más que en la tarjeta (el bloque es apaisado y el
-     cartón es 1.389), así que la pestaña sale algo más ancha. Es el precio de
-     usar la fotografía en vez de dibujarla, y se prefiere ese precio. */
+  /* El cartón manda la proporción, no al revés. Esto estuvo con el folder
+     estirado a la caja: el bloque destacado es 1.86 y el cartón 1.389, así que
+     `background-size: 100% 100%` ensanchaba la pestaña casi al doble y torcía
+     el pliegue de la solapa — se leía como un error, no como un folder.
+     Con `aspect-ratio` el bloque toma el alto que le corresponde y la
+     fotografía no se deforma. Si el contenido creciera más que eso, el folder
+     crece con él: `aspect-ratio` cede ante el contenido, que es justo lo que
+     se quiere para que nada se desborde. */
+  aspect-ratio: 1000 / 720;
   padding: 13% 5% 7% 6%;
   /* El color va DEBAJO de la fotografía: si el .webp no llega, el folder
      sigue siendo cartulina y lo mecanografiado conserva su contraste. */
@@ -1103,10 +1109,23 @@
 .amx-v2 .amx-dest-copia .amx-polaroid { transform: none; }
 .amx-v2 .amx-dest-copia .amx-polaroid-nombre { font-size: 17px; }
 
-/* Móvil: el folder se cierra y la copia baja debajo del texto. */
+/* Móvil: el folder NO se cierra. Apilar la copia debajo del texto hacía el
+   bloque más alto que ancho (0.836 medido a 560px) y `aspect-ratio` cede ante
+   el contenido, así que el cartón se estiraba a lo alto y la pestaña salía
+   deformada — el mismo defecto que en escritorio, del revés. Un folder abierto
+   es apaisado a cualquier tamaño, así que las dos columnas se quedan y lo que
+   encoge es la copia. */
 @media (max-width: 719px) {
-  .amx-v2 .amx-dest-folder { grid-template-columns: minmax(0, 1fr); }
-  .amx-v2 .amx-dest-copia { max-width: 260px; margin: 0 auto; }
+  .amx-v2 .amx-dest-folder {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 38%);
+    gap: var(--e3);
+  }
+  .amx-v2 .amx-dest-specs { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: 13px; }
+  .amx-v2 .amx-dest-specs dt { font-size: 11.5px; }
+  .amx-v2 .amx-dest-copia .amx-polaroid-nombre { font-size: 14px; }
+  /* La pestaña llega al 34 % del cartón; el rótulo puede ocuparla entera antes
+     que salir cortado con elipsis. */
+  .amx-v2 .amx-dest-rotulo { max-width: 32%; font-size: 11px; letter-spacing: .1em; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
