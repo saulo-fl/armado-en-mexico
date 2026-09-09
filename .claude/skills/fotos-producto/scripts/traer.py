@@ -32,7 +32,7 @@ RUIDO = re.compile(r"(logo|bandierin|flag|icon|sprite|favicon|banner|footer|head
 
 
 def _curl(url, destino=None):
-    cmd = ["curl", "-s", "-L", "--max-time", "30", "-A", UA,
+    cmd = ["curl", "-s", "-L", "--compressed", "--max-time", "30", "-A", UA,
            "-H", "Accept-Language: en-US,en;q=0.9"]
     if destino:
         subprocess.run(cmd + ["-o", str(destino), url], check=True)

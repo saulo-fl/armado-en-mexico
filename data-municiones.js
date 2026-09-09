@@ -51,11 +51,68 @@
     ],
   };
 
+  // ── Foto de la CAJA ────────────────────────────────────────────────────────
+  // El PNG de `imagenes/cartuchos/` es del CALIBRE: va en la home de calibres y en
+  // la guía educativa. La ficha de un cartucho de MARCA lleva la foto de su caja;
+  // sin caja cae al PNG del calibre (lo resuelve screens-municiones.jsx).
+  // La clave es `marca__calibre` normalizados: una caja sirve a todas las
+  // municiones de esa marca y ese calibre, que es como se venden. Una munición
+  // con foto propia se registra por su id y pisa a la de marca+calibre.
+  // El bloque lo escribe `cajas.py aplicar` (skill fotos-producto).
+  function _slug(s) {
+    return String(s).normalize('NFKD').toLowerCase().replace(/[^a-z0-9]/g, '');
+  }
+  /* ↓ generado por cajas.py · no editar a mano ↓ */
+  window.MUNICION_CAJAS = {
+    'aguila__12ga': 'imagenes/municiones/aguila__12ga.webp?v=20260908',
+    'aguila__20ga': 'imagenes/municiones/aguila__20ga.webp?v=20260908',
+    'aguila__22250rem': 'imagenes/municiones/aguila__22250rem.webp?v=20260908',
+    'aguila__243win': 'imagenes/municiones/aguila__243win.webp?v=20260908',
+    'aguila__270win': 'imagenes/municiones/aguila__270win.webp?v=20260908',
+    'aguila__3006sprg': 'imagenes/municiones/aguila__3006sprg.webp?v=20260908',
+    'aguila__300winmag': 'imagenes/municiones/aguila__300winmag.webp?v=20260908',
+    'aguila__3030win': 'imagenes/municiones/aguila__3030win.webp?v=20260908',
+    'aguila__308win': 'imagenes/municiones/aguila__308win.webp?v=20260908',
+    'aguila__30carbine': 'imagenes/municiones/aguila__30carbine.webp?v=20260908',
+    'aguila__38special': 'imagenes/municiones/aguila__38special.webp?v=20260908',
+    'aguila__38super': 'imagenes/municiones/aguila__38super.webp?v=20260908',
+    'aguila__40sw': 'imagenes/municiones/aguila__40sw.webp?v=20260908',
+    'aguila__556x45mm': 'imagenes/municiones/aguila__556x45mm.webp?v=20260908',
+    'aguila__762x51mm': 'imagenes/municiones/aguila__762x51mm.webp?v=20260908',
+    'ccispeer__9mmparabellum': 'imagenes/municiones/ccispeer__9mmparabellum.webp?v=20260908',
+    'corbon__38super': 'imagenes/municiones/corbon__38super.webp?v=20260908',
+    'egdelsur__12ga': 'imagenes/municiones/egdelsur__12ga.webp?v=20260908',
+    'eley__12ga': 'imagenes/municiones/eley__12ga.webp?v=20260908',
+    'federal__556x45mm': 'imagenes/municiones/federal__556x45mm.webp?v=20260908',
+    'fiocchi__308win': 'imagenes/municiones/fiocchi__308win.webp?v=20260908',
+    'gb__12ga': 'imagenes/municiones/gb__12ga.webp?v=20260908',
+    'hornady__17hmr': 'imagenes/municiones/hornady__17hmr.webp?v=20260908',
+    'hornady__22250rem': 'imagenes/municiones/hornady__22250rem.webp?v=20260908',
+    'hornady__6mmrem': 'imagenes/municiones/hornady__6mmrem.webp?v=20260908',
+    'jgexcopesa__12ga': 'imagenes/municiones/jgexcopesa__12ga.webp?v=20260908',
+    'pmc__308win': 'imagenes/municiones/pmc__308win.webp?v=20260908',
+    'pmc__380acp': 'imagenes/municiones/pmc__380acp.webp?v=20260908',
+    'pmc__556x45mm': 'imagenes/municiones/pmc__556x45mm.webp?v=20260908',
+    'pmc__9mmparabellum': 'imagenes/municiones/pmc__9mmparabellum.webp?v=20260908',
+    'remington__308win': 'imagenes/municiones/remington__308win.webp?v=20260908',
+    'rio__12ga': 'imagenes/municiones/rio__12ga.webp?v=20260908',
+    'rio__20ga': 'imagenes/municiones/rio__20ga.webp?v=20260908',
+    'saga__12ga': 'imagenes/municiones/saga__12ga.webp?v=20260908',
+    'saga__20ga': 'imagenes/municiones/saga__20ga.webp?v=20260908',
+    'sagasporting__12ga': 'imagenes/municiones/sagasporting__12ga.webp?v=20260908',
+    'trust__12ga': 'imagenes/municiones/trust__12ga.webp?v=20260908',
+  };
+  /* ↑ fin generado por cajas.py ↑ */
+  function _caja(id, marca, calibre) {
+    var C = window.MUNICION_CAJAS || {};
+    return C[String(id)] || C[_slug(marca) + '__' + _slug(calibre)] || '';
+  }
+
   function mun(id, nombre, marca, pais, calibre, tipo, bala, grano, avail, precio, dcamRef, descripcion, compatibilidad, specs) {
     return { id: id, nombre: nombre, marca: marca, pais: pais, calibre: calibre, tipo: tipo, bala: bala, grano: grano,
       avail: avail, categoria: calibre, compatibilidad: compatibilidad || [], specs: specs || [],
       descripcion: descripcion || '', priceExact: _mFmt(precio), priceLvl: _mLvl(precio),
-      dcamRef: dcamRef || '', priceManualId: 'man_otca_2025_09_26', img: '' };
+      dcamRef: dcamRef || '', priceManualId: 'man_otca_2025_09_26', img: _caja(id, marca, calibre) };
   }
 
   window.MUNICIONES = [

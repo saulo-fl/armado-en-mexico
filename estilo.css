@@ -137,6 +137,26 @@
   --loteria-tinta-2:#5A5142;   /*  4.55:1 sobre la lámina — el número y lo secundario */
   --loteria-filo:   #B6BDB0;   /* el canto del cartón — mismo papel que --copia-filo */
 
+  /* ── EL PUESTO DE MUNICIÓN — diegético, tampoco lleva `--d-` ─────────────
+     «Las cajas de municiones con transparencia sobre una mesa y al pasar el
+     mouse por encima se iluminan ligeramente por detrás. Y sus letreros serán
+     como los típicos letreros mexicanos de los tianguis y mercados de
+     frutería» (tablero del 8-sep-2026).
+
+     La mesa y el letrero son BOCETO: van dibujados en SVG dentro de
+     `--mesa-madera` y del degradado del palo mientras llegan las fotos. Los dos
+     están detrás de una sola variable a propósito — sustituirlos es cambiar esa
+     línea por un `url(imagenes/…​.webp)`, sin tocar ningún componente. */
+  --mesa-tabla:     #C09A72;   /* la tabla — tinta oscura encima daría 6.71:1 */
+  --mesa-veta:      #A8875F;
+  --mesa-junta:     #94714E;
+  --mesa-canto:     #7E6042;   /* el canto que mira al comprador */
+  --letrero:        #F2CE1B;   /* el amarillo del cartel de tianguis */
+  --letrero-tinta:  #171B19;   /* 11.28:1 sobre el cartel */
+  --letrero-filo:   #C9A21A;
+  --palo:           #B4906A;   /* la vara del cartel */
+  --puesto-luz:     #FFE9A8;   /* la luz que se enciende detrás de la caja */
+
   /* ── MARCA ──────────────────────────────────────────────────────────────
      El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
      siendo una SUPERFICIE oscura (banda, nav, hero), que es lo que siempre
@@ -1376,4 +1396,150 @@
 }
 @media (max-width: 719px) {
   .amx-v2 .amx-loteria-mesa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e2); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL PUESTO DE MUNICIÓN — la caja en la mesa, con su letrero (tablero 8-sep-2026)
+   ══════════════════════════════════════════════════════════════════════════
+   Sustituye a la tarjeta de calibre con el cartucho flotando sobre un degradado.
+   Cada calibre destacado es un PUESTO: el cartel amarillo clavado en su vara, la
+   caja de la marca apoyada en la tabla y, al pasar por encima, la luz que se
+   enciende detrás.
+
+   LA MESA Y LA VARA SON BOCETO. Van en SVG mientras llegan las fotos reales, y
+   por eso viven las dos en una sola variable cada una: cambiar `--mesa-madera`
+   por un `url(imagenes/mesa.webp)` —y `--palo-veta` por su recorte— basta para
+   sustituirlas sin tocar una sola regla de los componentes.
+
+   La tabla se repite en X y NO en Y: la veta va dibujada en horizontal y vuelve
+   a la misma altura en los dos extremos del mosaico, así que dos puestos
+   contiguos forman una mesa continua. Es lo que deja poner cuatro en fila en
+   escritorio y dos por fila en móvil sin que se note el corte. */
+.amx-v2 {
+  --mesa-madera: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='140' preserveAspectRatio='none'> <rect width='600' height='112' fill='%23C09A72'/> <rect y='0' width='600' height='38' fill='%23C6A179'/> <rect y='74' width='600' height='38' fill='%23B8916A'/> <g stroke='%2394714E' stroke-width='1.6' fill='none' opacity='.75'><path d='M0 38H600'/><path d='M0 74H600'/></g> <g stroke='%23A8875F' fill='none' opacity='.4'> <path d='M0 14C120 10 200 19 300 14S520 9 600 14' stroke-width='1.3'/> <path d='M0 27C140 31 240 22 360 28S520 32 600 27' stroke-width='1'/> <path d='M0 52C110 47 210 58 320 52S500 46 600 52' stroke-width='1.4'/> <path d='M0 63C160 67 260 58 380 64S520 68 600 63' stroke-width='1'/> <path d='M0 88C130 83 230 94 340 88S510 82 600 88' stroke-width='1.3'/> <path d='M0 101C150 105 250 96 370 102S530 106 600 101' stroke-width='1'/> </g> <rect y='106' width='600' height='6' fill='%237E6042' opacity='.35'/> <rect y='112' width='600' height='28' fill='%237E6042'/> <rect y='112' width='600' height='2' fill='%2394714E' opacity='.6'/> </svg>");
+  --palo-veta: linear-gradient(90deg, #8A6B49 0%, var(--palo) 32%, #CDAA82 52%, var(--palo) 74%, #8A6B49 100%);
+}
+
+.amx-v2 .amx-puestos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;                             /* sin hueco: las tablas se tocan y la mesa
+                                         sale de una pieza */
+}
+@media (max-width: 719px) {
+  .amx-v2 .amx-puestos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.amx-v2 .amx-puesto {
+  position: relative;
+  display: block;
+  width: 100%;
+  /* Cuadrado: el cartel, la caja y la tabla apretados como en un puesto.
+     Más alto dejaba un palmo de vara al aire entre el cartel y el cartón. */
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.amx-v2 .amx-puesto:focus-visible { outline: 2px solid var(--acento); outline-offset: -3px; }
+
+/* La tabla. Va en `::after` y no en un hijo para que el orden de pintado la
+   deje debajo de todo sin pelearse por el z-index con el contenido. */
+.amx-v2 .amx-puesto::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 24%;
+  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
+  z-index: 0;
+}
+
+/* El cartel. Texto de verdad, no rotulado dentro del SVG: el calibre sale del
+   dato y lo lee un lector de pantalla.
+   El giro es estático —un cartel clavado a mano nunca queda a plomo— y alterna
+   de signo entre puestos pares e impares para que la fila no salga peinada. */
+.amx-v2 .amx-puesto-letrero {
+  position: absolute;
+  left: 15%; right: 15%; top: 4%;
+  z-index: 3;
+  padding: 13px 6px 14px;
+  background: var(--letrero);
+  border: 1px solid var(--letrero-filo);
+  border-radius: 1px;
+  box-shadow: 0 2px 5px rgba(23, 27, 25, .28);
+  transform: rotate(-2.2deg);
+}
+.amx-v2 .amx-puesto:nth-child(even) .amx-puesto-letrero { transform: rotate(1.8deg); }
+.amx-v2 .amx-puesto-rotulo {
+  display: block;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.05;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--letrero-tinta);        /* 11.28:1 sobre el cartel */
+}
+/* La vara. Sale del cartel y se pierde detrás de la caja — no llega a la tabla
+   a propósito: el cartón la tapa, que es lo que pasa en un puesto de verdad. */
+.amx-v2 .amx-puesto-palo {
+  position: absolute;
+  left: 50%; top: 23%;
+  z-index: 1;
+  width: 9px;
+  height: 52%;
+  margin-left: -4.5px;
+  background: var(--palo-veta);
+  border-radius: 1px;
+}
+
+/* La luz de detrás. Apagada de salida; se enciende al pasar por encima Y con el
+   foco de teclado, que si no el efecto solo existiría para el ratón. */
+.amx-v2 .amx-puesto-luz {
+  position: absolute;
+  left: 50%; bottom: 18%;
+  z-index: 1;
+  width: 96%;
+  aspect-ratio: 1 / 1;
+  margin-left: -48%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--puesto-luz) 0%, rgba(255, 233, 168, .45) 45%, rgba(255, 233, 168, 0) 78%);
+  opacity: 0;
+  transition: opacity .22s ease;
+  pointer-events: none;
+}
+.amx-v2 .amx-puesto:hover .amx-puesto-luz,
+.amx-v2 .amx-puesto:focus-visible .amx-puesto-luz { opacity: .85; }
+
+/* La caja apoyada. `bottom` la mete 6 puntos dentro de la tabla: apoyada en la
+   superficie, no posada sobre el canto. La sombra de contacto es lo que la
+   asienta — sin ella la caja flota por muy bien recortada que esté. */
+.amx-v2 .amx-puesto-caja {
+  position: absolute;
+  left: 6%; right: 6%; bottom: 18%;
+  z-index: 2;
+  height: 48%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 2px 3px rgba(23, 27, 25, .30));
+}
+.amx-v2 .amx-puesto-sombra {
+  position: absolute;
+  left: 12%; right: 12%; bottom: 16%;
+  z-index: 1;
+  height: 6%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(23, 27, 25, .40) 0%, rgba(23, 27, 25, 0) 100%);
+  pointer-events: none;
+}
+@media (max-width: 719px) {
+  /* A media columna el cuadrado deja 179px de alto y no caben cartel, caja y
+     tabla sin apretarse: en móvil el puesto crece a lo alto, no a lo ancho. */
+  .amx-v2 .amx-puesto { aspect-ratio: 4 / 5; }
+  .amx-v2 .amx-puesto-rotulo { font-size: 14px; }
+  .amx-v2 .amx-puesto-letrero { padding: 7px 4px 8px; }
 }
