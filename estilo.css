@@ -96,6 +96,16 @@
   --carton-tinta:   #171B19;   /* lo mecanografiado — 13.94:1 sobre el cartón */
   --carton-tinta-2: #5A5142;   /* lo secundario — 6.25:1 */
 
+  /* ── LA FICHA DE FICHERO — diegética, tampoco lleva `--d-` ───────────────
+     El papel sale medido del propio .webp. Los ratios son contra el punto MÁS
+     OSCURO de la ficha (#CED2C3, la línea azul del rayado), no contra el papel
+     medio: el texto puede caer encima de una línea y ahí es donde peor lo
+     tiene. Por eso en esta ficha no entra ni el rojo de acción (4.44:1 sobre
+     el rayado) ni el verde de marca (4.84:1 sobre el papel). */
+  --ficha:          #E7DCC6;   /* la cartulina, por si el .webp no llega */
+  --ficha-tinta:    #171B19;   /* 11.29:1 sobre el rayado */
+  --ficha-tinta-2:  #5A5142;   /*  5.07:1 sobre el rayado */
+
   /* ── LOS SELLOS DE TINTA ─────────────────────────────────────────────────
      Dos colores, no tres: el amarillo que pedía el boceto para SEGURIDAD no
      llega a 3:1 sobre ningún papel de los que hay aquí. Saulo lo cambió a rojo
@@ -1074,4 +1084,111 @@
 @media (max-width: 719px) {
   .amx-v2 .amx-dest-folder { grid-template-columns: minmax(0, 1fr); }
   .amx-v2 .amx-dest-copia { max-width: 260px; margin: 0 auto; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA FICHA DE CALIBRE — cartulina de fichero y marco de época
+   Tablero de Saulo, 8-sep-2026: «La ficha de información va con estilo de ficha
+   bibliográfica antigua» y «la foto del calibre va dentro de un marco de foto
+   antiguo».
+
+   Aquí SÍ entran dos rasters, y es lo contrario de lo que pasó con el folder:
+   el rayado y el papel envejecido de una ficha de fichero, y sobre todo el
+   borde festoneado de una copia de época, no se pueden dibujar con CSS sin que
+   canten. El marco va con `border-image`, que reparte las ondas por los cuatro
+   lados sin deformarlas — que es exactamente para lo que existe.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-calibre {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--e3);
+  height: 100%;
+  padding: 14px;
+  /* El color va DEBAJO de la imagen: si el .webp no llega, la ficha sigue
+     siendo cartulina y la tinta conserva su contraste. */
+  background: var(--ficha) url(imagenes/ficha-biblioteca.webp) 50% 50% / 100% 100% no-repeat;
+  border-radius: 3px;                /* una ficha de cartulina no lleva radio */
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  text-align: left;
+}
+.amx-v2 .amx-calibre:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
+
+.amx-v2 .amx-calibre-datos {
+  display: flex; flex-direction: column;
+  flex: 1; min-width: 0;
+}
+.amx-v2 .amx-calibre-sistema {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta-2);       /* 5.07:1 incluso sobre el rayado azul */
+}
+.amx-v2 .amx-calibre-id {
+  margin-top: var(--e2);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ficha-tinta);         /* 11.29:1 sobre el rayado */
+}
+.amx-v2 .amx-calibre-uso {
+  flex: 1;
+  margin-top: 6px;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ficha-tinta-2);
+}
+/* La cuenta de armas iba en el verde de marca. Sobre esta cartulina ese verde
+   se queda en 4.84:1 y el rojo de acción cae a 4.44:1 sobre el rayado azul, por
+   debajo del mínimo de texto: en la ficha la llamada la hace la TINTA, que es
+   además lo que haría alguien escribiendo en una ficha de fichero. */
+.amx-v2 .amx-calibre-n {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--ficha-tinta);
+}
+
+/* El marco de época. Los cortes están medidos sobre el .webp (800x1225):
+   114 arriba, 95 a los lados, 145 abajo. `round` reparte las ondas enteras,
+   que es lo que evita que se vea un festón cortado a la mitad. */
+.amx-v2 .amx-calibre-marco {
+  flex: 0 0 auto;
+  align-self: stretch;               /* todos iguales y el cartucho apoyado en
+                                        el piso, que es lo que deja comparar de
+                                        un vistazo las alturas reales */
+  width: 94px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  /* Sin fondo: los .webp de `imagenes/cartuchos/` SÍ traen alfa (15-56 % de
+     transparencia), al revés que las fotos de arma, que son recortes sobre
+     blanco opaco. Un fondo blanco aquí metía un rectángulo vacío enorme dentro
+     del marco, porque el cartucho va a escala real y el .22 LR ocupa un tercio
+     del alto. Sobre la cartulina, el hueco desaparece. */
+  background: transparent;
+  border-style: solid;
+  border-width: 15px 13px 19px;
+  border-color: transparent;
+  /* Con bordes de 9px el festón se leía como una línea de puntos. Necesita
+     grosor para que la onda se vea como onda. */
+  border-image: url(imagenes/marco-festoneado.webp) 114 95 145 95 / 15px 13px 19px 13px round;
+  /* El marco es papel crema y la ficha también: 1.05:1, invisible. Quien los
+     separa es la SOMBRA, igual que en el resto del sistema (§5.1b: entre dos
+     superficies claras el contraste máximo es ~1.2:1). Va en `drop-shadow` y no
+     en `box-shadow` porque tiene que seguir el festón, no la caja. */
+  filter: drop-shadow(0 1px 1px rgba(23, 27, 25, .16))
+          drop-shadow(0 3px 6px rgba(23, 27, 25, .18));
+}
+.amx-v2 .amx-calibre-marco img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom;
 }
