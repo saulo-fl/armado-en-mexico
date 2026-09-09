@@ -1042,10 +1042,10 @@ function ArmaExpediente({ arma, onClick, distintivo, onCompare, inCompare }) {
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') abrir(e); }}
       aria-label={[arma.nombre, arma.marca, cal && ('calibre ' + cal),
         arma.availLabel || sello.texto, precio].filter(Boolean).join(', ')}>
-      <div className="amx-exp-cabecera">
-        <span className="amx-exp-pestana">{arma.marca}</span>
-      </div>
       <div className="amx-exp-folder">
+        {/* La marca va rotulada sobre la pestaña que trae la fotografía del
+            folder. Antes era una pestaña dibujada con CSS; Saulo la rechazó. */}
+        <span className="amx-exp-marca">{arma.marca}</span>
         {distintivo}
         {onCompare &&
           <button type="button" className="amx-exp-comparar" aria-pressed={!!inCompare}
@@ -1089,10 +1089,8 @@ function ArmaDestacada({ arma, onOpen }) {
   ].filter(([, v]) => v != null && v !== '');
   return (
     <article className="amx-dest">
-      <div className="amx-exp-cabecera">
-        <span className="amx-exp-pestana">Arma destacada</span>
-      </div>
       <div className="amx-dest-folder">
+        <span className="amx-dest-rotulo">Arma destacada</span>
         <div className="amx-dest-datos">
           {/* Lo primero que se estampa, encima de lo mecanografiado. Va grande
               porque aqui hay sitio, y dentro de esta columna y no como hermano
@@ -1566,7 +1564,14 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
           display: 'flex', gap, overflowX: 'auto', overflowY: 'hidden',
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
-          padding: `4px ${padX}px 12px`,
+          // El padding vertical NO es decorativo: es lo que deja respirar a lo
+          // que se sale de la tarjeta. La copia instantánea de `ArmaExpediente`
+          // va girada y sobresale unos 12px por arriba y por abajo, y un
+          // scroller horizontal SIEMPRE recorta el otro eje — la regla del CSS
+          // es que si un eje es `auto`, el otro no puede quedarse en `visible`.
+          // Con `overflowY: hidden` y sin este aire, la polaroid salía cortada
+          // en cuadrado y se perdía justo lo que la hace parecer una foto.
+          padding: `18px ${padX}px 20px`,
           scrollPaddingLeft: padX,
           cursor: dragging ? 'grabbing' : 'grab',
           userSelect: dragging ? 'none' : undefined,
@@ -1574,7 +1579,9 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
         {items.map((it, i) => (
           <div key={it.id || i} style={{
             flex: `0 0 ${itemWidth}px`,
-            width: itemWidth, minWidth: 0, overflow: 'hidden',
+            // `overflow: visible` por lo mismo: el recorte del item cortaba la
+            // copia por el canto.
+            width: itemWidth, minWidth: 0, overflow: 'visible',
             scrollSnapAlign: 'start',
           }}>{renderItem(it, i)}</div>
         ))}

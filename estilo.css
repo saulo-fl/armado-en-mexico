@@ -854,50 +854,46 @@
    compensarlo cada vez que un clip-path se lo come, y aquí no hay ninguno. */
 .amx-v2 .amx-exp:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
 
-.amx-v2 .amx-exp-cabecera { display: flex; align-items: flex-end; padding-left: 11%; }
-.amx-v2 .amx-exp-pestana {
-  flex: 0 0 auto;
-  max-width: 72%;
-  margin-bottom: -1px;               /* el folder tapa su filo inferior */
-  padding: 5px 11px 7px;
-  background: var(--carton-alto);
-  border: 1px solid var(--carton-filo);
-  border-bottom: 0;
-  border-radius: var(--radio-sm) var(--radio-sm) 0 0;
+/* El folder ES la fotografía que trajo Saulo, no un dibujo. Estuvo un rato
+   hecho con CSS —color, radio y un degradado para el filo de las hojas— y lo
+   rechazó: quiere el objeto que fotografió. La pestaña, el pliegue y las hojas
+   que asoman vienen ya en el .webp; aquí solo se coloca el texto encima.
+
+   `background-size: 100% 100%` estira. La proporción del cartón es 1.389 y la
+   del folder en la tarjeta ronda 1.4, así que la deformación es de un 1 %.
+   Todos los items del carrusel se estiran al mismo alto, de modo que todos los
+   folders se deforman igual y ninguno desentona al lado de otro. */
+.amx-v2 .amx-exp-folder {
+  position: relative;
+  height: 100%;
+  min-height: 132px;
+  /* Dentro del cartón: arriba por debajo de la pestaña, a la izquierda por
+     donde entra la copia, y abajo por encima del filo de las hojas. */
+  padding: 20% 7% 11% 13%;
+  /* El color va DEBAJO de la fotografía: si el .webp no llega, el folder
+     sigue siendo cartulina y lo mecanografiado conserva su contraste. */
+  background: var(--carton) url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
+  /* La sombra va en `drop-shadow` y no en `box-shadow`: tiene que seguir el
+     recorte del cartón —con su pestaña— y no la caja rectangular. */
+  filter: drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
+          drop-shadow(0 6px 12px rgba(23, 27, 25, .20));
+}
+
+/* La marca, rotulada sobre la pestaña que trae la foto. La pestaña ocupa del
+   2 % al 34 % del ancho del cartón, así que el rótulo vive en ese carril y se
+   corta con elipsis si la marca es larga — como una etiqueta de verdad. */
+.amx-v2 .amx-exp-marca {
+  position: absolute;
+  left: 6%; top: 3.5%;
+  max-width: 27%;
   font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: .16em;
+  font-size: 11px;
+  letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--carton-tinta-2);      /* 6.25:1 sobre el cartón */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.amx-v2 .amx-exp-folder {
-  position: relative;
-  z-index: 1;                        /* tapa la sombra que echa la pestaña */
-  min-height: 132px;
-  /* El padding izquierdo NO es simetrico a proposito: por ahi entra la copia,
-     que se solapa con el folder, y el texto tiene que arrancar despues de
-     ella. En %, para que el solape se mantenga a cualquier ancho de tarjeta. */
-  padding: var(--e3) var(--e3) 20px 11%;
-  background: var(--carton);
-  border: 1px solid var(--carton-filo);
-  /* Esquina superior izquierda a escuadra: es donde se apoya la pestaña. La
-     asimetría es SIEMPRE la misma (§5.4), no aleatoria. */
-  border-radius: 0 var(--radio) var(--radio) var(--radio);
-  box-shadow: var(--sombra);         /* quien separa las capas es la sombra */
-}
-/* Las hojas que asoman por el canto de abajo: es lo que convierte un
-   rectángulo beige en un folder con papeles dentro. */
-.amx-v2 .amx-exp-folder::after {
-  content: "";
-  position: absolute; inset: auto 0 0 0;
-  height: 9px;
-  border-radius: 0 0 var(--radio) var(--radio);
-  background: repeating-linear-gradient(
-    to bottom, transparent 0 2px, var(--carton-filo) 2px 3px);
-  pointer-events: none;
 }
 
 /* Lo mecanografiado. El orden lo fija el tablero: nombre, calibre, escala de
@@ -1007,25 +1003,34 @@
 
 .amx-v2 .amx-dest-folder {
   position: relative;
-  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
   gap: var(--e4);
   align-items: center;
-  padding: var(--e4) var(--e4) 24px;
-  background: var(--carton);
-  border: 1px solid var(--carton-filo);
-  border-radius: 0 var(--radio) var(--radio) var(--radio);
-  box-shadow: var(--sombra);
+  /* Aquí el folder se estira más que en la tarjeta (el bloque es apaisado y el
+     cartón es 1.389), así que la pestaña sale algo más ancha. Es el precio de
+     usar la fotografía en vez de dibujarla, y se prefiere ese precio. */
+  padding: 13% 5% 7% 6%;
+  /* El color va DEBAJO de la fotografía: si el .webp no llega, el folder
+     sigue siendo cartulina y lo mecanografiado conserva su contraste. */
+  background: var(--carton) url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
+          drop-shadow(0 8px 16px rgba(23, 27, 25, .20));
 }
-.amx-v2 .amx-dest-folder::after {
-  content: "";
-  position: absolute; inset: auto 0 0 0;
-  height: 11px;
-  border-radius: 0 0 var(--radio) var(--radio);
-  background: repeating-linear-gradient(
-    to bottom, transparent 0 2px, var(--carton-filo) 2px 3px);
-  pointer-events: none;
+/* El rótulo del bloque va sobre la pestaña de la foto, igual que la marca en
+   la tarjeta. */
+.amx-v2 .amx-dest-rotulo {
+  position: absolute;
+  left: 4%; top: 2.5%;
+  max-width: 26%;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .amx-v2 .amx-dest-procedencia {
@@ -1104,7 +1109,10 @@
   align-items: stretch;
   gap: var(--e3);
   height: 100%;
-  padding: 14px;
+  /* El padding superior es MENOR que el resto: la cartulina trae una línea roja
+     impresa a la altura de la primera guía, y con 14px el rótulo del sistema
+     caía justo encima y se perdía. */
+  padding: 8px 14px 14px;
   /* El color va DEBAJO de la imagen: si el .webp no llega, la ficha sigue
      siendo cartulina y la tinta conserva su contraste. */
   background: var(--ficha) url(imagenes/ficha-biblioteca.webp) 50% 50% / 100% 100% no-repeat;
@@ -1154,36 +1162,20 @@
   color: var(--ficha-tinta);
 }
 
-/* El marco de época. Los cortes están medidos sobre el .webp (800x1225):
-   114 arriba, 95 a los lados, 145 abajo. `round` reparte las ondas enteras,
-   que es lo que evita que se vea un festón cortado a la mitad. */
+/* El cartucho va SIN marco. Estuvo dentro de un marco de época festoneado —lo
+   pedía el tablero— pero Saulo lo descartó al verlo montado: sobre la cartulina
+   el marco es papel crema sobre papel crema y ni con sombra acababa de leerse,
+   y el festón, reducido a 13px de borde, salía como una línea de puntos. Queda
+   el .webp del cartucho apoyado en la ficha, que es lo que se aprobó. */
 .amx-v2 .amx-calibre-marco {
   flex: 0 0 auto;
-  align-self: stretch;               /* todos iguales y el cartucho apoyado en
-                                        el piso, que es lo que deja comparar de
-                                        un vistazo las alturas reales */
-  width: 94px;
+  align-self: stretch;               /* el cartucho apoyado en el piso, que es
+                                        lo que deja comparar de un vistazo las
+                                        alturas reales */
+  width: 72px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  /* Sin fondo: los .webp de `imagenes/cartuchos/` SÍ traen alfa (15-56 % de
-     transparencia), al revés que las fotos de arma, que son recortes sobre
-     blanco opaco. Un fondo blanco aquí metía un rectángulo vacío enorme dentro
-     del marco, porque el cartucho va a escala real y el .22 LR ocupa un tercio
-     del alto. Sobre la cartulina, el hueco desaparece. */
-  background: transparent;
-  border-style: solid;
-  border-width: 15px 13px 19px;
-  border-color: transparent;
-  /* Con bordes de 9px el festón se leía como una línea de puntos. Necesita
-     grosor para que la onda se vea como onda. */
-  border-image: url(imagenes/marco-festoneado.webp) 114 95 145 95 / 15px 13px 19px 13px round;
-  /* El marco es papel crema y la ficha también: 1.05:1, invisible. Quien los
-     separa es la SOMBRA, igual que en el resto del sistema (§5.1b: entre dos
-     superficies claras el contraste máximo es ~1.2:1). Va en `drop-shadow` y no
-     en `box-shadow` porque tiene que seguir el festón, no la caja. */
-  filter: drop-shadow(0 1px 1px rgba(23, 27, 25, .16))
-          drop-shadow(0 3px 6px rgba(23, 27, 25, .18));
 }
 .amx-v2 .amx-calibre-marco img {
   display: block;
