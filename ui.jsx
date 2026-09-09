@@ -859,6 +859,220 @@ function BottomNav({ current, onNav, compareCount }) {
 }
 window.BottomNav = BottomNav;
 
+// ══════════════════════════════════════════════════════════════
+// PIE DE OFICIO — el pie de página del sitio
+//
+// La ESTRUCTURA sale de canirun.ai (§4.1 de DESIGN.md): tres estratos de más a
+// menos peso — crédito + GitHub · procedencia de los datos · marcas registradas.
+// La estética no: aquí el pie es el reverso del membrete.
+//
+// POR QUÉ VA SOBRE LA BANDA DE MARCA y no sobre el lienzo. El pie es casi todo
+// letra chica, y la letra chica es justo donde se cae el contraste: entre dos
+// claros no queda margen. `--marca` (#173A32) es IDÉNTICA en los dos temas, y
+// con ella vienen sus tres tintas ya medidas y estables —10.83:1, 6.79:1 y
+// 5.27:1— sin un solo par nuevo que auditar en oscuro. De paso el documento
+// queda encuadernado: banda verde arriba (AppHeader/TopNav), el expediente
+// claro en medio, banda verde abajo.
+//
+// ── REVISIÓN DE SAULO, 9-sep-2026 — lo que pidió quitar y por qué consta aquí:
+//   · CENTRADO. DESIGN.md §6 dice «❌ todo centrado»; Saulo lo pidió centrado
+//     expresamente y manda él. Queda anotado para que nadie lo «arregle» luego
+//     citando la §6.
+//   · Fuera el cintillo «◆ FIN DEL EXPEDIENTE / ARMADO.MX» y su regla.
+//   · El recuadro «◆ AVISO» SE QUEDA aquí. Hubo un ida y vuelta: se dijo que
+//     volvía al Home y Saulo lo corrigió — de esa zona solo se iba el texto
+//     «FIN DEL EXPEDIENTE». Este pie es su ÚNICO sitio: en screens-1.jsx el
+//     bloque «7 ▸ Disclaimer» quedó como comentario a propósito. Si algún día
+//     se toca, que se mueva, no que se duplique.
+//   · Fuera la línea «Código abierto: …». La transparencia la dice el enlace.
+//   · La línea de crédito la dictó Saulo palabra por palabra: «Construido por
+//     saulo-fl y Armas M&S para la comunidad de tiradores de México». No es
+//     paráfrasis: «tiradores», no «armera», y el usuario de GitHub, no el
+//     nombre. Sin corazón: lo llevó un rato y lo quitó.
+//   · El enlace al repo, minimalista: icono + «GitHub», como canirun.ai. Sin
+//     recuadro. Conserva 44px de alto de área táctil sin pintar borde ni fondo
+//     (§7 no negocia el objetivo táctil, y no hace falta un botón para tenerlo).
+//   · LOS ENLACES NO SE MARCAN EN REPOSO. Ni subrayado ni cursiva, en ninguno
+//     de los siete: mismo tipo y mismo estilo que el texto que los rodea, y
+//     «lo único que los distingue es que se iluminan al hacer hover». Hubo dos
+//     pasadas antes —una con subrayado, otra con cursiva en FUENTES— y Saulo
+//     retiró las dos viendo el pie renderizado. No las devuelvas sin pedirlo.
+//   · El rojo del hover es #CE1126, el de la bandera de México: los rojos de
+//     la paleta le parecieron «desabridos y sin saturación». Da 2.21:1 sobre
+//     el verde del pie —no llega ni al 3:1 de un indicador— y queda puesto por
+//     instrucción expresa con el número delante. El razonamiento entero, los
+//     cuatro ratios y las alternativas que sí medirían están en el bloque
+//     «PIE DE OFICIO» al final de estilo.css. NO lo cambies por tu cuenta.
+//
+//     Toda la piel de los enlaces vive en ese bloque de CSS: `:hover` y
+//     `:focus-visible` no existen en un `style={{}}`, y es lo único del pie
+//     que no cabe inline.
+//
+// El anillo de foco lo resuelve `.amx-sobre-verde` (estilo.css): sobre el verde
+// el anillo rojo por defecto da 2.40:1, y esa clase lo pasa a crema (10.83:1).
+// El rojo del hover se SUMA al anillo, no lo sustituye: quien navega con
+// teclado sigue viendo dónde está.
+// ══════════════════════════════════════════════════════════════
+
+// Público al lanzamiento. A 9-sep-2026 el repo es PRIVADO y el enlace da 404 a
+// cualquiera que no sea Saulo. O se publica el repo, o se quita esta constante.
+const AMX_REPO = 'https://github.com/saulo-fl/armado-en-mexico';
+const AMX_PERFIL = 'https://github.com/saulo-fl';
+const AMX_TIENDA = 'https://armasmys.com/';
+
+// Hubo un corazón de matriz de puntos en la línea de crédito —el guiño al ♥ de
+// canirun.ai— y Saulo lo quitó el 9-sep-2026. Se borra en vez de dejarlo
+// colgando sin usar: código muerto que nadie sabe si puede tocar.
+
+// La marca de GitHub, en SVG inline. El sitio no carga recursos externos y un
+// icono servido por CDN sería el primero.
+function IconoGitHub({ size = 16 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden="true"
+      style={{ fill: 'currentColor', display: 'block', flex: 'none' }}>
+      <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+    </svg>
+  );
+}
+window.IconoGitHub = IconoGitHub;
+
+function PieDeSitio({ onNav }) {
+  const vp = window.useViewport();
+  const padX = vp.isDesktop ? 28 : 16;
+
+  // Rótulo mono en versalitas: el idioma de los cintillos del sitio
+  // («◆ AVISO», «◆ ACERCA DE», «▲ AVISO DE TRANSPARENCIA»).
+  const rotulo = (extra) => Object.assign({
+    fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
+    letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 700,
+  }, extra);
+
+  // LOS SIETE ENLACES DEL PIE llevan `amx-pie-enlace` y NADA de color ni de
+  // decoración inline: esa piel vive en el bloque del pie al final de
+  // estilo.css —donde sí existen `:hover` y `:focus-visible`— y una propiedad
+  // vive en un sitio o en el otro, nunca en los dos (DESIGN.md §8.3).
+  // En reposo heredan la tinta de su estrato y no se marcan de ninguna forma;
+  // en hover y en foco se pintan del rojo de la bandera. Los cuatro ratios
+  // están anotados en ese bloque de CSS, con lo que cuesta el que no mide.
+
+  // Enlace INTERNO: href de verdad —lo sigue el crawler, y el «abrir en pestaña
+  // nueva» del usuario— más la navegación del router al hacer clic.
+  const Interno = ({ a, tab, children }) => (
+    <a className="amx-pie-enlace" href={a} onClick={(e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      e.preventDefault(); onNav && onNav(tab);
+    }}>{children}</a>
+  );
+
+  const Externo = ({ a, etiqueta, children }) => (
+    <a className="amx-pie-enlace" href={a} target="_blank" rel="noopener noreferrer"
+      aria-label={etiqueta}>{children}</a>
+  );
+
+  return (
+    <footer className="amx-sobre-verde" style={{ marginTop: 32 }}>
+      {/* Línea tricolor — DESIGN.md §6b la autoriza expresamente («líneas
+          tricolor»), y es lo único mexicano que se puede usar sin caer en
+          iconografía oficial. Va SOBRE el lienzo claro, no dentro de la banda:
+          el segmento verde sobre verde no se vería y la regla parecería rota. */}
+      <div aria-hidden="true" style={{ display: 'flex', height: 3 }}>
+        <span style={{ flex: 1, background: '#0F6B47' }} />
+        <span style={{ flex: 1, background: 'var(--crema)' }} />
+        <span style={{ flex: 1, background: 'var(--rojo)' }} />
+      </div>
+
+      <div style={{
+        background: PALETTE.marca,
+        color: PALETTE.sobreMarca,
+        // El hueco de abajo respeta --amx-nav-h, que publica BottomNav
+        // midiéndose y ya incluye el safe-area. En escritorio el nav se
+        // desmonta y retira la propiedad, así que cae al 0px del fallback. Con
+        // eso el último renglón libra también la barra fija de la ficha, que se
+        // apoya en esa misma variable.
+        padding: `24px ${padX}px calc(24px + var(--amx-nav-h, 0px))`,
+      }}>
+        {/* Centrado por orden expresa de Saulo (revisión del 9-sep-2026). Un
+            solo `textAlign` en el contenedor y lo heredan los tres estratos: no
+            hace falta repetirlo en cada bloque. Los bloques con ancho de medida
+            —el aviso y la letra chica— se centran con `margin: 0 auto`. */}
+        <div style={{ maxWidth: 1280, margin: '0 auto', textAlign: 'center' }}>
+
+          {/* ── AVISO — literal del que estaba al final del Home ───────────── */}
+          <div style={{
+            border: '1px dashed rgba(250,249,245,.30)',
+            padding: '12px 14px', marginBottom: 20,
+            maxWidth: '82ch', marginInline: 'auto',
+          }}>
+            <div style={rotulo({ color: 'var(--rojo-sobre-marca)', fontSize: 12.5, letterSpacing: '0.15em', marginBottom: 5 })}>◆ Aviso</div>
+            <div style={window.amxProsa({ fontSize: 15.5, color: PALETTE.sobreMarca, lineHeight: 1.6 })}>
+              Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con
+              fines informativos. Información basada en la <Interno a="/legalidad" tab="legal">Ley
+              Federal de Armas de Fuego</Interno> y precios DCAM.
+            </div>
+          </div>
+
+          {/* ── 1 ▸ CRÉDITO + GITHUB — el estrato de más peso ──────────────────
+              Un solo párrafo que envuelve, con el corazón y el enlace al final,
+              como en canirun.ai. El texto de la línea es el que dictó Saulo,
+              palabra por palabra. */}
+          <div style={window.amxProsa({
+            fontSize: 17, color: PALETTE.sobreMarca, lineHeight: 1.6, marginBottom: 14,
+          })}>
+            Construido por <Externo a={AMX_PERFIL} etiqueta="Perfil de saulo-fl en GitHub (se abre en una pestaña nueva)">saulo-fl</Externo>
+            {' '}y <Externo a={AMX_TIENDA} etiqueta="Tienda Armas M&S, armasmys.com (se abre en una pestaña nueva)">Armas M&amp;S</Externo>
+            {' '}para la comunidad de tiradores de México
+            <span aria-hidden="true" style={{ margin: '0 8px', color: PALETTE.sobreMarcaMuted }}>·</span>
+            {/* Minimalista: icono + «GitHub», sin recuadro. El padding con
+                margen negativo le da los 44px de área táctil que pide §7 sin
+                alterar la altura de la línea ni pintar un botón.
+                El icono pinta con `fill: currentColor`, así que se pone rojo
+                junto al texto en hover y en foco, sin una regla propia. */}
+            <a className="amx-pie-enlace" href={AMX_REPO} target="_blank" rel="noopener noreferrer"
+              aria-label="Repositorio de Armado en México en GitHub (se abre en una pestaña nueva)"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                padding: '11px 6px', margin: '-11px 0',
+                verticalAlign: 'middle',
+              }}>
+              <IconoGitHub />GitHub
+            </a>
+          </div>
+
+          {/* ── 2 ▸ PROCEDENCIA DE LOS DATOS ───────────────────────────────── */}
+          <div style={window.amxProsa({
+            fontSize: 14, color: PALETTE.sobreMarcaDim, lineHeight: 1.7,
+            marginBottom: 12, maxWidth: '96ch', marginInline: 'auto',
+          })}>
+            <span style={rotulo({ color: PALETTE.sobreMarcaMuted, fontSize: 11.5, marginRight: 8 })}>Fuentes</span>
+            Precios y existencias de los <Interno a="/acerca" tab="about">inventarios
+            oficiales DCAM y OTCA</Interno>, con la fecha del inventario en cada ficha.
+            <span aria-hidden="true" style={{ margin: '0 7px', color: PALETTE.sobreMarcaMuted }}>·</span>
+            Marco legal: <Interno a="/legalidad" tab="legal">Ley Federal de Armas de Fuego
+            y Explosivos</Interno>.
+            <span aria-hidden="true" style={{ margin: '0 7px', color: PALETTE.sobreMarcaMuted }}>·</span>
+            Datos técnicos: <Interno a="/calibres" tab="calibres">guía de calibres</Interno>
+            {' '}y publicaciones de los fabricantes.
+          </div>
+
+          {/* ── 3 ▸ MARCAS REGISTRADAS — la letra chica ────────────────────── */}
+          <p style={window.amxProsa({
+            fontSize: 13, color: PALETTE.sobreMarcaMuted, lineHeight: 1.65,
+            maxWidth: '78ch', margin: '0 auto',
+          })}>
+            Los nombres de productos, logotipos y marcas que aparecen en este sitio son propiedad
+            de sus respectivos dueños y se usan únicamente para identificar el producto del que se
+            informa. Armado en México no está afiliado ni respaldado por ninguna de estas
+            compañías, y no forma parte de DEFENSA (anteriormente SEDENA), la DCAM ni de ninguna
+            dependencia del gobierno mexicano.
+          </p>
+
+        </div>
+      </div>
+    </footer>
+  );
+}
+window.PieDeSitio = PieDeSitio;
+
 // ──────────────────────────────────────────────────────────────
 // ARMA CARD — la tarjeta del catálogo
 // Desde el tablero de correcciones del 8-sep-2026 es un envoltorio fino de

@@ -247,49 +247,6 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <window.HomeMunicionesSection onNav={onNav} />
       }
 
-      {/* 6 ▸ Disponibilidad legal */}
-      <div style={{ ...containerMax, padding: `0 ${PAD}px` }}>
-        <SectionHeader>Por disponibilidad legal</SectionHeader>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
-          gap: 8, marginBottom: 22
-        }}>
-          {window.CATEGORIES.disponibilidad.map((d) => {
-            const count = window.DB.filter((a) => a.avail === d.id).length;
-            if (!count) return null;
-            return (
-              <button key={d.id} onClick={() => onNav('category', { mode: 'avail', value: d.id })}
-              style={{
-                background: PALETTE.bgCard, boxShadow: window.CLARO.sombra,
-                // El color de disponibilidad legal era una barra de 3px a la
-                // izquierda — el tic de UI generada de §6. Ahora es el hairline
-                // ENTERO de la tarjeta: misma informacion, sin la pestaña, y
-                // medido sobre la tarjeta: 6.02 / 5.49 / 6.42:1.
-                border: `1px solid ${window.amxColorAvail(d.color)}`,
-                padding: '10px 12px', cursor: 'pointer', textAlign: 'left',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-              }}>
-                <div>
-                  <div style={{
-                    fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 15,
-                    color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em'
-                  }}>{d.label}</div>
-                  <div style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
-                    color: PALETTE.textMuted, marginTop: 2, lineHeight: 1.4
-                  }}>{d.desc}</div>
-                </div>
-                <div style={{
-                  fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-                  fontSize: 19, color: window.amxColorAvail(d.color), marginLeft: 10
-                }}>{count}</div>
-              </button>);
-
-          })}
-        </div>
-      </div>
-
       {/* 9 ▸ Armas traumáticas (defensa menos letal) — al final del feed de inicio */}
       <window.HomeTraumaBanner onNav={onNav} />
 
@@ -312,21 +269,11 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         items={FOTOS_EXPERIENCIAS}
         renderItem={(f) => <window.ProximamenteCard img={f} />} />
 
-      {/* 7 ▸ Disclaimer */}
-      <div style={{
-        ...containerMax,
-        marginTop: 8, marginBottom: 16,
-        padding: '12px',
-        background: PALETTE.bgElev,
-        border: `1px dashed ${PALETTE.border}`,
-        ...window.amxProsa({ fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6 }),
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', color: PALETTE.amber, fontWeight: 700,
-          letterSpacing: '0.15em', marginBottom: 4, fontSize: 13}}>◆ AVISO</div>
-        Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la Ley Federal de Armas de Fuego y precios DCAM.
-      </div>
+      {/* 7 ▸ Disclaimer — MUDADO AL PIE (window.PieDeSitio, en ui.jsx) el
+          9-sep-2026. Era un aviso de SITIO viviendo en una sola pantalla: solo
+          lo veía quien entrase por la portada, y en las 322 páginas
+          prerenderizadas —las que recibe el buscador— no aparecía. El texto se
+          fue LITERAL, no reescrito. No lo devuelvas aquí: quedaría duplicado. */}
     </div>);
 
 }
@@ -945,14 +892,16 @@ function ArsenalHubScreen({ onNav }) {
       <span aria-hidden="true" style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${P.border}, transparent)` }} />
     </div>
   );
-  const Card = ({ label, sub, count, color, onClick }) => (
+  // `borde`: hairline COMPLETO en el color de la categoria, no barra lateral
+  // (DESIGN.md §5.4). Por defecto, el hairline neutro de siempre.
+  const Card = ({ label, sub, count, color, borde, onClick }) => (
     <button onClick={onClick} style={{
-      background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
+      background: P.bgCard, border: `1px solid ${borde || P.border}`, boxShadow: window.CLARO.sombra,
       padding: '12px 14px', cursor: 'pointer', textAlign: 'left', display: 'flex',
       justifyContent: 'space-between', alignItems: 'center', gap: 10, width: '100%', transition: 'border-color 0.18s',
     }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = borde || P.border; }}>
       <div style={{ minWidth: 0 }}>
         <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
         {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textMuted, marginTop: 2, lineHeight: 1.4 }}>{sub}</div>}
@@ -985,6 +934,23 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color={window.CLARO.ok} count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
       </div>
 
+      {/* Clasificación legal — venia del Home («Por disponibilidad legal»). Va
+          pegada a Disponibilidad porque las dos responden a lo mismo, «¿puedo
+          conseguirla?»: una por existencias, la otra por ley. Antes dos de las
+          tres categorias («Seguridad privada» y «Exclusivo del Ejército») colgaban
+          de Uso con este mismo mode:'avail'; se retiraron de alli para no dejar
+          dos puertas al mismo filtro, y Uso se queda solo con usos reales.
+          El color de la categoria (data.js) va en el hairline completo y en el
+          contador, como en el Home y como manda DESIGN.md §5.4. */}
+      <Hdr icon="§">Clasificación legal</Hdr>
+      <div style={{ ...grid(3), gridTemplateColumns: vp.isDesktop ? 'repeat(3,1fr)' : '1fr' }}>
+        {window.CATEGORIES.disponibilidad.map((d) => availCount(d.id)
+          ? <Card key={d.id} label={d.label} sub={d.desc}
+              color={window.amxColorAvail(d.color)} borde={window.amxColorAvail(d.color)}
+              count={availCount(d.id)} onClick={() => onNav('category', { mode: 'avail', value: d.id })} />
+          : null)}
+      </div>
+
       <Hdr icon="◢">Tipo de arma</Hdr>
       <div style={grid(5)}>
         {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
@@ -997,8 +963,6 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Tiro deportivo" sub="Clubes y polígonos" count={usoCount('club')} onClick={() => onNav('category', { mode: 'uso', value: 'club' })} />
         <Card label="Cacería" sub="Caza mayor y menor" count={usoCount('caza')} onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
         <Card label="Defensa del hogar" sub="Uso en domicilio" count={usoCount('domicilio')} onClick={() => onNav('category', { mode: 'uso', value: 'domicilio' })} />
-        <Card label="Seguridad privada" sub="Licencia colectiva" color="var(--seguridad)" count={availCount('seguridad')} onClick={() => onNav('category', { mode: 'avail', value: 'seguridad' })} />
-        <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color={window.CLARO.alerta} count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
       </div>
 
       <Hdr icon="◈">Calibre</Hdr>
