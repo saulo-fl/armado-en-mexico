@@ -85,7 +85,7 @@
     'eley__12ga': 'imagenes/municiones/eley__12ga.webp?v=20260908',
     'federal__556x45mm': 'imagenes/municiones/federal__556x45mm.webp?v=20260908',
     'fiocchi__308win': 'imagenes/municiones/fiocchi__308win.webp?v=20260908',
-    'gb__12ga': 'imagenes/municiones/gb__12ga.webp?v=20260908',
+    'gb__12ga': 'imagenes/municiones/gb__12ga.webp?v=20260909',
     'hornady__17hmr': 'imagenes/municiones/hornady__17hmr.webp?v=20260908',
     'hornady__22250rem': 'imagenes/municiones/hornady__22250rem.webp?v=20260908',
     'hornady__6mmrem': 'imagenes/municiones/hornady__6mmrem.webp?v=20260908',

@@ -143,17 +143,21 @@
      como los típicos letreros mexicanos de los tianguis y mercados de
      frutería» (tablero del 8-sep-2026).
 
-     La mesa y el letrero son BOCETO: van dibujados en SVG dentro de
-     `--mesa-madera` y del degradado del palo mientras llegan las fotos. Los dos
-     están detrás de una sola variable a propósito — sustituirlos es cambiar esa
-     línea por un `url(imagenes/…​.webp)`, sin tocar ningún componente. */
+     La mesa sigue siendo BOCETO: va dibujada en SVG dentro de `--mesa-madera`
+     mientras llega la foto, detrás de una sola variable a propósito —
+     sustituirla es cambiar esa línea por un `url(imagenes/…​.webp)`, sin tocar
+     ningún componente. El LETRERO ya hizo ese viaje (9-sep-2026): era un
+     rectángulo de color y hoy es la foto real recortada con alfa. */
   --mesa-tabla:     #C09A72;   /* la tabla — tinta oscura encima daría 6.71:1 */
   --mesa-veta:      #A8875F;
   --mesa-junta:     #94714E;
   --mesa-canto:     #7E6042;   /* el canto que mira al comprador */
-  --letrero:        #F2CE1B;   /* el amarillo del cartel de tianguis */
-  --letrero-tinta:  #171B19;   /* 11.28:1 sobre el cartel */
-  --letrero-filo:   #C9A21A;
+  --letrero:        url(imagenes/letrero-mercado.webp);   /* el cartel de mercado, con alfa */
+  /* Medido a mano sobre la banda del rótulo del WebP (contraste.mjs solo audita
+     la PALETTE, no los tokens diegéticos): la cara del cartel es #D9DD00 y su
+     píxel más oscuro bajo el texto #D9DB00 → la tinta da 11.84:1 y 11.67:1.
+     Antes, sobre el amarillo dibujado #F2CE1B, daba 11.28:1. */
+  --letrero-tinta:  #171B19;
   --palo:           #B4906A;   /* la vara del cartel */
   --puesto-luz:     #FFE9A8;   /* la luz que se enciende detrás de la caja */
 
@@ -1457,19 +1461,24 @@
   z-index: 0;
 }
 
-/* El cartel. Texto de verdad, no rotulado dentro del SVG: el calibre sale del
-   dato y lo lee un lector de pantalla.
+/* El cartel. Texto de verdad, no dibujado dentro de la foto: el calibre sale
+   del dato y lo lee un lector de pantalla. La foto pone solo el cartón.
    El giro es estático —un cartel clavado a mano nunca queda a plomo— y alterna
-   de signo entre puestos pares e impares para que la fila no salga peinada. */
+   de signo entre puestos pares e impares para que la fila no salga peinada.
+   La sombra va en `drop-shadow` y no en `box-shadow`: el cartón está recortado
+   con alfa y tiene los cantos a mano, así que una sombra de caja dibujaría el
+   rectángulo que la foto justamente no es. */
 .amx-v2 .amx-puesto-letrero {
   position: absolute;
-  left: 15%; right: 15%; top: 4%;
+  left: 15%; right: 15%; top: 3%;
   z-index: 3;
-  padding: 13px 6px 14px;
-  background: var(--letrero);
-  border: 1px solid var(--letrero-filo);
-  border-radius: 1px;
-  box-shadow: 0 2px 5px rgba(23, 27, 25, .28);
+  /* Generoso y asimétrico por dos razones: el cartón de la foto es casi
+     cuadrado (900x747) y estirarlo a una cinta de 4:1 le borra los cantos
+     cortados a mano; y en la foto el canto de abajo cae más que el de arriba,
+     así que el rótulo necesita más aire por debajo para no montarse en él. */
+  padding: 22px 12px 28px;
+  background: var(--letrero) 50% 50% / 100% 100% no-repeat;
+  filter: drop-shadow(0 3px 4px rgba(23, 27, 25, .34));
   transform: rotate(-2.2deg);
 }
 .amx-v2 .amx-puesto:nth-child(even) .amx-puesto-letrero { transform: rotate(1.8deg); }
@@ -1482,7 +1491,7 @@
   letter-spacing: .01em;
   text-transform: uppercase;
   text-align: center;
-  color: var(--letrero-tinta);        /* 11.28:1 sobre el cartel */
+  color: var(--letrero-tinta);        /* 11.84:1 sobre la cara del cartel */
 }
 /* La vara. Sale del cartel y se pierde detrás de la caja — no llega a la tabla
    a propósito: el cartón la tapa, que es lo que pasa en un puesto de verdad. */
@@ -1501,7 +1510,7 @@
    foco de teclado, que si no el efecto solo existiría para el ratón. */
 .amx-v2 .amx-puesto-luz {
   position: absolute;
-  left: 50%; bottom: 18%;
+  left: 50%; bottom: 10%;             /* baja con la caja: es su luz de detrás */
   z-index: 1;
   width: 96%;
   aspect-ratio: 1 / 1;
@@ -1515,31 +1524,96 @@
 .amx-v2 .amx-puesto:hover .amx-puesto-luz,
 .amx-v2 .amx-puesto:focus-visible .amx-puesto-luz { opacity: .85; }
 
-/* La caja apoyada. `bottom` la mete 6 puntos dentro de la tabla: apoyada en la
-   superficie, no posada sobre el canto. La sombra de contacto es lo que la
-   asienta — sin ella la caja flota por muy bien recortada que esté. */
+/* La caja apoyada (revisado 9-sep-2026 — antes flotaba, y aquí está medido
+   por qué; los PNG no tenían la culpa: su recorte es ajustado, 0 % de aire).
+
+   1. `bottom` no marca la base de la CAJA sino el canto del recorte, y en las
+      fotos PMC la caja se levanta sobre los cartuchos sueltos que tiene
+      delante: su base cae un 22 % por encima de ese canto. Con `bottom: 18 %`
+      en un puesto de 312 px, esa base quedaba a 89 px del suelo — 14 px POR
+      ENCIMA del borde trasero de la tabla (74.9 px). Se apoyaba en el aire.
+      A 10 % la base cae a 64 px, dentro de los 60 px de superficie dibujada
+      (la tabla mide 24 % y su quinta parte de abajo es el canto, o sea que la
+      madera que se pisa va de 15 px a 74.9 px).
+   2. La sombra de contacto era un `<span>` elíptico fijo que además estaba
+      colocado 3 px POR ENCIMA del canto de la imagen, así que la tapaba la
+      propia caja. Ahora va en el `drop-shadow` de la foto: sigue la silueta,
+      que es lo único que sirve cuando la caja de GB ocupa el 45 % del ancho y
+      la PMC el 91 %, y se coloca sola con cualquier altura de caja. */
 .amx-v2 .amx-puesto-caja {
   position: absolute;
-  left: 6%; right: 6%; bottom: 18%;
+  left: 6%; right: 6%; bottom: 10%;
   z-index: 2;
   height: 48%;
   object-fit: contain;
-  object-position: bottom center;
-  filter: drop-shadow(0 2px 3px rgba(23, 27, 25, .30));
-}
-.amx-v2 .amx-puesto-sombra {
-  position: absolute;
-  left: 12%; right: 12%; bottom: 16%;
-  z-index: 1;
-  height: 6%;
-  border-radius: 50%;
-  background: radial-gradient(closest-side, rgba(23, 27, 25, .40) 0%, rgba(23, 27, 25, 0) 100%);
-  pointer-events: none;
+  object-position: bottom center;     /* nunca deja aire ABAJO: el sobrante de
+                                         `contain` se va siempre arriba */
+  filter: drop-shadow(0 3px 2px rgba(23, 27, 25, .46))
+          drop-shadow(0 9px 9px rgba(23, 27, 25, .26));
 }
 @media (max-width: 719px) {
   /* A media columna el cuadrado deja 179px de alto y no caben cartel, caja y
      tabla sin apretarse: en móvil el puesto crece a lo alto, no a lo ancho. */
   .amx-v2 .amx-puesto { aspect-ratio: 4 / 5; }
   .amx-v2 .amx-puesto-rotulo { font-size: 14px; }
-  .amx-v2 .amx-puesto-letrero { padding: 7px 4px 8px; }
+  /* Menos aire que en escritorio pero la misma proporción de cartón: con los
+     7/4/8 de cuando era un rectángulo de color, la foto salía una cinta. */
+  .amx-v2 .amx-puesto-letrero { left: 11%; right: 11%; padding: 14px 8px 18px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PIE DE OFICIO — los enlaces del pie (window.PieDeSitio, en ui.jsx)
+
+   BLOQUE NUEVO AL FINAL, y no estilo inline, porque `:hover` y
+   `:focus-visible` no existen en un objeto `style={{}}`. Es lo único del pie
+   que no cabe inline; todo lo demás sigue allí.
+
+   EN REPOSO NO SE DISTINGUEN DEL TEXTO. Es lo que pidió Saulo el 9-sep-2026,
+   por escrito y viendo el pie renderizado: ni subrayado ni cursiva en ningún
+   enlace del pie —«nada en cursiva»—, mismo tipo y mismo estilo que el texto
+   que los rodea, y «lo único que los distingue es que se iluminan al hacer
+   hover». Hubo dos pasadas antes: una con subrayado y otra con cursiva en
+   FUENTES. Las dos se retiraron. NO las devuelvas sin pedírselo.
+
+   ⚠ LO QUE ESO CUESTA, para que conste: WCAG 1.4.1 pide que «esto es un
+   enlace» no dependa solo del color, y aquí en reposo no depende ni de eso.
+   Es una decisión tomada con el dato delante, no un descuido.
+
+   EL ROJO DEL HOVER es #CE1126, el rojo de la bandera de México, elegido por
+   Saulo porque los rojos de la paleta le resultaron «desabridos y sin
+   saturación». Es un valor literal a propósito: no es un token del sitio y no
+   se añade a `:root` sin que él lo decida.
+
+   ⚠ NO PASA EL UMBRAL DEL REPO. Medido con
+   `node .claude/skills/fidelidad-diseno/scripts/contraste.mjs '#CE1126' '#173A32'`:
+
+     reposo, crédito y aviso  --sobre-marca      #F3EFE4  10.83:1  AA
+     reposo, fuentes          --sobre-marca-dim  #B8C2BA   6.79:1  AA
+     HOVER y FOCO             rojo bandera       #CE1126   2.21:1  ✗ DÉBIL
+     anillo de foco           --sobre-marca      #F3EFE4  10.83:1  (1.4.11 pide 3)
+
+   DESIGN.md §7 pide >= 4.5:1 para todo texto que porte información. 2.21:1 no
+   llega, ni al 3:1 de un indicador. Queda puesto por instrucción expresa de
+   Saulo, informado del número. El texto NO se vuelve ilegible —solo se apaga
+   mientras el ratón está encima, y el estado de reposo sí cumple—, pero el
+   estado activo del enlace es el que se lee peor, que es al revés de lo
+   deseable. Alternativas que SÍ medirían, si alguna vez se reabre:
+   `--rojo-sobre-marca` #F29C8C (5.87:1, el token que el repo ya tiene para
+   rojo sobre la marca) o aclarar el bandera hasta ~#E8556B (4.5:1).
+   No las apliques por tu cuenta.
+
+   El anillo de foco lo pone `.amx-sobre-verde :focus-visible` (más arriba en
+   este archivo): el pie lleva esa clase, así que el foco SIEMPRE se ve en
+   crema a 10.83:1 y no depende de este rojo. Por eso quien navega con teclado
+   sabe dónde está aunque el color del texto no mida.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 .amx-pie-enlace {
+  color: inherit;
+  text-decoration: none;
+}
+.amx-v2 .amx-pie-enlace:hover,
+.amx-v2 .amx-pie-enlace:focus-visible {
+  color: #CE1126;          /* rojo de la bandera de México — 2.21:1, ver arriba */
+  text-decoration: none;   /* explícito: ni aquí vuelve el subrayado */
 }

@@ -171,8 +171,18 @@ window.MunicionCard = MunicionCard;
 // ese calibre que tenga caja: en el mostrador el calibre se reconoce por
 // cualquiera de sus cajas. Sin ninguna cae al PNG del cartucho, que es lo que
 // había antes y sigue siendo correcto.
+//
+// Dos calibres llevan marca elegida a mano (Saulo, 9-sep-2026): las cuatro
+// cajas de la mesa tienen que MIRAR AL MISMO LADO —de frente y en diagonal
+// hacia la izquierda, como las PMC Bronze— y por orden de catálogo salían la
+// Trust azul de frente en 12 GA y la Fiocchi Dynamics tumbada en .308 Win.
+// El mapa es solo para el Home; la ficha de cada munición sigue con su caja.
+const CAJA_DEL_HOME = { '12 GA': 'GB', '.308 Win': 'PMC' };
+
 function munCajaDeCalibre(cal) {
-  const m = (window.MUNICIONES || []).find(x => x.calibre === cal && x.img);
+  const conCaja = (window.MUNICIONES || []).filter(x => x.calibre === cal && x.img);
+  const marca = CAJA_DEL_HOME[cal];
+  const m = (marca && conCaja.find(x => x.marca === marca)) || conCaja[0];
   return m
     ? { src: m.img, alt: `Caja de ${m.marca} ${cal}` }
     : { src: munCartucho(cal), alt: cal };
@@ -225,7 +235,6 @@ function HomeMunicionesSection({ onNav }) {
               </span>
               <span className="amx-puesto-palo" aria-hidden="true" />
               <span className="amx-puesto-luz" aria-hidden="true" />
-              <span className="amx-puesto-sombra" aria-hidden="true" />
               {/* alt vacío a propósito: el botón ya se anuncia con el calibre y
                   su cuenta, y repetir «Caja de PMC .380 ACP» detrás lo duplica. */}
               <img className="amx-puesto-caja" src={caja.src} alt="" loading="lazy" decoding="async" />
