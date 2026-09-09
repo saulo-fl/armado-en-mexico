@@ -983,6 +983,43 @@ function ArmaPolaroid({ arma, pie = 'rotulo' }) {
 window.ArmaPolaroid = ArmaPolaroid;
 
 // ──────────────────────────────────────────────────────────────
+// CARTA DE LOTERÍA — la categoría, de arma o de accesorio
+// «Nombre de la categoría: Pistolas, Revólveres, Rifles, Escopetas, Carabinas»
+// abajo, y arriba «cantidad de armas/accesorios que haya en dicha categoría»
+// (tablero del 8-sep-2026). Sustituye a la tarjeta de foto con tinte verde en
+// las dos rejillas del Home.
+//
+// `forma` es la URL de la silueta que hace de figura. Se pinta como MÁSCARA,
+// igual que en la copia y en los accesorios sin foto: el .webp aporta solo el
+// contorno y el color lo pone el CSS.
+//
+// El número lo lee el lector de pantalla por el `aria-label` del botón, no
+// suelto: «31» a secas no dice de qué.
+// ──────────────────────────────────────────────────────────────
+// Cuáles de las siluetas son largas. Va por nombre de archivo y no por medir la
+// imagen porque el conjunto es cerrado y conocido: son ocho .webp del repo, no
+// imágenes de datos. Cargar cada una para leerle la proporción costaría una
+// petición y un repintado por carta para saber algo que ya sabemos aquí.
+const SILUETAS_LARGAS = /-(rifle|escopeta|carabina|optica|cargador|municion)\.webp/;
+
+function CartaLoteria({ nombre, cuenta, unidad = 'piezas', forma, onClick }) {
+  return (
+    <button type="button" className="amx-loteria" onClick={onClick}
+      aria-label={`${nombre} — ${cuenta} ${cuenta === 1 ? unidad.replace(/s$/, '') : unidad}`}>
+      <span className="amx-loteria-lam">
+        <span className="amx-loteria-num" aria-hidden="true">{cuenta}</span>
+        {forma &&
+          <span aria-hidden="true"
+            className={'amx-loteria-fig' + (SILUETAS_LARGAS.test(forma) ? ' amx-loteria-fig--largo' : '')}
+            style={{ '--silueta-forma': `url(${forma})` }} />}
+      </span>
+      <span className="amx-loteria-pie">{nombre}</span>
+    </button>
+  );
+}
+window.CartaLoteria = CartaLoteria;
+
+// ──────────────────────────────────────────────────────────────
 // SELLO LEGAL — la categoría del arma, estampada en tinta
 // «Hay que generar sellos que se vean como si fueran de documentos para las
 // categorías de legalidad» (tablero de Saulo, 8-sep-2026), y en la corrección

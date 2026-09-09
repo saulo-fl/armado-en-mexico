@@ -211,7 +211,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <CaliberMiniCard cal={c} onClick={() => onNav('calibres')} />
         } />
 
-      {/* 8 ▸ Categorías rápidas (legacy) */}
+      {/* 8 ▸ Categorías — cartas de lotería */}
       <div style={{ ...containerMax, padding: `8px ${PAD}px 0` }}>
         <SectionHeader action={
         // Mismo enlace de acción que «Ver guía»: rojo por estiloAccion, no el
@@ -219,89 +219,21 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <button onClick={() => onNav('catalog')} style={window.estiloAccion(false)}>Ver Todas →</button>
         }>Categorías</SectionHeader>
 
-        <div style={{
-          display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(5, 1fr)' : '1fr 1fr',
-          gap: 10, marginBottom: 22
-        }}>
-          {window.CATEGORIES.tipo.map((c) => {
-            const count = window.DB.filter((a) => a.tipo === c.id).length;
-            const hero = CATEGORY_HEROS[c.id];
-            return (
-              <button key={c.id} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} style={{
-                background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
-                padding: 0, cursor: 'pointer', textAlign: 'left',
-                position: 'relative', overflow: 'hidden',
-                display: 'block', width: '100%',
-                transition: 'border-color 0.18s'
-              }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = PALETTE.amber; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = PALETTE.border; }}>
-                {/* Foto 4:5 */}
-                <div style={{
-                  width: '100%', aspectRatio: '4 / 5',
-                  position: 'relative', overflow: 'hidden',
-                  background: `linear-gradient(135deg, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`
-                }}>
-                  {hero && (
-                    <img src={hero} alt={c.label} loading="lazy" style={{
-                      width: '100%', height: '100%',
-                      objectFit: 'cover',
-                      objectPosition: 'center',
-                      filter: 'contrast(1.06) saturate(0.92) brightness(0.92)',
-                      display: 'block'
-                    }} />
-                  )}
-                  {/* Tinte de marca. La parada final baja de 0.92 a 0.75: a 0.92
-                      la foto desaparecía bajo el verde y aun así el rótulo iba en
-                      tinta casi negra encima — ilegible a cualquier opacidad. El
-                      arreglo es doble: menos tinte Y texto claro (abajo). */}
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.35) 55%, rgba(23,58,50,0.75) 100%)`,
-                    pointerEvents: 'none'
-                  }} />
-                  {/* Aquí iban dos corchetes de esquina en verde de marca. Eran el
-                      esqueleto HUD del tema anterior, que §28 declaró derogado —«el
-                      HUD es un DETALLE de baja jerarquía, no la estructura»— y que
-                      es justo el tell de interfaz generada que Saulo viene
-                      señalando. `TacticalCorners` ya no pinta desde la fase 2;
-                      estos estaban puestos a mano y se habían quedado. */}
-                  {/* Rótulo sobre el tinte. Medido contra el PEOR fondo posible:
-                      foto blanca (tope real 235 tras el filtro brightness .92)
-                      bajo el tinte 0.75, que compone #4C6660.
-                        node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
-                      #F3EFE4 → 5.41:1 · #E7E0D0 → 4.73:1.
-                      El #DDD5C4 que usa el resto de la app se queda en 4.26:1 aquí
-                      —este tinte es más flojo que el de las fichas—, así que el
-                      contador sube un escalón. Sobre foto oscura ambos suben. */}
-                  <div style={{
-                    position: 'absolute', left: 10, right: 10, bottom: 10
-                  }}>
-                    <div style={{
-                      fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-                      fontSize: vp.isDesktop ? 17 : 16,
-                      color: PALETTE.sobreMarca,   // #F3EFE4 — 5.41:1
-                      textTransform: 'uppercase', letterSpacing: '0.06em',
-                      lineHeight: 1
-                      // Sin textShadow: la sombra negra era el parche del texto
-                      // oscuro sobre foto. El texto ya es claro y la sombra solo
-                      // le ensuciaba el borde.
-                    }}>{c.label}</div>
-                    <div style={{
-                      fontFamily: 'JetBrains Mono, monospace',
-                      fontSize: 13, color: '#E7E0D0',   // contador — 4.73:1
-                      letterSpacing: '0.18em',
-                      marginTop: 4,
-                      display: 'flex', alignItems: 'center', gap: 6
-                    }}>
-                      <span style={{ fontSize: 15.5}}>{c.icon}</span>
-                      <span>{count} unidades</span>
-                    </div>
-                  </div>
-                </div>
-              </button>);
-
-          })}
+        {/* Cinco cartas: el número de la carta es cuántas armas hay en la
+            categoría y el nombre va abajo, como en la baraja. Los ids de
+            `CATEGORIES.tipo` son exactamente los cinco de `SILUETA_TIPOS`, así
+            que la figura sale del asset que ya existe.
+            Las fotos de escena (`CATEGORY_HEROS`) no se pierden: siguen siendo
+            la portada de cada categoría en el hub del arsenal. */}
+        <div className="amx-loteria-mesa" style={{ marginBottom: 22 }}>
+          {window.CATEGORIES.tipo.map((c) => (
+            <window.CartaLoteria key={c.id}
+              nombre={c.label}
+              cuenta={window.DB.filter((a) => a.tipo === c.id).length}
+              unidad="armas"
+              forma={`imagenes/silueta-${c.id}.webp`}
+              onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+          ))}
         </div>
       </div>
 

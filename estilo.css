@@ -123,6 +123,20 @@
   --sello-civil:    #2F6B33;   /* CIVIL — 6.02:1 sobre el faldón de la copia */
   --sello-restr:    #A3341F;   /* SEGURIDAD y EXCLUSIVO — 6.42:1 */
 
+  /* ── LA CARTA DE LOTERÍA — diegética, tampoco lleva `--d-` ───────────────
+     Saulo cambió las categorías por cartas de lotería el 8-sep-2026. Es un
+     objeto impreso, como la copia y el folder: una carta de lotería es blanca
+     y amarilla en una mesa a oscuras igual que a plena luz, así que ninguno de
+     estos tokens tiene gemelo oscuro y sus ratios se miden una sola vez.
+     NO se reproduce ninguna carta existente: se reproduce el FORMATO —cartón
+     blanco, lámina amarilla, número arriba, nombre abajo—, que es de dominio
+     popular. Las ilustraciones de la baraja de Clemente Jacques tienen dueño. */
+  --loteria-carton: #FBF8EF;   /* el margen de papel, igual que la copia */
+  --loteria-lamina: #EFC01F;   /* el amarillo de la lámina */
+  --loteria-tinta:  #171B19;   /* 10.13:1 sobre la lámina · 16.38:1 sobre el cartón */
+  --loteria-tinta-2:#5A5142;   /*  4.55:1 sobre la lámina — el número y lo secundario */
+  --loteria-filo:   #B6BDB0;   /* el canto del cartón — mismo papel que --copia-filo */
+
   /* ── MARCA ──────────────────────────────────────────────────────────────
      El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
      siendo una SUPERFICIE oscura (banda, nav, hero), que es lo que siempre
@@ -1241,4 +1255,125 @@
   max-width: 100%;
   object-fit: contain;
   object-position: bottom;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA CARTA DE LOTERÍA — categorías de arma y de accesorio (tablero 8-sep-2026)
+   ══════════════════════════════════════════════════════════════════════════
+   Sustituye a la tarjeta con foto de escena y tinte verde. La foto no se pierde:
+   sigue viva en el hub del arsenal (`CATEGORY_HEROS`).
+
+   Se reproduce el FORMATO, no una carta concreta: cartón blanco, lámina
+   amarilla con filete, número arriba a la izquierda y nombre abajo en el
+   cartón. El número NO es el de la baraja — es cuántas piezas hay en la
+   categoría, que es lo que pidió el tablero.
+
+   La figura entra como MÁSCARA sobre las siluetas que ya usan la copia y los
+   accesorios sin foto (`imagenes/silueta-*.webp`): un asset menos y el color
+   lo pone el CSS. Si algún día hay ilustración propia por categoría, se cambia
+   `--silueta-forma` y nada más. */
+.amx-v2 .amx-loteria {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* 5.5 × 8.5 cm, la carta de mesa. `aspect-ratio` cede ante el contenido, y
+     aquí el contenido que puede crecer es el pie (dos líneas en «Portacargadores
+     y cananas»), así que la lámina es la que encoge — nunca el cartón. */
+  aspect-ratio: 55 / 85;
+  padding: 5.5%;
+  border: 1px solid var(--loteria-filo);
+  border-radius: 2px;                 /* una carta impresa no tiene esquinas redondeadas */
+  background: var(--loteria-carton);
+  box-shadow: var(--sombra);
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.amx-v2 .amx-loteria:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-hover);
+}
+.amx-v2 .amx-loteria:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+}
+
+.amx-v2 .amx-loteria-lam {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--loteria-lamina);
+  border: 1.5px solid var(--loteria-tinta);
+}
+/* El número de la carta = cuántas piezas hay en la categoría. Va dentro de la
+   lámina, como en la baraja, y en mono porque es un dato. 10.13:1. */
+.amx-v2 .amx-loteria-num {
+  position: absolute;
+  left: 7px;
+  top: 5px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--loteria-tinta);
+}
+.amx-v2 .amx-loteria-fig {
+  width: 88%;
+  height: 88%;
+  background-color: var(--loteria-tinta);
+  -webkit-mask-image: var(--silueta-forma);
+          mask-image: var(--silueta-forma);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-size: contain;
+          mask-size: contain;
+}
+/* Los cañones largos entran GIRADOS. Con `mask-size: contain` una silueta de
+   4.55 de proporción —la escopeta— dentro de una carta vertical se queda en un
+   hilo de 39px de alto mientras la pistola llena media lámina: las nueve cartas
+   se leían a escalas distintas. Girada, la diagonal de la lámina es lo que la
+   limita y todas ocupan lo mismo. Es además como se dibuja en la baraja: el
+   objeto llena el cuadro, no flota en él.
+   El giro es estático (§6 prohíbe animar otra cosa que no sea `transform`, y
+   aquí no hay transición que desactivar) y no desborda: `overflow` no hace falta
+   porque la lámina tiene fondo propio y el recorte lo pone la propia caja. */
+.amx-v2 .amx-loteria-fig--largo { transform: rotate(-30deg) scale(1.18); }
+
+/* Sin soporte de máscara la figura sería un bloque negro macizo tapando la
+   lámina: se cede el sitio y quedan el número y el nombre, que son los que
+   portan la información. Mismo criterio que las otras dos siluetas. */
+@supports not ((-webkit-mask-image: url('')) or (mask-image: url(''))) {
+  .amx-v2 .amx-loteria-fig { display: none; }
+}
+.amx-v2 .amx-loteria-pie {
+  flex: 0 0 auto;
+  padding-top: 7%;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.06;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--loteria-tinta);        /* 16.38:1 sobre el cartón */
+}
+@media (max-width: 719px) {
+  .amx-v2 .amx-loteria-pie { font-size: 12.5px; }
+  .amx-v2 .amx-loteria-num { font-size: 14px; left: 5px; top: 4px; }
+}
+/* El tablero pide las cartas en rejilla, no en carrusel: cinco de arma y las
+   de accesorio que tengan existencias. */
+.amx-v2 .amx-loteria-mesa {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--e3);
+}
+@media (max-width: 719px) {
+  .amx-v2 .amx-loteria-mesa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e2); }
 }
