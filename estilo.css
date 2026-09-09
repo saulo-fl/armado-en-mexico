@@ -87,7 +87,13 @@
      referencia de Saulo): cuerpo, canto y el filo de las hojas que asoman.
      El folder NO entra como imagen: estirar la foto deforma la pestaña y el
      filo, así que la geometría es CSS y escala a cualquier tamaño. */
-  --carton:         #F3E5C5;   /* la cartulina manila */
+  /* NO hay token para el cuerpo del cartón, y es deliberado: el color lo pone
+     la fotografía. Hubo un `--carton: #F3E5C5` usado de respaldo debajo del
+     .webp, y ese color rellenaba el rectángulo entero del elemento —incluida
+     la franja de arriba, transparente en un 69 % porque ahí solo sobresale la
+     pestaña—, así que borraba la silueta del folder. Si vuelve a hacer falta
+     un respaldo, que sea con `image-set()` o un fallback que respete la alfa,
+     nunca un color de fondo. */
   --carton-alto:    #F6EACF;   /* la pestaña, que recibe algo más de luz */
   --carton-filo:    #D8C69B;   /* el canto y las hojas — 1.35:1, y está bien:
                                   es el filo de un objeto, no porta información.
@@ -878,9 +884,15 @@
   /* Dentro del cartón: arriba por debajo de la pestaña, a la izquierda por
      donde entra la copia, y abajo por encima del filo de las hojas. */
   padding: 20% 7% 11% 13%;
-  /* El color va DEBAJO de la fotografía: si el .webp no llega, el folder
-     sigue siendo cartulina y lo mecanografiado conserva su contraste. */
-  background: var(--carton) url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
+  /* SIN color de respaldo, y es la corrección de un error mío. Puse
+     `background: var(--carton) url(...)` para que el folder siguiera siendo
+     cartulina si el .webp no llegaba, y ese color rellena el rectángulo ENTERO
+     del elemento — incluida la franja de arriba, donde el 69 % del ancho es
+     transparente porque ahí solo sobresale la pestaña. El respaldo tapaba
+     exactamente la muesca que hace que un folder parezca un folder, y lo
+     dejaba en un rectángulo liso con una línea encima.
+     La silueta del cartón la dibuja SOLO la alfa del .webp. */
+  background: url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
   /* La sombra va en `drop-shadow` y no en `box-shadow`: tiene que seguir el
      recorte del cartón —con su pestaña— y no la caja rectangular. */
   filter: drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
@@ -1035,9 +1047,15 @@
      se quiere para que nada se desborde. */
   aspect-ratio: 1000 / 720;
   padding: 13% 5% 7% 6%;
-  /* El color va DEBAJO de la fotografía: si el .webp no llega, el folder
-     sigue siendo cartulina y lo mecanografiado conserva su contraste. */
-  background: var(--carton) url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
+  /* SIN color de respaldo, y es la corrección de un error mío. Puse
+     `background: var(--carton) url(...)` para que el folder siguiera siendo
+     cartulina si el .webp no llegaba, y ese color rellena el rectángulo ENTERO
+     del elemento — incluida la franja de arriba, donde el 69 % del ancho es
+     transparente porque ahí solo sobresale la pestaña. El respaldo tapaba
+     exactamente la muesca que hace que un folder parezca un folder, y lo
+     dejaba en un rectángulo liso con una línea encima.
+     La silueta del cartón la dibuja SOLO la alfa del .webp. */
+  background: url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
   filter: drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
           drop-shadow(0 8px 16px rgba(23, 27, 25, .20));
 }
