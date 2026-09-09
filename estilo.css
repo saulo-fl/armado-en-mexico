@@ -938,8 +938,18 @@
   transform: translateY(-50%) rotate(-3deg);
   z-index: 2;
 }
-.amx-v2 .amx-exp-copia .amx-polaroid { padding: 8px; transform: none; }
-.amx-v2 .amx-exp-copia .amx-polaroid-pie { padding: 9px 0 3px; gap: 0; }
+/* El sello va CENTRADO en el faldón. El pie ya venía centrado por dentro, pero
+   el aire de arriba y el de abajo no eran el mismo: el `margin-top: 14px` que
+   separa el pie de la fotografía, más 9px de padding propio, contra los 3px de
+   abajo — 23 arriba y 3 abajo, y el sello caía al fondo con un hueco encima.
+   Ahora los dos lados miden 10px y el sello queda en medio de la banda. */
+.amx-v2 .amx-exp-copia .amx-polaroid { padding: 8px 8px 10px; transform: none; }
+.amx-v2 .amx-exp-copia .amx-polaroid-pie {
+  margin-top: 10px;
+  min-height: 26px;
+  padding: 0;
+  gap: 0;
+}
 
 /* El comparador y el distintivo van sobre el cartón, arriba a la derecha, que
    es la esquina que el texto mecanografiado deja libre. */
