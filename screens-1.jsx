@@ -502,68 +502,18 @@ window.CarouselSection = CarouselSection;
 // CARDS para los tres carruseles
 // ════════════════════════════════════════════════════════════════
 function FavCard({ arma, onClick }) {
-  return (
-    <div onClick={onClick} style={{
-      background: PALETTE.bgCard,
-      border: `1px solid ${PALETTE.border}`,
-      borderTop: `2px solid ${PALETTE.amber}`,
-      cursor: 'pointer', position: 'relative',
-      overflow: 'hidden',
-      height: '100%', display: 'flex', flexDirection: 'row',
-      transition: 'border-color 0.18s, transform 0.18s'
-    }}
-    onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
-    onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
-      {/* badge de favorito */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, zIndex: 2,
-        background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, fontWeight: 700,
-        letterSpacing: '0.1em',
-        padding: '3px 8px'
-      }}>★ TOP</div>
-      <div style={{
-        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
-        background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        borderRight: `1px solid ${PALETTE.border}`
-      }}>
-        <img src={arma.img} alt={arma.nombre}
-        style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
-        onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-      </div>
-      <window.ArmaCardBody arma={arma} />
-    </div>);
-
+  // El formato de tarjeta es UNO SOLO (tablero de Saulo, 8-sep-2026): aquí solo
+  // se añade el distintivo. Antes esta función repetía entera la maquetación de
+  // ArmaCard y declaraba un `getRating` que no usaba nadie.
+  return <window.ArmaExpediente arma={arma} onClick={onClick}
+    distintivo={<span className="amx-exp-distintivo">★ TOP</span>} />;
 }
 window.FavCard = FavCard;
 
-function VisitedCard({ arma, onClick }) {
-  const visits = window.Store ? (window.Store.getVisits()[arma.id] || []).length : 0;
-  return (
-    <div onClick={onClick} style={{
-      background: PALETTE.bgCard,
-      border: `1px solid ${PALETTE.border}`,
-      cursor: 'pointer', position: 'relative',
-      overflow: 'hidden',
-      height: '100%', display: 'flex', flexDirection: 'row'
-    }}>
-      <div style={{
-        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
-        background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        borderRight: `1px solid ${PALETTE.border}`
-      }}>
-        <img src={arma.img} alt={arma.nombre}
-        style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
-        onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-      </div>
-      <window.ArmaCardBody arma={arma} />
-    </div>);
 
+function VisitedCard({ arma, onClick }) {
+  // Sin distintivo: el contador de visitas se calculaba y no se pintaba.
+  return <window.ArmaExpediente arma={arma} onClick={onClick} />;
 }
 window.VisitedCard = VisitedCard;
 
