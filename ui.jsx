@@ -879,11 +879,12 @@ window.BottomNav = BottomNav;
 //     expresamente y manda él. Queda anotado para que nadie lo «arregle» luego
 //     citando la §6.
 //   · Fuera el cintillo «◆ FIN DEL EXPEDIENTE / ARMADO.MX» y su regla.
-//   · El recuadro «◆ AVISO» SE QUEDA aquí. Hubo un ida y vuelta: se dijo que
-//     volvía al Home y Saulo lo corrigió — de esa zona solo se iba el texto
-//     «FIN DEL EXPEDIENTE». Este pie es su ÚNICO sitio: en screens-1.jsx el
-//     bloque «7 ▸ Disclaimer» quedó como comentario a propósito. Si algún día
-//     se toca, que se mueva, no que se duplique.
+//   · El AVISO se queda en el pie, pero SIN el recuadro punteado y SIN el
+//     rótulo «◆ Aviso»: solo el texto, y colocado DEBAJO del crédito. Hubo
+//     antes un ida y vuelta sobre si volvía al Home — no vuelve. Este pie es
+//     su ÚNICO sitio: en screens-1.jsx el bloque «7 ▸ Disclaimer» quedó como
+//     comentario a propósito. Si algún día se toca, que se mueva, no que se
+//     duplique.
 //   · Fuera la línea «Código abierto: …». La transparencia la dice el enlace.
 //   · La línea de crédito la dictó Saulo palabra por palabra: «Construido por
 //     saulo-fl y Armas M&S para la comunidad de tiradores de México». No es
@@ -997,20 +998,6 @@ function PieDeSitio({ onNav }) {
             —el aviso y la letra chica— se centran con `margin: 0 auto`. */}
         <div style={{ maxWidth: 1280, margin: '0 auto', textAlign: 'center' }}>
 
-          {/* ── AVISO — literal del que estaba al final del Home ───────────── */}
-          <div style={{
-            border: '1px dashed rgba(250,249,245,.30)',
-            padding: '12px 14px', marginBottom: 20,
-            maxWidth: '82ch', marginInline: 'auto',
-          }}>
-            <div style={rotulo({ color: 'var(--rojo-sobre-marca)', fontSize: 12.5, letterSpacing: '0.15em', marginBottom: 5 })}>◆ Aviso</div>
-            <div style={window.amxProsa({ fontSize: 15.5, color: PALETTE.sobreMarca, lineHeight: 1.6 })}>
-              Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con
-              fines informativos. Información basada en la <Interno a="/legalidad" tab="legal">Ley
-              Federal de Armas de Fuego</Interno> y precios DCAM.
-            </div>
-          </div>
-
           {/* ── 1 ▸ CRÉDITO + GITHUB — el estrato de más peso ──────────────────
               Un solo párrafo que envuelve, con el corazón y el enlace al final,
               como en canirun.ai. El texto de la línea es el que dictó Saulo,
@@ -1036,6 +1023,18 @@ function PieDeSitio({ onNav }) {
               }}>
               <IconoGitHub />GitHub
             </a>
+          </div>
+
+          {/* ── AVISO ─ texto literal del que estaba al final del Home.
+              Sin recuadro punteado y sin el rótulo «◆ Aviso» por orden de Saulo
+              (revisión del 9-sep-2026): solo el texto, y debajo del crédito. */}
+          <div style={window.amxProsa({
+            fontSize: 15.5, color: PALETTE.sobreMarca, lineHeight: 1.6,
+            marginBottom: 14, maxWidth: '82ch', marginInline: 'auto',
+          })}>
+            Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con
+            fines informativos. Información basada en la <Interno a="/legalidad" tab="legal">Ley
+            Federal de Armas de Fuego</Interno> y precios DCAM.
           </div>
 
           {/* ── 2 ▸ PROCEDENCIA DE LOS DATOS ───────────────────────────────── */}

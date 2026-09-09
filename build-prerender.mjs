@@ -133,8 +133,8 @@ if (!shell.includes(MARCA_ROOT)) throw new Error('build-prerender: falta <div id
 // LOS DOS TEXTOS SON EL MISMO: si tocas el pie en ui.jsx, tócalo aquí.
 const PIE = `<footer>
 <hr>
-<p><strong>◆ AVISO.</strong> Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la <a href="/legalidad">Ley Federal de Armas de Fuego</a> y precios DCAM.</p>
 <p>Construido por <a href="https://github.com/saulo-fl" rel="noopener noreferrer">saulo-fl</a> y <a href="https://armasmys.com/" rel="noopener noreferrer">Armas M&amp;S</a> para la comunidad de tiradores de México · <a href="https://github.com/saulo-fl/armado-en-mexico" rel="noopener noreferrer">GitHub</a></p>
+<p>Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la <a href="/legalidad">Ley Federal de Armas de Fuego</a> y precios DCAM.</p>
 <p><small>Fuentes: precios y existencias de los <a href="/acerca">inventarios oficiales DCAM y OTCA</a>, con la fecha del inventario en cada ficha · Marco legal: <a href="/legalidad">Ley Federal de Armas de Fuego y Explosivos</a> · Datos técnicos: <a href="/calibres">guía de calibres</a> y publicaciones de los fabricantes.</small></p>
 <p><small>Los nombres de productos, logotipos y marcas que aparecen en este sitio son propiedad de sus respectivos dueños y se usan únicamente para identificar el producto del que se informa. Armado en México no está afiliado ni respaldado por ninguna de estas compañías, y no forma parte de DEFENSA (anteriormente SEDENA), la DCAM ni de ninguna dependencia del gobierno mexicano.</small></p>
 </footer>`;
