@@ -36,31 +36,34 @@
      CLARO: entre dos claros el contraste máximo es ~1.2:1 (papel/lienzo =
      1.14:1). Quien separa las capas es --sombra.
      OSCURO: la sombra NO separa —no hay luz que ocultar—, así que la jerarquía
-     la hace el SALTO DE SUPERFICIE (papel/lienzo = 1.54:1, un tercio más que
-     en claro) más un hairline visible (--hair sobre --papel = 1.81:1). Es el
+     la hace el SALTO DE SUPERFICIE (papel/lienzo = 1.48:1, un tercio más que
+     en claro) más un hairline visible (--hair sobre --papel = 1.68:1). Es el
      problema inverso al del tema claro y lleva su propia respuesta. */
-  --lienzo:     #E7EAE4;   --d-lienzo:   #0E1211;  /* lienzo de la app */
-  --papel:      #F7F8F4;   --d-papel:    #2E3733;  /* la tarjeta — 1.14:1 claro / 1.54:1 oscuro */
+  --lienzo:     #E7EAE4;   --d-lienzo:   #1D1D1D;  /* lienzo de la app. El oscuro
+                                                     lo eligio Saulo el 8-sep-2026:
+                                                     con #0E1211 el papel del folder
+                                                     saltaba demasiado. */
+  --papel:      #F7F8F4;   --d-papel:    #333C38;  /* la tarjeta — 1.14:1 claro / 1.48:1 oscuro */
   /* La fila alterna va HUNDIDA respecto al papel en los dos temas —más oscura,
      no más clara—: es lo mismo que hace el tema claro y deja la tinta de
      estado con más aire (--alerta pasa de 4.40:1 a 5.97:1 sobre ella). */
-  --beige:      #E4E7E0;   --d-beige:    #262E2A;  /* 1.17:1 claro / 1.14:1 oscuro, SOLO con hairline */
+  --beige:      #E4E7E0;   --d-beige:    #262E2A;  /* 1.17:1 claro / 1.22:1 oscuro, SOLO con hairline */
   /* La PLACA FOTOGRÁFICA no se invierte: 87 de las 111 fotos son recortes
      sobre BLANCO OPACO (CLAUDE.md), y sobre una placa oscura se leen como un
      rectángulo blanco pegado — «se leen como un error», ya medido en la época
      en que el sitio era oscuro. Una copia revelada sigue siendo papel: la
      placa se queda clara en los dos temas, apenas atenuada en oscuro. */
   --papel-hi:   #FFFFFF;   --d-papel-hi: #E8EBE5;
-  --hair:       #B6BDB0;   --d-hair:     #525E58;  /* 1.59:1 claro / 1.81:1 sobre el papel oscuro */
-  --hair-hi:    #868E84;   --d-hair-hi:  #7C8A83;  /* borde que PORTA estado — 3.17:1 / 3.40:1 (WCAG 1.4.11) */
+  --hair:       #B6BDB0;   --d-hair:     #525E58;  /* 1.59:1 claro / 1.68:1 sobre el papel oscuro */
+  --hair-hi:    #868E84;   --d-hair-hi:  #7C8A83;  /* borde que PORTA estado — 3.17:1 / 3.16:1 (WCAG 1.4.11) */
   --hair-osc:   rgba(250, 249, 245, .10);          /* hairline sobre superficie de marca — igual en ambos */
 
   /* ── TINTA ──────────────────────────────────────────────────────────────── */
   --negro:      #171B19;
   --gris:       #59605C;
-  --tinta:      var(--negro);   --d-tinta:     #EAEEE8;  /* 14.32:1 / 10.46:1 sobre el papel */
-  --tinta-dim:  #3E443D;        --d-tinta-dim: #C6CDC7;  /*  8.24:1 /  7.58:1 */
-  --tinta-2:    var(--gris);    --d-tinta-2:   #A5AFA8;  /*  5.32:1 /  5.44:1 */
+  --tinta:      var(--negro);   --d-tinta:     #EAEEE8;  /* 14.32:1 / 9.70:1 sobre el papel */
+  --tinta-dim:  #3E443D;        --d-tinta-dim: #C6CDC7;  /*  8.24:1 /  7.03:1 */
+  --tinta-2:    var(--gris);    --d-tinta-2:   #A5AFA8;  /*  5.32:1 /  5.04:1 */
   /* Tinta SOBRE LA PLACA fotográfica, que no cambia de tema: tampoco cambia. */
   --tinta-placa: #59605C;                                /*  6.46:1 /  5.36:1 */
   --silueta:    #868E84;        --d-silueta:   #798177;  /* gráfico sobre la placa — 3.38:1 / 3.34:1 */
@@ -179,7 +182,7 @@
   --hover-suave:   rgba(23,58,50,.06);      --d-hover-suave:   rgba(233,237,231,.07);
   --rejilla:       rgba(23,58,50,.035);     --d-rejilla:       rgba(121,195,171,.055);
   --seleccion:     rgba(23,58,50,.16);      --d-seleccion:     rgba(121,195,171,.26);
-  --placeholder:   #626963;                 --d-placeholder:   #97A19A;  /* 4.65:1 / 4.61:1 */
+  --placeholder:   #626963;                 --d-placeholder:   #9DA7A0;  /* 4.65:1 / 4.59:1 */
   --barra-track:   #DCE0D8;                 --d-barra-track:   #1A211E;
   --barra-thumb:   #B6BDB0;                 --d-barra-thumb:   #4A554F;
   --barra-thumb-hi:#59605C;                 --d-barra-thumb-hi:#8B968F;
