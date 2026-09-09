@@ -82,6 +82,38 @@
   --copia-tinta-2:  #59605C;   /* la leyenda del expediente — 6.46:1 */
   --copia-silueta:  #868E84;   /* la silueta — 3.38:1 (WCAG 1.4.11 pide 3:1) */
 
+  /* ── EL FOLDER MANILA — también diegético, tampoco lleva `--d-` ───────────
+     Los valores salen medidos de la fotografía de un folder real (el asset de
+     referencia de Saulo): cuerpo, canto y el filo de las hojas que asoman.
+     El folder NO entra como imagen: estirar la foto deforma la pestaña y el
+     filo, así que la geometría es CSS y escala a cualquier tamaño. */
+  --carton:         #F3E5C5;   /* la cartulina manila */
+  --carton-alto:    #F6EACF;   /* la pestaña, que recibe algo más de luz */
+  --carton-filo:    #D8C69B;   /* el canto y las hojas — 1.35:1, y está bien:
+                                  es el filo de un objeto, no porta información.
+                                  Mismo papel que --copia-filo (1.59:1). Quien
+                                  separa el folder del lienzo es la sombra. */
+  --carton-tinta:   #171B19;   /* lo mecanografiado — 13.94:1 sobre el cartón */
+  --carton-tinta-2: #5A5142;   /* lo secundario — 6.25:1 */
+
+  /* ── LA FICHA DE FICHERO — diegética, tampoco lleva `--d-` ───────────────
+     El papel sale medido del propio .webp. Los ratios son contra el punto MÁS
+     OSCURO de la ficha (#CED2C3, la línea azul del rayado), no contra el papel
+     medio: el texto puede caer encima de una línea y ahí es donde peor lo
+     tiene. Por eso en esta ficha no entra ni el rojo de acción (4.44:1 sobre
+     el rayado) ni el verde de marca (4.84:1 sobre el papel). */
+  --ficha:          #E7DCC6;   /* la cartulina, por si el .webp no llega */
+  --ficha-tinta:    #171B19;   /* 11.29:1 sobre el rayado */
+  --ficha-tinta-2:  #5A5142;   /*  5.07:1 sobre el rayado */
+
+  /* ── LOS SELLOS DE TINTA ─────────────────────────────────────────────────
+     Dos colores, no tres: el amarillo que pedía el boceto para SEGURIDAD no
+     llega a 3:1 sobre ningún papel de los que hay aquí. Saulo lo cambió a rojo
+     el 8-sep-2026, así que el rojo cubre las dos categorías restringidas y el
+     color deja de ser lo que las distingue — las distingue la palabra. */
+  --sello-civil:    #2F6B33;   /* CIVIL — 6.02:1 sobre el faldón de la copia */
+  --sello-restr:    #A3341F;   /* SEGURIDAD y EXCLUSIVO — 6.42:1 */
+
   /* ── MARCA ──────────────────────────────────────────────────────────────
      El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
      siendo una SUPERFICIE oscura (banda, nav, hero), que es lo que siempre
@@ -110,7 +142,15 @@
      precedente de CLARO.ok / CLARO.alerta. `amxColorAvail()` (ui.jsx) traduce
      el hex del dato a estos tokens. */
   --ok:         #2F6B33;   --d-ok:        #63C07C;  /* 5.28:1 / 5.47:1 */
-  --seguridad:  #7D6108;   --d-seguridad: #D3AC3F;  /* 5.49:1 / 5.70:1 */
+  /* SEGURIDAD comparte el rojo de EXCLUSIVO desde el 8-sep-2026. El amarillo
+     que tenía (#7D6108) no llegaba a 3:1 sobre los papeles del expediente, y
+     Saulo decidió dos colores y no tres: verde para lo civil, rojo para las
+     dos categorías restringidas. El color deja de distinguirlas y pasa a
+     hacerlo la PALABRA — por eso ninguna etiqueta de legalidad se abrevia.
+     Se conserva el token con su nombre: los data-*.js siguen mandando el hex
+     viejo y `amxColorAvail()` lo traduce aquí, así que el cambio llega a todo
+     el sitio sin tocar los datos ni el cache-busting. */
+  --seguridad:  var(--alerta);   --d-seguridad: var(--d-alerta);
   --alerta:     #A3341F;   --d-alerta:    #F0907E;  /* 5.63:1 / 5.26:1 */
   --azul:       #4A6B7C;   --d-azul:      #8FB9CE;  /* 4.69:1 / 5.85:1 */
   --gris-2:     #7C837B;   --d-gris-2:    #99A39B;  /* gráfico apagado */
@@ -748,3 +788,417 @@
   color: var(--tinta-2);             /* 5.17:1 sobre el beige */
 }
 .amx-v2 .amx-ficha .specs td { text-align: right; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL SELLO DE TINTA — la categoría legal, estampada
+   Tablero de correcciones de Saulo, 8-sep-2026: «Hay que generar sellos que se
+   vean como si fueran de documentos para las categorías de legalidad», y luego
+   «el sello de legalidad no va escrito a mano, va como un sello de tinta».
+
+   El sello es TEXTO, no una imagen: así la palabra la lee un lector de
+   pantalla, se puede seleccionar, y las tres categorías salen de un mecanismo
+   en vez de tres rasters. Lo que lo hace sello es el giro, el filo y —sobre
+   todo— el desgaste, que se aplica como máscara.
+
+   El desgaste NO tesela a propósito: un sello es un objeto físico y siempre se
+   gasta igual, así que se estira entero sobre cada estampación.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-sello {
+  display: inline-block;
+  padding: 3px 8px 4px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 12px;                   /* piso tipográfico de la app */
+  line-height: 1;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-6deg);          /* estático: §6 no permite animarlo */
+  /* La tinta no se deposita entera. La máscara recorta el filo Y la palabra a
+     la vez, que es lo que hace que se lea como una sola estampación y no como
+     un recuadro con una etiqueta dentro. */
+  -webkit-mask-image: url(imagenes/sello-desgaste.webp);
+          mask-image: url(imagenes/sello-desgaste.webp);
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+}
+/* Dos colores, no tres. El amarillo que pedía el boceto para SEGURIDAD no
+   llega a 3:1 sobre ningún papel del sitio; Saulo lo pasó a rojo. Como el rojo
+   cubre ya dos categorías, lo que las distingue es la PALABRA, no el color —
+   por eso el sello nunca se abrevia ni se queda sin texto. */
+.amx-v2 .amx-sello--civil { color: var(--sello-civil); }
+.amx-v2 .amx-sello--restr { color: var(--sello-restr); }
+.amx-v2 .amx-sello--grande { font-size: 15px; padding: 5px 13px 6px; border-width: 3px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA TARJETA EXPEDIENTE — el formato único de Home y Arsenal
+   «Este es el formato visual que deben tener las fichas de armas, accesorios y
+   municiones en HOME y Arsenal. Este formato también debe estar así para la
+   versión móvil.»
+
+   Dos objetos sobre el lienzo, no una caja: el folder manila detrás con lo
+   mecanografiado, y la copia instantánea encima y a la izquierda, salida del
+   folder como si alguien la hubiera dejado ahí.
+
+   El folder es GEOMETRÍA CSS, no la fotografía de un folder: estirar la foto
+   deforma la pestaña y el filo de las hojas, y estas tarjetas viven en
+   carruseles de anchos distintos.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-exp {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0 0 0 34%;                /* el hueco por donde asoma la copia */
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+/* El anillo de foco va en el botón, que no lleva recorte: §7 obliga a
+   compensarlo cada vez que un clip-path se lo come, y aquí no hay ninguno. */
+.amx-v2 .amx-exp:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
+
+/* El folder ES la fotografía que trajo Saulo, no un dibujo. Estuvo un rato
+   hecho con CSS —color, radio y un degradado para el filo de las hojas— y lo
+   rechazó: quiere el objeto que fotografió. La pestaña, el pliegue y las hojas
+   que asoman vienen ya en el .webp; aquí solo se coloca el texto encima.
+
+   `background-size: 100% 100%` estira. La proporción del cartón es 1.389 y la
+   del folder en la tarjeta ronda 1.4, así que la deformación es de un 1 %.
+   Todos los items del carrusel se estiran al mismo alto, de modo que todos los
+   folders se deforman igual y ninguno desentona al lado de otro. */
+.amx-v2 .amx-exp-folder {
+  position: relative;
+  height: 100%;
+  min-height: 132px;
+  /* Dentro del cartón: arriba por debajo de la pestaña, a la izquierda por
+     donde entra la copia, y abajo por encima del filo de las hojas. */
+  padding: 20% 7% 11% 13%;
+  /* El color va DEBAJO de la fotografía: si el .webp no llega, el folder
+     sigue siendo cartulina y lo mecanografiado conserva su contraste. */
+  background: var(--carton) url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
+  /* La sombra va en `drop-shadow` y no en `box-shadow`: tiene que seguir el
+     recorte del cartón —con su pestaña— y no la caja rectangular. */
+  filter: drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
+          drop-shadow(0 6px 12px rgba(23, 27, 25, .20));
+}
+
+/* La marca, rotulada sobre la pestaña que trae la foto. La pestaña ocupa del
+   2 % al 34 % del ancho del cartón, así que el rótulo vive en ese carril y se
+   corta con elipsis si la marca es larga — como una etiqueta de verdad. */
+.amx-v2 .amx-exp-marca {
+  position: absolute;
+  left: 6%; top: 3.5%;
+  max-width: 27%;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);      /* 6.25:1 sobre el cartón */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Lo mecanografiado. El orden lo fija el tablero: nombre, calibre, escala de
+   precio, precio. Las EXISTENCIAS no están, y es deliberado — «ignorar
+   existencias, eso va en la ficha únicamente». */
+.amx-v2 .amx-exp-nombre {
+  margin: 0 0 5px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.14;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--carton-tinta);        /* 13.94:1 sobre el cartón */
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.amx-v2 .amx-exp-dato {
+  margin: 0 0 4px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--carton-tinta-2);      /* 6.25:1 */
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.amx-v2 .amx-exp-precio {
+  margin: 6px 0 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--carton-tinta);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── La copia, encima y girada ─────────────────────────────────────────────
+   Reusa `.amx-polaroid`, que ya es diegética y no sigue al tema. Aquí solo se
+   la coloca: el giro es estático y mínimo, y el ancho va en % para que la
+   tarjeta funcione igual en un carrusel de 300px que en una rejilla ancha. */
+.amx-v2 .amx-exp-copia {
+  position: absolute;
+  left: 0; top: 50%;
+  width: 36%;
+  transform: translateY(-50%) rotate(-3deg);
+  z-index: 2;
+}
+/* El sello va CENTRADO en el faldón. El pie ya venía centrado por dentro, pero
+   el aire de arriba y el de abajo no eran el mismo: el `margin-top: 14px` que
+   separa el pie de la fotografía, más 9px de padding propio, contra los 3px de
+   abajo — 23 arriba y 3 abajo, y el sello caía al fondo con un hueco encima.
+   Ahora los dos lados miden 10px y el sello queda en medio de la banda. */
+.amx-v2 .amx-exp-copia .amx-polaroid { padding: 8px 8px 10px; transform: none; }
+.amx-v2 .amx-exp-copia .amx-polaroid-pie {
+  margin-top: 10px;
+  min-height: 26px;
+  padding: 0;
+  gap: 0;
+}
+
+/* El comparador y el distintivo van sobre el cartón, arriba a la derecha, que
+   es la esquina que el texto mecanografiado deja libre. */
+.amx-v2 .amx-exp-comparar {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 3;
+  min-width: 30px; min-height: 30px;    /* área táctil; el piso de 44px es para
+                                           los controles de nav, no para un
+                                           accesorio dentro de una tarjeta */
+  padding: 4px 7px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  border-radius: var(--radio-sm);
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--carton-tinta-2);
+  cursor: pointer;
+}
+.amx-v2 .amx-exp-comparar[aria-pressed="true"] {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: var(--sobre-marca);
+}
+.amx-v2 .amx-exp-distintivo {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 3;
+  padding: 3px 8px 4px;
+  border-radius: var(--radio-sm);
+  background: var(--acento);
+  color: var(--sobre-marca);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  line-height: 1;
+}
+/* Con las dos cosas a la vez el distintivo se aparta a la izquierda. */
+.amx-v2 .amx-exp-comparar ~ .amx-exp-distintivo { right: 44px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL DESTACADO DE LA PORTADA — el mismo folder, abierto
+   «En el sitio de escritorio caben al menos dos armas destacadas para no
+   desaprovechar el espacio. En el sitio móvil dejamos solo 1.»
+
+   La segunda se oculta por CSS y no por `vp.isDesktop`: el hook parte de
+   `window.innerWidth` en el primer render, y la portada es la página que más
+   gente ve de primeras. Una @media no puede equivocarse en el primer pintado.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-dest-lista { display: grid; gap: var(--e4); }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-dest-lista { grid-template-columns: 1fr 1fr; }
+}
+.amx-v2 .amx-dest-lista > :nth-child(n + 2) { display: none; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-dest-lista > :nth-child(n + 2) { display: block; }
+}
+
+.amx-v2 .amx-dest-folder {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
+  gap: var(--e4);
+  align-items: center;
+  /* Aquí el folder se estira más que en la tarjeta (el bloque es apaisado y el
+     cartón es 1.389), así que la pestaña sale algo más ancha. Es el precio de
+     usar la fotografía en vez de dibujarla, y se prefiere ese precio. */
+  padding: 13% 5% 7% 6%;
+  /* El color va DEBAJO de la fotografía: si el .webp no llega, el folder
+     sigue siendo cartulina y lo mecanografiado conserva su contraste. */
+  background: var(--carton) url(imagenes/folder-manila.webp) 50% 50% / 100% 100% no-repeat;
+  filter: drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
+          drop-shadow(0 8px 16px rgba(23, 27, 25, .20));
+}
+/* El rótulo del bloque va sobre la pestaña de la foto, igual que la marca en
+   la tarjeta. */
+.amx-v2 .amx-dest-rotulo {
+  position: absolute;
+  left: 4%; top: 2.5%;
+  max-width: 26%;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.amx-v2 .amx-dest-procedencia {
+  display: flex; align-items: center; gap: var(--e2);
+  margin-bottom: var(--e3);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);      /* 6.25:1 sobre el cartón */
+}
+
+/* Las especificaciones, mecanografiadas a dos columnas: etiqueta en versalitas
+   y valor alineado. Es una <dl> y no una tabla porque son pares sueltos, no
+   una rejilla de datos comparables. */
+.amx-v2 .amx-dest-specs {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px var(--e3);
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13.5px;
+}
+.amx-v2 .amx-dest-specs dt {
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);
+}
+.amx-v2 .amx-dest-specs dd {
+  margin: 0;
+  color: var(--carton-tinta);        /* 13.94:1 */
+  font-variant-numeric: tabular-nums;
+}
+
+/* El sello encabeza la columna de datos, en flujo. Estuvo un rato en
+   `position: absolute` sobre el cartón —más parecido al boceto, donde pisa el
+   texto— pero obligaba a reservarle sitio con un padding y dejaba un hueco
+   muerto arriba a la izquierda. En flujo no hay hueco y sigue leyéndose como
+   lo primero que se estampó. */
+.amx-v2 .amx-dest-sello { margin: 0 0 var(--e3) 2px; }
+
+/* La copia ES el enlace. El anillo de foco va aquí, en un botón sin recorte. */
+.amx-v2 .amx-dest-copia {
+  display: block;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transform: rotate(-1.5deg);        /* estático; §6 no permite animarlo */
+}
+.amx-v2 .amx-dest-copia:focus-visible { outline: 2px solid var(--acento); outline-offset: 4px; }
+.amx-v2 .amx-dest-copia .amx-polaroid { transform: none; }
+.amx-v2 .amx-dest-copia .amx-polaroid-nombre { font-size: 17px; }
+
+/* Móvil: el folder se cierra y la copia baja debajo del texto. */
+@media (max-width: 719px) {
+  .amx-v2 .amx-dest-folder { grid-template-columns: minmax(0, 1fr); }
+  .amx-v2 .amx-dest-copia { max-width: 260px; margin: 0 auto; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA FICHA DE CALIBRE — cartulina de fichero y marco de época
+   Tablero de Saulo, 8-sep-2026: «La ficha de información va con estilo de ficha
+   bibliográfica antigua» y «la foto del calibre va dentro de un marco de foto
+   antiguo».
+
+   Aquí SÍ entran dos rasters, y es lo contrario de lo que pasó con el folder:
+   el rayado y el papel envejecido de una ficha de fichero, y sobre todo el
+   borde festoneado de una copia de época, no se pueden dibujar con CSS sin que
+   canten. El marco va con `border-image`, que reparte las ondas por los cuatro
+   lados sin deformarlas — que es exactamente para lo que existe.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-calibre {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--e3);
+  height: 100%;
+  /* El padding superior es MENOR que el resto: la cartulina trae una línea roja
+     impresa a la altura de la primera guía, y con 14px el rótulo del sistema
+     caía justo encima y se perdía. */
+  padding: 8px 14px 14px;
+  /* El color va DEBAJO de la imagen: si el .webp no llega, la ficha sigue
+     siendo cartulina y la tinta conserva su contraste. */
+  background: var(--ficha) url(imagenes/ficha-biblioteca.webp) 50% 50% / 100% 100% no-repeat;
+  border-radius: 3px;                /* una ficha de cartulina no lleva radio */
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  text-align: left;
+}
+.amx-v2 .amx-calibre:focus-visible { outline: 2px solid var(--acento); outline-offset: 3px; }
+
+.amx-v2 .amx-calibre-datos {
+  display: flex; flex-direction: column;
+  flex: 1; min-width: 0;
+}
+.amx-v2 .amx-calibre-sistema {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta-2);       /* 5.07:1 incluso sobre el rayado azul */
+}
+.amx-v2 .amx-calibre-id {
+  margin-top: var(--e2);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ficha-tinta);         /* 11.29:1 sobre el rayado */
+}
+.amx-v2 .amx-calibre-uso {
+  flex: 1;
+  margin-top: 6px;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--ficha-tinta-2);
+}
+/* La cuenta de armas iba en el verde de marca. Sobre esta cartulina ese verde
+   se queda en 4.84:1 y el rojo de acción cae a 4.44:1 sobre el rayado azul, por
+   debajo del mínimo de texto: en la ficha la llamada la hace la TINTA, que es
+   además lo que haría alguien escribiendo en una ficha de fichero. */
+.amx-v2 .amx-calibre-n {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--ficha-tinta);
+}
+
+/* El cartucho va SIN marco. Estuvo dentro de un marco de época festoneado —lo
+   pedía el tablero— pero Saulo lo descartó al verlo montado: sobre la cartulina
+   el marco es papel crema sobre papel crema y ni con sombra acababa de leerse,
+   y el festón, reducido a 13px de borde, salía como una línea de puntos. Queda
+   el .webp del cartucho apoyado en la ficha, que es lo que se aprobó. */
+.amx-v2 .amx-calibre-marco {
+  flex: 0 0 auto;
+  align-self: stretch;               /* el cartucho apoyado en el piso, que es
+                                        lo que deja comparar de un vistazo las
+                                        alturas reales */
+  width: 72px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.amx-v2 .amx-calibre-marco img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}

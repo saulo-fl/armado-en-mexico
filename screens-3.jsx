@@ -377,28 +377,26 @@ function CursoCard({ curso, onNav, vp }) {
 // ═══════════════════════════════════════════════════════════════════════
 function CaliberMiniCard({ cal, onClick }) {
   const n = armasPorCalibre(cal.id).length;
+  // La altura del cartucho sigue siendo PROPORCIONAL A LOS MILIMETROS reales:
+  // esa decisión es anterior y no la toca el rediseño. Lo que cambia es dónde
+  // se apoya — ahora dentro del marco de época, en vez de un hueco gris.
+  const alto = Math.round(((cal.mm || 40) / CARTUCHO_MAX_MM) * CARTUCHO_HOME_MAXH);
+  const abrir = (e) => { e.preventDefault(); onClick && onClick(); };
   return (
-    <div onClick={onClick} style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`,
-      cursor: 'pointer', overflow: 'hidden', height: '100%', minHeight: CARTUCHO_HOME_MAXH + 22, display: 'flex', alignItems: 'stretch',
-    }}
-      onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
-      onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
-      <div style={{ padding: '14px 14px 12px', display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.amber, letterSpacing: '0.14em', textTransform: 'uppercase' }}>{cal.sistema}</div>
-      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 20, color: PALETTE.text, marginTop: 8, lineHeight: 1 }}>{cal.id}</div>
-      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.4, marginTop: 6, flex: 1 }}>{cal.uso}</div>
-      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.08em', marginTop: 10 }}>{n} arma{n === 1 ? '' : 's'} →</div>
+    <div className="amx-calibre" role="button" tabIndex={0}
+      onClick={abrir}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') abrir(e); }}
+      aria-label={[cal.id, cal.sistema, cal.uso, n + (n === 1 ? ' arma' : ' armas')]
+        .filter(Boolean).join(', ')}>
+      <div className="amx-calibre-datos">
+        <div className="amx-calibre-sistema">{cal.sistema}</div>
+        <div className="amx-calibre-id">{cal.id}</div>
+        <div className="amx-calibre-uso">{cal.uso}</div>
+        <div className="amx-calibre-n">{n} arma{n === 1 ? '' : 's'} →</div>
       </div>
-      {/* CARTUCHO SLOT — PNG vertical del cartucho a escala REAL (altura ∝ mm), anclado al piso */}
-      <div style={{
-        flexShrink: 0, width: 58, alignSelf: 'stretch', position: 'relative', overflow: 'hidden',
-        borderLeft: `1px solid ${PALETTE.border}`,
-        background: PALETTE.bgElev,
-        display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-      }}>
+      <div className="amx-calibre-marco">
         <img src={cal.cartucho} alt={`Cartucho ${cal.id}`} loading="lazy"
-          style={{ height: Math.round(((cal.mm || 40) / CARTUCHO_MAX_MM) * CARTUCHO_HOME_MAXH), width: 'auto', maxWidth: 'calc(100% - 10px)', objectFit: 'contain', objectPosition: 'bottom', display: 'block', marginBottom: 9 }} />
+          style={{ height: alto }} />
       </div>
     </div>
   );

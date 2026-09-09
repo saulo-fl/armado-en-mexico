@@ -77,18 +77,30 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   // el panel de admin sigue editándolo.
   const promos = useMemo(() => window.Store ? window.Store.getPromos() : [], [forceRender]);
 
-  // Arma destacada (DESIGN.md §5.1). FIJA en la CZ P-09 (id 31,
+  // Armas destacadas (DESIGN.md §5.1). La PRIMERA es fija en la CZ P-09 (id 31,
   // imagenes/077_CZ_P-09.webp): es la pieza que la portada del mockup enseña, y
   // no debe cambiar según los favoritos que tenga el visitante.
-  // Si ese id desapareciera del catálogo se cae al cálculo determinista anterior
-  // —primera favorita, y si no la primera del catálogo— para no dejar el hueco.
-  const destacada = useMemo(() => {
+  //
+  // La SEGUNDA existe desde el tablero del 8-sep-2026 —«en el sitio de
+  // escritorio caben al menos dos armas destacadas para no desaprovechar el
+  // espacio»— y también va fija, por el mismo motivo que la primera. El id 55
+  // es provisional: se eligió para que la portada enseñe las dos caras del
+  // sello (una CIVIL y una EXCLUSIVO), pero la pieza la decide Saulo y cambiarla
+  // es tocar este array y nada más.
+  //
+  // Si un id desapareciera del catálogo se rellena con las primeras armas que
+  // queden, para no dejar el hueco.
+  const IDS_DESTACADAS = [31, 55];
+  const destacadas = useMemo(() => {
     const db = window.DB || [];
-    const fija = db.find((a) => a.id === 31);
-    if (fija) return fija;
-    const favs = window.Store ? (window.Store.getFavoritos ? window.Store.getFavoritos() : []) : [];
-    const favId = Array.isArray(favs) && favs.length ? (favs[0] && (favs[0].id != null ? favs[0].id : favs[0])) : null;
-    return (favId != null && db.find((a) => a.id === favId)) || db[0] || null;
+    const elegidas = IDS_DESTACADAS
+      .map((id) => db.find((a) => a.id === id))
+      .filter(Boolean);
+    for (const a of db) {
+      if (elegidas.length >= IDS_DESTACADAS.length) break;
+      if (!elegidas.includes(a)) elegidas.push(a);
+    }
+    return elegidas;
   }, [forceRender]);
   useEffect(() => {
     if (promos.length < 2) return;
@@ -148,83 +160,18 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         </div>
       </div>
 
-      {/* 1.5 ▸ ARMA DESTACADA — DESIGN.md §5.1 */}
-      {destacada &&
+      {/* 1.5 ▸ ARMAS DESTACADAS — DESIGN.md §5.1 y tablero del 8-sep-2026.
+          Ya no es una tarjeta verde con dos botones debajo: es el mismo folder
+          del resto del sitio, abierto, con las especificaciones mecanografiadas
+          a la izquierda y la copia a la derecha. El rótulo «ARMA DESTACADA» que
+          iba suelto sobre el lienzo ahora es la pestaña del folder, que es
+          donde se rotula un expediente. */}
+      {destacadas.length > 0 &&
       <div style={{ ...containerMax, padding: `16px ${PAD}px 4px` }}>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontSize: 10.5, fontWeight: 600,
-          letterSpacing: '0.15em', textTransform: 'uppercase',
-          color: PALETTE.textDim, marginBottom: 10
-        }}>Arma destacada</div>
-
-        {/* La tarjeta va en VERDE (marcaAlt #1E4A40) para destacar sobre una
-            página que es toda clara. Todo el texto de dentro se invierte; el
-            rótulo «ARMA DESTACADA» de arriba se queda fuera, sobre el lienzo. */}
-        <div style={{
-          background: PALETTE.marcaAlt, borderRadius: window.CLARO.radio,
-          boxShadow: window.CLARO.sombra, overflow: 'hidden'
-        }}>
-          <div style={{ display: 'flex', gap: 12, padding: '16px 16px 0' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22,
-                color: PALETTE.sobreMarca,  // #F3EFE4 — 8.67:1 sobre #1E4A40
-                lineHeight: 1.1, marginBottom: 2
-              }}>{destacada.nombre}</div>
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
-                color: '#DDD5C4',          // 6.82:1 sobre #1E4A40
-                marginBottom: 12
-              }}>{destacada.calibre}</div>
-
-              {/* Sin país ni año: desde que la polaroid escribe la procedencia
-                  en su faldón, repetirlos aquí era decir dos veces lo mismo a
-                  un palmo de distancia. Quedan el mecanismo y la capacidad, que
-                  la copia no dice. */}
-              {[['✦', destacada.mecanismo],
-                ['▤', destacada.capacidad && ('Capacidad: ' + destacada.capacidad)]]
-                .filter(([, v]) => v).map(([ic, v]) =>
-                <div key={v} style={{
-                  display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
-                  fontFamily: 'Archivo, sans-serif', fontSize: 13.5,
-                  color: '#C6CEC6'         // specs — 6.19:1 sobre #1E4A40
-                }}>
-                  <span aria-hidden="true" style={{ fontSize: 12 }}>{ic}</span>
-                  <span>{v}</span>
-                </div>)}
-            </div>
-
-            {/* La misma copia instantánea de la ficha, no una foto suelta: es
-                la primitiva `ArmaPolaroid`, así que trae su cartón blanco, su
-                faldón con el nombre escrito y —gratis— la variante de
-                expediente sin fotografía si la destacada no tuviera foto.
-                Sobre el verde de marca luce lo que es: un objeto dejado encima.
-                Por ser diegética no cambia con el tema, igual que en la ficha.
-                Sustituye a un <img> con `drop-shadow`, que proyectaba la
-                silueta del arma pero no la leía como pieza de archivo. */}
-            <div style={{
-              width: '40%', maxWidth: 190, flexShrink: 0, alignSelf: 'center',
-              display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              <window.ArmaPolaroid arma={destacada} />
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 10, padding: 16 }}>
-            {/* .btn-claro trae tinta #171B19 y borde --hair, ambos calibrados
-                para superficie clara: sobre este verde la tinta cae a 1.6:1.
-                Se invierte aquí, solo en este botón, sin tocar la clase. */}
-            <button onClick={() => onOpenArma(destacada.id)} className="btn btn-claro"
-              style={{
-                flex: 1,
-                color: PALETTE.sobreMarca,            // 8.67:1 sobre #1E4A40
-                borderColor: 'rgba(250,249,245,.28)'
-              }}>Ver detalles</button>
-            {/* HomeScreen no recibe la prop de comparar (compareIds vive en App),
-                así que esto lleva al comparador en vez de añadir en silencio. */}
-            <button onClick={() => onNav('compare')}
-              className="btn btn-rojo" style={{ flex: 1 }}>Comparar</button>
-          </div>
+        <div className="amx-dest-lista">
+          {destacadas.map((a) =>
+            <window.ArmaDestacada key={a.id} arma={a}
+              onOpen={() => onOpenArma(a.id)} />)}
         </div>
       </div>}
 
@@ -313,21 +260,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                     background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.35) 55%, rgba(23,58,50,0.75) 100%)`,
                     pointerEvents: 'none'
                   }} />
-                  {/* corner ticks */}
-                  <div style={{
-                    position: 'absolute', top: 6, left: 6,
-                    width: 10, height: 10,
-                    borderTop: `1.5px solid ${PALETTE.amber}`,
-                    borderLeft: `1.5px solid ${PALETTE.amber}`,
-                    opacity: 0.75
-                  }} />
-                  <div style={{
-                    position: 'absolute', bottom: 6, right: 6,
-                    width: 10, height: 10,
-                    borderBottom: `1.5px solid ${PALETTE.amber}`,
-                    borderRight: `1.5px solid ${PALETTE.amber}`,
-                    opacity: 0.75
-                  }} />
+                  {/* Aquí iban dos corchetes de esquina en verde de marca. Eran el
+                      esqueleto HUD del tema anterior, que §28 declaró derogado —«el
+                      HUD es un DETALLE de baja jerarquía, no la estructura»— y que
+                      es justo el tell de interfaz generada que Saulo viene
+                      señalando. `TacticalCorners` ya no pinta desde la fase 2;
+                      estos estaban puestos a mano y se habían quedado. */}
                   {/* Rótulo sobre el tinte. Medido contra el PEOR fondo posible:
                       foto blanca (tope real 235 tras el filtro brightness .92)
                       bajo el tinte 0.75, que compone #4C6660.
@@ -502,68 +440,18 @@ window.CarouselSection = CarouselSection;
 // CARDS para los tres carruseles
 // ════════════════════════════════════════════════════════════════
 function FavCard({ arma, onClick }) {
-  return (
-    <div onClick={onClick} style={{
-      background: PALETTE.bgCard,
-      border: `1px solid ${PALETTE.border}`,
-      borderTop: `2px solid ${PALETTE.amber}`,
-      cursor: 'pointer', position: 'relative',
-      overflow: 'hidden',
-      height: '100%', display: 'flex', flexDirection: 'row',
-      transition: 'border-color 0.18s, transform 0.18s'
-    }}
-    onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
-    onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
-      {/* badge de favorito */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, zIndex: 2,
-        background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, fontWeight: 700,
-        letterSpacing: '0.1em',
-        padding: '3px 8px'
-      }}>★ TOP</div>
-      <div style={{
-        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
-        background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        borderRight: `1px solid ${PALETTE.border}`
-      }}>
-        <img src={arma.img} alt={arma.nombre}
-        style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
-        onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-      </div>
-      <window.ArmaCardBody arma={arma} />
-    </div>);
-
+  // El formato de tarjeta es UNO SOLO (tablero de Saulo, 8-sep-2026): aquí solo
+  // se añade el distintivo. Antes esta función repetía entera la maquetación de
+  // ArmaCard y declaraba un `getRating` que no usaba nadie.
+  return <window.ArmaExpediente arma={arma} onClick={onClick}
+    distintivo={<span className="amx-exp-distintivo">★ TOP</span>} />;
 }
 window.FavCard = FavCard;
 
-function VisitedCard({ arma, onClick }) {
-  const visits = window.Store ? (window.Store.getVisits()[arma.id] || []).length : 0;
-  return (
-    <div onClick={onClick} style={{
-      background: PALETTE.bgCard,
-      border: `1px solid ${PALETTE.border}`,
-      cursor: 'pointer', position: 'relative',
-      overflow: 'hidden',
-      height: '100%', display: 'flex', flexDirection: 'row'
-    }}>
-      <div style={{
-        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112, overflow: 'hidden',
-        background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        borderRight: `1px solid ${PALETTE.border}`
-      }}>
-        <img src={arma.img} alt={arma.nombre}
-        style={{ maxWidth: '85%', maxHeight: '85%', objectFit: 'contain', filter: 'grayscale(0.1) contrast(1.1)' }}
-        onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-      </div>
-      <window.ArmaCardBody arma={arma} />
-    </div>);
 
+function VisitedCard({ arma, onClick }) {
+  // Sin distintivo: el contador de visitas se calculaba y no se pintaba.
+  return <window.ArmaExpediente arma={arma} onClick={onClick} />;
 }
 window.VisitedCard = VisitedCard;
 
