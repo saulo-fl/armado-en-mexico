@@ -976,3 +976,102 @@
 }
 /* Con las dos cosas a la vez el distintivo se aparta a la izquierda. */
 .amx-v2 .amx-exp-comparar ~ .amx-exp-distintivo { right: 44px; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL DESTACADO DE LA PORTADA — el mismo folder, abierto
+   «En el sitio de escritorio caben al menos dos armas destacadas para no
+   desaprovechar el espacio. En el sitio móvil dejamos solo 1.»
+
+   La segunda se oculta por CSS y no por `vp.isDesktop`: el hook parte de
+   `window.innerWidth` en el primer render, y la portada es la página que más
+   gente ve de primeras. Una @media no puede equivocarse en el primer pintado.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-dest-lista { display: grid; gap: var(--e4); }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-dest-lista { grid-template-columns: 1fr 1fr; }
+}
+.amx-v2 .amx-dest-lista > :nth-child(n + 2) { display: none; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-dest-lista > :nth-child(n + 2) { display: block; }
+}
+
+.amx-v2 .amx-dest-folder {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 42%);
+  gap: var(--e4);
+  align-items: center;
+  padding: var(--e4) var(--e4) 24px;
+  background: var(--carton);
+  border: 1px solid var(--carton-filo);
+  border-radius: 0 var(--radio) var(--radio) var(--radio);
+  box-shadow: var(--sombra);
+}
+.amx-v2 .amx-dest-folder::after {
+  content: "";
+  position: absolute; inset: auto 0 0 0;
+  height: 11px;
+  border-radius: 0 0 var(--radio) var(--radio);
+  background: repeating-linear-gradient(
+    to bottom, transparent 0 2px, var(--carton-filo) 2px 3px);
+  pointer-events: none;
+}
+
+.amx-v2 .amx-dest-procedencia {
+  display: flex; align-items: center; gap: var(--e2);
+  margin-bottom: var(--e3);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);      /* 6.25:1 sobre el cartón */
+}
+
+/* Las especificaciones, mecanografiadas a dos columnas: etiqueta en versalitas
+   y valor alineado. Es una <dl> y no una tabla porque son pares sueltos, no
+   una rejilla de datos comparables. */
+.amx-v2 .amx-dest-specs {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px var(--e3);
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 13.5px;
+}
+.amx-v2 .amx-dest-specs dt {
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);
+}
+.amx-v2 .amx-dest-specs dd {
+  margin: 0;
+  color: var(--carton-tinta);        /* 13.94:1 */
+  font-variant-numeric: tabular-nums;
+}
+
+/* El sello encabeza la columna de datos, en flujo. Estuvo un rato en
+   `position: absolute` sobre el cartón —más parecido al boceto, donde pisa el
+   texto— pero obligaba a reservarle sitio con un padding y dejaba un hueco
+   muerto arriba a la izquierda. En flujo no hay hueco y sigue leyéndose como
+   lo primero que se estampó. */
+.amx-v2 .amx-dest-sello { margin: 0 0 var(--e3) 2px; }
+
+/* La copia ES el enlace. El anillo de foco va aquí, en un botón sin recorte. */
+.amx-v2 .amx-dest-copia {
+  display: block;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transform: rotate(-1.5deg);        /* estático; §6 no permite animarlo */
+}
+.amx-v2 .amx-dest-copia:focus-visible { outline: 2px solid var(--acento); outline-offset: 4px; }
+.amx-v2 .amx-dest-copia .amx-polaroid { transform: none; }
+.amx-v2 .amx-dest-copia .amx-polaroid-nombre { font-size: 17px; }
+
+/* Móvil: el folder se cierra y la copia baja debajo del texto. */
+@media (max-width: 719px) {
+  .amx-v2 .amx-dest-folder { grid-template-columns: minmax(0, 1fr); }
+  .amx-v2 .amx-dest-copia { max-width: 260px; margin: 0 auto; }
+}

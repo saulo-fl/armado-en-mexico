@@ -1070,6 +1070,58 @@ function ArmaExpediente({ arma, onClick, distintivo, onCompare, inCompare }) {
 window.ArmaExpediente = ArmaExpediente;
 
 // ──────────────────────────────────────────────────────────────
+// ARMA DESTACADA — el folder abierto de la portada
+// Tablero de Saulo, 8-sep-2026: «Polaroid solo con foto y nombre de la
+// pistola. Bandera, pais, especificaciones, etc. van escritos del lado
+// izquierdo en el folder». Y: «Se quitan estos botones. Si se hace click en la
+// Polaroid se abre el enlace al arma mostrada».
+//
+// Por eso el nombre del arma sale UNA vez, en el faldon de la copia, y no se
+// repite en el folder: en el boceto la copia es la que lleva el rotulo.
+// ──────────────────────────────────────────────────────────────
+function ArmaDestacada({ arma, onOpen }) {
+  const especificaciones = [
+    ['Calibre',   arma.calibre],
+    ['Capacidad', arma.capacidad],
+    ['Mecanismo', arma.mecanismo],
+    ['Longitud',  arma.longitud],
+    ['Peso',      arma.peso],
+  ].filter(([, v]) => v != null && v !== '');
+  return (
+    <article className="amx-dest">
+      <div className="amx-exp-cabecera">
+        <span className="amx-exp-pestana">Arma destacada</span>
+      </div>
+      <div className="amx-dest-folder">
+        <div className="amx-dest-datos">
+          {/* Lo primero que se estampa, encima de lo mecanografiado. Va grande
+              porque aqui hay sitio, y dentro de esta columna y no como hermano
+              del grid: un tercer hijo se iria a la celda de la copia. */}
+          <div className="amx-dest-sello">
+            <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} grande />
+          </div>
+          <div className="amx-dest-procedencia">
+            <CountryFlag pais={arma.pais} height={12} />
+            <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
+          </div>
+          <dl className="amx-dest-specs">
+            {especificaciones.map(([k, v]) =>
+              <React.Fragment key={k}><dt>{k}</dt><dd>{v}</dd></React.Fragment>)}
+          </dl>
+        </div>
+        {/* La copia ES el enlace: el tablero retira los dos botones que habia
+            debajo y deja que se entre por la fotografia. */}
+        <button type="button" className="amx-dest-copia" onClick={onOpen}
+          aria-label={'Ver la ficha de ' + arma.nombre}>
+          <ArmaPolaroid arma={arma} pie="nombre" />
+        </button>
+      </div>
+    </article>
+  );
+}
+window.ArmaDestacada = ArmaDestacada;
+
+// ──────────────────────────────────────────────────────────────
 // FICHA TÉCNICA — la columna derecha del folder
 // Reusa la tabla `.specs` que ya estaba bien resuelta (zebra + hairline, `th`
 // en versalitas, `td` en mono con tabular-nums). Los seis campos son los que
