@@ -473,94 +473,6 @@ function PriceLevel({ lvl, size = 12, claro = true }) {
 }
 window.PriceLevel = PriceLevel;
 
-// ──────────────────────────────────────────────────────────────
-// ARMA CARD BODY — cuerpo estándar de ficha:
-// marca + bandera · nombre (2 líneas) · calibre · legalidad · precio
-// ──────────────────────────────────────────────────────────────
-function ArmaCardBody({ arma }) {
-  // Existencias por sucursal en la tarjeta (rediseño 2026): dato del último
-  // inventario de cada sede, mismas fuentes que la ficha (solo lectura).
-  const exD = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
-  const exOReg = window.getArmaExistenciasOTCA ? window.getArmaExistenciasOTCA(arma.id) : null;
-  const exO = exOReg && exOReg.qty != null ? exOReg.qty : null;
-  const enStock = exD != null || exO != null;
-  // precio exacto compacto: "$9,870.04 MXN" → "$9,870"
-  const priceShort = (arma.priceExact || '').replace(/\.\d{2}\s*MXN\s*$/, '');
-  // Resumen de la comunidad: en la tarjeta va SOLO la etiqueta. El porcentaje y
-  // el conteo viven en la ficha; aquí no caben sin apretar el resto.
-  const op = window.Store ? window.Store.getOpiniones('arma', arma.id) : null;
-  const etRating = op ? window.amxOpinionLabel(op.up, op.down) : null;
-  return (
-    <div style={{ padding: '10px 12px 12px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
-        <CountryFlag pais={arma.pais} height={12} />
-        <span style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: CLARO.tinta2,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>{arma.marca}</span>
-      </div>
-      <div style={{
-        fontFamily: 'Archivo, sans-serif',
-        fontWeight: 600, fontSize: 17,
-        color: CLARO.tinta,
-        textTransform: 'uppercase',
-        lineHeight: 1.15,
-        marginBottom: 6,
-        letterSpacing: '0.02em',
-        // altura fija de 2 líneas para fichas uniformes
-        height: 40,
-        display: '-webkit-box',
-        WebkitBoxOrient: 'vertical',
-        WebkitLineClamp: 2,
-        overflow: 'hidden',
-      }}>{arma.nombre}</div>
-      {/* calibre */}
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13,
-        color: CLARO.tinta2,
-        marginBottom: 8,
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-      }}>
-        <span style={{ color: CLARO.tinta2 }}>CAL </span>{arma.calibre.replace(' Parabellum','').replace('Winchester','Win')}
-      </div>
-      {/* existencias por sucursal (último inventario de cada sede) */}
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 12,
-        color: enStock ? CLARO.ok : CLARO.alerta,
-        marginBottom: 8,
-        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-      }}>
-        {enStock
-          ? <>● {exD != null && <>{exD} DCAM</>}{exD != null && exO != null && ' · '}{exO != null && <>{exO} OTCA</>}</>
-          : '✕ AGOTADO'}
-      </div>
-      {etRating && etRating.hay &&
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 12, color: etRating.color,
-          letterSpacing: '0.08em', textTransform: 'uppercase',
-          marginBottom: 8,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>{etRating.label}</div>}
-      {/* legalidad + precio */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
-        <AvailBadge claro avail={arma.avail} compact />
-        <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
-          <PriceLevel claro lvl={arma.priceLvl} />
-          {priceShort && <span style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 12, color: CLARO.tinta2, lineHeight: 1,
-          }}>{priceShort}</span>}
-        </span>
-      </div>
-    </div>
-  );
-}
-window.ArmaCardBody = ArmaCardBody;
 
 // ──────────────────────────────────────────────────────────────
 // TACTICAL CORNERS — esquinas tipo mira para enmarcar contenido
@@ -948,78 +860,15 @@ function BottomNav({ current, onNav, compareCount }) {
 window.BottomNav = BottomNav;
 
 // ──────────────────────────────────────────────────────────────
-// ARMA CARD — tarjeta de arma estilo "ficha de armería"
+// ARMA CARD — la tarjeta del catálogo
+// Desde el tablero de correcciones del 8-sep-2026 es un envoltorio fino de
+// `ArmaExpediente`: el formato de tarjeta es UNO SOLO en Home y en Arsenal, y
+// vivía duplicado en tres sitios (ArmaCard, FavCard y VisitedCard).
+// Aquí solo queda el paso de props.
 // ──────────────────────────────────────────────────────────────
 function ArmaCard({ arma, onClick, onCompare, inCompare }) {
-  const [imgError, setImgError] = React.useState(false);
-  return (
-    // Tarjeta CLARA sobre el lienzo claro. La superficie sola da 1.14:1 —
-    // invisible—, así que la definen la SOMBRA y el hairline, en ese orden
-    // (§5.1b y §27: «bordes finos, sombras extremadamente suaves»). El borde
-    // no es el recurso principal: sin sombra la tarjeta desaparece.
-    <div onClick={onClick} className="amx-card" style={{
-      position: 'relative',
-      background: CLARO.panel,
-      borderRadius: CLARO.radio,
-      border: `1px solid ${CLARO.hair}`,
-      // La sombra la pone .amx-card en estilo.css: aqui, inline, ganaria por
-      // especificidad y anularia el :hover.
-      cursor: 'pointer',
-      overflow: 'hidden',
-      height: '100%',
-      display: 'flex', flexDirection: 'row',
-      contentVisibility: 'auto',
-      containIntrinsicSize: 'auto 170px',
-    }}>
-      {/* imagen · columna izquierda, sobre blanco como una ficha de producto */}
-      <div style={{
-        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
-        background: CLARO.panelHi,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
-        borderRight: `1px solid ${CLARO.hair}`,
-        overflow: 'hidden',
-      }}>
-        {!imgError ? (
-          <img src={arma.img} alt={arma.nombre}
-            loading="lazy" decoding="async"
-            onError={() => setImgError(true)}
-            style={{
-              maxWidth: '88%', maxHeight: '88%', objectFit: 'contain',
-              
-              position: 'relative', zIndex: 1,
-            }} />
-        ) : (
-          <img src={window.armaPlaceholder(arma)} alt={arma.nombre}
-            loading="lazy" decoding="async"
-            style={{
-              maxWidth: '90%', maxHeight: '70%', objectFit: 'contain',
-              position: 'relative', zIndex: 1, opacity: 0.85,
-            }} />
-        )}
-      </div>
-      {/* compare button — sólo donde hay comparador */}
-      {onCompare &&
-      <button onClick={(e) => { e.stopPropagation(); onCompare(); }}
-        style={{
-          position: 'absolute', top: 6, right: 6, zIndex: 2,
-          background: inCompare ? PALETTE.amber : 'rgba(0,0,0,0.6)',
-          // Sobre el relleno de acento la tinta la decide el TEMA: en claro el
-          // acento es verde oscuro, en oscuro es verde claro. El '#000' de antes
-          // daba 1.69:1 ya en claro.
-          color: inCompare ? PALETTE.tintaSobreMarca : PALETTE.textDim,
-          border: `1px solid ${inCompare ? PALETTE.amber : PALETTE.border}`,
-          padding: '2px 5px',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, fontWeight: 700,
-          cursor: 'pointer',
-          letterSpacing: '0.05em',
-        }}>{inCompare ? '✓' : '⇄'}</button>
-      }
-      {/* body — sólo: marca + bandera · nombre · calibre · legalidad · precio */}
-      <ArmaCardBody arma={arma} />
-    </div>
-  );
+  return <ArmaExpediente arma={arma} onClick={onClick}
+    onCompare={onCompare} inCompare={inCompare} />;
 }
 window.ArmaCard = ArmaCard;
 
@@ -1068,7 +917,15 @@ window.armaSinFoto = armaSinFoto;
 // fotografía —mismo marco, mismo faldón— con la silueta del tipo sobre el
 // papel. Un expediente incompleto es una cosa que existe; un hueco gris no.
 // ──────────────────────────────────────────────────────────────
-function ArmaPolaroid({ arma }) {
+// `pie` decide qué se rotula en el faldón, y son tres cosas distintas porque el
+// tablero de correcciones (8-sep-2026) pide tres:
+//   'rotulo' — nombre y procedencia. La ficha, donde la copia va sola.
+//   'nombre' — solo el nombre. El destacado del Home: «Polaroid solo con foto y
+//              nombre de la pistola. Bandera, país, especificaciones, etc. van
+//              escritos del lado izquierdo en el folder».
+//   'sello'  — solo el sello de legalidad. La tarjeta, donde el nombre y los
+//              datos ya están mecanografiados en el folder de al lado.
+function ArmaPolaroid({ arma, pie = 'rotulo' }) {
   // El fallback cubre los dos casos: el arma que nunca tuvo foto y el .webp
   // que existe en `data.js` pero no llega (404, red caída, formato no
   // soportado). En ambos se ve lo mismo, que es lo que hace que el `alt` y el
@@ -1111,16 +968,156 @@ function ArmaPolaroid({ arma }) {
           franja tricolor que había bajo el título se retiró porque, siendo
           mexicana, hacía parecer mexicana un arma checa o italiana. */}
       <figcaption className="amx-polaroid-pie">
-        <span className="amx-polaroid-nombre">{arma.nombre}</span>
-        <span className="amx-polaroid-datos">
-          <CountryFlag pais={arma.pais} height={9} />
-          <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
-        </span>
+        {pie === 'sello'
+          ? <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} />
+          : <span className="amx-polaroid-nombre">{arma.nombre}</span>}
+        {pie === 'rotulo' &&
+          <span className="amx-polaroid-datos">
+            <CountryFlag pais={arma.pais} height={9} />
+            <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
+          </span>}
       </figcaption>
     </figure>
   );
 }
 window.ArmaPolaroid = ArmaPolaroid;
+
+// ──────────────────────────────────────────────────────────────
+// SELLO LEGAL — la categoría del arma, estampada en tinta
+// «Hay que generar sellos que se vean como si fueran de documentos para las
+// categorías de legalidad» (tablero de Saulo, 8-sep-2026), y en la corrección
+// siguiente: en las tarjetas de arma tampoco va escrito a mano, va estampado.
+//
+// Es TEXTO, no una imagen: la palabra la lee un lector de pantalla, se puede
+// seleccionar, y las categorías salen de un mecanismo en vez de un raster por
+// cada una. El giro, el filo y el desgaste los pone estilo.css.
+//
+// EXCLUSIVO no es una palabra nueva: `availLabel` de data.js ya llama a esa
+// categoría «Exclusivo Ejército», y §6b prohíbe inventar terminología legal.
+// ──────────────────────────────────────────────────────────────
+const SELLOS = {
+  dcam:      { texto: 'CIVIL',     tono: 'civil' },
+  externo:   { texto: 'CIVIL',     tono: 'civil' },
+  seguridad: { texto: 'SEGURIDAD', tono: 'restr' },
+  ejercito:  { texto: 'EXCLUSIVO', tono: 'restr' },
+};
+
+function SelloLegal({ avail, etiqueta, grande = false }) {
+  const s = SELLOS[avail] || SELLOS.dcam;
+  return (
+    // El nombre accesible es la etiqueta LARGA de los datos («Uso civil —
+    // DCAM»), no la palabra del sello: fuera del contexto visual del folder,
+    // «CIVIL» a secas no dice de qué habla.
+    <span className={'amx-sello amx-sello--' + s.tono + (grande ? ' amx-sello--grande' : '')}
+      role="img" aria-label={etiqueta || s.texto}>{s.texto}</span>
+  );
+}
+window.SelloLegal = SelloLegal;
+
+// ──────────────────────────────────────────────────────────────
+// ARMA EXPEDIENTE — el formato ÚNICO de tarjeta (Home y Arsenal)
+// «Este es el formato visual que deben tener las fichas de armas, accesorios y
+// municiones en HOME y Arsenal. Este formato también debe estar así para la
+// versión móvil.» — tablero de Saulo, 8-sep-2026.
+//
+// Dos objetos sobre el lienzo, no una caja: el folder manila con lo
+// mecanografiado y la copia instantánea encima, saliéndose por la izquierda.
+// Los campos son los que dibuja el boceto y NO hay más: marca (en la pestaña),
+// nombre, calibre, escala de precio, precio. Las existencias se quedan fuera a
+// propósito — «ignorar existencias, eso va en la ficha únicamente».
+// ──────────────────────────────────────────────────────────────
+function ArmaExpediente({ arma, onClick, distintivo, onCompare, inCompare }) {
+  // "$9,870.04 MXN" → "$9,870"
+  const precio = (arma.priceExact || '').replace(/\.\d{2}\s*MXN\s*$/, '');
+  const cal = (arma.calibre || '').replace(' Parabellum', '').replace('Winchester', 'Win');
+  const sello = SELLOS[arma.avail] || SELLOS.dcam;
+  const abrir = (e) => { e.preventDefault(); onClick && onClick(); };
+  return (
+    // No es un <button>: dentro de uno solo cabe contenido de frase, y aquí hay
+    // una <figure> con su <figcaption>. Es un div con rol y teclado, y el
+    // aria-label lleva la tarjeta entera para que el lector no recite el
+    // contenido suelto.
+    <div className="amx-exp" role="button" tabIndex={0}
+      onClick={abrir}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') abrir(e); }}
+      aria-label={[arma.nombre, arma.marca, cal && ('calibre ' + cal),
+        arma.availLabel || sello.texto, precio].filter(Boolean).join(', ')}>
+      <div className="amx-exp-folder">
+        {/* La marca va rotulada sobre la pestaña que trae la fotografía del
+            folder. Antes era una pestaña dibujada con CSS; Saulo la rechazó. */}
+        <span className="amx-exp-marca">{arma.marca}</span>
+        {distintivo}
+        {onCompare &&
+          <button type="button" className="amx-exp-comparar" aria-pressed={!!inCompare}
+            title={inCompare ? 'Quitar de la comparación' : 'Añadir a la comparación'}
+            onClick={(e) => { e.stopPropagation(); onCompare(); }}>
+            {inCompare ? '✓' : '⇄'}
+          </button>}
+        <div className="amx-exp-nombre">{arma.nombre}</div>
+        {cal && <div className="amx-exp-dato">CAL {cal}</div>}
+        <div className="amx-exp-dato"><PriceLevel claro lvl={arma.priceLvl} /></div>
+        {precio && <div className="amx-exp-precio">{precio}</div>}
+      </div>
+      {/* La copia va con el sello en el faldón: el nombre y los datos ya están
+          mecanografiados a su derecha, repetirlos sería decir dos veces lo
+          mismo a un palmo. */}
+      <div className="amx-exp-copia" aria-hidden="true">
+        <ArmaPolaroid arma={arma} pie="sello" />
+      </div>
+    </div>
+  );
+}
+window.ArmaExpediente = ArmaExpediente;
+
+// ──────────────────────────────────────────────────────────────
+// ARMA DESTACADA — el folder abierto de la portada
+// Tablero de Saulo, 8-sep-2026: «Polaroid solo con foto y nombre de la
+// pistola. Bandera, pais, especificaciones, etc. van escritos del lado
+// izquierdo en el folder». Y: «Se quitan estos botones. Si se hace click en la
+// Polaroid se abre el enlace al arma mostrada».
+//
+// Por eso el nombre del arma sale UNA vez, en el faldon de la copia, y no se
+// repite en el folder: en el boceto la copia es la que lleva el rotulo.
+// ──────────────────────────────────────────────────────────────
+function ArmaDestacada({ arma, onOpen }) {
+  const especificaciones = [
+    ['Calibre',   arma.calibre],
+    ['Capacidad', arma.capacidad],
+    ['Mecanismo', arma.mecanismo],
+    ['Longitud',  arma.longitud],
+    ['Peso',      arma.peso],
+  ].filter(([, v]) => v != null && v !== '');
+  return (
+    <article className="amx-dest">
+      <div className="amx-dest-folder">
+        <span className="amx-dest-rotulo">Arma destacada</span>
+        <div className="amx-dest-datos">
+          {/* Lo primero que se estampa, encima de lo mecanografiado. Va grande
+              porque aqui hay sitio, y dentro de esta columna y no como hermano
+              del grid: un tercer hijo se iria a la celda de la copia. */}
+          <div className="amx-dest-sello">
+            <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} grande />
+          </div>
+          <div className="amx-dest-procedencia">
+            <CountryFlag pais={arma.pais} height={12} />
+            <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
+          </div>
+          <dl className="amx-dest-specs">
+            {especificaciones.map(([k, v]) =>
+              <React.Fragment key={k}><dt>{k}</dt><dd>{v}</dd></React.Fragment>)}
+          </dl>
+        </div>
+        {/* La copia ES el enlace: el tablero retira los dos botones que habia
+            debajo y deja que se entre por la fotografia. */}
+        <button type="button" className="amx-dest-copia" onClick={onOpen}
+          aria-label={'Ver la ficha de ' + arma.nombre}>
+          <ArmaPolaroid arma={arma} pie="nombre" />
+        </button>
+      </div>
+    </article>
+  );
+}
+window.ArmaDestacada = ArmaDestacada;
 
 // ──────────────────────────────────────────────────────────────
 // FICHA TÉCNICA — la columna derecha del folder
@@ -1567,7 +1564,14 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
           display: 'flex', gap, overflowX: 'auto', overflowY: 'hidden',
           scrollSnapType: 'x mandatory',
           WebkitOverflowScrolling: 'touch',
-          padding: `4px ${padX}px 12px`,
+          // El padding vertical NO es decorativo: es lo que deja respirar a lo
+          // que se sale de la tarjeta. La copia instantánea de `ArmaExpediente`
+          // va girada y sobresale unos 12px por arriba y por abajo, y un
+          // scroller horizontal SIEMPRE recorta el otro eje — la regla del CSS
+          // es que si un eje es `auto`, el otro no puede quedarse en `visible`.
+          // Con `overflowY: hidden` y sin este aire, la polaroid salía cortada
+          // en cuadrado y se perdía justo lo que la hace parecer una foto.
+          padding: `18px ${padX}px 20px`,
           scrollPaddingLeft: padX,
           cursor: dragging ? 'grabbing' : 'grab',
           userSelect: dragging ? 'none' : undefined,
@@ -1575,7 +1579,9 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
         {items.map((it, i) => (
           <div key={it.id || i} style={{
             flex: `0 0 ${itemWidth}px`,
-            width: itemWidth, minWidth: 0, overflow: 'hidden',
+            // `overflow: visible` por lo mismo: el recorte del item cortaba la
+            // copia por el canto.
+            width: itemWidth, minWidth: 0, overflow: 'visible',
             scrollSnapAlign: 'start',
           }}>{renderItem(it, i)}</div>
         ))}
