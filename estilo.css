@@ -142,7 +142,15 @@
      precedente de CLARO.ok / CLARO.alerta. `amxColorAvail()` (ui.jsx) traduce
      el hex del dato a estos tokens. */
   --ok:         #2F6B33;   --d-ok:        #63C07C;  /* 5.28:1 / 5.47:1 */
-  --seguridad:  #7D6108;   --d-seguridad: #D3AC3F;  /* 5.49:1 / 5.70:1 */
+  /* SEGURIDAD comparte el rojo de EXCLUSIVO desde el 8-sep-2026. El amarillo
+     que tenía (#7D6108) no llegaba a 3:1 sobre los papeles del expediente, y
+     Saulo decidió dos colores y no tres: verde para lo civil, rojo para las
+     dos categorías restringidas. El color deja de distinguirlas y pasa a
+     hacerlo la PALABRA — por eso ninguna etiqueta de legalidad se abrevia.
+     Se conserva el token con su nombre: los data-*.js siguen mandando el hex
+     viejo y `amxColorAvail()` lo traduce aquí, así que el cambio llega a todo
+     el sitio sin tocar los datos ni el cache-busting. */
+  --seguridad:  var(--alerta);   --d-seguridad: var(--d-alerta);
   --alerta:     #A3341F;   --d-alerta:    #F0907E;  /* 5.63:1 / 5.26:1 */
   --azul:       #4A6B7C;   --d-azul:      #8FB9CE;  /* 4.69:1 / 5.85:1 */
   --gris-2:     #7C837B;   --d-gris-2:    #99A39B;  /* gráfico apagado */

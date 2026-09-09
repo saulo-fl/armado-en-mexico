@@ -260,21 +260,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
                     background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.35) 55%, rgba(23,58,50,0.75) 100%)`,
                     pointerEvents: 'none'
                   }} />
-                  {/* corner ticks */}
-                  <div style={{
-                    position: 'absolute', top: 6, left: 6,
-                    width: 10, height: 10,
-                    borderTop: `1.5px solid ${PALETTE.amber}`,
-                    borderLeft: `1.5px solid ${PALETTE.amber}`,
-                    opacity: 0.75
-                  }} />
-                  <div style={{
-                    position: 'absolute', bottom: 6, right: 6,
-                    width: 10, height: 10,
-                    borderBottom: `1.5px solid ${PALETTE.amber}`,
-                    borderRight: `1.5px solid ${PALETTE.amber}`,
-                    opacity: 0.75
-                  }} />
+                  {/* Aquí iban dos corchetes de esquina en verde de marca. Eran el
+                      esqueleto HUD del tema anterior, que §28 declaró derogado —«el
+                      HUD es un DETALLE de baja jerarquía, no la estructura»— y que
+                      es justo el tell de interfaz generada que Saulo viene
+                      señalando. `TacticalCorners` ya no pinta desde la fase 2;
+                      estos estaban puestos a mano y se habían quedado. */}
                   {/* Rótulo sobre el tinte. Medido contra el PEOR fondo posible:
                       foto blanca (tope real 235 tras el filtro brightness .92)
                       bajo el tinte 0.75, que compone #4C6660.
