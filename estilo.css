@@ -666,7 +666,10 @@
      4px por lado, que caben de sobra en el padding del folder: no provoca
      scroll horizontal. En móvil no va: a ancho completo el giro se come el
      ancho útil y desalinea la columna. */
-  .amx-v2 .amx-polaroid { transform: rotate(-1.2deg); }
+  /* El giro sale de `--giro` si quien la usa se lo pone —así las copias de
+     un carrusel no salen todas peinadas al mismo ángulo— y si no, se queda
+     en el -1.2° de siempre, que es el de la copia de la ficha. */
+  .amx-v2 .amx-polaroid { transform: rotate(var(--giro, -1.2deg)); }
 }
 .amx-v2 .amx-polaroid-pozo {
   background: var(--copia-placa);

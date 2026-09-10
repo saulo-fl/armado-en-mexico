@@ -241,12 +241,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
       <CarouselSection
         title="Campos de tiro"
         items={FOTOS_CAMPOS}
-        renderItem={(f) => <window.ProximamenteCard img={f} />} />
+        renderItem={(f, i) => <window.ProximamenteCard img={f} i={i} />} />
 
       <CarouselSection
         title="Experiencias"
         items={FOTOS_EXPERIENCIAS}
-        renderItem={(f) => <window.ProximamenteCard img={f} />} />
+        renderItem={(f, i) => <window.ProximamenteCard img={f} i={i + 2} />} />
 
       {/* 7 ▸ Disclaimer — MUDADO AL PIE (window.PieDeSitio, en ui.jsx) el
           9-sep-2026. Era un aviso de SITIO viviendo en una sola pantalla: solo

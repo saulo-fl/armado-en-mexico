@@ -503,7 +503,17 @@ window.ProximamenteScreen = ProximamenteScreen;
 // Tarjeta de relleno del carrusel de la home. Reusa StripePlaceholder para que
 // el hueco de la foto sea el mismo que tendrá la tarjeta real. Sin onClick y
 // sin cursor: pointer — no debe leerse como algo pulsable.
-function ProximamenteCard({ img }) {
+// Cinco ángulos, entre 1° y 2° y alternando el signo, repartidos por índice:
+// «están muy perfectas en su alineación, añade un poco de jittering» (Saulo,
+// 9-sep-2026). DETERMINISTA y no aleatorio a propósito: con `Math.random` las
+// copias saltarían de ángulo en cada repintado del carrusel.
+//
+// Cinco y no cuatro para que el ciclo no cuadre con la fila de 4. El índice lo
+// da el carrusel y empieza en 0 en CADA sección, así que Experiencias entra
+// desplazada dos posiciones desde el Home para no repetir la misma tirada.
+const GIROS_COPIA = ['-1.4deg', '1.1deg', '-1.8deg', '1.5deg', '-1deg'];
+
+function ProximamenteCard({ img, i = 0 }) {
   // Es una POLAROID APAISADA, no una tarjeta. Saulo, 9-sep-2026: «reemplazar
   // los marcos perfectos de CAMPOS DE TIRO y EXPERIENCIAS por marcos de
   // polaroid horizontales para mantener la estética de todo el HOME». Reusa
@@ -513,7 +523,8 @@ function ProximamenteCard({ img }) {
   // El «Próximamente» baja al FALDÓN, que es donde se rotula una copia a
   // mano. Antes era una banda de interfaz pegada bajo la foto.
   return (
-    <figure className="amx-polaroid amx-polaroid--apaisada">
+    <figure className="amx-polaroid amx-polaroid--apaisada"
+      style={{ '--giro': GIROS_COPIA[i % GIROS_COPIA.length] }}>
       <div className="amx-polaroid-pozo">
         {img ? (
           <React.Fragment>
