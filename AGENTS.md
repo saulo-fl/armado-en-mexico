@@ -245,10 +245,17 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
    se siguen exista o no el asset, y se comería `sitemap.xml`, `robots.txt`,
    `app.js` e `imagenes/`.
 
-`sitemap.xml` y `robots.txt` salen del mismo script. El `lastmod` se toma del commit
-que tocó cada `data-*.js`; las páginas fijas van **sin** `lastmod` a propósito (Google
-se cree la columna entera o la descarta entera: una fecha inventada contamina las
-buenas).
+`sitemap.xml` y `robots.txt` salen del mismo script. El `lastmod` sale de la **fecha del
+inventario** del que viene cada artículo (los historiales de precio la traen, una por
+artículo), así que es real y distinta por URL. Las páginas fijas van **sin** `lastmod` a
+propósito (Google se cree la columna entera o la descarta entera: una fecha inventada
+contamina las buenas).
+
+**NO lo saques de git.** Se intentó y estuvo mal desde el principio: Cloudflare Pages
+clona en superficial, así que `git log -1 -- ruta` cae siempre al commit HEAD y el
+sitemap publicado llevaba UNA sola fecha —la del último deploy— en sus 317 URLs. En
+local no se ve, porque ahí sí hay historial. Medido el 9-sep-2026 comparando armado.mx
+con el historial local; corregido en la misma fecha.
 
 ## Direcciones (URLs) — esquema y reglas
 

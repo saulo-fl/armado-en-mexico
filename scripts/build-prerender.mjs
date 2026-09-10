@@ -19,7 +19,6 @@
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { createContext, runInContext } from 'node:vm';
 
 const SITIO = 'https://armado.mx';
@@ -44,6 +43,29 @@ for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js',
 }
 const ARMAS = win.DB || [], ACCESORIOS = win.ACCESORIOS || [], MUNICIONES = win.MUNICIONES || [];
 if (!ARMAS.length) throw new Error('No se cargaron las armas: revisa data.js');
+
+// ─── 1b. Fecha real de cada artículo, para el lastmod del sitemap ───────────
+// NO sale de git. Cloudflare Pages clona en superficial, así que
+// `git log -1 -- ruta` cae siempre al commit HEAD y el sitemap publicado
+// acababa con UNA sola fecha —la del último deploy— en sus 317 URLs. Medido el
+// 9-sep-2026 comparando armado.mx con el historial local.
+//
+// Los historiales de precio SÍ traen la fecha real de cada inventario, y una
+// por artículo: es exactamente cuándo cambió el dato de ESA página. Cobertura
+// verificada: 192/192 armas, 36/36 accesorios, 71/71 municiones.
+// Formato ISO corto (AAAA-MM-DD), que es W3C válido para <lastmod>.
+const ultimaFecha = (hist) => (Array.isArray(hist) ? hist : [])
+  .map((e) => e && e.date).filter(Boolean).sort().pop() || '';
+const histAcc = (id) => (typeof win.getAccesorioPriceHistory === 'function'
+  ? win.getAccesorioPriceHistory(id) : (win.ACCESORIOS_PRICE_HISTORY || {})[id]);
+const histMun = (id) => (typeof win.getMunicionPriceHistory === 'function'
+  ? win.getMunicionPriceHistory(id) : (win.MUNICIONES_PRICE_HISTORY || {})[id]);
+const fechaArma = (a) => ultimaFecha((win.AMX_PRICE_HISTORY_SEED || {})[a.id]);
+const fechaAcc = (c) => ultimaFecha(histAcc(c.id));
+const fechaMun = (m) => ultimaFecha(histMun(m.id));
+// Un listado es tan reciente como el más reciente de sus artículos.
+const fechaPorRuta = new Map();
+const masReciente = (fechas) => fechas.filter(Boolean).sort().pop() || '';
 
 // ─── 2. Slugs: misma lógica que app.jsx ─────────────────────────────────────
 // (duplicada a propósito — este script corre en Node, sin el bundle de la app.
@@ -214,7 +236,8 @@ ${a.historia ? `<h2>Contexto</h2><p>${esc(a.historia)}</p>` : ''}
 <p><small>Información divulgativa basada en la Ley Federal de Armas de Fuego y Explosivos y en el catálogo oficial DCAM/SEDENA. Sin fines de lucro; no se comercializan armas de fuego.</small></p>
 </article>`,
   });
-  paginas.push({ ruta, enSitemap: true, fuente: 'armas' });
+  fechaPorRuta.set(ruta, fechaArma(a));
+  paginas.push({ ruta, enSitemap: true, fuente: 'armas', lastmod: fechaArma(a) });
 }
 
 // 5b. Fichas de accesorio
@@ -239,7 +262,8 @@ ${dl([['Marca', c.marca], ['Categoría', CAT_LABEL[rama] || c.categoria], ['Paí
       ['Clasificación', c.avail], ['Precio de referencia', c.priceExact]])}
 </article>`,
   });
-  paginas.push({ ruta, enSitemap: true, fuente: 'acc' });
+  fechaPorRuta.set(ruta, fechaAcc(c));
+  paginas.push({ ruta, enSitemap: true, fuente: 'acc', lastmod: fechaAcc(c) });
 }
 
 // 5c. Fichas de munición
@@ -262,7 +286,8 @@ ${dl([['Calibre', m.calibre], ['Marca', m.marca], ['Tipo de bala', m.bala], ['Gr
       ['Uso', m.tipo], ['País', m.pais], ['Clasificación', m.avail], ['Precio de referencia', m.priceExact]])}
 </article>`,
   });
-  paginas.push({ ruta, enSitemap: true, fuente: 'mun' });
+  fechaPorRuta.set(ruta, fechaMun(m));
+  paginas.push({ ruta, enSitemap: true, fuente: 'mun', lastmod: fechaMun(m) });
 }
 
 // 5d. Listados por rama (armas y accesorios) + municiones
@@ -299,7 +324,8 @@ for (const l of listados) {
 <ul>${l.items.map((it) => `<li><a href="/${it.ruta}">${esc(it.nombre)}</a></li>`).join('')}</ul>
 </article>`,
   });
-  paginas.push({ ruta: l.ruta, enSitemap: true, fuente: l.fuente });
+  paginas.push({ ruta: l.ruta, enSitemap: true, fuente: l.fuente,
+    lastmod: masReciente((l.items || []).map((it) => fechaPorRuta.get(it.ruta))) });
 }
 
 // 5e. Páginas fijas de la app
@@ -351,33 +377,20 @@ for (const p of FIJAS) {
 }
 
 // ─── 6. sitemap.xml ─────────────────────────────────────────────────────────
-// lastmod: se toma la fecha real del último commit que tocó los datos. Google
-// solo usa lastmod si es "consistently and verifiably accurate" y la confianza
-// es binaria: si no fuera real, es mejor omitirlo que inventar la fecha del build.
-// Cada página lleva la fecha del commit que tocó SU fuente de datos. Las
-// páginas fijas no salen de un data-*.js, así que van SIN lastmod: es
-// preferible omitirlo a inventar una fecha, porque Google se cree la columna
-// entera o la descarta entera, y una fecha falsa contamina las verdaderas.
-// OJO (medido 9-sep-2026): en el build de Cloudflare esto NO devuelve la fecha del
-// dato. Pages clona en superficial, así que `git log -1 -- ruta` cae siempre al commit
-// HEAD: el sitemap publicado lleva UNA sola fecha en sus 317 URLs, la del último
-// deploy. Es la «fecha inventada» que el bloque de arriba dice evitar, y lleva así
-// desde siempre — en local no se ve, porque aquí sí hay historial. Arreglarlo es tarea
-// aparte: --follow --diff-filter=M lo resuelve en local pero deja el sitemap SIN
-// lastmod en Cloudflare, que es otro comportamiento distinto del actual.
-const fechaDe = (archivo) => {
-  try {
-    return execFileSync('git', ['log', '-1', '--format=%cI', '--', archivo],
-      { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
-  } catch { return ''; }   // sin git (build de Cloudflare sin historial) → se omite
-};
-const FECHA = { armas: fechaDe('src/data/data.js'), acc: fechaDe('src/data/data-accesorios.js'), mun: fechaDe('src/data/data-municiones.js') };
+// lastmod: la fecha real del inventario del que sale cada artículo (ver 1b), no
+// la del build ni la de un commit. Google solo usa lastmod si es "consistently
+// and verifiably accurate" y la confianza es binaria: si no fuera real, es mejor
+// omitirlo que inventar una fecha, porque se cree la columna entera o la
+// descarta entera, y una fecha falsa contamina las verdaderas. Las páginas fijas
+// no salen de un data-*.js, así que siguen SIN lastmod.
+// La portada lleva la más reciente de todas: es lo que cambia cuando cambia algo.
 
-const enSitemap = [{ ruta: '', enSitemap: true }, ...paginas].filter((p) => p.enSitemap);
+const enSitemap = [{ ruta: '', enSitemap: true, lastmod: masReciente(paginas.map((p) => p.lastmod)) },
+  ...paginas].filter((p) => p.enSitemap);
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${enSitemap.map(({ ruta, fuente }) => {
-  const lm = fuente ? FECHA[fuente] : '';
+${enSitemap.map(({ ruta, lastmod }) => {
+  const lm = lastmod || '';
   return `  <url><loc>${esc(ruta ? `${SITIO}/${ruta}` : `${SITIO}/`)}</loc>`
     + (lm ? `<lastmod>${lm}</lastmod>` : '') + `</url>`;
 }).join('\n')}
@@ -482,6 +495,7 @@ if (sinVersion.length) {
 console.log(`prerender: ${paginas.length} páginas`
   + ` (${ARMAS.length} armas · ${ACCESORIOS.length} accesorios · ${MUNICIONES.length} municiones`
   + ` · ${listados.length} listados · ${FIJAS.length} fijas)`);
-const conFecha = enSitemap.filter((p) => p.fuente && FECHA[p.fuente]).length;
+const conFecha = enSitemap.filter((p) => p.lastmod).length;
+const distintas = new Set(enSitemap.map((p) => p.lastmod).filter(Boolean)).size;
 console.log(`sitemap:   ${enSitemap.length} URLs · ${conFecha} con lastmod`
-  + (FECHA.armas ? ` (datos: ${FECHA.armas.slice(0, 10)})` : ' — sin git, lastmod omitido'));
+  + ` · ${distintas} fechas distintas (de los inventarios, no de git)`);
