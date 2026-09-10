@@ -217,7 +217,7 @@ window.useViewport = useViewport;
 // #FAF9F5 (11.81:1) — el texto un punto más claro para que gane la jerarquía.
 // El recuadro es marco decorativo (opacity .5): no porta información, la
 // información está en la silueta y en el texto.
-function LogoMarca({ size = 28, conTexto = false, src = null }) {
+function LogoMarca({ size = 28, conTexto = false, src = null, color = '#FAF9F5' }) {
   const ft = Math.max(12, Math.round(size * 0.43)); // piso tipográfico 12px
   // `src` = logo subido desde el panel de admin. El SVG de marca es el de
   // fabrica; si Saulo sube uno propio manda el suyo, y asi la pestana BRANDING
@@ -262,7 +262,9 @@ function LogoMarca({ size = 28, conTexto = false, src = null }) {
           fontFamily: 'Archivo, sans-serif', fontWeight: 700,
           fontSize: ft, lineHeight: 1.04,
           letterSpacing: '0.06em', textTransform: 'uppercase',
-          color: '#FAF9F5',                 // 11.81:1 sobre el verde de marca
+          // Por defecto, 11.81:1 sobre el verde de marca. El pie lo invierte a
+          // `--marca` sobre la placa crema: 10.83:1, el mismo par al revés.
+          color,
           whiteSpace: 'nowrap',
         }}>
           <span>Armado en</span>
@@ -992,6 +994,31 @@ function PieDeSitio({ onNav }) {
         // apoya en esa misma variable.
         padding: `24px ${padX}px calc(24px + var(--amx-nav-h, 0px))`,
       }}>
+        {/* ── LA PLACA DEL LOGOTIPO ─────────────────────────────────
+            «Añade el logo al pie de página para darle más identidad» (Saulo,
+            9-sep-2026), con su boceto: la placa clavada A CABALLO del canto,
+            mitad fuera del verde y mitad dentro, tapando la línea tricolor por
+            el centro. Es el mismo gesto del sello sobre el expediente.
+
+            El tirón hacia arriba son los 24px de `padding` más la mitad de los
+            50 de alto de la placa: así el canto la parte por el medio sin que
+            haya que posicionarla en absoluto ni tocar el flujo de lo demás.
+
+            `LogoMarca` es el logotipo de verdad —isotipo recortado del original
+            más las palabras al lado—, no un dibujo: §6b manda usarlo tal cual.
+            Sobre la placa crema el texto va en `--marca`: 10.83:1, el mismo par
+            que sobre el verde, invertido. */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: -49, marginBottom: 20 }}>
+          <span style={{
+            background: 'var(--crema)',
+            padding: '10px 18px',
+            display: 'inline-flex',
+            boxShadow: '0 2px 6px rgba(23, 27, 25, .28)',
+          }}>
+            <LogoMarca size={30} conTexto color={PALETTE.marca} />
+          </span>
+        </div>
+
         {/* Centrado por orden expresa de Saulo (revisión del 9-sep-2026). Un
             solo `textAlign` en el contenedor y lo heredan los tres estratos: no
             hace falta repetirlo en cada bloque. Los bloques con ancho de medida
