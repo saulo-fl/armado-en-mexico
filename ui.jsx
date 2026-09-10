@@ -1059,8 +1059,8 @@ function PieDeSitio({ onNav }) {
             fontSize: 15.5, color: PALETTE.sobreMarca, lineHeight: 1.6,
             marginBottom: 14, maxWidth: '82ch', marginInline: 'auto',
           })}>
-            Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con
-            fines informativos. Información basada en la <Interno a="/legalidad" tab="legal">Ley
+            Catálogo divulgativo de código abierto sin fines de lucro. Las armas de fuego se
+            muestran solo con fines informativos. Información basada en la <Interno a="/legalidad" tab="legal">Ley
             Federal de Armas de Fuego</Interno> y precios DCAM.
           </div>
 
