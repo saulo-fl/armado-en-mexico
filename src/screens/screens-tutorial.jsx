@@ -338,6 +338,14 @@
             font-family: var(--sans); font-weight: 600; font-size: 13px;
             letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-2);
           }
+          /* El filete del pie cruza la pantalla entera, pero sus dos botones van
+             a la anchura de la hoja. Repartidos a los cantos de una pantalla de
+             1440px, el sello de avance quedaba a 400px del documento que cierra
+             —suelto en una esquina—. En móvil el tope no llega a actuar. */
+          .tut-pie {
+            display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            max-width: 560px; margin: 0 auto;
+          }
         `}</style>
 
         {/* ── Cuerpo: la hoja del expediente ── */}
@@ -427,16 +435,17 @@
             etiqueta en el último paso pero el <button> seguía montado: un
             destino de tabulación invisible que cerraba el tutorial. */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14,
           padding: `10px ${PAD}px ${vp.isDesktop ? 22 : 14}px`,
           borderTop: `1px solid ${P.border}`,
         }}>
-          <button type="button" className="tut-atras" onClick={goBack} disabled={idx === 0}
-            style={{ visibility: idx === 0 ? 'hidden' : 'visible' }}>‹ Atrás</button>
+          <div className="tut-pie">
+            <button type="button" className="tut-atras" onClick={goBack} disabled={idx === 0}
+              style={{ visibility: idx === 0 ? 'hidden' : 'visible' }}>‹ Atrás</button>
 
-          <button type="button" className="tut-btn" onClick={() => (last ? finish() : goNext())}>
-            <Sello giro={-3}>{last ? 'Continuar' : 'Siguiente ›'}</Sello>
-          </button>
+            <button type="button" className="tut-btn" onClick={() => (last ? finish() : goNext())}>
+              <Sello giro={-3}>{last ? 'Continuar' : 'Siguiente ›'}</Sello>
+            </button>
+          </div>
         </div>
       </div>
     );
