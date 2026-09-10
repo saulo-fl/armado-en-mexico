@@ -60,7 +60,7 @@ if (args.length === 2) {
 
 // ── Las dos paletas, leídas de estilo.css ───────────────────────────────────
 const aqui = dirname(fileURLToPath(import.meta.url));
-const cssPath = resolve(aqui, '../../../../estilo.css');
+const cssPath = resolve(aqui, '../../../../src/styles/estilo.css');
 const css = readFileSync(cssPath, 'utf8');
 
 // El primer `:root { … }` del archivo es el bloque de tokens. Se corta en el

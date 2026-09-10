@@ -41,11 +41,13 @@ import fotos                      # hermano: mascara, aplanar, decontaminar, rec
 # descompuesta: sin esto, un print revienta la corrida entera.
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-REPO = fotos.REPO                 # .../repo/github-deploy
+REPO = fotos.REPO
+PUBLICO = fotos.PUBLICO
+DATOS = fotos.DATOS                 # .../repo/github-deploy
 PROY = fotos.PROY                 # .../Armado en Mexico
 FUENTE = PROY / "Catalogo de Armas" / "cajas-fuente"      # lo bajado, fuera del repo
 MASTER = FUENTE / "_master"                                # PNG recortado a resolucion plena
-DESTINO = REPO / "imagenes" / "municiones"                 # lo que entra al sitio
+DESTINO = PUBLICO / "imagenes" / "municiones"                 # lo que entra al sitio
 HOJA = PROY / "Catalogo de Armas" / "fotos-trabajo" / "hoja-cajas.html"
 
 ANCHO = 900          # la ficha da ~470 px al ancho de la caja; x2 de DPR
@@ -260,7 +262,7 @@ MARCA_FIN = "/* ↑ fin generado por cajas.py ↑ */"
 
 def aplicar(args):
     """Reescribe el bloque MUNICION_CAJAS con lo que HAY en imagenes/municiones/."""
-    js = (REPO / "data-municiones.js").read_text("utf-8")
+    js = (DATOS / "data-municiones.js").read_text("utf-8")
     if MARCA_INI not in js or MARCA_FIN not in js:
         print("data-municiones.js no tiene el bloque generado; ver SKILL.md")
         return 1
@@ -280,7 +282,7 @@ def aplicar(args):
     fin = js.index(MARCA_FIN) + len(MARCA_FIN)
     bloque = (MARCA_INI + " · no editar a mano ↓ */\n"
               "  window.MUNICION_CAJAS = {\n" + "\n".join(pares) + "\n  };\n  " + MARCA_FIN)
-    (REPO / "data-municiones.js").write_text(js[:ini] + bloque + js[fin:], "utf-8")
+    (DATOS / "data-municiones.js").write_text(js[:ini] + bloque + js[fin:], "utf-8")
     print(f"MUNICION_CAJAS: {len(pares)} cajas")
     return verificar(args)
 
@@ -289,7 +291,7 @@ def verificar(args):
     """Contra data-municiones.js CARGADO, no contra el texto: un bloque generado
     puede quedar sintacticamente bien y no llegar a ninguna municion."""
     db = catalogo()
-    rotas = [m for m in db if m["img"] and not (REPO / m["img"].split("?")[0]).exists()]
+    rotas = [m for m in db if m["img"] and not (PUBLICO / m["img"].split("?")[0]).exists()]
     con = [m for m in db if m["img"]]
     huerfanas = []
     claves_vivas = {clave(m) for m in db} | {str(m["id"]) for m in db}

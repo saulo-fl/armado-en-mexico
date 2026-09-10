@@ -24,6 +24,12 @@ import { createContext, runInContext } from 'node:vm';
 
 const SITIO = 'https://armado.mx';
 const RAIZ = process.cwd();
+// El repo separa fuente de salida: se lee de src/ y public/, se escribe en out/.
+// out/ es lo que Cloudflare Pages publica (pages_build_output_dir en wrangler.toml).
+const SRC = join(RAIZ, 'src');
+const PUB = join(RAIZ, 'public');
+const OUT = join(RAIZ, 'out');
+mkdirSync(OUT, { recursive: true });
 
 // ─── 1. Cargar los datos igual que el navegador ─────────────────────────────
 // Los data-*.js no son módulos: cuelgan sus catálogos de `window`. Se ejecutan
@@ -34,7 +40,7 @@ const ctx = createContext({ window: win, console });
 ctx.window = win;
 for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js',
                  'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
-  runInContext(readFileSync(join(RAIZ, f), 'utf8'), ctx, { filename: f });
+  runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
 const ARMAS = win.DB || [], ACCESORIOS = win.ACCESORIOS || [], MUNICIONES = win.MUNICIONES || [];
 if (!ARMAS.length) throw new Error('No se cargaron las armas: revisa data.js');
@@ -91,7 +97,7 @@ const migas = (items) => ({
 });
 
 // ─── 4. Shell: index.html con los huecos marcados ───────────────────────────
-const shell = readFileSync(join(RAIZ, 'index.html'), 'utf8');
+const shell = readFileSync(join(SRC, 'pages', 'index.html'), 'utf8');
 
 // APP_BASE se calcula desde location.pathname. Eso valía cuando toda ruta
 // profunda pasaba por 404.html (y pathname era "/"). Ahora que cada URL es un
@@ -166,7 +172,7 @@ function emitir(ruta, { titulo, desc, jsonld, cuerpo, noindex }) {
     // Es lo que leen los crawlers que no ejecutan JavaScript.
     .replace(MARCA_ROOT, `<div id="app-root">${cuerpo}${PIE}</div>`);
 
-  const destino = join(RAIZ, ruta ? `${ruta}.html` : 'index.html');
+  const destino = join(OUT, ruta ? `${ruta}.html` : 'index.html');
   mkdirSync(dirname(destino), { recursive: true });
   writeFileSync(destino, html, 'utf8');
   return url;
@@ -352,13 +358,20 @@ for (const p of FIJAS) {
 // páginas fijas no salen de un data-*.js, así que van SIN lastmod: es
 // preferible omitirlo a inventar una fecha, porque Google se cree la columna
 // entera o la descarta entera, y una fecha falsa contamina las verdaderas.
+// OJO (medido 9-sep-2026): en el build de Cloudflare esto NO devuelve la fecha del
+// dato. Pages clona en superficial, así que `git log -1 -- ruta` cae siempre al commit
+// HEAD: el sitemap publicado lleva UNA sola fecha en sus 317 URLs, la del último
+// deploy. Es la «fecha inventada» que el bloque de arriba dice evitar, y lleva así
+// desde siempre — en local no se ve, porque aquí sí hay historial. Arreglarlo es tarea
+// aparte: --follow --diff-filter=M lo resuelve en local pero deja el sitemap SIN
+// lastmod en Cloudflare, que es otro comportamiento distinto del actual.
 const fechaDe = (archivo) => {
   try {
     return execFileSync('git', ['log', '-1', '--format=%cI', '--', archivo],
       { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
   } catch { return ''; }   // sin git (build de Cloudflare sin historial) → se omite
 };
-const FECHA = { armas: fechaDe('data.js'), acc: fechaDe('data-accesorios.js'), mun: fechaDe('data-municiones.js') };
+const FECHA = { armas: fechaDe('src/data/data.js'), acc: fechaDe('src/data/data-accesorios.js'), mun: fechaDe('src/data/data-municiones.js') };
 
 const enSitemap = [{ ruta: '', enSitemap: true }, ...paginas].filter((p) => p.enSitemap);
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -370,7 +383,7 @@ ${enSitemap.map(({ ruta, fuente }) => {
 }).join('\n')}
 </urlset>
 `;
-writeFileSync(join(RAIZ, 'sitemap.xml'), xml, 'utf8');
+writeFileSync(join(OUT, 'sitemap.xml'), xml, 'utf8');
 
 // ─── 6b. (sin _redirects) ───────────────────────────────────────────────────
 // Aquí hubo un rewrite `/pistolas -> /pistolas.html 200` para fijar el listado
@@ -382,7 +395,7 @@ writeFileSync(join(RAIZ, 'sitemap.xml'), xml, 'utf8');
 // ─── 7. robots.txt ──────────────────────────────────────────────────────────
 // Cloudflare antepone su propio bloque gestionado (Content Signals) a este
 // fichero; la directiva Sitemap: es global y funciona igualmente. Ver SEO.md.
-writeFileSync(join(RAIZ, 'robots.txt'), `User-agent: *
+writeFileSync(join(OUT, 'robots.txt'), `User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin.html
@@ -414,13 +427,13 @@ Sitemap: ${SITIO}/sitemap.xml
 // El \r\n importa: git materializa `_headers` con CRLF en Windows y con LF en
 // el build de Cloudflare. Sin normalizar, en local fallaba denunciando los 19
 // archivos a la vez — un guardia que grita siempre se acaba ignorando.
-const reglasCache = readFileSync(join(RAIZ, '_headers'), 'utf8').replace(/\r\n/g, '\n');
+const reglasCache = readFileSync(join(PUB, '_headers'), 'utf8').replace(/\r\n/g, '\n');
 const scriptsLocales = new Set();
 const sinVersion = [];
-// shopify-demo.html también carga código del sitio; fuera de esta lista sus
-// <script> se saltaban los dos guardias.
-for (const html of ['index.html', 'admin.html', 'shopify-demo.html']) {
-  const src = readFileSync(join(RAIZ, html), 'utf8');
+// Las dos páginas fuente que cargan código del sitio. Fuera de esta lista sus
+// <script> se saltarían los dos guardias de abajo.
+for (const html of ['index.html', 'admin.html']) {
+  const src = readFileSync(join(SRC, 'pages', html), 'utf8');
   // Grupo 1 = ruta sin query (lo que se busca en `_headers`); grupo 2 = la query
   // tal cual, que es donde se comprueba el ?v=.
   const refs = [
