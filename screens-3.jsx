@@ -512,6 +512,7 @@ window.ProximamenteScreen = ProximamenteScreen;
 // da el carrusel y empieza en 0 en CADA sección, así que Experiencias entra
 // desplazada dos posiciones desde el Home para no repetir la misma tirada.
 const GIROS_COPIA = ['-1.4deg', '1.1deg', '-1.8deg', '1.5deg', '-1deg'];
+window.GIROS_COPIA = GIROS_COPIA;
 
 function ProximamenteCard({ img, i = 0 }) {
   // Es una POLAROID APAISADA, no una tarjeta. Saulo, 9-sep-2026: «reemplazar

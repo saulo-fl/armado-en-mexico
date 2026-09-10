@@ -297,7 +297,7 @@ function TraumaRegistro() {
   );
 }
 
-function TraumaTierCard({ p, vp, onNav, indice, total }) {
+function TraumaTierCard({ p, vp, onNav, indice }) {
   const go = () => onNav && onNav('traumaticas');
   const t = TRAUMA_TINTAS[p.id] || TRAUMA_TINTAS.secure68p;
   // MÓVIL: solo cuatro características —SEDENA, calibre, joules y capacidad—.
@@ -306,7 +306,6 @@ function TraumaTierCard({ p, vp, onNav, indice, total }) {
   // data-traumaticas.js ni duplicar el dato. El precio de no duplicarlo: si
   // algún día se reordenan allí, esta lista se reordena con ellas.
   const features = vp.isDesktop ? p.features : p.features.slice(0, 4);
-  const folio = (n) => String(n).padStart(2, '0');
   return (
     <div className="trauma-carton" role="link" tabIndex={0}
       onClick={go}
@@ -316,7 +315,9 @@ function TraumaTierCard({ p, vp, onNav, indice, total }) {
       <div className="trauma-plancha">
         <div className="trauma-cab">
           <TraumaRegistro />
-          <span className="trauma-folio">EXP. {folio(indice + 1)}/{folio(total)}</span>
+          {/* Sin folio. «Eliminar el slop de EXP 01/03» (Saulo, 9-sep-2026): era
+              un número de expediente inventado, y un dato falso no da carta de
+              autenticidad, la quita. El sello queda CENTRADO en la fila. */}
           <span className="trauma-sello">{p.tier}</span>
         </div>
         <div className="trauma-filete" />
@@ -325,9 +326,16 @@ function TraumaTierCard({ p, vp, onNav, indice, total }) {
           <span className="trauma-fuga" aria-hidden="true">{p.modelo}</span>
           <span className="trauma-tinta">{p.modelo}</span>
         </h3>
-        <div className="trauma-ventana">
-          <img src={p.img} alt={p.nombre} loading="lazy" />
-        </div>
+        {/* La foto va en POLAROID, como el resto del Home (Saulo, 9-sep-2026).
+            Reusa `.amx-polaroid--apaisada`: mismo cartón, mismo faldón y mismo
+            giro que las copias de Campos y Experiencias, con el ángulo repartido
+            por índice —que es lo que antes alimentaba el folio—. */}
+        <figure className="amx-polaroid amx-polaroid--apaisada trauma-copia"
+          style={{ '--giro': (window.GIROS_COPIA || [])[indice % 3] }}>
+          <div className="amx-polaroid-pozo">
+            <img src={p.img} alt={p.nombre} loading="lazy" />
+          </div>
+        </figure>
         <p className="trauma-tagline">{p.tagline}</p>
         <ul className="trauma-lista">
           {features.map((f) => <li key={f}>{f}</li>)}
@@ -434,18 +442,19 @@ function HomeTraumaBanner({ onNav }) {
 
         /* ── Cabecera: cruz de registro + folio + sello del tier ─────────── */
         .trauma-cab {
-          display: flex; align-items: center; gap: 7px; flex-wrap: wrap; row-gap: 6px;
+          /* Rejilla de tres y no flex: así el sello cae en el centro EXACTO de
+             la fila, sin que lo desplace el ancho de la cruz de registro. */
+          display: grid; grid-template-columns: 1fr auto 1fr;
+          align-items: center; gap: 7px;
           font-family: var(--mono);
           font-size: 11px;                     /* piso de texto funcional */
           font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
         }
-        .trauma-folio { font-variant-numeric: tabular-nums; }
         /* El tier se queda —«Más económica / Más popular / Más poderosa»—
            pero deja de ser una píldora flotante de radio 999 colgada del
            borde: eso es UI de 2026, no imprenta. Ahora es un sello
            recuadrado, y ningún sello cae recto. */
         .trauma-sello {
-          margin-left: auto;
           border: 1px solid currentColor;
           padding: 3px 7px;
           letter-spacing: .1em;
@@ -482,20 +491,29 @@ function HomeTraumaBanner({ onNav }) {
           pointer-events: none;
         }
         .trauma-tinta { position: relative; z-index: 1; }
-        /* La ventana del grabado: papel sin imprimir con su filete. Se queda
-           clara en los dos temas —87 de las fotos son recortes sobre blanco
-           opaco (CLAUDE.md) y el multiply necesita blanco debajo—. Sobre el
-           cartón da 1.07:1: quien la encuadra es el filete de tinta. */
-        .trauma-ventana {
-          margin-top: 13px; height: 152px; box-sizing: border-box;
-          background: var(--copia-placa);
-          border: 1.5px solid currentColor;
-          display: flex; align-items: center; justify-content: center;
-          padding: 9px 13px; overflow: hidden;
+        /* LA COPIA. Sustituye a la ventana de tinta: mismo cartón y mismo
+           faldón que las copias de Campos y Experiencias, para que las fichas
+           hablen el idioma del resto del Home. */
+        .amx-v2 .trauma-carton .trauma-copia {
+          margin-top: 13px;
+          /* El faldón, como padding: aquí no va rotulado —el modelo ya está
+             escrito arriba, en el título— y repetirlo debajo sería decir dos
+             veces lo mismo. Igual que la polaroid apaisada de referencia, que
+             tiene el faldón en blanco. */
+          padding-bottom: 34px;
         }
-        .trauma-ventana img {
-          max-width: 100%; max-height: 100%;
-          object-fit: contain; display: block; mix-blend-mode: multiply;
+        /* El pozo de la apaisada va a 16/9, casi el alto que tenía la ventana
+           de antes: el cartón entra sin estirar la tarjeta. */
+        .amx-v2 .trauma-carton .trauma-copia .amx-polaroid-pozo img {
+          /* La apaisada recorta al marco porque sirve fotos de paisaje. Estas
+             son RECORTES DE PRODUCTO: se contienen, no se encuadran. Y siguen
+             en multiply porque 87 de las fotos del catálogo son recortes sobre
+             blanco opaco (CLAUDE.md) y el multiply necesita el blanco debajo,
+             que es justo lo que pone el pozo con --copia-placa. */
+          width: auto; height: auto;
+          max-width: 92%; max-height: 92%;
+          object-fit: contain;
+          mix-blend-mode: multiply;
         }
         .trauma-tagline {
           margin: 13px 0 0; font-family: var(--sans);
@@ -539,7 +557,7 @@ function HomeTraumaBanner({ onNav }) {
            que el cartón se aprieta. */
         @media (max-width: 899px) {
           .trauma-titulo  { font-size: 29px; }
-          .trauma-ventana { height: 128px; margin-top: 12px; }
+          .amx-v2 .trauma-carton .trauma-copia { margin-top: 12px; padding-bottom: 28px; }
           .trauma-plancha { padding: 11px 12px 14px; }
         }
       `}</style>
