@@ -39,25 +39,6 @@ const FOTOS_EXPERIENCIAS = [
   'imagenes/proximamente-exp-2.webp',
   'imagenes/proximamente-exp-3.webp',
 ];
-// Ocupa el sitio del «Ver todos →» pero NO es un enlace. Ahora que los enlaces
-// de acción son rojos (estiloAccion), el verde de marca ya lo diferencia solo:
-// se queda en PALETTE.marca —10.83:1 sobre el lienzo crema, el mismo hex que el
-// antiguo PALETTE.amber— y se nombra por lo que es. Sobre superficie verde habría
-// que usar PALETTE.sobreMarcaMuted, pero este tag siempre cae sobre el lienzo.
-// Sin aria-hidden a propósito: «(Próximamente)» es la ÚNICA señal de que la
-// sección está congelada, y ocultarla al lector de pantalla borra esa información.
-function ProximamenteTag() {
-  return (
-    <span style={{
-      // El ACENTO, no la superficie de marca: en oscuro el verde #173A32 sobre
-      // el lienzo da 1.52:1 y este rótulo desaparecía. PALETTE.amber vale lo
-      // mismo (#173A32) en claro y sube a la variante clara en oscuro (9.17:1).
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber,
-      letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-      cursor: 'default',   // refuerza que no se pincha, aunque esté donde iba el enlace
-    }}>(Próximamente)</span>
-  );
-}
 
 // precio numérico (MXN) a partir de priceExact "$10,061.26 MXN"
 const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^\d.]/g, '')) || 0;
@@ -211,7 +192,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <CaliberMiniCard cal={c} onClick={() => onNav('calibres')} />
         } />
 
-      {/* 8 ▸ Categorías rápidas (legacy) */}
+      {/* 8 ▸ Categorías — cartas de lotería */}
       <div style={{ ...containerMax, padding: `8px ${PAD}px 0` }}>
         <SectionHeader action={
         // Mismo enlace de acción que «Ver guía»: rojo por estiloAccion, no el
@@ -219,89 +200,21 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <button onClick={() => onNav('catalog')} style={window.estiloAccion(false)}>Ver Todas →</button>
         }>Categorías</SectionHeader>
 
-        <div style={{
-          display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(5, 1fr)' : '1fr 1fr',
-          gap: 10, marginBottom: 22
-        }}>
-          {window.CATEGORIES.tipo.map((c) => {
-            const count = window.DB.filter((a) => a.tipo === c.id).length;
-            const hero = CATEGORY_HEROS[c.id];
-            return (
-              <button key={c.id} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} style={{
-                background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
-                padding: 0, cursor: 'pointer', textAlign: 'left',
-                position: 'relative', overflow: 'hidden',
-                display: 'block', width: '100%',
-                transition: 'border-color 0.18s'
-              }}
-                onMouseEnter={(e) => { e.currentTarget.style.borderColor = PALETTE.amber; }}
-                onMouseLeave={(e) => { e.currentTarget.style.borderColor = PALETTE.border; }}>
-                {/* Foto 4:5 */}
-                <div style={{
-                  width: '100%', aspectRatio: '4 / 5',
-                  position: 'relative', overflow: 'hidden',
-                  background: `linear-gradient(135deg, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`
-                }}>
-                  {hero && (
-                    <img src={hero} alt={c.label} loading="lazy" style={{
-                      width: '100%', height: '100%',
-                      objectFit: 'cover',
-                      objectPosition: 'center',
-                      filter: 'contrast(1.06) saturate(0.92) brightness(0.92)',
-                      display: 'block'
-                    }} />
-                  )}
-                  {/* Tinte de marca. La parada final baja de 0.92 a 0.75: a 0.92
-                      la foto desaparecía bajo el verde y aun así el rótulo iba en
-                      tinta casi negra encima — ilegible a cualquier opacidad. El
-                      arreglo es doble: menos tinte Y texto claro (abajo). */}
-                  <div style={{
-                    position: 'absolute', inset: 0,
-                    background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.35) 55%, rgba(23,58,50,0.75) 100%)`,
-                    pointerEvents: 'none'
-                  }} />
-                  {/* Aquí iban dos corchetes de esquina en verde de marca. Eran el
-                      esqueleto HUD del tema anterior, que §28 declaró derogado —«el
-                      HUD es un DETALLE de baja jerarquía, no la estructura»— y que
-                      es justo el tell de interfaz generada que Saulo viene
-                      señalando. `TacticalCorners` ya no pinta desde la fase 2;
-                      estos estaban puestos a mano y se habían quedado. */}
-                  {/* Rótulo sobre el tinte. Medido contra el PEOR fondo posible:
-                      foto blanca (tope real 235 tras el filtro brightness .92)
-                      bajo el tinte 0.75, que compone #4C6660.
-                        node .claude/skills/fidelidad-diseno/scripts/contraste.mjs
-                      #F3EFE4 → 5.41:1 · #E7E0D0 → 4.73:1.
-                      El #DDD5C4 que usa el resto de la app se queda en 4.26:1 aquí
-                      —este tinte es más flojo que el de las fichas—, así que el
-                      contador sube un escalón. Sobre foto oscura ambos suben. */}
-                  <div style={{
-                    position: 'absolute', left: 10, right: 10, bottom: 10
-                  }}>
-                    <div style={{
-                      fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-                      fontSize: vp.isDesktop ? 17 : 16,
-                      color: PALETTE.sobreMarca,   // #F3EFE4 — 5.41:1
-                      textTransform: 'uppercase', letterSpacing: '0.06em',
-                      lineHeight: 1
-                      // Sin textShadow: la sombra negra era el parche del texto
-                      // oscuro sobre foto. El texto ya es claro y la sombra solo
-                      // le ensuciaba el borde.
-                    }}>{c.label}</div>
-                    <div style={{
-                      fontFamily: 'JetBrains Mono, monospace',
-                      fontSize: 13, color: '#E7E0D0',   // contador — 4.73:1
-                      letterSpacing: '0.18em',
-                      marginTop: 4,
-                      display: 'flex', alignItems: 'center', gap: 6
-                    }}>
-                      <span style={{ fontSize: 15.5}}>{c.icon}</span>
-                      <span>{count} unidades</span>
-                    </div>
-                  </div>
-                </div>
-              </button>);
-
-          })}
+        {/* Cinco cartas: el número de la carta es cuántas armas hay en la
+            categoría y el nombre va abajo, como en la baraja. Los ids de
+            `CATEGORIES.tipo` son exactamente los cinco de `SILUETA_TIPOS`, así
+            que la figura sale del asset que ya existe.
+            Las fotos de escena (`CATEGORY_HEROS`) no se pierden: siguen siendo
+            la portada de cada categoría en el hub del arsenal. */}
+        <div className="amx-loteria-mesa" style={{ marginBottom: 22 }}>
+          {window.CATEGORIES.tipo.map((c) => (
+            <window.CartaLoteria key={c.id}
+              nombre={c.label}
+              cuenta={window.DB.filter((a) => a.tipo === c.id).length}
+              unidad="armas"
+              forma={`imagenes/silueta-${c.id}.webp`}
+              onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+          ))}
         </div>
       </div>
 
@@ -315,49 +228,6 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <window.HomeMunicionesSection onNav={onNav} />
       }
 
-      {/* 6 ▸ Disponibilidad legal */}
-      <div style={{ ...containerMax, padding: `0 ${PAD}px` }}>
-        <SectionHeader>Por disponibilidad legal</SectionHeader>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
-          gap: 8, marginBottom: 22
-        }}>
-          {window.CATEGORIES.disponibilidad.map((d) => {
-            const count = window.DB.filter((a) => a.avail === d.id).length;
-            if (!count) return null;
-            return (
-              <button key={d.id} onClick={() => onNav('category', { mode: 'avail', value: d.id })}
-              style={{
-                background: PALETTE.bgCard, boxShadow: window.CLARO.sombra,
-                // El color de disponibilidad legal era una barra de 3px a la
-                // izquierda — el tic de UI generada de §6. Ahora es el hairline
-                // ENTERO de la tarjeta: misma informacion, sin la pestaña, y
-                // medido sobre la tarjeta: 6.02 / 5.49 / 6.42:1.
-                border: `1px solid ${window.amxColorAvail(d.color)}`,
-                padding: '10px 12px', cursor: 'pointer', textAlign: 'left',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-              }}>
-                <div>
-                  <div style={{
-                    fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 15,
-                    color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em'
-                  }}>{d.label}</div>
-                  <div style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
-                    color: PALETTE.textMuted, marginTop: 2, lineHeight: 1.4
-                  }}>{d.desc}</div>
-                </div>
-                <div style={{
-                  fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-                  fontSize: 19, color: window.amxColorAvail(d.color), marginLeft: 10
-                }}>{count}</div>
-              </button>);
-
-          })}
-        </div>
-      </div>
-
       {/* 9 ▸ Armas traumáticas (defensa menos letal) — al final del feed de inicio */}
       <window.HomeTraumaBanner onNav={onNav} />
 
@@ -370,31 +240,19 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           componente— así que mover el bloque no arrastra dependencias. */}
       <CarouselSection
         title="Campos de tiro"
-        action={<ProximamenteTag />}
         items={FOTOS_CAMPOS}
-        renderItem={(f) => <window.ProximamenteCard img={f} />} />
+        renderItem={(f, i) => <window.ProximamenteCard img={f} i={i} />} />
 
       <CarouselSection
         title="Experiencias"
-        action={<ProximamenteTag />}
         items={FOTOS_EXPERIENCIAS}
-        renderItem={(f) => <window.ProximamenteCard img={f} />} />
+        renderItem={(f, i) => <window.ProximamenteCard img={f} i={i + 2} />} />
 
-      {/* 7 ▸ Disclaimer */}
-      <div style={{
-        ...containerMax,
-        marginTop: 8, marginBottom: 16,
-        padding: '12px',
-        background: PALETTE.bgElev,
-        border: `1px dashed ${PALETTE.border}`,
-        ...window.amxProsa({ fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6 }),
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', color: PALETTE.amber, fontWeight: 700,
-          letterSpacing: '0.15em', marginBottom: 4, fontSize: 13}}>◆ AVISO</div>
-        Catálogo divulgativo sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la Ley Federal de Armas de Fuego y precios DCAM.
-      </div>
+      {/* 7 ▸ Disclaimer — MUDADO AL PIE (window.PieDeSitio, en ui.jsx) el
+          9-sep-2026. Era un aviso de SITIO viviendo en una sola pantalla: solo
+          lo veía quien entrase por la portada, y en las 322 páginas
+          prerenderizadas —las que recibe el buscador— no aparecía. El texto se
+          fue LITERAL, no reescrito. No lo devuelvas aquí: quedaría duplicado. */}
     </div>);
 
 }
@@ -1013,14 +871,16 @@ function ArsenalHubScreen({ onNav }) {
       <span aria-hidden="true" style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${P.border}, transparent)` }} />
     </div>
   );
-  const Card = ({ label, sub, count, color, onClick }) => (
+  // `borde`: hairline COMPLETO en el color de la categoria, no barra lateral
+  // (DESIGN.md §5.4). Por defecto, el hairline neutro de siempre.
+  const Card = ({ label, sub, count, color, borde, onClick }) => (
     <button onClick={onClick} style={{
-      background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
+      background: P.bgCard, border: `1px solid ${borde || P.border}`, boxShadow: window.CLARO.sombra,
       padding: '12px 14px', cursor: 'pointer', textAlign: 'left', display: 'flex',
       justifyContent: 'space-between', alignItems: 'center', gap: 10, width: '100%', transition: 'border-color 0.18s',
     }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = borde || P.border; }}>
       <div style={{ minWidth: 0 }}>
         <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
         {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textMuted, marginTop: 2, lineHeight: 1.4 }}>{sub}</div>}
@@ -1053,6 +913,23 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color={window.CLARO.ok} count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
       </div>
 
+      {/* Clasificación legal — venia del Home («Por disponibilidad legal»). Va
+          pegada a Disponibilidad porque las dos responden a lo mismo, «¿puedo
+          conseguirla?»: una por existencias, la otra por ley. Antes dos de las
+          tres categorias («Seguridad privada» y «Exclusivo del Ejército») colgaban
+          de Uso con este mismo mode:'avail'; se retiraron de alli para no dejar
+          dos puertas al mismo filtro, y Uso se queda solo con usos reales.
+          El color de la categoria (data.js) va en el hairline completo y en el
+          contador, como en el Home y como manda DESIGN.md §5.4. */}
+      <Hdr icon="§">Clasificación legal</Hdr>
+      <div style={{ ...grid(3), gridTemplateColumns: vp.isDesktop ? 'repeat(3,1fr)' : '1fr' }}>
+        {window.CATEGORIES.disponibilidad.map((d) => availCount(d.id)
+          ? <Card key={d.id} label={d.label} sub={d.desc}
+              color={window.amxColorAvail(d.color)} borde={window.amxColorAvail(d.color)}
+              count={availCount(d.id)} onClick={() => onNav('category', { mode: 'avail', value: d.id })} />
+          : null)}
+      </div>
+
       <Hdr icon="◢">Tipo de arma</Hdr>
       <div style={grid(5)}>
         {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
@@ -1065,8 +942,6 @@ function ArsenalHubScreen({ onNav }) {
         <Card label="Tiro deportivo" sub="Clubes y polígonos" count={usoCount('club')} onClick={() => onNav('category', { mode: 'uso', value: 'club' })} />
         <Card label="Cacería" sub="Caza mayor y menor" count={usoCount('caza')} onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
         <Card label="Defensa del hogar" sub="Uso en domicilio" count={usoCount('domicilio')} onClick={() => onNav('category', { mode: 'uso', value: 'domicilio' })} />
-        <Card label="Seguridad privada" sub="Licencia colectiva" color="var(--seguridad)" count={availCount('seguridad')} onClick={() => onNav('category', { mode: 'avail', value: 'seguridad' })} />
-        <Card label="Exclusivo del Ejército" sub="Fuerzas Armadas" color={window.CLARO.alerta} count={availCount('ejercito')} onClick={() => onNav('category', { mode: 'avail', value: 'ejercito' })} />
       </div>
 
       <Hdr icon="◈">Calibre</Hdr>

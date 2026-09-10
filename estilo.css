@@ -123,6 +123,44 @@
   --sello-civil:    #2F6B33;   /* CIVIL — 6.02:1 sobre el faldón de la copia */
   --sello-restr:    #A3341F;   /* SEGURIDAD y EXCLUSIVO — 6.42:1 */
 
+  /* ── LA CARTA DE LOTERÍA — diegética, tampoco lleva `--d-` ───────────────
+     Saulo cambió las categorías por cartas de lotería el 8-sep-2026. Es un
+     objeto impreso, como la copia y el folder: una carta de lotería es blanca
+     y amarilla en una mesa a oscuras igual que a plena luz, así que ninguno de
+     estos tokens tiene gemelo oscuro y sus ratios se miden una sola vez.
+     NO se reproduce ninguna carta existente: se reproduce el FORMATO —cartón
+     blanco, lámina amarilla, número arriba, nombre abajo—, que es de dominio
+     popular. Las ilustraciones de la baraja de Clemente Jacques tienen dueño. */
+  --loteria-carton: #FBF8EF;   /* el margen de papel, igual que la copia */
+  --loteria-lamina: #EFC01F;   /* el amarillo de la lámina */
+  --loteria-tinta:  #171B19;   /* 10.13:1 sobre la lámina · 16.38:1 sobre el cartón */
+  --loteria-tinta-2:#5A5142;   /*  4.55:1 sobre la lámina — el número y lo secundario */
+  --loteria-filo:   #B6BDB0;   /* el canto del cartón — mismo papel que --copia-filo */
+
+  /* ── EL PUESTO DE MUNICIÓN — diegético, tampoco lleva `--d-` ─────────────
+     «Las cajas de municiones con transparencia sobre una mesa y al pasar el
+     mouse por encima se iluminan ligeramente por detrás. Y sus letreros serán
+     como los típicos letreros mexicanos de los tianguis y mercados de
+     frutería» (tablero del 8-sep-2026).
+
+     La mesa sigue siendo BOCETO: va dibujada en SVG dentro de `--mesa-madera`
+     mientras llega la foto, detrás de una sola variable a propósito —
+     sustituirla es cambiar esa línea por un `url(imagenes/…​.webp)`, sin tocar
+     ningún componente. El LETRERO ya hizo ese viaje (9-sep-2026): era un
+     rectángulo de color y hoy es la foto real recortada con alfa. */
+  --mesa-tabla:     #C09A72;   /* la tabla — tinta oscura encima daría 6.71:1 */
+  --mesa-veta:      #A8875F;
+  --mesa-junta:     #94714E;
+  --mesa-canto:     #7E6042;   /* el canto que mira al comprador */
+  --letrero:        url(imagenes/letrero-mercado.webp);   /* el cartel de mercado, con alfa */
+  /* Medido a mano sobre la banda del rótulo del WebP (contraste.mjs solo audita
+     la PALETTE, no los tokens diegéticos): la cara del cartel es #D9DD00 y su
+     píxel más oscuro bajo el texto #D9DB00 → la tinta da 11.84:1 y 11.67:1.
+     Antes, sobre el amarillo dibujado #F2CE1B, daba 11.28:1. */
+  --letrero-tinta:  #171B19;
+  --palo:           #B4906A;   /* la vara del cartel */
+  --puesto-luz:     #FFE9A8;   /* la luz que se enciende detrás de la caja */
+
   /* ── MARCA ──────────────────────────────────────────────────────────────
      El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
      siendo una SUPERFICIE oscura (banda, nav, hero), que es lo que siempre
@@ -628,7 +666,10 @@
      4px por lado, que caben de sobra en el padding del folder: no provoca
      scroll horizontal. En móvil no va: a ancho completo el giro se come el
      ancho útil y desalinea la columna. */
-  .amx-v2 .amx-polaroid { transform: rotate(-1.2deg); }
+  /* El giro sale de `--giro` si quien la usa se lo pone —así las copias de
+     un carrusel no salen todas peinadas al mismo ángulo— y si no, se queda
+     en el -1.2° de siempre, que es el de la copia de la ficha. */
+  .amx-v2 .amx-polaroid { transform: rotate(var(--giro, -1.2deg)); }
 }
 .amx-v2 .amx-polaroid-pozo {
   background: var(--copia-placa);
@@ -678,6 +719,60 @@
   letter-spacing: .1em;
   text-transform: uppercase;
   color: var(--copia-tinta-2);
+}
+
+/* Apaisada — la copia de un PAISAJE, no de un objeto. Campos de tiro y
+   Experiencias son fotos de lugar, y el pozo cuadrado de la ficha las recortaba
+   a un cuadrado o las dejaba flotando con aire a los lados. Aquí el pozo va a
+   16/9 y la foto lo LLENA (`cover`), que es cómo se revela una instantánea de
+   paisaje: al borde, sin márgenes. El faldón ancho de abajo sigue siendo lo
+   que la hace polaroid — §4: geometría, nunca un filtro de foto envejecida. */
+.amx-v2 .amx-polaroid--apaisada {
+  /* Las proporciones salen MEDIDAS de la polaroid apaisada de referencia que
+     mandó Saulo: margen lateral al 2.7% del ancho de la foto —no al 4.5% del
+     pozo cuadrado, que enmarcaba de más— y faldón al 15.6% de ese mismo
+     ancho. Con una foto de ~310px en el carrusel: 9px de canto y 48px de
+     faldón contando su hueco y el canto de abajo. */
+  padding: 9px;
+}
+.amx-v2 .amx-polaroid--apaisada .amx-polaroid-pozo {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  /* Sin filo: en una copia de verdad la emulsión acaba contra el cartón, no
+     tiene una línea dibujada alrededor. El pozo cuadrado lo lleva porque ahí
+     la foto va contenida y con aire; aquí la llena. */
+  border: 0;
+}
+.amx-v2 .amx-polaroid--apaisada .amx-polaroid-pie {
+  min-height: 30px;
+  margin-top: 9px;
+  /* La tipografía de antes, por orden de Saulo: la Archivo en versalitas del
+     rótulo que tenían estas tarjetas, no la mono del faldón de la ficha. */
+  font-family: var(--sans);
+}
+.amx-v2 .amx-polaroid--apaisada .amx-polaroid-nombre {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.amx-v2 .amx-polaroid--apaisada .amx-polaroid-pozo img {
+  /* Pisa el `max-width: 92%` + `contain` del pozo cuadrado, que existe para
+     los recortes de producto con fondo transparente. Una foto de paisaje no
+     se contiene: se encuadra. */
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* El velo verde. Las fotos vienen de fuentes distintas y con dominantes
+   distintas; esto las hermana. Ya venía en las tarjetas que esto sustituye. */
+.amx-v2 .amx-polaroid-velo {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(23, 58, 50, .10) 0%, rgba(23, 58, 50, .28) 100%);
+  pointer-events: none;
 }
 
 /* Ficha de expediente SIN fotografía: 62 de las 192 armas (32 %) no tienen.
@@ -1241,4 +1336,341 @@
   max-width: 100%;
   object-fit: contain;
   object-position: bottom;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA CARTA DE LOTERÍA — categorías de arma y de accesorio (tablero 8-sep-2026)
+   ══════════════════════════════════════════════════════════════════════════
+   Sustituye a la tarjeta con foto de escena y tinte verde. La foto no se pierde:
+   sigue viva en el hub del arsenal (`CATEGORY_HEROS`).
+
+   Se reproduce el FORMATO, no una carta concreta: cartón blanco, lámina
+   amarilla con filete, número arriba a la izquierda y nombre abajo en el
+   cartón. El número NO es el de la baraja — es cuántas piezas hay en la
+   categoría, que es lo que pidió el tablero.
+
+   La figura entra como MÁSCARA sobre las siluetas que ya usan la copia y los
+   accesorios sin foto (`imagenes/silueta-*.webp`): un asset menos y el color
+   lo pone el CSS. Si algún día hay ilustración propia por categoría, se cambia
+   `--silueta-forma` y nada más. */
+.amx-v2 .amx-loteria {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  /* 5.5 × 8.5 cm, la carta de mesa. `aspect-ratio` cede ante el contenido, y
+     aquí el contenido que puede crecer es el pie (dos líneas en «Portacargadores
+     y cananas»), así que la lámina es la que encoge — nunca el cartón. */
+  aspect-ratio: 55 / 85;
+  padding: 5.5%;
+  border: 1px solid var(--loteria-filo);
+  border-radius: 2px;                 /* una carta impresa no tiene esquinas redondeadas */
+  background: var(--loteria-carton);
+  box-shadow: var(--sombra);
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.amx-v2 .amx-loteria:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-hover);
+}
+.amx-v2 .amx-loteria:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+}
+
+.amx-v2 .amx-loteria-lam {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--loteria-lamina);
+  border: 1.5px solid var(--loteria-tinta);
+}
+/* El número de la carta = cuántas piezas hay en la categoría. Va dentro de la
+   lámina, como en la baraja, y en mono porque es un dato. 10.13:1. */
+.amx-v2 .amx-loteria-num {
+  position: absolute;
+  left: 7px;
+  top: 5px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--loteria-tinta);
+}
+.amx-v2 .amx-loteria-fig {
+  width: 88%;
+  height: 88%;
+  background-color: var(--loteria-tinta);
+  -webkit-mask-image: var(--silueta-forma);
+          mask-image: var(--silueta-forma);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-size: contain;
+          mask-size: contain;
+}
+/* Los cañones largos entran GIRADOS. Con `mask-size: contain` una silueta de
+   4.55 de proporción —la escopeta— dentro de una carta vertical se queda en un
+   hilo de 39px de alto mientras la pistola llena media lámina: las nueve cartas
+   se leían a escalas distintas. Girada, la diagonal de la lámina es lo que la
+   limita y todas ocupan lo mismo. Es además como se dibuja en la baraja: el
+   objeto llena el cuadro, no flota en él.
+   El giro es estático (§6 prohíbe animar otra cosa que no sea `transform`, y
+   aquí no hay transición que desactivar) y no desborda: `overflow` no hace falta
+   porque la lámina tiene fondo propio y el recorte lo pone la propia caja. */
+.amx-v2 .amx-loteria-fig--largo { transform: rotate(-30deg) scale(1.18); }
+
+/* Sin soporte de máscara la figura sería un bloque negro macizo tapando la
+   lámina: se cede el sitio y quedan el número y el nombre, que son los que
+   portan la información. Mismo criterio que las otras dos siluetas. */
+@supports not ((-webkit-mask-image: url('')) or (mask-image: url(''))) {
+  .amx-v2 .amx-loteria-fig { display: none; }
+}
+.amx-v2 .amx-loteria-pie {
+  flex: 0 0 auto;
+  padding-top: 7%;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.06;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--loteria-tinta);        /* 16.38:1 sobre el cartón */
+}
+@media (max-width: 719px) {
+  .amx-v2 .amx-loteria-pie { font-size: 12.5px; }
+  .amx-v2 .amx-loteria-num { font-size: 14px; left: 5px; top: 4px; }
+}
+/* El tablero pide las cartas en rejilla, no en carrusel: cinco de arma y las
+   de accesorio que tengan existencias. */
+.amx-v2 .amx-loteria-mesa {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--e3);
+}
+@media (max-width: 719px) {
+  .amx-v2 .amx-loteria-mesa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e2); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL PUESTO DE MUNICIÓN — la caja en la mesa, con su letrero (tablero 8-sep-2026)
+   ══════════════════════════════════════════════════════════════════════════
+   Sustituye a la tarjeta de calibre con el cartucho flotando sobre un degradado.
+   Cada calibre destacado es un PUESTO: el cartel amarillo clavado en su vara, la
+   caja de la marca apoyada en la tabla y, al pasar por encima, la luz que se
+   enciende detrás.
+
+   LA MESA Y LA VARA SON BOCETO. Van en SVG mientras llegan las fotos reales, y
+   por eso viven las dos en una sola variable cada una: cambiar `--mesa-madera`
+   por un `url(imagenes/mesa.webp)` —y `--palo-veta` por su recorte— basta para
+   sustituirlas sin tocar una sola regla de los componentes.
+
+   La tabla se repite en X y NO en Y: la veta va dibujada en horizontal y vuelve
+   a la misma altura en los dos extremos del mosaico, así que dos puestos
+   contiguos forman una mesa continua. Es lo que deja poner cuatro en fila en
+   escritorio y dos por fila en móvil sin que se note el corte. */
+.amx-v2 {
+  --mesa-madera: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='140' preserveAspectRatio='none'> <rect width='600' height='112' fill='%23C09A72'/> <rect y='0' width='600' height='38' fill='%23C6A179'/> <rect y='74' width='600' height='38' fill='%23B8916A'/> <g stroke='%2394714E' stroke-width='1.6' fill='none' opacity='.75'><path d='M0 38H600'/><path d='M0 74H600'/></g> <g stroke='%23A8875F' fill='none' opacity='.4'> <path d='M0 14C120 10 200 19 300 14S520 9 600 14' stroke-width='1.3'/> <path d='M0 27C140 31 240 22 360 28S520 32 600 27' stroke-width='1'/> <path d='M0 52C110 47 210 58 320 52S500 46 600 52' stroke-width='1.4'/> <path d='M0 63C160 67 260 58 380 64S520 68 600 63' stroke-width='1'/> <path d='M0 88C130 83 230 94 340 88S510 82 600 88' stroke-width='1.3'/> <path d='M0 101C150 105 250 96 370 102S530 106 600 101' stroke-width='1'/> </g> <rect y='106' width='600' height='6' fill='%237E6042' opacity='.35'/> <rect y='112' width='600' height='28' fill='%237E6042'/> <rect y='112' width='600' height='2' fill='%2394714E' opacity='.6'/> </svg>");
+  --palo-veta: linear-gradient(90deg, #8A6B49 0%, var(--palo) 32%, #CDAA82 52%, var(--palo) 74%, #8A6B49 100%);
+}
+
+.amx-v2 .amx-puestos {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;                             /* sin hueco: las tablas se tocan y la mesa
+                                         sale de una pieza */
+}
+@media (max-width: 719px) {
+  .amx-v2 .amx-puestos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.amx-v2 .amx-puesto {
+  position: relative;
+  display: block;
+  width: 100%;
+  /* Cuadrado: el cartel, la caja y la tabla apretados como en un puesto.
+     Más alto dejaba un palmo de vara al aire entre el cartel y el cartón. */
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.amx-v2 .amx-puesto:focus-visible { outline: 2px solid var(--acento); outline-offset: -3px; }
+
+/* La tabla. Va en `::after` y no en un hijo para que el orden de pintado la
+   deje debajo de todo sin pelearse por el z-index con el contenido. */
+.amx-v2 .amx-puesto::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 24%;
+  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
+  z-index: 0;
+}
+
+/* El cartel. Texto de verdad, no dibujado dentro de la foto: el calibre sale
+   del dato y lo lee un lector de pantalla. La foto pone solo el cartón.
+   El giro es estático —un cartel clavado a mano nunca queda a plomo— y alterna
+   de signo entre puestos pares e impares para que la fila no salga peinada.
+   La sombra va en `drop-shadow` y no en `box-shadow`: el cartón está recortado
+   con alfa y tiene los cantos a mano, así que una sombra de caja dibujaría el
+   rectángulo que la foto justamente no es. */
+.amx-v2 .amx-puesto-letrero {
+  position: absolute;
+  left: 15%; right: 15%; top: 3%;
+  z-index: 3;
+  /* Generoso y asimétrico por dos razones: el cartón de la foto es casi
+     cuadrado (900x747) y estirarlo a una cinta de 4:1 le borra los cantos
+     cortados a mano; y en la foto el canto de abajo cae más que el de arriba,
+     así que el rótulo necesita más aire por debajo para no montarse en él. */
+  padding: 22px 12px 28px;
+  background: var(--letrero) 50% 50% / 100% 100% no-repeat;
+  filter: drop-shadow(0 3px 4px rgba(23, 27, 25, .34));
+  transform: rotate(-2.2deg);
+}
+.amx-v2 .amx-puesto:nth-child(even) .amx-puesto-letrero { transform: rotate(1.8deg); }
+.amx-v2 .amx-puesto-rotulo {
+  display: block;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.05;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--letrero-tinta);        /* 11.84:1 sobre la cara del cartel */
+}
+/* La vara. Sale del cartel y se pierde detrás de la caja — no llega a la tabla
+   a propósito: el cartón la tapa, que es lo que pasa en un puesto de verdad. */
+.amx-v2 .amx-puesto-palo {
+  position: absolute;
+  left: 50%; top: 23%;
+  z-index: 1;
+  width: 9px;
+  height: 52%;
+  margin-left: -4.5px;
+  background: var(--palo-veta);
+  border-radius: 1px;
+}
+
+/* La luz de detrás. Apagada de salida; se enciende al pasar por encima Y con el
+   foco de teclado, que si no el efecto solo existiría para el ratón. */
+.amx-v2 .amx-puesto-luz {
+  position: absolute;
+  left: 50%; bottom: 10%;             /* baja con la caja: es su luz de detrás */
+  z-index: 1;
+  width: 96%;
+  aspect-ratio: 1 / 1;
+  margin-left: -48%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--puesto-luz) 0%, rgba(255, 233, 168, .45) 45%, rgba(255, 233, 168, 0) 78%);
+  opacity: 0;
+  transition: opacity .22s ease;
+  pointer-events: none;
+}
+.amx-v2 .amx-puesto:hover .amx-puesto-luz,
+.amx-v2 .amx-puesto:focus-visible .amx-puesto-luz { opacity: .85; }
+
+/* La caja apoyada (revisado 9-sep-2026 — antes flotaba, y aquí está medido
+   por qué; los PNG no tenían la culpa: su recorte es ajustado, 0 % de aire).
+
+   1. `bottom` no marca la base de la CAJA sino el canto del recorte, y en las
+      fotos PMC la caja se levanta sobre los cartuchos sueltos que tiene
+      delante: su base cae un 22 % por encima de ese canto. Con `bottom: 18 %`
+      en un puesto de 312 px, esa base quedaba a 89 px del suelo — 14 px POR
+      ENCIMA del borde trasero de la tabla (74.9 px). Se apoyaba en el aire.
+      A 10 % la base cae a 64 px, dentro de los 60 px de superficie dibujada
+      (la tabla mide 24 % y su quinta parte de abajo es el canto, o sea que la
+      madera que se pisa va de 15 px a 74.9 px).
+   2. La sombra de contacto era un `<span>` elíptico fijo que además estaba
+      colocado 3 px POR ENCIMA del canto de la imagen, así que la tapaba la
+      propia caja. Ahora va en el `drop-shadow` de la foto: sigue la silueta,
+      que es lo único que sirve cuando la caja de GB ocupa el 45 % del ancho y
+      la PMC el 91 %, y se coloca sola con cualquier altura de caja. */
+.amx-v2 .amx-puesto-caja {
+  position: absolute;
+  left: 6%; right: 6%; bottom: 10%;
+  z-index: 2;
+  height: 48%;
+  object-fit: contain;
+  object-position: bottom center;     /* nunca deja aire ABAJO: el sobrante de
+                                         `contain` se va siempre arriba */
+  filter: drop-shadow(0 3px 2px rgba(23, 27, 25, .46))
+          drop-shadow(0 9px 9px rgba(23, 27, 25, .26));
+}
+@media (max-width: 719px) {
+  /* A media columna el cuadrado deja 179px de alto y no caben cartel, caja y
+     tabla sin apretarse: en móvil el puesto crece a lo alto, no a lo ancho. */
+  .amx-v2 .amx-puesto { aspect-ratio: 4 / 5; }
+  .amx-v2 .amx-puesto-rotulo { font-size: 14px; }
+  /* Menos aire que en escritorio pero la misma proporción de cartón: con los
+     7/4/8 de cuando era un rectángulo de color, la foto salía una cinta. */
+  .amx-v2 .amx-puesto-letrero { left: 11%; right: 11%; padding: 14px 8px 18px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PIE DE OFICIO — los enlaces del pie (window.PieDeSitio, en ui.jsx)
+
+   BLOQUE NUEVO AL FINAL, y no estilo inline, porque `:hover` y
+   `:focus-visible` no existen en un objeto `style={{}}`. Es lo único del pie
+   que no cabe inline; todo lo demás sigue allí.
+
+   EN REPOSO NO SE DISTINGUEN DEL TEXTO. Es lo que pidió Saulo el 9-sep-2026,
+   por escrito y viendo el pie renderizado: ni subrayado ni cursiva en ningún
+   enlace del pie —«nada en cursiva»—, mismo tipo y mismo estilo que el texto
+   que los rodea, y «lo único que los distingue es que se iluminan al hacer
+   hover». Hubo dos pasadas antes: una con subrayado y otra con cursiva en
+   FUENTES. Las dos se retiraron. NO las devuelvas sin pedírselo.
+
+   ⚠ LO QUE ESO CUESTA, para que conste: WCAG 1.4.1 pide que «esto es un
+   enlace» no dependa solo del color, y aquí en reposo no depende ni de eso.
+   Es una decisión tomada con el dato delante, no un descuido.
+
+   EL ROJO DEL HOVER es #CE1126, el rojo de la bandera de México, elegido por
+   Saulo porque los rojos de la paleta le resultaron «desabridos y sin
+   saturación». Es un valor literal a propósito: no es un token del sitio y no
+   se añade a `:root` sin que él lo decida.
+
+   ⚠ NO PASA EL UMBRAL DEL REPO. Medido con
+   `node .claude/skills/fidelidad-diseno/scripts/contraste.mjs '#CE1126' '#173A32'`:
+
+     reposo, crédito y aviso  --sobre-marca      #F3EFE4  10.83:1  AA
+     reposo, fuentes          --sobre-marca-dim  #B8C2BA   6.79:1  AA
+     HOVER y FOCO             rojo bandera       #CE1126   2.21:1  ✗ DÉBIL
+     anillo de foco           --sobre-marca      #F3EFE4  10.83:1  (1.4.11 pide 3)
+
+   DESIGN.md §7 pide >= 4.5:1 para todo texto que porte información. 2.21:1 no
+   llega, ni al 3:1 de un indicador. Queda puesto por instrucción expresa de
+   Saulo, informado del número. El texto NO se vuelve ilegible —solo se apaga
+   mientras el ratón está encima, y el estado de reposo sí cumple—, pero el
+   estado activo del enlace es el que se lee peor, que es al revés de lo
+   deseable. Alternativas que SÍ medirían, si alguna vez se reabre:
+   `--rojo-sobre-marca` #F29C8C (5.87:1, el token que el repo ya tiene para
+   rojo sobre la marca) o aclarar el bandera hasta ~#E8556B (4.5:1).
+   No las apliques por tu cuenta.
+
+   El anillo de foco lo pone `.amx-sobre-verde :focus-visible` (más arriba en
+   este archivo): el pie lleva esa clase, así que el foco SIEMPRE se ve en
+   crema a 10.83:1 y no depende de este rojo. Por eso quien navega con teclado
+   sabe dónde está aunque el color del texto no mida.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 .amx-pie-enlace {
+  color: inherit;
+  text-decoration: none;
+}
+.amx-v2 .amx-pie-enlace:hover,
+.amx-v2 .amx-pie-enlace:focus-visible {
+  color: #CE1126;          /* rojo de la bandera de México — 2.21:1, ver arriba */
+  text-decoration: none;   /* explícito: ni aquí vuelve el subrayado */
 }

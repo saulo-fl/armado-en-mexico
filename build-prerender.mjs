@@ -125,6 +125,20 @@ const MARCA_TITULO = /<title>[\s\S]*?<\/title>/;
 const MARCA_ROOT = '<div id="app-root"></div>';
 if (!shell.includes(MARCA_ROOT)) throw new Error('build-prerender: falta <div id="app-root"></div> en index.html');
 
+// ─── 4b. El pie del sitio, en HTML crudo ────────────────────────────────────
+// `window.PieDeSitio` (ui.jsx) solo existe DESPUÉS de que React monte, y GPTBot,
+// ClaudeBot y PerplexityBot no ejecutan JS (SEO.md §2). Un aviso legal que solo
+// existe en JavaScript no es un aviso: para ellos el sitio no lo lleva.
+// Va una vez aquí, dentro de emitir(), y sale en las 322 páginas.
+// LOS DOS TEXTOS SON EL MISMO: si tocas el pie en ui.jsx, tócalo aquí.
+const PIE = `<footer>
+<hr>
+<p>Construido por <a href="https://github.com/saulo-fl" rel="noopener noreferrer">saulo-fl</a> y <a href="https://armasmys.com/" rel="noopener noreferrer">Armas M&amp;S</a> para la comunidad de tiradores de México · <a href="https://github.com/saulo-fl/armado-en-mexico" rel="noopener noreferrer">GitHub</a></p>
+<p>Catálogo divulgativo de código abierto sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la <a href="/legalidad">Ley Federal de Armas de Fuego</a> y precios DCAM.</p>
+<p><small>Fuentes: precios y existencias de los <a href="/acerca">inventarios oficiales DCAM y OTCA</a>, con la fecha del inventario en cada ficha · Marco legal: <a href="/legalidad">Ley Federal de Armas de Fuego y Explosivos</a> · Datos técnicos: <a href="/calibres">guía de calibres</a> y publicaciones de los fabricantes.</small></p>
+<p><small>Los nombres de productos, logotipos y marcas que aparecen en este sitio son propiedad de sus respectivos dueños y se usan únicamente para identificar el producto del que se informa. Armado en México no está afiliado ni respaldado por ninguna de estas compañías, y no forma parte de DEFENSA (anteriormente SEDENA), la DCAM ni de ninguna dependencia del gobierno mexicano.</small></p>
+</footer>`;
+
 function emitir(ruta, { titulo, desc, jsonld, cuerpo, noindex }) {
   const url = ruta ? `${SITIO}/${ruta}` : `${SITIO}/`;
   const cabeza = [
@@ -150,7 +164,7 @@ function emitir(ruta, { titulo, desc, jsonld, cuerpo, noindex }) {
     // El contenido va DENTRO de #app-root: React lo reemplaza al montar
     // (createRoot, no hydrateRoot), así que no hay desajuste de hidratación.
     // Es lo que leen los crawlers que no ejecutan JavaScript.
-    .replace(MARCA_ROOT, `<div id="app-root">${cuerpo}</div>`);
+    .replace(MARCA_ROOT, `<div id="app-root">${cuerpo}${PIE}</div>`);
 
   const destino = join(RAIZ, ruta ? `${ruta}.html` : 'index.html');
   mkdirSync(dirname(destino), { recursive: true });

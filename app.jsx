@@ -466,6 +466,15 @@ function App() {
         WebkitOverflowScrolling: 'touch',
       }}>
         {content}
+        {/* PIE DE OFICIO — global, no solo del Home. Tres razones:
+            (1) lo que lleva dentro son avisos de SITIO —divulgativo, sin fines
+                de lucro, no somos gobierno, marcas de terceros—, no de pantalla;
+            (2) casi nadie entra por la portada: el buscador manda a las fichas,
+                y ahí el aviso tiene que estar;
+            (3) va DENTRO del cuerpo con scroll, no como hermano del nav: en
+                móvil este div es el único que hace scroll, y colgado fuera se
+                quedaría fijo comiéndose la pantalla. */}
+        <window.PieDeSitio onNav={navTab} />
       </div>
 
       {/* Floating Compare Bar (mobile only) */}

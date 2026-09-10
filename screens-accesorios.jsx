@@ -132,7 +132,6 @@ window.AccesorioCard = AccesorioCard;
 // ════════════════════════════════════════════════════════════════
 function HomeAccesoriosSection({ onOpen, onNav }) {
   const P = window.PALETTE;
-  const vp = window.useViewport();
   const PAD = 16;
   const cats = window.ACCESORIO_CATEGORIES.categoria;
   const total = (window.ACCESORIOS || []).length;
@@ -158,70 +157,20 @@ function HomeAccesoriosSection({ onOpen, onNav }) {
         </div>
       </div>
 
-      <div style={{
-        padding: `0 ${PAD}px`,
-        display: 'grid',
-        gridTemplateColumns: vp.isDesktop ? 'repeat(5, 1fr)' : '1fr 1fr',
-        gap: 10,
-      }}>
+      {/* Mismas cartas de lotería que las categorías de arma: el número es
+          cuántos accesorios hay en la categoría y el nombre va abajo.
+          La figura sale de `accesorioPlaceholder`, que ya sabe mapear las diez
+          categorías a las siluetas que existen —solo lee `.categoria`, por eso
+          se le pasa un objeto de un campo— y así las dos rejillas comparten
+          asset y criterio. */}
+      <div className="amx-loteria-mesa" style={{ padding: `0 ${PAD}px` }}>
         {visible.map(c => (
-          <button key={c.id} onClick={() => onNav && onNav('accesorios', { categoria: c.id })} style={{
-            background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
-            padding: 0, cursor: 'pointer', textAlign: 'left',
-            position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
-            transition: 'border-color 0.18s',
-          }}
-            onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
-            onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
-            <div style={{
-              width: '100%', aspectRatio: '4 / 5', position: 'relative', overflow: 'hidden',
-              background: `radial-gradient(circle at 50% 42%, ${P.bgElev} 0%, ${P.bg} 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              {/* scanline */}
-              <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
-              {/* glyph de categoría */}
-              <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: vp.isDesktop ? 62.5 : 55,
-                color: P.amber, opacity: 0.92, position: 'relative', zIndex: 1, lineHeight: 1,
-                textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-              }}>{c.icon}</span>
-              {/* corner ticks */}
-              <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${P.amber}`, borderLeft: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-              <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${P.amber}`, borderRight: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-              {/* Degradado decorativo: solo funde la foto/glifo con la placa de abajo.
-                  Baja de 0.94 a 0.75 — ya no tiene que sostener contraste de texto. */}
-              <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.75) 100%)`, pointerEvents: 'none' }} />
-              {/* PLACA DE LEGIBILIDAD. Antes el rotulo se apoyaba en el degradado, que
-                  solo llega a su parada final en el ultimo pixel: la etiqueta de
-                  categoria (1-3 lineas segun ancho: «Portacargadores y cananas») caia
-                  en la rampa, sobre verde a ~0.66 → crema 4.12:1. La placa fija 0.94 de
-                  verde bajo TODAS las lineas. Compuesto real (0.94 sobre el degradado a
-                  0.75 sobre el lienzo) = #1A3D35: crema 10.37:1, salmon 5.62:1.
-                  El fundido de 12px cabe dentro del paddingTop de 14, asi que ninguna
-                  linea de texto se apoya en la rampa. */}
-              <div style={{
-                position: 'absolute', left: 0, right: 0, bottom: 0, padding: '14px 10px 10px',
-                background: `linear-gradient(180deg, rgba(23,58,50,0) 0, rgba(23,58,50,0.94) 12px)`,
-              }}>
-                {/* P.text (#171B19) sobre este verde daba 1.65:1. Crema: 10.37:1.
-                    Fuera el textShadow negro: era para texto oscuro, bajo texto claro
-                    solo ensucia el borde de la letra. */}
-                <div style={{
-                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
-                  color: P.sobreMarca, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
-                }}>{c.label}</div>
-                {/* Rotulo de accion, no un control aparte: la tarjeta entera es el boton
-                    y ya mide >=44px, asi que toma solo el color de estiloAccion(true)
-                    —P.redSobreVerde— sin su minHeight, que aqui hincharia la placa.
-                    P.amber (verde de marca) sobre este verde era invisible. 5.62:1. */}
-                <div style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.redSobreVerde,
-                  letterSpacing: '0.16em', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6,
-                }}>VER <span aria-hidden="true">→</span></div>
-              </div>
-            </div>
-          </button>
+          <window.CartaLoteria key={c.id}
+            nombre={c.label}
+            cuenta={counts[c.id]}
+            unidad="accesorios"
+            forma={window.accesorioPlaceholder({ categoria: c.id })}
+            onClick={() => onNav && onNav('accesorios', { categoria: c.id })} />
         ))}
       </div>
     </div>

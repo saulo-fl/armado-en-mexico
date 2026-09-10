@@ -34,6 +34,19 @@ function munCartucho(cal) {
     : 'imagenes/silueta-municion.webp';
 }
 
+// El PNG del cartucho es del CALIBRE: manda en la home de calibres y en la guía
+// educativa, donde lo que se enseña es el calibre. Pero la tarjeta y la ficha de
+// un cartucho son de una MARCA concreta, y ahí lo que identifica al producto es
+// su CAJA — que es como se compra y como se reconoce en el mostrador. `mun.img`
+// la resuelve data-municiones.js por marca+calibre; cuando no hay caja (marcas
+// que no publican foto), se cae al PNG del calibre, que sigue siendo correcto.
+// El encuadre cambia con la foto: la caja es apaisada y el cartucho es un huso.
+function munFoto(mun) {
+  return mun.img ? { src: mun.img, caja: true }
+                 : { src: munCartucho(mun.calibre), caja: false };
+}
+window.munFoto = munFoto;
+
 // Unidad del precio de referencia. El inventario cotiza casi todo POR CARTUCHO,
 // pero no todo: la 2046 (9mm PMC) viene por caja y su descripción lo dice — por
 // eso cuesta $406 y no $6. Sin este chequeo la tarjeta la etiquetaría mal.
@@ -49,7 +62,7 @@ window.munUnidadPrecio = munUnidadPrecio;
 function MunicionCard({ mun, onClick }) {
   const P = window.PALETTE;
   const [imgError, setImgError] = useStateMun(false);
-  const cart = munCartucho(mun.calibre);
+  const foto = munFoto(mun);
   return (
     <div onClick={onClick} style={{
       position: 'relative', background: window.CLARO.panel,
@@ -59,7 +72,7 @@ function MunicionCard({ mun, onClick }) {
       height: '100%', display: 'flex', flexDirection: 'row',
       contentVisibility: 'auto', containIntrinsicSize: 'auto 150px',
     }} className="amx-card">
-      {/* cartucho */}
+      {/* foto: caja de la marca; sin caja, cartucho del calibre */}
       <div style={{
         width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
         background: `radial-gradient(circle at 50% 50%, ${window.CLARO.panelHi} 0%, ${P.bg} 100%)`,
@@ -70,9 +83,13 @@ function MunicionCard({ mun, onClick }) {
         boxSizing: 'border-box', padding: '28px 6px 8px',
       }}>
         <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
-        {cart && !imgError ? (
-          <img src={cart} alt={mun.calibre} loading="lazy" decoding="async" onError={() => setImgError(true)}
-            style={{ maxHeight: '82%', maxWidth: '60%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
+        {foto.src && !imgError ? (
+          <img src={foto.src} alt={foto.caja ? `${mun.marca} ${mun.calibre}` : mun.calibre}
+            loading="lazy" decoding="async" onError={() => setImgError(true)}
+            style={{
+              maxHeight: foto.caja ? '76%' : '82%', maxWidth: foto.caja ? '92%' : '60%',
+              objectFit: 'contain', position: 'relative', zIndex: 1,
+            }} />
         ) : (
           <span style={{
             fontFamily: 'JetBrains Mono, monospace', fontSize: 18, color: window.CLARO.tinta2,
@@ -138,11 +155,41 @@ function MunicionCard({ mun, onClick }) {
 window.MunicionCard = MunicionCard;
 
 // ════════════════════════════════════════════════════════════════
-// HOME — "Municiones" como grid por calibre
+// HOME — "Municiones" como PUESTO DE TIANGUIS
+// «Las municiones cambiarán de su ficha plana por un objeto que sea
+// interactivo. Las cajas de municiones con transparencia sobre una mesa y al
+// pasar el mouse por encima se iluminan ligeramente por detrás. Y sus letreros
+// serán como los típicos letreros mexicanos de los tianguis y mercados de
+// frutería» (tablero del 8-sep-2026).
+//
+// La mesa y la vara van dibujadas en CSS mientras llegan las fotos reales; la
+// caja NO, esa ya es fotografía recortada.
 // ════════════════════════════════════════════════════════════════
+
+// La caja que representa al calibre en la portada. Aquí no hay una marca
+// concreta —la tarjeta es del CALIBRE—, así que se toma la primera munición de
+// ese calibre que tenga caja: en el mostrador el calibre se reconoce por
+// cualquiera de sus cajas. Sin ninguna cae al PNG del cartucho, que es lo que
+// había antes y sigue siendo correcto.
+//
+// Dos calibres llevan marca elegida a mano (Saulo, 9-sep-2026): las cuatro
+// cajas de la mesa tienen que MIRAR AL MISMO LADO —de frente y en diagonal
+// hacia la izquierda, como las PMC Bronze— y por orden de catálogo salían la
+// Trust azul de frente en 12 GA y la Fiocchi Dynamics tumbada en .308 Win.
+// El mapa es solo para el Home; la ficha de cada munición sigue con su caja.
+const CAJA_DEL_HOME = { '12 GA': 'GB', '.308 Win': 'PMC' };
+
+function munCajaDeCalibre(cal) {
+  const conCaja = (window.MUNICIONES || []).filter(x => x.calibre === cal && x.img);
+  const marca = CAJA_DEL_HOME[cal];
+  const m = (marca && conCaja.find(x => x.marca === marca)) || conCaja[0];
+  return m
+    ? { src: m.img, alt: `Caja de ${m.marca} ${cal}` }
+    : { src: munCartucho(cal), alt: cal };
+}
+
 function HomeMunicionesSection({ onNav }) {
   const P = window.PALETTE;
-  const vp = window.useViewport();
   const PAD = 16;
   const cats = window.MUNICION_CATEGORIES.categoria;
   const total = (window.MUNICIONES || []).length;
@@ -154,7 +201,9 @@ function HomeMunicionesSection({ onNav }) {
   // No hay .22 rimfire en los inventarios DCAM/OTCA: cierra el .308 Win (hay Aguila).
   const DESTACADOS = ['.380', '9mm', '12 GA', '.308 Win'];
   const destacados = DESTACADOS.flatMap(p => conStock.filter(c => c.id.startsWith(p)));
-  const visible = destacados.length ? destacados : conStock;
+  // Cuatro puestos exactos: la mesa es una rejilla, no un carrusel, y con cinco
+  // el quinto abriría una segunda fila con la tabla cortada a un cuarto.
+  const visible = (destacados.length ? destacados : conStock).slice(0, 4);
 
   return (
     <div style={{ marginBottom: 20, maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto' }}>
@@ -172,59 +221,27 @@ function HomeMunicionesSection({ onNav }) {
         </div>
       </div>
 
-      <window.HCarousel items={visible} itemWidth={vp.isDesktop ? 220 : 165} padX={PAD}
-        renderItem={(c) => {
-          const cart = munCartucho(c.id);
+      <div className="amx-puestos" style={{ padding: `0 ${PAD}px` }}>
+        {visible.map(c => {
+          const caja = munCajaDeCalibre(c.id);
           return (
-            <button onClick={() => onNav && onNav('municiones', { categoria: c.id })} style={{
-              background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
-              padding: 0, cursor: 'pointer', textAlign: 'left',
-              position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
-              transition: 'border-color 0.18s',
-            }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
-              <div style={{
-                width: '100%', aspectRatio: '4 / 5', position: 'relative', overflow: 'hidden',
-                background: `radial-gradient(circle at 50% 42%, ${P.bgElev} 0%, ${P.bg} 100%)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
-                {cart
-                  ? <img src={cart} alt={c.label} loading="lazy" style={{ maxHeight: '62%', maxWidth: '46%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
-                  : <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: vp.isDesktop ? 55 : 48, color: P.amber, opacity: 0.9, position: 'relative', zIndex: 1 }}>{c.icon}</span>}
-                <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${P.amber}`, borderLeft: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-                <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${P.amber}`, borderRight: `1.5px solid ${P.amber}`, opacity: 0.75 }} />
-                {/* Degradado decorativo: funde el cartucho con la placa. De 0.94 a 0.75
-                    porque ya no sostiene el contraste del texto. */}
-                <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0) 45%, rgba(23,58,50,0.55) 72%, rgba(23,58,50,0.75) 100%)`, pointerEvents: 'none' }} />
-                {/* PLACA DE LEGIBILIDAD — misma receta que en accesorios. El degradado
-                    solo alcanza su parada final en el ultimo pixel, asi que el fondo bajo
-                    el rotulo cambiaba con la altura del texto. La placa fija 0.94 de verde
-                    bajo todas las lineas: compuesto #1A3D35 → crema 10.37:1, salmon 5.62:1.
-                    Los 12px de fundido caben en el paddingTop de 14. */}
-                <div style={{
-                  position: 'absolute', left: 0, right: 0, bottom: 0, padding: '14px 10px 10px',
-                  background: `linear-gradient(180deg, rgba(23,58,50,0) 0, rgba(23,58,50,0.94) 12px)`,
-                }}>
-                  {/* P.text (#171B19) aqui daba 1.65:1. Crema: 10.37:1. El textShadow
-                      negro se va: sombra oscura bajo texto claro solo emborrona. */}
-                  <div style={{
-                    fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 15 : 14,
-                    color: P.sobreMarca, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.08,
-                  }}>{c.label}</div>
-                  {/* Rotulo, no control: la tarjeta entera es el boton y ya pasa de 44px,
-                      asi que toma solo el color de estiloAccion(true) —P.redSobreVerde—
-                      sin su minHeight. P.amber (verde) sobre verde era invisible. 5.62:1. */}
-                  <div style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.redSobreVerde,
-                    letterSpacing: '0.16em', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6,
-                  }}>VER <span aria-hidden="true">→</span></div>
-                </div>
-              </div>
+            <button key={c.id} type="button" className="amx-puesto"
+              aria-label={`${c.label} — ${counts[c.id]} ${counts[c.id] === 1 ? 'munición' : 'municiones'}`}
+              onClick={() => onNav && onNav('municiones', { categoria: c.id })}>
+              {/* El nombre del calibre es TEXTO sobre el cartel, no parte del
+                  dibujo: sale del dato y lo lee un lector de pantalla. */}
+              <span className="amx-puesto-letrero">
+                <span className="amx-puesto-rotulo">{c.label}</span>
+              </span>
+              <span className="amx-puesto-palo" aria-hidden="true" />
+              <span className="amx-puesto-luz" aria-hidden="true" />
+              {/* alt vacío a propósito: el botón ya se anuncia con el calibre y
+                  su cuenta, y repetir «Caja de PMC .380 ACP» detrás lo duplica. */}
+              <img className="amx-puesto-caja" src={caja.src} alt="" loading="lazy" decoding="async" />
             </button>
           );
-        }} />
+        })}
+      </div>
     </div>
   );
 }
@@ -422,7 +439,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
     );
   }
 
-  const cart = munCartucho(mun.calibre);
+  const foto = munFoto(mun);
   const availMeta = window.MUNICION_CATEGORIES.disponibilidad.find(d => d.id === mun.avail);
   const priceHistory = window.getMunicionPriceHistory(mun.id);
   const existencias = window.getMunicionExistencias(mun.id);
@@ -451,8 +468,13 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
         }}>
           <window.TacticalCorners size={14} color={P.amber} thickness={2} />
           <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
-          {cart && !imgError
-            ? <img src={cart} alt={mun.calibre} onError={() => setImgError(true)} style={{ maxHeight: '78%', maxWidth: '46%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
+          {foto.src && !imgError
+            ? <img src={foto.src} alt={foto.caja ? `Caja de ${mun.marca} ${mun.calibre}` : mun.calibre}
+                onError={() => setImgError(true)}
+                style={{
+                  maxHeight: foto.caja ? '74%' : '78%', maxWidth: foto.caja ? '84%' : '46%',
+                  objectFit: 'contain', position: 'relative', zIndex: 1,
+                }} />
             : <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 60, color: P.amber, opacity: 0.85, position: 'relative', zIndex: 1 }}>◉</span>}
           <span style={{
             position: 'absolute', top: 10, left: 10,
