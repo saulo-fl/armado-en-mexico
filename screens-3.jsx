@@ -504,53 +504,39 @@ window.ProximamenteScreen = ProximamenteScreen;
 // el hueco de la foto sea el mismo que tendrá la tarjeta real. Sin onClick y
 // sin cursor: pointer — no debe leerse como algo pulsable.
 function ProximamenteCard({ img }) {
+  // Es una POLAROID APAISADA, no una tarjeta. Saulo, 9-sep-2026: «reemplazar
+  // los marcos perfectos de CAMPOS DE TIRO y EXPERIENCIAS por marcos de
+  // polaroid horizontales para mantener la estética de todo el HOME». Reusa
+  // `.amx-polaroid` —la misma copia instantánea de la ficha de arma— con el
+  // modificador que le pone el pozo a 16/9: ni un token ni una sombra nuevos.
+  //
+  // El «Próximamente» baja al FALDÓN, que es donde se rotula una copia a
+  // mano. Antes era una banda de interfaz pegada bajo la foto.
   return (
-    <div style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
-      overflow: 'hidden', height: '100%', cursor: 'default',
-    }}>
-      {img ? (
-        /* La foto viene YA difuminada, desaturada y con el contraste bajado
-           desde el pipeline de imágenes (Pillow: blur 3.2, saturación .32,
-           contraste .72). Se procesa en origen y no con `filter` de CSS a
-           propósito: un blur en runtime se repinta en cada scroll y estas
-           tarjetas van dentro de un carrusel. De paso pesan 3-7 KB cada una.
-           El velo verde encima las unifica entre sí, porque vienen de fuentes
-           distintas y con dominantes distintas. */
-        <div style={{
-          position: 'relative', aspectRatio: '16 / 9',
-          overflow: 'hidden', background: PALETTE.bgElev,
-        }}>
-          <img src={img} alt="" aria-hidden="true"
-            loading="lazy" decoding="async"
-            style={{
-              position: 'absolute', inset: 0,
-              width: '100%', height: '100%', objectFit: 'cover',
-              display: 'block',
-            }} />
-          <div aria-hidden="true" style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(180deg, rgba(23,58,50,0.10) 0%, rgba(23,58,50,0.28) 100%)',
-          }} />
-        </div>
-      ) : (
-      <StripePlaceholder ratio="16 / 9">
-        {/* A opacity 0.45 el verde de marca resolvía a #94A39D sobre el hueco
-            #FAF9F5 de StripePlaceholder: 2.50:1, por debajo del 3:1 que exige
-            un elemento gráfico. A 0.6 resuelve a #728680 = 3.67:1. */}
-        <span aria-hidden="true" style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 42, color: PALETTE.amber,
-          opacity: 0.6, lineHeight: 1,
-        }}>?</span>
-      </StripePlaceholder>
-      )}
-      <div style={{ padding: '11px 12px' }}>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.textMuted,
-          textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.15,
-        }}>Próximamente</div>
+    <figure className="amx-polaroid amx-polaroid--apaisada">
+      <div className="amx-polaroid-pozo">
+        {img ? (
+          <React.Fragment>
+            {/* La foto viene YA difuminada, desaturada y con el contraste
+                bajado desde el pipeline de imágenes (Pillow: blur 3.2,
+                saturación .32, contraste .72). Se procesa en origen y no con
+                `filter` de CSS a propósito: un blur en runtime se repinta en
+                cada scroll y estas tarjetas van dentro de un carrusel. De paso
+                pesan 3-7 KB cada una. */}
+            <img src={img} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+            <div className="amx-polaroid-velo" aria-hidden="true" />
+          </React.Fragment>
+        ) : (
+          <span aria-hidden="true" style={{
+            fontFamily: 'JetBrains Mono, monospace', fontSize: 42,
+            color: 'var(--copia-silueta)', lineHeight: 1,
+          }}>?</span>
+        )}
       </div>
-    </div>
+      <figcaption className="amx-polaroid-pie">
+        <span className="amx-polaroid-nombre">Próximamente</span>
+      </figcaption>
+    </figure>
   );
 }
 window.ProximamenteCard = ProximamenteCard;
