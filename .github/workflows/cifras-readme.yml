@@ -6,8 +6,9 @@ name: Cifras del README
 on:
   push:
     branches: [main, 'claude/**']
-    # README.md NO está en la lista, y es lo ÚNICO que este workflow escribe:
-    # ese es el segundo cortafuegos contra el bucle push → workflow → push.
+    # Lo que pinta actualizar-readme.mjs (FICHEROS; hoy solo README.md) NO puede
+    # entrar en esta lista: es el segundo cortafuegos contra el bucle
+    # push → workflow → push.
     paths:
       - 'src/data/**'
       - 'scripts/build-prerender.mjs'
@@ -43,9 +44,11 @@ jobs:
           npm run build:html
           npm run cifras
 
+      # Todo el árbol, sin nombrar ficheros: out/ está en .gitignore, así que lo
+      # único que puede cambiar es lo que pinta el script.
       - name: ¿Cambió algo?
         id: revisar
-        run: git diff --quiet -- README.md || echo "hay=si" >> "$GITHUB_OUTPUT"
+        run: git diff --quiet || echo "hay=si" >> "$GITHUB_OUTPUT"
 
       # `if:`, no `git diff --quiet && git commit`: bajo `set -e` (el default de
       # los run de Actions) ese `&&` devuelve 1 justo cuando SÍ hay cambios y
@@ -55,5 +58,5 @@ jobs:
         run: |
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Cifras del README al día [skip ci]' -- README.md
+          git commit -am 'Cifras del README al día [skip ci]'
           git push
