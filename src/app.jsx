@@ -208,8 +208,16 @@ function App() {
   }, []);
 
   // ─── Tutorial de bienvenida (primer arranque + reproducible desde MÁS) ───
+  // SOLO se abre solo para quien entra por la PORTADA. Este efecto corría sin
+  // mirar la pantalla, así que quien llegaba desde un buscador a una de las 322
+  // páginas prerenderizadas se lo comía igual — y desde que el tutorial no
+  // tiene SALTAR (obligatorio por legalidad, tablero del 10-sep-2026) eso sería
+  // obligarle a atravesar cuatro pantallas antes de ver la ficha que venía a
+  // leer. `_init` es la ruta con la que se cargó la página; el efecto corre una
+  // sola vez, al montar, así que es la de ATERRIZAJE y no cambia al navegar.
   const [tutorialOpen, setTutorialOpen] = useStateApp(false);
   useEffectApp(() => {
+    if (_init.screen !== 'home') return;
     let seen = false;
     try { seen = !!localStorage.getItem('amx_onboarded_v1'); } catch (e) {}
     if (!seen) setTutorialOpen(true);
