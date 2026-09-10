@@ -2,11 +2,12 @@
   "name": "armado-en-mexico",
   "version": "1.0.0",
   "private": true,
-  "description": "Enciclopedia divulgativa de armas legales en México (DCAM · SEDENA) — app estática. El único paso de build precompila los .jsx a .js con Babel; no hay bundler.",
+  "description": "Enciclopedia divulgativa de armas legales en México (DCAM · SEDENA) — app estática. La fuente vive en src/ y public/; el build la deja en out/, que es lo que publica Cloudflare Pages. Babel precompila los .jsx a .js; no hay bundler.",
   "scripts": {
-    "build": "npm run build:js && npm run build:html",
-    "build:js": "babel --extensions .jsx --out-dir . --out-file-extension .js *.jsx",
-    "build:html": "node build-prerender.mjs",
+    "build": "npm run build:static && npm run build:js && npm run build:html",
+    "build:static": "node scripts/copiar-estaticos.mjs",
+    "build:js": "babel --extensions .jsx --out-dir out --out-file-extension .js src/app.jsx src/admin.jsx src/components src/screens",
+    "build:html": "node scripts/build-prerender.mjs",
     "watch": "npm run build:js -- --watch"
   },
   "devDependencies": {

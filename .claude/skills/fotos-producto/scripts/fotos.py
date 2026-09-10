@@ -39,7 +39,10 @@ ORIGINALES = PROY / "Catalogo de Armas" / "imagenes"
 # —`<id>.jpg`, o `<id>_loquesea.png`— porque es la unica clave estable: el
 # correlativo NNN de `imagenes/` es del catalogo DCAM y solo llega a 111.
 FUENTE = PROY / "Catalogo de Armas" / "fotos-fuente"
-IMAGENES = REPO / "imagenes"
+PUBLICO = REPO / "public"           # todo lo que se sirve tal cual (imagenes/, inventarios/)
+DATOS = REPO / "src" / "data"       # los data-*.js: son fuente, ya no viven en la raiz
+
+IMAGENES = PUBLICO / "imagenes"
 
 MODELO = "birefnet-general"
 MIN_LADO = 900          # por debajo de esto no hay pipeline que valga: resustituir
@@ -112,7 +115,7 @@ def mejor_origen(arma):
     cands = sorted(FUENTE.glob(f"{arma['id']}.*")) + sorted(FUENTE.glob(f"{arma['id']}_*"))
     ruta_repo = str(arma.get("img") or "")
     if ruta_repo.startswith("imagenes/"):
-        p = REPO / ruta_repo.split("?")[0]
+        p = PUBLICO / ruta_repo.split("?")[0]
         if p.exists():
             cands.append(p)
         # el original sin comprimir, por su correlativo NNN
@@ -522,7 +525,7 @@ def aplicar(args):
         print("nada aprobado")
         return 0
 
-    datajs = (REPO / "data.js").read_text("utf-8")
+    datajs = (DATOS / "data.js").read_text("utf-8")
     copiadas, altas, parches = [], [], 0
     for i in ids:
         r = porid.get(i)
@@ -535,7 +538,7 @@ def aplicar(args):
             # al cargar, porque su `img` viene vacio). Se le da ruta propia y se
             # rellena el hueco `img` de su mk(), que es el 15o argumento.
             nueva = f"imagenes/{r['archivo']}"
-            destino = REPO / nueva
+            destino = PUBLICO / nueva
             if destino.exists():
                 print(f"  #{i}: {nueva} ya existe, no piso nada — revisa a mano")
                 continue
@@ -547,7 +550,7 @@ def aplicar(args):
             copiadas.append(destino.name)
             altas.append((i, nueva))
             continue
-        destino = REPO / actual.split("?")[0]
+        destino = PUBLICO / actual.split("?")[0]
         shutil.copy2(TRABAJO / "3-final" / r["archivo"], destino)
         copiadas.append(destino.name)
 
@@ -566,7 +569,7 @@ def aplicar(args):
         else:
             print(f"  #{i}: no encuentro {antiguo} en data.js")
 
-    (REPO / "data.js").write_text(datajs, "utf-8")
+    (DATOS / "data.js").write_text(datajs, "utf-8")
 
     # Las altas se escriben por posicion de argumento. Eso NO se da por bueno sin
     # comprobarlo: se recarga data.js en node y se mira que cada arma tenga
@@ -608,7 +611,7 @@ def verificar(args):
         ruta = str(a.get("img") or "")
         if not ruta.startswith("imagenes/"):
             continue
-        p = REPO / ruta.split("?")[0]
+        p = PUBLICO / ruta.split("?")[0]
         if not p.exists():
             faltan.append((a["id"], ruta))
             continue

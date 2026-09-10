@@ -40,7 +40,7 @@ if (!['armas', 'pages'].includes(dominio)) {
 function desdeElCodigo(dom) {
   if (dom === 'armas') {
     global.window = global;
-    require(path.join(ROOT, 'data.js'));
+    require(path.join(ROOT, 'src/data/data.js'));
     return (global.DB || []).map((a) => {
       const c = Object.assign({}, a);
       // Las que no tienen foto real van con img vacía: el cliente les pone el
@@ -69,8 +69,8 @@ function desdeElCodigo(dom) {
     console, JSON, Date, Math, String, Number, Object, Array, RegExp,
     setTimeout, clearTimeout, localStorage: win.localStorage,
   }));
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'data-precios.js'), 'utf8'), ctx);
-  vm.runInContext(fs.readFileSync(path.join(ROOT, 'store.js'), 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/data/data-precios.js'), 'utf8'), ctx);
+  vm.runInContext(fs.readFileSync(path.join(ROOT, 'src/lib/store.js'), 'utf8'), ctx);
   ctx.Store.init();
   return ctx.Store.getPages();
 }

@@ -1,45 +1,70 @@
 # Armado en México — Enciclopedia táctica
 
 Enciclopedia divulgativa de armas legales en México (DCAM · SEDENA), por **Armas M&S**.
-App 100% estática del lado del cliente — no requiere backend ni build step.
+En producción: **[armado.mx](https://armado.mx)**
 
-## Ramas de la app
+Catálogo actual: **192 armas · 36 accesorios · 71 municiones**, servidas como **322
+páginas HTML prerenderizadas** para que los buscadores y los bots de IA —que no ejecutan
+JavaScript— vean el contenido real.
 
-| Página | URL en Pages | Descripción |
-|---|---|---|
-| `index.html` | `/` | App principal — catálogo, comparador, legalidad, calibres, campos, cursos. Responsive escritorio + móvil. |
-| `admin.html` | `/admin.html` | Panel de administración — edición del catálogo, cola de propuestas, favoritos. |
-| `shopify-demo.html` | `/shopify-demo.html` | Demo de la sección embebible para armasmys.com (la versión instalable real está en `shopify/`). |
+## Cómo funciona
 
-## Estructura
+App estática de React **sin bundler**. Los archivos no son módulos ES: se comunican por
+`window.*` y el orden de los `<script>` importa. Babel solo precompila los `.jsx` a
+`.js`.
+
+La fuente vive en `src/` y `public/`; el build la deja en `out/`, que es lo que se
+publica. **Las rutas servidas son planas**: `src/styles/estilo.css` acaba en
+`out/estilo.css` y se sirve como `/estilo.css`.
 
 ```
-index.html            ← app principal (monta React)
-admin.html            ← panel de edición
-shopify-demo.html     ← demo de la sección Shopify
-data.js / data-extra.js  ← catálogo seed (111 armas) y datos auxiliares
-store.js              ← persistencia (localStorage) compartida app ↔ admin
-ui.jsx                ← componentes compartidos (paleta, nav, cards)
-screens-1/2/3.jsx     ← pantallas (home, catálogo, ficha, comparador, etc.)
-app.jsx               ← router + estado raíz
-admin.jsx             ← panel de administración
-tweaks-panel.jsx      ← panel de ajustes de diseño
-dev-viewport.js       ← barra DEBUG (AUTO / MÓVIL / ESCRIT.) en las 3 páginas
-imagenes/             ← 111 fotos del catálogo
-shopify/              ← sección Liquid instalable + catálogo JSON + INSTALL.md
+public/       imagenes/ · inventarios/ · _headers · logo.png · manifest.webmanifest
+src/          app.jsx · admin.jsx
+  pages/      index.html · admin.html · 404.html
+  screens/    pantallas (home, catálogo, ficha, comparador, municiones…)
+  components/ ui.jsx · tweaks-panel.jsx
+  data/       catálogo y precios (data-*.js)
+  lib/        store.js (persistencia) · dev-viewport.js (barra DEBUG)
+  styles/     estilo.css
+scripts/      build-prerender.mjs · copiar-estaticos.mjs · sql/schema.sql
+functions/    Cloudflare Pages Functions (API)
+docs/         documentación técnica
+out/          generado por el build — no se commitea
 ```
 
-## Notas técnicas
+## Desarrollo local
 
-- **Un solo paso de build**: los `.jsx` se precompilan a `.js` con Babel CLI (`npm run build`); el navegador recibe JS plano. No hay bundler ni módulos: los archivos siguen comunicándose por `window.*` y el orden de los `<script>` sigue importando. React 18.3.1 vía unpkg con hashes de integridad.
-- **Los `.js` generados no se commitean** (están en `.gitignore`): los produce el build de Cloudflare Pages en cada deploy. La fuente son los `.jsx`.
-- **Datos**: el catálogo curado vive en `localStorage` por navegador y, cuando está aprovisionado el **backend compartido** (Cloudflare Pages Functions + D1), se replica al servidor para que todos los visitantes vean lo mismo. La app funciona igual sin backend (modo offline con seeds). Detalle y alta en **`BACKEND.md`**.
-- **Desarrollo local**: instala (`npm install`), compila (`npm run build`, o `npm run watch` para recompilar al guardar) y sirve por HTTP:
-  ```bash
-  npx serve .        # o: python3 -m http.server 8080
-  ```
-- **Paleta de marca** (Armas M&S): Negro Carbón `#1A1A1A` · Amarillo Táctica `#F5C518` · Rojo Alerta `#C0392B` · Gris Oscuro `#2C2C2C` · Gris Medio `#555555`.
+```bash
+npm install
+npm run build     # build:static → build:js → build:html
+npx serve out
+```
 
-## Deploy
+`npm run watch` recompila los `.jsx` al guardar.
 
-Pensada para **GitHub Pages** (rama `main`, raíz). Ver `CLAUDE.md` para los pasos automatizados.
+## Despliegue
+
+Lo sirve **Cloudflare Pages** desde `out/` (`pages_build_output_dir` en
+`wrangler.toml`), con build `npm ci && npm run build`. GitHub Pages sigue configurado
+pero solo redirige a armado.mx.
+
+Los datos curados viven en `localStorage` por navegador y, cuando el backend está
+aprovisionado (**Pages Functions + D1**), se replican al servidor para que todos los
+visitantes vean lo mismo. La app funciona igual sin backend, en modo offline con seeds.
+Detalle en [`docs/BACKEND.md`](docs/BACKEND.md).
+
+## Documentación
+
+| Documento | Contenido |
+|---|---|
+| [`AGENTS.md`](AGENTS.md) | Guía completa: estructura, build, deploy, trampas ya pagadas |
+| [`docs/DESIGN.md`](docs/DESIGN.md) | Brief de diseño vigente y dirección de arte |
+| [`docs/BACKEND.md`](docs/BACKEND.md) | Backend D1, alta y sondas de verificación |
+| [`docs/SEO.md`](docs/SEO.md) | Por qué existe el prerender, con fuentes |
+| [`docs/PRODUCT.md`](docs/PRODUCT.md) | Alcance y decisiones de producto |
+| [`docs/PLACEHOLDERS.md`](docs/PLACEHOLDERS.md) | Secciones congeladas y cómo reactivarlas |
+
+## Paleta de marca
+
+Armas M&S — Negro Carbón `#1A1A1A` · Amarillo Táctica `#F5C518` · Rojo Alerta `#C0392B`
+· Gris Oscuro `#2C2C2C` · Gris Medio `#555555`.

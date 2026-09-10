@@ -14,10 +14,10 @@ const ok = (m) => console.log('  ✅ ' + m);
 // 1) transpilar .jsx
 try {
   const Babel = require(path.join(ROOT, 'node_modules/@babel/standalone/babel.js'));
-  const jsx = fs.readdirSync(ROOT).filter((f) => f.endsWith('.jsx'));
+  const jsx = ['src', 'src/components', 'src/screens'].flatMap((d) => fs.readdirSync(path.join(ROOT, d)).filter((f) => f.endsWith('.jsx')).map((f) => path.join(d, f)));
   let errs = 0;
   jsx.forEach((f) => {
-    try { Babel.transform(fs.readFileSync(f, 'utf8'), { presets: ['react'], filename: f }); }
+    try { Babel.transform(fs.readFileSync(path.join(ROOT, f), 'utf8'), { presets: ['react'], filename: f }); }
     catch (e) { errs++; bad('transpila ' + f + ': ' + e.message); }
   });
   if (!errs) ok(jsx.length + ' archivos .jsx transpilan');
@@ -27,7 +27,7 @@ try {
 const win = {};
 global.window = win;
 ['data.js', 'data-extra.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']
-  .forEach((f) => { try { eval(fs.readFileSync(path.join(ROOT, f), 'utf8')); } catch (e) { bad('carga ' + f + ': ' + e.message); } });
+  .forEach((f) => { try { eval(fs.readFileSync(path.join(ROOT, 'src/data', f), 'utf8')); } catch (e) { bad('carga ' + f + ': ' + e.message); } });
 const DB = win.DB || [];
 const H = win.AMX_PRICE_HISTORY_SEED || {};
 const num = (s) => parseFloat(String(s).replace(/[^\d.]/g, '')) || 0;
@@ -59,7 +59,7 @@ const rotas = [];
 DB.forEach((a) => {
   const r = String(a.img || '');
   if (!r.startsWith('imagenes/')) return;   // data-URI del placeholder o URL remota
-  if (!fs.existsSync(path.join(ROOT, r.split('?')[0]))) rotas.push('#' + a.id + ' ' + r);
+  if (!fs.existsSync(path.join(ROOT, 'public', r.split('?')[0]))) rotas.push('#' + a.id + ' ' + r);
 });
 rotas.length
   ? bad(rotas.length + ' armas apuntan a una imagen inexistente: ' + rotas.slice(0, 6).join(', '))

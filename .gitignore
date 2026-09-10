@@ -1,63 +1,23 @@
 node_modules
 
-# ── Generados por `npm run build` — NO se commitean ────────────────────────
-# Los produce el build de Cloudflare Pages en cada deploy. La fuente son los
-# .jsx y los data-*.js.
+# ── Generado por `npm run build` — NO se commitea ───────────────────────────
+# La fuente vive en src/ y public/. El build deja TODO lo publicable en out/:
+# los .js que Babel saca de los .jsx, las 322 páginas del prerender, el sitemap
+# y el robots, más la copia de public/. Es lo que Cloudflare Pages sirve
+# (pages_build_output_dir en wrangler.toml) y lo regenera en cada deploy.
+/out/
 
-# 1) JS transpilado de los .jsx (build:js)
-#    Ojo: data*.js, store.js y dev-viewport.js SÍ son fuente y no van aquí.
-/admin.js
-/app.js
-/screens-1.js
-/screens-2.js
-/screens-3.js
-/screens-4.js
-/screens-accesorios.js
-/screens-municiones.js
-/screens-tutorial.js
-/tweaks-panel.js
-/ui.js
-
-# 2) HTML prerenderizado (build:html) — ver build-prerender.mjs
-#    Fuente que NO se toca: index.html, admin.html, 404.html, shopify-demo.html
-/pistolas/
-/revolveres/
-/rifles/
-/escopetas/
-/carabinas/
-/cargadores/
-/opticas/
-/refacciones/
-/empunaduras/
-/municiones/
-/pistolas.html
-/revolveres.html
-/rifles.html
-/escopetas.html
-/carabinas.html
-/cargadores.html
-/opticas.html
-/refacciones.html
-/empunaduras.html
-/municiones.html
-/arsenal.html
-/calibres.html
-/legalidad.html
-/traumaticas.html
-/preguntas.html
-/soporte.html
-/campos.html
-/cursos.html
-/experiencias.html
-/acerca.html
-/comparar.html
-/proponer.html
-/mas.html
-
-# 3) Ficheros de despliegue generados junto al prerender
-/sitemap.xml
-/robots.txt
-/_redirects
-
-# 4) Temporal del resembrado de D1 (skill sincronizar-d1)
+# Temporal del resembrado de D1 (skill sincronizar-d1)
 /.d1-resembrado.sql
+
+# Impeccable (skill de diseño) — el binario del motor lo baja el instalador
+# (`npx impeccable install`); 14 MB por proveedor, no se versionan.
+/.claude/skills/impeccable/scripts/bin/
+/.agents/skills/impeccable/scripts/bin/
+
+# Respaldo del brief manual mientras se mergea con lo que genere Impeccable.
+# Copia durable en «Documentos de Proyecto/DESIGN.original-AAAA-MM-DD.md».
+/DESIGN.original.md
+
+# cajas.py importa fotos.py como modulo hermano: Python deja su cache al lado
+__pycache__/
