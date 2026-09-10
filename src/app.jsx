@@ -467,8 +467,8 @@ function App() {
       }}>
         {content}
         {/* PIE DE OFICIO — global, no solo del Home. Tres razones:
-            (1) lo que lleva dentro son avisos de SITIO —divulgativo, sin fines
-                de lucro, no somos gobierno, marcas de terceros—, no de pantalla;
+            (1) lo que lleva dentro son avisos de SITIO —divulgativo, no somos
+                gobierno, marcas de terceros—, no de pantalla;
             (2) casi nadie entra por la portada: el buscador manda a las fichas,
                 y ahí el aviso tiene que estar;
             (3) va DENTRO del cuerpo con scroll, no como hermano del nav: en

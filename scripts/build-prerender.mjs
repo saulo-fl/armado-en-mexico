@@ -162,7 +162,7 @@ if (!shell.includes(MARCA_ROOT)) throw new Error('build-prerender: falta <div id
 const PIE = `<footer>
 <hr>
 <p>Construido por <a href="https://github.com/saulo-fl" rel="noopener noreferrer">saulo-fl</a> y <a href="https://armasmys.com/" rel="noopener noreferrer">Armas M&amp;S</a> para la comunidad de tiradores de México · <a href="https://github.com/saulo-fl/armado-en-mexico" rel="noopener noreferrer">GitHub</a></p>
-<p>Catálogo divulgativo de código abierto sin fines de lucro. Las armas de fuego se muestran solo con fines informativos. Información basada en la <a href="/legalidad">Ley Federal de Armas de Fuego</a> y precios DCAM.</p>
+<p>Catálogo divulgativo de código abierto. Las armas de fuego se muestran solo con fines informativos. Información basada en la <a href="/legalidad">Ley Federal de Armas de Fuego</a> y precios DCAM.</p>
 <p><small>Fuentes: precios y existencias de los <a href="/acerca">inventarios oficiales DCAM y OTCA</a>, con la fecha del inventario en cada ficha · Marco legal: <a href="/legalidad">Ley Federal de Armas de Fuego y Explosivos</a> · Datos técnicos: <a href="/calibres">guía de calibres</a> y publicaciones de los fabricantes.</small></p>
 <p><small>Los nombres de productos, logotipos y marcas que aparecen en este sitio son propiedad de sus respectivos dueños y se usan únicamente para identificar el producto del que se informa. Armado en México no está afiliado ni respaldado por ninguna de estas compañías, y no forma parte de DEFENSA (anteriormente SEDENA), la DCAM ni de ninguna dependencia del gobierno mexicano.</small></p>
 </footer>`;
@@ -233,7 +233,7 @@ ${dl([['Marca', a.marca], ['Tipo', tipoNom], ['Calibre', a.calibre], ['Capacidad
       ['Precio de referencia', a.priceExact]])}
 ${a.legalTit ? `<h2>Situación legal en México</h2><p><strong>${esc(a.legalTit)}.</strong> ${esc(a.legalDesc || '')}</p>` : ''}
 ${a.historia ? `<h2>Contexto</h2><p>${esc(a.historia)}</p>` : ''}
-<p><small>Información divulgativa basada en la Ley Federal de Armas de Fuego y Explosivos y en el catálogo oficial DCAM/SEDENA. Sin fines de lucro; no se comercializan armas de fuego.</small></p>
+<p><small>Información divulgativa basada en la Ley Federal de Armas de Fuego y Explosivos y en el catálogo oficial DCAM/SEDENA. No se comercializan armas de fuego.</small></p>
 </article>`,
   });
   fechaPorRuta.set(ruta, fechaArma(a));
@@ -355,7 +355,7 @@ const FIJAS = [
   { ruta: 'cursos', titulo: 'Experiencias', enSitemap: false, noindex: true,
     desc: 'Formación y actividades de tiro. Sección en preparación.' },
   { ruta: 'acerca', titulo: 'Acerca de Armado en México', enSitemap: true,
-    desc: 'Quiénes somos, con qué fuentes trabajamos y por qué esta enciclopedia es divulgativa y sin fines de lucro.' },
+    desc: 'Quiénes somos, con qué fuentes trabajamos y por qué esta enciclopedia es divulgativa.' },
   // Sin valor de búsqueda: existen para no dar 404, pero fuera del índice.
   { ruta: 'comparar', titulo: 'Comparador de armas', enSitemap: false, noindex: true,
     desc: 'Compara dos armas del catálogo lado a lado.' },
