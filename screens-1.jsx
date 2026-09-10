@@ -39,25 +39,6 @@ const FOTOS_EXPERIENCIAS = [
   'imagenes/proximamente-exp-2.webp',
   'imagenes/proximamente-exp-3.webp',
 ];
-// Ocupa el sitio del «Ver todos →» pero NO es un enlace. Ahora que los enlaces
-// de acción son rojos (estiloAccion), el verde de marca ya lo diferencia solo:
-// se queda en PALETTE.marca —10.83:1 sobre el lienzo crema, el mismo hex que el
-// antiguo PALETTE.amber— y se nombra por lo que es. Sobre superficie verde habría
-// que usar PALETTE.sobreMarcaMuted, pero este tag siempre cae sobre el lienzo.
-// Sin aria-hidden a propósito: «(Próximamente)» es la ÚNICA señal de que la
-// sección está congelada, y ocultarla al lector de pantalla borra esa información.
-function ProximamenteTag() {
-  return (
-    <span style={{
-      // El ACENTO, no la superficie de marca: en oscuro el verde #173A32 sobre
-      // el lienzo da 1.52:1 y este rótulo desaparecía. PALETTE.amber vale lo
-      // mismo (#173A32) en claro y sube a la variante clara en oscuro (9.17:1).
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber,
-      letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-      cursor: 'default',   // refuerza que no se pincha, aunque esté donde iba el enlace
-    }}>(Próximamente)</span>
-  );
-}
 
 // precio numérico (MXN) a partir de priceExact "$10,061.26 MXN"
 const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^\d.]/g, '')) || 0;
@@ -259,13 +240,11 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           componente— así que mover el bloque no arrastra dependencias. */}
       <CarouselSection
         title="Campos de tiro"
-        action={<ProximamenteTag />}
         items={FOTOS_CAMPOS}
         renderItem={(f) => <window.ProximamenteCard img={f} />} />
 
       <CarouselSection
         title="Experiencias"
-        action={<ProximamenteTag />}
         items={FOTOS_EXPERIENCIAS}
         renderItem={(f) => <window.ProximamenteCard img={f} />} />
 

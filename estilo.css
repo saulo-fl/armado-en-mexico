@@ -724,9 +724,34 @@
    16/9 y la foto lo LLENA (`cover`), que es cómo se revela una instantánea de
    paisaje: al borde, sin márgenes. El faldón ancho de abajo sigue siendo lo
    que la hace polaroid — §4: geometría, nunca un filtro de foto envejecida. */
+.amx-v2 .amx-polaroid--apaisada {
+  /* Las proporciones salen MEDIDAS de la polaroid apaisada de referencia que
+     mandó Saulo: margen lateral al 2.7% del ancho de la foto —no al 4.5% del
+     pozo cuadrado, que enmarcaba de más— y faldón al 15.6% de ese mismo
+     ancho. Con una foto de ~310px en el carrusel: 9px de canto y 48px de
+     faldón contando su hueco y el canto de abajo. */
+  padding: 9px;
+}
 .amx-v2 .amx-polaroid--apaisada .amx-polaroid-pozo {
   position: relative;
   aspect-ratio: 16 / 9;
+  /* Sin filo: en una copia de verdad la emulsión acaba contra el cartón, no
+     tiene una línea dibujada alrededor. El pozo cuadrado lo lleva porque ahí
+     la foto va contenida y con aire; aquí la llena. */
+  border: 0;
+}
+.amx-v2 .amx-polaroid--apaisada .amx-polaroid-pie {
+  min-height: 30px;
+  margin-top: 9px;
+  /* La tipografía de antes, por orden de Saulo: la Archivo en versalitas del
+     rótulo que tenían estas tarjetas, no la mono del faldón de la ficha. */
+  font-family: var(--sans);
+}
+.amx-v2 .amx-polaroid--apaisada .amx-polaroid-nombre {
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
 }
 .amx-v2 .amx-polaroid--apaisada .amx-polaroid-pozo img {
   /* Pisa el `max-width: 92%` + `contain` del pozo cuadrado, que existe para
