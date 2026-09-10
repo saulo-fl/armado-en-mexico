@@ -358,12 +358,16 @@ for (const p of FIJAS) {
 // páginas fijas no salen de un data-*.js, así que van SIN lastmod: es
 // preferible omitirlo a inventar una fecha, porque Google se cree la columna
 // entera o la descarta entera, y una fecha falsa contamina las verdaderas.
-// --follow + --diff-filter=M: cuenta el último cambio de CONTENIDO, no un renombrado.
-// Sin ellos, mover los data-*.js a src/ le pondría a las 309 URLs la fecha de la
-// mudanza — justo la «fecha inventada» que el comentario de arriba manda evitar.
+// OJO (medido 9-sep-2026): en el build de Cloudflare esto NO devuelve la fecha del
+// dato. Pages clona en superficial, así que `git log -1 -- ruta` cae siempre al commit
+// HEAD: el sitemap publicado lleva UNA sola fecha en sus 317 URLs, la del último
+// deploy. Es la «fecha inventada» que el bloque de arriba dice evitar, y lleva así
+// desde siempre — en local no se ve, porque aquí sí hay historial. Arreglarlo es tarea
+// aparte: --follow --diff-filter=M lo resuelve en local pero deja el sitemap SIN
+// lastmod en Cloudflare, que es otro comportamiento distinto del actual.
 const fechaDe = (archivo) => {
   try {
-    return execFileSync('git', ['log', '-1', '--format=%cI', '--follow', '--diff-filter=M', '--', archivo],
+    return execFileSync('git', ['log', '-1', '--format=%cI', '--', archivo],
       { cwd: RAIZ, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
   } catch { return ''; }   // sin git (build de Cloudflare sin historial) → se omite
 };
