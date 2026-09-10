@@ -1,13 +1,15 @@
 # Armado en México — configuración de Cloudflare Pages + Functions + D1
 # =============================================================================
-# La app es estática (raíz del repo). Las Functions viven en  functions/  y
+# La app es estática. La fuente vive en  src/  y  public/ ; el build la deja en
+#  out/ , que es lo que Pages publica. Las Functions viven en  functions/  (en la
+# RAÍZ del repo, fuera de out/ — Pages las descubre ahí) y
 # Cloudflare Pages las despliega automáticamente. La base D1 se expone a las
 # Functions como  env.DB .
 #
-# ALTA YA REALIZADA (25-ago-2026) — ver BACKEND.md. Queda documentado por si hay
+# ALTA YA REALIZADA (25-ago-2026) — ver docs/BACKEND.md. Queda documentado por si hay
 # que rehacerla en otra cuenta:
 #   1. wrangler d1 create armado-en-mexico   → de ahí sale el database_id.
-#   2. wrangler d1 execute armado-en-mexico --remote --file=./schema.sql
+#   2. wrangler d1 execute armado-en-mexico --remote --file=./scripts/sql/schema.sql
 #   3. Variables de Access: en [vars] de abajo (no son secretas).
 #   4. Política de Cloudflare Access sobre  /admin*  y (opcional) /api/admin/*
 #      — es lo que realmente protege la escritura del admin.
@@ -15,7 +17,7 @@
 
 name = "armado-en-mexico"
 compatibility_date = "2024-09-01"
-pages_build_output_dir = "."
+pages_build_output_dir = "out"
 
 # ── D1 ACTIVO ────────────────────────────────────────────────────────────────
 # OJO: el binding debe llamarse DB (es lo que leen las Functions como env.DB).
