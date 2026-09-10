@@ -29,8 +29,11 @@ const planos = [
   ...readdirSync(join(RAIZ, 'src', 'data')).map((f) => ['src/data', f]),
   ...readdirSync(join(RAIZ, 'src', 'lib')).map((f) => ['src/lib', f]),
   ['src/styles', 'estilo.css'],
-  // index.html no va aquí: lo genera el prerender a partir de src/pages/index.html.
-  // admin.html y 404.html sí, que se sirven tal cual.
+  // Las TRES páginas fuente se copian. index.html incluido: el prerender NO emite
+  // portada (ninguna de sus 322 páginas tiene ruta vacía), así que `/` se sirve con
+  // este shell y React pinta el home en cliente. Sin esta copia, el sitio no tiene
+  // portada: 404 en la raíz.
+  ['src/pages', 'index.html'],
   ['src/pages', 'admin.html'],
   ['src/pages', '404.html'],
 ];
