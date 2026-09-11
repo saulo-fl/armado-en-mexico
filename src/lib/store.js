@@ -40,7 +40,7 @@
       id: 'p1',
       eyebrow: '◆ ENCICLOPEDIA TÁCTICA · 2026',
       title: 'Conoce las armas legales en México',
-      subtitle: 'Catálogo divulgativo con información oficial DCAM-SEDENA. Sin fines de lucro.',
+      subtitle: 'Catálogo divulgativo con información oficial DCAM-SEDENA.',
       cta: 'Explorar arsenal',
       ctaTarget: 'catalog',
       bgImage: '',
