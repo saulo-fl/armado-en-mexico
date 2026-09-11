@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="public/imagenes/logo-main.png" alt="Armado en México" width="440">
+  <img src="public/imagenes/logo-armado-mx.webp" alt="Armado en México" width="220">
   <p><strong>Enciclopedia divulgativa de armas legales en México</strong><br>Inventario oficial DCAM · SEDENA, por Armas M&amp;S</p>
   <p><a href="https://armado.mx"><strong>armado.mx</strong></a></p>
 </div>
@@ -16,18 +16,167 @@ bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap d
 |  |  |
 |---|---|
 | <img src="docs/capturas/portada.webp" alt="Portada de armado.mx"><br>**Portada** — las armas destacadas en su expediente y los favoritos de Armas M&S | <img src="docs/capturas/arsenal.webp" alt="Arsenal con filtros"><br>**Arsenal** — filtros por tipo, calibre, uso y disponibilidad |
-| <img src="docs/capturas/ficha.webp" alt="Ficha de arma con historial de precio"><br>**Ficha de arma** — clasificación legal y precio DCAM con historial | <img src="docs/capturas/comparador.webp" alt="Comparador de armas"><br>**Comparador** — dos armas lado a lado, con su ficha técnica |
+| <img src="docs/capturas/ficha.webp" alt="Ficha de arma con historial de precio"><br>**Ficha de arma** — clasificación legal y precio DCAM con historial | <img src="docs/capturas/comparador.webp" alt="Comparador: Ruger LCP frente a Ruger LCP MAX"><br>**Comparador** — la Ruger LCP frente a la LCP MAX, fila por fila |
+
+## Declaración de intenciones
+
+Armado en México nace de la opacidad. Las instituciones no dan información pública y actualizada
+sobre las armas que un ciudadano puede tener legalmente: desincentivan así el ejercicio de un
+derecho constitucional —el del artículo 10, a la posesión legal de armas para proteger el
+domicilio— y satanizan las armas en un país asolado desde hace más de veinte años por la
+violencia y el narcotráfico.
+
+Frente a eso, transparencia. Cada arma se muestra con fines informativos, y cada precio se publica
+con el inventario oficial del que sale y su fecha, para que quien se lo plantee decida informado.
+
+No creemos que cualquiera deba tener un arma. Defendemos el derecho que tenemos como mexicanos y
+como personas a proteger nuestra vida, nuestra familia y nuestro hogar en un entorno donde la
+violencia y el crimen son el pan de cada día, y donde alguien puede irrumpir en tu casa sin que las
+autoridades respondan a tiempo.
+
+Abogamos por la tenencia responsable de armas: para el tiro deportivo, pero sobre todo para la
+capacitación y la protección del hogar.
+
+*Armado en México · ¡Protege lo que amas!*
 
 ## Qué hace
 
-- **Arsenal con filtros.** El catálogo completo en una pantalla, acotable por tipo, calibre,
-  uso y disponibilidad, y cruzable con el buscador.
-- **Una ficha por arma.** Datos técnicos, **clasificación legal** en México (qué se puede tener,
-  qué se puede portar y con qué permiso) y el **precio de referencia DCAM con su historial**:
-  cada inventario publicado deja su punto, así que se ve cómo se ha movido.
-- **Comparador.** Dos armas lado a lado, campo por campo.
+### Portada: Favoritos de Armas M&S y calibres
+
+![Favoritos de Armas M&S en la portada](docs/capturas/favoritos.webp)
+
+**Favoritos de Armas M&S** es una selección del equipo de Armas M&S: armas que nos gustan y que
+creemos que vale la pena conocer. No es un ranking ni depende de las visitas —para eso está «Las
+más visitadas», justo debajo—: la elegimos a mano desde el panel de administración. Cada tarjeta
+abre la ficha del arma.
+
+![Fila de calibres de la portada](docs/capturas/portada-calibres.webp)
+
+**Calibres** es la puerta corta a la guía. Cada ficha resume un calibre: su sistema (Rimfire o
+Percusión central), su uso típico —«Defensa personal compacta», «Práctica, plinking y caza
+menor»— y cuántas armas del catálogo lo usan, con el cartucho dibujado a escala: su altura es
+proporcional a la longitud real del cartucho, con la misma escala en todas, así que se comparan
+de un vistazo. Sirven para orientarse antes de mirar armas: para qué es cada calibre y cuánta
+oferta tiene. Tocar una ficha, o «Ver guía →», abre la Guía de calibres.
+
+### Arsenal
+
+![Primera página del Arsenal: las armerías DCAM y OTCA y la disponibilidad](docs/capturas/arsenal-inicio.webp)
+
+El Arsenal no abre con una lista: abre con una página que reparte el catálogo según la pregunta
+con la que llega cada quien. Todos los grupos abren el listado ya filtrado, y los que llevan
+contador dicen cuántas armas reúnen:
+
+- **Armería.** Las dos armerías cuyos inventarios oficiales concilia el sitio: la **DCAM**, en la
+  Ciudad de México, y la **OTCA**, en Nuevo León. Cada una publica su propio inventario, y al
+  elegir una aparecen las armas que han figurado en los de esa sede: sirve para saber qué ha
+  ofrecido la que te queda cerca.
+- **Disponibilidad.** «Disponibles actualmente» junta las armas con existencias en el último
+  inventario de su armería. Es el atajo para empezar por lo que había en existencia; ese dato es
+  el del inventario, no un stock en tiempo real, y la ficha lo advierte.
+- **Clasificación legal.** Uso civil, Policía / Seguridad y Exclusivo Ejército, cada una con su
+  descripción y su contador.
+- **Tipo de arma, uso y calibre.** Pistolas, revólveres, rifles, escopetas y carabinas; tiro
+  deportivo, cacería y defensa del hogar; y un acceso por cada calibre que tiene armas en el
+  catálogo.
+- **Ver todas las armas**, al final, abre el listado completo.
+
+Todas esas entradas llevan al mismo listado —el de la segunda captura de arriba—, con su filtro
+ya puesto y el resto a mano para seguir afinando:
+
+- **Buscador**: nombre, marca, calibre o país.
+- **Tipo de arma**, **Calibre**, **Armería** (DCAM · Ciudad de México u OTCA · Nuevo León) y
+  **Disponibilidad** (con existencias o agotadas).
+- **Rango de precio**: una barra con mínimo y máximo. Sus límites se recalculan con los demás
+  filtros para abarcar solo las armas que quedan, y con el tirador al tope entra también todo lo
+  que pasa de $100,000.
+- **Filtros avanzados**: uso, clasificación legal, marca, mecanismo (Semi-auto, Cerrojo, Bombeo,
+  Revólver o Sobrepuesta) y era (Clásico, antes de 1990; Moderno, de 1990 a 2014; Vanguardia, de
+  2015 en adelante).
+
+Sobre las tarjetas se lee cuántas armas quedan frente al total, y la ✕ del buscador quita todos
+los filtros de una vez. Cada tarjeta es un expediente con la marca, el nombre, el calibre, el
+nivel de precio (de $, menos de $10,000, a $$$$$, desde $100,000) y el precio de referencia, con
+el sello de su clasificación legal al pie de la foto. Su botón ⇄ la añade al comparador.
+
+### Ficha de arma
+
+Cada arma tiene su página (la tercera captura de arriba), ordenada según las preguntas de quien
+la está considerando:
+
+- **El expediente.** Un folder abierto con la pestaña de su tipo. A la izquierda, la foto en una
+  copia instantánea con marca, país —con su bandera— y año anotados al pie, y bajo ella el precio
+  de referencia con la armería que lo publicó y la fecha de su inventario. A la derecha, el
+  mecanismo, la ficha técnica (calibre, capacidad, longitud, peso, origen y año), el sello de su
+  clasificación legal y el botón **⇄ Comparar**.
+- **Precio de referencia.** El precio actual con IVA, la armería y la fecha, y las existencias por
+  sede: cuántas piezas marcó el último inventario de la DCAM y el de la OTCA, o AGOTADO si el arma
+  ya no aparece en él. «Detalle de la fuente» da la descripción literal con la que figura en el
+  inventario y el enlace al PDF oficial, con el aviso de que las existencias son un dato
+  histórico, no en tiempo real.
+- **Historial de precios.** Cada inventario oficial en el que aparece el arma deja un punto: la
+  gráfica enseña cómo se ha movido el precio y cuánto ha variado en porcentaje desde el primer
+  registro, y el desglose lista cada inventario con su precio, su fecha y su PDF. Solo sale cuando
+  hay más de un registro.
+- **Munición y accesorios compatibles.** Los cartuchos del inventario de su mismo calibre y los
+  accesorios que le corresponden —por calibre, por tipo de arma o universales—, cada uno con su
+  ficha.
+- **Usos, Legalidad e Historia**, en pestañas: para qué se emplea (defensa del hogar, tiro
+  deportivo, cacería…), su clasificación con un enlace a la sección de legalidad, y la historia
+  del modelo.
+- **Para cerrar**, el video del modelo cuando lo hay; «¿Recomiendas esta arma?», un sí o no con
+  reseña escrita que solo se publica después de moderarla; armas similares del mismo tipo, y
+  «Sugerir cambios» para proponer una corrección.
+
+### Comparador
+
+Pone dos armas lado a lado y las lee fila por fila: **calibre, capacidad, peso, longitud, origen,
+año, mecanismo, precio de referencia y disponibilidad**. Se llena con el botón ⇄ de cualquier
+tarjeta o con **⇄ Comparar** en la ficha; COMPARAR, en la barra de navegación, lleva la cuenta, y
+si se añade una tercera arma sale la primera que entró. Cada lado tiene «Ver ficha →» y una ✕
+para quitarla, y un hueco libre deja elegir otra desde el listado.
+
+Sirve para decidir entre candidatas con datos y no con fotos. El calibre dice qué munición
+necesita; capacidad, peso y longitud, cuánto carga y cuánto abulta; el año separa diseños
+recientes de clásicos; el precio es el de referencia del inventario oficial, y la disponibilidad
+dice a quién se destina según su clasificación legal.
+
+La captura enseña el caso típico. La **Ruger LCP** y la **Ruger LCP MAX** parecen la misma pistola
+en dos versiones: misma marca, mismo calibre, mismo mecanismo, mismo origen y las dos de uso
+civil. Fila por fila, la diferencia salta:
+
+|  | Ruger LCP | Ruger LCP MAX | Diferencia |
+|---|---|---|---|
+| Capacidad | 6+1 | 10+1 | 4 cartuchos más en el cargador |
+| Peso | 270g | 297g | +27 g |
+| Longitud | 133mm | 137mm | +4 mm |
+| Año | 2008 | 2021 | 13 años después |
+| Precio | $9,110.35 MXN | $14,875.83 MXN | +$5,765.48, un 63 % más |
+
+La MAX es la evolución de la LCP: casi del mismo tamaño y peso, lleva cuatro cartuchos más y
+cuesta un 63 % más. Si esos cuatro cartuchos valen la diferencia lo decide cada quien, pero con
+los números delante: eso es lo que una foto no enseña y el comparador sí.
+
+<sub>Precios de referencia del último inventario oficial de cada arma, tal como los mostraba el
+comparador el 11 de septiembre de 2026. Cambian con cada inventario nuevo.</sub>
+
+### Guía de calibres
+
+![Guía de calibres](docs/capturas/calibres.webp)
+
+Una ficha por calibre, desde el menú MÁS o desde la portada. Cada una da su sistema y su uso
+típico, una descripción, la balística aproximada —velocidad y energía—, el retroceso y cuántas
+armas del catálogo lo usan; debajo, esas armas en una tira que se arrastra, y cada una abre su
+ficha. A un lado va el cartucho, con la misma escala en todas las fichas. Arriba, un filtro separa
+Rimfire de Percusión central.
+
+Sirve para elegir el calibre antes que el arma: qué se usa para defensa, qué para tiro deportivo o
+caza, cuánto retroceso tiene y cuántas opciones hay en el catálogo. Las cifras son divulgativas y
+varían según marca y munición, y la guía lo advierte.
+
+### Y además
+
 - **Municiones y accesorios** del inventario oficial, con marca, compatibilidad y precio.
-- **Guía de calibres** — para qué sirve cada uno: uso típico, velocidad, energía y retroceso.
 - **Tenencia legal** — requisitos y pasos del trámite ante la SEDENA conforme a la Ley Federal
   de Armas de Fuego y Explosivos, y **preguntas frecuentes** sobre licencias y portación.
 - **Armas traumáticas** — defensa menos letal por CO₂, que no son armas de fuego y no piden
