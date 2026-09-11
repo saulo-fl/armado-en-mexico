@@ -69,7 +69,8 @@ def catalogo():
           "({id:m.id,nombre:m.nombre,marca:m.marca,calibre:m.calibre,img:m.img,ref:m.dcamRef}))))")
     # encoding explicito: node escribe UTF-8 y en Windows text=True decodifica en
     # cp1252, que revienta con "Aguila" y con el punto medio de los nombres.
-    out = subprocess.run(["node", "-e", js], cwd=REPO, capture_output=True,
+    # cwd: data-municiones.js ya no vive en la raiz, sino en src/data.
+    out = subprocess.run(["node", "-e", js], cwd=fotos.DATOS, capture_output=True,
                          text=True, encoding="utf-8", check=True)
     return json.loads(out.stdout)
 
