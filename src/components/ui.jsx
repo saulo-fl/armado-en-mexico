@@ -505,58 +505,6 @@ function TacticalCorners({ color = PALETTE.amber, size = 10, thickness = 1.5, al
 window.TacticalCorners = TacticalCorners;
 
 // ──────────────────────────────────────────────────────────────
-// STATS BAR — barra de estadística estilo videojuego
-// ──────────────────────────────────────────────────────────────
-function StatsBar({ label, value, max = 100, color = PALETTE.amber, compareValue = null }) {
-  const pct = Math.min(100, (value / max) * 100);
-  const cmpPct = compareValue != null ? Math.min(100, (compareValue / max) * 100) : null;
-  return (
-    <div style={{ marginBottom: 10 }}>
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 14.5, color: PALETTE.textDim,
-        textTransform: 'uppercase', letterSpacing: '0.1em',
-        marginBottom: 4,
-      }}>
-        <span>{label}</span>
-        <span style={{ color: PALETTE.text, fontWeight: 600 }}>{value}</span>
-      </div>
-      <div style={{
-        position: 'relative',
-        height: 6,
-        background: PALETTE.bg,
-        border: `1px solid ${PALETTE.border}`,
-        borderRadius: 1,
-        overflow: 'hidden',
-      }}>
-        {cmpPct != null && (
-          <div style={{
-            position: 'absolute', inset: 0,
-            width: `${cmpPct}%`,
-            background: 'rgba(90,122,154,0.35)',
-            borderRight: `1px dashed ${PALETTE.blue}`,
-          }} />
-        )}
-        <div style={{
-          position: 'absolute', top: 0, bottom: 0, left: 0,
-          width: `${pct}%`,
-          background: `linear-gradient(90deg, ${amxAlfa(color, 67)}, ${color})`,
-          boxShadow: `0 0 6px ${amxAlfa(color, 33)}`,
-        }} />
-        {/* segmentos visuales */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'repeating-linear-gradient(90deg, transparent 0 9px, rgba(0,0,0,0.6) 9px 10px)',
-          pointerEvents: 'none',
-        }} />
-      </div>
-    </div>
-  );
-}
-window.StatsBar = StatsBar;
-
-// ──────────────────────────────────────────────────────────────
 // SECTION HEADER — encabezado de sección con línea
 // ──────────────────────────────────────────────────────────────
 function SectionHeader({ children, action, accent = PALETTE.amber }) {

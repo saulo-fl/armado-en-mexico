@@ -162,7 +162,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   // la etiqueta dice "control" — con el número a la vista, "Retroceso 52" se
   // habría leído justo al revés.
   // `statsKeys` vivía aquí para la valoración divulgativa, retirada el
-  // 7-sep-2026. El comparador no lo usaba: lleva su propia lista inline.
+  // 7-sep-2026. El comparador no lo usaba; su lista propia salió el 10-sep-2026.
   // El rótulo del tipo para la pestaña del folder. En singular y acentuado:
   // `CATEGORIES.tipo` guarda los rótulos en plural y despluralizar «Rifles» y
   // «Revólveres» con la misma regla no sale (uno pierde la «s», el otro «es»).
@@ -289,9 +289,10 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           su fecha, cada afirmación legal con su texto de ley— una cifra sin
           respaldo cuesta más credibilidad de la que aporta.
 
-          `arma.stats` NO se toca: sigue en data.js y lo sigue usando el
-          comparador, que lleva su propia lista inline. `window.StatsBar` se
-          queda en ui.jsx por lo mismo. Si esto vuelve, que vuelva con fuente. */}
+          El 10-sep-2026 salió también del comparador, por lo mismo, y con él
+          `window.StatsBar`, que ya no tenía consumidores. `arma.stats` sigue en
+          data.js, pero ninguna pantalla lo pinta ni lo edita. Si esto vuelve, que
+          vuelva con fuente. */}
 
       {/* ── 5 · PRECIO DE REFERENCIA + 6 · HISTORIAL ───────────────────── */}
       <ProdSection pad={PAD} gap={SEC}>
@@ -1121,7 +1122,6 @@ function SuggestChangesModal({ arma, onClose }) {
             { value: 'historia', label: 'Historia / descripción' },
             { value: 'legal', label: 'Información legal' },
             { value: 'imagen', label: 'Imagen' },
-            { value: 'stats', label: 'Stats de combate' },
             { value: 'otro', label: 'Otro' }]
           })}
             {sfld('Valor actual (lo que dice ahora)', 'current', f, set, { ta: true, rows: 2 })}
@@ -1262,81 +1262,8 @@ function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerFo
         )}
       </div>
 
-      {/* STATS SIDE BY SIDE */}
       {a && b &&
       <div style={{ padding: `0 ${padX}px 16px` }}>
-          <SectionHeader>Estadísticas</SectionHeader>
-          <div style={{
-          background: PALETTE.bgCard,
-          border: `1px solid ${PALETTE.border}`,
-          padding: 12,
-          position: 'relative'
-        }}>
-            <TacticalCorners size={10} color={PALETTE.amber} />
-            {[
-          { k: 'alcance', l: 'Alcance' },
-          { k: 'precision', l: 'Precisión' },
-          { k: 'retroceso', l: 'Retroceso' },
-          { k: 'capacidad', l: 'Capacidad' },
-          { k: 'manejo', l: 'Manejo' },
-          { k: 'poder', l: 'Poder' }].
-          map((stat) => {
-            const va = a.stats[stat.k],vb = b.stats[stat.k];
-            const winner = va > vb ? 'a' : vb > va ? 'b' : null;
-            return (
-              <div key={stat.k} style={{
-                display: 'grid', gridTemplateColumns: '1fr 70px 1fr',
-                alignItems: 'center', gap: 8, marginBottom: 10
-              }}>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 15.5, color: winner === 'a' ? PALETTE.amber : PALETTE.text,
-                    fontWeight: 700
-                  }}>{va}</div>
-                    <div style={{
-                    height: 4, background: PALETTE.bg,
-                    border: `1px solid ${PALETTE.border}`,
-                    marginTop: 3, position: 'relative'
-                  }}>
-                      <div style={{
-                      position: 'absolute', right: 0, top: 0, bottom: 0,
-                      width: `${va}%`,
-                      background: winner === 'a' ? PALETTE.amber : PALETTE.textMuted,
-                      boxShadow: winner === 'a' ? `0 0 4px ${window.amxAlfa(PALETTE.amber, 40)}` : 'none'
-                    }} />
-                    </div>
-                  </div>
-                  <div style={{
-                  fontFamily: 'JetBrains Mono, monospace',
-                  fontSize: 13, color: PALETTE.textMuted,
-                  textAlign: 'center', letterSpacing: '0.1em',
-                  textTransform: 'uppercase'
-                }}>{stat.l}</div>
-                  <div>
-                    <div style={{
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 15.5, color: winner === 'b' ? PALETTE.amber : PALETTE.text,
-                    fontWeight: 700
-                  }}>{vb}</div>
-                    <div style={{
-                    height: 4, background: PALETTE.bg,
-                    border: `1px solid ${PALETTE.border}`,
-                    marginTop: 3, position: 'relative'
-                  }}>
-                      <div style={{
-                      position: 'absolute', left: 0, top: 0, bottom: 0,
-                      width: `${vb}%`,
-                      background: winner === 'b' ? PALETTE.amber : PALETTE.textMuted,
-                      boxShadow: winner === 'b' ? `0 0 4px ${window.amxAlfa(PALETTE.amber, 40)}` : 'none'
-                    }} />
-                    </div>
-                  </div>
-                </div>);
-
-          })}
-          </div>
-
           {/* SPEC ROWS */}
           <SectionHeader>Ficha técnica</SectionHeader>
           <div style={{
@@ -2339,7 +2266,6 @@ function SubmitScreen({ onNav }) {
       avail: f.avail, availLabel: window.CATEGORIES.disponibilidad.find((d) => d.id === f.avail)?.label || 'Civil',
       uses: ['domicilio', 'club'],
       priceLvl: 2, priceExact: 'Por confirmar',
-      stats: { alcance: 50, precision: 50, retroceso: 50, capacidad: 50, manejo: 50, poder: 50 },
       disponibilidad: [], dcamRef: '', legalTit: '', legalDesc: ''
     });
     setSent(true);
