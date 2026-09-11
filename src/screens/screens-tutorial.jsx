@@ -58,10 +58,10 @@
         key: 'welcome',
         eyebrow: 'Bienvenido a',
         title: 'Armado en México',
-        // Literal del tablero de Saulo (10-sep-2026). Se transcribe tal cual,
-        // incluida la elisión de «de» en «más grande todo México»: la copia de
-        // la portada es suya, no del código.
-        body: 'La guía de armas y legalidad más grande todo México. Conoce el armamento disponible, los trámites necesarios y mucho más',
+        // Literal del tablero de Saulo (10-sep-2026): la copia de la portada es
+        // suya, no del código, y se transcribe tal cual. Solo se añadió el «de» de
+        // «más grande de todo México», que faltaba y Saulo confirmó al revisar el PR.
+        body: 'La guía de armas y legalidad más grande de todo México. Conoce el armamento disponible, los trámites necesarios y mucho más',
         // El rombo en SVG que había aquí se fue: «se nota IA slop de webs»
         // (Saulo). En su sitio, el logotipo dentro de una copia instantánea —el
         // objeto que ya usa todo el sitio— con el faldón en blanco, como la
