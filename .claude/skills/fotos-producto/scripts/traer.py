@@ -23,7 +23,9 @@ from urllib.parse import urljoin, urlparse
 
 from PIL import Image
 
-FUENTE = Path(__file__).resolve().parents[4].parents[1] / "Catalogo de Armas" / "fotos-fuente"
+# Mismo criterio que PROY en fotos.py: el ancestro con «Catalogo de Armas» (vale desde un worktree).
+FUENTE = next(p for p in Path(__file__).resolve().parents
+              if (p / "Catalogo de Armas").is_dir()) / "Catalogo de Armas" / "fotos-fuente"
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 EXT = (".jpg", ".jpeg", ".png", ".webp")

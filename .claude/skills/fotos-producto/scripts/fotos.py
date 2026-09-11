@@ -32,7 +32,10 @@ import numpy as np
 from PIL import Image, ImageOps
 
 REPO = Path(__file__).resolve().parents[4]           # .../repo/github-deploy
-PROY = REPO.parents[1]                                # .../Armado en Mexico
+# El proyecto es el ancestro que tiene «Catalogo de Armas». `REPO.parents[1]` solo
+# acertaba desde el checkout principal: desde un worktree (.claude/worktrees/<rama>)
+# caia dentro del propio repo y la carpeta de trabajo salia en `.claude/`.
+PROY = next(p for p in REPO.parents if (p / "Catalogo de Armas").is_dir())
 TRABAJO = PROY / "Catalogo de Armas" / "fotos-trabajo"
 ORIGINALES = PROY / "Catalogo de Armas" / "imagenes"
 # Fotos conseguidas de fuera (fabricante, Wikimedia). Se nombran por ID de arma
@@ -59,7 +62,9 @@ def catalogo():
     js = ("global.window=global;require('./data.js');"
           "console.log(JSON.stringify((window.DB||[]).map(a=>"
           "({id:a.id,nombre:a.nombre,marca:a.marca,tipo:a.tipo,calibre:a.calibre,img:a.img}))))")
-    out = subprocess.run(["node", "-e", js], cwd=REPO, capture_output=True, text=True, check=True)
+    # cwd=DATOS: data.js ya no vive en la raiz. encoding: ver catalogo() de cajas.py.
+    out = subprocess.run(["node", "-e", js], cwd=DATOS, capture_output=True,
+                         text=True, encoding="utf-8", check=True)
     return json.loads(out.stdout)
 
 
