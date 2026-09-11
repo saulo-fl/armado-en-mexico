@@ -16,7 +16,7 @@ bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap d
 |  |  |
 |---|---|
 | <img src="docs/capturas/portada.webp" alt="Portada de armado.mx"><br>**Portada** — las armas destacadas en su expediente y los favoritos de Armas M&S | <img src="docs/capturas/arsenal.webp" alt="Arsenal con filtros"><br>**Arsenal** — filtros por tipo, calibre, uso y disponibilidad |
-| <img src="docs/capturas/ficha.webp" alt="Ficha de arma con historial de precio"><br>**Ficha de arma** — clasificación legal y precio DCAM con historial | <img src="docs/capturas/comparador.webp" alt="Comparador de armas"><br>**Comparador** — dos armas enfrentadas, dato a dato |
+| <img src="docs/capturas/ficha.webp" alt="Ficha de arma con historial de precio"><br>**Ficha de arma** — clasificación legal y precio DCAM con historial | <img src="docs/capturas/comparador.webp" alt="Comparador de armas"><br>**Comparador** — dos armas lado a lado, con su ficha técnica |
 
 ## Qué hace
 
