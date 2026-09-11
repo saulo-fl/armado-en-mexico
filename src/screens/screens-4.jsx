@@ -496,11 +496,24 @@ function HomeTraumaBanner({ onNav }) {
            hablen el idioma del resto del Home. */
         .amx-v2 .trauma-carton .trauma-copia {
           margin-top: 13px;
-          /* El faldón, como padding: aquí no va rotulado —el modelo ya está
+          /* EL MARCO VA EN PORCENTAJE, no en px. Esta es la única polaroid del
+             sitio montada sobre una tarjeta de ancho PROPORCIONAL (flex 78 %);
+             Campos y Experiencias van a ancho fijo, y por eso allí los 9px de
+             la clase apaisada sí caen en la proporción correcta. Aquí no: a
+             390px el canto salía al 4.2 % de la foto en vez del 2.7 %.
+             El porcentaje de padding se resuelve SIEMPRE contra el ancho del
+             bloque contenedor, que es justo lo que quiere decir «proporcional
+             a la foto» — y de paso deja de hacer falta la media query.
+             Aritmética: el pozo mide CB − 2px de filo − 2p, así que para un
+             canto del 2.7 % del pozo, p ≈ 2.55 % del contenedor.
+             El faldón, como padding: aquí no va rotulado —el modelo ya está
              escrito arriba, en el título— y repetirlo debajo sería decir dos
-             veces lo mismo. Igual que la polaroid apaisada de referencia, que
-             tiene el faldón en blanco. */
-          padding-bottom: 34px;
+             veces lo mismo. El 9.6 % son los 34px de escritorio de siempre,
+             congelados en proporción: se mantiene el aspecto de escritorio
+             tal cual y es el móvil el que se pone a la par.
+             OJO: nada de acentos graves aquí dentro; esto vive en un template
+             literal y un acento grave lo cierra a media CSS. */
+          padding: 2.55% 2.55% 9.6%;
         }
         /* El pozo de la apaisada va a 16/9, casi el alto que tenía la ventana
            de antes: el cartón entra sin estirar la tarjeta. */
@@ -557,7 +570,8 @@ function HomeTraumaBanner({ onNav }) {
            que el cartón se aprieta. */
         @media (max-width: 899px) {
           .trauma-titulo  { font-size: 29px; }
-          .amx-v2 .trauma-carton .trauma-copia { margin-top: 12px; padding-bottom: 28px; }
+          /* El marco ya no se toca aquí: va en % y se ajusta solo. */
+          .amx-v2 .trauma-carton .trauma-copia { margin-top: 12px; }
           .trauma-plancha { padding: 11px 12px 14px; }
         }
       `}</style>
