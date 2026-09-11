@@ -38,7 +38,7 @@ Mover una propiedad al CSS significa **borrarla del objeto `style`**, no duplica
 ### 1 · Elegir la primitiva, no la pantalla
 
 Las de `ui.jsx` propagan a las 322 páginas: `ArmaCard`, `FilterChip`, `AvailBadge`,
-`TacticalCorners`, `SectionHeader`, `PriceLevel`, `StatsBar`, `AppHeader`, `TopNav`,
+`TacticalCorners`, `SectionHeader`, `PriceLevel`, `AppHeader`, `TopNav`,
 `BottomNav`, `HCarousel`, `SpecRow`, `MiniSpec`, `Disclosure`, `CompareFloat`.
 
 Migrar una pantalla suelta es trabajo tirado: las pantallas solo componen primitivas.

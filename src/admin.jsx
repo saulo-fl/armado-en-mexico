@@ -496,7 +496,11 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
       dcamRef: base.dcamRef || '',
       disponibilidad: (base.disponibilidad || []).join('\n'),
       uses: base.uses || ['domicilio','club'],
-      stats: base.stats || { alcance:50, precision:50, retroceso:50, capacidad:50, manejo:50, poder:50 },
+      // `stats` ya no se muestra ni se edita (10-sep-2026), pero upsertArma
+      // REEMPLAZA el arma entera con lo que sale de este formulario: sin esta
+      // línea, guardar desde el admin borraría el `stats` de cada arma, y D1 con
+      // él. Pasa tal cual: ni se escribe ni se inventa uno si no lo había.
+      stats: base.stats,
     };
   });
 
@@ -527,7 +531,6 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
   const removePriceEntry = (i) => setPriceHist(prev => prev.filter((_, idx) => idx !== i));
 
   const set = (k, v) => setF(prev => ({ ...prev, [k]: v }));
-  const setStat = (k, v) => setF(prev => ({ ...prev, stats: { ...prev.stats, [k]: Number(v) } }));
   const toggleUse = (u) => setF(prev => ({ ...prev, uses: prev.uses.includes(u) ? prev.uses.filter(x => x !== u) : [...prev.uses, u] }));
 
   const save = () => {
@@ -790,28 +793,6 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
                 }}>
                   {u.icon} {u.label}
                 </button>
-              ))}
-            </div>
-          </FormField>
-
-          <FormField label="Stats de combate (0-100)" span="2">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {[
-                ['alcance','Alcance'],['precision','Precisión'],['retroceso','Retroceso'],
-                ['capacidad','Capacidad'],['manejo','Manejo'],['poder','Poder']
-              ].map(([k, l]) => (
-                <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 10,
-                    color: P.textDim, width: 80, textTransform: 'uppercase', letterSpacing: '0.08em',
-                  }}>{l}</span>
-                  <input type="range" min="0" max="100" value={f.stats[k]}
-                    onChange={(e) => setStat(k, e.target.value)} style={{ flex: 1, accentColor: P.amber }} />
-                  <span style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
-                    color: P.amber, fontWeight: 700, width: 30, textAlign: 'right',
-                  }}>{f.stats[k]}</span>
-                </div>
               ))}
             </div>
           </FormField>
@@ -1608,8 +1589,8 @@ function BulkImportTab() {
   };
 
   const downloadTemplate = () => {
-    const headers = 'id,nombre,marca,tipo,pais,calibre,capacidad,peso,longitud,mecanismo,anio,era,img,avail,availLabel,priceExact,priceLvl,dcamRef,legalTit,legalDesc,disponibilidad,uses,alcance,precision,retroceso,capacidad_stat,manejo,poder,historia';
-    const sample = ',Ejemplo Pistola,Marca X,pistola,México,9mm Parabellum,15+1,750g,185mm,"Semi-auto, striker",2025,moderno,,dcam,Uso civil — DCAM,"$10,000 MXN",2,REF DCAM ABC,Civil — DCAM,Descripción legal,DCAM CDMX;OTCA Monterrey,domicilio;club,60,70,45,75,80,62,Texto de la historia';
+    const headers = 'id,nombre,marca,tipo,pais,calibre,capacidad,peso,longitud,mecanismo,anio,era,img,avail,availLabel,priceExact,priceLvl,dcamRef,legalTit,legalDesc,disponibilidad,uses,historia';
+    const sample = ',Ejemplo Pistola,Marca X,pistola,México,9mm Parabellum,15+1,750g,185mm,"Semi-auto, striker",2025,moderno,,dcam,Uso civil — DCAM,"$10,000 MXN",2,REF DCAM ABC,Civil — DCAM,Descripción legal,DCAM CDMX;OTCA Monterrey,domicilio;club,Texto de la historia';
     const blob = new Blob([headers + '\n' + sample], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

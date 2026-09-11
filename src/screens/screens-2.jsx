@@ -291,7 +291,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
           El 10-sep-2026 salió también del comparador, por lo mismo, y con él
           `window.StatsBar`, que ya no tenía consumidores. `arma.stats` sigue en
-          data.js, pero ninguna pantalla pública lo pinta. Si esto vuelve, que
+          data.js, pero ninguna pantalla lo pinta ni lo edita. Si esto vuelve, que
           vuelva con fuente. */}
 
       {/* ── 5 · PRECIO DE REFERENCIA + 6 · HISTORIAL ───────────────────── */}
@@ -1122,7 +1122,6 @@ function SuggestChangesModal({ arma, onClose }) {
             { value: 'historia', label: 'Historia / descripción' },
             { value: 'legal', label: 'Información legal' },
             { value: 'imagen', label: 'Imagen' },
-            { value: 'stats', label: 'Stats de combate' },
             { value: 'otro', label: 'Otro' }]
           })}
             {sfld('Valor actual (lo que dice ahora)', 'current', f, set, { ta: true, rows: 2 })}
@@ -2267,7 +2266,6 @@ function SubmitScreen({ onNav }) {
       avail: f.avail, availLabel: window.CATEGORIES.disponibilidad.find((d) => d.id === f.avail)?.label || 'Civil',
       uses: ['domicilio', 'club'],
       priceLvl: 2, priceExact: 'Por confirmar',
-      stats: { alcance: 50, precision: 50, retroceso: 50, capacidad: 50, manejo: 50, poder: 50 },
       disponibilidad: [], dcamRef: '', legalTit: '', legalDesc: ''
     });
     setSent(true);
