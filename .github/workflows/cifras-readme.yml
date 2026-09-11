@@ -1,0 +1,62 @@
+# Repinta las cifras del README cuando cambian los datos del catálogo.
+# El README no es la fuente: las cifras las cuenta el prerender (out/cifras.json)
+# y scripts/actualizar-readme.mjs solo las pinta entre sus dos marcadores.
+name: Cifras del README
+
+on:
+  push:
+    branches: [main]
+    # Lo que pinta actualizar-readme.mjs (FICHEROS; hoy solo README.md) NO puede
+    # entrar en esta lista: es el segundo cortafuegos contra el bucle
+    # push → workflow → push.
+    paths:
+      - 'src/data/**'
+      - 'scripts/build-prerender.mjs'
+      - 'scripts/actualizar-readme.mjs'
+      - '.github/workflows/cifras-readme.yml'
+  workflow_dispatch:   # escotilla manual: repintar sin tocar los datos
+
+# El GITHUB_TOKEN de este repo nace con contents:read. Sin esta línea el push
+# de vuelta muere con 403.
+permissions:
+  contents: write
+
+# Dos pushes seguidos a los datos no deben pelearse por el mismo README.
+concurrency:
+  group: cifras-readme-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cifras:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Sin `npm ci`: build:html es Node puro (node:fs, node:vm) y no toca Babel.
+      # Instalar 200 MB de devDependencies para leer unos data-*.js sería tirar
+      # un minuto de CI por nada.
+      - name: Contar y repintar
+        run: |
+          npm run build:html
+          npm run cifras
+
+      # Todo el árbol, sin nombrar ficheros: out/ está en .gitignore, así que lo
+      # único que puede cambiar es lo que pinta el script.
+      - name: ¿Cambió algo?
+        id: revisar
+        run: git diff --quiet || echo "hay=si" >> "$GITHUB_OUTPUT"
+
+      # `if:`, no `git diff --quiet && git commit`: bajo `set -e` (el default de
+      # los run de Actions) ese `&&` devuelve 1 justo cuando SÍ hay cambios y
+      # tumba el step. La condición va fuera del shell.
+      - name: Commitear
+        if: steps.revisar.outputs.hay == 'si'
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am 'Cifras del README al día [skip ci]'
+          git push
