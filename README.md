@@ -15,7 +15,7 @@ bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap d
 
 |  |  |
 |---|---|
-| <img src="docs/capturas/portada.webp" alt="Portada de armado.mx"><br>**Portada** — la entrada al catálogo, por tipo de arma | <img src="docs/capturas/arsenal.webp" alt="Arsenal con filtros"><br>**Arsenal** — filtros por tipo, calibre, uso y disponibilidad |
+| <img src="docs/capturas/portada.webp" alt="Portada de armado.mx"><br>**Portada** — las armas destacadas en su expediente y los favoritos de Armas M&S | <img src="docs/capturas/arsenal.webp" alt="Arsenal con filtros"><br>**Arsenal** — filtros por tipo, calibre, uso y disponibilidad |
 | <img src="docs/capturas/ficha.webp" alt="Ficha de arma con historial de precio"><br>**Ficha de arma** — clasificación legal y precio DCAM con historial | <img src="docs/capturas/comparador.webp" alt="Comparador de armas"><br>**Comparador** — dos armas enfrentadas, dato a dato |
 
 ## Qué hace
@@ -102,7 +102,28 @@ Detalle en [`docs/BACKEND.md`](docs/BACKEND.md).
 | [`docs/PRODUCT.md`](docs/PRODUCT.md) | Alcance y decisiones de producto |
 | [`docs/PLACEHOLDERS.md`](docs/PLACEHOLDERS.md) | Secciones congeladas y cómo reactivarlas |
 
-## Paleta de marca
+## Identidad y paleta
 
-Armas M&S — Negro Carbón `#1A1A1A` · Amarillo Táctica `#F5C518` · Rojo Alerta `#C0392B`
-· Gris Oscuro `#2C2C2C` · Gris Medio `#555555`.
+La identidad de Armado en México sale de donde sale su catálogo: del papeleo real de la DCAM.
+En el arsenal, cada arma es un expediente —folder manila, copia instantánea y un sello de tinta
+que la clasifica como CIVIL, SEGURIDAD o EXCLUSIVO—. Las categorías de la portada son cartas de
+lotería, y las municiones esperan en un puesto con letrero de mercado. Lo mexicano está en esas
+cosas que cualquiera reconoce, no en símbolos oficiales: el sitio no usa escudo, águila ni
+emblemas de ninguna institución. Es la gráfica de todos los días en México, tomada en serio.
+
+| Color | Token | Hex | Dónde |
+|---|---|---|---|
+| Verde de marca | `--marca` | `#173A32` | la banda superior y la navegación, igual en los dos temas |
+| Crema | `--crema` | `#F3EFE4` | la tinta clara sobre el verde |
+| Lienzo | `--lienzo` · `--d-lienzo` | `#E7EAE4` · `#1D1D1D` | el fondo, en tema claro y oscuro |
+| Tinta | `--negro` | `#171B19` | lo mecanografiado |
+| Folder manila | `--carton-alto` · `--carton-filo` | `#F6EACF` · `#D8C69B` | la pestaña y el canto; el cuerpo lo pone la foto de un folder real |
+| Copia instantánea | `--copia-carton` | `#F7F8F4` | el marco de la foto del arma |
+| Sello CIVIL | `--sello-civil` | `#2F6B33` | la tinta de las armas civiles |
+| Sello SEGURIDAD y EXCLUSIVO | `--sello-restr` | `#A3341F` | la tinta de las restringidas |
+| Lámina de lotería | `--loteria-lamina` | `#EFC01F` | las cartas de categoría de la portada |
+| Mesa del puesto | `--mesa-tabla` | `#C09A72` | la madera del puesto de municiones |
+
+Los valores salen de [`src/styles/estilo.css`](src/styles/estilo.css) y el criterio, de
+[`docs/DESIGN.md`](docs/DESIGN.md). Los colores de los objetos no tienen variante oscura a
+propósito: una carta de lotería es amarilla con la luz encendida o apagada.
