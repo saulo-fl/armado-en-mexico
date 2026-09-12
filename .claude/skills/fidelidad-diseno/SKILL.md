@@ -169,9 +169,10 @@ anuncia solo.
 - **Los pulgares son SVG de trazo** (`window.ThumbIcon`), como los iconos del
   `BottomNav`. Nunca emoji: renderizan distinto por plataforma y son un tell de UI
   generada.
-- Las barras de la valoración usan **`StatsBar`**, que ya pinta el número. No
-  reimplementes una barra plana: había una duplicada y se eliminó. Una barra sin
-  cifra no informa.
+- **La valoración divulgativa está retirada de toda la app** (la ficha el 7-sep-2026;
+  el comparador, el admin y el CSV el 10-sep-2026): las barras de 0 a 100 se derivaban
+  por tipo y calibre, no de mediciones. `StatsBar` se borró. `arma.stats` sigue en
+  `data.js` y en D1, pero no se muestra ni se edita: no la reintroduzcas sin fuente.
 - El precio de munición se etiqueta con **`window.munUnidadPrecio(mun)`**
   (`screens-municiones.jsx`), no con un literal: la 2046 cotiza POR CAJA y el resto
   por cartucho. Lo usan la tarjeta y la ficha.

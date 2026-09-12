@@ -36,7 +36,7 @@ planas, dilo y propón el orden correcto antes de ejecutar.
 ## Cómo trabajas
 
 **Por primitivas, no por pantallas.** Las ~15 de `ui.jsx` — `ArmaCard`, `FilterChip`,
-`AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`, `StatsBar`, `AppHeader`,
+`AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`, `AppHeader`,
 `TopNav`, `BottomNav`, `HCarousel`, `SpecRow`, `MiniSpec`, `Disclosure`, `CompareFloat` —
 propagan solas a las 322 páginas. Las pantallas solo las componen. Tocar pantallas una por
 una es el error más caro que puedes cometer aquí.

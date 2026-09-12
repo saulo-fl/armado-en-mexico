@@ -748,7 +748,8 @@
       if (lines.length < 2) throw new Error('CSV vacío o sin filas de datos');
       const headers = parseCsvRow(lines[0]).map(h => h.trim().toLowerCase());
       const out = { added: 0, updated: 0, errors: [] };
-      const arr = mode === 'replace' ? [] : this.getArmas();
+      const actuales = this.getArmas();
+      const arr = mode === 'replace' ? [] : actuales;
 
       for (let i = 1; i < lines.length; i++) {
         try {
@@ -783,14 +784,6 @@
             dcamRef: obj.dcamref || obj.dcam_ref || '',
             disponibilidad: (obj.disponibilidad || '').split(';').map(s => s.trim()).filter(Boolean),
             uses: (obj.uses || obj.usos || 'domicilio;club').split(';').map(s => s.trim()).filter(Boolean),
-            stats: {
-              alcance:   Number(obj.alcance   || 50),
-              precision: Number(obj.precision || 50),
-              retroceso: Number(obj.retroceso || 50),
-              capacidad: Number(obj.capacidad_stat || 50),
-              manejo:    Number(obj.manejo    || 50),
-              poder:     Number(obj.poder     || 50),
-            },
           };
 
           if (!arma.nombre || !arma.marca) {
@@ -804,6 +797,12 @@
             arr[existingIdx] = Object.assign({}, arr[existingIdx], arma);
             out.updated++;
           } else {
+            // El CSV ya no trae `stats` (si un CSV viejo trae esas columnas, se
+            // ignoran). En REPLACE `arr` empieza vacío, así que sin esto el catálogo
+            // entero perdería su `stats` —y D1 con él— al reimportarse. Solo si la
+            // fila trae su propio id: a una fila sin id no se le hereda nada.
+            const previa = mode === 'replace' && arma.id ? actuales.find(a => a.id === arma.id) : null;
+            if (previa && previa.stats) arma.stats = previa.stats;
             arma.id = arma.id || (arr.reduce((m, a) => Math.max(m, a.id || 0), 0) + 1);
             arr.push(arma);
             out.added++;
@@ -818,7 +817,7 @@
 
     exportCsv() {
       const armas = this.getArmas();
-      const cols = ['id','nombre','marca','tipo','pais','calibre','capacidad','peso','longitud','mecanismo','anio','era','img','youtube','avail','availLabel','priceExact','priceLvl','dcamRef','legalTit','legalDesc','disponibilidad','uses','alcance','precision','retroceso','capacidad_stat','manejo','poder','historia'];
+      const cols = ['id','nombre','marca','tipo','pais','calibre','capacidad','peso','longitud','mecanismo','anio','era','img','youtube','avail','availLabel','priceExact','priceLvl','dcamRef','legalTit','legalDesc','disponibilidad','uses','historia'];
       const esc = (v) => {
         const s = (v == null ? '' : String(v));
         if (/[",\n;]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
@@ -829,8 +828,6 @@
         rows.push(cols.map(c => {
           if (c === 'disponibilidad') return esc((a.disponibilidad || []).join(';'));
           if (c === 'uses') return esc((a.uses || []).join(';'));
-          if (c === 'capacidad_stat') return esc(a.stats?.capacidad);
-          if (['alcance','precision','retroceso','manejo','poder'].includes(c)) return esc(a.stats?.[c]);
           return esc(a[c]);
         }).join(','));
       });
