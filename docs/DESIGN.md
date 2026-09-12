@@ -634,22 +634,23 @@ Contacto.
 Versión.
 ---
 25. VER TUTORIAL
-Tutorial interactivo de onboarding.
-No debe ser un video obligatorio.
-Puede ser un walkthrough:
+Tutorial de bienvenida de cuatro pasos, a PANTALLA COMPLETA (no overlays sobre la interfaz), con el lenguaje del expediente: hoja con pestaña de folder, copia instantánea y sellos de tinta.
+Es OBLIGATORIO la primera vez: no hay SALTAR, porque lleva el aviso legal. «Menos accesible, pero es imprescindible esta información por legalidad» (Saulo, 10-sep-2026).
+Solo se abre por sí mismo al entrar por la PORTADA. Quien aterriza en una ficha desde un buscador no lo ve.
+Escape NO lo cierra la primera vez (sería el SALTAR escondido en una tecla); sí lo cierra cuando se repite desde MÁS → «Ver tutorial».
 Paso 1
-Explora el Arsenal
-> Encuentra información sobre armas y sus características.
+Bienvenido a Armado en México
+> Qué es el sitio, con el logotipo en una copia instantánea.
 Paso 2
-Compara
-> Consulta diferencias entre registros.
+¿Qué es Armado en México?
+> Plataforma divulgativa de código abierto. Tres sellos rojos: no pertenecemos al gobierno · no vendemos armas de fuego · no tramitamos licencias ni permisos.
 Paso 3
-Consulta Legalidad
-> Accede a información normativa.
+Lo que puedes hacer
+> Armas · Calibres · Legalidad · Comparación, en texto centrado.
 Paso 4
-Explora Más
-> Descubre calibres, municiones, accesorios y otros contenidos.
-Usar overlays sobre la interfaz real.
+Todo listo
+> Sello de aprobado y «¿Qué prefieres?» Modo claro / Modo oscuro: el tema cambia EN VIVO y no avanza. «Continuar» cierra.
+El texto literal vive en src/screens/screens-tutorial.jsx; este brief fija la estructura, no el copy.
 ---
 26. Diseño de componentes
 El agente debería construir componentes reutilizables.
