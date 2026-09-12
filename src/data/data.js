@@ -161,7 +161,7 @@ window.DB = [
     "Evolución del PT58 con cañón ligeramente más largo. Mecanismo doble acción / simple acción con seguro de descenso. Apreciada en clubes de tiro y por su capacidad."),
 
   mk(4, "Bersa Thunder 380", "Bersa", "pistola", "Argentina", ".380 ACP", "7+1", "565g", "165mm", "Semi-auto, DA/SA", 1995, "dcam", "9936.59", "PISTOLA CAL .380 BERSA THUNDER",
-    "imagenes/004_Bersa_Thunder_380.webp",
+    "imagenes/004_Bersa_Thunder_380.webp?v=2",
     "Pistola compacta argentina inspirada en la Walther PPK. Una de las opciones más económicas y confiables en .380 ACP para portar oculto."),
 
   mk(5, "Ruger LCP", "Ruger", "pistola", "EE.UU.", ".380 ACP", "6+1", "270g", "133mm", "Semi-auto, DAO subcompacta", 2008, "dcam", "9110.35", "PISTOLA CAL .380 RUGER LCP NEGRO",
@@ -230,11 +230,11 @@ window.DB = [
   //  REVÓLVERES .38 SPECIAL — USO CIVIL (DCAM)
   // ═══════════════════════════════════════════════════════════
   mk(19, "Taurus 856 Acero Inox", "Taurus", "revolver", "Brasil", ".38 Special", "6", "626g", "190mm", "Revólver DA/SA cañón 3\"", 2018, "dcam", "9797.22", "REVOLVER TAURUS 856 CAÑÓN 3\" CAL .38 SPL AC INOX",
-    "imagenes/018_Taurus_856_Acero_Inox.webp",
+    "imagenes/018_Taurus_856_Acero_Inox.webp?v=2",
     "Revólver compacto de 6 tiros en acero inoxidable. Cañón 3\" balance ideal entre portabilidad y precisión. Excelente para defensa de hogar y portación."),
 
   mk(20, "Taurus 856 Pavón Mate", "Taurus", "revolver", "Brasil", ".38 Special", "6", "626g", "190mm", "Revólver DA/SA cañón 3\"", 2018, "dcam", "9428.27", "REVOLVER TAURUS 856 CAÑÓN 3\" CAL .38 SPL PV MT",
-    "imagenes/019_Taurus_856_Pavon_Mate.webp",
+    "imagenes/019_Taurus_856_Pavon_Mate.webp?v=2",
     "Versión con acabado pavón mate del Taurus 856. Mismo desempeño, presentación táctica discreta."),
 
   mk(21, "Taurus 856 Tungsten", "Taurus", "revolver", "Brasil", ".38 Special", "6", "626g", "190mm", "Revólver DA/SA cañón 3\"", 2020, "dcam", "10904.07", "REVOLVER TAURUS 856 CAÑÓN 3\" CAL .38 SPL TUNGSTENO",
