@@ -1619,16 +1619,20 @@
    `:focus-visible` no existen en un objeto `style={{}}`. Es lo único del pie
    que no cabe inline; todo lo demás sigue allí.
 
-   EN REPOSO NO SE DISTINGUEN DEL TEXTO. Es lo que pidió Saulo el 9-sep-2026,
-   por escrito y viendo el pie renderizado: ni subrayado ni cursiva en ningún
-   enlace del pie —«nada en cursiva»—, mismo tipo y mismo estilo que el texto
-   que los rodea, y «lo único que los distingue es que se iluminan al hacer
-   hover». Hubo dos pasadas antes: una con subrayado y otra con cursiva en
-   FUENTES. Las dos se retiraron. NO las devuelvas sin pedírselo.
+   EN REPOSO, LOS SEIS ENLACES DE TEXTO SE MARCAN. Decisión de Saulo del
+   11-sep-2026, que deja sin efecto la del 9-sep («en reposo no se distinguen
+   del texto», «lo único que los distingue es que se iluminan al hacer
+   hover»). Literal, con captura del pie: «Tenías razón respecto a la
+   necesidad de resaltar de alguna forma las palabras que tienen enlace. Hazlo
+   con un subrayado ligero y un tono un poco más claro que el resto del texto
+   de cada oración». Alcance fijado al preguntarle: los seis enlaces de texto
+   (clase `amx-pie-enlace-texto`) sí; «GitHub», icono + palabra, NO: se queda
+   sin subrayado y con la tinta de su estrato. La cursiva que se retiró el
+   9-sep en FUENTES no vuelve. Historial completo en el bloque del pie de
+   ui.jsx.
 
-   ⚠ LO QUE ESO CUESTA, para que conste: WCAG 1.4.1 pide que «esto es un
-   enlace» no dependa solo del color, y aquí en reposo no depende ni de eso.
-   Es una decisión tomada con el dato delante, no un descuido.
+   Con el subrayado, WCAG 1.4.1 —que «esto es un enlace» no dependa solo del
+   color—, que el 9-sep quedaba incumplido a sabiendas, se cumple en los seis.
 
    EL ROJO DEL HOVER es #CE1126, el rojo de la bandera de México, elegido por
    Saulo porque los rojos de la paleta le resultaron «desabridos y sin
@@ -1638,8 +1642,11 @@
    ⚠ NO PASA EL UMBRAL DEL REPO. Medido con
    `node .claude/skills/fidelidad-diseno/scripts/contraste.mjs '#CE1126' '#173A32'`:
 
-     reposo, crédito y aviso  --sobre-marca      #F3EFE4  10.83:1  AA
-     reposo, fuentes          --sobre-marca-dim  #B8C2BA   6.79:1  AA
+     texto, crédito y aviso   --sobre-marca      #F3EFE4  10.83:1  AA
+     texto, fuentes           --sobre-marca-dim  #B8C2BA   6.79:1  AA
+     ENLACE, crédito y aviso  crema + L 0.05     #FFFFF4  12.36:1  AA
+     ENLACE, fuentes          dim + L 0.05       #C8D2CA   8.02:1  AA
+     subrayado al 50 %        crédito · fuentes  4.33:1 · 3.19:1   (gráfico, pide 3)
      HOVER y FOCO             rojo bandera       #CE1126   2.21:1  ✗ DÉBIL
      anillo de foco           --sobre-marca      #F3EFE4  10.83:1  (1.4.11 pide 3)
 
@@ -1663,8 +1670,24 @@
   color: inherit;
   text-decoration: none;
 }
+/* Los SEIS enlaces de texto (Interno y Externo en ui.jsx). GitHub no lleva la
+   clase. Va antes del hover, que le gana por especificidad. */
+.amx-v2 .amx-pie-enlace-texto {
+  /* «Un tono un poco más claro que el resto del texto de cada oración»: el
+     mismo paso de luminosidad sobre la tinta HEREDADA del párrafo —en `color`,
+     `currentColor` es la del padre—. Paso fijo de L y no `color-mix` con
+     blanco: sobre la crema (L 0.95) un porcentaje fijo no se ve y sobre la dim
+     se pasa. Sin sintaxis de color relativo el navegador descarta la línea y
+     se queda con el `inherit` de arriba: el subrayado sigue marcando. */
+  color: oklch(from currentColor calc(l + 0.05) c h);
+  /* «Subrayado ligero»: 1px, separado del texto y a media tinta del enlace. */
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, currentColor 50%, transparent);
+}
 .amx-v2 .amx-pie-enlace:hover,
 .amx-v2 .amx-pie-enlace:focus-visible {
   color: #CE1126;          /* rojo de la bandera de México — 2.21:1, ver arriba */
-  text-decoration: none;   /* explícito: ni aquí vuelve el subrayado */
+  text-decoration: none;   /* en hover y foco el subrayado se va: señala el rojo */
 }

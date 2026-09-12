@@ -841,11 +841,24 @@ window.BottomNav = BottomNav;
 //   · El enlace al repo, minimalista: icono + «GitHub», como canirun.ai. Sin
 //     recuadro. Conserva 44px de alto de área táctil sin pintar borde ni fondo
 //     (§7 no negocia el objetivo táctil, y no hace falta un botón para tenerlo).
-//   · LOS ENLACES NO SE MARCAN EN REPOSO. Ni subrayado ni cursiva, en ninguno
-//     de los siete: mismo tipo y mismo estilo que el texto que los rodea, y
-//     «lo único que los distingue es que se iluminan al hacer hover». Hubo dos
-//     pasadas antes —una con subrayado, otra con cursiva en FUENTES— y Saulo
-//     retiró las dos viendo el pie renderizado. No las devuelvas sin pedirlo.
+//   · (DEJADO SIN EFECTO el 11-sep-2026, ver abajo) El 9-sep los enlaces no se
+//     marcaban en reposo: ni subrayado ni cursiva, «lo único que los distingue
+//     es que se iluminan al hacer hover». Hubo dos pasadas antes —una con
+//     subrayado, otra con cursiva en FUENTES— y Saulo retiró las dos viendo el
+//     pie renderizado. La cursiva sigue fuera.
+//
+// ── REVISIÓN DE SAULO, 11-sep-2026 — LOS ENLACES DE TEXTO SÍ SE MARCAN:
+//   · Literal, dejado con una captura del pie: «Tenías razón respecto a la
+//     necesidad de resaltar de alguna forma las palabras que tienen enlace.
+//     Hazlo con un subrayado ligero y un tono un poco más claro que el resto
+//     del texto de cada oración».
+//   · Alcance, preguntado ese mismo día: se marcan LOS SEIS enlaces de texto
+//     —saulo-fl, Armas M&S, las dos leyes, los inventarios DCAM y OTCA y la
+//     guía de calibres— y «GitHub» (icono + palabra) se queda como estaba,
+//     sin subrayado ni cambio de tono.
+//   · «De cada oración»: cada enlace se aclara respecto a la tinta de SU
+//     párrafo (crema en crédito y aviso, `sobreMarcaDim` en FUENTES), no hacia
+//     un color único. La regla y sus ratios, en «PIE DE OFICIO» de estilo.css.
 //   · El rojo del hover es #CE1126, el de la bandera de México: los rojos de
 //     la paleta le parecieron «desabridos y sin saturación». Da 2.21:1 sobre
 //     el verde del pie —no llega ni al 3:1 de un indicador— y queda puesto por
@@ -900,21 +913,23 @@ function PieDeSitio({ onNav }) {
   // decoración inline: esa piel vive en el bloque del pie al final de
   // estilo.css —donde sí existen `:hover` y `:focus-visible`— y una propiedad
   // vive en un sitio o en el otro, nunca en los dos (DESIGN.md §8.3).
-  // En reposo heredan la tinta de su estrato y no se marcan de ninguna forma;
-  // en hover y en foco se pintan del rojo de la bandera. Los cuatro ratios
+  // Los SEIS de texto —los que pintan Interno y Externo— llevan además
+  // `amx-pie-enlace-texto`: en reposo se aclaran sobre la tinta de su estrato
+  // y llevan un subrayado ligero (Saulo, 11-sep-2026). GitHub no la lleva.
+  // En hover y en foco los siete se pintan del rojo de la bandera. Los ratios
   // están anotados en ese bloque de CSS, con lo que cuesta el que no mide.
 
   // Enlace INTERNO: href de verdad —lo sigue el crawler, y el «abrir en pestaña
   // nueva» del usuario— más la navegación del router al hacer clic.
   const Interno = ({ a, tab, children }) => (
-    <a className="amx-pie-enlace" href={a} onClick={(e) => {
+    <a className="amx-pie-enlace amx-pie-enlace-texto" href={a} onClick={(e) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
       e.preventDefault(); onNav && onNav(tab);
     }}>{children}</a>
   );
 
   const Externo = ({ a, etiqueta, children }) => (
-    <a className="amx-pie-enlace" href={a} target="_blank" rel="noopener noreferrer"
+    <a className="amx-pie-enlace amx-pie-enlace-texto" href={a} target="_blank" rel="noopener noreferrer"
       aria-label={etiqueta}>{children}</a>
   );
 
@@ -975,7 +990,9 @@ function PieDeSitio({ onNav }) {
                 margen negativo le da los 44px de área táctil que pide §7 sin
                 alterar la altura de la línea ni pintar un botón.
                 El icono pinta con `fill: currentColor`, así que se pone rojo
-                junto al texto en hover y en foco, sin una regla propia. */}
+                junto al texto en hover y en foco, sin una regla propia.
+                SIN `amx-pie-enlace-texto` a propósito: en reposo no se subraya
+                ni se aclara (Saulo, 11-sep-2026). */}
             <a className="amx-pie-enlace" href={AMX_REPO} target="_blank" rel="noopener noreferrer"
               aria-label="Repositorio de Armado en México en GitHub (se abre en una pestaña nueva)"
               style={{
