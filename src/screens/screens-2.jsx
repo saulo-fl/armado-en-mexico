@@ -1448,7 +1448,7 @@ function LegalScreen({ onNav }) {
           fontWeight: 700
         }}>▲ AVISO DE TRANSPARENCIA</div>
         <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no gestionamos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA.
+          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no emitimos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA.
         </div>
       </div>
 
@@ -1681,7 +1681,7 @@ function AboutScreen() {
           marginBottom: 6, fontWeight: 700
         }}>▲ NO SOMOS GOBIERNO · FINES INFORMATIVOS</div>
         <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No tramitamos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.
+          Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.
         </div>
       </div>
 
