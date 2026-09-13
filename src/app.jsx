@@ -16,7 +16,7 @@ const SCREEN_TO_PATH = {
   home: '', catalog: 'arsenal', accesorios: 'accesorios',
   calibres: 'calibres', campos: 'campos', experiencias: 'experiencias',
   compare: 'comparar', legal: 'legalidad', about: 'acerca',
-  faq: 'preguntas', menu: 'mas', submit: 'proponer', traumaticas: 'traumaticas',
+  faq: 'preguntas', menu: 'mas', traumaticas: 'traumaticas',
   soporte: 'soporte',
   municiones: 'municiones',
 };
@@ -280,7 +280,6 @@ function App() {
     else if (id === 'about') setScreen('about');
     else if (id === 'faq') setScreen('faq');
     else if (id === 'soporte') setScreen('soporte');
-    else if (id === 'submit') setScreen('submit');
     else if (id === 'compare') setScreen('compare');
     else if (id === 'catalog') { setCatalogFilter(null); setScreen('catalog'); }
     else if (id === 'accesorios') { setCatalogFilter(null); setScreen('accesorios'); }
@@ -315,12 +314,11 @@ function App() {
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
-    submit: 'Proponer arma',
     calibres: 'Calibres', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'soporte', 'submit', 'calibres', 'campos', 'experiencias', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
     legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
@@ -366,8 +364,6 @@ function App() {
     content = <window.SoporteScreen onNav={navTab} />;
   } else if (screen === 'menu') {
     content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
-  } else if (screen === 'submit') {
-    content = <window.SubmitScreen onNav={navigate} />;
   } else if (screen === 'calibres') {
     content = <window.CalibresScreen onOpenArma={openArma} onNav={navigate} />;
   // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son

@@ -293,7 +293,6 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
     { id: 'faq',     label: 'FAQ' },
     { id: 'about',   label: 'ACERCA' },
     { id: 'menu',    label: 'MÁS', dropdown: true },
-    { id: 'submit',  label: '＋ PROPONER', accent: true },
   ];
   return (
     <div className="amx-sobre-verde" style={{
@@ -372,17 +371,16 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
           }
           return (
             <button key={it.id} onClick={() => onNav(it.id)} style={{
-              background: it.accent ? (active ? '#DDD5C4' : 'transparent') : 'none',
-              border: it.accent ? `1px solid ${'#DDD5C4'}` : 'none', cursor: 'pointer',
-              padding: it.accent ? '8px 12px' : '8px 14px',
+              background: 'none',
+              border: 'none', cursor: 'pointer',
+              padding: '8px 14px',
               fontFamily: 'Archivo, sans-serif',
               fontSize: 14, fontWeight: 600,
               letterSpacing: '0.12em', textTransform: 'uppercase',
-              color: active ? (it.accent ? '#000' : '#DDD5C4') : (it.accent ? '#DDD5C4' : PALETTE.sobreMarcaDim),
-              borderBottom: active && !it.accent ? `2px solid ${'#DDD5C4'}` : (it.accent ? `1px solid ${'#DDD5C4'}` : '2px solid transparent'),
+              color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
+              borderBottom: active ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
               position: 'relative',
               transition: 'color 0.15s',
-              marginLeft: it.accent ? 8 : 0,
               whiteSpace: 'nowrap',
             }}>
               {it.label}

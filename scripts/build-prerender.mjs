@@ -359,8 +359,6 @@ const FIJAS = [
   // Sin valor de búsqueda: existen para no dar 404, pero fuera del índice.
   { ruta: 'comparar', titulo: 'Comparador de armas', enSitemap: false, noindex: true,
     desc: 'Compara dos armas del catálogo lado a lado.' },
-  { ruta: 'proponer', titulo: 'Proponer un arma', enSitemap: false, noindex: true,
-    desc: 'Envía al curador un arma que falte en el catálogo.' },
   { ruta: 'mas', titulo: 'Más secciones', enSitemap: false, noindex: true,
     desc: 'Índice de secciones de Armado en México.' },
 ];

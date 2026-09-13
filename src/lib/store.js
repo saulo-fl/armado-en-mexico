@@ -47,17 +47,6 @@
       bgColor: '#12302A',
       accent: '#DDD5C4',
     },
-    {
-      id: 'p3',
-      eyebrow: '＋ COLABORA',
-      title: '¿Conoces un arma que falta?',
-      subtitle: 'Envíala al curador para revisión y se publicará en el catálogo.',
-      cta: 'Proponer arma',
-      ctaTarget: 'submit',
-      bgImage: '',
-      bgColor: '#173A32',
-      accent: '#DDD5C4',
-    },
   ];
 
   // ── INVENTARIOS OFICIALES (PDFs versionados en el repo) ──────────────
@@ -578,10 +567,12 @@
     // Oculta por el momento el promo de asesoría legal con abogado externo.
     // Robusto: no depende del id 'p2' (puede venir distinto desde localStorage);
     // filtra por destino 'legal' o por mención de abogado/asesoría en el texto.
+    // Y la de «Proponer arma» (p3, destino 'submit'): esa pantalla se retiró el
+    // 13-sep-2026, pero la promo puede seguir guardada en D1 o en el navegador.
     getPromos() {
       return read(K.promos, DEFAULT_PROMOS).filter(p => {
         if (p.id === 'p2') return false;
-        if (p.ctaTarget === 'legal') return false;
+        if (p.ctaTarget === 'legal' || p.ctaTarget === 'submit') return false;
         const txt = ((p.title || '') + ' ' + (p.subtitle || '') + ' ' + (p.eyebrow || '') + ' ' + (p.cta || '')).toLowerCase();
         if (/abogad|asesor[íi]a/.test(txt)) return false;
         return true;

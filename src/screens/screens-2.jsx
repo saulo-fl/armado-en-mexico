@@ -89,7 +89,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const [, forceProd] = useState2(0);
   useEffect(() => window.Store && window.Store.onChange(() => forceProd((x) => x + 1)), []);
   const arma = window.findArma(armaId);
-  const [showSuggest, setShowSuggest] = useState2(false);
 
   // track de visita una vez por mount
   useEffect(() => {
@@ -643,20 +642,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               </div>)}
           </div>
         </div>}
-
-      {/* ── SUGERIR CAMBIOS — cierra la página ─────────────────────────── */}
-      <ProdSection pad={PAD} gap={SEC}>
-        <button onClick={() => setShowSuggest(true)} style={{
-            width: '100%', background: 'transparent', color: PALETTE.amber,
-            border: `1.5px dashed ${PALETTE.amber}`,
-            padding: '14px', minHeight: 48,
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-            letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
-          }}>Sugerir cambios</button>
-      </ProdSection>
-
-      {showSuggest &&
-        <SuggestChangesModal arma={arma} onClose={() => setShowSuggest(false)} />}
      </div>
 
       {/* BARRA FIJA DE ACCIÓN (móvil) — precio + comparar en zona del pulgar.
@@ -1041,120 +1026,6 @@ function YouTubeBlock({ arma, padX = 16 }) {
 }
 window.YouTubeBlock = YouTubeBlock;
 
-// ════════════════════════════════════════════════════════════════
-// SUGGEST CHANGES — modal para sugerir cambios a una ficha
-// ════════════════════════════════════════════════════════════════
-function SuggestChangesModal({ arma, onClose }) {
-  const [f, setF] = useState2({ name: '', email: '', field: 'precio', current: '', suggested: '', source: '', notes: '' });
-  const [sent, setSent] = useState2(false);
-  const set = (k, v) => setF((p) => ({ ...p, [k]: v }));
-
-  const submit = (e) => {
-    e.preventDefault();
-    if (!f.name || !f.suggested) {alert('Falta tu nombre y el cambio sugerido.');return;}
-    window.Store.addSuggestion({
-      armaId: arma.id,
-      armaNombre: arma.nombre,
-      submitterName: f.name,
-      submitterEmail: f.email,
-      field: f.field,
-      currentValue: f.current,
-      suggestedValue: f.suggested,
-      source: f.source,
-      notes: f.notes
-    });
-    setSent(true);
-  };
-
-  return (
-    <div onClick={onClose} style={{
-      position: 'fixed', inset: 0, zIndex: 9999,
-      background: 'rgba(7,8,10,0.85)', backdropFilter: 'blur(6px)',
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-      padding: '40px 16px', overflowY: 'auto'
-    }}>
-      <div onClick={(e) => e.stopPropagation()} style={{
-        maxWidth: 580, width: '100%',
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.amber}`,
-        boxShadow: '0 30px 80px rgba(0,0,0,0.6)'
-      }}>
-        <div style={{
-          padding: '14px 18px',
-          background: PALETTE.bgElev,
-          borderBottom: `2px solid ${PALETTE.amber}`,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-        }}>
-          <div>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em' }}>✎ SUGERIR CAMBIO</div>
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17, color: PALETTE.text, textTransform: 'uppercase' }}>{arma.nombre}</div>
-          </div>
-          <button onClick={onClose} style={{
-            background: 'none', border: `1px solid ${PALETTE.border}`,
-            color: PALETTE.textDim, width: 28, height: 28, cursor: 'pointer',
-            fontSize: 19, lineHeight: 1
-          }}>✕</button>
-        </div>
-
-        {sent ?
-        <div style={{ padding: 28, textAlign: 'center' }}>
-            <div style={{ fontSize: 50.5, color: PALETTE.amber, lineHeight: 1, marginBottom: 12 }}>✓</div>
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: PALETTE.text, textTransform: 'uppercase', marginBottom: 8 }}>¡Gracias!</div>
-            <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.6, marginBottom: 20 })}>Tu sugerencia entró en la cola. Revisaremos la información y, si procede, aplicaremos el cambio.</div>
-            <button onClick={onClose} style={{
-            background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-            padding: '10px 20px',
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-            letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
-          }}>Cerrar</button>
-          </div> :
-
-        <form onSubmit={submit} style={{ padding: 18 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 12px' }}>
-              {sfld('Tu nombre', 'name', f, set, { required: true })}
-              {sfld('Correo (opcional)', 'email', f, set, { type: 'email' })}
-            </div>
-            {sfld('Campo a corregir', 'field', f, set, { select: [
-            { value: 'precio', label: 'Precio / Historial de precios' },
-            { value: 'ficha_tecnica', label: 'Ficha técnica (specs)' },
-            { value: 'historia', label: 'Historia / descripción' },
-            { value: 'legal', label: 'Información legal' },
-            { value: 'imagen', label: 'Imagen' },
-            { value: 'otro', label: 'Otro' }]
-          })}
-            {sfld('Valor actual (lo que dice ahora)', 'current', f, set, { ta: true, rows: 2 })}
-            {sfld('Valor sugerido / corrección', 'suggested', f, set, { ta: true, rows: 3, required: true })}
-            {sfld('Fuente / referencia (URL, doc, etc.)', 'source', f, set, { placeholder: 'https://... o "publicación oficial XYZ"' })}
-            {sfld('Comentarios adicionales', 'notes', f, set, { ta: true, rows: 2 })}
-
-            <div style={window.amxProsa({
-            background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
-            padding: 10, marginTop: 8,
-            fontSize: 14, color: PALETTE.textMuted, lineHeight: 1.55
-          })}>
-              <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu sugerencia va a la cola de revisión. No se aplica al instante; se revisa, se valida con la fuente y luego se publica.
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
-              <button type="button" onClick={onClose} style={{
-              background: 'transparent', color: PALETTE.textDim,
-              border: `1px solid ${PALETTE.border}`,
-              padding: '10px 18px',
-              fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 14,
-              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
-            }}>Cancelar</button>
-              <button type="submit" style={{
-              background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-              padding: '10px 20px',
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-              letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
-            }}>✓ Enviar sugerencia</button>
-            </div>
-          </form>
-        }
-      </div>
-    </div>);
-
-}
 function sfld(label, k, f, set, p = {}) {
   return (
     <div style={{ marginBottom: 12, gridColumn: p.span === 2 ? '1 / -1' : 'auto' }}>
@@ -1202,7 +1073,6 @@ function sInpStyle() {
     resize: 'vertical', lineHeight: 1.55
   });
 }
-window.SuggestChangesModal = SuggestChangesModal;
 
 // ════════════════════════════════════════════════════════════════
 // COMPARE — Vista lado a lado tipo loadout
@@ -1915,7 +1785,6 @@ function SoporteScreen({ onNav }) {
             <Regla>Escribe sobre el arma, el accesorio, la munición o el lugar que estás reseñando: cómo se comporta, para qué sirve, qué te sorprendió.</Regla>
             <Regla>No uses las reseñas para hacer preguntas de trámite: para eso están las <b>preguntas frecuentes</b> y la <b>guía legal</b>.</Regla>
             <Regla>No repitas la misma reseña en varias fichas.</Regla>
-            <Regla>Si un dato del catálogo está mal, no lo denuncies en una reseña: usa el botón <b>Sugerir cambios</b> de la ficha, que va directo a corregirlo.</Regla>
           </div>
         </window.Disclosure>
 
@@ -2163,8 +2032,7 @@ function MenuScreen({ onNav, onTutorial }) {
   { id: 'soporte', icon: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
   { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
   { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
-  { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
-  { id: 'submit', icon: '＋', title: 'Proponer arma', desc: 'Envía un arma para revisión' }];
+  { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' }];
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
@@ -2226,190 +2094,4 @@ function MenuScreen({ onNav, onTutorial }) {
     </div>);
 
 }
-window.MenuScreen = MenuScreen;
-
-// ════════════════════════════════════════════════════════════════
-// SUBMIT — Formulario público para proponer un arma
-// ════════════════════════════════════════════════════════════════
-function SubmitScreen({ onNav }) {
-  const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
-  const [sent, setSent] = useState2(false);
-  const [f, setF] = useState2({
-    submitterName: '', submitterEmail: '', submitterMessage: '',
-    nombre: '', marca: '', tipo: 'pistola', pais: '',
-    calibre: '', capacidad: '', peso: '', longitud: '', mecanismo: '',
-    anio: new Date().getFullYear(), img: '',
-    historia: '', avail: 'dcam'
-  });
-  const set = (k, v) => setF((prev) => ({ ...prev, [k]: v }));
-
-  const submit = (e) => {
-    e.preventDefault();
-    if (!f.submitterName || !f.nombre || !f.marca || !f.calibre) {
-      alert('Faltan campos obligatorios: tu nombre, nombre del arma, marca y calibre.');
-      return;
-    }
-    window.Store.addPending({
-      submitterName: f.submitterName,
-      submitterEmail: f.submitterEmail,
-      submitterMessage: f.submitterMessage,
-      nombre: f.nombre, marca: f.marca, tipo: f.tipo, pais: f.pais,
-      calibre: f.calibre, capacidad: f.capacidad, peso: f.peso,
-      longitud: f.longitud, mecanismo: f.mecanismo,
-      anio: Number(f.anio) || new Date().getFullYear(),
-      era: 'moderno',
-      img: f.img, historia: f.historia,
-      avail: f.avail, availLabel: window.CATEGORIES.disponibilidad.find((d) => d.id === f.avail)?.label || 'Civil',
-      uses: ['domicilio', 'club'],
-      priceLvl: 2, priceExact: 'Por confirmar',
-      disponibilidad: [], dcamRef: '', legalTit: '', legalDesc: ''
-    });
-    setSent(true);
-  };
-
-  if (sent) {
-    return (
-      <div style={{ padding: `40px ${padX}px 90px`, maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
-        <div style={{
-          fontSize: 67, color: PALETTE.amber, marginBottom: 20, lineHeight: 1
-        }}>✓</div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 14.5, color: PALETTE.amber,
-          letterSpacing: '0.25em', marginBottom: 10
-        }}>◆ ENVÍO RECIBIDO</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-          fontSize: 26, color: PALETTE.text, textTransform: 'uppercase',
-          lineHeight: 1.1, letterSpacing: '0.02em', marginBottom: 14
-        }}>¡Gracias por contribuir!</div>
-        <div style={window.amxProsa({ fontSize: 17, marginBottom: 28 })}>
-          Tu propuesta entró en la cola de revisión. Saulo Flores revisará la información,
-          podrá enriquecerla con datos técnicos adicionales, y publicarla en el catálogo cuando esté lista.
-          {f.submitterEmail && <div style={{ marginTop: 10, color: PALETTE.amber }}>
-            Te avisaremos por correo a <b>{f.submitterEmail}</b> cuando se publique.
-          </div>}
-        </div>
-        <button onClick={() => onNav('home')} style={{
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-          padding: '12px 24px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          cursor: 'pointer', marginRight: 8
-        }}>Volver al inicio</button>
-        <button onClick={() => {setSent(false);setF((prev) => ({ ...prev, nombre: '', marca: '', calibre: '', img: '', historia: '' }));}} style={{
-          background: 'transparent', color: PALETTE.text,
-          border: `1px solid ${PALETTE.border}`,
-          padding: '12px 24px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          cursor: 'pointer'
-        }}>Enviar otra</button>
-      </div>);
-
-  }
-
-  const fld = (label, k, props = {}) =>
-  <div style={{ marginBottom: 14, gridColumn: props.span === 2 ? '1 / -1' : 'auto' }}>
-      <label style={sLblStyle()}>{label} {props.required && <span style={{ color: PALETTE.amber }}>*</span>}</label>
-      {props.ta ?
-    <textarea value={f[k]} onChange={(e) => set(k, e.target.value)}
-    rows={props.rows || 3} style={sInpStyle()} placeholder={props.placeholder} /> :
-    props.select ?
-    <select value={f[k]} onChange={(e) => set(k, e.target.value)} style={sInpStyle()}>
-          {props.select.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-        </select> :
-
-    <input type={props.type || 'text'} value={f[k]} onChange={(e) => set(k, e.target.value)}
-    style={sInpStyle()} placeholder={props.placeholder} />
-    }
-    </div>;
-
-
-  return (
-    <form onSubmit={submit} style={{ padding: `0 ${padX}px 90px`, maxWidth: 880, margin: '0 auto' }}>
-      <div style={{
-        padding: '24px 0',
-        textAlign: 'center',
-        borderBottom: `1px solid ${PALETTE.border}`,
-        marginBottom: 22
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.25em', marginBottom: 8
-        }}>＋ COLABORA</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-          fontSize: 28, color: PALETTE.text, textTransform: 'uppercase',
-          lineHeight: 1, letterSpacing: '0.04em', marginBottom: 10
-        }}>Proponer un arma</div>
-        <div style={window.amxProsa({
-          fontSize: 16.5, lineHeight: 1.6, maxWidth: 540, margin: '0 auto'
-        })}>¿Tienes información de un arma que falta en el catálogo? Compártela. Revisaremos tu envío y lo publicaremos si cumple los criterios divulgativos.</div>
-      </div>
-
-      <SectionHeader>Sobre ti</SectionHeader>
-      <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, padding: 18, marginBottom: 24, display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', gap: '0 16px' }}>
-        {fld('Tu nombre', 'submitterName', { required: true, placeholder: 'Cómo apareces en los créditos' })}
-        {fld('Correo (opcional)', 'submitterEmail', { type: 'email', placeholder: 'Para avisarte cuando se publique' })}
-        {fld('Comentario (opcional)', 'submitterMessage', { ta: true, rows: 2, span: 2, placeholder: 'Cualquier nota: fuentes, dudas, contexto...' })}
-      </div>
-
-      <SectionHeader>Datos del arma</SectionHeader>
-      <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, padding: 18, marginBottom: 24, display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', gap: '0 16px' }}>
-        {fld('Nombre del arma', 'nombre', { required: true, placeholder: 'CZ Shadow 2' })}
-        {fld('Marca / fabricante', 'marca', { required: true, placeholder: 'Ceska Zbrojovka' })}
-        {fld('Tipo', 'tipo', { select: [
-          { value: 'pistola', label: 'Pistola' }, { value: 'revolver', label: 'Revólver' },
-          { value: 'rifle', label: 'Rifle' }, { value: 'escopeta', label: 'Escopeta' },
-          { value: 'carabina', label: 'Carabina' }]
-        })}
-        {fld('País de origen', 'pais', { placeholder: 'República Checa' })}
-        {fld('Calibre', 'calibre', { required: true, placeholder: '9mm Parabellum' })}
-        {fld('Capacidad', 'capacidad', { placeholder: '17+1' })}
-        {fld('Peso', 'peso', { placeholder: '1,270g' })}
-        {fld('Longitud', 'longitud', { placeholder: '206mm' })}
-        {fld('Mecanismo', 'mecanismo', { placeholder: 'Semi-auto, DA/SA, metal completo', span: 2 })}
-        {fld('Año de introducción', 'anio', { type: 'number' })}
-        {fld('Disponibilidad legal', 'avail', { select: [
-          { value: 'dcam', label: 'Civil — DCAM' },
-          { value: 'externo', label: 'Civil con licencia externa' },
-          { value: 'seguridad', label: 'Policía / Seguridad' },
-          { value: 'ejercito', label: 'Exclusivo Ejército' }]
-        })}
-        {fld('URL de imagen (opcional)', 'img', { placeholder: 'https://...jpg', span: 2 })}
-        {fld('Historia / contexto', 'historia', { ta: true, rows: 5, placeholder: 'Datos históricos, fabricante, usos notables, año de introducción al mercado mexicano...', span: 2 })}
-      </div>
-
-      <div style={window.amxProsa({
-        background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
-        padding: 14, marginBottom: 22,
-        fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6
-      })}>
-        <b style={{ color: PALETTE.amber }}>◆ Nota:</b> tu envío no se publica automáticamente. Pasa primero por la revisión. Pueden completarse datos faltantes (precio, ficha legal, ref. DCAM), corregir errores y enriquecerlo con fotografía oficial.
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-        <button type="button" onClick={() => onNav('home')} style={{
-          background: 'transparent', color: PALETTE.textDim,
-          border: `1px solid ${PALETTE.border}`,
-          padding: '12px 22px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 14,
-          letterSpacing: '0.15em', textTransform: 'uppercase',
-          cursor: 'pointer'
-        }}>Cancelar</button>
-        <button type="submit" style={{
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-          padding: '12px 26px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          cursor: 'pointer'
-        }}>＋ Enviar propuesta</button>
-      </div>
-    </form>);
-
-}
-
-window.SubmitScreen = SubmitScreen;
+window.MenuScreen = MenuScreen;
