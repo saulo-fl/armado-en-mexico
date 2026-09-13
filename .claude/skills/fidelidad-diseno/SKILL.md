@@ -178,6 +178,12 @@ ellas. Los desplegables (`window.Disclosure`) quedan para el detalle secundario
   por cartucho. Lo usan la tarjeta y la ficha.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-09: **Safari no resuelve `max-height: %` dentro de una caja cuya altura sale de
+  `aspect-ratio`.** Chrome sí, así que en escritorio se ve bien y en el iPhone la foto
+  sale recortada (la cuadrada de las traumáticas en el pozo 16:9). No es la resolución
+  del teléfono. Solución: la imagen `position:absolute; inset:0; margin:auto` con
+  `width/height` en % + `object-fit: contain` (así está `.amx-polaroid-pozo img`).
+  Verificable en Windows con Playwright WebKit + `devices['iPhone 14 Pro Max']`.
 - 2026-08: **una pantalla nueva son 8 puntos de alta, no 1.** `SCREEN_TO_PATH`,
   `titles`, `isInternal`, `currentNavId`, **la rama de `navTab`**, la rama del
   switch de `app.jsx`, el item de menú (`moreItems` de `TopNav` + `MenuScreen`), la

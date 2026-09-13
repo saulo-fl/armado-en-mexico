@@ -522,9 +522,11 @@ function HomeTraumaBanner({ onNav }) {
              son RECORTES DE PRODUCTO: se contienen, no se encuadran. Y siguen
              en multiply porque 87 de las fotos del catálogo son recortes sobre
              blanco opaco (CLAUDE.md) y el multiply necesita el blanco debajo,
-             que es justo lo que pone el pozo con --copia-placa. */
-          width: auto; height: auto;
-          max-width: 92%; max-height: 92%;
+             que es justo lo que pone el pozo con --copia-placa.
+             El 92 % va como ancho y alto de la caja, NO como max-width/max-height:
+             Safari ignoraba el max-height en % dentro de un pozo con aspect-ratio
+             y la foto cuadrada salía recortada en el iPhone (ver estilo.css). */
+          width: 92%; height: 92%;
           object-fit: contain;
           mix-blend-mode: multiply;
         }

@@ -625,14 +625,25 @@
      como las fotos 1:1 del catálogo nuevo, que así se ven al tamaño que
      tenían en el hero apaisado en vez de quedar limitadas por el alto. */
   aspect-ratio: 1 / 1;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
 }
+/* La foto va ABSOLUTA y con el 92 % como caja, no como `max-height: 92%` de un
+   hijo de flex. Safari (WebKit, o sea todo navegador de iPhone) no resuelve un
+   porcentaje de alto contra un pozo cuya altura sale de `aspect-ratio`: ignoraba
+   el max-height, la foto cuadrada se quedaba al 92 % del ANCHO y el pozo 16:9 de
+   las traumáticas la recortaba arriba y abajo. Chrome sí lo resolvía, por eso
+   solo se veía roto en el teléfono. En absoluto el porcentaje va contra el
+   bloque contenedor, que siempre es definido; `contain` conserva la proporción. */
 .amx-v2 .amx-polaroid-pozo img {
-  max-width: 92%;
-  max-height: 92%;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 92%;
+  height: 92%;
   object-fit: contain;
 }
 /* El faldón. Crece si el nombre es largo en vez de recortarlo, así que ninguna
@@ -683,7 +694,6 @@
   padding: 9px;
 }
 .amx-v2 .amx-polaroid--apaisada .amx-polaroid-pozo {
-  position: relative;
   aspect-ratio: 16 / 9;
   /* Sin filo: en una copia de verdad la emulsión acaba contra el cartón, no
      tiene una línea dibujada alrededor. El pozo cuadrado lo lleva porque ahí
@@ -704,11 +714,9 @@
   text-transform: uppercase;
 }
 .amx-v2 .amx-polaroid--apaisada .amx-polaroid-pozo img {
-  /* Pisa el `max-width: 92%` + `contain` del pozo cuadrado, que existe para
-     los recortes de producto con fondo transparente. Una foto de paisaje no
-     se contiene: se encuadra. */
-  max-width: none;
-  max-height: none;
+  /* Pisa el 92 % + `contain` del pozo cuadrado, que existe para los recortes
+     de producto con fondo transparente. Una foto de paisaje no se contiene:
+     se encuadra. */
   width: 100%;
   height: 100%;
   object-fit: cover;
