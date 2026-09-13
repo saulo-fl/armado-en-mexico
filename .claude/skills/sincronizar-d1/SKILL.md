@@ -27,8 +27,10 @@ node .claude/skills/sincronizar-d1/scripts/resembrar.js pages
 node .claude/skills/sincronizar-d1/scripts/resembrar.js armas --aplicar
 ```
 
-Requiere el permiso `Bash(npx wrangler d1 execute:*)` en `.claude/settings.json`
-y wrangler autenticado (`npx wrangler whoami`).
+Requiere wrangler autenticado (`npx wrangler whoami`). **`--aplicar` escribe en la
+D1 de producción** —la misma que usan los previews—: se pide al usuario SIEMPRE,
+y el guardia del arnés (`.claude/hooks/guardia.mjs`) lo convierte en pregunta
+aunque algo lo autorice.
 
 ## Por qué NO se usa el botón del admin
 
@@ -50,10 +52,10 @@ ese aviso, para y decide; no lo ignores.
 
 ## Comprobado, no supuesto
 
-- Un `UPDATE` con el JSON entero da **`SQLITE_TOOBIG`** (el catálogo son ~188 KB).
-  Por eso se trocea en fragmentos de 40 KB concatenados con `||`.
-- La concatenación va sobre una fila **temporal** (`armas_tmp`) y solo al final
-  se copia sobre el dominio real: un fallo a medias no deja producción rota.
+- La escritura es **un solo `UPDATE` parametrizado** contra la API de consultas de
+  D1, con el token de `wrangler auth token`. Con el JSON dentro del SQL daba
+  **`SQLITE_TOOBIG`** (~188 KB) y había que trocearlo sobre una fila temporal; como
+  parámetro entra entero (medidos 220 KB) y el `UPDATE` es atómico por sí mismo.
 - Las armas sin foto se guardan con `img: ''` en vez del data-URI del
   placeholder. Son ~900 B × 68 armas que viajarían en **cada** `GET /api/state`
   de **cada** visitante; el cliente repone el placeholder solo.

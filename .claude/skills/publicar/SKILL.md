@@ -15,7 +15,7 @@ SIEMPRE parte de un `origin/main` fresco:
 git fetch origin main
 git checkout -B <rama-de-trabajo> origin/main
 ```
-Los merges se hacen por la API de GitHub (MCP), así que tu `origin/main` LOCAL queda
+Los merges se hacen en GitHub (`gh pr merge` o la web), así que tu `origin/main` LOCAL queda
 viejo si no haces `fetch`. Si te basaste en un main viejo, **rebasa antes de pushear**:
 `git rebase --onto origin/main <base-vieja> <rama>`.
 
@@ -38,11 +38,15 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
 2. `git add ...` && commit con mensaje claro. Cierra el mensaje con la línea
    `Co-Authored-By` y `Claude-Session` que exige el entorno.
 3. `git push -u origin <rama>` (reintenta con backoff si falla por red).
-4. Abre PR a `main` (MCP `create_pull_request`) y **mergéalo** (`merge_pull_request`).
-5. Abre PR de la misma rama a `develop` y mergéalo (sincroniza espejo).
+4. Abre los dos PR gemelos, a `main` y a `develop` (`gh pr create --base …`).
+5. **Mergear a `main` publica en armado.mx: se pide a Saulo explícitamente**, salvo que
+   ya haya dicho «publica» / «mergea» en esta conversación. Mergea primero el gemelo a
+   `develop` y luego el de `main`, con `--match-head-commit <sha verificado>` para no
+   publicar algo distinto de lo que revisaste. El guardia del arnés convierte
+   `gh pr merge` en pregunta de todas formas.
 6. NO crees PR si el usuario no lo pidió para otros repos; aquí el flujo es el estándar.
 
-## Verificar el deploy (lo hace el usuario; tú no tienes red)
+## Verificar el deploy (las sondas las puedes correr tú: hay red)
 - Cloudflare reconstruye `main` al hacer merge; ~1-2 min.
 - Si el deploy queda **Failed**: revisar el log. Causa conocida: un `database_id`
   inválido en `wrangler.toml` («Error 8000022») → la Function no publica y NADA se
@@ -99,6 +103,14 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
   `git diff <combinado> origin/main` debe salir vacío. Al borrar el worktree, **quita
   antes el enlace de `node_modules`**: un borrado recursivo que siga el enlace vaciaría
   el `node_modules` real del repo.
+- 2026-09-13: **`--match-head-commit` quiere el SHA COMPLETO y exacto.** Con uno mal
+  tecleado GitHub responde «Head branch was modified», que parece otra cosa. Sácalo de
+  `gh pr view N --json headRefOid`, no lo reconstruyas desde el corto.
+- 2026-09-13: **`develop` no debería volver a borrarse al mergear `develop → main`**: el
+  ruleset «Ramas permanentes» prohíbe borrar `main` y `develop`. SIN MEDIR todavía:
+  la próxima vez que se mergee un PR con cabeza `develop`, comprueba que sigue en
+  `git ls-remote origin develop` y anota aquí el resultado. Si faltara, recrearla es
+  push a develop: el guardia lo bloquea y lo hace Saulo.
 - 2026-06: un deploy fallido NO publica el sitio aunque suban los assets.
 - 2026-06: preview por-rama (`<hash>.pages.dev`) tiene origen distinto → localStorage
   no persiste ahí; validar en armado.mx.

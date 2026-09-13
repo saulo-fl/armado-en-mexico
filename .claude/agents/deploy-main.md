@@ -51,10 +51,10 @@ resembrar D1**.
    sube lo que tenga el navegador en `localStorage`, que es justo el catálogo
    viejo que le sirvió D1. En agosto habría consolidado la pérdida de 13 fichas.
 
-## Verificación posterior — la entregas tú, la corre el usuario
+## Verificación posterior — la corres tú
 
-No tienes red. Dale estos comandos **escritos, listos para pegar**, y espera su
-salida antes de dar nada por bueno. Cloudflare reconstruye en 1-2 min.
+Hay red: córrelas tú en cuanto Cloudflare termine (1-2 min; comprueba antes que
+armado.mx ya sirve los `?v=` nuevos) y entrega la salida real, no «pasó».
 
 ```bash
 # 1. Estados HTTP: es lo que ve un crawler, no basta con que se vea bien
@@ -73,7 +73,7 @@ curl -s -X PUT  https://armado.mx/api/admin/state/pages -d '{}'   # no_autentica
 perdieron las vars de Access. Los dos son 503 y los dos son **silenciosos**: el
 sitio se ve perfecto y nada se comparte entre visitantes.
 
-Si tocaste fotos, que confirme también **la ficha sobre el hero oscuro, el
+Si tocaste fotos, mira también **la ficha sobre el hero oscuro, el
 listado, la portada de la categoría y el móvil**. Una imagen puede estar
 perfecta en disco y verse mal en su sitio.
 
@@ -106,10 +106,13 @@ Esto es lo que convirtió el flujo del 31-ago-2026 en un ir y venir de prompts.
 
 La lista vive en el `.claude/settings.local.json` de la **raíz del proyecto**
 (`Armado en Mexico`), no en el `.claude/settings.json` del repo: la raíz es el
-cwd de la sesión y el repo es una subcarpeta. Si el clasificador del entorno te
-bloquea algo igualmente (pasó con `gh pr merge`, con el merge por git y hasta
-con un `git ls-remote` de solo lectura): **para y pide el permiso al usuario con
-el comando exacto**. No busques una tercera vía para colar la misma acción.
+cwd de la sesión y el repo es una subcarpeta. Encima va el **guardia del arnés**
+(ver «Arnés» en AGENTS.md): `gh pr merge`, `resembrar.js --aplicar` y
+`wrangler d1 execute --remote` te llegan como pregunta a Saulo aunque algo los
+autorice, y el push directo a `main`/`develop` está bloqueado — se llega por PR.
+Si el guardia o el clasificador te bloquean algo: **para y pide el permiso al
+usuario con el comando exacto**. No busques una tercera vía (`gh api`, otro shell)
+para colar la misma acción: es la misma acción por otro transporte.
 
 Y aparte de los permisos: **esto es producción**. Mergear a `main` se pide
 explícitamente aunque el flujo esté autorizado, salvo que el usuario ya haya
@@ -122,5 +125,4 @@ porque escribe sobre la base que sirve a los visitantes.
 2. La salida real de `npm run build` y `auditar.js` — los números.
 3. SHA del merge a `main`, y confirmación de que `develop` quedó en espejo.
 4. Si resembraste D1: el diff que enseñó el script antes de aplicar.
-5. Las sondas de verificación, escritas para pegar, y **su resultado** una vez
-   que el usuario te lo dé. No cierres la tarea antes de eso.
+5. Las sondas de verificación y **su salida real**. No cierres la tarea antes de eso.

@@ -57,6 +57,41 @@ que se daba por publicado algo que ningún visitante veía.
 `fidelidad-diseno` antes de publicar. Al terminar algo no trivial, aplica
 `mejorar-tooling`.
 
+### Arnés: quién puede hacer qué (13-sep-2026)
+
+Lo que dicen los agentes en prosa lo hace cumplir **`.claude/hooks/guardia.mjs`**, un
+hook `PreToolUse` sobre Bash **y** PowerShell que lee el comando entero (no por prefijo,
+que es como se saltaban las reglas `deny`: `git -C ruta push --force`, el flag al final,
+o cualquier cosa desde PowerShell). Devuelve `deny`, `ask` (decide Saulo) o nada.
+Prueba: `node .claude/hooks/guardia.test.mjs`.
+
+| Perfil | Agentes | Además de la base |
+|---|---|---|
+| base | sesión principal, `deploy-main` | — |
+| `lectura` | `revisor-armado`, `auditor-a11y-perf`, `auditor-estructura`, `impeccable-finish-reviewer`, `Explore`, `Plan` | nada de git/gh/wrangler que escriba, ni `npm install` |
+| `trabajo` | `conciliador-inventario`, `preparador-imagenes`, `disenador-oficial`, `impeccable-*` que editan | ramas y PR sí; mergear, `gh api` de escritura y D1, no |
+| `develop` | `deploy-develop` | PR y merge solo con base `develop` (lo consulta a GitHub); D1, no |
+
+**Base, para todos:** `deny` al push directo a `main`/`develop`, al push forzado o que
+borra, `reset --hard`, `clean -f`, `branch -D`, `gh auth token`, `wrangler auth token` y
+matar procesos por nombre. `ask` en `gh pr merge`, `gh api` de escritura,
+`resembrar.js --aplicar`, `wrangler d1 execute --remote` y deploys directos, y en lo que
+tira cambios de otra sesión (`checkout -- …`, `restore`, `stash pop/drop`).
+El perfil sale del `agent_type` que Claude Code pasa al hook. Un agente nuevo entra en
+`base` hasta que se le asigne perfil en `PERFILES`.
+
+**En GitHub**, el ruleset «Ramas permanentes» impide borrar o forzar `main` y `develop`
+(no exige PR: rompería el push del workflow de cifras). Debería impedir también que el
+borrado automático al mergear `develop → main` se lleve `develop` — sin medir aún.
+
+**Sesiones que arrancan en la carpeta padre** (`Armado en Mexico\`, lo habitual): ahí no
+se carga este `settings.json` ni `.claude/agents/`. Por eso la carpeta padre tiene
+`.claude/agents` y `.claude/hooks` como **enlaces** a `repo/espejo-main/`, un worktree en
+`origin/main` que su `SessionStart` refresca — y su `settings.local.json` engancha el
+mismo guardia. **`repo/espejo-main` no se edita nunca**: es solo lectura, para que los
+agentes y el guardia sean siempre los de `main` y no los de la rama que otra sesión tenga
+sacada en `github-deploy`.
+
 ## Estructura del repo
 
 Reestructurado el **9-sep-2026**. La regla es una sola: **la raíz solo lleva
@@ -468,5 +503,6 @@ Search Console con el sitemap enviado. Las vars de Access viven en `wrangler.tom
 **Fuera del código — pendiente:** decidir si se abre el `robots.txt` gestionado de
 Cloudflare a GPTBot/ClaudeBot (hoy bloquea el **entrenamiento**; los bots de citación
 sí pasan, que son los que importan para GEO). Ver `docs/SEO.md`. Y cambiar la contraseña
-por defecto del admin (`armado2026`, en claro en `store.js` dentro de un repo público):
+por defecto del admin (`armado2026`, en claro en `store.js`, que armado.mx sirve público
+aunque el repo sea privado):
 ya no es la única barrera —Access va delante— pero sigue ahí.
