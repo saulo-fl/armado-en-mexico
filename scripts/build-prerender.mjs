@@ -204,12 +204,21 @@ function emitir(ruta, { titulo, desc, jsonld, cuerpo, noindex }) {
 const paginas = [];  // {ruta, enSitemap}
 
 // 5a. Fichas de arma
+// Nombre del tipo en singular, con su artículo. Antes se despluralizaba
+// TIPO_LABEL con /e?s$/ y el artículo iba fijo en femenino: salían «rifl .300»
+// y «La Ruger Wrangler es una revólver» en 42 títulos y 50 resúmenes.
+const TIPO_NOM = {
+  pistola: ['pistola', 'La', 'una'], revolver: ['revólver', 'El', 'un'],
+  rifle: ['rifle', 'El', 'un'], escopeta: ['escopeta', 'La', 'una'],
+  carabina: ['carabina', 'La', 'una'],
+};
+const mayus = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 for (const a of ARMAS) {
   const ruta = rutaArma.get(a.id);
   const rama = TIPO_TO_PATH[a.tipo] || 'otras';
-  const tipoNom = (TIPO_LABEL[a.tipo] || 'Arma').replace(/e?s$/, '');
-  const titulo = `${a.nombre} — ${tipoNom.toLowerCase()} ${a.calibre} | Armado en México`;
-  const resumen = `La ${a.nombre} es una ${tipoNom.toLowerCase()} de ${a.marca} `
+  const [tipoNom, art, indef] = TIPO_NOM[a.tipo] || ['arma', 'El', 'un'];
+  const titulo = `${a.nombre} — ${tipoNom} ${a.calibre} | Armado en México`;
+  const resumen = `${art} ${a.nombre} es ${indef} ${tipoNom} de ${a.marca} `
     + `en calibre ${a.calibre}${a.capacidad ? `, con capacidad de ${a.capacidad}` : ''}. `
     + `En México su clasificación es «${a.availLabel}»${a.priceExact ? `, con precio de referencia ${a.priceExact} en el catálogo oficial` : ''}.`;
   emitir(ruta, {
@@ -227,7 +236,7 @@ for (const a of ARMAS) {
 <nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/${rama}">${esc(TIPO_LABEL[a.tipo] || 'Arsenal')}</a> › ${esc(a.nombre)}</nav>
 <h1>${esc(a.nombre)}</h1>
 <p>${esc(resumen)}</p>
-${dl([['Marca', a.marca], ['Tipo', tipoNom], ['Calibre', a.calibre], ['Capacidad', a.capacidad],
+${dl([['Marca', a.marca], ['Tipo', mayus(tipoNom)], ['Calibre', a.calibre], ['Capacidad', a.capacidad],
       ['Mecanismo', a.mecanismo], ['Peso', a.peso], ['Longitud', a.longitud],
       ['País de origen', a.pais], ['Año', a.anio], ['Clasificación legal', a.availLabel],
       ['Precio de referencia', a.priceExact]])}
