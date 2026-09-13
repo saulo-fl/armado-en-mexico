@@ -2,108 +2,122 @@
 
 const { useState: useState2, useMemo: useMemo2 } = React;
 
-// Formatea la fecha de un inventario DCAM (YYYY-MM-DD) a texto legible es-MX
-function amxFmtManualDate(f) {
-  if (!f) return '';
-  const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
-  if (isNaN(d)) return String(f);
-  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+// ════════════════════════════════════════════════════════════════
+// PRODUCT — la ficha de un arma: el expediente completo
+// Rediseño del 13-sep-2026, decidido con Saulo sección por sección. Qué papel
+// es cada dato, cómo cambia entre móvil y escritorio y qué pasa en el tema
+// oscuro está explicado en estilo.css, bloque «LA FICHA DE ARMA», y en
+// docs/DESIGN.md §4.3. Aquí solo vive lo que depende del dato.
+// ════════════════════════════════════════════════════════════════
 
-// ════════════════════════════════════════════════════════════════
-// PRODUCT — Ficha completa de un arma
-// ════════════════════════════════════════════════════════════════
-// Sección de la ficha. Vive FUERA de ProductScreen a propósito: definida
-// dentro, React la trataría como un componente nuevo en cada render y
-// remontaría el subárbol — lo que cerraría los <details> abiertos.
-// ──────────────────────────────────────────────────────────────
-// TABS de la ficha (DESIGN.md §11) — variante B de la comparación.
-// Envuelve los paneles sin reescribir su contenido: cada hijo <Panel label="X">
-// aporta su rótulo y el resto va igual que en la variante de desplegables.
-// Vive fuera de ProductScreen a propósito: un componente definido dentro de
-// otro remonta su subárbol en cada render (la trampa que ya documenta
-// fidelidad-diseno con ProdSection).
-// ──────────────────────────────────────────────────────────────
+// SEPARADORES de la hoja de oficio: Legalidad · Usos · Antecedentes.
+// Controlados desde fuera, porque el enlace «§ Ver situación legal» de la
+// copia tiene que poder abrir Legalidad. Conservan lo que ya tenían: rol
+// tablist, foco itinerante y flechas ←/→.
+// Viven FUERA de ProductScreen a propósito: un componente definido dentro de
+// otro remonta su subárbol en cada render (la trampa que documenta
+// fidelidad-diseno).
 function Panel({ children }) { return <React.Fragment>{children}</React.Fragment>; }
 
-function FichaTabs({ children }) {
+function FichaTabs({ children, activo, onCambiar }) {
   const paneles = React.Children.toArray(children).filter(Boolean);
-  const [act, setAct] = React.useState(0);
   const refs = React.useRef([]);
   if (!paneles.length) return null;
-  const activo = Math.min(act, paneles.length - 1);
+  const act = Math.min(activo, paneles.length - 1);
 
-  // Flechas entre pestañas: lo que espera un lector de pantalla en un tablist.
   function onKey(e) {
     const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
     if (!d) return;
     e.preventDefault();
-    const n = (activo + d + paneles.length) % paneles.length;
-    setAct(n);
+    const n = (act + d + paneles.length) % paneles.length;
+    onCambiar(n);
     if (refs.current[n]) refs.current[n].focus();
   }
 
   return (
     <div>
-      <div className="tabs-bar" role="tablist" onKeyDown={onKey}>
+      <div className="amx-separadores-pestanas" role="tablist" aria-label="Documentos del expediente" onKeyDown={onKey}>
         {paneles.map((p, i) => (
           <button
             key={i}
+            type="button"
             ref={(el) => { refs.current[i] = el; }}
             role="tab"
-            id={'tab-' + i}
-            aria-selected={i === activo}
-            aria-controls={'panel-' + i}
-            tabIndex={i === activo ? 0 : -1}
-            className={'tab' + (i === activo ? ' is-act' : '')}
-            onClick={() => setAct(i)}>
+            id={'ficha-tab-' + i}
+            aria-selected={i === act}
+            aria-controls={'ficha-panel-' + i}
+            tabIndex={i === act ? 0 : -1}
+            className="amx-separador"
+            onClick={() => onCambiar(i)}>
             {p.props.label}
           </button>
         ))}
       </div>
-      <div className="tab-panel" role="tabpanel" id={'panel-' + activo} aria-labelledby={'tab-' + activo}>
-        {paneles[activo]}
+      <div className="amx-oficio" role="tabpanel" id={'ficha-panel-' + act} aria-labelledby={'ficha-tab-' + act}>
+        {/* Membrete genérico del sitio: sin escudo ni emblema oficial (§6b). */}
+        <div className="amx-oficio-membrete" aria-hidden="true">
+          <span>Armado en México</span><span>{paneles[act].props.label}</span>
+        </div>
+        {paneles[act]}
       </div>
     </div>
-  );
-}
-
-function ProdSection({ pad, gap, band, children }) {
-  return (
-    <section style={{
-      padding: `${gap}px ${pad}px ${band ? gap : 0}px`,
-      background: band ? PALETTE.bgElev : 'transparent'
-    }}>
-      <div style={{ maxWidth: 1000, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-        {children}
-      </div>
-    </section>
   );
 }
 
 function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   // Las opiniones llegan en la hidratacion desde /api/state, DESPUES del primer
-  // render. Sin esta suscripcion la etiqueta de arriba se quedaba vacia hasta
+  // render. Sin esta suscripcion la etiqueta de la copia se quedaba vacia hasta
   // que el usuario navegaba a otra pantalla y volvia.
   const [, forceProd] = useState2(0);
   useEffect(() => window.Store && window.Store.onChange(() => forceProd((x) => x + 1)), []);
   const arma = window.findArma(armaId);
 
-  // track de visita una vez por mount
+  // La pestaña abierta: Legalidad (la 0) al llegar y al pasar de un arma a otra.
+  const [tab, setTab] = useState2(0);
+  // El talón fijo de abajo (móvil) solo aparece cuando el de la ficha ya salió
+  // de la pantalla por arriba, así que nunca hay dos talones a la vista.
+  const [talonFuera, setTalonFuera] = useState2(false);
+  // …y se retira cuando asoma el pie de sitio, para no taparle el último renglón.
+  const [pieVisible, setPieVisible] = useState2(false);
+  const talonRef = React.useRef(null);
+  const separadoresRef = React.useRef(null);
+
   useEffect(() => {
     if (arma && window.Store) window.Store.trackVisit(arma.id);
   }, [arma?.id]);
+  useEffect(() => { setTab(0); setTalonFuera(false); setPieVisible(false); }, [armaId]);
+
+  // IntersectionObserver con la raíz implícita: recorta por los `overflow` de
+  // los ancestros, así que funciona igual si hace scroll la página que si lo
+  // hace el contenedor interno del shell móvil. Nada de escuchar el scroll.
+  // El margen de arriba descuenta la barra superior (64px), que tapa lo que
+  // pasa por debajo de ella.
+  useEffect(() => {
+    const el = talonRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([e]) => {
+      setTalonFuera(!e.isIntersecting && e.boundingClientRect.top < 64);
+    }, { rootMargin: '-64px 0px 0px 0px' });
+    io.observe(el);
+    // Se observa el <footer> del shell y no un centinela al final de la ficha:
+    // un salto de scroll (ir al final, un fling largo) lleva el centinela de
+    // debajo de la ventana a encima SIN cruzarla, y el observer no dispara. El
+    // pie, al final de la página, siempre queda dentro.
+    const pie = document.querySelector('footer');
+    const ioPie = pie && new IntersectionObserver(([e]) => setPieVisible(e.isIntersecting));
+    if (ioPie) ioPie.observe(pie);
+    return () => { io.disconnect(); if (ioPie) ioPie.disconnect(); };
+  }, [armaId]);
 
   if (!arma) return <div style={{ padding: 40, color: PALETTE.text }}>Arma no encontrada</div>;
 
-  const availMeta = window.CATEGORIES.disponibilidad.find((d) => d.id === arma.avail);
   const inCmp = compareIds.includes(arma.id);
-  const containerMax = { maxWidth: 1200, margin: '0 auto', width: '100%' };
-  const PAD = vp.isDesktop ? 28 : 16;
-  const SEC = vp.isDesktop ? 52 : 34;   // aire ENTRE secciones (dentro se usa 12-22)
-  const ORANGE = window.GUN_ACCENT || PALETTE.amber;
-  const NUM = { fontVariantNumeric: 'tabular-nums' };
+  // Un solo corte, el del expediente: 1024px. `vp.isDesktop` corta a 900 y deja
+  // una franja con las dos columnas del CSS apagadas y el espaciado de escritorio.
+  const ancho = vp.width >= 1024;
+  const PAD = ancho ? 28 : 16;
+  const SEC = ancho ? 52 : 34;   // aire ENTRE secciones fuera del folder
 
   const priceHistory = window.Store ? window.Store.getPriceHistory(arma.id) : [];
   const manuales = window.Store ? window.Store.getManuales() : [];
@@ -116,6 +130,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
   const curSigla = curAut ? curAut.sigla : 'DCAM';
   const precioActual = priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact;
+  const fechaPrecio = currentManual ? amxFmtManualDate(currentManual.fecha) : '';
 
   // Existencias POR SUCURSAL (no hay primaria/secundaria): DCAM y OTCA se
   // muestran por separado, cada una con su inventario fuente. Regla: SOLO
@@ -142,23 +157,16 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
     }
   }
 
-  // La gráfica necesita DOS fechas distintas: DCAM y OTCA publican el mismo
-  // día y sus registros se funden en un solo punto.
-  const fechasHist = [];
-  priceHistory.forEach((h) => { if (fechasHist.indexOf(h.date) < 0) fechasHist.push(h.date); });
-  const hayGrafica = fechasHist.length >= 2;
-  const pIni = priceHistory.length ? window.amxPrecioNum(priceHistory[0].price) : null;
-  const pFin = window.amxPrecioNum(precioActual);
-  const deltaPct = (hayGrafica && pIni && pFin != null) ? ((pFin - pIni) / pIni) * 100 : null;
-
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
   const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
   const muns = window.getMunicionesParaArma ? window.getMunicionesParaArma(arma) : [];
   const opin = window.Store ? window.Store.getOpiniones('arma', arma.id) : { up: 0, down: 0, total: 0, lista: [] };
   const etOpin = window.amxOpinionLabel(opin.up, opin.down);
+  const SELLOS = window.SELLOS_LEGALES || {};
+  const sello = SELLOS[arma.avail] || SELLOS.dcam || { texto: 'CIVIL', tono: 'civil' };
 
   // `statsKeys` vivía aquí para la valoración divulgativa, retirada el
-  // 7-sep-2026. El comparador no lo usaba; su lista propia salió el 10-sep-2026.
+  // 7-sep-2026 (las barras se derivaban por tipo y calibre, no de mediciones).
   // El rótulo del tipo para la pestaña del folder. En singular y acentuado:
   // `CATEGORIES.tipo` guarda los rótulos en plural y despluralizar «Rifles» y
   // «Revólveres» con la misma regla no sale (uno pierde la «s», el otro «es»).
@@ -167,527 +175,206 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
     escopeta: 'Escopeta', carabina: 'Carabina' };
   const tipoRotulo = TIPO_SINGULAR[arma.tipo] || arma.tipo || 'Expediente';
 
-  const btnComparar = (
-    <span className="amx-cut" style={{ display: vp.isDesktop ? 'inline-block' : 'block' }}>
-      <button onClick={() => toggleCompare(arma.id)} style={{
-        width: '100%',
-        background: inCmp ? PALETTE.amber : 'transparent',
-        color: inCmp ? PALETTE.tintaSobreMarca : PALETTE.amber,
-        border: `1.5px solid ${PALETTE.amber}`,
-        clipPath: CUT_TR,
-        padding: '12px 22px', minHeight: 48,
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-        letterSpacing: '0.15em', textTransform: 'uppercase',
-        cursor: 'pointer'
-      }}>{inCmp ? '✓ AÑADIDA' : '⇄ Comparar'}</button>
-    </span>
-  );
+  const comparar = () => toggleCompare(arma.id);
+
+  // «§ Ver situación legal»: abre Legalidad, baja hasta la hoja y deja el foco
+  // en su pestaña, para que el lector de pantalla llegue al mismo sitio.
+  const verLegal = () => {
+    setTab(0);
+    const el = separadoresRef.current;
+    if (!el) return;
+    const reducir = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ behavior: reducir ? 'auto' : 'smooth', block: 'start' });
+    const pestana = document.getElementById('ficha-tab-0');
+    if (pestana) pestana.focus({ preventScroll: true });
+  };
 
   return (
     <div style={{ paddingBottom: 90 }}>
-     <div style={containerMax}>
+     <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
-      {/* ── 1 · EL EXPEDIENTE — el elemento firma (DESIGN.md §4.3) ───────
-          «La pagina de arma de cada elemento debe ser preciosa, con un diseño
-           tipo analógico que de la sensación de estar leyendo desde un folder.
-           En escritorio aprovecharemos el ancho de la pagina para tener un
-           folder extendido con la foto del arma del lado izquierdo con un marco
-           de polaroid y su precio de referencia y del lado derecho la ficha
-           tecnica del arma.»
+      {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
+      <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
+        <article className="amx-carpeta" aria-labelledby="ficha-nombre">
+          {/* El tipo, rotulado sobre la pestaña de la foto. El folio `AR-####`
+              que iba aquí se retiró el 7-sep-2026: un código de expediente que
+              no corresponde a ningún registro real es decoración que finge ser
+              dato. El tipo sí dice algo verdadero. */}
+          <span className="amx-carpeta-rotulo" aria-hidden="true">{tipoRotulo}</span>
 
-          Sustituye a TRES bloques apilados: la identidad, el hero apaisado de
-          380px y los cuatro «datos clave». Los tres decían lo mismo tres veces
-          —calibre, capacidad, longitud y peso salían en el bloque de datos y
-          otra vez en la pestaña de Especificaciones— y en escritorio dejaban
-          1200px de ancho sin usar, que es justo lo que §4.3 quiere aprovechar.
+          <div className="amx-carpeta-grid">
+            <header className="amx-carpeta-cab">
+              <h1 id="ficha-nombre" className="t-titulo">{arma.nombre}</h1>
+            </header>
 
-          El reparto en columnas lo hace estilo.css con una @media a 1024px, no
-          `vp.isDesktop`: aquí solo vive lo que depende del dato. */}
-      <div style={{ padding: `${vp.isDesktop ? 26 : 18}px ${PAD}px 0` }}>
-
-        <div className="amx-folder-cabecera">
-          <span className="amx-folder-pestana">{tipoRotulo}</span>
-          <span className="amx-folder-rayado" aria-hidden="true" />
-          {/* Aquí iba un folio `AR-####` derivado del id. Saulo lo descartó el
-              7-sep-2026: un código de expediente que no corresponde a ningún
-              registro real es decoración que finge ser dato, y en un sitio cuyo
-              valor es la trazabilidad eso cuesta credibilidad. La pestaña con el
-              tipo sí dice algo verdadero, y se queda. */}
-        </div>
-
-        <div className="amx-folder">
-          <div className="amx-folder-grid">
-
-            {/* La marca, el país y el año se fueron al faldón de la polaroid,
-                escritos donde alguien los anotaría en una copia. Aquí quedaban
-                repetidos a dos columnas de distancia.
-
-                Y la franja tricolor que iba bajo el título se retiró: es la
-                bandera de México y estaba puesta bajo el nombre de armas checas,
-                italianas o brasileñas, así que sugería una nacionalidad falsa.
-                Quien dice el origen ahora es la bandera del país real, en el
-                faldón. §6b lista el tricolor entre lo permitido, pero permitido
-                no es obligatorio y aquí desinformaba. */}
-            <div className="amx-folder-cab">
-              <h1 className="t-titulo" style={{
-                fontSize: vp.isDesktop ? 36 : 27,
-                margin: '0 0 12px'
-              }}>{arma.nombre}</h1>
-
-              <div style={window.amxProsa({ fontSize: 16.5, margin: 0 })}>{arma.mecanismo}</div>
-            </div>
-
-            <div className="amx-folder-izq">
-              <window.ArmaPolaroid arma={arma} />
-              {/* El precio bajo la foto, con su procedencia a la vista (§14 y
-                  §6b: todo dato con fuente). Los tres valores ya existían en
-                  esta pantalla — no se inventa ninguno. */}
-              <div className="amx-precio-ref">
-                <div className="amx-precio-ref-cifra">{precioActual}</div>
-                <div className="amx-precio-ref-fuente">
-                  <div>Referencia · {curSigla}</div>
-                  {currentManual && <div>al {amxFmtManualDate(currentManual.fecha)}</div>}
-                </div>
+            {/* SOLAPA IZQUIERDA — fija en escritorio (ver estilo.css). */}
+            <div className="amx-carpeta-izq">
+              <div className="amx-copia">
+                <span className="amx-copia-clip" aria-hidden="true" />
+                <window.ArmaPolaroid arma={arma} selloSinFoto />
+                {/* El sello se estampa al llegar. La `key` lo vuelve a estampar
+                    al pasar de un arma a otra desde «Armas similares». */}
+                <span className="amx-copia-sello">
+                  <window.SelloLegal key={arma.id} avail={arma.avail} etiqueta={arma.availLabel}
+                    className="amx-sello--estampa" />
+                </span>
               </div>
+
+              <p className="amx-copia-legal">
+                <span className="amx-copia-legal-tit">{arma.legalTit}</span>
+                <button type="button" className="amx-enlace-legal" onClick={verLegal}>§ Ver situación legal</button>
+              </p>
+
+              <window.TalonComprobante talonRef={talonRef}
+                precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
+                enComparacion={inCmp} onComparar={comparar} />
+
+              {/* Lo que opina la comunidad, junto al precio: la pregunta «¿vale
+                  la pena?» se responde aquí y no al final de la página. */}
+              {etOpin.hay &&
+                <p className="amx-copia-opinion">Opiniones: <b>{etOpin.label}</b></p>}
             </div>
 
-            <div className="amx-folder-der">
+            {/* SOLAPA DERECHA — los documentos, en el orden en que se leen. */}
+            <div className="amx-carpeta-der">
               <window.FichaTecnica arma={arma} />
 
-              {/* la pregunta que trae al visitante, resuelta antes del pliegue */}
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-                marginTop: 20
-              }}>
-                <AvailBadge avail={arma.avail} />
-                <span style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
-                  color: window.amxColorAvail(availMeta?.color) || PALETTE.textDim, letterSpacing: '0.04em'
-                }}>{arma.legalTit}</span>
+              <window.TarjetaAlmacen filas={branches} referencia={arma.dcamRef}
+                sigla={curSigla} nivelPrecio={arma.priceLvl} />
+
+              {priceHistory.length > 0 &&
+                <window.HistorialPrecios historial={priceHistory} manualById={manualById}
+                  plegarRegistro={!ancho} />}
+
+              <div ref={separadoresRef} className="amx-separadores">
+                <FichaTabs activo={tab} onCambiar={setTab}>
+
+                  <Panel label="Legalidad">
+                    <div className={'amx-oficio-banda amx-oficio-banda--' + sello.tono}>
+                      <span>Clasificación: {sello.texto}</span>
+                      <small>{arma.availLabel}</small>
+                    </div>
+                    <h3 className="amx-oficio-tit">{arma.legalTit}</h3>
+                    <p className="amx-oficio-texto">{arma.legalDesc}</p>
+                    {arma.disponibilidad && arma.disponibilidad.length > 0 &&
+                      <React.Fragment>
+                        <p className="amx-oficio-sub">Dónde se consigue</p>
+                        <ul className="amx-oficio-lista">
+                          {arma.disponibilidad.map((d, i) => <li key={i}>{d}</li>)}
+                        </ul>
+                      </React.Fragment>}
+                    <button type="button" className="amx-oficio-boton" onClick={() => onNav('legal')}>
+                      § Guía legal completa
+                    </button>
+                  </Panel>
+
+                  {arma.uses && arma.uses.length > 0 &&
+                    <Panel label="Usos">
+                      <ul className="amx-usos">
+                        {arma.uses.map((u) => {
+                          const meta = window.CATEGORIES.uso.find((x) => x.id === u);
+                          return <li key={u}><span className="amx-sello">{meta ? meta.label : u}</span></li>;
+                        })}
+                      </ul>
+                    </Panel>}
+
+                  {arma.historia &&
+                    <Panel label="Antecedentes">
+                      <p className="amx-oficio-maquina">{arma.historia}</p>
+                    </Panel>}
+
+                </FichaTabs>
               </div>
-
-              <div style={{ marginTop: 14 }}>{btnComparar}</div>
             </div>
-
           </div>
-        </div>
+        </article>
       </div>
 
-      {/* ── VALORACIÓN DIVULGATIVA — RETIRADA (7-sep-2026) ───────────────
-          Aquí iban seis barras —precisión, daño, alcance, movilidad, capacidad
-          y control de retroceso— con su aviso de «estimación por familia».
-
-          Saulo la retiró: los números no salían de mediciones ni de votos
-          verificables, sino de una derivación por tipo y calibre, así que TODAS
-          las armas de una misma familia mostraban exactamente lo mismo. Una
-          barra de 0 a 100 promete una precisión que el dato no tiene, y en un
-          sitio cuyo valor es la trazabilidad —cada precio con su inventario y
-          su fecha, cada afirmación legal con su texto de ley— una cifra sin
-          respaldo cuesta más credibilidad de la que aporta.
-
-          El 10-sep-2026 salió también del comparador, por lo mismo, y con él
-          `window.StatsBar`, que ya no tenía consumidores. `arma.stats` sigue en
-          data.js, pero ninguna pantalla lo pinta ni lo edita. Si esto vuelve, que
-          vuelva con fuente. */}
-
-      {/* ── 5 · PRECIO DE REFERENCIA + 6 · HISTORIAL ───────────────────── */}
-      <ProdSection pad={PAD} gap={SEC}>
-        <SectionHeader>Precio de referencia</SectionHeader>
-        {/* Lo que opina la comunidad, en una línea: la pregunta "¿vale la pena?"
-            se responde junto al precio, no al final de la página. */}
-        {etOpin.hay &&
-          <div style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
-            letterSpacing: '0.14em', textTransform: 'uppercase',
-            color: PALETTE.textMuted, marginTop: -6, marginBottom: 9
-          }}>
-            Opiniones: <span style={{ color: etOpin.color, fontWeight: 700 }}>{etOpin.label}</span>
-          </div>}
-        {/* Este panel se quedó en el tema oscuro cuando la app pasó a clara: el
-            fondo seguía siendo casi negro y, como PALETTE.amber dejó de ser ámbar
-            para ser el verde de marca #173A32, el precio —30px, el dato que trae
-            al visitante— daba 1.24:1 sobre él, y sus rótulos 2.40:1. Una caja
-            negra ilegible en mitad de una página clara.
-            El texto ya estaba calibrado para superficie clara (amber 11.81:1 y
-            textMuted 6.13:1 sobre CLARO.panel): lo único que hacía falta era el
-            fondo. Superficie + sombra en vez de borde de 1px, que es lo que piden
-            DESIGN.md §5.1b y §6, con el mismo patrón que ya usa la línea 267. */}
-        <div style={{
-          background: CLARO.panel,
-          borderRadius: CLARO.radio,
-          border: `1px solid ${CLARO.hair}`,
-          boxShadow: CLARO.sombra,
-          padding: vp.isDesktop ? '16px 18px' : '14px',
-          position: 'relative'
-        }}>
-          <TacticalCorners size={12} color={PALETTE.amber} thickness={2} />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
-              color: PALETTE.textMuted, letterSpacing: '0.18em', textTransform: 'uppercase'
-            }}>◆ Precio actual · con IVA</span>
-            {curAut &&
-              <span title={curAut.nombre} style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-                letterSpacing: '0.12em', color: '#000', background: curAut.color,
-                padding: '2px 7px', flexShrink: 0
-              }}>{curAut.sigla}</span>}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-            <span style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-              fontSize: vp.isDesktop ? 30 : 25, color: PALETTE.amber,
-              letterSpacing: '0.01em', ...NUM
-            }}>{precioActual}</span>
-            {currentManual &&
-              <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
-                color: PALETTE.textMuted, letterSpacing: '0.06em'
-              }}>{amxFmtManualDate(currentManual.fecha)}</span>}
-          </div>
-
-          {/* existencias: un chip por sucursal, sin prosa */}
-          {branches.length > 0 &&
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 14 }}>
-              {branches.map((b, bi) => {
-                const col = b.agotado ? PALETTE.redHi : PALETTE.green;
-                return (
-                  <span key={b.sigla + bi}
-                    title={b.manual ? b.manual.nombre : ''}
-                    style={{
-                      // El chip vivía sobre el fondo casi negro del panel; ahora que
-                      // el panel es claro, ningún relleno claro lo separa (crema
-                      // 1.09:1, zebra 1.12:1). Lo que lo define es el borde de color
-                      // semántico, y en sólido en vez del `55` de antes: verde
-                      // 5.44:1 y rojo 5.80:1 sobre la zebra. Aquí el borde SÍ porta
-                      // información (hay existencias / está agotado), así que no es
-                      // el «borde como recurso principal» que prohíbe §6.
-                      display: 'inline-flex', alignItems: 'baseline', gap: 7,
-                      background: CLARO.zebra, border: `1px solid ${col}`,
-                      clipPath: window.CUT_TR_SM,
-                      padding: '7px 12px'
-                    }}>
-                    <span style={{
-                      fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, fontWeight: 700,
-                      color: PALETTE.textDim, letterSpacing: '0.14em'
-                    }}>{b.sigla}</span>
-                    {b.agotado
-                      ? <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: col, letterSpacing: '0.08em' }}>AGOTADO</span>
-                      : <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16, color: col, ...NUM }}>{Number(b.qty).toLocaleString('es-MX')}</span>}
-                  </span>);
-              })}
-            </div>}
-
-        </div>
-
-        {/* La atribución y el PDF viven aquí, como pie de nota: siguen en el
-            sitio y dejan de competir con el precio. `compact` los pinta
-            pequeños, sin fondo ni barrita de acento. */}
-        <div style={{ marginTop: 10 }}>
-          <window.Disclosure title="Detalle de la fuente" compact>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
-              <div style={{ marginBottom: 10 }}>
-                <span style={{ color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase', fontSize: 12 }}>Ref. {curSigla}</span>
-                <div style={{ color: PALETTE.text }}>{arma.dcamRef}</div>
-              </div>
-              {branches.map((b, bi) => (
-                <div key={b.sigla + bi} style={{ marginBottom: 8 }}>
-                  {b.agotado ? 'No aparece en el último inventario de ' : `${Number(b.qty).toLocaleString('es-MX')} en `}
-                  <b style={{ color: PALETTE.text, letterSpacing: '0.08em' }}>{b.sigla}</b>
-                  {' — '}
-                  {b.manual && b.manual.url
-                    ? <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: PALETTE.amber, textDecoration: 'none', borderBottom: `1px solid ${PALETTE.amber}` }}>▦ {b.manual.nombre} ↗</a>
-                    : <span style={{ color: PALETTE.textMuted }}>{b.manual ? b.manual.nombre : 'inventario oficial ' + b.sigla}</span>}
-                  {b.manual ? ` (${amxFmtManualDate(b.manual.fecha)}).` : '.'}
-                </div>
-              ))}
-              {branches.length === 0 &&
-                <div style={{ marginBottom: 8 }}>Existencias pendientes de conciliar con el inventario oficial.</div>}
-              {!currentManual &&
-                <div style={{ marginBottom: 8 }}>Sin PDF de inventario vinculado.</div>}
-              <div style={{ fontSize: 12.5, color: PALETTE.textMuted, marginTop: 10 }}>
-                ⚠ Dato <b style={{ color: PALETTE.textDim }}>histórico</b> por sucursal, no en tiempo
-                real: la disponibilidad actual puede variar.
-              </div>
-              <div style={{ marginTop: 8 }}>
-                Nivel de precio: <window.PriceLevel lvl={arma.priceLvl} size={13} />
-              </div>
-              {currentManual && currentManual.url &&
-                <a href={currentManual.url} target="_blank" rel="noopener" style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 7, marginTop: 12,
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5,
-                  color: PALETTE.amber, textDecoration: 'none',
-                  border: `1px solid ${PALETTE.amber}`,
-                  padding: '10px 13px', minHeight: 44, boxSizing: 'border-box', letterSpacing: '0.04em'
-                }}>
-                  <span aria-hidden="true">▦</span>
-                  Inventario fuente (PDF)
-                  <span aria-hidden="true">↗</span>
-                </a>}
-            </div>
-          </window.Disclosure>
-        </div>
-
-        {/* HISTORIAL — con UN solo registro no hay historia que contar: el precio
-            y su PDF ya están arriba, y la sección quedaba hueca (le pasa a la
-            mayoría de las armas). La gráfica pide además dos fechas distintas. */}
-        {priceHistory.length > 1 &&
-          <div style={{ marginTop: vp.isDesktop ? 34 : 26 }}>
-            <SectionHeader>Historial de precios</SectionHeader>
-            {hayGrafica &&
-              <div style={{
-                background: PALETTE.bgCard,
-                border: `1px solid ${PALETTE.border}`,
-                padding: '12px 14px 10px',
-                position: 'relative', marginBottom: 10
-              }}>
-                <TacticalCorners size={10} color={ORANGE} />
-                <window.PriceChart history={priceHistory} color={ORANGE} height={vp.isDesktop ? 170 : 148} />
-                <div style={{
-                  display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
-                  gap: 10, flexWrap: 'wrap', marginTop: 6,
-                  borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 10
-                }}>
-                  <span style={{
-                    fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                    color: deltaPct <= 0 ? PALETTE.green : PALETTE.redHi, ...NUM
-                  }}>
-                    {deltaPct <= 0 ? '▼' : '▲'} {deltaPct > 0 ? '+' : '−'}{Math.abs(deltaPct).toFixed(1)} %
-                  </span>
-                  <span style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
-                    color: PALETTE.textMuted, letterSpacing: '0.04em'
-                  }}>{fechasHist.length} inventarios oficiales DCAM / OTCA</span>
-                </div>
-              </div>}
-            <window.Disclosure
-              title={hayGrafica ? 'Ver inventarios y PDFs' : 'Ver el registro de precios'}>
-              <div>
-                {priceHistory.slice().reverse().map((h, i, arr) => {
-                  const man = manualById(h.manualId);
-                  const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
+      {/* ── LA VITRINA — munición y accesorios compatibles ──────────────
+          En escritorio las repisas van en filas de seis, cada una con su tabla;
+          en móvil cada repisa es una tira que se desliza de lado. */}
+      {(muns.length > 0 || compat.length > 0) &&
+        <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-vitrina">
+          <window.CintaDymo id="ficha-vitrina">Munición y accesorios</window.CintaDymo>
+          <div className="amx-vitrina">
+            {muns.length > 0 &&
+              <window.Repisa rotulo={'Munición · ' + arma.calibre} items={muns} porFila={ancho ? 6 : 0}
+                renderArticulo={(m) => {
+                  const foto = window.munFoto ? window.munFoto(m) : { src: m.img };
+                  const s = SELLOS[m.avail] || sello;
+                  const unidad = window.munUnidadPrecio ? window.munUnidadPrecio(m) : 'cartucho';
+                  const precio = m.priceExact ? String(m.priceExact).replace(' MXN', '') : '';
                   return (
-                    <div key={i} style={{
-                      padding: i === 0 ? '0 0 10px' : '10px 0',
-                      borderBottom: i < arr.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
-                      fontFamily: 'JetBrains Mono, monospace', fontSize: 15
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                          <span style={{
-                            color: i === 0 ? PALETTE.amber : PALETTE.textMuted,
-                            fontSize: 13, letterSpacing: '0.1em', flexShrink: 0
-                          }}>{i === 0 ? '● ACTUAL' : '○'}</span>
-                          <span style={{ color: PALETTE.text, fontWeight: i === 0 ? 700 : 500, ...NUM }}>{h.price}</span>
-                          {hAut &&
-                            <span title={hAut.nombre} style={{
-                              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-                              letterSpacing: '0.1em', color: '#000', background: hAut.color,
-                              padding: '1px 6px', flexShrink: 0
-                            }}>{hAut.sigla}</span>}
-                        </div>
-                        <span style={{ color: PALETTE.textDim, fontSize: 14, flexShrink: 0, ...NUM }}>
-                          {amxFmtManualDate(h.date) || '—'}
-                        </span>
-                      </div>
-                      {(man || h.note) &&
-                        <div style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                          gap: 10, marginTop: 6, paddingLeft: 22
-                        }}>
-                          <span style={{
-                            color: PALETTE.textMuted, fontSize: 13,
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
-                          }}>{man ? man.nombre : h.note}</span>
-                          {man && man.url &&
-                            <a href={man.url} target="_blank" rel="noopener" style={{
-                              color: PALETTE.amber, fontSize: 13, textDecoration: 'none',
-                              borderBottom: `1px solid ${PALETTE.amber}`, flexShrink: 0, whiteSpace: 'nowrap'
-                            }}>▦ Ver PDF ↗</a>}
-                        </div>}
-                    </div>);
-                })}
-              </div>
-            </window.Disclosure>
-          </div>}
-      </ProdSection>
-
-      {/* ── 7 · MUNICIÓN COMPATIBLE ────────────────────────────────────── */}
-      {/* sin banda: las tarjetas de munición ya usan bgCard y sobre la banda
-          (mismo color) perderían su contorno */}
-      {muns.length > 0 &&
-        <ProdSection pad={PAD} gap={SEC}>
-          <window.CarouselSection
-            title="Munición compatible"
-            items={muns}
-            renderItem={(m) => <window.MunicionCard mun={m} onClick={() => onOpenMunicion && onOpenMunicion(m.id)} />} />
-        </ProdSection>}
-
-      {/* ── 8 · ACCESORIOS COMPATIBLES ─────────────────────────────────── */}
-      {compat.length > 0 &&
-        <ProdSection pad={PAD} gap={muns.length > 0 ? (vp.isDesktop ? 30 : 22) : SEC}>
-          <window.CarouselSection
-            title="Accesorios compatibles"
-            items={compat}
-            renderItem={(ac) => <window.AccesorioCard acc={ac} onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)} />} />
-        </ProdSection>}
-
-      {/* ── 9-12 · TABS (DESIGN.md §11) — variante B de la comparación.
-             GALERÍA no está: hoy cada arma tiene una sola foto. Cuando haya
-             varias imágenes por ficha, entra como quinto Panel y ya.
-             ESPECIFICACIONES tampoco: la ficha técnica del folder (§4.3) es la
-             misma tabla `.specs` con los mismos campos. `mecanismo` es la prosa
-             bajo el título y `tipo` es la pestaña del folder, así que aquí no
-             se pierde ningún dato — se deja de repetir. ────────────────── */}
-      <ProdSection pad={PAD} gap={SEC}>
-        <FichaTabs>
-
-          {arma.uses && arma.uses.length > 0 &&
-            <Panel label="Usos">
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {arma.uses.map((u) => {
-                  const meta = window.CATEGORIES.uso.find((x) => x.id === u);
+                    <window.RepisaArticulo key={m.id} foto={foto.src} silueta="imagenes/silueta-municion.webp"
+                      ariaLabel={[m.nombre, s.texto, precio && (precio + ' por ' + unidad)].filter(Boolean).join(', ')}
+                      onClick={() => onOpenMunicion && onOpenMunicion(m.id)}
+                      etiqueta={<React.Fragment>
+                        <span className="amx-etiqueta-marca"><span>{m.marca}</span><i className={'es-' + s.tono}>{s.texto}</i></span>
+                        <span className="amx-etiqueta-nombre">{[m.bala, m.grano].filter(Boolean).join(' · ')}</span>
+                        {precio && <span className="amx-etiqueta-precio">{precio} <small>/ {unidad}</small></span>}
+                      </React.Fragment>} />
+                  );
+                }} />}
+            {compat.length > 0 &&
+              <window.Repisa rotulo="Accesorios" items={compat} porFila={ancho ? 6 : 0}
+                renderArticulo={(ac) => {
+                  const s = SELLOS[ac.avail] || sello;
+                  const foto = window.isRealImage && window.isRealImage(ac.img) ? ac.img : '';
+                  const precio = ac.priceExact ? String(ac.priceExact).replace(' MXN', '') : '';
                   return (
-                    <span key={u} style={{
-                      background: PALETTE.bg,
-                      border: `1px solid ${PALETTE.border}`,
-                      clipPath: window.CUT_TR_SM,
-                      padding: '7px 11px',
-                      fontFamily: 'JetBrains Mono, monospace',
-                      fontSize: 14, color: PALETTE.text,
-                      letterSpacing: '0.08em', textTransform: 'uppercase',
-                      display: 'inline-flex', alignItems: 'center', gap: 6
-                    }}>
-                      <span style={{ color: ORANGE }}>{meta?.icon || '●'}</span>
-                      {meta?.label || u}
-                    </span>);
-                })}
-              </div>
-            </Panel>}
+                    <window.RepisaArticulo key={ac.id} foto={foto}
+                      silueta={window.accesorioPlaceholder ? window.accesorioPlaceholder(ac) : ''}
+                      ariaLabel={[ac.nombre, ac.marca, s.texto, precio].filter(Boolean).join(', ')}
+                      onClick={() => onOpenAccesorio && onOpenAccesorio(ac.id)}
+                      etiqueta={<React.Fragment>
+                        <span className="amx-etiqueta-marca"><span>{ac.marca}</span><i className={'es-' + s.tono}>{s.texto}</i></span>
+                        <span className="amx-etiqueta-nombre">{ac.nombre}</span>
+                        {precio && <span className="amx-etiqueta-precio">{precio}</span>}
+                      </React.Fragment>} />
+                  );
+                }} />}
+          </div>
+        </section>}
 
-          <Panel label="Legalidad">
-            <div>
-              <div style={{
-                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                color: window.amxColorAvail(availMeta?.color) || PALETTE.text,
-                textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 7
-              }}>{arma.legalTit}</div>
-              <div style={window.amxProsa({ fontSize: 16, marginBottom: 14 })}>{arma.legalDesc}</div>
+      {/* ── LA TELE — el video del modelo (solo si hay) ───────────────── */}
+      <YouTubeBlock arma={arma} padX={PAD} gap={SEC} />
 
-              {arma.disponibilidad && arma.disponibilidad.length > 0 &&
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-                    color: PALETTE.textMuted, letterSpacing: '0.16em',
-                    textTransform: 'uppercase', marginBottom: 6
-                  }}>Disponibilidad</div>
-                  {arma.disponibilidad.map((d, i) =>
-                    <div key={i} style={window.amxProsa({
-                      fontSize: 15.5, color: PALETTE.text, padding: '5px 0',
-                      lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: 8
-                    })}>
-                      <span style={{ color: ORANGE }}>▸</span>{d}
-                    </div>)}
-                </div>}
-
-              <button onClick={() => onNav('legal')} style={{
-                width: '100%', background: 'transparent',
-                border: `1.5px dashed ${PALETTE.border}`, color: PALETTE.amber,
-                padding: '12px', minHeight: 48,
-                fontFamily: 'Archivo, sans-serif', fontSize: 14, fontWeight: 600,
-                letterSpacing: '0.15em', textTransform: 'uppercase', cursor: 'pointer'
-              }}>§ Guía legal completa →</button>
-            </div>
-          </Panel>
-
-          {arma.historia &&
-            <Panel label="Historia">
-              <div style={window.amxProsa({
-                fontSize: 16.5, color: PALETTE.text, lineHeight: 1.75
-              })}>{arma.historia}</div>
-            </Panel>}
-
-        </FichaTabs>
-      </ProdSection>
-
-      {/* VIDEO YOUTUBE (sólo si hay) */}
-      <YouTubeBlock arma={arma} padX={PAD} />
-
-      {/* CALIFICACIÓN DE LA COMUNIDAD */}
-      <ProdSection pad={PAD} gap={SEC}>
+      {/* ── LA TARJETA DE COMENTARIOS ─────────────────────────────────── */}
+      <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-opiniones">
+        <window.CintaDymo id="ficha-opiniones">Opiniones</window.CintaDymo>
         <OpinionBlock tipo="arma" entidadId={arma.id} entidadNombre={arma.nombre}
           nombreTipo="arma" onNav={onNav} />
-      </ProdSection>
+      </section>
 
-      {/* RELACIONADAS */}
+      {/* ── ARMAS SIMILARES — los expedientes de la Home ─────────────── */}
       {related.length > 0 &&
-        <div style={{ padding: `${SEC}px ${PAD}px 0` }}>
-          <SectionHeader>Armas similares</SectionHeader>
+        <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-similares">
+          <window.CintaDymo id="ficha-similares">Armas similares</window.CintaDymo>
           <div className="amx-hscroll" style={{
-            display: vp.isDesktop ? 'grid' : 'flex',
-            gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : undefined,
-            gap: vp.isDesktop ? 14 : 10,
-            overflowX: vp.isDesktop ? 'visible' : 'auto',
-            margin: vp.isDesktop ? 0 : `0 -${PAD}px`,
-            padding: vp.isDesktop ? 0 : `0 ${PAD}px 4px`
+            display: ancho ? 'grid' : 'flex',
+            gridTemplateColumns: ancho ? 'repeat(4, 1fr)' : undefined,
+            gap: ancho ? 14 : 10,
+            overflowX: ancho ? 'visible' : 'auto',
+            margin: ancho ? 0 : `0 -${PAD}px`,
+            padding: ancho ? 0 : `0 ${PAD}px 4px`
           }}>
             {related.map((a) =>
-              <div key={a.id} style={{ width: vp.isDesktop ? 'auto' : 300, flexShrink: 0 }}>
+              <div key={a.id} style={{ width: ancho ? 'auto' : 300, flexShrink: 0 }}>
                 <ArmaCard arma={a}
                   onClick={() => onOpenArma(a.id)}
                   onCompare={() => toggleCompare(a.id)}
                   inCompare={compareIds.includes(a.id)} />
               </div>)}
           </div>
-        </div>}
+        </section>}
      </div>
 
-      {/* BARRA FIJA DE ACCIÓN (móvil) — precio + comparar en zona del pulgar.
+      {/* El talón fijo (móvil): el mismo comprobante, en la zona del pulgar.
           Se oculta si el flotante de comparación está activo (mismo hueco). */}
-      {vp.isMobile && compareIds.length === 0 &&
-        <div style={{
-          position: 'fixed', left: 0, right: 0,
-          // --amx-nav-h la publica BottomNav midiéndose (ya incluye el safe-area).
-          // El -1px superpone los dos bordes en una sola línea: si se apoya justo
-          // encima queda una rendija por la que se ve pasar el contenido.
-          bottom: 'calc(var(--amx-nav-h, 74px) - 1px)',
-          // Superficie sólida, no placa fotográfica: usa --papel, que SÍ sigue al
-          // tema. Con CLARO.panelHi (la placa, clara en ambos temas) el texto
-          // --tinta-2 de esta barra quedaba gris claro sobre casi blanco.
-          // Sin backdrop-filter: es el asesino nº1 del scroll en móvil.
-          background: CLARO.panel,
-          borderTop: `1px solid ${PALETTE.border}`,
-          boxShadow: '0 -6px 18px -12px rgba(23,27,25,.28)',
-          padding: '10px 16px',
-          display: 'flex', alignItems: 'center', gap: 12,
-          zIndex: 55
-        }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-              color: PALETTE.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase'
-            }}>Precio actual</div>
-            <div style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 18,
-              color: PALETTE.amber, whiteSpace: 'nowrap', ...NUM
-            }}>{String(precioActual).replace(' MXN', '')}</div>
-          </div>
-          <div style={{ flex: 1 }} />
-          <span className="amx-cut" style={{ display: 'block' }}>
-            <button onClick={() => toggleCompare(arma.id)} style={{
-              background: inCmp ? 'transparent' : PALETTE.amber,
-              color: inCmp ? PALETTE.amber : PALETTE.tintaSobreMarca,
-              border: `1.5px solid ${PALETTE.amber}`,
-              clipPath: CUT_TR,
-              minHeight: 46, padding: '0 20px',
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-              letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-              boxShadow: inCmp ? 'none' : '0 0 16px rgba(221,213,196,0.25)'
-            }}>{inCmp ? '✓ Añadida' : '⇄ Comparar'}</button>
-          </span>
-        </div>}
+      {!ancho && talonFuera && !pieVisible && compareIds.length === 0 &&
+        <window.TalonComprobante fijo
+          precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
+          enComparacion={inCmp} onComparar={comparar} />}
     </div>);
 
 }
@@ -700,11 +387,12 @@ window.ProductScreen = ProductScreen;
 // en el agregado. Nada se publica sin aprobación — ver la pantalla de Soporte.
 // `nombreTipo` es la palabra de la pregunta, para reutilizar el bloque tal cual
 // en las fichas de accesorio, munición, campo y curso.
+// Desde el 13-sep-2026 es una TARJETA DE COMENTARIOS: el voto son dos sellos de
+// goma y el formulario se escribe sobre renglones. La lógica no cambia.
 // ════════════════════════════════════════════════════════════════
 const RESENA_MIN = 100, RESENA_MAX = 1200;
 
 function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
-  const vp = window.useViewport();
   const [, force] = useState2(0);
   useEffect(() => window.Store && window.Store.onChange(() => force((x) => x + 1)), []);
 
@@ -735,176 +423,110 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
     setEnviado(true);
   };
 
-  // Botón de pulgar. El anillo de foco va en el propio botón (aquí no hay
-  // clip-path, así que no hace falta el wrapper .amx-cut).
-  const Pulgar = ({ up, activo, onClick }) => {
-    const col = up ? PALETTE.green : PALETTE.redHi;
-    return (
-      <button type="button" onClick={onClick}
-        aria-pressed={activo}
-        style={{
-          flex: '1 1 0', minWidth: 0, minHeight: 64,
-          background: activo ? col : 'transparent',
-          color: activo ? '#000' : col,
-          border: `1.5px solid ${activo ? col : PALETTE.border}`,
-          cursor: 'pointer', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', gap: 10,
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-          letterSpacing: '0.14em', textTransform: 'uppercase',
-          transition: 'background 0.15s, border-color 0.15s, color 0.15s'
-        }}>
-        <window.ThumbIcon up={up} size={24} />
-        {up ? 'Sí' : 'No'}
-      </button>
-    );
-  };
-
   // El formulario permanece plegado hasta que hay voto: `rec` ya distingue "no ha
-  // votado" (null) de "votó", así que el gate no necesita estado propio. Sin esto
-  // media pantalla de ficha la ocupaba un formulario que casi nadie va a usar.
+  // votado" (null) de "votó", así que el gate no necesita estado propio.
   const hayVoto = rec !== null;
+  const femenino = nombreTipo === 'munición' || nombreTipo === 'arma';
+  const pron = femenino ? 'la' : 'lo';
+  const id = 'op-' + tipo + '-' + entidadId;
+  const irANormas = () => onNav && onNav('soporte');
 
   return (
     <React.Fragment>
-      <div style={{
-        background: PALETTE.bgCard,
-        border: `1px solid ${PALETTE.border}`,
-        padding: vp.isDesktop ? '18px 20px' : '15px 16px',
-        position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={enviado ? PALETTE.green : PALETTE.amber} />
+      <div className="amx-comentarios">
+        <div className="amx-comentarios-cab" aria-hidden="true">
+          <span>Tarjeta de comentarios</span>
+        </div>
 
         {enviado ?
-          <div>
-            <div style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16,
-              color: PALETTE.green, textTransform: 'uppercase',
-              letterSpacing: '0.1em', marginBottom: 8
-            }}>✓ Tu opinión entró en revisión</div>
-            <div style={window.amxProsa({ fontSize: 15, lineHeight: 1.6 })}>
-              Se publicará cuando se compruebe que cumple las{' '}
-              <button type="button" onClick={() => onNav && onNav('soporte')} style={{
-                background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                font: 'inherit', color: PALETTE.amber,
-                borderBottom: `1px solid ${PALETTE.amber}`
-              }}>normas de la comunidad</button>.
-            </div>
+          <div className="amx-comentarios-enviado" role="status">
+            <span className="amx-sello">En revisión</span>
+            <p>
+              Tu opinión entró en revisión. Se publicará cuando se compruebe que cumple las{' '}
+              <button type="button" className="amx-enlace-tinta" onClick={irANormas}>normas de la comunidad</button>.
+            </p>
           </div>
         :
           <div>
-            <div style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-              fontSize: vp.isDesktop ? 19 : 17, color: PALETTE.text,
-              textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12
-            }}>¿Recomiendas {nombreTipo === 'munición' ? 'esta' : nombreTipo === 'arma' ? 'esta' : 'este'} {nombreTipo}?</div>
-
-            <div style={{ display: 'flex', gap: 10, marginBottom: hayVoto ? 16 : 0 }}>
-              <Pulgar up activo={rec === true} onClick={() => setRec(true)} />
-              <Pulgar up={false} activo={rec === false} onClick={() => setRec(false)} />
+            <h3 className="amx-comentarios-pregunta" id={id + '-q'}>
+              ¿Recomiendas {femenino ? 'esta' : 'este'} {nombreTipo}?
+            </h3>
+            <div className="amx-votos" role="group" aria-labelledby={id + '-q'}>
+              <button type="button" className="amx-sello-voto amx-sello-voto--si"
+                aria-pressed={rec === true} onClick={() => setRec(true)}>
+                <span className="amx-sello"><window.ThumbIcon up size={20} />Sí {pron} recomiendo</span>
+              </button>
+              <button type="button" className="amx-sello-voto amx-sello-voto--no"
+                aria-pressed={rec === false} onClick={() => setRec(false)}>
+                <span className="amx-sello"><window.ThumbIcon up={false} size={20} />No {pron} recomiendo</span>
+              </button>
             </div>
 
             {hayVoto &&
             <React.Fragment>
-              <label style={sLblStyle()}>Tu reseña <span style={{ color: PALETTE.amber }}>*</span></label>
-              <textarea value={f.texto} onChange={(e) => set('texto', e.target.value)}
-                rows={4} maxLength={RESENA_MAX}
-                placeholder="Cuenta tu experiencia con calma: qué tal se maneja, para qué la usas, qué te sorprendió."
-                style={Object.assign(sInpStyle(), { marginBottom: 4 })} />
-              <div style={window.amxProsa({
-                fontSize: 13.5, lineHeight: 1.5, marginBottom: 12,
-                color: largo >= RESENA_MIN ? PALETTE.green : PALETTE.textMuted
-              })}>
+              <label className="amx-renglon-etq" htmlFor={id + '-texto'}>Tu reseña *</label>
+              <textarea id={id + '-texto'} className="amx-renglon" value={f.texto}
+                onChange={(e) => set('texto', e.target.value)}
+                rows={4} maxLength={RESENA_MAX} aria-describedby={id + '-cuenta'}
+                placeholder="Cuenta tu experiencia con calma: qué tal se maneja, para qué la usas, qué te sorprendió." />
+              <p id={id + '-cuenta'} className={'amx-renglon-ayuda' + (largo >= RESENA_MIN ? ' es-ok' : '')}>
                 {largo >= RESENA_MIN
                   ? `✓ ${largo} caracteres`
                   : `${largo} / ${RESENA_MIN} mínimo — una reseña más corta no puede contar en la calificación`}
-              </div>
+              </p>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
-                columnGap: 12
-              }}>
-                {sfld('Nombre / Apodo', 'autor', f, set, { required: true, placeholder: 'Como quieres firmar' })}
-                {sfld('Correo electrónico', 'email', f, set, {
-                  required: true, type: 'email', placeholder: 'tucorreo@ejemplo.com',
-                  hint: 'No se publica. Solo para contactarte si hace falta.'
-                })}
-              </div>
-
-              <div style={{
-                borderTop: `1px dashed ${PALETTE.border}`, paddingTop: 12, marginTop: 2,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                gap: 12, flexWrap: 'wrap'
-              }}>
-                <div style={window.amxProsa({
-                  fontSize: 13.5, lineHeight: 1.55,
-                  color: PALETTE.textMuted, flex: '1 1 240px'
-                })}>
-                  Toda reseña se revisa antes de publicarse.{' '}
-                  <button type="button" onClick={() => onNav && onNav('soporte')} style={{
-                    background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-                    font: 'inherit', color: PALETTE.amber,
-                    borderBottom: `1px solid ${PALETTE.amber}`
-                  }}>Normas de la comunidad →</button>
+              <div className="amx-renglones-2">
+                <div>
+                  <label className="amx-renglon-etq" htmlFor={id + '-autor'}>Nombre / Apodo *</label>
+                  <input id={id + '-autor'} className="amx-renglon" value={f.autor}
+                    onChange={(e) => set('autor', e.target.value)} placeholder="Como quieres firmar" />
                 </div>
-                <button type="button" onClick={enviar} disabled={!listo} style={{
-                  background: listo ? PALETTE.amber : 'transparent',
-                  color: listo ? PALETTE.tintaSobreMarca : PALETTE.textMuted,
-                  border: `1.5px solid ${listo ? PALETTE.amber : PALETTE.border}`,
-                  padding: '0 22px', minHeight: 48,
-                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-                  letterSpacing: '0.14em', textTransform: 'uppercase',
-                  cursor: listo ? 'pointer' : 'not-allowed'
-                }}>Publicar opinión</button>
+                <div>
+                  <label className="amx-renglon-etq" htmlFor={id + '-email'}>Correo electrónico *</label>
+                  <input id={id + '-email'} type="email" className="amx-renglon" value={f.email}
+                    onChange={(e) => set('email', e.target.value)} placeholder="tucorreo@ejemplo.com"
+                    aria-describedby={id + '-correo'} />
+                  <p id={id + '-correo'} className="amx-renglon-ayuda">No se publica. Solo para contactarte si hace falta.</p>
+                </div>
+              </div>
+
+              <div className="amx-comentarios-pie">
+                <p>
+                  Toda reseña se revisa antes de publicarse.{' '}
+                  <button type="button" className="amx-enlace-tinta" onClick={irANormas}>Normas de la comunidad</button>
+                </p>
+                <button type="button" className="amx-boton-tinta" onClick={enviar} disabled={!listo}>Publicar opinión</button>
               </div>
             </React.Fragment>}
           </div>}
       </div>
 
       {op.total > 0 &&
-        <div style={{ marginTop: 10 }}>
+        <div style={{ marginTop: 18 }}>
           <window.Disclosure title={`Leer opiniones (${op.total})`}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <ul className="amx-tarjetitas">
               {op.lista.slice(0, 20).map((r, i) =>
-                <div key={r.id || i} style={{
-                  paddingBottom: 14,
-                  borderBottom: i < Math.min(op.lista.length, 20) - 1 ? `1px solid ${PALETTE.border}` : 'none'
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-                    <span style={{ color: r.recomienda ? PALETTE.green : PALETTE.redHi, display: 'flex' }}>
-                      <window.ThumbIcon up={!!r.recomienda} size={17} />
+                <li key={r.id || i} className="amx-tarjetita">
+                  <div className="amx-tarjetita-cab">
+                    <span className={'amx-sello amx-sello--' + (r.recomienda ? 'civil' : 'restr')}>
+                      {r.recomienda ? `${pron === 'la' ? 'La' : 'Lo'} recomienda` : `No ${pron} recomienda`}
                     </span>
-                    <span style={{
-                      fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 12.5,
-                      color: r.recomienda ? PALETTE.green : PALETTE.redHi,
-                      letterSpacing: '0.12em', textTransform: 'uppercase'
-                    }}>{r.recomienda ? 'La recomienda' : 'No la recomienda'}</span>
-                    <span style={{ flex: 1 }} />
-                    <span style={{
-                      fontFamily: 'JetBrains Mono, monospace', fontSize: 12,
-                      color: PALETTE.textMuted, letterSpacing: '0.06em'
-                    }}>{amxFmtManualDate(String(r.submittedAt || '').slice(0, 10))}</span>
+                    <span>{amxFmtManualDate(String(r.submittedAt || '').slice(0, 10))}</span>
                   </div>
-                  <div style={window.amxProsa({
-                    fontSize: 16, color: PALETTE.text, lineHeight: 1.65, marginBottom: 6,
-                    whiteSpace: 'pre-wrap', overflowWrap: 'anywhere'
-                  })}>{r.texto}</div>
-                  <div style={{
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 13,
-                    color: PALETTE.textMuted, letterSpacing: '0.08em'
-                  }}>— {r.autor || 'Anónimo'}</div>
-                </div>
+                  <p>{r.texto}</p>
+                  <footer>— {r.autor || 'Anónimo'}</footer>
+                </li>
               )}
-            </div>
+            </ul>
           </window.Disclosure>
         </div>}
 
       {et.hay &&
         <div style={{
           fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
-          color: PALETTE.textMuted, letterSpacing: '0.08em', marginTop: 10
+          color: PALETTE.textMuted, letterSpacing: '0.08em', marginTop: 12
         }}>
-          {op.up} de {op.total} {op.total === 1 ? 'persona la recomienda' : 'personas la recomiendan'} ({et.pct} %)
+          {op.up} de {op.total} {op.total === 1 ? `persona ${pron} recomienda` : `personas ${pron} recomiendan`} ({et.pct} %)
         </div>}
     </React.Fragment>);
 
@@ -912,116 +534,57 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
 window.OpinionBlock = OpinionBlock;
 
 // ════════════════════════════════════════════════════════════════
-// YOUTUBE BLOCK — embed de video de Armas M&S (si existe)
+// YOUTUBE BLOCK — el video de Armas M&S, en una tele de los 80 (si existe)
+// La pantalla es un botón: el iframe no se pide hasta que el visitante la toca,
+// así la ficha no carga YouTube para nadie que no lo quiera ver.
 // ════════════════════════════════════════════════════════════════
-function YouTubeBlock({ arma, padX = 16 }) {
+function YouTubeBlock({ arma, padX = 16, gap = 34 }) {
   const [loaded, setLoaded] = useState2(false);
   const vid = window.youtubeId(arma.youtube);
+  useEffect(() => { setLoaded(false); }, [vid]);
   if (!vid) return null; // si no hay video, no se renderiza nada
 
   const thumb = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
   const embed = `https://www.youtube-nocookie.com/embed/${vid}?rel=0&autoplay=1&modestbranding=1`;
 
   return (
-    <div style={{ padding: `0 ${padX}px 16px` }}>
-      <SectionHeader action={
-      <a href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noopener noreferrer"
-      style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.textMuted,
-        letterSpacing: '0.1em', textDecoration: 'none'
-      }}>
-          @ArmasMS ↗
-        </a>
-      }>Video Review · YouTube</SectionHeader>
-
-      <div style={{
-        position: 'relative',
-        background: '#000',
-        border: `1px solid ${PALETTE.border}`,
-        aspectRatio: '16/9',
-        overflow: 'hidden',
-        cursor: loaded ? 'default' : 'pointer'
-      }} onClick={() => !loaded && setLoaded(true)}>
-        {loaded ?
-        <iframe
-          src={embed}
-          title={'Video: ' + arma.nombre}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          style={{ width: '100%', height: '100%', border: 'none', display: 'block' }} /> :
-
-
-        <React.Fragment>
-            <img src={thumb} alt={arma.nombre}
-          loading="lazy"
-          style={{
-            width: '100%', height: '100%',
-            objectFit: 'cover',
-            filter: 'brightness(0.7)'
-          }}
-          onError={(e) => {
-            // fallback: thumbnail "0" if hqdefault not available
-            if (!e.target.dataset.fb) {
-              e.target.dataset.fb = '1';
-              e.target.src = `https://i.ytimg.com/vi/${vid}/0.jpg`;
-            } else {
-              e.target.style.display = 'none';
-            }
-          }} />
-          
-            {/* play button overlay */}
-            <div style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            pointerEvents: 'none'
-          }}>
-              <div style={{
-              width: 70, height: 50,
-              background: 'rgba(192,57,43,0.92)',
-              borderRadius: 12,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
-              transition: 'transform 0.18s'
-            }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="#fff">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-            {/* canal info bottom-left */}
-            <div style={{
-            position: 'absolute', bottom: 10, left: 12,
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 15.5, color: '#fff',
-            letterSpacing: '0.08em',
-            textShadow: '0 2px 6px rgba(0,0,0,0.8)',
-            display: 'flex', alignItems: 'center', gap: 6
-          }}>
-              {/* Los siete rellenos `background: PALETTE.amber` de este archivo
-                  llevaban el texto en '#000': cuando «amber» era ámbar el negro
-                  encima funcionaba, pero hoy amber ES el verde de marca #173A32
-                  y el negro encima daba 1.69:1 — CTAs ilegibles. Sobre verde el
-                  texto va en sobreMarca #F3EFE4 (10.83:1). Vale para los siete. */}
-              <span style={{
-              background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
-              padding: '2px 6px', fontWeight: 700, fontSize: 13,
-              letterSpacing: '0.1em'
-            }}>YOUTUBE</span>
-              @ArmasMS
-            </div>
-            <div style={{
-            position: 'absolute', top: 10, right: 12,
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 13, color: '#fff', opacity: 0.85,
-            letterSpacing: '0.12em',
-            background: 'rgba(0,0,0,0.5)',
-            padding: '3px 7px'
-          }}>▶ TOCA PARA REPRODUCIR</div>
-          </React.Fragment>
-        }
+    <section style={{ padding: `${gap}px ${padX}px 0` }} aria-labelledby="ficha-video">
+      <window.CintaDymo id="ficha-video">Video</window.CintaDymo>
+      <div className="amx-tele">
+        <div className="amx-tele-marco">
+          {loaded ?
+            <div className="amx-tele-pantalla" style={{ cursor: 'default' }}>
+              <iframe
+                src={embed}
+                title={'Video: ' + arma.nombre}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen />
+            </div> :
+            <button type="button" className="amx-tele-pantalla" onClick={() => setLoaded(true)}
+              aria-label={'Reproducir el video de ' + arma.nombre}>
+              <img src={thumb} alt="" loading="lazy"
+                onError={(e) => {
+                  // fallback: thumbnail "0" if hqdefault not available
+                  if (!e.target.dataset.fb) {
+                    e.target.dataset.fb = '1';
+                    e.target.src = `https://i.ytimg.com/vi/${vid}/0.jpg`;
+                  } else {
+                    e.target.style.display = 'none';
+                  }
+                }} />
+              <span className="amx-tele-sello" aria-hidden="true"><span className="amx-sello">▶ Ver video</span></span>
+            </button>}
+        </div>
+        <div className="amx-tele-panel" aria-hidden="true">
+          <span className="amx-tele-perilla" />
+          <span className="amx-tele-bocina" />
+          <span className="amx-tele-perilla" />
+        </div>
       </div>
-    </div>);
+      <a className="amx-tele-canal" href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noopener noreferrer">
+        @ArmasMS en YouTube ↗
+      </a>
+    </section>);
 
 }
 window.YouTubeBlock = YouTubeBlock;
