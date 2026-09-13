@@ -154,9 +154,6 @@ window.amxColorAvail = amxColorAvail;
 // El atributo `data-tema` de <html> lo pone el script inline del <head> ANTES
 // del primer pintado (sin él habría fogonazo). Ausente = seguir al sistema, que
 // resuelve el `@media (prefers-color-scheme: dark)` de estilo.css.
-const TEMAS = ['sistema', 'claro', 'oscuro'];
-const TEMA_ROTULO = { sistema: 'Automático', claro: 'Claro', oscuro: 'Oscuro' };
-
 function amxLeerTema() {
   if (typeof document === 'undefined') return 'sistema';
   const t = document.documentElement.getAttribute('data-tema');
@@ -595,62 +592,47 @@ window.amxProsa = amxProsa;
 // vive SOLO en el cuerpo — aquí duplicaba el que ya pinta cada pantalla, y
 // además nunca quedaba centrado (textAlign left/right según hubiera «volver»).
 // ──────────────────────────────────────────────────────────────
-// TEMA TOGGLE — claro · oscuro · seguir al sistema
+// TEMA TOGGLE — sol en oscuro, luna en claro
 // ──────────────────────────────────────────────────────────────
-// Un solo botón que cicla los tres estados, no tres controles: en la barra
-// superior no hay sitio para un segmentado, y la barra de escritorio ya
-// desborda por debajo de ~1140px (CLAUDE.md). Este botón cuesta 44px.
+// Referencia de Saulo (12-sep-2026, PureRef «Modo Claro Oscuro»): solo icono,
+// sin píldora ni rótulo, en tinta apagada y verde al pasar. Antes era una
+// píldora que ciclaba tres estados con el rótulo «AUTOMÁTICO» y pesaba más que
+// los enlaces de la barra.
 //
-// Los glifos son los de la app (●, ◆, ▲, ◉ ya se usan), no emoji: §6 veta el
-// emoji como icono. ○ claro · ● oscuro · ◐ automático.
+// Dos estados, como el selector del tutorial: el icono enseña el modo al que
+// vas (sol = pasar a claro). Sin elección guardada se sigue al sistema, y el
+// botón resuelve cuál es para no pedir «oscuro» estando ya en oscuro.
 //
-// El `aria-label` dice el estado ACTUAL y la acción SIGUIENTE, porque un botón
-// que cicla no se entiende solo por su glifo. Y como el lector de pantalla no
-// vuelve a leer la etiqueta de un botón que sigue enfocado, el cambio se
-// anuncia por una región `aria-live`.
-const TEMA_GLIFO = { sistema: '◐', claro: '○', oscuro: '●' };
-
-function TemaToggle({ compacto = false }) {
-  const [tema, setTema] = React.useState(() => (window.amxLeerTema ? window.amxLeerTema() : 'sistema'));
-  // Solo para reanunciar: el primer render no debe disparar el aria-live.
-  const [tocado, setTocado] = React.useState(false);
-  const siguiente = TEMAS[(TEMAS.indexOf(tema) + 1) % TEMAS.length];
-  const cambiar = () => {
-    window.amxPonerTema(siguiente);
-    setTema(siguiente);
-    setTocado(true);
-  };
-  const etiqueta = `Tema: ${TEMA_ROTULO[tema].toLowerCase()}. Cambiar a ${TEMA_ROTULO[siguiente].toLowerCase()}`;
+// El tema se lee del DOM en cada render, no de un estado propio: el tutorial
+// también lo cambia y un estado copiado se quedaría atrás.
+function TemaToggle() {
+  const [, repintar] = React.useReducer(n => n + 1, 0);
+  const mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  React.useEffect(() => {
+    if (!mq || !mq.addEventListener) return;
+    mq.addEventListener('change', repintar);
+    return () => mq.removeEventListener('change', repintar);
+  }, []);
+  const t = amxLeerTema();
+  const oscuro = t === 'oscuro' || (t === 'sistema' && !!(mq && mq.matches));
+  const cambiar = () => { amxPonerTema(oscuro ? 'claro' : 'oscuro'); repintar(); };
+  // `aria-pressed` y no una etiqueta que cambia: el lector anuncia solo el
+  // cambio de estado de un botón enfocado (precedente: `.tut-tema`).
   return (
-    <React.Fragment>
-      <button type="button" onClick={cambiar} aria-label={etiqueta} title={etiqueta} style={{
-        flexShrink: 0,
-        minWidth: 44, minHeight: 44,            // área táctil, no negociable (§7)
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        gap: 7,
-        padding: compacto ? 0 : '0 12px',
-        background: 'rgba(250,249,245,0.10)',
-        border: '1px solid rgba(250,249,245,0.30)',
-        borderRadius: 999,
-        cursor: 'pointer',
-        color: PALETTE.sobreMarca,              // 10.83:1 sobre la marca, en los dos temas
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 15, lineHeight: 1,
-      }}>
-        <span aria-hidden="true">{TEMA_GLIFO[tema]}</span>
-        {!compacto && (
-          <span aria-hidden="true" style={{
-            fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', fontWeight: 700,
-          }}>{TEMA_ROTULO[tema]}</span>
+    <button type="button" className="amx-tema" onClick={cambiar}
+      aria-label="Modo oscuro" aria-pressed={oscuro}
+      title={oscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>
+      <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+        {oscuro ? (
+          <g fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round">
+            <circle cx="12" cy="12" r="4" fill="currentColor" />
+            <path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4" />
+          </g>
+        ) : (
+          <path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
         )}
-      </button>
-      {/* Fuera de pantalla pero NO `display:none`: así lo lee el lector y no lo
-          ve nadie. Sin `clip-path`, que aquí se comería nada — no es enfocable. */}
-      <span aria-live="polite" style={{
-        position: 'absolute', width: 1, height: 1, overflow: 'hidden',
-        clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap', border: 0, padding: 0, margin: -1,
-      }}>{tocado ? `Tema ${TEMA_ROTULO[tema].toLowerCase()}` : ''}</span>
-    </React.Fragment>
+      </svg>
+    </button>
   );
 }
 window.TemaToggle = TemaToggle;
@@ -698,7 +680,7 @@ function AppHeader({ title, back, onBack, onHome, right }) {
 
       <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 8 }}>
         {right}
-        <TemaToggle compacto />
+        <TemaToggle />
       </div>
     </div>
   );
