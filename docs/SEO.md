@@ -37,7 +37,7 @@ de «Not found (404)». Hay que arreglar el estado HTTP **antes** del sitemap.
 | **C. Borrar `404.html`** | Pages entra en modo SPA nativo | ❌ Soft 404 masivos, no arregla nada más |
 
 **Gotcha de Pages a favor de B:** Pages sirve `/x.html` también en `/x` (redirige
-`.html` → sin extensión). Verificado aquí: `/shopify-demo.html` → 308 → `/shopify-demo`.
+`.html` → sin extensión). Verificado aquí: `/pistolas.html` → 308 → `/pistolas`.
 → Emitir `pistolas/glock-19.html` da `/pistolas/glock-19` con **200 y sin slash**,
 que es justo el esquema actual. **No emitir `pistolas/glock-19/index.html`**: eso
 produce URL *con* slash y obliga a decidir canonicals.
@@ -75,10 +75,10 @@ solution"*. Recomienda static rendering — que es exactamente la opción B.
 
 ---
 
-## 3. `robots.txt` — lo gestiona Cloudflare, no el repo
+## 3. `robots.txt` — dos bloques: el de Cloudflare y el del repo
 
-No hay `robots.txt` en el repo: lo genera Cloudflare (Content Signals Policy) y
-**antepone** su bloque a cualquiera que se añada. Hoy bloquea:
+El repo emite su propio `robots.txt` desde `scripts/build-prerender.mjs`, pero Cloudflare
+(Content Signals Policy) **antepone** su bloque gestionado a él. Ese bloque hoy bloquea:
 
 ```
 Content-Signal: search=yes, ai-train=no, use=reference
@@ -95,16 +95,14 @@ Se cambia en **Cloudflare Dashboard → Security → Control AI Crawlers**. No i
 contrarrestarlo con un `Allow:` propio: quedaría en un segundo grupo y la resolución
 depende de cada crawler.
 
-**Lo que sí falta añadir** (un `robots.txt` propio; Cloudflare lo anexa tras el suyo,
-y `Sitemap:` es directiva global):
+**Lo que añade el repo** (ya hecho: lo escribe `build-prerender.mjs` en cada build;
+Cloudflare lo anexa tras el suyo, y `Sitemap:` es directiva global):
 
 ```
 User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin.html
-Disallow: /shopify-demo
-Disallow: /shopify-demo.html
 
 Sitemap: https://armado.mx/sitemap.xml
 ```
@@ -124,8 +122,10 @@ Sitemap: https://armado.mx/sitemap.xml
 - **`changefreq` y `priority`: Google los ignora.** Omitirlos.
 - **`lastmod`**: ISO 8601. Google lo usa *"if it's consistently and verifiably accurate"*.
   La confianza es **binaria**: o se cree toda la columna o la descarta entera, sin avisar.
-  → O se deriva de algo real (`git log -1 --format=%cI -- data.js`, o un campo por ficha)
-  **o se omite**. Nunca poner la fecha del build en las 285 URLs.
+  → O se deriva de algo real **o se omite**. Nunca poner la fecha del build en todas las URLs.
+  Aquí sale de la **fecha del inventario** de cada artículo; **no** de `git log`: Cloudflare
+  Pages clona en superficial y todas las URLs caían a la fecha del último commit
+  (ver `AGENTS.md`, sección del prerender).
 
 Generarlo **en el build, desde la misma fuente de datos que la app** — así no puede
 desincronizarse. Un sitemap a mano se pudre en dos semanas.
@@ -136,7 +136,7 @@ desincronizarse. Un sitemap a mano se pudre en dos semanas.
 - **Trailing slash**: el router usa *sin* slash. Mantenerlo en sitemap, canonical y
   enlaces internos. Google trata `/x` y `/x/` como URLs distintas.
 - No listar `/?/pistolas/glock-19` (la forma interna del truco SPA).
-- Excluir `/admin` y `/shopify-demo`.
+- Excluir `/admin`.
 - Ya resuelto: HSTS activo, sin www, slugs ASCII en minúscula.
 
 ---
@@ -176,7 +176,7 @@ de respuesta directa al principio de cada ficha (los LLM citan párrafos autocon
 
 ```bash
 for u in / /pistolas /pistolas/glock-19 /municiones/12-ga-rio-perdigon-7-5-28-gr \
-         /sitemap.xml /robots.txt /app.js /imagenes/logo-armado-mx.png /noexiste-xyz; do
+         /sitemap.xml /robots.txt /app.js /imagenes/favicon.png /noexiste-xyz; do
   echo "$(curl -s -o /dev/null -w '%{http_code}' https://armado.mx$u)  $u"
 done
 # Esperado: 200 en todas menos /noexiste-xyz -> 404

@@ -1,19 +1,18 @@
 # DESIGN.md — Armado en México
 
 > **Qué es esto.** El brief de dirección de arte del sitio. Cualquier agente que vaya a tocar UI
-> lee este archivo **antes** de escribir una línea. Sustituye a `HANDOFF-DISENO.md`, que describe
-> un stack que ya no existe.
+> lee este archivo **antes** de escribir una línea.
 >
 > **Estado:** borrador. Las secciones marcadas **`◻︎ SAULO`** están vacías a propósito — las llena
 > él. Hasta que no estén llenas, este brief no está terminado y la dirección sigue siendo genérica.
 
 ---
 
-## 1. El stack real (verificado 31-ago-2026, no confiar en HANDOFF-DISENO.md)
+## 1. El stack real (verificado 31-ago-2026, rutas al día a 12-sep-2026)
 
-- **Sí hay build step.** `npm run build` → `babel --extensions .jsx --out-dir .` + `node build-prerender.mjs`. Corre en Cloudflare Pages en cada deploy.
+- **Sí hay build step.** `npm run build` son tres pasos que acaban en `out/`: `build:static` (copia `public/`), `build:js` (Babel, `.jsx` → `.js`) y `build:html` (`scripts/build-prerender.mjs`). Corre en Cloudflare Pages en cada deploy.
 - **No se transpila en el navegador.** `index.html` carga React/ReactDOM UMD y `.js` ya compilados.
-- **Sí hay CSS.** ~190 líneas en el `<style>` de `index.html`, que ya usan `::before`, `::after`, `:hover`, `:focus-visible`, `@media`, `@keyframes` y `:has()`.
+- **Sí hay CSS.** Vive en `src/styles/estilo.css` (se sirve como `/estilo.css`) y ya usa `::before`, `::after`, `:hover`, `:focus-visible`, `@media`, `@keyframes` y `:has()`.
 - **Los `.js` no se versionan.** Se editan los `.jsx`; el build genera los `.js`.
 
 **Consecuencia:** no hay ninguna limitación técnica para hacer buen CSS. Lo que falta es que los

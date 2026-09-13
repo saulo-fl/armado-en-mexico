@@ -14,10 +14,11 @@ darle `:hover`, `::before`, `@media` ni `@keyframes` a un componente.
 La salida no es migrar todo. Es migrar **la piel** —decoración y estado— y dejar inline
 **el layout** y lo que depende de datos.
 
-Prueba de que hoy falta: para que el tweak de tipografía funcionara hubo que escribir
-`body[data-type="editorial"] *[style*="Montserrat"] { … !important }`, que estila por
-coincidencia de subcadena en el atributo serializado. Ese hack desaparece cuando la
-primitiva tiene clase.
+Prueba de lo que pasa sin clase: para que el tweak de tipografía funcionara hubo que
+escribir `body[data-type="editorial"] *[style*="Montserrat"] { … !important }`, que
+estilaba por coincidencia de subcadena en el atributo serializado. Ese hack ya se retiró
+con el tema anterior (queda la lápida en `src/pages/index.html`), pero es lo que vuelve a
+aparecer cuando una primitiva no tiene `className`.
 
 ## Qué va a cada sitio
 
@@ -50,7 +51,7 @@ por 0 coste: `.amx-card`, `.amx-chip`, `.amx-badge`.
 
 ### 3 · Escribir el CSS antes de tocar el JSX
 
-En el `<style>` de `index.html` (o en `estilo.css` cuando exista). Empieza por las
+En `src/styles/estilo.css`, dentro de su bloque de sección. Empieza por las
 propiedades que **no se pueden** hacer inline — ese es el motivo de la migración. Las que
 ya funcionan inline se mueven solo si estorban.
 
@@ -94,13 +95,11 @@ Y a ojo, en este orden:
 
 ## Trampas de este repo
 
-- **`_headers` y el guardia del build.** `build-prerender.mjs` solo escanea
-  `<script src="*.js">`. Un `.css` nuevo **no rompe el build**: se cuela en silencio y se
-  queda sin regla de caché. Si añades una hoja, extiende ese regex a
-  `<link rel=stylesheet>` y añade la regla en `_headers`.
+- **`_headers` y el guardia del build.** `scripts/build-prerender.mjs` escanea los
+  `<script src="*.js">` **y** los `<link href="*.css">` de `index.html` y `admin.html`:
+  una hoja nueva sin su regla en `public/_headers` o sin `?v=` rompe el build a
+  propósito. Si añades una: la regla, el `?v=`, y su línea en
+  `scripts/copiar-estaticos.mjs`, que copia `estilo.css` **por nombre** a `out/`.
 - **El prerender no estorba.** `emitir()` usa `index.html` como shell y solo sustituye seis
   marcas; un `<link>` viaja solo a las 322 páginas. No hay que tocar el script para eso.
-- **El panel de tweaks.** Si migras `PALETTE` a custom properties, el panel debe escribir en
-  `document.documentElement.style` en lugar de re-renderizar. Es una mejora, pero hecha a
-  medias rompe la mejor herramienta de iteración que hay.
 - **No toques** el orden de carga de scripts ni los `integrity` de unpkg.

@@ -21,12 +21,12 @@ node .claude/skills/fidelidad-diseno/scripts/contraste.mjs #FFF #262626   # un p
 Umbrales: **4.5:1** para todo texto que porte información, **3:1** para texto grande y
 elementos gráficos. Las etiquetas que parecen decorativas no lo son: si comunican, cuentan.
 
-Deuda conocida a vigilar: el borde `#3A3A3A` sobre tarjeta `#2C2C2C` da 1.23:1 y la tarjeta
-sobre el fondo da 1.25:1. Mientras el rediseño no las corrija, repórtalas una vez y sigue —
-no las repitas en cada auditoría.
-
-Ya resuelto, **no lo reportes como nuevo**: `red #C0392B` da 3.20:1 y por eso existe
-`redHi #E4574B` (4.78:1) para texto y bordes. Está documentado en `ui.jsx`.
+Ya resuelto, **no lo reportes como nuevo**: la deuda del tema oscuro (borde `#3A3A3A` sobre
+tarjeta `#2C2C2C` a 1.23:1, el rojo `#E4574B`) desapareció con el tema claro del 31-ago-2026.
+Hoy el rojo va en dos tokens —relleno con texto claro encima y rojo **como texto**— y
+`contraste.mjs` audita los dos temas: si pasa, no hay deuda de paleta que repetir.
+Los hex `#1A1A1A/#2C2C2C/#3A3A3A` de `src/lib/dev-viewport.js` son de su barra DEBUG,
+que solo sale en local.
 
 ## 2 · Foco visible
 
@@ -34,7 +34,8 @@ Ya resuelto, **no lo reportes como nuevo**: `red #C0392B` da 3.20:1 y por eso ex
 - **`clip-path` recorta el anillo de foco.** Si una tarjeta enfocable está recortada, exige
   `outline-offset` negativo o el indicador desaparece. Este es el fallo más fácil de
   introducir con el rediseño en curso — búscalo activamente.
-- `grep -n "clip-path\|CUT_TR" *.jsx` y cruza con lo que sea enfocable.
+- `git grep -n "clip-path\|CUT_TR" -- 'src/*.jsx' src/styles/estilo.css` y cruza con lo que
+  sea enfocable.
 
 ## 3 · Áreas táctiles
 
@@ -43,9 +44,9 @@ Mínimo **44 px** en filtros, chips, paginación y controles del `BottomNav`. WC
 
 ## 4 · Peso y carga
 
-- **Fuentes:** hoy se cargan 4 familias y 13 archivos. Cualquier familia añadida sin
-  sustituir otra es un hallazgo. Exige `display=swap`.
-- `grep -o "family=[^&\"]*" index.html` para el inventario real.
+- **Fuentes:** hoy se cargan 2 familias (Archivo y JetBrains Mono). Cualquier familia
+  añadida sin sustituir otra es un hallazgo. Exige `display=swap`.
+- `grep -o "family=[^&\"]*" src/pages/index.html` para el inventario real.
 - Comprueba que no se haya colado ninguna librería CSS pesada: augmented-ui son 167 KB.
 - Cache-busting `?v=` en los `data-*.js` si cambiaron.
 

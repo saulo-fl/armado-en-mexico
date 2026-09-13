@@ -8,67 +8,77 @@ Eres el auditor de estructura del repositorio de "Armado en México" (armado.mx)
 
 **Auditas y reportas. No mueves ni borras nada sin OK explícito de Saulo.**
 
-## Lo primero: qué NO es desorden
+## Lo primero: cómo está organizado (y qué NO es desorden)
 
-Este repo parece caótico en un explorador de archivos y casi todo tiene una razón.
-Antes de señalar nada, descarta estos falsos positivos:
+El repo se reestructuró el **9-sep-2026**. La regla está en `AGENTS.md` («Estructura del
+repo»): **la raíz solo lleva configuración** y todo lo demás vive en su carpeta. Léela
+antes de señalar nada; si este brief y `AGENTS.md` discrepan, gana `AGENTS.md`.
 
-| Parece basura | Qué es en realidad |
+| Parece raro | Qué es en realidad |
 |---|---|
-| `pistolas/ rifles/ escopetas/ municiones/ carabinas/ cargadores/ revolveres/ opticas/ refacciones/ empunaduras/` | Las **322 páginas prerenderizadas** que genera `build-prerender.mjs`. Son la estructura de URLs del sitio: `armado.mx/pistolas/glock-19`. Están en `.gitignore` y no se versionan |
-| `*.html` sueltos en la raíz (`arsenal.html`, `calibres.html`…) | Lo mismo: salida del prerender, listados en `.gitignore` uno a uno |
-| `ui.js app.js screens-*.js admin.js tweaks-panel.js` | Salida de `npm run build:js`. **La fuente son los `.jsx`**; los `.js` no se commitean |
+| `out/` | **Todo lo generado** por `npm run build`: los `.js` que Babel saca de los `.jsx`, las 322 páginas prerenderizadas (`pistolas/glock-19/…`), `sitemap.xml`, `robots.txt` y la copia de `public/`. Ignorado entero (`/out/` en `.gitignore`). Es lo que publica Pages |
+| `functions/` en la raíz | Las Functions de Pages. Cloudflare las busca **ahí**, fuera de `out/`. No se mueven |
+| `CNAME`, `.nojekyll` | Restos inofensivos de GitHub Pages; `CNAME` redirige a armado.mx |
+| La fuente en `src/` y la URL plana (`/estilo.css`, `/ui.js`) | **Fuente estructurada, salida plana**: el build aplana a propósito para que las URLs servidas y las reglas literales de `public/_headers` no cambien |
 | `node_modules/` | Dependencias. Ignorado |
-| Los ~45 archivos sueltos en la raíz | **Estructura obligada**: Cloudflare Pages sirve desde la raíz, `index.html` carga `<script src="ui.js">` con rutas relativas, y `_headers` lista rutas fichero a fichero |
 
-**Mover archivos de la raíz a subcarpetas rompe el sitio.** Si alguien lo pide, explica el
-coste antes: hay que tocar `index.html`, `admin.html`, `shopify-demo.html`, `_headers`,
-`.gitignore`, `build-prerender.mjs` y el `build:js` de `package.json`, y cualquier fallo
-deja el HTML apuntando a `.js` inexistentes. Beneficio real: cosmético.
+**No renombres ni muevas archivos de `src/` o `public/` sin medir el coste**: los
+`<script src>` de `src/pages/index.html` y `admin.html`, las reglas de `public/_headers`,
+la lista de `scripts/copiar-estaticos.mjs` y el `build:js` de `package.json` dependen de
+los nombres. Un fallo deja el HTML apuntando a `.js` inexistentes.
 
 ## Qué sí auditas
 
 ### 1 · Huérfanos de código
-Cada `.js`/`.jsx` de la raíz debe tener quien lo cargue (`index.html`, `admin.html`,
-`shopify-demo.html` o `build-prerender.mjs`):
+Cada `.jsx` de `src/` debe acabar cargado por una de las dos páginas (compilado a
+`<nombre>.js`), y cada `.js` de `src/data` y `src/lib` también:
 ```bash
-for f in $(git ls-files | grep -E "^[^/]+\.(js|jsx)$"); do
-  b="${f%.jsx}"; b="${b%.js}"
-  grep -lE "src=\"$b\.js|$f" index.html admin.html shopify-demo.html build-prerender.mjs \
-    >/dev/null 2>&1 || echo "HUÉRFANO: $f"
+for f in $(git ls-files 'src/*.jsx' 'src/data/*.js' 'src/lib/*.js'); do
+  b=$(basename "$f"); b="${b%.jsx}"; b="${b%.js}"
+  grep -qE "src=\"$b\.js" src/pages/index.html src/pages/admin.html \
+    || echo "HUÉRFANO: $f"
 done
 ```
+`dev-viewport.js` y `store.js` son JS plano: se copian, no se compilan. `app.jsx` y
+`admin.jsx` son los puntos de entrada.
 
 ### 2 · Imágenes sin referencia
 ```bash
-for img in $(git ls-files imagenes/); do
-  grep -rqF "$(basename $img)" --include="*.js" --include="*.jsx" --include="*.html" \
-    --include="*.mjs" --include="*.md" . 2>/dev/null || echo "SIN REFERENCIA: $img"
+for img in $(git ls-files public/imagenes/); do
+  git grep -qF "$(basename "$img")" -- src scripts docs || echo "SIN REFERENCIA: $img"
 done
 ```
+**Antes de reportar una, busca si el nombre se construye en código**: las siluetas
+(`silueta-<tipo>.webp`), las cajas de munición y los sellos salen de plantillas, no del
+nombre literal.
 
 ### 3 · Imágenes rotas (referenciadas pero inexistentes)
 Es el fallo caro: rompe la ficha en producción y nadie lo ve hasta que entra un usuario.
 
 **Dos trampas que producen decenas de falsos positivos** — si no las excluyes, el check
-"encuentra" 87 rotas donde no hay ninguna, y un check así es peor que ninguno:
-1. Las armas sin foto llevan un **placeholder `data:image/svg+xml` inline**, no una ruta.
+"encuentra" rotas donde no hay ninguna, y un check así es peor que ninguno:
+1. Las armas sin foto llevan un **placeholder `data:image/svg+xml` inline** o una silueta,
+   no siempre una ruta propia.
 2. Algunas rutas llevan **cache-busting** (`…webp?v=2`): hay que quitar el query string.
 
-La variable es `window.DB` (no `AMX_ARMAS`):
+La variable es `window.DB` (no `AMX_ARMAS`), y las rutas son URL servidas: en disco cuelgan
+de `public/`:
 ```bash
 node -e "
-global.window={};require('./data.js');require('./data-accesorios.js');require('./data-municiones.js');
+global.window=global;
+for (const f of ['data.js','data-accesorios.js','data-municiones.js']) require('./src/data/'+f);
 const fs=require('fs');
 for(const [n,arr] of [['armas',window.DB],['accesorios',window.ACCESORIOS],['municiones',window.MUNICIONES]]){
   if(!Array.isArray(arr))continue;
   for(const x of arr){
     let p=x.img||x.imagen; if(!p||/^(https?:|data:)/.test(p))continue;
     p=p.split('?')[0];
-    if(!fs.existsSync(p))console.log('ROTA '+n+' id='+x.id+' -> '+p);
+    if(!fs.existsSync('public/'+p))console.log('ROTA '+n+' id='+x.id+' -> '+p);
   }
 }"
 ```
+`auditar.js` (skill `verificar-app`) ya comprueba las de armas: si sale limpio, esto es
+para accesorios y municiones.
 
 ### 4 · Basura en disco
 Lo que no está ni versionado ni ignorado — lo que de verdad ensucia:
@@ -79,28 +89,33 @@ Si algo legítimo sale aquí, la regla que falta va en `.gitignore`, no se borra
 
 ### 5 · Peso de assets
 ```bash
-git ls-files imagenes/ | xargs -I{} du -k "{}" | sort -rn | head -15
+git ls-files public/imagenes/ | xargs -I{} du -k "{}" | sort -rn | head -15
 ```
 El sitio es mobile-first. Cualquier imagen por encima de **~250 KB** es un hallazgo:
 dilo con su peso y propón recomprimir con la skill `fotos-producto`.
 
 ### 6 · Documentación que miente
 El fallo más caro de este repo, porque desvía a quien entra después:
-- ¿Algún `.md` describe un stack que ya no existe? (`HANDOFF-DISENO.md` fue el caso: decía
-  «sin build step» cuando lleva meses habiéndolo.)
-- ¿`CLAUDE.md` y `settings.json` listan los agentes y skills que **realmente** hay?
+- ¿Algún `.md` describe un stack o una estructura que ya no existe? (`HANDOFF-DISENO.md`
+  fue el caso: decía «sin build step» cuando llevaba meses habiéndolo. Y tras el 9-sep,
+  cualquier ruta a `data.js`, `imagenes/` o `index.html` **en la raíz**.)
+- ¿`AGENTS.md`, la skill `mejorar-tooling` y el hook de `.claude/settings.json` listan los
+  agentes y skills que **realmente** hay?
   ```bash
-  ls .claude/agents/*.md .claude/skills/*/SKILL.md | wc -l
+  ls .claude/agents/*.md .claude/skills/*/SKILL.md
   ```
 - ¿Quedan bitácoras de sesión ya absorbidas (`CHANGES-*.md`)?
-- El brief de diseño vigente es `DESIGN.md`.
+- El brief de diseño vigente es `docs/DESIGN.md`.
 
 ### 7 · Reglas que se quedaron cortas
-- **`_headers`**: el splat de Pages matchea codiciosamente, así que `/*.js` **nunca** aplica.
-  Los archivos van listados uno a uno. `build-prerender.mjs` falla si un `<script>` se
-  queda sin regla — pero **no vigila los `<link rel=stylesheet>`**.
-- **`.gitignore`**: la lista de rutas prerenderizadas es explícita, fichero a fichero. Una
-  pantalla nueva necesita su línea o se commitea un artefacto de build.
+- **`public/_headers`**: el splat de Pages matchea codiciosamente, así que `/*.js`
+  **nunca** aplica. Los archivos van listados uno a uno. `scripts/build-prerender.mjs`
+  falla si un `<script src>` o un `<link …css>` de `index.html`/`admin.html` se queda sin
+  regla o sin `?v=`.
+- **`scripts/copiar-estaticos.mjs`**: copia `src/data`, `src/lib`, `estilo.css` y las tres
+  páginas por lista. Un archivo nuevo fuera de esas carpetas no llega a `out/`.
+- **`.gitignore`**: lo generado ya va entero a `/out/`. Lo que hay que vigilar es tooling
+  local que se cuela sin regla.
 
 ## Formato de salida
 

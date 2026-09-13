@@ -32,10 +32,11 @@ resembrar D1**.
    npm run build                                              # 322 páginas · sitemap 317
    node .claude/skills/conciliar-inventario/scripts/auditar.js  # sin hallazgos
    ```
-3. **`git add` con rutas explícitas, NUNCA `git add -A`** (el build deja `.js` y
-   322 `.html` generados; `.gitignore` ya tuvo un agujero con `experiencias.html`).
+3. **`git add` con rutas explícitas, NUNCA `git add -A`.** Lo generado ya va entero
+   a `out/` (ignorado), pero en el working tree viven carpetas locales sin versionar
+   (tooling de Codex, Impeccable, `settings.local.json`) que un `-A` se llevaría.
 4. **Cache-busting si cambió cualquier `data-*.js`**: sube el `?v=` en
-   `index.html`, `admin.html` **y** `shopify-demo.html`. Son tres.
+   `src/pages/index.html` **y** `src/pages/admin.html`. Son dos.
 5. Commit → push → PR a **`main`** → mergear.
 6. **PR de la misma rama a `develop` y mergear**, para mantener el espejo. No lo
    dejes para luego: `develop` divergido es la vía por la que vuelve trabajo viejo.

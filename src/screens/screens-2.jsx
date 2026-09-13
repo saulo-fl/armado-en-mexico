@@ -158,9 +158,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const opin = window.Store ? window.Store.getOpiniones('arma', arma.id) : { up: 0, down: 0, total: 0, lista: [] };
   const etOpin = window.amxOpinionLabel(opin.up, opin.down);
 
-  // Valoración: 'retroceso' se invierte (barra larga = poco retroceso), por eso
-  // la etiqueta dice "control" — con el número a la vista, "Retroceso 52" se
-  // habría leído justo al revés.
   // `statsKeys` vivía aquí para la valoración divulgativa, retirada el
   // 7-sep-2026. El comparador no lo usaba; su lista propia salió el 10-sep-2026.
   // El rótulo del tipo para la pestaña del folder. En singular y acentuado:
