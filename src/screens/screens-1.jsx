@@ -200,7 +200,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <button onClick={() => onNav('catalog')} style={window.estiloAccion(false)}>Ver Todas →</button>
         }>Categorías</SectionHeader>
 
-        {/* Cinco cartas: el número de la carta es cuántas armas hay en la
+        {/* Cinco cartas de arma y detrás las de accesorio: el número de la carta es cuántas armas hay en la
             categoría y el nombre va abajo, como en la baraja. Los ids de
             `CATEGORIES.tipo` son exactamente los cinco de `SILUETA_TIPOS`, así
             que la figura sale del asset que ya existe.
@@ -215,13 +215,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
               forma={`imagenes/silueta-${c.id}.webp`}
               onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
           ))}
+          {/* 8.5 ▸ Las categorías de accesorio, en la misma mesa */}
+          {window.HomeAccesoriosSection &&
+            <window.HomeAccesoriosSection onNav={onNav} />
+          }
         </div>
       </div>
-
-      {/* 8.5 ▸ Accesorios DCAM — categorías (justo después de las categorías de armas) */}
-      {window.HomeAccesoriosSection &&
-        <window.HomeAccesoriosSection onOpen={onOpenAccesorio} onNav={onNav} />
-      }
 
       {/* 8.6 ▸ Municiones DCAM/OTCA — por calibre */}
       {window.HomeMunicionesSection &&
