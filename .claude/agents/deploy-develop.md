@@ -77,10 +77,11 @@ Esto es lo que convirtió el flujo del 31-ago-2026 en un ir y venir de prompts.
 
 La lista de permisos vive en el `.claude/settings.local.json` de la **raíz del
 proyecto** (`Armado en Mexico`), no en el `.claude/settings.json` del repo: la
-raíz es el cwd de la sesión y el repo es una subcarpeta. Si algo aun así te lo
-bloquea el clasificador del entorno (pasó con `gh pr merge`, con el merge por
-git **y** con un `git ls-remote` de solo lectura): **para y pídeselo al usuario
-con el comando exacto**. No busques una tercera vía para colar la misma acción.
+raíz es el cwd de la sesión y el repo es una subcarpeta. Encima va el **guardia
+del arnés** con tu perfil, `develop`: solo abres y mergeas PR con base `develop`
+(`gh pr create` sin `--base` apunta a main y se bloquea), y D1 no se toca. Si el
+guardia o el clasificador te bloquean algo: **para y pídeselo al usuario con el
+comando exacto**. No busques una tercera vía para colar la misma acción.
 
 ## Entrega SIEMPRE
 
