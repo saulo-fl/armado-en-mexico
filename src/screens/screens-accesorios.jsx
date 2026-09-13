@@ -128,52 +128,31 @@ function AccesorioCard({ acc, onClick }) {
 window.AccesorioCard = AccesorioCard;
 
 // ════════════════════════════════════════════════════════════════
-// HOME — "Accesorios DCAM" como GRID DE CATEGORÍAS (estilo categorías de arma)
+// HOME — cartas de lotería de las categorías de accesorio
 // ════════════════════════════════════════════════════════════════
-function HomeAccesoriosSection({ onOpen, onNav }) {
-  const P = window.PALETTE;
-  const PAD = 16;
+// Sin encabezado ni rejilla propios: devuelve solo las cartas, y el Home las
+// pinta dentro de la misma mesa de «Categorías» que las de arma (Saulo,
+// 13-sep-2026: fuera el título «Accesorios DCAM» y su «Ver todos →»).
+function HomeAccesoriosSection({ onNav }) {
   const cats = window.ACCESORIO_CATEGORIES.categoria;
-  const total = (window.ACCESORIOS || []).length;
-  if (!total) return null;
   const counts = {};
   (window.ACCESORIOS || []).forEach(a => { counts[a.categoria] = (counts[a.categoria] || 0) + 1; });
-  const visible = cats.filter(c => counts[c.id]);
 
+  // El número es cuántos accesorios hay en la categoría y el nombre va abajo.
+  // La figura sale de `accesorioPlaceholder`, que ya sabe mapear las diez
+  // categorías a las siluetas que existen —solo lee `.categoria`, por eso se le
+  // pasa un objeto de un campo.
   return (
-    <div style={{ marginBottom: 20, maxWidth: 1280, marginLeft: 'auto', marginRight: 'auto' }}>
-      <div style={{ padding: `0 ${PAD}px`, margin: '25px 0 10px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 12 }}>
-          <div style={{
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 21, color: P.text,
-            textTransform: 'uppercase', letterSpacing: '0.04em', flex: '1 1 auto', minWidth: 0, whiteSpace: 'nowrap',
-          }}>Accesorios DCAM</div>
-          {/* El estilo estaba copiado a mano y en P.amber, que es el VERDE de marca:
-              contrasta de sobra sobre el lienzo (10.83:1) pero compite con el titulo
-              y no es el color de accion del sistema. estiloAccion(false) trae el rojo
-              #A3341F (5.96:1 sobre #F3EFE4) y el area tactil de 44px. */}
-          <button onClick={() => onNav && onNav('accesorios')}
-            style={window.estiloAccion(false)}>Ver todos →</button>
-        </div>
-      </div>
-
-      {/* Mismas cartas de lotería que las categorías de arma: el número es
-          cuántos accesorios hay en la categoría y el nombre va abajo.
-          La figura sale de `accesorioPlaceholder`, que ya sabe mapear las diez
-          categorías a las siluetas que existen —solo lee `.categoria`, por eso
-          se le pasa un objeto de un campo— y así las dos rejillas comparten
-          asset y criterio. */}
-      <div className="amx-loteria-mesa" style={{ padding: `0 ${PAD}px` }}>
-        {visible.map(c => (
-          <window.CartaLoteria key={c.id}
-            nombre={c.label}
-            cuenta={counts[c.id]}
-            unidad="accesorios"
-            forma={window.accesorioPlaceholder({ categoria: c.id })}
-            onClick={() => onNav && onNav('accesorios', { categoria: c.id })} />
-        ))}
-      </div>
-    </div>
+    <React.Fragment>
+      {cats.filter(c => counts[c.id]).map(c => (
+        <window.CartaLoteria key={c.id}
+          nombre={c.label}
+          cuenta={counts[c.id]}
+          unidad="accesorios"
+          forma={window.accesorioPlaceholder({ categoria: c.id })}
+          onClick={() => onNav && onNav('accesorios', { categoria: c.id })} />
+      ))}
+    </React.Fragment>
   );
 }
 window.HomeAccesoriosSection = HomeAccesoriosSection;
