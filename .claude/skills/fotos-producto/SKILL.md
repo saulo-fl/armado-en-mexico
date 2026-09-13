@@ -15,7 +15,7 @@ que ya traen alfa. Es problema de assets.
 Estado al 31-ago-2026: **36 de 192 armas con alfa**. Y el cuello de botella no es
 el recorte: **81 armas no tienen foto ninguna** (ids 112-192, las altas de OTCA)
 y otras 74 tienen una inservible. `fotos.py` solo procesa lo que ya está en
-disco; conseguir las fotos no lo hace nadie todavía. Censo en `PLACEHOLDERS.md`.
+disco; conseguir las fotos no lo hace nadie todavía. Censo en `docs/PLACEHOLDERS.md`.
 
 ## Uso
 

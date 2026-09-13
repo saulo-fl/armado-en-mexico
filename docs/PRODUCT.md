@@ -79,8 +79,6 @@ Vocabulario del dominio, no intercambiable por sinónimos:
   de precios. **OTCA** — la otra sucursal con inventario propio.
 - **Clase legal** — la categoría bajo la que la ley permite o restringe un arma.
 - **Disponibilidad** — `uso civil` · `policía / seguridad` · `exclusivo Ejército`.
-- **Folio / expediente** — el identificador `AR-####` de cada ficha. Es un código propio del sitio,
-  **no** un registro oficial.
 
 ---
 

@@ -153,21 +153,11 @@ function amxParsePath(pathname) {
 function App() {
   const vp = window.useViewport();
 
-  // ─── Tweaks (3 controles expresivos: facción, intensidad HUD, tipografía) ───
-  const [tw, setTweak] = window.useTweaks(window.TWEAK_DEFAULTS || {
-    faction: 'amarillo', hudIntensity: 'standard', typeface: 'stencil',
-  });
-  useEffectApp(() => {
-    // NO se vuelve a escribir PALETTE en runtime. El selector de «facción» venía
-    // del tema oscuro y pisaba PALETTE.amber con un beige (#DDD5C4) calibrado
-    // contra el fondo VERDE de entonces. Al invertir el tema a lienzo crema ese
-    // beige pasó a medir 1.27:1 — invisible — y como la mutación ocurría en un
-    // efecto, el acento salía verde en el primer paint y beige a partir del
-    // segundo render. Afectaba a los ~260 usos de PALETTE.amber del sitio.
-    // La paleta la define ui.jsx y no la reescribe nadie.
-    document.body.dataset.hud = tw.hudIntensity || 'standard';
-    document.body.dataset.type = tw.typeface || 'stencil';
-  }, [tw.hudIntensity, tw.typeface]);
+  // Aquí vivía el panel de Tweaks del prototipo de Claude Design (facción,
+  // intensidad HUD, tipografía). Se retiró el 12-sep-2026: solo se abría desde
+  // un marco padre y sus tres controles ya no hacían nada. NO se vuelve a
+  // escribir PALETTE en runtime: su «facción» pisaba PALETTE.amber con un beige
+  // que sobre el lienzo crema medía 1.27:1. La paleta la define ui.jsx.
 
   // Navegación — estado inicial leído de la URL (deep-links)
   const _init = amxParsePath(window.location.pathname);
@@ -520,47 +510,6 @@ function App() {
       {/* ─── TUTORIAL DE BIENVENIDA (overlay) ─── */}
       {window.OnboardingTutorial && (
         <window.OnboardingTutorial open={tutorialOpen} onClose={closeTutorial} />
-      )}
-
-      {/* ─── TWEAKS PANEL ─── */}
-      {window.TweaksPanel && (
-        <window.TweaksPanel title="Tweaks · Armado MX">
-          <window.TweakSection label="Acento · marca">
-            <window.TweakColor
-              label="Color"
-              value={({amarillo:'#DDD5C4',oro:'#B0A894',alerta:'#C0392B',acero:'#9AA3AD'})[tw.faction] || '#DDD5C4'}
-              options={['#DDD5C4','#B0A894','#C0392B','#9AA3AD']}
-              onChange={(hex) => {
-                const map = { '#DDD5C4':'amarillo', '#B0A894':'oro', '#C0392B':'alerta', '#9AA3AD':'acero' };
-                setTweak('faction', map[hex] || 'amarillo');
-              }}
-            />
-          </window.TweakSection>
-          <window.TweakSection label="Intensidad HUD">
-            <window.TweakRadio
-              label="Chrome"
-              value={tw.hudIntensity}
-              options={[
-                { value: 'minimal',  label: 'Discreta' },
-                { value: 'standard', label: 'Estándar' },
-                { value: 'max',      label: 'Máxima' },
-              ]}
-              onChange={(v) => setTweak('hudIntensity', v)}
-            />
-          </window.TweakSection>
-          <window.TweakSection label="Tipografía">
-            <window.TweakRadio
-              label="Sistema"
-              value={tw.typeface}
-              options={[
-                { value: 'stencil',   label: 'Stencil' },
-                { value: 'editorial', label: 'Editorial' },
-                { value: 'terminal',  label: 'Terminal' },
-              ]}
-              onChange={(v) => setTweak('typeface', v)}
-            />
-          </window.TweakSection>
-        </window.TweaksPanel>
       )}
     </div>
   );

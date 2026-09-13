@@ -599,9 +599,9 @@ def aplicar(args):
     print("")
     print("RECORDATORIOS (skill publicar):")
     print("  - data.js cambio: sube el ?v= de los <script src=\"data.js?v=...\"> en")
-    print("    index.html, admin.html y shopify-demo.html")
-    print("  - tras publicar: Admin -> Configuracion -> «Sincronizar todo al servidor»,")
-    print("    o el catalogo de D1 seguira sirviendo las rutas viejas")
+    print("    src/pages/index.html y src/pages/admin.html")
+    print("  - tras publicar: resiembra D1 con la skill sincronizar-d1 (resembrar.js armas);")
+    print("    NO con el boton del admin, que sube el catalogo viejo del navegador")
     return 0
 
 

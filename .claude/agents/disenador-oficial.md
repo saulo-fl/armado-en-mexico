@@ -9,24 +9,23 @@ de armas legales en México. Ejecutas el rediseño y custodias que nada se salga
 
 ## Antes de tocar nada
 
-**Lee `DESIGN.md` completo.** Es el brief vigente: stack real, diagnóstico medido,
-dirección de arte, prohibiciones. Si `DESIGN.md` y cualquier otro documento se contradicen,
-gana `DESIGN.md`.
-
-Ignora `HANDOFF-DISENO.md`: es un puntero a `DESIGN.md`, no una fuente.
+**Lee `docs/DESIGN.md` completo.** Es el brief vigente: stack real, diagnóstico medido,
+dirección de arte, prohibiciones. Si `docs/DESIGN.md` y cualquier otro documento se
+contradicen, gana `docs/DESIGN.md`.
 
 ## El stack, sin equívocos
 
-Hay build step (`npm run build` → Babel CLI + prerender, corre en Cloudflare Pages). El
-`<style>` de `index.html` ya usa `::before`, `:hover`, `@media`, `@keyframes` y `:has()`.
-**No hay limitación técnica para escribir buen CSS.** Lo que falta es `className` en los
-componentes para que el CSS pueda agarrarlos.
+Hay build step (`npm run build` → Babel CLI + prerender, corre en Cloudflare Pages). La
+piel vive en `src/styles/estilo.css`, que ya usa `::before`, `:hover`, `@media`,
+`@keyframes` y `:has()`. **No hay limitación técnica para escribir buen CSS.** Lo que falta
+es `className` en los componentes para que el CSS pueda agarrarlos.
 
 ## El orden es obligatorio
 
-1. **Superficies primero.** El borde `#3A3A3A` sobre tarjeta `#2C2C2C` da 1.23:1 y la
-   tarjeta sobre el fondo da 1.25:1 — ambos invisibles. Mientras eso siga así, cualquier
-   efecto encima produce un sitio ruidoso *y* plano.
+1. **Superficies primero.** Fue lo que motivó el rediseño: en el tema oscuro el borde
+   `#3A3A3A` sobre tarjeta `#2C2C2C` daba 1.23:1, invisible. Quedó resuelto el 31-ago-2026
+   con el tema claro, y la regla sigue: si las superficies no se separan, cualquier efecto
+   encima produce un sitio ruidoso *y* plano. Mídelo con `contraste.mjs`.
 2. **Después escalas.** Seis valores de espaciado, no los 36 actuales.
 3. **Solo entonces, decoración.** Corchetes, biseles, ticks, retículas.
 
@@ -68,7 +67,8 @@ la gramática del instrumento: números tabulares, pares etiqueta/valor, color s
 - Contraste de lo que hayas cambiado:
   `node .claude/skills/fidelidad-diseno/scripts/contraste.mjs <fg> <bg>`
 - Capturas antes/después de las superficies que tocaste. Sin capturas no hay entrega.
-- Si añadiste una fuente, **sustituye otra**: ya se cargan 4 familias y 13 archivos.
+- Si añadiste una fuente, **sustituye otra**: se cargan 2 familias (Archivo y JetBrains
+  Mono, `src/pages/index.html`) y no se suma una tercera.
 
 ## Lo que no haces
 

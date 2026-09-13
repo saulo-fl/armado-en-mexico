@@ -9,8 +9,8 @@ Flujo recurrente y de alta precisión (se publican precios oficiales). Sigue est
 pasos EN ORDEN. No improvises el mapeo: un precio mal mapeado es un error visible.
 
 ## 0) Antes de empezar
-- Lee `CLAUDE.md` (sección "Conciliar inventarios y precios") y la cabecera de
-  `data-precios.js` — son la fuente de verdad del esquema.
+- Lee `AGENTS.md` (sección "Conciliar inventarios y precios") y la cabecera de
+  `src/data/data-precios.js` — son la fuente de verdad del esquema.
 - Trabaja SIEMPRE sobre `origin/main` fresco: `git fetch origin main && git checkout -B <rama> origin/main`. (Ver skill `publicar`: NO hacer `checkout -B` sin `fetch` — te basas en un main viejo y revertirías trabajo.)
 - El entorno de nube NO tiene salida a internet: no intentes descargar imágenes ni verificar armado.mx con curl.
 
@@ -39,10 +39,10 @@ por prefijo (`CARG|CART|CULATA|SISTEMA|CLIPS|CAÑON` = accesorio/munición).
   GX4 vs GX4 CO vs GX4XL, XD-M vs XD-M Elite). Elige UNA representativa por modelo.
 
 ## 3) Aplicar cambios
-Guiado por las reglas de `CLAUDE.md` y `data-precios.js`:
+Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
 - **Registrar el inventario nuevo** en el `*_MANUALES` correspondiente con
   `primary: true` y quitar `primary` al anterior de esa autoridad. Copia el PDF a
-  `inventarios/<dcam|otca>-...-AAAA-MM-DD.pdf`.
+  `public/inventarios/<dcam|otca>-...-AAAA-MM-DD.pdf`.
 - **Presentes**: actualiza `priceExact` (13º arg de `mk(...)` en data.js — reemplaza
   solo el token `"\d+\.\d{2}"`) y AÑADE un registro al historial. INVARIANTE:
   `priceExact` debe igualar SIEMPRE el último registro del historial.

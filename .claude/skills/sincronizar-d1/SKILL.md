@@ -75,3 +75,10 @@ recargar y contar `window.DB.length`. La API puede estar bien y el cliente no.
   inventario del 6-jul. `pages` igual, con el FAQ y el paso del trámite. Ambos
   resembrados y verificados. D1 bajó de 221.7 KB a 187.6 KB al quitar los
   data-URI.
+- **2026-09-12** — el resumen de `resembrar.js` solo enseña tamaños y conteos.
+  Cuando dice «Difieren» y la diferencia no cuadra con lo publicado (hoy 1.8 KB
+  frente a tres `?v=2`), **compara campo a campo antes de `--aplicar`**: carga
+  `src/data/data.js` con la misma transformación del script y cruza por `id`
+  contra `/api/state`. Salieron 62 armas con `img: ""` en D1 que en el código ya
+  llevan `imagenes/silueta-*.webp`, más las 3 fotos; ningún otro campo. Sin ese
+  cruce no se sabe si resembrar pisa ediciones hechas desde el admin.

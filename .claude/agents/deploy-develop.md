@@ -30,13 +30,14 @@ comprueba antes de commitear). Aquí solo va lo que cambia respecto a ellas.
    El build tiene que decir **322 páginas** y el sitemap **317 URLs** (a
    31-ago-2026, con Campos y Experiencias congeladas). Si esos números bajan sin
    que hayas quitado contenido a propósito, para: algo dejó de generarse.
-3. **`git add` con rutas explícitas. NUNCA `git add -A`.** El build deja `.js` y
-   322 `.html` generados que no se commitean, y `.gitignore` ya tuvo un agujero
-   una vez (`experiencias.html` se coló). Añade los archivos que tocaste, uno a
-   uno, y comprueba con `git status --short` que no se cuela nada más.
+3. **`git add` con rutas explícitas. NUNCA `git add -A`.** Lo generado ya va entero
+   a `out/` (ignorado), pero en el working tree viven carpetas locales sin
+   versionar (tooling de Codex, Impeccable, `settings.local.json`) que un `-A` se
+   llevaría. Añade los archivos que tocaste, uno a uno, y comprueba con
+   `git status --short` que no se cuela nada más.
 4. **Cache-busting si cambió cualquier `data-*.js`**: sube el `?v=` de los
-   `<script src="data.js?v=...">` en `index.html`, `admin.html` **y**
-   `shopify-demo.html`. Son tres, y olvidar el tercero es lo normal.
+   `<script src="data.js?v=...">` en `src/pages/index.html` **y**
+   `src/pages/admin.html`. Son dos.
 5. Commit, `git push -u origin <rama>`, PR con `--base develop`, y mergear.
 
 ## Ver el resultado
@@ -56,7 +57,7 @@ Después de mergear, el preview de `develop` tarda 1-2 min.
   respeta los `\r\n`.
 - **Si el deploy queda Failed no se publica nada** y sigue vivo el anterior.
   Causa conocida: `database_id` inválido en `wrangler.toml` («Error 8000022»).
-- **No añadas un `_redirects`.** CLAUDE.md lo prohíbe expresamente: ya provocó
+- **No añadas un `_redirects`.** AGENTS.md lo prohíbe expresamente: ya provocó
   un bucle infinito una vez.
 
 ## Permisos: entra al repo UNA vez, y luego comandos pelados
