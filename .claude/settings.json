@@ -1,12 +1,25 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/guardia.mjs\"",
+            "timeout": 20,
+            "statusMessage": "Guardia del arnés"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "printf '%s\\n' 'ARMADO EN MÉXICO — tooling en .claude/ (autoinvocable por su description)' '' 'SKILLS' '  • conciliar-inventario  → incorporar un PDF DCAM/OTCA (precios, existencias, altas).' '  • verificar-app         → antes de commitear: compila los .jsx y audita invariantes.' '  • fidelidad-diseno      → al tocar UI: decisiones ya tomadas + bitácora de trampas.' '  • migrar-a-css          → pasar una primitiva de estilos inline a className + CSS.' '  • fotos-producto        → fotos de armas/accesorios: alfa, recorte, control de calidad.' '  • sincronizar-d1        → tras publicar cambios de data.js: resembrar D1 o nadie los ve.' '  • publicar              → git fetch antes de checkout -B; PR a main Y develop; ?v= si tocaste datos.' '  • mejorar-tooling       → al cerrar una tarea: capturar los aprendizajes en las skills.' '' 'AGENTES' '  • disenador-oficial     → rediseño y custodia del sistema visual.' '  • auditor-a11y-perf     → contraste, foco, áreas táctiles, peso, coste de scroll.' '  • revisor-armado        → audita datos y fidelidad antes de publicar.' '  • conciliador-inventario · preparador-imagenes · deploy-develop · deploy-main · auditor-estructura' '' 'DISEÑO: el brief vigente es docs/DESIGN.md.' 'STACK: SÍ hay build step (npm run build → Babel CLI + prerender). Los .js no se versionan.' 'Verifica SIEMPRE con auditar.js antes de publicar.'"
+            "command": "printf '%s\\n' 'ARMADO EN MÉXICO — tooling en .claude/ (autoinvocable por su description)' '' 'SKILLS' '  • conciliar-inventario  → incorporar un PDF DCAM/OTCA (precios, existencias, altas).' '  • verificar-app         → antes de commitear: compila los .jsx y audita invariantes.' '  • fidelidad-diseno      → al tocar UI: decisiones ya tomadas + bitácora de trampas.' '  • migrar-a-css          → pasar una primitiva de estilos inline a className + CSS.' '  • fotos-producto        → fotos de armas/accesorios: alfa, recorte, control de calidad.' '  • sincronizar-d1        → tras publicar cambios de data.js: resembrar D1 o nadie los ve.' '  • publicar              → git fetch antes de checkout -B; PR a main Y develop; ?v= si tocaste datos.' '  • mejorar-tooling       → al cerrar una tarea: capturar los aprendizajes en las skills.' '' 'AGENTES' '  • disenador-oficial     → rediseño y custodia del sistema visual.' '  • auditor-a11y-perf     → contraste, foco, áreas táctiles, peso, coste de scroll.' '  • revisor-armado        → audita datos y fidelidad antes de publicar.' '  • conciliador-inventario · preparador-imagenes · deploy-develop · deploy-main · auditor-estructura' '' 'ARNÉS: .claude/hooks/guardia.mjs revisa cada comando (perfiles por agente, ver AGENTS.md). main/develop: solo por PR, sin push forzado ni borrado.' '' 'DISEÑO: el brief vigente es docs/DESIGN.md.' 'STACK: SÍ hay build step (npm run build → Babel CLI + prerender). Los .js no se versionan.' 'Verifica SIEMPRE con auditar.js antes de publicar.'"
           }
         ]
       }
@@ -21,8 +34,7 @@
       "Bash(git fetch:*)",
       "Bash(git status:*)",
       "Bash(git log:*)",
-      "Bash(git diff:*)",
-      "Bash(npx wrangler d1 execute:*)"
+      "Bash(git diff:*)"
     ]
   }
 }

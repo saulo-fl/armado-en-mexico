@@ -13,11 +13,10 @@
  * catálogo viejo que le sirvió D1, así que puede consolidar el error en vez de
  * arreglarlo. Este script parte del código, que es la fuente de verdad.
  *
- * Dos cosas que costaron un intento cada una:
- *   - Un UPDATE con el JSON entero da SQLITE_TOOBIG (el catálogo son ~188 KB).
- *     Se trocea y se concatena con ||.
- *   - La concatenación va sobre una fila TEMPORAL y solo al final se copia sobre
- *     el dominio real, para que un fallo a medias no deje producción a medias.
+ * Historia de la escritura (lo que costó un intento cada vez):
+ *   - Un UPDATE con el JSON entero DENTRO del SQL da SQLITE_TOOBIG (~188 KB):
+ *     hasta el 12-sep se troceaba y concatenaba sobre una fila temporal.
+ *   - Desde el 13-sep va como parámetro de la API de consultas: ver abajo.
  */
 const fs = require('fs');
 const path = require('path');
@@ -25,8 +24,7 @@ const vm = require('vm');
 const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '../../../..');   // repo/github-deploy
-const TMP = path.join(ROOT, '.d1-resembrado.sql');     // efímero, en .gitignore
-const TROZO = 40000;                                    // holgado bajo el límite de D1
+const CUENTA = '093b05ab8c36ac3d4c79e73b7e4b5d5b';     // cuenta de Cloudflare (no es secreto)                                  // holgado bajo el límite de D1
 const API = 'https://armado.mx/api/state';
 
 const dominio = process.argv[2];
@@ -120,37 +118,42 @@ if (!aplicar) {
   process.exit(0);
 }
 
+// UNA consulta parametrizada contra la API de D1 (13-sep-2026). Lo que había
+// antes —SQL troceado en un fichero y `wrangler d1 execute --file`— dejó de
+// servir: `--file` va por el endpoint /import, que responde «Authentication error
+// [code: 10000]» al token OAuth de wrangler aunque tenga d1 (write). Pasarlo a
+// `--command` tampoco: en Windows npx relanza wrangler por cmd.exe, que corta en
+// 8191 caracteres y revienta (0xC0000409) con trozos llenos de comillas.
+// Con el JSON como PARÁMETRO no hay SQL que escapar ni límite de sentencia
+// (medido: 220 KB entran), así que sobran los trozos y la fila temporal: es un
+// solo UPDATE, atómico por sí mismo.
 const json = JSON.stringify(nuevo);
-const esc = (s) => s.split("'").join("''");   // en SQLite la comilla se duplica
-const tmp = dominio + '_tmp';
-const stmts = [
-  `DELETE FROM state WHERE domain='${tmp}';`,
-  `INSERT INTO state (domain, data, updated_at) VALUES ('${tmp}', '', datetime('now'));`,
-];
-for (let i = 0; i < json.length; i += TROZO) {
-  stmts.push(`UPDATE state SET data = data || '${esc(json.slice(i, i + TROZO))}' WHERE domain='${tmp}';`);
-}
-stmts.push(`UPDATE state SET data = (SELECT data FROM state WHERE domain='${tmp}'), ` +
-           `updated_at = datetime('now') WHERE domain='${dominio}';`);
-stmts.push(`DELETE FROM state WHERE domain='${tmp}';`);
+const npx = process.platform === 'win32'   // Node no lanza npx.cmd sin shell
+  ? [process.execPath, [path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npx-cli.js')]]
+  : ['npx', []];
+const auth = execFileSync(npx[0], [...npx[1], 'wrangler', 'auth', 'token', '--json'],
+                          { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], cwd: ROOT });
+const token = JSON.parse(auth.slice(auth.indexOf('{'))).token;   // nunca se imprime
+const base = fs.readFileSync(path.join(ROOT, 'wrangler.toml'), 'utf8').match(/database_id\s*=\s*"([^"]+)"/)[1];
 
-fs.writeFileSync(TMP, stmts.join('\n'));
-try {
-  console.log(`\nescribiendo ${stmts.length} sentencias...`);
-  // OJO con la ruta: en Windows hace falta shell:true para encontrar npx, y con
-  // shell:true Node junta los argumentos con espacios y los reparsea el shell.
-  // La ruta del proyecto lleva un espacio ("Armado en Mexico"), asi que pasar TMP
-  // absoluto partia el argumento en dos y wrangler fallaba sin decir por que:
-  // execFileSync solo devolvia status 1 con stdout y stderr en null. El mismo SQL
-  // ejecutado a mano entraba sin problema. Se pasa el NOMBRE y se fija cwd.
-  execFileSync('npx', ['wrangler', 'd1', 'execute', 'armado-en-mexico', '--remote',
-                       '--file', path.basename(TMP)],
-               { stdio: 'inherit', cwd: ROOT, shell: process.platform === 'win32' });
-} finally {
-  fs.unlinkSync(TMP);
-}
+(async () => {
+  console.log('\nescribiendo en D1...');
+  const r = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CUENTA}/d1/database/${base}/query`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      sql: "UPDATE state SET data = ?, updated_at = datetime('now') WHERE domain = ?",
+      params: [json, dominio],
+    }),
+  }).then((res) => res.json());
+  const cambios = r.result?.[0]?.meta?.changes;
+  if (!r.success || cambios !== 1) {
+    console.error('!! D1 no aceptó la escritura:', JSON.stringify(r.errors), '| filas cambiadas:', cambios);
+    process.exit(1);
+  }
 
-const tras = desdeProduccion(dominio);
-console.log('\n  D1 tras escribir:', JSON.stringify(resumen(tras)));
-console.log(JSON.stringify(tras) === json ? '\nOK: D1 coincide con el codigo.'
-                                          : '\n!! D1 NO coincide con el codigo. Revisar.');
+  const tras = desdeProduccion(dominio);
+  console.log('\n  D1 tras escribir:', JSON.stringify(resumen(tras)));
+  console.log(JSON.stringify(tras) === json ? '\nOK: D1 coincide con el codigo.'
+                                            : '\n!! D1 NO coincide con el codigo. Revisar.');
+})();
