@@ -642,7 +642,7 @@ Bienvenido a Armado en México
 > Qué es el sitio, con el logotipo en una copia instantánea.
 Paso 2
 ¿Qué es Armado en México?
-> Plataforma divulgativa de código abierto. Tres sellos rojos: no pertenecemos al gobierno · no vendemos armas de fuego · no tramitamos licencias ni permisos.
+> Plataforma divulgativa de código abierto. Tres sellos rojos: no pertenecemos al gobierno · no vendemos armas de fuego · no emitimos licencias ni permisos.
 Paso 3
 Lo que puedes hacer
 > Armas · Calibres · Legalidad · Comparación, en texto centrado.
