@@ -350,7 +350,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {related.length > 0 &&
         <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-similares">
           <window.CintaDymo id="ficha-similares">Armas similares</window.CintaDymo>
-          <div className="amx-hscroll" style={{
+          <div className="amx-hscroll amx-similares" style={{
             display: ancho ? 'grid' : 'flex',
             gridTemplateColumns: ancho ? 'repeat(4, 1fr)' : undefined,
             gap: ancho ? 14 : 10,

@@ -2509,13 +2509,19 @@
   padding: 10px 6px 0;
   list-style: none;
 }
-/* La tabla de la repisa: corre por debajo de las cajas, a la altura de su base. */
+/* La tabla de la repisa. Estuvo en una tira de 24px bajo la base de las fotos, y
+   las cajas FLOTABAN (Saulo, 13-sep-2026): una tabla vista de frente sin cubierta
+   no tiene dónde apoyar nada. Ahora mide 40px —la madera trae la cubierta en su
+   80 % de arriba y el canto en el 20 % de abajo— y la base de cada foto cae 24px
+   dentro de ella, a 8px del canto: la caja pisa la cubierta, como en el puesto
+   de la Home. En las fotos PMC los cartuchos sueltos van delante y la caja queda
+   un poco más atrás, que es justo como estaría en una repisa. */
 .amx-v2 .amx-repisa-carril::before {
   content: '';
   position: absolute;
   left: 0; right: 0;
-  top: calc(10px + var(--alto-foto) - 4px);
-  height: 24px;
+  top: calc(10px + var(--alto-foto) - 24px);
+  height: 40px;
   background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
   box-shadow: 0 4px 6px -3px rgba(23, 27, 25, .4);
 }
@@ -2590,7 +2596,7 @@
   position: relative;
   z-index: 2;
   display: block;
-  margin-top: 16px;
+  margin-top: 12px;                   /* la cinta pisa el canto de la tabla */
   padding: 11px 9px 9px;
   background: var(--etiqueta);
   box-shadow: 0 1px 2px rgba(23, 27, 25, .24), 0 3px 6px -3px rgba(23, 27, 25, .2);
@@ -2824,7 +2830,14 @@
   transform: rotate(-2deg);
   transition: transform .16s;
 }
-.amx-v2 .amx-sello-voto:hover .amx-sello { transform: rotate(-1deg) scale(1.03); }
+/* Al pasar el ratón, el sello se entinta de su color antes de estamparse: verde
+   para «Sí la recomiendo», rojo para «No la recomiendo» (Saulo, 13-sep-2026).
+   Solo con ratón: en un teléfono el hover se queda pegado tras tocar. */
+@media (hover: hover) {
+  .amx-v2 .amx-sello-voto:hover .amx-sello { transform: rotate(-1deg) scale(1.03); }
+  .amx-v2 .amx-sello-voto--si:hover .amx-sello { color: var(--sello-civil); }
+  .amx-v2 .amx-sello-voto--no:hover .amx-sello { color: var(--sello-restr); }
+}
 .amx-v2 .amx-sello-voto[aria-pressed="true"] .amx-sello {
   border-style: solid;
   -webkit-mask-image: url(imagenes/sello-desgaste.webp);
@@ -2928,6 +2941,14 @@
 .amx-v2 .amx-comentarios-enviado { padding-top: var(--e4); }
 .amx-v2 .amx-comentarios-enviado .amx-sello { color: var(--sello-civil); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; }
 .amx-v2 .amx-comentarios-enviado p { margin: var(--e4) 0 0; font-family: var(--sans); font-size: 15.5px; line-height: 1.6; }
+
+/* ── ARMAS SIMILARES — folders del mismo tamaño ─────────────────────────────
+   «Estandariza los tamaños de los folders para que todos se vean iguales en tamaño
+   y no dependan del texto contenido» (Saulo, 13-sep-2026). Lo único que variaba
+   era el nombre, a uno o dos renglones: se le reservan siempre los dos (ya estaba
+   cortado a dos con elipsis), así que el folder mide lo mismo con cualquier arma.
+   Solo aquí: el Home usa la misma tarjeta y no se tocó. */
+.amx-v2 .amx-similares .amx-exp-nombre { min-height: calc(2em * 1.14); }
 
 /* Las opiniones publicadas: tarjetitas llenas, cada una a su ángulo. */
 .amx-v2 .amx-tarjetitas { display: grid; gap: var(--e4); margin: 0; padding: var(--e2) 0 0; list-style: none; }
