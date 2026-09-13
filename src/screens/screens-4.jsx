@@ -440,7 +440,7 @@ function HomeTraumaBanner({ onNav }) {
         }
         .trauma-plancha > * { position: relative; z-index: 1; }
 
-        /* ── Cabecera: cruz de registro + folio + sello del tier ─────────── */
+        /* ── Cabecera: cruz de registro + sello del tier ─────────────────── */
         .trauma-cab {
           /* Rejilla de tres y no flex: así el sello cae en el centro EXACTO de
              la fila, sin que lo desplace el ancho de la cruz de registro. */

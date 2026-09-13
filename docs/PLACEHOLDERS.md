@@ -28,7 +28,8 @@ que más se notan.
 >    `CarouselSection` con su botón «Ver todos →», en vez de `ProximamenteCard`.
 > 3. `ui.jsx` y `screens-2.jsx` — quitar `proximamente: true` de las entradas de
 >    menú y el «(Próximamente)» del rótulo.
-> 4. `screens-tutorial.jsx` — quitar el «· próximamente» de la fila Experiencias.
+> 4. `screens-tutorial.jsx` — decidir si vuelven como entradas de «Lo que puedes
+>    hacer» (el tutorial de 4 pasos, 10-sep-2026, las quitó por ser «próximamente»).
 > 5. `build-prerender.mjs` — quitar `noindex` y volver a `enSitemap: true`, y
 >    decidir entonces qué hacer con `/cursos` (hoy es un alias vivo de
 >    `/experiencias`, que es la ruta canónica).
@@ -147,7 +148,7 @@ opaco se lee como un error y hace falta el alfa.
 - **Cartuchos (19):** completos en `imagenes/cartuchos/` (PNG vertical, escala real).
 - **Armas traumáticas (3):** usan fotos reales del CDN de Shopify (HDP 50, Secure 68P,
   HDX 68). No requieren diseño local.
-- **Logos y autor:** `logo-main.png`, `logo-armado-mx.png`, `saulo-flores.png` ya
+- **Logos y autor:** `logo-main.png`, `logo-armado-mx.webp`, `saulo-flores.webp` ya
   presentes. (`logo.png` sigue siendo borrador reemplazable.)
 
 ---

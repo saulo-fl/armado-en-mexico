@@ -11,24 +11,25 @@ atrape, así que la verificación es manual pero automatizable.
 
 ## Rápido (dos órdenes)
 ```bash
-npm run build                                              # .jsx -> .js  +  prerender de las 294 páginas
+npm run build                                              # .jsx -> .js  +  prerender de las 322 páginas, todo a out/
 node .claude/skills/conciliar-inventario/scripts/auditar.js
 ```
 Si `npm run build` falla, NO sigas: el deploy publicaría HTML apuntando a `.js`
 que no existen. Corre `npm install` primero si no hay `node_modules/`.
 
 `build:html` (prerender) falla a propósito si `index.html` cambió de forma. Tras
-tocar datos o pantallas, comprueba también el recuento que imprime (294 páginas /
-292 URLs en sitemap) y que `sitemap.xml` y `robots.txt` se regeneraron.
+tocar datos o pantallas, comprueba también el recuento que imprime (322 páginas /
+317 URLs en sitemap, a 12-sep-2026) y que `out/sitemap.xml` y `out/robots.txt` se
+regeneraron.
 Debe terminar en `✔✔ AUDITORÍA SIN HALLAZGOS` (sale con código !=0 si falla). Cubre:
 - Todos los `.jsx` transpilan con `@babel/standalone`.
 - Los `data-*.js` cargan juntos en Node (shim de `window`).
-- `priceExact == último registro del historial` para las 168 armas.
+- `priceExact == último registro del historial` para las 192 armas.
 - ids contiguos, existencias > 0, historiales cronológicos, conteo por sucursal.
 
 ## Transpilar un archivo suelto (al iterar una pantalla)
 ```bash
-node -e 'const B=require("./node_modules/@babel/standalone/babel.js");const fs=require("fs");B.transform(fs.readFileSync("screens-1.jsx","utf8"),{presets:["react"],filename:"screens-1.jsx"});console.log("OK")'
+node -e 'const B=require("./node_modules/@babel/standalone/babel.js");const fs=require("fs");B.transform(fs.readFileSync("src/screens/screens-1.jsx","utf8"),{presets:["react"],filename:"screens-1.jsx"});console.log("OK")'
 ```
 
 ## Reglas

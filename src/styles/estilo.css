@@ -297,11 +297,8 @@
   line-height: 1.1;
   text-wrap: balance;
 }
-.amx-v2 .t-dato {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;  /* lo que hace que un calibre se lea como instrumento */
-  font-feature-settings: "tnum" 1;
-}
+/* Retirada .t-dato el 12-sep-2026: cero usos en jsx/html/js. Las cifras
+   tabulares las pone cada componente con var(--mono) y tabular-nums. */
 
 /* ── Superficies ────────────────────────────────────────────────────────── */
 
@@ -348,28 +345,8 @@
 .amx-v2 .specs tr:nth-child(even) { background: var(--beige); }
 .amx-v2 .specs tr:last-child { border-bottom: 0; }
 
-/* ── Botones ────────────────────────────────────────────────────────────── */
-
-.amx-v2 .btn {
-  font-family: var(--sans);
-  font-size: 12px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .1em;
-  padding: 0 var(--e4);
-  min-height: 44px;                  /* área táctil, no negociable */
-  border-radius: var(--radio-sm);
-  border: 1px solid transparent;
-  cursor: pointer;
-  display: inline-flex; align-items: center; justify-content: center;
-  transition: background .16s, border-color .16s;
-}
-/* El rojo como RELLENO con texto claro. Como texto sobre verde da 2.45:1 */
-.amx-v2 .btn-rojo { background: var(--rojo); color: var(--blanco); }
-.amx-v2 .btn-rojo:hover { filter: brightness(.92); }
-.amx-v2 .btn-claro {
-  background: transparent; color: var(--tinta);
-  border-color: var(--hair);
-}
-.amx-v2 .btn-claro:hover { background: var(--hover-suave); }
+/* Retirados .btn, .btn-rojo y .btn-claro el 12-sep-2026: cero usos en
+   jsx/html/js desde 272b1b9. Los botones viven en las primitivas de ui.jsx. */
 
 /* ── Foco: no negociable, y clip-path se lo come si no se compensa ──────── */
 
@@ -504,34 +481,10 @@
   opacity: 1;                        /* Firefox le baja la opacidad por su cuenta */
 }
 
-/* ── Enlace de acción: el rojo como TEXTO, nunca como relleno ────────────── */
-
-.amx-v2 .amx-accion,
-.amx-v2 .amx-accion-verde {
-  font-family: var(--mono);
-  font-size: 14.5px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  min-height: 44px;                  /* área táctil aunque el texto sea una línea */
-  display: inline-flex;
-  align-items: center;
-  gap: var(--e1);
-  text-decoration: none;
-}
-.amx-v2 .amx-accion       { color: var(--alerta); }  /* 5.63:1 claro / 8.08:1 oscuro sobre el lienzo */
-.amx-v2 .amx-accion-verde { color: var(--rojo-sobre-marca); }  /* 5.87:1 sobre la marca, en los dos temas */
-.amx-v2 .amx-accion:hover,
-.amx-v2 .amx-accion-verde:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-/* El rojo del anillo por defecto sobre verde da 2.45:1: en la variante verde
-   el foco reusa el mismo salmón del texto. */
-.amx-v2 .amx-accion-verde:focus-visible { outline-color: var(--rojo-sobre-marca); }
+/* Retirados .amx-accion y .amx-accion-verde (enlace de acción en rojo como
+   texto) el 12-sep-2026: cero usos en jsx/html/js. Si vuelve un enlace así, sus
+   tintas medidas eran --alerta sobre el lienzo y --rojo-sobre-marca sobre la
+   marca, con el foco en el mismo color del texto sobre verde. */
 
 /* ── Foco sobre las superficies verdes de marca ───────────────────────────── */
 /* El anillo global usa --rojo-txt, que sobre el verde de marca mide 2.40:1 y

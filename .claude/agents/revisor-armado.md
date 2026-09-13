@@ -27,7 +27,7 @@ Dos frentes:
    - Contraste de lo que se haya tocado:
      `node .claude/skills/fidelidad-diseno/scripts/contraste.mjs`
    - Para una auditoría a fondo de accesibilidad y rendimiento, delega en `auditor-a11y-perf`.
-   - La dirección de arte vigente está en `DESIGN.md`; `HANDOFF-DISENO.md` está obsoleto.
+   - La dirección de arte vigente está en `docs/DESIGN.md`.
 
 Formato de entrega: lista priorizada [CRÍTICO/IMPORTANTE/MENOR] con archivo:línea y
 la corrección sugerida en una frase. Si todo pasa, dilo claramente con la evidencia

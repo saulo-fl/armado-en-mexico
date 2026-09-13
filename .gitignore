@@ -10,14 +10,21 @@ node_modules
 # Temporal del resembrado de D1 (skill sincronizar-d1)
 /.d1-resembrado.sql
 
-# Impeccable (skill de diseño) — el binario del motor lo baja el instalador
-# (`npx impeccable install`); 14 MB por proveedor, no se versionan.
-/.claude/skills/impeccable/scripts/bin/
-/.agents/skills/impeccable/scripts/bin/
+# Impeccable (skill de diseño de terceros): se queda instalado en local y fuera
+# del repo; se reinstala con `npx impeccable install`. Decidido el 12-sep-2026.
+/.claude/skills/impeccable/
+/.claude/agents/impeccable-*.md
+/.impeccable/
 
-# Respaldo del brief manual mientras se mergea con lo que genere Impeccable.
-# Copia durable en «Documentos de Proyecto/DESIGN.original-AAAA-MM-DD.md».
-/DESIGN.original.md
+# Configuración personal de Claude Code (permisos y hooks locales) y worktrees
+# de agentes. Lo compartido va en .claude/settings.json.
+/.claude/settings.local.json
+/.claude/worktrees/
+
+# Espejos para Codex de .claude/skills y .claude/agents: se regeneran en local
+# desde .claude/, que es la fuente. No se versionan copias.
+/.agents/
+/.codex/
 
 # cajas.py importa fotos.py como modulo hermano: Python deja su cache al lado
 __pycache__/

@@ -1,6 +1,6 @@
 // Armado en México — DEV VIEWPORT: alternador de vista escritorio / móvil
 // ─────────────────────────────────────────────────────────────────────────
-// Módulo compartido por las 3 ramas (Principal, Admin, Shopify).
+// Módulo compartido por el sitio público y el admin.
 // Vanilla JS — no depende de React ni Babel.
 //
 //   AUTO    → la página se renderiza directa (cero overhead, modo por defecto)

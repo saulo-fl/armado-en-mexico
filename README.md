@@ -204,7 +204,7 @@ public/       imagenes/ · inventarios/ · _headers · logo.png · manifest.webm
 src/          app.jsx · admin.jsx
   pages/      index.html · admin.html · 404.html
   screens/    pantallas (home, catálogo, ficha, comparador, municiones…)
-  components/ ui.jsx · tweaks-panel.jsx
+  components/ ui.jsx
   data/       catálogo y precios (data-*.js)
   lib/        store.js (persistencia) · dev-viewport.js (barra DEBUG)
   styles/     estilo.css

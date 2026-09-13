@@ -5,7 +5,7 @@
 // Edita ESTE archivo al alimentar un PDF nuevo — no hace falta tocar el admin.
 //
 // ── 1) INVENTARIOS (PDFs oficiales) ──────────────────────────────────────────
-// Cada PDF va físicamente en la carpeta  inventarios/  del repo y se registra
+// Cada PDF va físicamente en la carpeta  public/inventarios/  del repo y se registra
 // aquí en window.AMX_MANUALES_SEED. Esquema de cada entrada:
 //
 //   {
@@ -34,7 +34,7 @@
 //   - note     : (opcional) nota corta; por defecto se muestra el nombre del inventario
 //
 // ── REGLA DE CONCILIACIÓN (al cargar un PDF nuevo) ───────────────────────────
-// 1. Copia el PDF a  inventarios/  con nombre  dcam-existencias-AAAA-MM-DD.pdf
+// 1. Copia el PDF a  public/inventarios/  con nombre  dcam-existencias-AAAA-MM-DD.pdf
 // 2. Agrega su entrada en AMX_MANUALES_SEED. Si es el más reciente, ponle
 //    primary:true y quítaselo al anterior.
 // 3. Por cada arma cuyo precio aparezca en ese PDF, AÑADE (no reemplaces) un

@@ -1,16 +1,14 @@
 ---
 name: fidelidad-diseno
-description: Guía de fidelidad estética para "Armado en México" — memoria viva de las decisiones de diseño ya tomadas y de las trampas conocidas. Úsalo SIEMPRE que agregues o modifiques UI (pantallas .jsx, tarjetas, filtros, ui.jsx): decisiones de producto, estructura de la ficha, vocabulario prohibido, reglas de "no romper" y la bitácora de aprendizajes. El sistema visual y la dirección de arte viven en DESIGN.md; esta skill guarda lo aprendido a golpes.
+description: Guía de fidelidad estética para "Armado en México" — memoria viva de las decisiones de diseño ya tomadas y de las trampas conocidas. Úsalo SIEMPRE que agregues o modifiques UI (pantallas .jsx, tarjetas, filtros, ui.jsx): decisiones de producto, estructura de la ficha, vocabulario prohibido, reglas de "no romper" y la bitácora de aprendizajes. El sistema visual y la dirección de arte viven en docs/DESIGN.md; esta skill guarda lo aprendido a golpes.
 ---
 
 # Fidelidad de diseño — Armado en México
 
-> **La dirección de arte y el sistema visual están en [`DESIGN.md`](../../../DESIGN.md)**
+> **La dirección de arte y el sistema visual están en [`docs/DESIGN.md`](../../../docs/DESIGN.md)**
 > (superficies, escalas, tipografía, prohibiciones). Esta skill es la otra mitad: lo que ya
 > se decidió, lo que no se toca, y las trampas que costaron una sesión descubrir.
-> Si las dos se contradicen, gana `DESIGN.md`.
->
-> `HANDOFF-DISENO.md` está obsoleto — es solo un puntero. No lo uses como fuente.
+> Si las dos se contradicen, gana `docs/DESIGN.md`.
 
 ## Estado del rediseño — RESUELTO (31-ago-2026)
 
@@ -60,15 +58,16 @@ a CSS, la skill `migrar-a-css`.
   páginas; las pantallas solo las componen.
 
 ## Dónde vive cada estilo
-- La **piel** (hover, foco, pseudo-elementos, media queries, animación, superficies) va al
-  `<style>` de `index.html` con clases `amx-`. El **layout** y lo que depende de datos se
+- La **piel** (hover, foco, pseudo-elementos, media queries, animación, superficies) va a
+  `src/styles/estilo.css` con clases `amx-` (el `<style>` de `index.html` guarda solo la
+  base global que ya vive ahí). El **layout** y lo que depende de datos se
   queda inline. Una propiedad vive en un sitio **o** en el otro, nunca en los dos: si se
   comparte, el inline gana por especificidad y empieza la guerra de `!important`.
 - Lo dinámico viaja como custom property: `style={{'--estado': color}}`. Precedente en el
   repo: `BottomNav` publica `--amx-nav-h`.
 - Hay **1238 objetos `style={{`** en los `.jsx`. Migrarlos todos está descartado; se migra
   la piel de las primitivas, con `migrar-a-css`.
-- Centraliza tokens/utilidades nuevas en `ui.jsx` / `index.html`, no dispersos.
+- Centraliza tokens/utilidades nuevas en `ui.jsx` / `src/styles/estilo.css`, no dispersos.
 
 ## Reglas de "NO romper" (críticas)
 - **Sí hay build step** (`npm run build` → Babel CLI + prerender, corre en Cloudflare Pages;
@@ -128,20 +127,21 @@ a CSS, la skill `migrar-a-css`.
 - El "precio actual" de la ficha se toma del último registro del historial.
 
 ## Ficha de arma — estructura vigente (rediseño ago-2026, PR #45)
-Orden fijo: **identidad → foto HERO → datos clave → valoración → precio → historial
+Orden fijo: **identidad → foto HERO → datos clave → precio → historial
 → munición → accesorios → desplegables → vídeo → opinión → armas similares →
 sugerir cambios**. No lo reordenes sin motivo: el `AvailBadge` y `legalTit` van
 arriba a propósito, para responder "¿puedo comprarla?" antes del pliegue, y
 «Sugerir cambios» cierra la página (es la última acción, no una interrupción).
-**Ya no hay tabs**: ficha técnica, usos, legalidad e **Historia** son cuatro
-`<details>` (`window.Disclosure`) **sin encabezado de sección** — cada uno se
-anuncia solo.
+**Usos, Legalidad e Historia van en pestañas**: `FichaTabs` con un `<Panel label>`
+por pestaña (`screens-2.jsx`, docs/DESIGN.md §11), con flechas de teclado entre
+ellas. Los desplegables (`window.Disclosure`) quedan para el detalle secundario
+(la fuente del precio, «Leer opiniones»).
 - Separación entre secciones = **espacio** (52px escritorio / 34px móvil) + banda de
   fondo, nunca una línea gris. El helper `ProdSection` de `screens-2.jsx`.
 - Primitivas nuevas en `ui.jsx`: **`Disclosure`** (desplegable; con `compact` se pinta
   como pie de nota — sin fondo ni barrita de acento, título en mono 12.5),
   **`PriceChart`** (gráfica de precios), **`amxPrecioNum`** / **`amxFechaCorta`** /
-  **`amxRatingLabel`** (helpers), y `CUT_TR_SM` ya está expuesto en `window`.
+  **`amxOpinionLabel`** (helpers), y `CUT_TR_SM` ya está expuesto en `window`.
 - **`PriceChart` colorea POR TRAMO**: verde si el precio bajó entre esos dos
   inventarios, rojo si subió, gris si no cambió. El relleno bajo la línea es
   **neutro** (blanco 8%) a propósito: si también fuera de color competiría con los
@@ -155,8 +155,8 @@ anuncia solo.
   los cortes **reales** de Steam sobre el % de recomendaciones (95/70/40/20).
   `OPINION_EXTREMO = 20` es el único umbral de volumen: la etiqueta sale desde la
   primera opinión, pero "Extremadamente…" exige 20, para que una sola persona no
-  fije la reputación de un arma. La usan `OpinionBlock` (ficha) y `ArmaCardBody`
-  (todas las tarjetas: `ArmaCard`, `FavCard` y `VisitedCard` comparten ese cuerpo).
+  fije la reputación de un arma. Solo la usa la ficha: junto al precio y en
+  `OpinionBlock` (`screens-2.jsx`). Las tarjetas ya no la pintan.
 - **La etiqueta va ARRIBA, junto al precio** (`Opiniones: Mayormente positivas`, en
   Courier 12.5), no en el bloque del final. La pregunta "¿vale la pena?" se responde
   al lado del precio. Abajo solo queda el formulario para opinar.
@@ -181,9 +181,9 @@ anuncia solo.
 - 2026-08: **una pantalla nueva son 8 puntos de alta, no 1.** `SCREEN_TO_PATH`,
   `titles`, `isInternal`, `currentNavId`, **la rama de `navTab`**, la rama del
   switch de `app.jsx`, el item de menú (`moreItems` de `TopNav` + `MenuScreen`), la
-  entrada en `FIJAS` de `build-prerender.mjs` **y una línea en `.gitignore`** para su
-  `.html` generado (la lista es explícita, fichero a fichero: sin eso se commitea un
-  artefacto de build). La trampa que más cuesta ver es `navTab`: es una cadena
+  entrada en `FIJAS` de `build-prerender.mjs`. (La línea en `.gitignore` que también
+  hacía falta ya no: desde el 9-sep todo lo generado va a `out/`, ignorado entero.)
+  La trampa que más cuesta ver es `navTab`: es una cadena
   `if/else if` **sin default**, así que sin su rama el enlace funciona en móvil (que
   usa `navigate`) y es un botón muerto en escritorio.
 - 2026-08: **`ProductScreen` no escuchaba `Store.onChange`.** Cualquier dato que
@@ -194,17 +194,20 @@ anuncia solo.
   catálogo entero en `localStorage['amx_armas_v2']` en la primera visita y a partir de
   ahí **el localStorage gana sobre `data.js`**. Para verificar un cambio de datos hay
   que limpiar localStorage; para propagarlo a visitantes que ya entraron, sembrar D1
-  desde *Admin → Configuración → Sincronizar todo al servidor*. El prerender y los
+  con la skill `sincronizar-d1` (**no** con el botón del admin, que sube el catálogo
+  viejo del navegador: ver esa skill). El prerender y los
   visitantes nuevos sí lo ven al instante. Y aparte, sin subir el `?v=` de los
   `data-*.js` en `index.html`/`admin.html` el navegador sirve la copia cacheada.
 - 2026-08: **`NUM` no es global.** En `screens-2.jsx`, `const NUM = { fontVariantNumeric }`
-  vive DENTRO de `ProductScreen`: los componentes hermanos (`RatingBlock`, `YouTubeBlock`)
+  vive DENTRO de `ProductScreen`: los componentes hermanos (`RatingBlock` —hoy `OpinionBlock`—, `YouTubeBlock`)
   no lo ven. Babel transpila igual y el `ReferenceError` solo sale en runtime. `PALETTE`,
   `SectionHeader` y `TacticalCorners` sí son globales (declaraciones de nivel superior de
   scripts clásicos, compartidas entre archivos).
 - 2026-08: **las cuatro tarjetas de arma comparten cuerpo.** `ArmaCard`, `FavCard`,
   `VisitedCard` y `RatedCard` delegan en `window.ArmaCardBody`: un cambio ahí las toca
   todas. (De paso: `FavCard` declaraba un `getRating` que no usaba — código muerto.)
+  **Hoy** `ArmaCardBody` y `RatedCard` ya no existen: `ArmaCard`, `FavCard` y
+  `VisitedCard` delegan en `window.ArmaExpediente` (`ui.jsx`). La lección es la misma.
 - 2026-08: **un helper de layout definido DENTRO de un componente remonta su subárbol
   en cada render** — React lo ve como un tipo de componente nuevo. Con `<details>`
   dentro, eso los cierra solos al redimensionar (`useViewport` re-renderiza). Por eso
@@ -226,21 +229,20 @@ anuncia solo.
   crawlers nunca ven los `<details>`. La condición es la inversa — texto NUEVO hay que
   añadirlo también a la plantilla del prerender (`build-prerender.mjs`, ~línea 184) o
   no se indexa.
-- 2026-08: para revisar UI en el navegador basta `npx serve . -l 4173` + Chrome
-  DevTools; el tutorial de bienvenida tapa la pantalla — la clave real es
+- 2026-08: para revisar UI en el navegador basta `npm run build` + `npx serve out -l 4173`
+  + Chrome DevTools; el tutorial de bienvenida tapa la pantalla — la clave real es
   **`localStorage['amx_onboarded_v1'] = '1'`** (no `amx_tutorial_visto`), y hay que
   recargar.
 - 2026-08: al comprobar desbordes horizontales, **excluye los elementos dentro de un
   ancestro con `overflow-x: auto`** (los carruseles) o todo da falso positivo.
 - 2026-06: `@babel/standalone` está vendorizado en `node_modules` → úsalo para validar.
 - 2026-08: `node_modules` NO está en git — al reciclarse el contenedor se pierde.
-  Reinstalar: `npm install --no-save @babel/standalone@7.29.0`. GOTCHA: sin
-  package.json, cada `npm install --no-save X` BORRA los paquetes anteriores —
-  instala todo lo que necesites en UN solo comando.
-- 2026-08: smoke test visual sin red del navegador: `python3 -m http.server` +
-  playwright-core con `executablePath:'/opt/pw-browsers/chromium'` y `page.route`
-  ruteando unpkg a copias locales (npm react@18.3.1 trae `umd/`). El tutorial de
-  bienvenida cubre la home la primera vez — clic en SALTAR antes de capturar.
+  Reinstalar: `npm ci` (hay `package.json` y `package-lock.json`).
+- 2026-08: smoke test visual sin red del navegador: `python3 -m http.server` desde
+  `out/` + playwright-core con `executablePath:'/opt/pw-browsers/chromium'` y
+  `page.route` ruteando unpkg a copias locales (npm react@18.3.1 trae `umd/`). El
+  tutorial de bienvenida cubre la home la primera vez y ya no tiene SALTAR:
+  `localStorage['amx_onboarded_v1'] = '1'` y recarga antes de capturar.
 - 2026-06 → **RESUELTO ago-2026**: las fotos de armería eran placeholders SVG por falta de
   red. Ya son fotos reales (`imagenes/armeria-dcam.webp` / `armeria-otca.webp`, usadas por
   `ArsenalPhotoCard` en `screens-1.jsx`) y los `.svg` se borraron. Si una foto de sección

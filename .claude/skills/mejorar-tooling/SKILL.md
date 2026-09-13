@@ -26,10 +26,19 @@ no trivial o descubras un edge-case, DÉJALO ESCRITO para no reaprenderlo.
 6. Publica con el skill `publicar` (los archivos de `.claude/` viajan en el repo).
 
 ## Inventario de tooling (mantén esta lista al día)
-- skills: `conciliar-inventario`, `verificar-app`, `fidelidad-diseno`, `publicar`,
-  `mejorar-tooling`.
-- agentes: `conciliador-inventario`, `revisor-armado`.
-- scripts: `conciliar-inventario/scripts/parse_pdf.py`, `.../auditar.js`.
+A 12-sep-2026, según el disco (`ls .claude/skills .claude/agents`):
+- skills: `conciliar-inventario`, `verificar-app`, `fidelidad-diseno`, `migrar-a-css`,
+  `fotos-producto`, `sincronizar-d1`, `publicar`, `mejorar-tooling`.
+- agentes: `conciliador-inventario`, `revisor-armado`, `disenador-oficial`,
+  `auditor-a11y-perf`, `auditor-estructura`, `preparador-imagenes`, `deploy-develop`,
+  `deploy-main`.
+- scripts: `conciliar-inventario/scripts/{parse_pdf.py, auditar.js}` ·
+  `fidelidad-diseno/scripts/contraste.mjs` ·
+  `fotos-producto/scripts/{fotos.py, cajas.py, traer.py}` ·
+  `sincronizar-d1/scripts/resembrar.js`.
+- De terceros, sin versionar y fuera de este inventario: Impeccable
+  (`.claude/skills/impeccable/`, agentes `impeccable-*`), que se reinstala con
+  `npx impeccable install`.
 
 ## Principios
 - Un skill = un flujo repetible con triggers claros; un agente = ejecutor delegable.

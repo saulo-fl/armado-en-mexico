@@ -22,20 +22,21 @@ functions/
     state.js                    GET  /api/state                 → snapshot público (read)
     append/[domain].js          POST /api/append/:domain         → escritura pública (merge atómico)
     admin/state/[domain].js     PUT  /api/admin/state/:domain    → reemplazo de dominio (solo admin)
-schema.sql                      tabla `state(domain, data, updated_at)` — un blob JSON por dominio
+scripts/sql/schema.sql          tabla `state(domain, data, updated_at)` — un blob JSON por dominio
 wrangler.toml                   binding D1 (env.DB) + config de Pages
 ```
 
 **Modelo de datos:** un *document store* por **dominio**. Cada dominio que store.js ya
-maneja (`pages`, `promos`, `armas`, `favorites`, `appConfig`, `manuales`, `priceHist`,
-`suggestions`, `pending`, `rejected`, `visits`, `ratings`) es **una fila** con su JSON,
+maneja (`armas`, `pages`, `promos`, `favorites`, `appConfig`, `manuales`, `priceHist`,
+`suggestions`, `pending`, `rejected`, `visits`, `reviews`, `reviewsQueue`, `reports`;
+lista canónica en `ALL_DOMAINS` de `functions/api/_lib.js`) es **una fila** con su JSON,
 con el mismo shape que en `localStorage`. La contraseña/sesión (`admin`) **nunca** viaja.
 
 - **Escritura admin** (`PUT /api/admin/state/:domain`): reemplaza el blob del dominio.
   La usa todo el panel (editar páginas/promos/catálogo/favoritos/branding/inventarios y
   gestionar la cola: aprobar/rechazar propuestas y sugerencias).
-- **Escritura pública** (`POST /api/append/:domain`, solo `suggestions`/`pending`/`ratings`/`visits`):
-  manda **un item**; el servidor hace el *read-modify-write* para que votos y propuestas
+- **Escritura pública** (`POST /api/append/:domain`, solo `suggestions`/`pending`/`visits`/`reviewsQueue`/`reports`):
+  manda **un item**; el servidor hace el *read-modify-write* para que reseñas y propuestas
   concurrentes no se pisen. Reproduce exactamente el shape que la app espera.
 
 ## Alta (una sola vez)
@@ -48,7 +49,7 @@ desplegado como proyecto de Cloudflare Pages.
 wrangler d1 create armado-en-mexico
 
 # 2) Crear la tabla (remota; usa --local para pruebas con `wrangler pages dev`)
-wrangler d1 execute armado-en-mexico --remote --file=./schema.sql
+wrangler d1 execute armado-en-mexico --remote --file=./scripts/sql/schema.sql
 
 # 3) Vincular la D1 al proyecto Pages como  DB :
 #    Dashboard → Pages → (proyecto) → Settings → Functions → D1 database bindings
@@ -84,9 +85,10 @@ contenido ya editado en un navegador (el del admin) por primera vez:
 ```bash
 # Sirve la app + Functions + D1 local. ALLOW_INSECURE_ADMIN salta la verificación de
 # Access SOLO en local (nunca en producción).
-wrangler pages dev . --d1 DB=armado-en-mexico --binding ALLOW_INSECURE_ADMIN=1
+npm run build   # primero: se sirve out/
+wrangler pages dev out --d1 DB=armado-en-mexico --binding ALLOW_INSECURE_ADMIN=1
 # crea el esquema en la D1 local una vez:
-wrangler d1 execute armado-en-mexico --local --file=./schema.sql
+wrangler d1 execute armado-en-mexico --local --file=./scripts/sql/schema.sql
 ```
 
 Sin `wrangler` (solo estático, ej. `python3 -m http.server`): la app corre en modo offline;
@@ -96,9 +98,10 @@ Sin `wrangler` (solo estático, ej. `python3 -m http.server`): la app corre en m
 
 - Lectura pública abierta (`GET /api/state`); es contenido de display.
 - Escritura admin verificada por Access (path rule + JWT). Las variables faltantes = fail-closed.
-- Escritura pública acotada: solo 4 dominios *append*, cuerpo ≤ 1 MB, strings recortados,
-  arrays con tope, ventana de visitas de 60 días, ratings 1-5.
+- Escritura pública acotada: solo 5 dominios *append*, cuerpo ≤ 1 MB, strings recortados,
+  arrays con tope, ventana de visitas de 60 días, reseñas de 100 a 1200 caracteres
+  (`RESENA_MIN`/`RESENA_MAX`) que esperan moderación en `reviewsQueue`.
 - Concurrencia: el *append* hace read-modify-write por petición (suficiente para este tráfico).
-  Para volumen alto, migrar `ratings`/`visits`/colas a tablas fila-por-item es la evolución natural.
+  Para volumen alto, migrar `reviews`/`visits`/colas a tablas fila-por-item es la evolución natural.
 - "Última escritura gana" en los `PUT` de admin (sin control de versiones). El admin re-hidrata
   al enfocar la pestaña.

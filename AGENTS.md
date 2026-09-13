@@ -10,7 +10,7 @@ los `<script>` en el HTML sigue importando.
 Cloudflare Pages en cada deploy. En local: `npm install`
 y `npm run build` (o `npm run watch`) antes de abrir la app por HTTP.
 
-## Tooling de Codex — flujos, skills y agentes (`.Codex/`)
+## Tooling de agentes — flujos, skills y agentes (`.claude/`)
 
 Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
 `description`. Úsalos; no reinventes estos flujos a mano:
@@ -19,7 +19,7 @@ Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
   altas de fichas). Incluye scripts: `parse_pdf.py` (parser posicional para ambos
   formatos) y `auditar.js` (verificación de integridad).
 - **`verificar-app`** — antes de commitear: transpila los `.jsx` + carga los
-  `data-*.js` + valida invariantes. Orden: `node .Codex/skills/conciliar-inventario/scripts/auditar.js`.
+  `data-*.js` + valida invariantes. Orden: `node .claude/skills/conciliar-inventario/scripts/auditar.js`.
 - **`fidelidad-diseno`** — al tocar UI: decisiones de producto ya tomadas, estructura de
   la ficha, vocabulario prohibido y la bitácora de trampas descubiertas. Incluye
   `contraste.mjs` (audita la `PALETTE` viva contra los umbrales WCAG).
@@ -40,7 +40,8 @@ sondas de verificación) · **`deploy-develop`** (llevar a `develop` para ver el
 sin tocar producción) · **`conciliador-inventario`** (conciliación completa) ·
 **`preparador-imagenes`** (fotos de arma con alfa) · **`revisor-armado`** (auditoría de
 datos + fidelidad de diseño) · **`disenador-oficial`** (rediseño y custodia del sistema
-visual) · **`auditor-a11y-perf`** (contraste, foco, áreas táctiles, peso, coste de scroll).
+visual) · **`auditor-a11y-perf`** (contraste, foco, áreas táctiles, peso, coste de scroll) ·
+**`auditor-estructura`** (orden del repo: huérfanos, basura, docs desactualizadas; solo informa).
 
 **Diseño:** el brief vigente es **`docs/DESIGN.md`** — stack real, diagnóstico medido,
 dirección de arte «Documento Oficial Mexicano + instrumentación» y prohibiciones
@@ -71,7 +72,7 @@ public/       lo que se sirve tal cual → se copia entero a out/
 src/          app.jsx · admin.jsx          (puntos de entrada)
   pages/      index.html · admin.html · 404.html
   screens/    los 7 screens-*.jsx
-  components/ ui.jsx · tweaks-panel.jsx
+  components/ ui.jsx
   data/       los 6 data-*.js
   lib/        store.js · dev-viewport.js
   styles/     estilo.css
@@ -102,9 +103,9 @@ merges se hacen por la API y tu `origin/main` local se queda viejo).
 
 ```bash
 npm install                 # una vez
-npm run build               # .jsx -> .js  +  prerender de las 295 páginas
-npx serve .                 # o cualquier servidor HTTP: los .jsx no cargan desde file://
-node .Codex/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
+npm run build               # estáticos + .jsx -> .js + prerender de las 322 páginas, todo en out/
+npx serve out               # o cualquier servidor HTTP sobre out/: no carga desde file://
+node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
 ```
 
 Antes de publicar, la skill **`verificar-app`**. Al tocar UI, **`fidelidad-diseno`**.
@@ -209,8 +210,8 @@ Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que correspon
 
 ## Prerender: un .html real por URL (`scripts/build-prerender.mjs`)
 
-`npm run build` hace dos cosas: **`build:js`** (Babel) y **`build:html`**
-(`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 322 — con su
+`npm run build` son tres pasos (ver «Estructura del repo»): **`build:static`**, **`build:js`**
+(Babel) y **`build:html`** (`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 322 — con su
 `<title>`, `description`, `canonical`, Open Graph, JSON-LD y el contenido **en HTML
 crudo** dentro de `#app-root`.
 
@@ -291,7 +292,7 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
 ## Reglas importantes
 
 - **⚠️ SI ENTRA ALGUIEN MÁS AL REPO, ACOTA LOS PERMISOS ANTES.** La lista
-  `permissions.allow` de `.Codex/settings.json` está calibrada para **un solo
+  `permissions.allow` de `.claude/settings.json` está calibrada para **un solo
   desarrollador que es también el dueño de la cuenta de Cloudflare** (Saulo,
   27-ago-2026). El permiso `Bash(npx wrangler d1 execute:*)` es el que hay que
   mirar primero: con el comodín, autoriza **cualquier SQL contra cualquier base D1
@@ -319,7 +320,7 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
   variantes como `git push origin +main` ni `--force-with-lease`. Es una red para
   el descuido, no una barrera contra la intención.
 
-  **Nota para Codex:** editar `.Codex/settings.json` está bloqueado por el
+  **Nota para Claude:** editar `.claude/settings.json` está bloqueado por el
   clasificador del entorno, y está bien que lo esté — es el archivo que te da
   permisos a ti. Propón el contenido y que lo aplique el usuario; no busques otra
   vía para escribirlo.
@@ -336,8 +337,9 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
 - **Los `.jsx` se precompilan** con `npm run build` (Babel CLI, `babel.config.json` con `runtime: "classic"` — obligatorio: React se carga como global UMD, y el runtime `automatic` que Babel 8 trae por defecto emite `import` y rompe la app). Tras editar un `.jsx`, recompila antes de probar.
 - Los scripts de React/Babel vienen de unpkg con hashes `integrity` fijados — no cambies las versiones.
 - La barra "◉ DEBUG" (abajo-izquierda) es una herramienta de desarrollo intencional; no la quites.
-- `public/logo.png` es el logo del **header**, y es un borrador: se reemplazará por la
-  versión final con el mismo nombre. No confundir con los iconos de `imagenes/`.
+- `public/logo.png` **no** es el logo del header: es el borrador de 256 px sin alfa que
+  queda como valor de fábrica del admin (`store.js`). El header lo pinta `LogoMarca` en
+  SVG (`src/components/ui.jsx`). No confundir con los iconos de `imagenes/`.
 - **Los iconos están separados por uso a propósito** — no los unifiques: `favicon.png`
   (48px, 2 KB) es lo que pide todo navegador en cada visita; `apple-touch-icon.png`
   (180px) solo lo pide Safari al añadir a inicio; `logo-armado-mx.webp` (512px) es el
@@ -409,7 +411,7 @@ resiembra D1 y compruébalo como visitante, no por la API.
   Admin → RESEÑAS. La evolución natural es que un modelo la contraste antes contra
   las normas de la comunidad (`/soporte`) y la marque `ok` / `dudosa` / `rechazar`
   con su motivo, para que el humano revise solo lo dudoso. Encaja como llamada a la
-  API de Codex dentro de la Function de `append`, o como tarea programada sobre la
+  API de Claude dentro de la Function de `append`, o como tarea programada sobre la
   cola. **La decisión de publicar sigue siendo humana**: la IA ordena la cola, no la
   sustituye. Pedido explícito de Saulo (25-ago-2026).
 - **Reseñas a tabla fila-por-reseña.** El dominio `reviews` viaja ENTERO en cada
@@ -447,12 +449,11 @@ resiembra D1 y compruébalo como visitante, no por la API.
 - Revisar 3 municiones indistinguibles entre sí por calibre, marca, bala y grano
   (ids 2002/2034, 2048/2033, 2051/2029): puede ser el mismo producto en dos inventarios
   o un error de conciliación. Requiere los PDFs a la mano.
-- **Fotos de arma con alfa — EN CURSO (skill `fotos-producto`).** Al 27-ago-2026,
-  **24 de 111** tienen alfa; el resto siguen siendo recortes sobre blanco opaco, que
-  sobre el hero oscuro se leen como un error. Hay pipeline, control de calidad y hoja
-  de aprobación; lo que falta es material: de las 61 pistolas, 27 están en resolución
-  inservible y varias apuntan al lado contrario. El estándar acordado es **lateral
-  derecha sobre lienzo 1:1**. Siguiente paso: censo de las 61 y adquisición.
+- **Fotos de arma con alfa — EN CURSO (skill `fotos-producto`).** El censo vigente
+  (cuántas tienen alfa, cuáles faltan y en qué resolución) vive en
+  **`docs/PLACEHOLDERS.md`**; no lo dupliques aquí. Hay pipeline, control de calidad y
+  hoja de aprobación; lo que falta es material. El estándar acordado es **lateral
+  derecha sobre lienzo 1:1**.
 
 Ya hechas (no rehacer): precompilación de los `.jsx` con Babel CLI · React en builds de
 producción · `imagenes/` a WebP · URLs legibles por tipo y modelo · prerender estático

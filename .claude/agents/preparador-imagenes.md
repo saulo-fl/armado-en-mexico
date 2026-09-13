@@ -6,7 +6,7 @@ tools: Read, Write, Edit, Bash, Grep, Glob
 
 Preparas las imágenes de "Armado en México". Lee primero las skills
 `fotos-producto` (el pipeline y sus trampas), `fidelidad-diseno` (el look) y
-`sincronizar-d1` (por qué publicar no basta), más `PLACEHOLDERS.md` y `CLAUDE.md`.
+`sincronizar-d1` (por qué publicar no basta), más `docs/PLACEHOLDERS.md` y `AGENTS.md`.
 
 NO publicas. Dejas la rama construida, verificada y explicada, y pides permiso.
 
@@ -40,7 +40,7 @@ NO publicas. Dejas la rama construida, verificada y explicada, y pides permiso.
 - **La aprobación visual es humana.** Las métricas no distinguen el modelo
   equivocado, la variante de color equivocada, ni un recorte perfecto sobre una
   foto de escena. Genera la hoja de contactos y espera.
-- **Cada categoría tiene su spec** (`PLACEHOLDERS.md`): armas y cartuchos con
+- **Cada categoría tiene su spec** (`docs/PLACEHOLDERS.md`): armas y cartuchos con
   alfa sobre 1:1; campos y cursos en 16:9; portadas de categoría en 4:5 y **sin**
   recortar el fondo.
 - **Si la foto viene de fuera**, registra su procedencia y di de dónde salió. Las
@@ -65,8 +65,8 @@ imagen puede estar perfecta en disco y verse mal en su sitio.
 2. Las métricas de las que entraron, con su número.
 3. Qué falta por conseguir de fuera, como lista accionable.
 4. El resultado de las verificaciones, con su salida real.
-5. Los pasos que quedan para publicar: `?v=` de `data.js` en los tres HTML, y el
-   resembrado de D1.
+5. Los pasos que quedan para publicar: `?v=` de `data.js` en `src/pages/index.html` y
+   `src/pages/admin.html`, y el resembrado de D1.
 6. Petición explícita de permiso para commitear y mergear.
 
 Al cerrar, aplica `mejorar-tooling`: apunta en la bitácora de `fotos-producto`

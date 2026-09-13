@@ -20,14 +20,15 @@ viejo si no haces `fetch`. Si te basaste en un main viejo, **rebasa antes de pus
 `git rebase --onto origin/main <base-vieja> <rama>`.
 
 ## Cache-busting (si cambió CUALQUIER data-*.js)
-Los `<script src="data-*.js?v=YYYYMMDD...">` en `index.html`, `admin.html` y
-`shopify-demo.html` llevan un sufijo `?v=`. Súbelo (p. ej. `20260616b` → `20260617`)
+Los `<script src="data-*.js?v=YYYYMMDD...">` de `src/pages/index.html` y
+`src/pages/admin.html` (son dos) llevan un sufijo `?v=`. Súbelo (p. ej. `20260616b` → `20260617`)
 cuando cambien los datos, para forzar descarga fresca (el navegador puede cachear
 `data.js` viejo aunque el historial venga fresco). Los `.jsx` revalidan solos.
 
 ## Build (Cloudflare lo corre solo)
-El proyecto de Pages tiene **build command `npm ci && npm run build`** y output `.`:
-Babel CLI precompila los `.jsx` a `.js` en cada deploy. Los `.js` NO se commitean.
+El proyecto de Pages tiene **build command `npm ci && npm run build`** y output `out`
+(`pages_build_output_dir` en `wrangler.toml`): Babel CLI precompila los `.jsx` a `.js`
+en cada deploy y todo lo generado cae en `out/`, que no se commitea.
 Si tocas `package.json` o `babel.config.json`, comprueba el build del preview del PR
 antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
 
@@ -86,8 +87,18 @@ antes de mergear: un fallo ahí deja el HTML apuntando a `.js` inexistentes.
   `/api/append/ratings`, y al retirar el dominio `ratings` (opiniones tipo Steam)
   pasó a responder `dominio_invalido` — que NO distingue si D1 sigue vinculada.
   Ahora sonda `reviewsQueue`. Si algún día cambian los dominios de append, actualiza
-  esta línea y la de CLAUDE.md: una sonda que ya no prueba nada es peor que ninguna,
+  esta línea y la de AGENTS.md: una sonda que ya no prueba nada es peor que ninguna,
   porque da confianza falsa.
+- 2026-09-12: **para dejar `develop` en espejo tras publicar varios PRs, basta un PR
+  `main → develop`.** GitHub marca como merged los PRs abiertos a `develop` cuyo
+  contenido llega así (pasó con #135 y #137 vía #138): no hay que mergearlos uno a uno.
+- 2026-09-12: **al publicar varias ramas juntas, verifica el combinado ANTES de
+  mergear.** Simula el merge encadenando `git merge-tree --write-tree <acumulado> <rama>`
+  + `git commit-tree`, levanta un worktree temporal en ese commit con `node_modules`
+  enlazado (junction) y corre build + `auditar.js` + `contraste.mjs`. Tras mergear,
+  `git diff <combinado> origin/main` debe salir vacío. Al borrar el worktree, **quita
+  antes el enlace de `node_modules`**: un borrado recursivo que siga el enlace vaciaría
+  el `node_modules` real del repo.
 - 2026-06: un deploy fallido NO publica el sitio aunque suban los assets.
 - 2026-06: preview por-rama (`<hash>.pages.dev`) tiene origen distinto → localStorage
   no persiste ahí; validar en armado.mx.

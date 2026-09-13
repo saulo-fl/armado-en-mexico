@@ -412,8 +412,6 @@ writeFileSync(join(OUT, 'robots.txt'), `User-agent: *
 Allow: /
 Disallow: /admin
 Disallow: /admin.html
-Disallow: /shopify-demo
-Disallow: /shopify-demo.html
 
 Sitemap: ${SITIO}/sitemap.xml
 `, 'utf8');
