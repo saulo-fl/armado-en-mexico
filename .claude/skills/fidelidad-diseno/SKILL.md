@@ -108,8 +108,10 @@ a CSS, la skill `migrar-a-css`.
 - **Tarjetas de arma:** muestran existencias por sucursal (`● 36 DCAM · 18 OTCA` /
   `✕ AGOTADO`) y precio exacto compacto bajo la escala $$$$$ (solo lectura de
   getArmaExistencias/getArmaExistenciasOTCA — sin tocar store).
-- **Ficha móvil:** barra fija de acción (precio + comparar) apoyada en
-  `bottom: calc(var(--amx-nav-h, 74px) - 1px)`; se oculta si hay comparación activa.
+- **Ficha móvil:** desde el 13-sep-2026 la barra fija es el **talón de comprobante**
+  (`.amx-talon--fijo`), que flota 8px sobre `var(--amx-nav-h)` y solo aparece cuando
+  el talón de la ficha sale de pantalla (ver «Ficha de arma — estructura vigente»).
+  La barra soldada al nav que había antes usaba `calc(var(--amx-nav-h, 74px) - 1px)`.
   **`--amx-nav-h` la publica `BottomNav` midiéndose con `ResizeObserver`** (y ya
   incluye el safe-area en su propio padding — no lo sumes otra vez). Antes eran dos
   literales `76px` a mano contra un nav que mide ~74: quedaba una rendija de 2px por
@@ -126,22 +128,38 @@ a CSS, la skill `migrar-a-css`.
 - Las tarjetas de arma ya NO llevan etiqueta de tipo sobre la imagen (redundante).
 - El "precio actual" de la ficha se toma del último registro del historial.
 
-## Ficha de arma — estructura vigente (rediseño ago-2026, PR #45)
-Orden fijo: **identidad → foto HERO → datos clave → precio → historial
-→ munición → accesorios → desplegables → vídeo → opinión → armas similares →
-sugerir cambios**. No lo reordenes sin motivo: el `AvailBadge` y `legalTit` van
-arriba a propósito, para responder "¿puedo comprarla?" antes del pliegue, y
-«Sugerir cambios» cierra la página (es la última acción, no una interrupción).
-**Usos, Legalidad e Historia van en pestañas**: `FichaTabs` con un `<Panel label>`
-por pestaña (`screens-2.jsx`, docs/DESIGN.md §11), con flechas de teclado entre
-ellas. Los desplegables (`window.Disclosure`) quedan para el detalle secundario
-(la fuente del precio, «Leer opiniones»).
-- Separación entre secciones = **espacio** (52px escritorio / 34px móvil) + banda de
-  fondo, nunca una línea gris. El helper `ProdSection` de `screens-2.jsx`.
-- Primitivas nuevas en `ui.jsx`: **`Disclosure`** (desplegable; con `compact` se pinta
-  como pie de nota — sin fondo ni barrita de acento, título en mono 12.5),
-  **`PriceChart`** (gráfica de precios), **`amxPrecioNum`** / **`amxFechaCorta`** /
-  **`amxOpinionLabel`** (helpers), y `CUT_TR_SM` ya está expuesto en `window`.
+## Ficha de arma — estructura vigente (el expediente, 13-sep-2026)
+Rediseño decidido con Saulo sección por sección; las reglas están en
+**docs/DESIGN.md §5.5** y la piel en `estilo.css`, bloque «LA FICHA DE ARMA».
+Todo va dentro del **folder manila** (`.amx-carpeta`, la foto de la Home en 9-slice):
+- **Cabecera**: el tipo rotulado en la pestaña y el nombre. Nada más: el folio
+  `AR-####` y cualquier «No.» sacado del id están vetados (decoración que finge dato).
+- **Columna izquierda** (fija ≥1024px y ≥720px de alto): copia instantánea con clip
+  y el **sello legal estampado encima** (la única animación de entrada), `legalTit`
+  y «§ Ver situación legal» (abre Legalidad y lleva el foco a su pestaña), el
+  **talón de comprobante** rosa (precio, fuente, fecha y la casilla Comparar) y la
+  etiqueta de opiniones. Responde «¿puedo comprarla?» y «¿cuánto cuesta?» antes
+  del pliegue, que es por lo que existe el orden.
+- **Documentos**: `FichaTecnica` (ficha de fichero, con `mecanismo`) → `TarjetaAlmacen`
+  (kárdex por sucursal, absorbe «Detalle de la fuente») → `HistorialPrecios`
+  (milimétrico + registro + anexos grapados; con UNA sola fecha sale solo el
+  registro, ya no se oculta) → separadores **Legalidad · Usos · Antecedentes**
+  (`FichaTabs` controlada, Legalidad abierta por defecto, hoja de oficio).
+- **Fuera del folder**, cada sección con su **`CintaDymo`**: vitrina con dos repisas
+  (`Repisa` + `RepisaArticulo`; filas de 6 en escritorio, tira con scroll en móvil)
+  → tele de los 80 (`YouTubeBlock`, solo si hay video) → tarjeta de comentarios
+  (`OpinionBlock`) → armas similares (`ArmaExpediente`).
+- **Móvil (<1024px)**: el mismo orden en pila. El **talón fijo** abajo aparece
+  cuando el talón de la ficha sale por arriba (IntersectionObserver, sin escuchar
+  el scroll) y se retira al asomar el `<footer>` o con una comparación activa.
+- **«Sugerir cambios» y «Proponer arma» ya no existen** (13-sep-2026): el catálogo
+  sale de los inventarios oficiales y las fichas de fabricantes.
+- Primitivas de la ficha en `ui.jsx`: **`Disclosure`**, **`PriceChart`** (con `tintas`
+  para dibujar sobre papel), **`amxPrecioNum`** / **`amxFechaCorta`** /
+  **`amxFmtManualDate`** / **`amxOpinionLabel`**, y las de la papelería: `CintaDymo`,
+  `TalonComprobante`, `TarjetaAlmacen`, `HistorialPrecios`, `Repisa`,
+  `RepisaArticulo`. Están en `ui.jsx` para que las fichas de accesorio y munición
+  las porteen tal cual.
 - **`PriceChart` colorea POR TRAMO**: verde si el precio bajó entre esos dos
   inventarios, rojo si subió, gris si no cambió. El relleno bajo la línea es
   **neutro** (blanco 8%) a propósito: si también fuera de color competiría con los
@@ -178,6 +196,27 @@ ellas. Los desplegables (`window.Disclosure`) quedan para el detalle secundario
   por cartucho. Lo usan la tarjeta y la ficha.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-09: **un IntersectionObserver no dispara si el objetivo SALTA la ventana.** Un
+  centinela al final de la ficha pasaba de «debajo» a «encima» con un salto de scroll
+  (ir al final, un fling largo) sin cruzar nunca la ventana: su estado seguía siendo
+  «no se ve» y el talón fijo se quedaba tapando el pie. Hay que observar algo que al
+  final QUEDE dentro (el `<footer>`), no un punto de paso.
+- 2026-09: **una máscara recorta también la sombra.** El talón picado y la ficha
+  perforada llevan `mask`; su sombra va en un envoltorio con `filter: drop-shadow`
+  (`.amx-talon`, `.amx-papel`), que sigue el recorte. Con `box-shadow` en el mismo
+  elemento, la sombra desaparece.
+- 2026-09: **el desgaste del sello se come letras si el sello es grande.** Con la
+  máscara entera, EXCLUSIVO salía «EXC USIVO» en la copia de la ficha. Para texto que
+  informa (legalidad), la máscara rebajada del tutorial: la máscara más una capa lisa
+  al 60 % (`mask-composite: add`).
+- 2026-09: **dentro de un papel diegético, nada de `PALETTE`/`CLARO`.** Siguen al tema:
+  en oscuro dejan tinta clara sobre un papel que sigue siendo claro. `PriceChart` pinta
+  sobre el milimétrico con `tintas` fijas por esa razón.
+- 2026-09: **para medir en los anchos reales sin el Chrome del MCP** (ocupado por otra
+  sesión): `playwright-core` instalado FUERA del repo, con
+  `executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe'`,
+  `viewport` exacto, `isMobile`/`hasTouch` y `reducedMotion: 'reduce'` para comprobar
+  el movimiento reducido.
 - 2026-09: **Safari no resuelve `max-height: %` dentro de una caja cuya altura sale de
   `aspect-ratio`.** Chrome sí, así que en escritorio se ve bien y en el iPhone la foto
   sale recortada (la cuadrada de las traumáticas en el pozo 16:9). No es la resolución

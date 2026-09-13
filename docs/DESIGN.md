@@ -1098,6 +1098,43 @@ como instrumentación y no como texto.
 - **Asimetría sistemática, no aleatoria:** siempre la misma esquina cortada, siempre los mismos
   dos corchetes. Rompe el rectángulo conservando el escaneo predecible.
 
+### 5.5 La papelería del expediente — la ficha de arma (13-sep-2026)
+
+Cómo se resolvió §4.3, decidido con Saulo sección por sección. El detalle de cada pieza, con sus
+medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al final de `ui.jsx`.
+
+- **Cada dato es un papel de oficina distinto dentro del folder manila.** La copia instantánea con
+  clip y el sello legal estampado encima; el talón de comprobante rosa (precio y Comparar); la
+  ficha de fichero (ficha técnica); la tarjeta de almacén (existencias por sucursal); el papel
+  milimétrico con su registro y los anexos grapados (historial y PDFs); los separadores con la
+  hoja de oficio (Legalidad · Usos · Antecedentes). Fuera del folder: la vitrina con dos repisas
+  (munición y accesorios), la tele de los 80 (video), la tarjeta de comentarios y los expedientes
+  de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra.
+- **Intensidad: papelería física, sin texturas.** Se permiten clips, grapas, cinta canela,
+  perforaciones, papel autocopiante, cinta rotuladora y líneas de corte, dibujados en CSS o como
+  recortes ligeros. Sigue prohibido lo de §27 («texturas de papel fuertes») y lo de §3: ningún
+  filtro de envejecido, ninguna fuente nueva. Una cuadrícula de milimétrico o el rayado de una
+  ficha no son texturas: son el papel mismo.
+- **El folder es la foto de la Home como 9-slice** (`border-image`, igual que el tutorial): crece
+  con la ficha sin torcer la pestaña. Saulo rechazó dos veces el folder dibujado en CSS.
+- **Excepción a la regla diegética: manila en penumbra.** Los papeles no siguen al tema (§5.1b),
+  pero el folder ocupa casi toda la pantalla y en oscuro deslumbraba. En oscuro baja el BRILLO de
+  la foto al 68 % (`--manila-luz`), no su color; los papeles de dentro siguen claros. Lo escrito
+  directamente sobre el manila usa la tinta plena en oscuro: la secundaria no llega a 4.5:1.
+- **Dos colores legales, no tres** (decisión del 8-sep-2026, se mantiene): verde para CIVIL, rojo
+  para SEGURIDAD y EXCLUSIVO; las distingue la palabra. La tinta azul de sello es para lo que no
+  es legal (usos, foto pendiente).
+- **Un solo corte, 1024px.** Por encima: columna izquierda fija (copia, sello, talón) y documentos
+  a la derecha; la columna solo es fija con 720px de alto o más. Por debajo: pila de documentos y
+  talón fijo abajo, que aparece solo cuando el talón de la ficha sale de pantalla y se retira al
+  asomar el pie. La tableta no es objetivo; el móvil sí, medido en los anchos reales de México
+  (Statcounter, ago-2026): 360 · 384 · 390 · 393 · 402 · 412 · 414 · 440.
+- **Una sola animación de entrada:** el sello que se estampa sobre la copia. Todo lo demás solo
+  responde a una acción.
+- **Dentro de un papel no se usa `PALETTE` ni `CLARO`** (siguen al tema y en oscuro dejarían tinta
+  clara sobre papel claro): solo los tokens de la papelería, auditados por `contraste.mjs` en el
+  grupo «LA PAPELERÍA DE LA FICHA DE ARMA». El anillo de foco sobre los papeles va en tinta.
+
 ---
 
 ## 6. Prohibiciones explícitas
