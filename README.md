@@ -107,12 +107,12 @@ la está considerando:
 - **El expediente.** Todo va dentro de un folder manila abierto, con su tipo rotulado en la
   pestaña. A la izquierda, la foto en una copia instantánea sujeta con un clip, con marca, país
   —con su bandera— y año anotados al pie y el **sello de su clasificación legal** estampado encima;
-  debajo, la situación legal en una línea y el **comprobante de precio**: la cifra con IVA, la
-  armería que la publicó, la fecha de su inventario y la casilla **Comparar**. En escritorio esa
-  columna se queda fija mientras se leen los documentos de la derecha; en el teléfono el
-  comprobante vuelve a aparecer abajo en cuanto sale de la pantalla.
+  a la derecha, la ficha técnica. Al abrir el folder se ven también el comprobante y la tarjeta de
+  almacén, y al bajar aparecen las hojas de legalidad y el historial.
 - **Ficha técnica**, mecanografiada en una ficha de fichero: calibre, capacidad, mecanismo,
   longitud, peso, origen y año.
+- **Comprobante de precio**: la cifra con IVA, la armería que la publicó, la fecha de su inventario
+  y la casilla **Comparar**. En el teléfono vuelve a aparecer abajo en cuanto sale de la pantalla.
 - **Tarjeta de almacén.** Las existencias por sede: cuántas piezas marcó el último inventario de la
   DCAM y el de la OTCA, o AGOTADO si el arma ya no aparece en él, con la descripción literal con la
   que figura en el inventario, el enlace a cada PDF y el aviso de que es un dato histórico.

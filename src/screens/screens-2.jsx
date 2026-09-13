@@ -53,12 +53,23 @@ function FichaTabs({ children, activo, onCambiar }) {
           </button>
         ))}
       </div>
-      <div className="amx-oficio" role="tabpanel" id={'ficha-panel-' + act} aria-labelledby={'ficha-tab-' + act}>
-        {/* Membrete genérico del sitio: sin escudo ni emblema oficial (§6b). */}
-        <div className="amx-oficio-membrete" aria-hidden="true">
-          <span>Armado en México</span><span>{paneles[act].props.label}</span>
-        </div>
-        {paneles[act]}
+      {/* LAS TRES HOJAS SE PINTAN, apiladas en la misma celda, y solo se ve la
+          activa. Antes se pintaba solo la activa y el folder crecía o encogía al
+          cambiar de pestaña —«puede marear o ser incómodo», Saulo, 13-sep-2026—.
+          Así la pila mide siempre lo que la hoja más larga. Las de detrás van
+          con `visibility: hidden` (estilo.css), que las saca del lector de
+          pantalla y del orden del tabulador sin quitarles el alto. */}
+      <div className="amx-oficio-pila">
+        {paneles.map((p, i) => (
+          <div key={i} className="amx-oficio" role="tabpanel" id={'ficha-panel-' + i}
+            aria-labelledby={'ficha-tab-' + i} data-activo={i === act ? 'si' : 'no'}>
+            {/* Membrete genérico del sitio: sin escudo ni emblema oficial (§6b). */}
+            <div className="amx-oficio-membrete" aria-hidden="true">
+              <span>Armado en México</span><span>{p.props.label}</span>
+            </div>
+            {p}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -81,7 +92,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   // …y se retira cuando asoma el pie de sitio, para no taparle el último renglón.
   const [pieVisible, setPieVisible] = useState2(false);
   const talonRef = React.useRef(null);
-  const separadoresRef = React.useRef(null);
+  const fichaRef = React.useRef(null);
 
   useEffect(() => {
     if (arma && window.Store) window.Store.trackVisit(arma.id);
@@ -93,13 +104,25 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   // hace el contenedor interno del shell móvil. Nada de escuchar el scroll.
   // El margen de arriba descuenta la barra superior (64px), que tapa lo que
   // pasa por debajo de ella.
+  //
+  // NO BASTA OBSERVAR EL TALÓN. En móvil va debajo de la ficha técnica, fuera
+  // de la pantalla al cargar, y un salto de scroll lo lleva de «debajo» a
+  // «encima» sin cruzar nunca la ventana: su estado no cambia y el observer no
+  // dispara (la misma trampa que obligó a observar el pie). Por eso se observan
+  // también las celdas del folder y las secciones de la ficha, que cubren la
+  // página entera: cualquier salto cambia la visibilidad de alguna, y en cada
+  // aviso se mide dónde quedó el talón.
   useEffect(() => {
     const el = talonRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(([e]) => {
-      setTalonFuera(!e.isIntersecting && e.boundingClientRect.top < 64);
-    }, { rootMargin: '-64px 0px 0px 0px' });
+    const revisar = () => setTalonFuera(el.getBoundingClientRect().bottom < 64);
+    const io = new IntersectionObserver(revisar, { rootMargin: '-64px 0px 0px 0px' });
     io.observe(el);
+    const ficha = fichaRef.current;
+    if (ficha) {
+      Array.from(ficha.children).forEach((c) => io.observe(c));
+      ficha.querySelectorAll('.amx-carpeta-grid > *').forEach((c) => io.observe(c));
+    }
     // Se observa el <footer> del shell y no un centinela al final de la ficha:
     // un salto de scroll (ir al final, un fling largo) lleva el centinela de
     // debajo de la ventana a encima SIN cruzarla, y el observer no dispara. El
@@ -177,21 +200,9 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
   const comparar = () => toggleCompare(arma.id);
 
-  // «§ Ver situación legal»: abre Legalidad, baja hasta la hoja y deja el foco
-  // en su pestaña, para que el lector de pantalla llegue al mismo sitio.
-  const verLegal = () => {
-    setTab(0);
-    const el = separadoresRef.current;
-    if (!el) return;
-    const reducir = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    el.scrollIntoView({ behavior: reducir ? 'auto' : 'smooth', block: 'start' });
-    const pestana = document.getElementById('ficha-tab-0');
-    if (pestana) pestana.focus({ preventScroll: true });
-  };
-
   return (
     <div style={{ paddingBottom: 90 }}>
-     <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+     <div ref={fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
       {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
       <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
@@ -202,13 +213,21 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               dato. El tipo sí dice algo verdadero. */}
           <span className="amx-carpeta-rotulo" aria-hidden="true">{tipoRotulo}</span>
 
+          {/* Las celdas van en el orden de lectura del teléfono. En escritorio
+              estilo.css las reparte por filas en las dos solapas (Saulo,
+              13-sep-2026): foto | ficha técnica y comprobante | tarjeta de
+              almacén a la vista al abrir, y al bajar, Legalidad · Usos ·
+              Antecedentes | historial. Nada se queda fijo al hacer scroll: son
+              papeles sobre un folder, y una columna fija rompía esa ficción. */}
           <div className="amx-carpeta-grid">
             <header className="amx-carpeta-cab">
               <h1 id="ficha-nombre" className="t-titulo">{arma.nombre}</h1>
             </header>
 
-            {/* SOLAPA IZQUIERDA — fija en escritorio (ver estilo.css). */}
-            <div className="amx-carpeta-izq">
+            {/* La situación legal la dice el sello, y entera la hoja de
+                Legalidad: la línea «Exclusivo — Fuerzas Armadas» y el enlace
+                «§ Ver situación legal» que iban bajo la copia la repetían. */}
+            <div className="amx-carpeta-foto">
               <div className="amx-copia">
                 <span className="amx-copia-clip" aria-hidden="true" />
                 <window.ArmaPolaroid arma={arma} selloSinFoto />
@@ -219,34 +238,28 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     className="amx-sello--estampa" />
                 </span>
               </div>
+            </div>
 
-              <p className="amx-copia-legal">
-                <span className="amx-copia-legal-tit">{arma.legalTit}</span>
-                <button type="button" className="amx-enlace-legal" onClick={verLegal}>§ Ver situación legal</button>
-              </p>
+            <div className="amx-carpeta-ficha">
+              <window.FichaTecnica arma={arma} />
+            </div>
 
+            <div className="amx-carpeta-talon">
               <window.TalonComprobante talonRef={talonRef}
                 precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
                 enComparacion={inCmp} onComparar={comparar} />
-
               {/* Lo que opina la comunidad, junto al precio: la pregunta «¿vale
                   la pena?» se responde aquí y no al final de la página. */}
               {etOpin.hay &&
                 <p className="amx-copia-opinion">Opiniones: <b>{etOpin.label}</b></p>}
             </div>
 
-            {/* SOLAPA DERECHA — los documentos, en el orden en que se leen. */}
-            <div className="amx-carpeta-der">
-              <window.FichaTecnica arma={arma} />
-
+            <div className="amx-carpeta-almacen">
               <window.TarjetaAlmacen filas={branches} referencia={arma.dcamRef}
                 sigla={curSigla} nivelPrecio={arma.priceLvl} />
+            </div>
 
-              {priceHistory.length > 0 &&
-                <window.HistorialPrecios historial={priceHistory} manualById={manualById}
-                  plegarRegistro={!ancho} />}
-
-              <div ref={separadoresRef} className="amx-separadores">
+            <div className="amx-carpeta-legal amx-separadores">
                 <FichaTabs activo={tab} onCambiar={setTab}>
 
                   <Panel label="Legalidad">
@@ -284,8 +297,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     </Panel>}
 
                 </FichaTabs>
-              </div>
             </div>
+
+            {priceHistory.length > 0 &&
+              <div className="amx-carpeta-historial">
+                <window.HistorialPrecios historial={priceHistory} manualById={manualById}
+                  plegarRegistro={!ancho} />
+              </div>}
           </div>
         </article>
       </div>
@@ -342,8 +360,12 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {/* ── LA TARJETA DE COMENTARIOS ─────────────────────────────────── */}
       <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-opiniones">
         <window.CintaDymo id="ficha-opiniones">Opiniones</window.CintaDymo>
-        <OpinionBlock tipo="arma" entidadId={arma.id} entidadNombre={arma.nombre}
-          nombreTipo="arma" onNav={onNav} />
+        {/* Centrada en el ancho de la ficha, con sus opiniones publicadas debajo
+            a la misma medida (Saulo, 13-sep-2026). */}
+        <div className="amx-comentarios-marco">
+          <OpinionBlock tipo="arma" entidadId={arma.id} entidadNombre={arma.nombre}
+            nombreTipo="arma" onNav={onNav} />
+        </div>
       </section>
 
       {/* ── ARMAS SIMILARES — los expedientes de la Home ─────────────── */}

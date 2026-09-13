@@ -134,24 +134,34 @@ Rediseño decidido con Saulo sección por sección; las reglas están en
 Todo va dentro del **folder manila** (`.amx-carpeta`, la foto de la Home en 9-slice):
 - **Cabecera**: el tipo rotulado en la pestaña y el nombre. Nada más: el folio
   `AR-####` y cualquier «No.» sacado del id están vetados (decoración que finge dato).
-- **Columna izquierda** (fija ≥1024px y ≥720px de alto): copia instantánea con clip
-  y el **sello legal estampado encima** (la única animación de entrada), `legalTit`
-  y «§ Ver situación legal» (abre Legalidad y lleva el foco a su pestaña), el
-  **talón de comprobante** rosa (precio, fuente, fecha y la casilla Comparar) y la
-  etiqueta de opiniones. Responde «¿puedo comprarla?» y «¿cuánto cuesta?» antes
-  del pliegue, que es por lo que existe el orden.
-- **Documentos**: `FichaTecnica` (ficha de fichero, con `mecanismo`) → `TarjetaAlmacen`
-  (kárdex por sucursal, absorbe «Detalle de la fuente») → `HistorialPrecios`
-  (milimétrico + registro + anexos grapados; con UNA sola fecha sale solo el
-  registro, ya no se oculta) → separadores **Legalidad · Usos · Antecedentes**
-  (`FichaTabs` controlada, Legalidad abierta por defecto, hoja de oficio).
+- **Orden de las celdas** (el del DOM y el de la pila en móvil): copia instantánea
+  con clip y el **sello legal estampado encima** (la única animación de entrada) →
+  `FichaTecnica` (ficha de fichero, con `mecanismo`) → **talón de comprobante**
+  rosa (precio, fuente, fecha, casilla Comparar, y debajo la etiqueta de opiniones)
+  → `TarjetaAlmacen` (kárdex por sucursal, absorbe «Detalle de la fuente») →
+  separadores **Legalidad · Usos · Antecedentes** (`FichaTabs` controlada, Legalidad
+  abierta, hoja de oficio) → `HistorialPrecios` (milimétrico + registro + anexos;
+  con UNA sola fecha sale solo el registro).
+- **Escritorio (≥1024px), por filas en dos solapas** (Saulo, 13-sep-2026): foto |
+  cabecera + ficha técnica, comprobante | almacén (lo que se ve al abrir) y, al
+  bajar, Legalidad… | historial. **Nada fijo**: la columna izquierda sticky que hubo
+  «rompe completamente la estética vintage/diegética». Tampoco van bajo la foto la
+  línea legal ni «§ Ver situación legal»: lo dicen el sello y la hoja de Legalidad.
+- **Las tres hojas de oficio se pintan apiladas** en la misma celda
+  (`.amx-oficio-pila`, las de detrás con `visibility: hidden`): el folder no crece
+  ni encoge al cambiar de pestaña, que mareaba.
 - **Fuera del folder**, cada sección con su **`CintaDymo`**: vitrina con dos repisas
   (`Repisa` + `RepisaArticulo`; filas de 6 en escritorio, tira con scroll en móvil)
   → tele de los 80 (`YouTubeBlock`, solo si hay video) → tarjeta de comentarios
   (`OpinionBlock`) → armas similares (`ArmaExpediente`).
 - **Móvil (<1024px)**: el mismo orden en pila. El **talón fijo** abajo aparece
-  cuando el talón de la ficha sale por arriba (IntersectionObserver, sin escuchar
-  el scroll) y se retira al asomar el `<footer>` o con una comparación activa.
+  cuando el talón de la ficha sale por arriba y se retira al asomar el `<footer>` o
+  con una comparación activa. IntersectionObserver sin escuchar el scroll, pero
+  observando también las celdas y las secciones (ver la bitácora: un salto de
+  scroll no dispara el observer del objetivo si este no cruza la ventana).
+- **Vitrina**: la cubierta de la repisa sube el 34 % del alto de la foto por detrás
+  de su base; las fotos de caja son en tres cuartos desde arriba y su esquina
+  trasera queda hasta un 28 % por encima del punto más bajo.
 - **«Sugerir cambios» y «Proponer arma» ya no existen** (13-sep-2026): el catálogo
   sale de los inventarios oficiales y las fichas de fabricantes.
 - Primitivas de la ficha en `ui.jsx`: **`Disclosure`**, **`PriceChart`** (con `tintas`

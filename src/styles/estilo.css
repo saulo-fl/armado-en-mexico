@@ -1554,8 +1554,8 @@
    LA FICHA DE ARMA — el expediente completo (rediseño del 13-sep-2026)
 
    Decidido con Saulo sección por sección (rama opus-5/red-fichas-de-armas):
-   «Expediente con columna fija» en escritorio y «pila de documentos + talón
-   fijo» en móvil; papelería física —clips, grapas, cinta canela, cinta Dymo,
+   dos solapas por filas en escritorio (sin nada fijo) y «pila de documentos +
+   talón fijo» en móvil; papelería física —clips, grapas, cinta canela, cinta Dymo,
    papel autocopiante— y NINGUNA textura ni filtro de envejecido.
 
    Cada dato es un papel de oficina distinto dentro del folder manila:
@@ -1645,38 +1645,48 @@
   overflow: hidden;
 }
 
-/* ── Las dos solapas ────────────────────────────────────────────────────────
-   El DOM va cabecera → columna izquierda → documentos, que es el orden de la
-   pila en móvil. En escritorio las áreas lo reparten sin reordenar el DOM: el
-   teclado y el lector de pantalla siguen el mismo camino. */
+/* ── Las dos solapas, por filas ─────────────────────────────────────────────
+   El DOM va en el orden de lectura del teléfono: cabecera, foto, ficha técnica,
+   comprobante, tarjeta de almacén, Legalidad · Usos · Antecedentes e historial.
+   En escritorio las áreas lo reparten sin reordenar el DOM (el teclado y el
+   lector de pantalla siguen el mismo camino), y lo reparten POR FILAS, como pidió
+   Saulo el 13-sep-2026:
+
+       foto          │ cabecera + ficha técnica      ← lo primero que se ve
+       comprobante   │ tarjeta de almacén              al abrir el folder
+       ─────────────────────────────────────────
+       Legalidad…    │ historial de precios          ← lo que revela el scroll
+
+   NADA SE QUEDA FIJO. Hubo una columna izquierda con `position: sticky` (copia,
+   sello y talón siguiendo al scroll) y Saulo la retiró: «rompe completamente la
+   estética vintage/diegética». Son papeles sobre un folder; un papel no persigue
+   a quien lee. */
 .amx-v2 .amx-carpeta-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--e5);
 }
-.amx-v2 .amx-carpeta-der { display: grid; gap: var(--e5); min-width: 0; }
+.amx-v2 .amx-carpeta-grid > * { min-width: 0; }
 @media (min-width: 1024px) {
   .amx-v2 .amx-carpeta-grid {
     grid-template-columns: minmax(0, 36%) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    grid-template-areas: "izq cab" "izq der";
+    grid-template-areas:
+      "foto   cab"
+      "foto   ficha"
+      "talon  almacen"
+      "legal  historial";
+    grid-template-rows: auto 1fr auto auto;
     column-gap: var(--e6);
-    row-gap: var(--e4);
+    row-gap: 40px;
     align-items: start;
   }
-  .amx-v2 .amx-carpeta-cab { grid-area: cab; }
-  .amx-v2 .amx-carpeta-izq { grid-area: izq; }
-  .amx-v2 .amx-carpeta-der { grid-area: der; gap: 44px; }
-}
-/* LA COLUMNA FIJA. Solo con alto de sobra: en una pantalla de 768px la copia,
-   el sello y el talón no caben enteros, y una columna fija más alta que la
-   ventana deja el botón Comparar donde no se alcanza. Por debajo de 720px de
-   alto la columna hace scroll con la página, como cualquier otra. */
-@media (min-width: 1024px) and (min-height: 720px) {
-  .amx-v2 .amx-carpeta-izq {
-    position: sticky;
-    top: calc(64px + var(--e4));       /* bajo la barra superior, que mide 64 */
-  }
+  .amx-v2 .amx-carpeta-cab       { grid-area: cab; }
+  .amx-v2 .amx-carpeta-foto      { grid-area: foto; }
+  .amx-v2 .amx-carpeta-ficha     { grid-area: ficha; margin-top: -16px; }  /* la ficha, pegada al nombre */
+  .amx-v2 .amx-carpeta-talon     { grid-area: talon; }
+  .amx-v2 .amx-carpeta-almacen   { grid-area: almacen; }
+  .amx-v2 .amx-carpeta-legal     { grid-area: legal; }
+  .amx-v2 .amx-carpeta-historial { grid-area: historial; }
 }
 
 .amx-v2 .amx-carpeta-cab h1 {
@@ -1688,17 +1698,17 @@
   .amx-v2 .amx-carpeta-cab h1 { font-size: 40px; }
 }
 
-/* ── LA COPIA: clip, sello estampado y la línea legal ─────────────────────── */
+/* ── LA COPIA: clip y sello estampado ──────────────────────────────────────── */
 .amx-v2 .amx-copia {
   position: relative;
   width: min(100%, 250px);
   margin: 6px auto 0;
   --giro: -1.6deg;
 }
-/* En escritorio la copia manda el alto de la columna fija: se limita por el
-   ALTO de la ventana para que copia, sello y talón quepan en ella. */
+/* En escritorio la copia ocupa su solapa entera. Estuvo limitada por el alto de
+   la ventana para caber en la columna fija; sin columna fija, sobra. */
 @media (min-width: 1024px) {
-  .amx-v2 .amx-copia { width: min(100%, max(240px, calc(100vh - 430px))); margin-top: 0; }
+  .amx-v2 .amx-copia { width: 100%; margin-top: 0; }
 }
 /* En la ficha la copia gira también en móvil: va centrada y a 290px, no a
    ancho completo, así que el giro ya no se come el ancho útil. */
@@ -1774,35 +1784,8 @@
   transform: rotate(-9deg);
 }
 
-.amx-v2 .amx-copia-legal {
-  margin: var(--e4) 0 0;
-  text-align: center;
-}
-@media (min-width: 1024px) { .amx-v2 .amx-copia-legal { margin-top: var(--e5); } }
-.amx-v2 .amx-copia-legal-tit {
-  display: block;
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: .06em;
-  line-height: 1.45;
-  color: var(--manila-tinta);
-}
-.amx-v2 .amx-enlace-legal {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 var(--e2);
-  background: none;
-  border: 0;
-  font-family: var(--mono);
-  font-size: 13px;
-  letter-spacing: .08em;
-  color: var(--manila-tinta);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
-  cursor: pointer;
-}
+/* Aquí iban «Exclusivo — Fuerzas Armadas» y «§ Ver situación legal» bajo la
+   copia. Salieron el 13-sep-2026: lo dicen el sello y la hoja de Legalidad. */
 .amx-v2 .amx-copia-opinion {
   margin: var(--e3) 0 0;
   text-align: center;
@@ -1822,7 +1805,7 @@
 .amx-v2 .amx-talon {
   position: relative;
   width: min(100%, 340px);
-  margin: var(--e4) auto 0;
+  margin: 0 auto;
   filter: drop-shadow(0 1px 1px rgba(23, 27, 25, .16)) drop-shadow(0 5px 8px rgba(23, 27, 25, .18));
   transform: rotate(-.8deg);
 }
@@ -2280,7 +2263,7 @@
    Legalidad · Usos · Antecedentes. Las pestañas son las de un separador de
    archivero: la de delante se une a su hoja; las de detrás van un papel más
    gastadas y un punto más abajo, metidas en el folder. */
-.amx-v2 .amx-separadores { scroll-margin-top: calc(64px + var(--e4)); min-width: 0; }
+.amx-v2 .amx-separadores { min-width: 0; }
 .amx-v2 .amx-separadores-pestanas {
   display: flex;
   gap: 4px;
@@ -2316,6 +2299,12 @@
   box-shadow: 0 -2px 4px -2px rgba(23, 27, 25, .16);
   transform: none;
 }
+/* Las tres hojas (Legalidad, Usos, Antecedentes) comparten celda: la pila mide
+   lo que la más larga y el folder no crece ni encoge al cambiar de pestaña. Las
+   de detrás, invisibles y fuera del lector de pantalla y del tabulador. */
+.amx-v2 .amx-oficio-pila { display: grid; }
+.amx-v2 .amx-oficio-pila > .amx-oficio { grid-area: 1 / 1; }
+.amx-v2 .amx-oficio-pila > [data-activo="no"] { visibility: hidden; }
 .amx-v2 .amx-oficio {
   position: relative;
   padding: 16px 18px 22px;
@@ -2509,19 +2498,25 @@
   padding: 10px 6px 0;
   list-style: none;
 }
-/* La tabla de la repisa. Estuvo en una tira de 24px bajo la base de las fotos, y
-   las cajas FLOTABAN (Saulo, 13-sep-2026): una tabla vista de frente sin cubierta
-   no tiene dónde apoyar nada. Ahora mide 40px —la madera trae la cubierta en su
-   80 % de arriba y el canto en el 20 % de abajo— y la base de cada foto cae 24px
-   dentro de ella, a 8px del canto: la caja pisa la cubierta, como en el puesto
-   de la Home. En las fotos PMC los cartuchos sueltos van delante y la caja queda
-   un poco más atrás, que es justo como estaría en una repisa. */
+/* La tabla de la repisa, con su cubierta a la vista.
+   1ª versión: una tira de 24px bajo la base de las fotos — las cajas flotaban.
+   2ª: 40px con la base 24px dentro — seguían flotando «unas partes de la caja»
+   (Saulo, 13-sep-2026). Medido sobre las 37 fotos de caja: están tomadas desde
+   arriba, en tres cuartos, y la esquina TRASERA de la base queda hasta un 28 %
+   del alto de la foto por encima de su punto más bajo (PMC 9mm: 0.28; Águila
+   30-06: 0.27). La cubierta tiene que llegar más atrás que esa esquina.
+   Ahora la cubierta sube el 34 % del alto de la foto por detrás de su base, y
+   la base queda 8px antes del canto. La madera trae la cubierta en su 80 % de
+   arriba y el canto en el 20 % de abajo, de ahí el `/ .8`.
+   Se descartó redibujar las fotos con un ángulo menos picado: son cajas de
+   marca, y generarlas de nuevo arriesga deformar etiquetas y logotipos. */
+.amx-v2 .amx-repisa-fila { --fondo-repisa: calc(var(--alto-foto) * .34); }
 .amx-v2 .amx-repisa-carril::before {
   content: '';
   position: absolute;
   left: 0; right: 0;
-  top: calc(10px + var(--alto-foto) - 24px);
-  height: 40px;
+  top: calc(10px + var(--alto-foto) - var(--fondo-repisa));
+  height: calc((var(--fondo-repisa) + 8px) / .8);
   background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
   box-shadow: 0 4px 6px -3px rgba(23, 27, 25, .4);
 }
@@ -2596,7 +2591,8 @@
   position: relative;
   z-index: 2;
   display: block;
-  margin-top: 12px;                   /* la cinta pisa el canto de la tabla */
+  /* la cinta pisa el canto: la tabla acaba 8px + su canto por debajo de la base */
+  margin-top: calc((var(--fondo-repisa) + 8px) / .8 - var(--fondo-repisa) - 4px);
   padding: 11px 9px 9px;
   background: var(--etiqueta);
   box-shadow: 0 1px 2px rgba(23, 27, 25, .24), 0 3px 6px -3px rgba(23, 27, 25, .2);
@@ -2768,9 +2764,13 @@
 /* ── LA TARJETA DE COMENTARIOS — ¿Recomiendas esta arma? ───────────────────
    Tarjeta de buzón con su renglón rojo. El voto son dos sellos de goma: sin
    usar se ven como el contorno de un sello sin tinta; el elegido se estampa. */
+/* Centrada en la ficha, con las opiniones publicadas y el recuento a la misma
+   medida debajo (Saulo, 13-sep-2026: «no está centrada en escritorio»). */
+.amx-v2 .amx-comentarios-marco { max-width: 780px; margin: 0 auto; }
 .amx-v2 .amx-comentarios {
   position: relative;
   max-width: 780px;
+  margin: 0 auto;
   padding: 0 18px 20px;
   background-color: var(--oficio);
   background-image: linear-gradient(var(--fichero-rojo), var(--fichero-rojo));

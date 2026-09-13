@@ -1124,10 +1124,16 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
 - **Dos colores legales, no tres** (decisión del 8-sep-2026, se mantiene): verde para CIVIL, rojo
   para SEGURIDAD y EXCLUSIVO; las distingue la palabra. La tinta azul de sello es para lo que no
   es legal (usos, foto pendiente).
-- **Un solo corte, 1024px.** Por encima: columna izquierda fija (copia, sello, talón) y documentos
-  a la derecha; la columna solo es fija con 720px de alto o más. Por debajo: pila de documentos y
-  talón fijo abajo, que aparece solo cuando el talón de la ficha sale de pantalla y se retira al
-  asomar el pie. La tableta no es objetivo; el móvil sí, medido en los anchos reales de México
+- **Un solo corte, 1024px.** Por encima, las dos solapas se leen POR FILAS: foto | ficha técnica y
+  comprobante | tarjeta de almacén a la vista al abrir, y al bajar, Legalidad · Usos · Antecedentes |
+  historial. **Nada se queda fijo al hacer scroll** en el folder: hubo una columna izquierda fija y
+  Saulo la retiró porque rompía la estética diegética (un papel no persigue a quien lee). Por
+  debajo de 1024px: pila en ese mismo orden y talón fijo abajo —ese sí, es la barra del pulgar—, que
+  aparece cuando el talón de la ficha sale de pantalla y se retira al asomar el pie.
+- **La situación legal se dice una vez:** el sello sobre la copia y la hoja de Legalidad. Sin línea
+  de texto ni enlace «§ Ver situación legal» bajo la foto.
+- **Las pestañas no mueven el fondo:** las tres hojas de oficio comparten celda y la pila mide lo
+  que la más larga. La tableta no es objetivo; el móvil sí, medido en los anchos reales de México
   (Statcounter, ago-2026): 360 · 384 · 390 · 393 · 402 · 412 · 414 · 440.
 - **Una sola animación de entrada:** el sello que se estampa sobre la copia. Todo lo demás solo
   responde a una acción.
