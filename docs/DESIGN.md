@@ -1042,7 +1042,7 @@ Dos condiciones, las dos aprendidas a golpes:
 - **En la tinta del sitio `rgba(23,27,25,…)`, nunca teñida con el verde.** Una sombra de color es
   un halo cromático: otro tic de interfaz generada. El detector lo marca como `dark-glow`.
 - **Máximo 18px de blur** (24px en hover, y solo ahí). El coste de una sombra escala con el
-  cuadrado del radio, y son 322 páginas con muchas tarjetas.
+  cuadrado del radio, y son 321 páginas con muchas tarjetas.
 
 ### 5.2 Escala de espaciado — 6 valores, no 36
 
@@ -1110,7 +1110,7 @@ Restricciones negativas: sin ellas el modelo vuelve al promedio.
 - ❌ **`backdrop-filter: blur()`** en cualquier cosa que haga scroll.
 - ❌ **`box-shadow` con blur > 24px** en listas: el costo escala con el cuadrado del radio.
 - ❌ **augmented-ui en la grilla.** Como recetario de `clip-path` para 3-6 elementos hero, sí; como
-  librería en 322 tarjetas, no — crea un contexto de apilamiento por elemento.
+  librería en 321 tarjetas, no — crea un contexto de apilamiento por elemento.
 - ❌ **Tailwind por CDN.** Compila en runtime; deshace el prerender del que dependen los crawlers.
 - ❌ **Animar `background-position`.** Si algo rota, se anima con `transform`.
 - ❌ **Todo centrado.** Y nada de `border-radius` uniforme en todo.
@@ -1152,7 +1152,7 @@ Es un sitio publicado, divulgativo y con contenido de referencia legal.
 
 ## 8. Cómo se trabaja
 
-1. **Nunca sobre las 322 páginas.** Se itera en una página de galería con todos los primitivos.
+1. **Nunca sobre las 321 páginas.** Se itera en una página de galería con todos los primitivos.
 2. **Las primitivas antes que las pantallas.** Las ~15 de `ui.jsx` (`ArmaCard`, `FilterChip`,
    `AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`…) propagan solas a todo el sitio.
    Las pantallas solo las componen.

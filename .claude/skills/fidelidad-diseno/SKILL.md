@@ -54,7 +54,7 @@ a CSS, la skill `migrar-a-css`.
   (`TacticalCorners` y `CUT_TR` siguen existiendo pero **ya no pintan**: eran el esqueleto
   HUD del tema anterior y era lo que ataba el sitio al diseño viejo por mucho que cambiara
   el color.)
-- **Trabaja por primitivas, no por pantallas.** Las ~15 de `ui.jsx` propagan a las 322
+- **Trabaja por primitivas, no por pantallas.** Las ~15 de `ui.jsx` propagan a las 321
   páginas; las pantallas solo las componen.
 
 ## Dónde vive cada estilo

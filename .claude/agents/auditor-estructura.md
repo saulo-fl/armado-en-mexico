@@ -16,7 +16,7 @@ antes de señalar nada; si este brief y `AGENTS.md` discrepan, gana `AGENTS.md`.
 
 | Parece raro | Qué es en realidad |
 |---|---|
-| `out/` | **Todo lo generado** por `npm run build`: los `.js` que Babel saca de los `.jsx`, las 322 páginas prerenderizadas (`pistolas/glock-19/…`), `sitemap.xml`, `robots.txt` y la copia de `public/`. Ignorado entero (`/out/` en `.gitignore`). Es lo que publica Pages |
+| `out/` | **Todo lo generado** por `npm run build`: los `.js` que Babel saca de los `.jsx`, las 321 páginas prerenderizadas (`pistolas/glock-19/…`), `sitemap.xml`, `robots.txt` y la copia de `public/`. Ignorado entero (`/out/` en `.gitignore`). Es lo que publica Pages |
 | `functions/` en la raíz | Las Functions de Pages. Cloudflare las busca **ahí**, fuera de `out/`. No se mueven |
 | `CNAME`, `.nojekyll` | Restos inofensivos de GitHub Pages; `CNAME` redirige a armado.mx |
 | La fuente en `src/` y la URL plana (`/estilo.css`, `/ui.js`) | **Fuente estructurada, salida plana**: el build aplana a propósito para que las URLs servidas y las reglas literales de `public/_headers` no cambien |

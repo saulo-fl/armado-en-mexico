@@ -157,7 +157,7 @@ if (!shell.includes(MARCA_ROOT)) throw new Error('build-prerender: falta <div id
 // `window.PieDeSitio` (ui.jsx) solo existe DESPUÉS de que React monte, y GPTBot,
 // ClaudeBot y PerplexityBot no ejecutan JS (SEO.md §2). Un aviso legal que solo
 // existe en JavaScript no es un aviso: para ellos el sitio no lo lleva.
-// Va una vez aquí, dentro de emitir(), y sale en las 322 páginas.
+// Va una vez aquí, dentro de emitir(), y sale en las 321 páginas.
 // LOS DOS TEXTOS SON EL MISMO: si tocas el pie en ui.jsx, tócalo aquí.
 const PIE = `<footer>
 <hr>

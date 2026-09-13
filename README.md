@@ -6,7 +6,7 @@
 
 <!-- cifras:inicio -->
 Catálogo actual: **192 armas · 36 accesorios · 71 municiones**,
-servidas como **322 páginas HTML prerenderizadas** para que los buscadores y los
+servidas como **321 páginas HTML prerenderizadas** para que los buscadores y los
 bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap declara
 **317 URLs**, 310 de ellas con la fecha real de su inventario (la última, 2026-07-06).
 
@@ -125,8 +125,7 @@ la está considerando:
   deportivo, cacería…), su clasificación con un enlace a la sección de legalidad, y la historia
   del modelo.
 - **Para cerrar**, el video del modelo cuando lo hay; «¿Recomiendas esta arma?», un sí o no con
-  reseña escrita que solo se publica después de moderarla; armas similares del mismo tipo, y
-  «Sugerir cambios» para proponer una corrección.
+  reseña escrita que solo se publica después de moderarla, y armas similares del mismo tipo.
 
 ### Comparador
 
@@ -181,7 +180,7 @@ varían según marca y munición, y la guía lo advierte.
   de Armas de Fuego y Explosivos, y **preguntas frecuentes** sobre licencias y portación.
 - **Armas traumáticas** — defensa menos letal por CO₂, que no son armas de fuego y no piden
   permiso; la duda más repetida del público.
-- **Prerender.** La app pinta con JavaScript, y hasta las 322 páginas el sitio era invisible
+- **Prerender.** La app pinta con JavaScript, y hasta las 321 páginas el sitio era invisible
   para quien no lo ejecuta: Googlebot no renderiza JS en respuestas 4xx y los crawlers de IA
   (GPTBot, ClaudeBot, PerplexityBot) no lo ejecutan nunca. El build emite un `.html` real por
   URL, con su `<title>`, canonical, Open Graph y JSON-LD. El porqué, con fuentes, en

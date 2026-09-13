@@ -12,7 +12,7 @@
 
 ## Plataforma
 
-`web` **[evidencia]**. Sitio estático publicado en Cloudflare Pages, con prerender de 322 páginas
+`web` **[evidencia]**. Sitio estático publicado en Cloudflare Pages, con prerender de 321 páginas
 y una capa de datos en D1. No hay app nativa ni envoltorio; el móvil es web móvil.
 
 ---
@@ -58,7 +58,7 @@ fecha; cada afirmación legal, a su texto de ley. El sitio vale lo que vale su p
 
 ## Capacidades
 
-**[evidencia]** — 192 armas en catálogo, 326 páginas `.html` (322 generadas).
+**[evidencia]** — 192 armas en catálogo, 325 páginas `.html` (321 generadas).
 
 - Catálogo por tipo (pistola · revólver · rifle · escopeta · carabina), calibre, uso y disponibilidad.
 - Ficha por arma: especificaciones, clase legal, precio actual e histórico, existencias por sucursal,
@@ -111,7 +111,7 @@ falla el build si no se cumple.
 **[evidencia]** — decidido y en producción; no es una elección abierta.
 
 - React vía UMD, sin bundler. Los `.jsx` son la fuente.
-- `npm run build` = Babel CLI (`.jsx` → `.js`) + `build-prerender.mjs` (prerender de las 322 páginas).
+- `npm run build` = Babel CLI (`.jsx` → `.js`) + `build-prerender.mjs` (prerender de las 321 páginas).
 - **Los `.js` y los `.html` generados no se versionan.** Se edita el `.jsx`.
 - Cloudflare Pages + D1. `admin.html` protegido por Cloudflare Access.
 
