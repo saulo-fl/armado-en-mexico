@@ -1,18 +1,16 @@
 // Armado en México — Store (persistencia en localStorage)
-// Mantiene catálogo, cola de pendientes, contenido editable de páginas y auth admin.
+// Mantiene catálogo, colas de moderación, contenido editable de páginas y auth admin.
 // Compartido entre app pública y admin via mismo origen + localStorage.
 
 (function(){
   const K = {
     armas:       'amx_armas_v2',
-    pending:     'amx_pending_v2',
     pages:       'amx_pages_v4',
     admin:       'amx_admin_v2',
     rejected:    'amx_rejected_v2',
     visits:      'amx_visits_v2',
     priceHist:   'amx_priceHist_v2',
     promos:      'amx_promos_v2',
-    suggestions: 'amx_suggestions_v2',
     favorites:   'amx_favorites_v2',
     reviews:     'amx_reviews_v1',
     reviewsQueue:'amx_reviewsq_v1',
@@ -27,9 +25,11 @@
     teamName: 'Armas M&S',   // nombre del equipo para "Favoritos de"
   };
 
-  // limpia versiones anteriores para evitar que un catálogo viejo (con URLs rotas) se quede atascado
+  // limpia versiones anteriores para evitar que un catálogo viejo (con URLs rotas) se quede atascado.
+  // Las colas de «Proponer arma» y «Sugerir cambios» (_v2) se retiraron el 13-sep-2026.
   try {
-    ['amx_armas_v1','amx_pending_v1','amx_pages_v1','amx_admin_v1','amx_rejected_v1','amx_visits_v1','amx_priceHist_v1','amx_promos_v1','amx_suggestions_v1']
+    ['amx_armas_v1','amx_pending_v1','amx_pages_v1','amx_admin_v1','amx_rejected_v1','amx_visits_v1','amx_priceHist_v1','amx_promos_v1','amx_suggestions_v1',
+     'amx_pending_v2','amx_suggestions_v2']
       .forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
   } catch(e) {}
 
@@ -188,7 +188,7 @@
   const DOMAIN_K = {
     armas: K.armas, pages: K.pages, promos: K.promos, favorites: K.favorites,
     appConfig: K.appConfig, manuales: K.manuales, priceHist: K.priceHist,
-    suggestions: K.suggestions, pending: K.pending, rejected: K.rejected,
+    rejected: K.rejected,
     visits: K.visits,
     reviews: K.reviews, reviewsQueue: K.reviewsQueue, reports: K.reports,
   };
@@ -276,12 +276,10 @@
       }
       // sembrar páginas si no existen
       if (!localStorage.getItem(K.pages)) write(K.pages, DEFAULT_PAGES);
-      if (!localStorage.getItem(K.pending)) write(K.pending, []);
       if (!localStorage.getItem(K.rejected)) write(K.rejected, []);
       if (!localStorage.getItem(K.visits)) write(K.visits, {});
       if (!localStorage.getItem(K.priceHist)) write(K.priceHist, {});
       if (!localStorage.getItem(K.promos)) write(K.promos, DEFAULT_PROMOS);
-      if (!localStorage.getItem(K.suggestions)) write(K.suggestions, []);
       if (!localStorage.getItem(K.admin)) write(K.admin, { password: DEFAULT_PW, loggedIn: false });
       if (!localStorage.getItem(K.favorites)) write(K.favorites, []);
       if (!localStorage.getItem(K.reviews)) write(K.reviews, []);
@@ -385,7 +383,7 @@
     },
     getReviewQueue() { return read(K.reviewsQueue, []); },
     // Moderación (admin). Publicar RETIRA el correo: nunca cruza al dominio
-    // público, igual que hace approvePending con submitterEmail.
+    // público.
     approveReview(id) {
       const cola = read(K.reviewsQueue, []);
       const rev = cola.find((r) => r.id === id);
@@ -592,76 +590,6 @@
       this.savePromos(arr);
     },
 
-    // ─── SUGGESTIONS (cambios sugeridos a armas existentes) ──
-    getSuggestions() { return read(K.suggestions, []); },
-    saveSuggestions(arr) { write(K.suggestions, arr); Store._notify(); },
-    addSuggestion(s) {
-      const arr = this.getSuggestions();
-      s.id = 's_' + Date.now() + '_' + Math.floor(Math.random()*1000);
-      s.submittedAt = new Date().toISOString();
-      s.status = 'pending';
-      arr.unshift(s);
-      this.saveSuggestions(arr);
-      publicAppend('suggestions', s); // el server le asigna su propio id/fecha
-      return s;
-    },
-    deleteSuggestion(id) {
-      const arr = this.getSuggestions().filter(s => s.id !== id);
-      this.saveSuggestions(arr);
-      adminSync('suggestions');
-    },
-
-    // ─── PENDING SUBMISSIONS ──────────────────────────────
-    getPending() { return read(K.pending, []); },
-    savePending(arr) { write(K.pending, arr); Store._notify(); },
-    addPending(sub) {
-      const arr = this.getPending();
-      sub.id = 'p_' + Date.now() + '_' + Math.floor(Math.random()*1000);
-      sub.submittedAt = new Date().toISOString();
-      sub.status = 'pending';
-      arr.unshift(sub);
-      this.savePending(arr);
-      publicAppend('pending', sub); // el server le asigna su propio id/fecha
-      return sub;
-    },
-    approvePending(pid, overrides) {
-      const arr = this.getPending();
-      const idx = arr.findIndex(p => p.id === pid);
-      if (idx < 0) return null;
-      const sub = arr[idx];
-      arr.splice(idx, 1);
-      this.savePending(arr);
-      adminSync('pending');
-      // crear arma
-      const arma = Object.assign({}, sub, overrides || {});
-      // limpiar campos de submission
-      delete arma.id; delete arma.submittedAt; delete arma.status;
-      delete arma.submitterName; delete arma.submitterEmail; delete arma.submitterMessage;
-      const saved = this.upsertArma(arma);
-      return saved;
-    },
-    rejectPending(pid, reason) {
-      const arr = this.getPending();
-      const idx = arr.findIndex(p => p.id === pid);
-      if (idx < 0) return;
-      const rej = Object.assign({}, arr[idx], { status: 'rejected', rejectionReason: reason, rejectedAt: new Date().toISOString() });
-      arr.splice(idx, 1);
-      this.savePending(arr);
-      adminSync('pending');
-      const rejected = read(K.rejected, []);
-      rejected.unshift(rej);
-      write(K.rejected, rejected);
-      Store._notify();
-      adminSync('rejected');
-    },
-    updatePending(pid, fields) {
-      const arr = this.getPending();
-      const idx = arr.findIndex(p => p.id === pid);
-      if (idx < 0) return;
-      arr[idx] = Object.assign({}, arr[idx], fields);
-      this.savePending(arr);
-      adminSync('pending');
-    },
     getRejected() { return read(K.rejected, []); },
 
     // ─── PÁGINAS ──────────────────────────────────────────
@@ -705,11 +633,9 @@
       return {
         armas: this.getArmas(),
         pages: this.getPages(),
-        pending: this.getPending(),
         rejected: this.getRejected(),
         priceHist: read(K.priceHist, {}),
         promos: this.getPromos(),
-        suggestions: this.getSuggestions(),
         favorites: this.getFavorites(),
         reviews: this.getReviews(),
         reviewsQueue: this.getReviewQueue(),
@@ -721,11 +647,9 @@
       if (!data || typeof data !== 'object') throw new Error('JSON inválido');
       if (Array.isArray(data.armas)) this.saveArmas(data.armas);
       if (data.pages) this.savePages(data.pages);
-      if (Array.isArray(data.pending)) this.savePending(data.pending);
       if (Array.isArray(data.rejected)) write(K.rejected, data.rejected);
       if (data.priceHist) write(K.priceHist, data.priceHist);
       if (Array.isArray(data.promos)) this.savePromos(data.promos);
-      if (Array.isArray(data.suggestions)) this.saveSuggestions(data.suggestions);
       if (Array.isArray(data.favorites)) this.setFavorites(data.favorites);
       if (Array.isArray(data.reviews)) { write(K.reviews, data.reviews); Store._notify(); }
       if (Array.isArray(data.reviewsQueue)) { write(K.reviewsQueue, data.reviewsQueue); Store._notify(); }
