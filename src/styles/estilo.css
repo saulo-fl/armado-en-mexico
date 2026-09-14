@@ -1852,6 +1852,27 @@
 }
 .amx-v2 .amx-talon-datos dt { letter-spacing: .12em; text-transform: uppercase; color: var(--talon-tinta-2); }
 .amx-v2 .amx-talon-datos dd { margin: 0; }
+/* «ÚLTIMO PRECIO CONOCIDO»: sello rojo estampado junto a la cifra cuando el
+   precio es de un inventario anterior al último de su sucursal (Saulo,
+   13-sep-2026). En un renglón y con el desgaste rebajado, como el sello de la
+   copia: es un aviso y ninguna letra se puede perder. Rojo impreso sobre el
+   talón: 5.19:1 (el mismo #A3341F que --talon-rojo, par auditado en contraste.mjs). */
+.amx-v2 .amx-talon-sello {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: 8px 0 10px auto;
+  font-size: 13px;
+  padding: 4px 10px 5px;
+  border-width: 2.5px;
+  transform: rotate(-4deg);
+  -webkit-mask-image: url(imagenes/sello-desgaste.webp), linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6));
+          mask-image: url(imagenes/sello-desgaste.webp), linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6));
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+  -webkit-mask-composite: source-over;
+          mask-composite: add;
+}
 /* La casilla de Comparar: se tacha a máquina. El estado lo dice la X Y el
    texto, no un color. */
 .amx-v2 .amx-talon-casilla {
