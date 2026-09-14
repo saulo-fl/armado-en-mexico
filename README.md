@@ -67,8 +67,8 @@ El Arsenal no abre con una lista: abre con una página que reparte el catálogo 
 con la que llega cada quien. Todos los grupos abren el listado ya filtrado, y los que llevan
 contador dicen cuántas armas reúnen:
 
-- **Armería.** Las dos armerías cuyos inventarios oficiales concilia el sitio: la **DCAM**, en la
-  Ciudad de México, y la **OTCA**, en Nuevo León. Cada una publica su propio inventario, y al
+- **Armería.** Las dos armerías cuyos inventarios oficiales concilia el sitio: la **DCAM**, en el
+  Estado de México, y la **OTCA**, en Nuevo León. Cada una publica su propio inventario, y al
   elegir una aparecen las armas que han figurado en los de esa sede: sirve para saber qué ha
   ofrecido la que te queda cerca.
 - **Disponibilidad.** «Disponibles actualmente» junta las armas con existencias en el último
@@ -85,7 +85,7 @@ Todas esas entradas llevan al mismo listado —el de la segunda captura de arrib
 ya puesto y el resto a mano para seguir afinando:
 
 - **Buscador**: nombre, marca, calibre o país.
-- **Tipo de arma**, **Calibre**, **Armería** (DCAM · Ciudad de México u OTCA · Nuevo León) y
+- **Tipo de arma**, **Calibre**, **Armería** (DCAM · Estado de México u OTCA · Nuevo León) y
   **Disponibilidad** (con existencias o agotadas).
 - **Rango de precio**: una barra con mínimo y máximo. Sus límites se recalculan con los demás
   filtros para abarcar solo las armas que quedan, y con el tirador al tope entra también todo lo
