@@ -598,7 +598,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   return (
     <div>
       {/* ── HEADER VERDE — buscador + filtros colapsables ─────────────── */}
-      <div className="amx-catalogo-header">
+      <div className="amx-catalogo-header amx-sobre-verde">
         <div style={innerMax}>
           {/* Buscador estilo pill cristal (sobre verde, como en HOME) */}
           <div className="amx-buscador amx-catalogo-busq">
@@ -615,11 +615,6 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
                 width: 44, minHeight: 44, borderRadius: 999
               }}>✕</button>
             }
-            <button onClick={() => {}} aria-label="Buscar" style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: PALETTE.sobreMarca, fontSize: 18,
-              width: 44, minHeight: 44, borderRadius: 999
-            }}>⌕</button>
           </div>
 
           {/* Contador de resultados */}
@@ -792,7 +787,7 @@ function HubPolaroid({ img, label, sub, onClick, stamp, stampSub, style: extraSt
         {stamp && (
           <img
             className="amx-polaroid-sello-img"
-            src={`imagenes/sello-${stamp.toLowerCase()}.webp`}
+            src={`imagenes/${SELLO_IMG[stamp] || `sello-${stamp.toLowerCase()}.webp`}`}
             alt={`${stamp} · ${stampSub || ''}`}
             style={stamp === 'CDMX'
               ? { top: 8, right: 8 }
@@ -816,67 +811,17 @@ function HubPolaroid({ img, label, sub, onClick, stamp, stampSub, style: extraSt
 // Jittering determinista para polaroids de armería — cada una con un ángulo
 // distinto para que no se vean gemelas. Se usa `Math.sin` del índice como
 // generador simple: valores entre -3 y +3 grados.
-const ARMERIA_GIROS = [-2.5, 1.8];
+const ARMERIA_GIROS = ['-2.5deg', '1.8deg'];
 
 // Rotaciones deterministas para las polaroids de Usos — grid 2×2 con jittering.
 // Cada valor entre -1.5° y +1.5° para que no se vean gemelas.
-const USO_GIROS = [-1.2, 0.8, -0.5, 1.3];
+const USO_GIROS = ['-1.2deg', '0.8deg', '-0.5deg', '1.3deg'];
 
-// Potencia relativa de cada calibre — de menor a mayor. Sirve para dimensionar
-// las tarjetas en la estantería del Hub (más potente = más ancho).
-const CALIBRE_POTENCIA = {
-  '.22 LR':          1,
-  '.380 ACP':        2,
-  '.38 Special':     3,
-  '.38 Super':       3,
-  '.40 S&W':         4,
-  '9mm Parabellum':  5,
-  '.243 Winchester': 6,
-  '.270 Winchester': 7,
-  '.308 Winchester': 8,
-  '.30-06 Sprg':     9,
-  '7mm Rem Mag':    10,
-  '.300 Win Mag':   11,
-  '6.5 PRC':        12,
-  '5.56x45mm':      8,
-  '7.62x39mm':      9,
-  '7.62x51mm':     10,
-  '20 GA':          13,
-  '.410 Bore':      13,
-  '12 GA':          14,
-};
-
-// Calibre ID → factor de ancho (min 80px, max 160px). Se escala linealmente.
-const calibreWidth = (id) => {
-  const p = CALIBRE_POTENCIA[id] || 7; // medio si no se conoce
-  return Math.round(80 + (p / 14) * 80); // 80–160px
-};
-
-// Calibre ID → nombre de archivo de silueta en public/imagenes/cartuchos/
-const CALIBRE_IMG = {
-  '.22 LR': '22lr.webp',
-  '.380 ACP': '380acp.webp',
-  '.38 Special': '38special.webp',
-  '.38 Super': '38super.webp',
-  '9mm Parabellum': '9mm.webp',
-  '.40 S&W': '40sw.webp',
-  '.243 Winchester': '243win.webp',
-  '.270 Winchester': '270win.webp',
-  '.308 Winchester': '308win.webp',
-  '.30-06 Sprg': '3006.webp',
-  '7mm Rem Mag': '7mmrem.webp',
-  '.300 Win Mag': '300wm.webp',
-  '6.5 PRC': '65prc.webp',
-  '12 GA': '12ga.webp',
-  '20 GA': '20ga.webp',
-  '.410 Bore': '410.webp',
-  '5.56x45mm': '556.webp',
-  '7.62x39mm': '762x39.webp',
-  '7.62x51mm': '762x51.webp',
-};
+// Mapeo stamp postal → archivo de imagen (evita path roto con espacios/puntos).
+const SELLO_IMG = { 'CDMX': 'sello-cdmx.webp', 'N.L.': 'sello-otca.webp' };
 
 function calibreImgPath(calibreId) {
-  return `imagenes/cartuchos/${CALIBRE_IMG[calibreId] || 'silueta-municion.webp'}`;
+  return window.CALIBRES.find(x => x.id === calibreId)?.cartucho || 'imagenes/cartuchos/silueta-municion.webp';
 }
 
 function ArsenalHubScreen({ onNav }) {
@@ -888,7 +833,10 @@ function ArsenalHubScreen({ onNav }) {
 
   // Contadores por categoría
   const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
-  const usoCount = (id) => DB.filter((a) => a.uses.includes(id)).length;
+  const usoCount = (id) => {
+    if (id === 'militar') return 0; // no se muestra en el Hub del Arsenal
+    return DB.filter((a) => a.uses.includes(id)).length;
+  };
   const availCount = (id) => DB.filter((a) => a.avail === id).length;
   const dispCount = DB.filter((a) =>
     (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
@@ -929,22 +877,18 @@ function ArsenalHubScreen({ onNav }) {
       {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
       <SectionHdr>Armería</SectionHdr>
       <div style={gridN(2)}>
-        <HubPolaroid label="DCAM" stamp="CDMX" stampSub="México"
+        <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
           img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
           style={{ '--giro': ARMERIA_GIROS[0], width: '100%', aspectRatio: '4 / 5' }} />
-        <HubPolaroid label="OTCA" stamp="N.L." stampSub="México"
+        <HubPolaroid label="OTCA" stamp="N.L." stampSub="México" sub="Nuevo León"
           img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })}
           style={{ '--giro': ARMERIA_GIROS[1], width: '100%', aspectRatio: '4 / 5' }} />
       </div>
 
-      {/* ── DISPONIBILIDAD: banner ticket ancho, sin maxWidth fijo ─── */}
+      {/* ── DISPONIBILIDAD: DocCard reutilizable (buen contraste, accesible) ─ */}
       <SectionHdr>Disponibilidad</SectionHdr>
       <div style={{ ...gridN(1) }}>
-        <button className="amx-arsenal-disp-banner" onClick={() => onNav('category', { mode: 'disponible', value: 'si' })}>
-          <span className="amx-arsenal-disp-label">Disponibles actualmente</span>
-          <span className="amx-arsenal-disp-sub">En existencia en el último inventario de su sucursal</span>
-          <span className="amx-arsenal-disp-count">{dispCount}</span>
-        </button>
+        <DocCard label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" count={dispCount} accent="var(--ok)" onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
       </div>
 
       {/* ── CLASIFICACIÓN LEGAL: pestaletas tipo archivador ─────────── */}
@@ -974,14 +918,16 @@ function ArsenalHubScreen({ onNav }) {
         }
       </div>
 
-      {/* ── USO: polaroids apaisadas (16:9) como EXPERIENCIAS del HOME ─ */}
+      {/* ── USO: tarjetas informativas (sin foto) ───────────────────── */}
       <SectionHdr>Uso</SectionHdr>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 'var(--e3)' }}>
         {window.CATEGORIES.uso.map((u, i) => usoCount(u.id) ? (
-          <HubPolaroid key={u.id} label={u.label} sub={u.desc}
-            img={`imagenes/uso-${u.id}.webp`} onClick={() => onNav('category', { mode: 'uso', value: u.id })}
-            style={{ '--giro': USO_GIROS[i % USO_GIROS.length], width: '100%', aspectRatio: '16 / 9' }}
-            pozoStyle={{ aspectRatio: '16 / 9' }} />
+          <button key={u.id} className="amx-arsenal-uso-card"
+            style={{ '--giro': USO_GIROS[i % USO_GIROS.length] }}
+            onClick={() => onNav('category', { mode: 'uso', value: u.id })}>
+            <span className="amx-arsenal-uso-icon">{u.icon}</span>
+            <span className="amx-arsenal-uso-label">{u.label}</span>
+          </button>
         ) : null)}
       </div>
 
@@ -992,7 +938,7 @@ function ArsenalHubScreen({ onNav }) {
           const n = DB.filter((a) => a.calibre === c.id).length;
           return n ? (
             <button key={c.id} className="amx-arsenal-calibre-item"
-              style={{ '--calibre-w': calibreWidth(c.id) + 'px', width: calibreWidth(c.id) }}
+              style={{ width: 'var(--calibre-w, 100%)' }}
               onClick={() => onNav('category', { mode: 'calibre', value: c.id })}>
               <img className="amx-arsenal-calibre-foto" src={calibreImgPath(c.id)} alt={c.label} loading="lazy" />
               <span className="amx-arsenal-calibre-ficha">{c.label}</span>

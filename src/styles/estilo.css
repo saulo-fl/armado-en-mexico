@@ -3185,76 +3185,9 @@
   width: var(--sello-size, 64px);
   height: auto;
   opacity: 0.85;
-  mix-blend-mode: multiply;
+  /* screen: texto blanco sobre transparente → visible en fondo claro */
+  mix-blend-mode: screen;
   z-index: 2; /* sobre el velo verde y la foto */
-}
-
-/* ── Disponibilidad — banner ticket perforado ─────────────────────── */
-.amx-v2 .amx-arsenal-disp-banner {
-  display: flex;
-  align-items: center;
-  gap: var(--e3);
-  padding: 16px 20px;
-  background: var(--copia-carton);
-  border: none;
-  box-shadow: var(--sombra);
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  position: relative; /* para ::before banda lateral */
-  transition: transform .18s, box-shadow .18s;
-  /* Bordes dentados tipo boleto perforado (arriba y abajo) */
-  clip-path: polygon(
-    0% 4px, 3.57% 0%, 7.14% 4px, 10.71% 0%, 14.29% 4px, 17.86% 0%, 21.43% 4px,
-    25% 0%, 28.57% 4px, 32.14% 0%, 35.71% 4px, 39.29% 0%, 42.86% 4px, 46.43% 0%,
-    50% 4px, 53.57% 0%, 57.14% 4px, 60.71% 0%, 64.29% 4px, 67.86% 0%, 71.43% 4px,
-    75% 0%, 78.57% 4px, 82.14% 0%, 85.71% 4px, 89.29% 0%, 92.86% 4px, 96.43% 0%,
-    100% 4px,
-    100% calc(100% - 4px), 96.43% 100%, 92.86% calc(100% - 4px), 89.29% 100%,
-    85.71% calc(100% - 4px), 82.14% 100%, 78.57% calc(100% - 4px), 75% 100%,
-    71.43% calc(100% - 4px), 67.86% 100%, 64.29% calc(100% - 4px), 60.71% 100%,
-    57.14% calc(100% - 4px), 53.57% 100%, 50% calc(100% - 4px), 46.43% 100%,
-    42.86% calc(100% - 4px), 39.29% 100%, 35.71% calc(100% - 4px), 32.14% 100%,
-    28.57% calc(100% - 4px), 25% 100%, 21.43% calc(100% - 4px), 17.86% 100%,
-    14.29% calc(100% - 4px), 10.71% 100%, 7.14% calc(100% - 4px), 3.57% 100%,
-    0% calc(100% - 4px)
-  );
-}
-/* Banda de acento lateral */
-.amx-v2 .amx-arsenal-disp-banner::before {
-  content: '';
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 4px;
-  background: var(--ok);
-}
-.amx-v2 .amx-arsenal-disp-banner:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-hover);
-}
-.amx-v2 .amx-arsenal-disp-label {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 16px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--tinta);
-}
-.amx-v2 .amx-arsenal-disp-sub {
-  margin-top: 2px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--tinta-dim);
-  line-height: 1.4;
-}
-.amx-v2 .amx-arsenal-disp-count {
-  margin-left: auto;
-  flex-shrink: 0;
-  font-family: var(--sans);
-  font-weight: 800;
-  font-size: 36px;
-  color: var(--ok);
-  line-height: 1;
 }
 
 /* ── Clasificación legal — pestaletas tipo archivador ─────────────────── */
@@ -3332,14 +3265,14 @@
 }
 
 .amx-v2 .amx-arsenal-legal-tab--seguridad {
-  border-top: 4px solid #E8A600;
+  border-top: 4px solid var(--seguridad);
 }
 .amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs {
-  background: rgba(232, 166, 0, .12);
-  color: #7a5800;
+  background: color-mix(in srgb, var(--seguridad) 15%, transparent);
+  color: var(--seguridad);
 }
 .amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-count {
-  color: #E8A600;
+  color: var(--seguridad);
 }
 
 .amx-v2 .amx-arsenal-legal-tab--ejercito {
@@ -3371,8 +3304,36 @@
   }
 }
 
-/* ── Uso — polaroids apaisadas (16:9) como EXPERIENCIAS del HOME ─────── */
-/* Reusa .amx-polaroid--apaisada que ya existe en estilo.css */
+/* ── Uso — tarjetas informativas sin foto ─────────────────────── */
+.amx-v2 .amx-arsenal-uso-card {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: 14px 16px;
+  background: var(--papel);
+  border: 1px solid var(--hair);
+  box-shadow: var(--sombra);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: transform .18s, box-shadow .18s;
+}
+.amx-v2 .amx-arsenal-uso-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-hover);
+}
+.amx-v2 .amx-arsenal-uso-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+.amx-v2 .amx-arsenal-uso-label {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--tinta);
+}
 
 /* ── Calibre — mesa de exhibición con siluetas de cartucho ───────────── */
 .amx-v2 .amx-arsenal-calibre-shelf {
@@ -3382,7 +3343,7 @@
   align-items: stretch;
 }
 
-/* Carta individual — fondo oscuro tipo vitrina */
+/* Carta individual — fondo token del tema (buen contraste) */
 .amx-v2 .amx-arsenal-calibre-item {
   display: flex;
   flex-direction: column;
@@ -3390,9 +3351,9 @@
   justify-content: space-between;
   padding: 8px;
   min-height: 140px;
-  background: linear-gradient(180deg, #1a1e1c 0%, #232725 100%);
-  border: none;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06), var(--sombra);
+  background: var(--papel);
+  border: 1px solid var(--hair);
+  box-shadow: var(--sombra);
   cursor: pointer;
   text-align: center;
   transition: transform .18s, box-shadow .18s;
@@ -3400,16 +3361,15 @@
 }
 .amx-v2 .amx-arsenal-calibre-item:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), var(--sombra-hover);
+  box-shadow: var(--sombra-hover);
 }
 
-/* Silueta del cartucho — filtro para fondos claros sobre superficie oscura */
+/* Silueta del cartucho — sin filtros vetados (§4) */
 .amx-v2 .amx-arsenal-calibre-foto {
   width: calc(var(--calibre-w, 100px) * 0.7);
   height: auto;
   max-height: 60px;
   object-fit: contain;
-  filter: brightness(0.15) contrast(3) drop-shadow(0 2px 4px rgba(0,0,0,.5));
 }
 
 /* Letrero con nombre del calibre */
@@ -3419,7 +3379,7 @@
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: .04em;
-  color: rgba(255,255,255,.85);
+  color: var(--tinta);
   line-height: 1.2;
 }
 
@@ -3430,123 +3390,6 @@
   font-size: 11px;
   color: rgba(255,255,255,.55);
 }
-
-/* ── Clasificación legal — pestaletas tipo archivador ─────────────────── */
-.amx-v2 .amx-arsenal-legal-grid {
-  display: grid;
-  gap: var(--e3);
-  /* Desktop: 3 columnas iguales, móvil: apilados con aire */
-  grid-template-columns: repeat(3, 1fr);
-}
-@media (max-width: 600px) {
-  .amx-v2 .amx-arsenal-legal-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.amx-v2 .amx-arsenal-legal-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 20px 12px;
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  box-shadow: var(--sombra);
-  cursor: pointer;
-  text-align: center;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  transition: transform .18s, box-shadow .18s;
-}
-.amx-v2 .amx-arsenal-legal-tab:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--sombra-hover);
-}
-
-/* Pestaleta de color arriba — folder archivador */
-.amx-v2 .amx-arsenal-legal-pegs {
-  font-family: var(--sans);
-  font-weight: 800;
-  font-size: 15px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--tinta);
-  padding: 4px 12px;
-  border-radius: 3px;
-}
-
-.amx-v2 .amx-arsenal-legal-desc {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--tinta-dim);
-  line-height: 1.4;
-  max-width: 200px;
-}
-
-.amx-v2 .amx-arsenal-legal-count {
-  font-family: var(--sans);
-  font-weight: 800;
-  font-size: 28px;
-  line-height: 1;
-}
-
-/* Colores por tipo — pestaleta + contador */
-.amx-v2 .amx-arsenal-legal-tab--civil {
-  border-top: 4px solid var(--ok);
-}
-.amx-v2 .amx-arsenal-legal-tab--civil .amx-arsenal-legal-pegs {
-  background: rgba(34, 170, 85, .12);
-  color: #1a6b38;
-}
-.amx-v2 .amx-arsenal-legal-tab--civil .amx-arsenal-legal-count {
-  color: var(--ok);
-}
-
-.amx-v2 .amx-arsenal-legal-tab--seguridad {
-  border-top: 4px solid #E8A600;
-}
-.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs {
-  background: rgba(232, 166, 0, .12);
-  color: #7a5800;
-}
-.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-count {
-  color: #E8A600;
-}
-
-.amx-v2 .amx-arsenal-legal-tab--ejercito {
-  border-top: 4px solid var(--alerta);
-}
-.amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-pegs {
-  background: rgba(200, 50, 50, .12);
-  color: #8b1a1a;
-}
-.amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-count {
-  color: var(--alerta);
-}
-
-/* ── Tipo de arma — lotería (reusa HOME amx-loteria-mesa) ─────────────── */
-.amx-v2 .amx-arsenal-loteria-mesa {
-  display: grid;
-  gap: var(--e3);
-  /* Desktop: 6 columnas (5 tipos + accesorios), móvil: 2 */
-  grid-template-columns: repeat(6, 1fr);
-}
-@media (max-width: 900px) {
-  .amx-v2 .amx-arsenal-loteria-mesa {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-@media (max-width: 500px) {
-  .amx-v2 .amx-arsenal-loteria-mesa {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* ── Uso — polaroids apaisadas (16:9) como EXPERIENCIAS del HOME ─────── */
-/* Reusa .amx-polaroid--apaisada que ya existe en estilo.css */
 
 /* ══════════════════════════════════════════════════════════════════════════
    CATÁLOGO — Header verde + filtros + grid de armas (RED-Arsenal)
@@ -3562,7 +3405,7 @@
 }
 /* En desktop, sticky en la parte superior (debajo del TopNav) */
 @media (min-width: 1024px) {
-  .amx-v2 .amx-catalogo-header { position: sticky; top: 64; z-index: 30; }
+  .amx-v2 .amx-catalogo-header { position: sticky; top: 64px; z-index: 30; }
 }
 /* En móvil, el buscador ya es sticky por sí mismo en la banda verde */
 
