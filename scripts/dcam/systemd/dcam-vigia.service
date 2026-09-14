@@ -1,0 +1,18 @@
+[Unit]
+Description=Vigía DCAM (gob.mx → Telegram) — corrida única
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=saulo
+Group=saulo
+WorkingDirectory=/home/saulo/apps/dcam-bot/repo
+Environment=PYTHONPATH=/home/saulo/apps/quiron/lib
+Environment=DCAM_DIR=/home/saulo/apps/dcam-bot
+Environment=DCAM_TG_ENV=/opt/hestia/panoptes-watchdog/watchdog.env
+# El guion inicial «-»: si no hay red para el pull, corre igual con el código que ya tiene
+# (y si tampoco hay red para gob.mx, el propio vigía avisa que está roto).
+ExecStartPre=-/usr/bin/git -C /home/saulo/apps/dcam-bot/repo pull --ff-only --quiet
+ExecStart=/usr/bin/python3 scripts/dcam/vigia.py
+Nice=10

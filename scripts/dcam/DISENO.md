@@ -130,11 +130,27 @@ APOLO · 20:00 diario (systemd timer, Persistent=true)
 
 ### Instalación
 
-1. PR con `scripts/dcam/` a `main` y `develop`, pruebas en verde. Saulo mergea.
-2. APOLO: `git clone` en `~/apps/dcam-bot/repo`; corrida manual con `--sin-telegram`.
-3. Copiar las unidades a `/etc/systemd/system/` y `systemctl enable --now dcam-vigia.timer`
-   (requiere `sudo`: lo corre Saulo o lo autoriza).
-4. Primera corrida real: siembra el estado y llega el latido.
+PR con `scripts/dcam/` a `main` y `develop`, pruebas en verde. Saulo mergea. Después:
+
+1. Clon dedicado:
+   ```
+   ssh apolo 'mkdir -p ~/apps/dcam-bot && git clone --quiet https://github.com/saulo-fl/armado-en-mexico ~/apps/dcam-bot/repo && git -C ~/apps/dcam-bot/repo log -1 --format="%h %s"'
+   ```
+2. Pruebas y corrida en seco:
+   ```
+   ssh apolo 'cd ~/apps/dcam-bot/repo && python3 scripts/dcam/test_vigia.py && test -r /opt/hestia/panoptes-watchdog/watchdog.env && echo env-legible && DCAM_DIR=/tmp/dcam-seco python3 scripts/dcam/vigia.py --sin-telegram; echo exit=$?; rm -rf /tmp/dcam-seco'
+   ```
+3. Instalar y activar (sudo):
+   ```
+   ssh -t apolo 'sudo cp ~/apps/dcam-bot/repo/scripts/dcam/systemd/dcam-vigia.service ~/apps/dcam-bot/repo/scripts/dcam/systemd/dcam-vigia.timer /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable --now dcam-vigia.timer && systemctl list-timers dcam-vigia.timer'
+   ```
+4. Primera corrida real:
+   ```
+   ssh -t apolo 'sudo systemctl start dcam-vigia.service; systemctl status dcam-vigia.service --no-pager | head -5; journalctl -u dcam-vigia.service -n 20 --no-pager; ls ~/apps/dcam-bot ~/apps/dcam-bot/archivo'
+   ```
+   Confirmar que llegó el mensaje a Telegram.
+
+Para leer los logs después: `journalctl -u dcam-vigia.service -n 50 --no-pager`.
 
 ### Fuera de la pieza 1
 
