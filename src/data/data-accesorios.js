@@ -335,11 +335,17 @@ window.ACCESORIOS = [
 
   // ── NUEVOS (DCAM · 11-sep-2026) ──
   { ...amx(132, "Cargador .380 ACP · Tanfoglio FT-9-FS (18 cart.)", "Tanfoglio", "Italia", 'cargadores', "dcam", 2.56,
-    "CARGADOR 0.380\" TANFOGLIO FT-9-FS CAR SP", ["Pistola Tanfoglio FT-9-FS (Carry y Sport)", ".380 ACP"], [["Calibre", ".380 ACP"], ["Capacidad", "18 cartuchos"], ["Plataforma", "Tanfoglio FT-9-FS"]],
-    "Cargador de 18 cartuchos para pistola Tanfoglio FT-9-FS en versiones Carry y Sport, calibre .380 ACP."), priceManualId: 'man_acc_2026_09_11' },
+    "CARGADOR 0.380\" TANFOGLIO FT-9-FS CAR SP", ["Pistola Tanfoglio FT-9-FS (Full Size y Carry)", ".380 ACP"], [["Calibre", ".380 ACP"], ["Capacidad", "18 cartuchos"], ["Plataforma", "Tanfoglio FT-9-FS"]],
+    "Cargador de 18 cartuchos para pistola Tanfoglio FT-9-FS en versiones Full Size y Carry, calibre .380 ACP."), priceManualId: 'man_acc_2026_09_11' },
   { ...amx(133, "Cargador 5.56x45 · IWI Galil ACE 21/22 (35 cart.)", "IWI", "Israel", 'cargadores', "seguridad", 664.46,
     "CARGADOR P/FUSIL 5.56 P/ACE 21 y ACE 22", ["Fusil IWI Galil ACE 21", "Fusil IWI Galil ACE 22", "5.56x45"], [["Calibre", "5.56x45 OTAN"], ["Capacidad", "35 cartuchos"], ["Plataforma", "Galil ACE 21 / ACE 22"]],
     "Cargador de 35 cartuchos para los fusiles IWI Galil ACE 21 y ACE 22 en 5.56x45. Plataforma restringida a corporaciones de seguridad."), priceManualId: 'man_acc_2026_09_11' },
+
+  // ── Separado en la revisión del 13-sep-2026: el registro OTCA 26-sep de la 113 era
+  //    el cargador de la CZ P-07; la 113 sigue el de la CZ Shadow 2 (DCAM) ──
+  { ...amx(134, "Cargador .380 ACP · CZ P-07 (15 cart.)", "Česká Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 666.10,
+    "CARGADOR PARA PISTOLA CAL. 0.380\" MARCA CESKA ZBROJOVKA MOD. CZ P-07, CAP. 15 CARTS.", ["Pistola CZ P-07 .380"], [["Calibre", ".380 ACP"], ["Capacidad", "15 cartuchos"], ["Plataforma", "CZ P-07"]],
+    "Cargador de 15 cartuchos para pistola Česká Zbrojovka CZ P-07 en .380 ACP. Existencia y precio del inventario OTCA 26-sep-2025 (Monterrey)."), priceManualId: 'man_acc_2025_09_26' },
 ];
 
 // ── COMPATIBILIDAD ESTRUCTURADA (derivada de la compatibilidad declarada) ────
@@ -384,8 +390,9 @@ const ACC_COMPAT = {
   129: { tipos: ['pistola'], calibres: ['.380 ACP'] },
   130: { tipos: ['pistola'], calibres: ['.22 LR'] },
   131: { tipos: ['rifle','carabina'], calibres: ['.22 LR'] },
-  132: { tipos: ['pistola'], calibres: ['.380 ACP'] },
-  133: { tipos: ['carabina','rifle'], calibres: ['5.56x45mm'] },
+  // 132 (Tanfoglio FT-9-FS) y 133 (Galil ACE 21/22) sin entrada a propósito: por
+  // tipo+calibre se mostraban compatibles con armas del catálogo que no los aceptan.
+  // Sin entrada no se muestra ninguna; la compatibilidad por modelo llega aparte.
 };
 window.ACCESORIOS.forEach(a => { a.compat = ACC_COMPAT[a.id] || {}; });
 
@@ -419,7 +426,10 @@ window.isRealImage = function (src) {
 // accesorioId -> [{ manualId, price, date, qty }]
 // qty = existencias marcadas en ESE inventario (dato histórico, no en tiempo real).
 // Los que aparecen en ambos inventarios traen 2 registros (sep → oct).
-const _h = (mid, price, date, qty) => ({ manualId: mid, price: _accFmt(price), date, qty: (qty == null ? null : qty) });
+// errata (opcional): el precio TAL COMO lo publicó la DCAM cuando es una errata
+// evidente; `price` es entonces el que se publica (el último conocido o, si no
+// hay, el mismo del PDF) y la ficha avisa junto al precio.
+const _h = (mid, price, date, qty, errata) => ({ manualId: mid, price: _accFmt(price), date, qty: (qty == null ? null : qty), ...(errata == null ? {} : { errata: _accFmt(errata) }) });
 const SEP = 'man_acc_2025_09_26', OCT = 'man_acc_2025_10_03', JUN = 'man_acc_2026_06_16';
 const SEPd = '2025-09-26', OCTd = '2025-10-03', JUNd = '2026-06-16';
 const JUN18 = 'man_acc_2026_06_18', JUN18d = '2026-06-18';
@@ -439,7 +449,7 @@ window.ACCESORIOS_PRICE_HISTORY = {
   110: [_h(OCT, 621.04, OCTd, 5), _h(JUN18, 558.31, JUN18d, 6)],
   111: [_h(SEP, 1054.65, SEPd, 8), _h(OCT, 1053.55, OCTd, 40), _h(JUN18, 947.12, JUN18d, 4), _h(S11, 935.17, S11d, 26)],
   112: [_h(SEP, 701.44, SEPd, 5), _h(OCT, 693.12, OCTd, 42), _h(S11, 615.24, S11d, 19)],
-  113: [_h(SEP, 666.1, SEPd, 35), _h(OCT, 543.41, OCTd, 70), _h(JUN, 488.85, JUNd, 1)],
+  113: [_h(OCT, 543.41, OCTd, 70), _h(JUN, 488.85, JUNd, 1)],
   114: [_h(OCT, 368.86, OCTd, 36), _h(JUN, 368.86, JUNd, 36), _h(JUL, 368.86, JULd, 36), _h(S11, 368.86, S11d, 36)],
   115: [_h(OCT, 546.2, OCTd, 18), _h(JUN, 546.2, JUNd, 18), _h(JUL, 546.20, JULd, 18), _h(S11, 546.20, S11d, 18)],
   116: [_h(OCT, 9426.46, OCTd, 5), _h(JUN, 8479.99, JUNd, 5), _h(JUL, 8615.57, JULd, 5), _h(S11, 8367.29, S11d, 5)],
@@ -466,8 +476,10 @@ window.ACCESORIOS_PRICE_HISTORY = {
   130: [_h(JUN18, 623.11, JUN18d, 13), _h(JUL, 633.50, JULd, 29), _h(S11, 615.24, S11d, 19)],
   131: [_h(JUN18, 1121.59, JUN18d, 16), _h(JUL, 1140.30, JULd, 37), _h(S11, 1107.44, S11d, 11)],
   // ── Nuevos accesorios DCAM 11-sep-2026 ──
-  132: [_h(S11, 2.56, S11d, 3)],
+  132: [_h(S11, 2.56, S11d, 3, 2.56)], // errata DCAM ($2.56); sin precio anterior se publica el del PDF
   133: [_h(S11, 664.46, S11d, 15)],
+  // ── Separado en la revisión del 13-sep-2026 (antes, registro OTCA de la 113) ──
+  134: [_h(SEP, 666.1, SEPd, 35)],
 };
 
 // ── Helpers (auto-contenidos; no tocan el store de armas) ────────────────────

@@ -201,7 +201,7 @@
       "Cartucho de rifle .17 HMR, marca Hornady (V-MAX, 17 gr). Precio y existencia TAL CUAL del inventario OTCA 18-jun-2026 (Monterrey).", ["Armas calibre .17 HMR"], [["Calibre",".17 HMR"],["Bala","V-MAX"],["Peso","17 gr"],["Tipo","Fusil/Rifle"]]), priceManualId: 'man_mun_otca_2026_06_18' },
     { ...mun(2054, "Cartucho 12 GA · Rio (Royal Buck)", "Rio", "España", "12 GA", "escopeta", "Buckshot 9P", "—", "dcam", 15.49, "CARTUCHO CALIBRE 12, MARCA RIO, ROYAL BUCK 9, PERDIGON 9P (3X3)",
       "Cartucho de escopeta 12 GA, marca Rio Royal Buck (Buckshot 9 postas). Precio y existencia TAL CUAL del inventario OTCA 18-jun-2026 (Monterrey).", ["Armas calibre 12 GA"], [["Calibre","12 GA"],["Bala","Buckshot 9P"],["Peso","—"],["Tipo","Escopeta"]]), priceManualId: 'man_mun_otca_2026_06_18' },
-    { ...mun(2055, "Cartucho 12 GA · Bullet T-4", "Bullet", "México", "12 GA", "escopeta", "Perdigón 9", "36 gr", "dcam", 11.56, "CARTUCHO MARCA BULLET T-4 CAZA CAL. 12 MUN. 9 36 GR.",
+    { ...mun(2055, "Cartucho 12 GA · Bullet T-4", "Bullet", "España", "12 GA", "escopeta", "Perdigón 9", "36 gr", "dcam", 11.56, "CARTUCHO MARCA BULLET T-4 CAZA CAL. 12 MUN. 9 36 GR.",
       "Cartucho de escopeta 12 GA, marca Bullet T-4 Caza (Perdigón 9, 36 gr). Precio y existencia TAL CUAL del inventario OTCA 18-jun-2026 (Monterrey).", ["Armas calibre 12 GA"], [["Calibre","12 GA"],["Bala","Perdigón 9"],["Peso","36 gr"],["Tipo","Escopeta"]]), priceManualId: 'man_mun_otca_2026_06_18' },
     { ...mun(2056, "Cartucho 12 GA · Bornaghi (Posta)", "Bornaghi", "Italia", "12 GA", "escopeta", "Posta 0B", "33 g", "dcam", 15.5, "CARTUCHO CAL. 12 POSTA 0B, MARCA BORNAGHI, 33 GRAMOS, T3",
       "Cartucho de escopeta 12 GA, marca Bornaghi (Posta 0B, 33 g). Precio y existencia TAL CUAL del inventario OTCA 18-jun-2026 (Monterrey).", ["Armas calibre 12 GA"], [["Calibre","12 GA"],["Bala","Posta 0B"],["Peso","33 g"],["Tipo","Escopeta"]]), priceManualId: 'man_mun_otca_2026_06_18' },
@@ -318,7 +318,7 @@
     { ...mun(2080, "Cartucho 12 GA · Saga (Export 32)", "Saga", "España", "12 GA", "escopeta", "Perdigón 7.5", "32 gr", "dcam", 9.62, "CART.CAL. 12G.A.SAGA EXPORT 32, 32GR,M7.",
       "Cartucho de escopeta en calibre 12 GA, marca Saga (Perdigón 7.5, 32 gr). Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]), priceManualId: SEP11 },
     { ...mun(2081, "Cartucho 12 GA · Saga (Magnum 50)", "Saga", "España", "12 GA", "escopeta", "Perdigón BB", "50 gr", "dcam", 13.05, "CARTUCHO CAL12 SAGA MAGNUM 50GR M BB",
-      "Cartucho de escopeta en calibre 12 GA, marca Saga (Perdigón BB, 50 gr). Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón BB"], ["Peso", "50 gr"], ["Tipo", "Escopeta"]]), priceManualId: SEP11 },
+      "Cartucho de escopeta en calibre 12 GA, marca Saga (Perdigón BB, 50 gr). Vaina magnum de 76 mm: requiere recámara de 76 mm (3\"). Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 12 GA con recámara de 76 mm"], [["Calibre", "12 GA"], ["Vaina", "76 mm (magnum)"], ["Bala", "Perdigón BB"], ["Peso", "50 gr"], ["Tipo", "Escopeta"]]), priceManualId: SEP11 },
     { ...mun(2082, "Cartucho 20 GA · Saga (Gold BB)", "Saga", "España", "20 GA", "escopeta", "Perdigón BB", "28 gr", "dcam", 10.07, "CART.CAL.20.G.A.SAG.C.20-70. 28 MUN BB.",
       "Cartucho de escopeta en calibre 20 GA, marca Saga (Perdigón BB, 28 gr). Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 20 GA"], [["Calibre", "20 GA"], ["Bala", "Perdigón BB"], ["Peso", "28 gr"], ["Tipo", "Escopeta"]]), priceManualId: SEP11 },
     { ...mun(2083, "Cartucho 12 GA · J&G Excopesa (Alta Competición)", "J&G Excopesa", "España", "12 GA", "escopeta", "Perdigón 7.5", "28 gr", "dcam", 9.84, "CART. CAL. 12 EXCOPESA 28GR M7.5 130-75",
@@ -340,7 +340,7 @@
     { ...mun(2091, "Cartucho 12 GA · Trust (Blue Line P8)", "Trust", "España", "12 GA", "escopeta", "Perdigón 8", "32 gr", "dcam", 10.30, "CART CAL12 TRUST BLUE LINE 32GR M8",
       "Cartucho de escopeta en calibre 12 GA, marca Trust (Perdigón 8, 32 gr). Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 8"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]), priceManualId: SEP11 },
     { ...mun(2092, "Cartucho 7.62x51mm · PMC (Ball M80)", "PMC", "Corea del Sur", "7.62x51mm", "rifle", "FMJ", "147 gr", "seguridad", 28.15, "CARTUCHO CAL7.62X51 mm PMC BALL M80 147G",
-      "Cartucho de fusil/rifle en calibre 7.62x51mm, marca PMC (FMJ, 147 gr). Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 7.62x51mm"], [["Calibre", "7.62x51mm"], ["Bala", "FMJ"], ["Peso", "147 gr"], ["Tipo", "Fusil/Rifle"]]), priceManualId: SEP11 },
+      "Cartucho de fusil/rifle en calibre 7.62x51mm, marca PMC (FMJ, 147 gr), eslabonado. Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 7.62x51mm"], [["Calibre", "7.62x51mm"], ["Bala", "FMJ"], ["Peso", "147 gr"], ["Presentación", "Eslabonado"], ["Tipo", "Fusil/Rifle"]]), priceManualId: SEP11 },
   ];
 
   function _mh(price, qty) { return { manualId: OTCA, price: _mFmt(price), date: OTCAd, qty: (qty == null ? null : qty) }; }
@@ -372,7 +372,7 @@
     2020: [_mhj(21.35, 540)],
     2021: [_mhj(24.14, 6490), _mhl(24.53, 5450), _mhs(23.82, 1710)],
     2022: [_mhj(24.14, 4090), _mhl(24.53, 1550), _mhs(23.82, 4650)],
-    2023: [_mhj(24.14, 540)],
+    2023: [_mhj(24.14, 1780)],
     2024: [_mhj(22.15, 2760), _mhl(22.50, 2760), _mhs(21.85, 1660)],
     2025: [_mhj(24.14, 5110), _mhl(24.53, 3810), _mhs(23.82, 2010)],
     2026: [_mhj(47.49, 1942), _mhl(48.25, 1892), _mhs(46.86, 1842)],
