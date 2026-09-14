@@ -3138,20 +3138,44 @@
   z-index: 2; /* sobre el velo verde y la foto */
 }
 
-/* ── Disponibilidad — banner ticket ancho (sin maxWidth fijo) ─────────── */
+/* ── Disponibilidad — banner ticket perforado ─────────────────────── */
 .amx-v2 .amx-arsenal-disp-banner {
   display: flex;
   align-items: center;
   gap: var(--e3);
   padding: 16px 20px;
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  border-left: 4px solid var(--ok);
+  background: var(--copia-carton);
+  border: none;
   box-shadow: var(--sombra);
   cursor: pointer;
   text-align: left;
   width: 100%;
-  transition: border-color .18s, transform .18s, box-shadow .18s;
+  position: relative; /* para ::before banda lateral */
+  transition: transform .18s, box-shadow .18s;
+  /* Bordes dentados tipo boleto perforado (arriba y abajo) */
+  clip-path: polygon(
+    0% 4px, 3.57% 0%, 7.14% 4px, 10.71% 0%, 14.29% 4px, 17.86% 0%, 21.43% 4px,
+    25% 0%, 28.57% 4px, 32.14% 0%, 35.71% 4px, 39.29% 0%, 42.86% 4px, 46.43% 0%,
+    50% 4px, 53.57% 0%, 57.14% 4px, 60.71% 0%, 64.29% 4px, 67.86% 0%, 71.43% 4px,
+    75% 0%, 78.57% 4px, 82.14% 0%, 85.71% 4px, 89.29% 0%, 92.86% 4px, 96.43% 0%,
+    100% 4px,
+    100% calc(100% - 4px), 96.43% 100%, 92.86% calc(100% - 4px), 89.29% 100%,
+    85.71% calc(100% - 4px), 82.14% 100%, 78.57% calc(100% - 4px), 75% 100%,
+    71.43% calc(100% - 4px), 67.86% 100%, 64.29% calc(100% - 4px), 60.71% 100%,
+    57.14% calc(100% - 4px), 53.57% 100%, 50% calc(100% - 4px), 46.43% 100%,
+    42.86% calc(100% - 4px), 39.29% 100%, 35.71% calc(100% - 4px), 32.14% 100%,
+    28.57% calc(100% - 4px), 25% 100%, 21.43% calc(100% - 4px), 17.86% 100%,
+    14.29% calc(100% - 4px), 10.71% 100%, 7.14% calc(100% - 4px), 3.57% 100%,
+    0% calc(100% - 4px)
+  );
+}
+/* Banda de acento lateral */
+.amx-v2 .amx-arsenal-disp-banner::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--ok);
 }
 .amx-v2 .amx-arsenal-disp-banner:hover {
   transform: translateY(-2px);
