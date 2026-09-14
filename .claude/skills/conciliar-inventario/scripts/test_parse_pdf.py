@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Autochequeo de parse_pdf.py contra PDFs ya versionados en public/inventarios/.
 Uso (desde la raiz del repo):  python3 .claude/skills/conciliar-inventario/scripts/test_parse_pdf.py
-Falla con AssertionError si el parser deja de leer bien el formato DCAM de 3 PDFs (11-sep-2026).
+Falla con AssertionError si el parser deja de leer bien el formato DCAM de 3 PDFs (11-sep-2026)
+o los PDFs DCAM de oct-2025 (columnas mas a la izquierda, sin "$", precios pegados a texto).
 """
 import os, sys
 import fitz
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from parse_pdf import parse_dcam
+from parse_pdf import parse_dcam, formato
 
 INV = os.path.join("public", "inventarios")
 def items(nombre):
@@ -31,4 +32,17 @@ assert next(r for r in municiones if r["name"].startswith("CART. CAL. 12 EXCOPES
 assert not any("xclusiva" in r["desc"] or "Armada de México" in r["desc"] for r in accesorios)
 tip = next(r for r in accesorios if r["name"].startswith("CARGADOR TIPPMANN"))
 assert (tip["qty"], tip["priceN"]) == (26, 935.17)
-print("OK parse_pdf: 204 armas · 42 municiones · 30 accesorios")
+
+# oct-2025: la deteccion no se deja engañar por la cabecera acentuada y lee todo
+fmt = lambda n: formato(fitz.open(os.path.join(INV, n)))
+assert [fmt(n) for n in ("dcam-existencias-2025-10-03.pdf", "dcam-accesorios-2025-10-03.pdf",
+                         "otca-stock-2025-09-26.pdf", "otca-stock-2026-06-18.pdf")] == ["DCAM", "DCAM", "OTCA", "OTCA"]
+oct_armas = items("dcam-existencias-2025-10-03.pdf")
+oct_acc = items("dcam-accesorios-2025-10-03.pdf")
+assert (len(oct_armas), len(oct_acc)) == (177, 22), (len(oct_armas), len(oct_acc))
+par = {(r["qty"], r["priceN"]) for r in oct_armas}
+assert (20, 11930.34) in par and (44, 11426.2) in par  # precio pegado a texto (856 Tungsten) y XD-M
+# 14 nombres con matriz rota salen "?" en vez de heredar el del vecino
+assert sum(r["name"] == "?" for r in oct_armas) == 14
+assert next(r for r in oct_acc if "BENELLI MR1" in r["name"])["priceN"] == 841.81
+print("OK parse_pdf: 204 armas · 42 municiones · 30 accesorios · oct-2025 177 armas · 22 accesorios")
