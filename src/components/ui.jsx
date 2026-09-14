@@ -914,7 +914,9 @@ function PieDeSitio({ onNav }) {
   );
 
   return (
-    <footer className="amx-sobre-verde" style={{ marginTop: 32 }}>
+    // `amx-pie-sitio` es la seña del pie para quien lo busca desde fuera (el talón
+    // fijo de la ficha): hay otros <footer> en la página, como el de cada opinión.
+    <footer className="amx-sobre-verde amx-pie-sitio" style={{ marginTop: 32 }}>
       {/* Línea tricolor — DESIGN.md §6b la autoriza expresamente («líneas
           tricolor»), y es lo único mexicano que se puede usar sin caer en
           iconografía oficial. Va SOBRE el lienzo claro, no dentro de la banda:

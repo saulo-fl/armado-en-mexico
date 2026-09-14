@@ -249,7 +249,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
 
       {/* 7 ▸ Disclaimer — MUDADO AL PIE (window.PieDeSitio, en ui.jsx) el
           9-sep-2026. Era un aviso de SITIO viviendo en una sola pantalla: solo
-          lo veía quien entrase por la portada, y en las 322 páginas
+          lo veía quien entrase por la portada, y en las 321 páginas
           prerenderizadas —las que recibe el buscador— no aparecía. El texto se
           fue LITERAL, no reescrito. No lo devuelvas aquí: quedaría duplicado. */}
     </div>);

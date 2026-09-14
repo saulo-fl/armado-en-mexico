@@ -123,11 +123,14 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       Array.from(ficha.children).forEach((c) => io.observe(c));
       ficha.querySelectorAll('.amx-carpeta-grid > *').forEach((c) => io.observe(c));
     }
-    // Se observa el <footer> del shell y no un centinela al final de la ficha:
-    // un salto de scroll (ir al final, un fling largo) lleva el centinela de
-    // debajo de la ventana a encima SIN cruzarla, y el observer no dispara. El
-    // pie, al final de la página, siempre queda dentro.
-    const pie = document.querySelector('footer');
+    // Se observa el pie del sitio y no un centinela al final de la ficha: un
+    // salto de scroll (ir al final, un fling largo) lleva el centinela de debajo
+    // de la ventana a encima SIN cruzarla, y el observer no dispara. El pie, al
+    // final de la página, siempre queda dentro.
+    // Se busca por su clase y NO por la etiqueta: cada opinión publicada lleva su
+    // propio <footer>, que va antes en el DOM. Con `querySelector('footer')` el
+    // talón vigilaba la primera opinión (revisión del PR #152).
+    const pie = document.querySelector('.amx-pie-sitio');
     const ioPie = pie && new IntersectionObserver(([e]) => setPieVisible(e.isIntersecting));
     if (ioPie) ioPie.observe(pie);
     return () => { io.disconnect(); if (ioPie) ioPie.disconnect(); };
@@ -211,7 +214,9 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
               que iba aquí se retiró el 7-sep-2026: un código de expediente que
               no corresponde a ningún registro real es decoración que finge ser
               dato. El tipo sí dice algo verdadero. */}
-          <span className="amx-carpeta-rotulo" aria-hidden="true">{tipoRotulo}</span>
+          {/* Sin aria-hidden: es el único sitio de la ficha donde se dice el tipo
+              (el h1 lleva solo el nombre y la ficha técnica no tiene fila Tipo). */}
+          <span className="amx-carpeta-rotulo">{tipoRotulo}</span>
 
           {/* Las celdas van en el orden de lectura del teléfono. En escritorio
               estilo.css las reparte por filas en las dos solapas (Saulo,
