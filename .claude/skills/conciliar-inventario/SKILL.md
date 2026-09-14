@@ -109,6 +109,20 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
   mismo formato que `price`) y `price` es el que se publica. En accesorios:
   `_h(mid, price, date, qty, errata)`. Solo lo marca Saulo: si la conciliación o una
   auditoría encuentra otra errata, se LISTA en el PR, no se marca.
+- **(14-sep-2026) Compatibilidad accesorio ↔ arma por LISTA EXPLÍCITA, no por calibre.**
+  Al dar de alta un accesorio **o una arma nueva**, actualiza `ACC_COMPAT` en
+  `data-accesorios.js`. Cargador, cañón, culata o refacción = `armas: [ids]`: las fichas
+  que nombra la descripción del PDF («P/HK G36», «IWI MASADA»), verificadas con la ficha
+  del fabricante, incluidas todas las fichas del mismo modelo y calibre (variantes de
+  acabado). Si no se confirma ninguna, `armas: []`: mejor nada que algo falso. Solo lo
+  verdaderamente universal (ópticas de riel) va por `tipos` + `riel: true`, y solo sale en
+  las fichas con `riel` en `data.js` (riel Picatinny/Weaver superior de fábrica verificado
+  con el fabricante; si no se puede verificar, sin riel): al dar de alta un arma, decide
+  su `riel`. Un arma nueva puede entrar en listas ya existentes (p. ej. otra Glock 9 mm en
+  las de los cargadores Glock): revísalas. «Compatible con» sale solo de los nombres de la
+  lista; sin fichas, escribe en `amx()` la plataforma que nombra el PDF («Mossberg 500»),
+  nunca un genérico («Pistola 9mm»). `auditar.js` falla si una lista apunta a un id de
+  arma inexistente.
 
 ## 4) Verificar (obligatorio antes de commitear)
 Invoca el skill `verificar-app` o corre `scripts/auditar.js`:
