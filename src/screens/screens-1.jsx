@@ -894,10 +894,10 @@ function ArsenalHubScreen({ onNav }) {
       {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
       <SectionHdr>Armería</SectionHdr>
       <div style={gridN(2)}>
-        <HubPolaroid label="DCAM" sub="Ciudad de México" stamp="CDMX" stampSub="México"
+        <HubPolaroid label="DCAM" stamp="CDMX" stampSub="México"
           img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
           style={{ '--giro': ARMERIA_GIROS[0], width: '100%', aspectRatio: '4 / 5' }} />
-        <HubPolaroid label="OTCA" sub="Nuevo León" stamp="N.L." stampSub="México"
+        <HubPolaroid label="OTCA" stamp="N.L." stampSub="México"
           img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })}
           style={{ '--giro': ARMERIA_GIROS[1], width: '100%', aspectRatio: '4 / 5' }} />
       </div>
