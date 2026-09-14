@@ -257,7 +257,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             <div className="amx-carpeta-talon">
               <window.TalonComprobante talonRef={talonRef}
                 precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
-                ultimoConocido={ultimoConocido}
+                ultimoConocido={ultimoConocido} historial={priceHistory}
                 enComparacion={inCmp} onComparar={comparar} />
               {/* Lo que opina la comunidad, junto al precio: la pregunta «¿vale
                   la pena?» se responde aquí y no al final de la página. */}
@@ -407,7 +407,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {!ancho && talonFuera && !pieVisible && compareIds.length === 0 &&
         <window.TalonComprobante fijo
           precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
-          ultimoConocido={ultimoConocido}
+          ultimoConocido={ultimoConocido} historial={priceHistory}
           enComparacion={inCmp} onComparar={comparar} />}
     </div>);
 
