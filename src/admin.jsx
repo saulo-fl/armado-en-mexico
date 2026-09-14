@@ -399,7 +399,11 @@ function ArmaForm({ arma, mode, onSave, onCancel }) {
     // Si hay historial de inventarios, el precio actual = entrada más reciente
     const cleanHist = priceHist
       .filter(h => h.price && String(h.price).trim())
-      .map(h => ({ price: String(h.price).trim(), manualId: h.manualId || '', date: h.date || '', note: h.note || '' }))
+      // `errata` (el precio mal publicado por la DCAM) y `qty` (en armas, la
+      // existencia OTCA de ese inventario) viajan tal cual: este formulario no
+      // los edita, y sin ellos guardar borraba la nota de la ficha y el kárdex OTCA.
+      .map(h => ({ price: String(h.price).trim(), manualId: h.manualId || '', date: h.date || '', note: h.note || '',
+        ...(h.errata ? { errata: h.errata } : {}), ...(h.qty != null ? { qty: h.qty } : {}) }))
       .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
     const latest = cleanHist[cleanHist.length - 1];
     if (latest) {
