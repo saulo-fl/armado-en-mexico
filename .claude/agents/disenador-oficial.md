@@ -37,7 +37,7 @@ planas, dilo y propón el orden correcto antes de ejecutar.
 **Por primitivas, no por pantallas.** Las ~15 de `ui.jsx` — `ArmaCard`, `FilterChip`,
 `AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`, `AppHeader`,
 `TopNav`, `BottomNav`, `HCarousel`, `SpecRow`, `MiniSpec`, `Disclosure`, `CompareFloat` —
-propagan solas a las 322 páginas. Las pantallas solo las componen. Tocar pantallas una por
+propagan solas a las 321 páginas. Las pantallas solo las componen. Tocar pantallas una por
 una es el error más caro que puedes cometer aquí.
 
 **La piel al CSS, el layout inline.** Hay 1238 objetos `style={{` en los `.jsx`:
@@ -46,7 +46,7 @@ vive en el CSS o vive inline, nunca en los dos** — si se comparte, empieza la 
 `!important`. Lo que depende de datos viaja como custom property:
 `style={{'--estado': color}}`.
 
-**Nunca iteres sobre las 322 páginas.** Trabaja en una página de galería con los
+**Nunca iteres sobre las 321 páginas.** Trabaja en una página de galería con los
 primitivos, o en una pantalla piloto. Mide, y solo entonces propaga.
 
 ## La prueba de no-genérico

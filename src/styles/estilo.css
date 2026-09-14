@@ -161,6 +161,67 @@
   --palo:           #B4906A;   /* la vara del cartel */
   --puesto-luz:     #FFE9A8;   /* la luz que se enciende detrás de la caja */
 
+  /* ── LA PAPELERÍA DE LA FICHA DE ARMA — diegética (13-sep-2026) ──────────
+     El expediente completo: el folder manila de la Home abierto a toda la
+     ficha, y dentro los papeles de oficina de cada dato. Todos son OBJETOS,
+     así que no llevan `--d-`… salvo el manila, que es la excepción pedida por
+     Saulo: «manila en penumbra» en el tema oscuro. El folder ocupa casi toda la
+     pantalla y a oscuras deslumbraba; baja la luz sobre ÉL, no su color (lo
+     pone la foto), y los papeles de dentro siguen claros.
+
+     `--manila-medido` NO se pinta en ningún sitio: es el 1 % más oscuro del
+     papel de `folder-manila.webp`, medido, y en penumbra ese mismo punto al
+     68 % de brillo. Existe para que `contraste.mjs` audite la tinta sobre el
+     folder en los dos temas sin medir a mano. */
+  --manila-medido:  #EEDFBD;   --d-manila-medido:  #A29780;
+  --manila-luz:     1;         --d-manila-luz:     .68;
+  --manila-tinta:   #171B19;   /* 13.19:1 claro · 6.03:1 en penumbra */
+  --manila-tinta-2: #5A5142;   --d-manila-tinta-2: #171B19;  /* 5.92:1; en penumbra
+                                  daría 2.9:1, así que pasa a la tinta plena y lo
+                                  secundario se distingue por cuerpo, no por tono */
+  /* El talón: papel autocopiante ROSA, la «copia del cliente». */
+  --talon:          #F7D9DC;
+  --talon-filo:     #E2B4BB;   /* perforación y rayas — gráfico, no porta información */
+  --talon-tinta:    #171B19;   /* 13.18:1 */
+  --talon-tinta-2:  #6A4C52;   /*  5.75:1 */
+  --talon-rojo:     #A3341F;   /*  5.19:1 — el encabezado impreso */
+  /* La ficha de fichero, calcada en CSS de `ficha-biblioteca.webp` (papel
+     #E8DCC4, rayado azul #A6B7BA, renglón rojo): la ficha técnica crece con el
+     arma y el .webp estirado deformaba el rayado. El azul va un punto más
+     claro que el de la foto: la tinta secundaria puede caer sobre la raya y ahí
+     el #B3C3C6 daba 4.29:1; con #C3CFD1 da 4.89:1. */
+  --fichero:        #EAE0CA;
+  --fichero-rojo:   #D98C84;
+  --fichero-azul:   #C3CFD1;
+  /* La tarjeta de almacén (kárdex): cartulina verde pálido con rayado impreso. */
+  --kardex:         #E2EBD8;
+  --kardex-linea:   #8FAE8C;
+  --kardex-imp:     #2F5B3A;   /*  6.39:1 — lo impreso de la tarjeta */
+  --kardex-tinta-2: #4F5A4B;   /*  5.91:1 */
+  /* El papel milimétrico del historial, con su cuadrícula azul. */
+  --milimetrico:    #F6F9F5;
+  --milimetrico-linea: #8FB2C4;
+  --milimetrico-tinta-2: #4E5B63; /* 6.59:1 */
+  /* La hoja de oficio (Legalidad · Usos · Antecedentes) y los anexos. */
+  --oficio:         #FBFAF5;
+  --oficio-2:       #E7E1D1;   /* el separador de atrás, un papel más gastado */
+  --oficio-tinta-2: #5A5142;   /*  7.47:1 sobre el oficio · 5.98:1 sobre el separador */
+  --sello-azul:     #3F4A7A;   /* tinta de sello de goma para lo que NO es legal:
+                                  los usos y la foto pendiente — 8.13:1 sobre el
+                                  oficio · 8.50:1 sobre la placa de la copia */
+  /* La etiqueta de precio de la vitrina, en cartón claro. */
+  --etiqueta:       #F3E7C6;
+  --etiqueta-tinta-2: #5A5142; /*  6.34:1 */
+  --laton:          #CDB57A;   /* la placa de la repisa — la tinta da 8.69:1 */
+  --vitrina-fondo:  #EFEADF;
+  /* La cinta rotuladora: negra, con las letras en relieve. */
+  --dymo:           #1C1D1F;
+  --dymo-letra:     #F2F1EC;   /* 14.92:1 */
+  /* El televisor de los 80. */
+  --tele-mueble:    #5E3F26;
+  --tele-marco:     #26221E;
+  --tele-perilla:   #BDB6A6;
+
   /* ── MARCA ──────────────────────────────────────────────────────────────
      El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
      siendo una SUPERFICIE oscura (banda, nav, hero), que es lo que siempre
@@ -245,6 +306,8 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="claro"]) {
     color-scheme: dark;
+    --manila-medido: var(--d-manila-medido); --manila-luz: var(--d-manila-luz);
+    --manila-tinta-2: var(--d-manila-tinta-2);
     --lienzo: var(--d-lienzo);   --papel: var(--d-papel);       --beige: var(--d-beige);
     --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi);
     --tinta: var(--d-tinta);     --tinta-dim: var(--d-tinta-dim); --tinta-2: var(--d-tinta-2);
@@ -262,6 +325,8 @@
 }
 :root[data-tema="oscuro"] {
   color-scheme: dark;
+  --manila-medido: var(--d-manila-medido); --manila-luz: var(--d-manila-luz);
+  --manila-tinta-2: var(--d-manila-tinta-2);
   --lienzo: var(--d-lienzo);   --papel: var(--d-papel);       --beige: var(--d-beige);
   --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi);
   --tinta: var(--d-tinta);     --tinta-dim: var(--d-tinta-dim); --tinta-2: var(--d-tinta-2);
@@ -322,29 +387,6 @@
    pero permitido no es obligatorio: aquí desinformaba. Se fue sin dejar un
    solo consumidor. */
 
-/* ── Tabla de especificaciones (§11) ────────────────────────────────────── */
-
-.amx-v2 .specs { width: 100%; border-collapse: collapse; }
-.amx-v2 .specs th,
-.amx-v2 .specs td { padding: 11px var(--e3); text-align: left; }
-.amx-v2 .specs th {
-  font-family: var(--sans);
-  font-size: 10.5px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .13em;
-  color: var(--tinta-2);
-  width: 42%;
-}
-.amx-v2 .specs td {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-  font-size: 13px;
-  color: var(--tinta);
-}
-/* zebra: --beige sobre el papel es 1.17:1, invisible solo — necesita el hairline */
-.amx-v2 .specs tr { border-bottom: 1px solid var(--hair); }
-.amx-v2 .specs tr:nth-child(even) { background: var(--beige); }
-.amx-v2 .specs tr:last-child { border-bottom: 0; }
-
 /* Retirados .btn, .btn-rojo y .btn-claro el 12-sep-2026: cero usos en
    jsx/html/js desde 272b1b9. Los botones viven en las primitivas de ui.jsx. */
 
@@ -362,41 +404,6 @@
 @media (prefers-reduced-motion: reduce) {
   .amx-v2 * { transition: none !important; animation: none !important; }
 }
-
-/* ── Tabs de la ficha (DESIGN.md §11) — solo en la rama claude/ficha-tabs ── */
-
-.amx-v2 .tabs-bar {
-  display: flex;
-  gap: 0;
-  overflow-x: auto;
-  border-bottom: 1px solid var(--hair);   /* la barra vive sobre superficie clara */
-  scrollbar-width: none;
-}
-.amx-v2 .tabs-bar::-webkit-scrollbar { display: none; }
-
-.amx-v2 .tab {
-  flex: 0 0 auto;
-  background: none;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  color: var(--tinta-2);         /* 6.05:1 claro / 5.44:1 oscuro sobre el papel. Antes --beige: 1.27:1 */
-  font-family: var(--sans);
-  font-size: 11.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  padding: 0 var(--e4);
-  min-height: 46px;              /* área táctil */
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color .16s, border-color .16s;
-}
-.amx-v2 .tab:hover { color: var(--tinta); }
-.amx-v2 .tab.is-act {
-  color: var(--tinta);                /* 16.31:1 sobre el papel #F7F8F4 */
-  border-bottom-color: var(--rojo);   /* el rojo como marca de posición, no como texto */
-}
-.amx-v2 .tab-panel { padding-top: var(--e4); }
 
 /* ── Tarjeta clara: el patrón dominante del mockup ───────────────────────── */
 
@@ -518,98 +525,13 @@
 .amx-v2 .amx-tema svg { display: block; }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   EL EXPEDIENTE ABIERTO — la ficha de arma (DESIGN.md §4.3)
+   LA COPIA INSTANTÁNEA — la usan la Home, las tarjetas expediente y la ficha
 
-   «Un diseño tipo analógico que dé la sensación de estar leyendo desde un
-    folder. En escritorio […] un folder extendido con la foto del arma del lado
-    izquierdo con un marco de polaroid y su precio de referencia y del lado
-    derecho la ficha técnica.»
-
-   Las dos columnas son CSS puro, no `vp.isDesktop`: el hook parte de
-   `window.innerWidth` en el primer render y la ficha es la página que más se
-   comparte por enlace. Una @media no puede equivocarse en el primer pintado.
+   Aquí vivían también el folder CSS de la ficha (`.amx-folder*`), su precio
+   (`.amx-precio-ref*`), su ficha técnica en tabla (`.amx-ficha`, `.specs`) y
+   sus pestañas (`.tabs-bar`). El rediseño del 13-sep-2026 los sustituyó por el
+   expediente completo, que vive al final del archivo: LA FICHA DE ARMA.
    ══════════════════════════════════════════════════════════════════════════ */
-
-/* ── La pestaña del folder ────────────────────────────────────────────────
-   NO es un clip-path. CUT_TR quedó en 'none' cuando el bisel se retiró (§27),
-   así que reusarlo no dibujaría nada; y un recorte se come el anillo de foco,
-   que es el parche que §7 obliga a compensar cada vez. Es geometría pura: una
-   caja con las dos esquinas de arriba redondeadas que se solapa 1px con el
-   folder para que compartan filo, como la pestaña de un separador. El resto
-   del canto lo ocupa el rayado a trazos. */
-.amx-v2 .amx-folder-cabecera {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--e3);
-  padding-left: var(--e4);
-}
-.amx-v2 .amx-folder-pestana {
-  flex: 0 0 auto;
-  margin-bottom: -1px;               /* el folder tapa su filo inferior */
-  padding: 7px 14px 9px;
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  border-bottom: 0;
-  border-radius: var(--radio) var(--radio) 0 0;
-  box-shadow: var(--sombra);
-  font-family: var(--mono);
-  font-size: 10.5px;
-  font-weight: 500;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--tinta-2);             /* 6.05:1 sobre el papel */
-  white-space: nowrap;
-}
-/* El canto superior del folder entre la pestaña y el folio, a trazos: es el
-   rayado de un separador de archivador, no el borde de una caja. */
-.amx-v2 .amx-folder-rayado {
-  flex: 1 1 auto;
-  min-width: var(--e4);
-  align-self: flex-end;
-  height: 0;
-  margin-bottom: 10px;
-  border-bottom: 1px dashed var(--hair);
-}
-/* El rayado llega ahora hasta el final del canto: el folio que lo cerraba por
-   la derecha se retiró. */
-
-.amx-v2 .amx-folder {
-  position: relative;
-  z-index: 1;                        /* tapa la sombra que la pestaña echa abajo */
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  /* Esquina superior izquierda a escuadra: es donde se apoya la pestaña, y la
-     asimetría es SIEMPRE la misma (§5.4), no aleatoria. */
-  border-radius: 0 var(--radio) var(--radio) var(--radio);
-  box-shadow: var(--sombra);         /* quien separa las capas es la sombra */
-  padding: var(--e4);
-}
-
-/* ── Las dos columnas ───────────────────────────────────────────────────── */
-/* El orden del DOM es cabecera → foto → ficha, que es el orden de lectura en
-   móvil («el folder se cierra»): identidad, polaroid, precio, ficha. En
-   escritorio las áreas reparten eso en dos columnas sin reordenar el DOM, así
-   que el foco por teclado y el lector de pantalla siguen el mismo camino. */
-.amx-v2 .amx-folder-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--e4);
-}
-@media (min-width: 1024px) {
-  .amx-v2 .amx-folder-grid {
-    grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "foto cabeza"
-      "foto ficha";
-    column-gap: var(--e6);
-    row-gap: var(--e4);
-    align-items: start;
-  }
-  .amx-v2 .amx-folder-cab { grid-area: cabeza; }
-  .amx-v2 .amx-folder-izq { grid-area: foto; }
-  .amx-v2 .amx-folder-der { grid-area: ficha; }
-}
 
 /* ── La polaroid ─────────────────────────────────────────────────────────
    Es GEOMETRÍA, no un filtro: §4 pide el estilo ochentero «en el lenguaje
@@ -822,53 +744,6 @@
   text-align: center;
   color: var(--copia-tinta-2);       /* 6.46:1 sobre la placa, en los dos temas */
 }
-
-/* ── El precio de referencia, bajo la foto ───────────────────────────────
-   §14 y §6b: todo dato con procedencia la lleva visible. La sigla y la fecha
-   salen del inventario fuente, no se inventan. */
-.amx-v2 .amx-precio-ref { margin-top: var(--e4); }
-.amx-v2 .amx-precio-ref-cifra {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 30px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: .01em;
-  line-height: 1.1;
-  color: var(--acento);              /* 11.67:1 claro / 5.97:1 oscuro sobre el papel */
-}
-.amx-v2 .amx-precio-ref-fuente {
-  margin-top: var(--e1);
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .15em;
-  text-transform: uppercase;
-  line-height: 1.7;
-  color: var(--tinta-2);             /* 6.05:1 sobre el papel */
-}
-
-/* ── La ficha técnica ────────────────────────────────────────────────────
-   Reusa la tabla .specs, que ya tenía la zebra con hairline, el `th` en
-   versalitas y el `td` en mono con tabular-nums. Aquí los valores van
-   alineados a la derecha: esa columna de números cuadrados es la
-   «instrumentación» de §3, y es lo que separa esto de una lista cualquiera. */
-.amx-v2 .amx-ficha {
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  border-radius: var(--radio-sm);
-  overflow: hidden;                  /* la zebra de la última fila respeta el radio */
-}
-.amx-v2 .amx-ficha-rotulo {
-  padding: 9px var(--e3);
-  background: var(--beige);
-  border-bottom: 1px solid var(--hair);
-  font-family: var(--sans);
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--tinta-2);             /* 5.17:1 sobre el beige */
-}
-.amx-v2 .amx-ficha .specs td { text-align: right; }
 
 /* ══════════════════════════════════════════════════════════════════════════
    EL SELLO DE TINTA — la categoría legal, estampada
@@ -1674,3 +1549,1428 @@
   color: #CE1126;          /* rojo de la bandera de México — 2.21:1, ver arriba */
   text-decoration: none;   /* en hover y foco el subrayado se va: señala el rojo */
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA FICHA DE ARMA — el expediente completo (rediseño del 13-sep-2026)
+
+   Decidido con Saulo sección por sección (rama opus-5/red-fichas-de-armas):
+   dos solapas por filas en escritorio (sin nada fijo) y «pila de documentos +
+   talón fijo» en móvil; papelería física —clips, grapas, cinta canela, cinta Dymo,
+   papel autocopiante— y NINGUNA textura ni filtro de envejecido.
+
+   Cada dato es un papel de oficina distinto dentro del folder manila:
+     copia instantánea con clip y sello legal · talón de comprobante (precio)
+     ficha de fichero (ficha técnica) · tarjeta de almacén (existencias)
+     papel milimétrico + registro (historial) · anexos grapados (PDFs)
+     separadores de folder + hoja de oficio (Legalidad · Usos · Antecedentes)
+   y fuera del folder: la vitrina (munición y accesorios), la tele de los 80,
+   la tarjeta de comentarios y los expedientes de armas similares.
+
+   UN SOLO CORTE, a 1024px, como el resto del expediente: por debajo, pila; por
+   encima, dos columnas. La tableta no es objetivo; el móvil sí, y se mide en
+   los anchos reales de México (360 · 384 · 390 · 393 · 402 · 412 · 414 · 440).
+
+   Los papeles son OBJETOS (ver los tokens de la papelería en `:root`): no
+   siguen al tema. Por eso dentro de ellos no se usa PALETTE ni CLARO —que sí lo
+   siguen— y el anillo de foco va en tinta, no en el rojo del lienzo.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Texto solo para lectores de pantalla (la cinta Dymo parte sus letras). */
+.amx-v2 .amx-sr {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* El anillo de foco sobre los papeles claros: en tinta. El rojo del lienzo
+   (--rojo-txt) en oscuro es un salmón claro que sobre el papel no llega a 2:1. */
+.amx-v2 .amx-carpeta :focus-visible,
+.amx-v2 .amx-vitrina :focus-visible,
+.amx-v2 .amx-comentarios :focus-visible,
+.amx-v2 .amx-tarjetita :focus-visible,
+.amx-v2 .amx-talon :focus-visible { outline-color: var(--manila-tinta); }
+
+/* ── EL FOLDER MANILA — la foto de la Home como 9-slice ───────────────────
+   Misma técnica que el tutorial (PR #146): `folder-manila.webp` (1000×720) con
+   `border-image`. Las cuatro esquinas quedan fijas —la pestaña entera cabe en
+   la de arriba a la izquierda— y solo se estiran el canto de la solapa, el
+   filo de las hojas y el papel liso del centro. Así el folder mide lo que mida
+   la ficha (hasta 4000px de alto en móvil) sin torcer la pestaña.
+   Cortes medidos sobre la foto: la solapa acaba en y≈120 y la curva de la
+   pestaña en x≈360; las hojas asoman de y≈660 a 710.
+   Va en un pseudo-elemento por la sombra: un `filter` en la caja sombrearía
+   también todo lo que lleva encima.
+   PENUMBRA: en oscuro `--manila-luz` baja el brillo de la foto al 68 %. Es luz,
+   no un filtro de envejecido: el cartón no cambia de tono, se apaga. */
+.amx-v2 .amx-carpeta {
+  --manila-escala: .36;
+  position: relative;
+  isolation: isolate;
+  padding: calc(120px * var(--manila-escala) + var(--e4)) var(--e4) calc(60px * var(--manila-escala) + var(--e5));
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-carpeta::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  border-style: solid; border-width: 0;
+  border-image-source: url(imagenes/folder-manila.webp);
+  border-image-slice: 140 60 70 370 fill;
+  border-image-width:
+    calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+    calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
+  filter: brightness(var(--manila-luz))
+          drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
+          drop-shadow(0 8px 16px rgba(23, 27, 25, .20));
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-carpeta {
+    --manila-escala: .5;
+    padding: calc(120px * var(--manila-escala) + var(--e5)) 40px calc(60px * var(--manila-escala) + 44px);
+  }
+}
+/* El tipo, rotulado sobre la pestaña de la foto (como la marca en las tarjetas
+   y el folio en el tutorial). La pestaña va de x≈20 a 340 y de y≈0 a 115. */
+.amx-v2 .amx-carpeta-rotulo {
+  position: absolute;
+  left: calc(40px * var(--manila-escala)); top: calc(14px * var(--manila-escala));
+  width: calc(290px * var(--manila-escala)); height: calc(100px * var(--manila-escala));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--manila-tinta-2);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* ── Las dos solapas, por filas ─────────────────────────────────────────────
+   El DOM va en el orden de lectura del teléfono: cabecera, foto, ficha técnica,
+   comprobante, tarjeta de almacén, Legalidad · Usos · Antecedentes e historial.
+   En escritorio las áreas lo reparten sin reordenar el DOM (el teclado y el
+   lector de pantalla siguen el mismo camino), y lo reparten POR FILAS, como pidió
+   Saulo el 13-sep-2026:
+
+       foto          │ cabecera + ficha técnica      ← lo primero que se ve
+       comprobante   │ tarjeta de almacén              al abrir el folder
+       ─────────────────────────────────────────
+       Legalidad…    │ historial de precios          ← lo que revela el scroll
+
+   NADA SE QUEDA FIJO. Hubo una columna izquierda con `position: sticky` (copia,
+   sello y talón siguiendo al scroll) y Saulo la retiró: «rompe completamente la
+   estética vintage/diegética». Son papeles sobre un folder; un papel no persigue
+   a quien lee. */
+.amx-v2 .amx-carpeta-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e5);
+}
+.amx-v2 .amx-carpeta-grid > * { min-width: 0; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-carpeta-grid {
+    grid-template-columns: minmax(0, 36%) minmax(0, 1fr);
+    grid-template-areas:
+      "foto   cab"
+      "foto   ficha"
+      "talon  almacen"
+      "legal  historial";
+    grid-template-rows: auto 1fr auto auto;
+    column-gap: var(--e6);
+    row-gap: 40px;
+    align-items: start;
+  }
+  .amx-v2 .amx-carpeta-cab       { grid-area: cab; }
+  .amx-v2 .amx-carpeta-foto      { grid-area: foto; }
+  .amx-v2 .amx-carpeta-ficha     { grid-area: ficha; margin-top: -16px; }  /* la ficha, pegada al nombre */
+  .amx-v2 .amx-carpeta-talon     { grid-area: talon; }
+  .amx-v2 .amx-carpeta-almacen   { grid-area: almacen; }
+  .amx-v2 .amx-carpeta-legal     { grid-area: legal; }
+  .amx-v2 .amx-carpeta-historial { grid-area: historial; }
+}
+
+.amx-v2 .amx-carpeta-cab h1 {
+  margin: 0;
+  font-size: 27px;
+  color: var(--manila-tinta);
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-carpeta-cab h1 { font-size: 40px; }
+}
+
+/* ── LA COPIA: clip y sello estampado ──────────────────────────────────────── */
+.amx-v2 .amx-copia {
+  position: relative;
+  width: min(100%, 250px);
+  margin: 6px auto 0;
+  --giro: -1.6deg;
+}
+/* En escritorio la copia ocupa su solapa entera. Estuvo limitada por el alto de
+   la ventana para caber en la columna fija; sin columna fija, sobra. */
+@media (min-width: 1024px) {
+  .amx-v2 .amx-copia { width: 100%; margin-top: 0; }
+}
+/* En la ficha la copia gira también en móvil: va centrada y a 290px, no a
+   ancho completo, así que el giro ya no se come el ancho útil. */
+.amx-v2 .amx-copia .amx-polaroid { transform: rotate(var(--giro)); }
+
+/* El clip. Un clip de alambre es un trazo de metal doblado en dos lazos: el
+   exterior y, dentro, uno más corto. Dos cajas redondeadas con canto
+   metálico, sin imagen. Pisa el canto superior de la copia. */
+.amx-v2 .amx-copia-clip {
+  position: absolute;
+  z-index: 3;
+  top: -20px; left: 22%;
+  width: 19px; height: 60px;
+  border: 2.5px solid #9CA2A6;
+  border-radius: 10px;
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .55), 1px 2px 2px rgba(23, 27, 25, .3);
+  transform: rotate(7deg);
+  pointer-events: none;
+}
+.amx-v2 .amx-copia-clip::before {
+  content: '';
+  position: absolute;
+  left: 2px; right: 2px; top: 13px; bottom: 2px;
+  border: 2.5px solid #B8BDC0;
+  border-top: 0;
+  border-radius: 0 0 7px 7px;
+}
+
+/* El sello legal, estampado encima de la copia: pisa la esquina de la foto y
+   el faldón, como un sello real que nadie alinea. */
+.amx-v2 .amx-copia-sello {
+  position: absolute;
+  z-index: 4;
+  right: -14px; bottom: 24%;          /* en móvil, sobre la foto: más abajo tapaba el nombre del faldón */
+  pointer-events: none;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-copia-sello { right: -12px; bottom: 15%; } }
+.amx-v2 .amx-copia-sello .amx-sello {
+  font-size: 15px;
+  padding: 5px 12px 6px;
+  border-width: 3px;
+  transform: rotate(-8deg);
+  /* DESGASTE REBAJADO, como los avisos del tutorial: con la máscara entera se
+     comía trazos —la L de EXCLUSIVO, medido en la primera captura— y es la
+     categoría legal. Una capa lisa al 60 % sumada a la máscara deja ver la
+     textura sin que desaparezca ninguna letra. */
+  -webkit-mask-image: url(imagenes/sello-desgaste.webp), linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6));
+          mask-image: url(imagenes/sello-desgaste.webp), linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6));
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+  -webkit-mask-composite: source-over;
+          mask-composite: add;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-copia-sello .amx-sello { font-size: 18px; padding: 6px 14px 7px; } }
+/* LA ÚNICA ANIMACIÓN DE ENTRADA DE LA FICHA: el sello cae sobre la copia.
+   Solo `transform` y `opacity` (§6). Con movimiento reducido la regla global
+   de arriba la anula y el sello aparece ya estampado. */
+@keyframes amx-estampa {
+  0%   { opacity: 0; transform: rotate(-8deg) scale(1.7); }
+  70%  { opacity: 1; transform: rotate(-8deg) scale(.96); }
+  100% { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
+.amx-v2 .amx-copia-sello .amx-sello--estampa {
+  animation: amx-estampa .42s cubic-bezier(.3, .7, .2, 1) .25s both;
+}
+
+/* Sin fotografía (62 de 192): el sello «FOTOGRAFÍA PENDIENTE» sustituye a la
+   leyenda. Tinta azul de sello de goma: no es una categoría legal, así que no
+   usa ni el verde ni el rojo. */
+.amx-v2 .amx-sello--pendiente {
+  color: var(--sello-azul);
+  font-size: 12px;
+  transform: rotate(-9deg);
+}
+
+/* Aquí iban «Exclusivo — Fuerzas Armadas» y «§ Ver situación legal» bajo la
+   copia. Salieron el 13-sep-2026: lo dicen el sello y la hoja de Legalidad. */
+.amx-v2 .amx-copia-opinion {
+  margin: var(--e3) 0 0;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-copia-opinion b { color: var(--manila-tinta); }
+
+/* ── EL TALÓN DE COMPROBANTE — papel autocopiante rosa ─────────────────────
+   El borde de abajo va PICADO, como un talón arrancado de su block. El picado
+   es una máscara, y una máscara recorta también la sombra: por eso la sombra
+   va en el envoltorio (`drop-shadow`, que sigue el picado) y la máscara en el
+   papel. */
+.amx-v2 .amx-talon {
+  position: relative;
+  width: min(100%, 340px);
+  margin: 0 auto;
+  filter: drop-shadow(0 1px 1px rgba(23, 27, 25, .16)) drop-shadow(0 5px 8px rgba(23, 27, 25, .18));
+  transform: rotate(-.8deg);
+}
+.amx-v2 .amx-talon-papel {
+  position: relative;
+  padding: 12px 16px 16px;
+  background: var(--talon);
+  color: var(--talon-tinta);
+  -webkit-mask: radial-gradient(circle at 50% 100%, transparent 3.5px, #000 4px) 0 0 / 11px 100% repeat-x;
+          mask: radial-gradient(circle at 50% 100%, transparent 3.5px, #000 4px) 0 0 / 11px 100% repeat-x;
+}
+.amx-v2 .amx-talon-cab {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e2);
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--talon-filo);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--talon-rojo);
+}
+.amx-v2 .amx-talon-cifra {
+  display: block;
+  margin: 8px 0 4px;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.1;
+  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+}
+/* Fuente y fecha en UN renglón: el talón baja 18px y en móvil eso sube la
+   ficha técnica al pliegue. */
+.amx-v2 .amx-talon-datos {
+  display: grid;
+  grid-template-columns: auto auto auto minmax(0, 1fr);
+  gap: 2px var(--e3);
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.amx-v2 .amx-talon-datos dt { letter-spacing: .12em; text-transform: uppercase; color: var(--talon-tinta-2); }
+.amx-v2 .amx-talon-datos dd { margin: 0; }
+/* La casilla de Comparar: se tacha a máquina. El estado lo dice la X Y el
+   texto, no un color. */
+.amx-v2 .amx-talon-casilla {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  padding: 6px 0 0;
+  background: none;
+  border: 0;
+  border-top: 1px dashed var(--talon-filo);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--talon-tinta);
+  cursor: pointer;
+  text-align: left;
+}
+.amx-v2 .amx-talon-caja {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px; height: 20px;
+  border: 1.5px solid var(--talon-tinta);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* El mismo talón, fijo abajo en móvil. Aparece solo cuando el de la ficha sale
+   de la pantalla (IntersectionObserver en ProductScreen) y sube desde abajo:
+   es la respuesta a un gesto del visitante, no una animación de entrada. */
+.amx-v2 .amx-talon--fijo {
+  position: fixed;
+  z-index: 55;
+  left: 10px; right: 10px;
+  bottom: calc(var(--amx-nav-h, env(safe-area-inset-bottom, 0px)) + 8px);
+  width: auto;
+  margin: 0;
+  transform: none;
+  animation: amx-talon-sube .22s ease-out both;
+}
+@keyframes amx-talon-sube {
+  from { transform: translateY(130%); }
+  to   { transform: none; }
+}
+.amx-v2 .amx-talon--fijo .amx-talon-papel {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  padding: 6px 14px 11px;
+}
+.amx-v2 .amx-talon-resumen { flex: 1 1 auto; min-width: 0; }
+.amx-v2 .amx-talon-mini {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--talon-rojo);
+}
+.amx-v2 .amx-talon--fijo .amx-talon-cifra { margin: 1px 0 0; font-size: 20px; white-space: nowrap; }
+/* A 360px la fecha partía el rótulo en dos renglones y el talón crecía: en los
+   teléfonos más estrechos se queda la fuente, que es lo que respalda la cifra. */
+.amx-v2 .amx-talon-mini { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 399px) { .amx-v2 .amx-talon-mini-fecha { display: none; } }
+.amx-v2 .amx-talon--fijo .amx-talon-casilla {
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+  padding: 0 0 0 var(--e3);
+  border-top: 0;
+  border-left: 1px dashed var(--talon-filo);
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-talon--fijo { display: none; }
+}
+
+/* ── Los papeles de la solapa derecha: sombra y giro comunes ──────────────
+   `.amx-papel` es el envoltorio que lleva la sombra; el papel de dentro puede
+   llevar máscara (perforaciones) sin perderla. Giros mínimos y estáticos. */
+.amx-v2 .amx-papel {
+  position: relative;
+  min-width: 0;
+  filter: drop-shadow(0 1px 1px rgba(23, 27, 25, .14)) drop-shadow(0 6px 10px rgba(23, 27, 25, .16));
+  transform: rotate(var(--giro-papel, 0deg));
+}
+.amx-v2 .amx-papel-tit {
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+/* ── LA FICHA DE FICHERO — la ficha técnica ────────────────────────────────
+   Cartulina con el renglón rojo arriba, el rayado azul y la perforación
+   abajo. Cada fila mide un renglón (30px) y el texto se apoya en su raya, que
+   es lo que hace que se lea como una ficha mecanografiada y no como una tabla. */
+.amx-v2 .amx-fichero-carton {
+  --renglon: 30px;
+  position: relative;
+  padding: 0 18px 44px;
+  background-color: var(--fichero);
+  background-image:
+    linear-gradient(var(--fichero-rojo), var(--fichero-rojo)),
+    repeating-linear-gradient(180deg, transparent 0 calc(var(--renglon) - 1px), var(--fichero-azul) calc(var(--renglon) - 1px) var(--renglon));
+  background-size: 100% 2px, 100% 100%;
+  background-position: 0 42px, 0 44px;
+  background-repeat: no-repeat;
+  border-radius: 2px;
+  color: var(--ficha-tinta);
+  -webkit-mask: radial-gradient(circle 8px at 50% calc(100% - 20px), transparent 96%, #000 100%);
+          mask: radial-gradient(circle 8px at 50% calc(100% - 20px), transparent 96%, #000 100%);
+}
+.amx-v2 .amx-fichero-cab {
+  height: 42px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding-bottom: 7px;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-fichero-cab span {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.amx-v2 .amx-fichero-lista { margin: 2px 0 0; }
+.amx-v2 .amx-fichero-fila {
+  display: grid;
+  grid-template-columns: auto minmax(18px, 1fr) minmax(0, max-content);
+  align-items: end;
+  min-height: var(--renglon);
+}
+.amx-v2 .amx-fichero-fila dt,
+.amx-v2 .amx-fichero-fila dd {
+  position: relative;
+  top: -5px;                          /* el texto se apoya en la raya, no flota a media altura */
+  line-height: calc(var(--renglon) - 6px);
+  font-family: var(--mono);
+}
+.amx-v2 .amx-fichero-fila dt {
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-fichero-fila dd {
+  margin: 0;
+  font-size: 14px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.amx-v2 .amx-fichero-guia {
+  align-self: end;
+  margin: 0 8px 12px;
+  border-bottom: 2px dotted rgba(90, 81, 66, .4);
+}
+
+/* ── LA TARJETA DE ALMACÉN — existencias por sucursal ──────────────────────
+   Cartulina verde con lo impreso en verde oscuro y lo escrito en tinta. */
+.amx-v2 .amx-kardex-carton {
+  padding: 12px 14px 14px;
+  background: var(--kardex);
+  border-radius: 2px;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-kardex-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--e3);
+  flex-wrap: wrap;
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--kardex-imp);
+  color: var(--kardex-imp);
+}
+.amx-v2 .amx-kardex-cab small {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.amx-v2 .amx-kardex-articulo {
+  margin: 10px 0 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.amx-v2 .amx-kardex-articulo span {
+  margin-right: 8px;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--kardex-imp);
+}
+.amx-v2 .amx-kardex-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.amx-v2 .amx-kardex-tabla th {
+  padding: 6px 6px 5px;
+  text-align: left;
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--kardex-imp);
+  border-bottom: 1.5px solid var(--kardex-imp);
+}
+.amx-v2 .amx-kardex-tabla td {
+  padding: 4px 6px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--kardex-linea);
+}
+.amx-v2 .amx-kardex-tabla th + th,
+.amx-v2 .amx-kardex-tabla td + td { border-left: 1px solid var(--kardex-linea); }
+.amx-v2 .amx-kardex-tabla .num { text-align: right; }
+.amx-v2 .amx-kardex-suc b { display: block; font-weight: 700; letter-spacing: .08em; }
+/* El nombre largo de la autoridad solo cabe con ancho: en un teléfono partía
+   «Dirección de Comercialización…» en cinco renglones y la tabla se salía de la
+   tarjeta. La sigla basta ahí; el nombre completo sigue en el PDF. */
+.amx-v2 .amx-kardex-suc small {
+  display: none;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--kardex-tinta-2);
+}
+@media (min-width: 600px) { .amx-v2 .amx-kardex-suc small { display: block; } }
+.amx-v2 .amx-kardex-tabla .amx-sello { font-size: 11px; padding: 2px 6px 3px; }
+.amx-v2 .amx-kardex-pdf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  color: var(--kardex-imp);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.amx-v2 .amx-kardex-nota {
+  margin: 12px 0 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--kardex-tinta-2);
+}
+.amx-v2 .amx-nivel b { font-family: var(--mono); letter-spacing: .08em; color: var(--manila-tinta); }
+.amx-v2 .amx-nivel span { font-family: var(--mono); letter-spacing: .08em; color: var(--kardex-linea); }
+
+/* ── EL HISTORIAL — papel milimétrico, registro y anexos grapados ──────────
+   La cuadrícula es el papel mismo, no una textura encima: líneas finas cada
+   10px y marcadas cada 50px, en el azul de un block de milimétrico. */
+.amx-v2 .amx-historial { container-type: inline-size; min-width: 0; }
+.amx-v2 .amx-milimetrico {
+  padding: 12px 14px 14px;
+  border-radius: 2px;
+  color: var(--manila-tinta);
+  background-color: var(--milimetrico);
+  background-image:
+    linear-gradient(rgba(143, 178, 196, .5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 178, 196, .5) 1px, transparent 1px),
+    linear-gradient(rgba(143, 178, 196, .2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(143, 178, 196, .2) 1px, transparent 1px);
+  background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+  background-position: -1px -1px;
+}
+.amx-v2 .amx-historial-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px var(--e3);
+  flex-wrap: wrap;
+  margin-bottom: var(--e3);
+  color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-historial-cab h2 { color: var(--manila-tinta); }
+.amx-v2 .amx-historial-cab small {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .08em;
+}
+.amx-v2 .amx-historial-cuerpo { display: grid; gap: var(--e4); }
+@container (min-width: 780px) {
+  .amx-v2 .amx-historial-cuerpo--doble {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+.amx-v2 .amx-registro {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  background: rgba(246, 249, 245, .82);   /* se lee sobre la cuadrícula sin taparla del todo */
+}
+.amx-v2 .amx-registro th {
+  padding: 5px 6px;
+  text-align: left;
+  font-weight: 400;
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--milimetrico-tinta-2);
+  border-bottom: 1.5px solid var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-registro td { padding: 7px 6px; border-bottom: 1px solid rgba(143, 178, 196, .6); white-space: nowrap; }
+.amx-v2 .amx-registro .num { text-align: right; }
+.amx-v2 .amx-registro tr.es-actual td { font-weight: 700; }
+.amx-v2 .amx-baja { color: var(--sello-civil); }
+.amx-v2 .amx-sube { color: var(--sello-restr); }
+.amx-v2 .amx-historial-variacion {
+  margin: var(--e3) 0 0;
+  padding-top: var(--e2);
+  border-top: 1px dashed var(--milimetrico-tinta-2);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-historial-variacion b { margin-left: 8px; font-size: 14px; letter-spacing: .02em; }
+
+/* El registro plegado en móvil: un <details> nativo, sin librería. */
+.amx-v2 .amx-plegable summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+  border-top: 1px dashed var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-plegable summary::-webkit-details-marker { display: none; }
+.amx-v2 .amx-plegable summary::after { content: '+'; font-size: 18px; line-height: 1; }
+.amx-v2 .amx-plegable[open] summary::after { content: '−'; }
+
+/* Los anexos: hojas pequeñas grapadas al pie del historial, que asoman por
+   debajo de su borde. Cada una abre su PDF oficial. */
+.amx-v2 .amx-anexos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));   /* en móvil, de dos en dos */
+  gap: var(--e4) var(--e3);
+  margin: -14px 0 0;
+  padding: 0 var(--e3);
+  list-style: none;
+}
+@media (min-width: 600px) { .amx-v2 .amx-anexos { display: flex; flex-wrap: wrap; } }
+.amx-v2 .amx-anexo { position: relative; min-width: 0; }
+@media (min-width: 600px) { .amx-v2 .amx-anexo { flex: 0 0 auto; width: 148px; } }
+.amx-v2 .amx-anexo:nth-child(3n + 1) { --giro-anexo: -1.4deg; }
+.amx-v2 .amx-anexo:nth-child(3n + 2) { --giro-anexo: 1.1deg; }
+.amx-v2 .amx-anexo:nth-child(3n)     { --giro-anexo: -.5deg; }
+.amx-v2 .amx-anexo a {
+  display: block;
+  min-height: 44px;
+  padding: 18px 10px 10px;
+  background: var(--oficio);
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .16), 0 4px 8px -3px rgba(23, 27, 25, .2);
+  transform: rotate(var(--giro-anexo));
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--manila-tinta);
+  text-decoration: none;
+  transition: transform .16s;
+}
+.amx-v2 .amx-anexo a:hover { transform: rotate(var(--giro-anexo)) translateY(-3px); }
+.amx-v2 .amx-anexo a b { display: block; letter-spacing: .14em; text-transform: uppercase; color: var(--oficio-tinta-2); font-weight: 400; }
+.amx-v2 .amx-anexo a u { display: inline-block; margin-top: 4px; text-underline-offset: 3px; }
+/* La grapa: una barrita de metal que muerde el anexo y el borde del historial. */
+.amx-v2 .amx-grapa {
+  position: absolute;
+  z-index: 2;
+  top: 5px; left: 50%;
+  width: 28px; height: 4px;
+  margin-left: -14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #E6E9EB 0%, #A5AAAE 60%, #7F8589 100%);
+  box-shadow: 0 1px 1px rgba(23, 27, 25, .4);
+  transform: rotate(var(--giro-anexo));
+  pointer-events: none;
+}
+
+/* ── LOS SEPARADORES Y LA HOJA DE OFICIO ───────────────────────────────────
+   Legalidad · Usos · Antecedentes. Las pestañas son las de un separador de
+   archivero: la de delante se une a su hoja; las de detrás van un papel más
+   gastadas y un punto más abajo, metidas en el folder. */
+.amx-v2 .amx-separadores { min-width: 0; }
+.amx-v2 .amx-separadores-pestanas {
+  display: flex;
+  gap: 4px;
+  padding: 0 0 0 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.amx-v2 .amx-separadores-pestanas::-webkit-scrollbar { display: none; }
+.amx-v2 .amx-separador {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 12px 11px 8px;
+  background: var(--oficio-2);
+  border: 0;
+  border-radius: 8px 8px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .08em;             /* las tres pestañas caben en 360px sin scroll */
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+  box-shadow: inset 0 -7px 7px -7px rgba(23, 27, 25, .28);
+  transform: translateY(5px);
+  cursor: pointer;
+  transition: transform .16s;
+}
+@media (min-width: 600px) { .amx-v2 .amx-separador { padding: 12px 16px 8px; font-size: 12px; letter-spacing: .14em; } }
+.amx-v2 .amx-separador:hover { transform: translateY(2px); }
+.amx-v2 .amx-separador[aria-selected="true"] {
+  z-index: 1;
+  background: var(--oficio);
+  color: var(--manila-tinta);
+  box-shadow: 0 -2px 4px -2px rgba(23, 27, 25, .16);
+  transform: none;
+}
+/* Las tres hojas (Legalidad, Usos, Antecedentes) comparten celda: la pila mide
+   lo que la más larga y el folder no crece ni encoge al cambiar de pestaña. Las
+   de detrás, invisibles y fuera del lector de pantalla y del tabulador. */
+.amx-v2 .amx-oficio-pila { display: grid; }
+.amx-v2 .amx-oficio-pila > .amx-oficio { grid-area: 1 / 1; }
+.amx-v2 .amx-oficio-pila > [data-activo="no"] { visibility: hidden; }
+.amx-v2 .amx-oficio {
+  position: relative;
+  padding: 16px 18px 22px;
+  background: var(--oficio);
+  border-radius: 0 3px 3px 3px;
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 8px 14px -6px rgba(23, 27, 25, .22);
+  color: var(--manila-tinta);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-oficio { padding: 20px 26px 26px; } }
+.amx-v2 .amx-oficio-membrete {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-bottom: var(--e4);
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--oficio-tinta-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+/* La banda del color de la clasificación, impresa de canto a canto. Dos
+   colores, no tres (decisión del 8-sep-2026): SEGURIDAD y EXCLUSIVO comparten
+   el rojo y los distingue la palabra, que nunca se abrevia. */
+.amx-v2 .amx-oficio-banda {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px var(--e3);
+  margin: 0 -18px var(--e4);
+  padding: 9px 18px;
+  color: var(--oficio);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-oficio-banda { margin: 0 -26px var(--e4); padding: 10px 26px; } }
+.amx-v2 .amx-oficio-banda small { font-family: var(--mono); font-weight: 400; font-size: 11.5px; letter-spacing: .08em; }
+.amx-v2 .amx-oficio-banda--civil { background: var(--sello-civil); }
+.amx-v2 .amx-oficio-banda--restr { background: var(--sello-restr); }
+.amx-v2 .amx-oficio-tit {
+  margin: 0 0 var(--e2);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.amx-v2 .amx-oficio-texto {
+  max-width: 68ch;
+  margin: 0 0 var(--e4);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+.amx-v2 .amx-oficio-sub {
+  margin: 0 0 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-oficio-lista { margin: 0 0 var(--e4); padding: 0; list-style: none; }
+.amx-v2 .amx-oficio-lista li {
+  padding: 4px 0 4px 18px;
+  text-indent: -18px;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.5;
+}
+.amx-v2 .amx-oficio-lista li::before { content: '—'; display: inline-block; width: 18px; text-indent: 0; }
+.amx-v2 .amx-oficio-boton {
+  min-height: 44px;
+  padding: 0 var(--e4);
+  background: none;
+  border: 1.5px solid var(--manila-tinta);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-oficio-maquina {
+  max-width: 68ch;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 14.5px;
+  line-height: 1.8;
+}
+/* Los usos: un sello de goma chico por uso, cada uno a su ángulo. Solo los que
+   aplican, así que no se afirma nada de los que no. */
+.amx-v2 .amx-usos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e4) 22px;
+  margin: 0;
+  padding: var(--e2) 4px;
+  list-style: none;
+}
+.amx-v2 .amx-usos .amx-sello { color: var(--sello-azul); font-size: 13px; padding: 5px 10px 6px; }
+.amx-v2 .amx-usos li:nth-child(3n + 1) .amx-sello { transform: rotate(-5deg); }
+.amx-v2 .amx-usos li:nth-child(3n + 2) .amx-sello { transform: rotate(3deg); }
+.amx-v2 .amx-usos li:nth-child(3n)     .amx-sello { transform: rotate(-2deg); }
+
+/* ── LA CINTA DYMO — los títulos fuera del folder ──────────────────────────
+   Cinta negra y letras en relieve. Cada letra va en su span con un salto de
+   medio píxel —la rotuladora nunca las alinea— y cada PALABRA en una caja que
+   no se parte, para que un título largo baje de línea entre palabras. */
+.amx-v2 .amx-dymo {
+  display: inline-block;
+  max-width: 100%;
+  margin: 0 0 var(--e4);
+  padding: 7px 14px 6px;
+  background: linear-gradient(180deg, #2B2C2F 0%, var(--dymo) 45%, #121315 100%);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 -1px 0 rgba(0, 0, 0, .55), 0 2px 3px rgba(23, 27, 25, .28);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.35;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--dymo-letra);
+  transform: rotate(-.8deg);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-dymo { font-size: 16px; padding: 8px 16px 7px; } }
+.amx-v2 .amx-dymo-palabra { display: inline-block; white-space: nowrap; }
+.amx-v2 .amx-dymo-letra {
+  display: inline-block;
+  transform: translateY(var(--dy, 0));
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .2);
+}
+
+/* ── LA VITRINA — munición y accesorios compatibles ────────────────────────
+   Un mueble de tienda con dos repisas: arriba la munición, abajo los
+   accesorios. Las cajas se apoyan en la tabla y la etiqueta de precio va
+   pegada con cinta canela al canto. La madera es la misma `--mesa-madera` del
+   puesto del Home. */
+.amx-v2 .amx-vitrina {
+  position: relative;
+  padding: 14px 12px 10px;
+  background: linear-gradient(180deg, #E4DDCD 0%, var(--vitrina-fondo) 22%, #E9E3D6 100%);
+  border: 10px solid var(--mesa-canto);
+  border-bottom-width: 14px;
+  border-radius: 6px;
+  box-shadow: inset 0 10px 18px -12px rgba(23, 27, 25, .45), var(--sombra);
+  color: var(--manila-tinta);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-vitrina { padding: 18px 20px 14px; } }
+.amx-v2 .amx-repisa + .amx-repisa { margin-top: 26px; }
+.amx-v2 .amx-repisa-placa {
+  display: inline-block;
+  margin: 0 0 6px 2px;
+  padding: 3px 10px;
+  background: linear-gradient(180deg, #DCC68F, var(--laton) 55%, #B79E62);
+  border-radius: 2px;
+  box-shadow: 0 1px 1px rgba(23, 27, 25, .3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+}
+/* La fila de una repisa. En móvil hace scroll de lado con imán; en escritorio
+   las cajas se reparten en filas de seis, cada una con su tabla. */
+.amx-v2 .amx-repisa-fila {
+  --alto-foto: 112px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-left: 6px;
+  scrollbar-width: thin;
+  margin: 0 -12px;
+  padding: 0 12px 6px;
+}
+.amx-v2 .amx-repisa-fila + .amx-repisa-fila { margin-top: 18px; }
+.amx-v2 .amx-repisa-carril {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  min-width: 100%;
+  margin: 0;
+  padding: 10px 6px 0;
+  list-style: none;
+}
+/* La tabla de la repisa, con su cubierta a la vista.
+   1ª versión: una tira de 24px bajo la base de las fotos — las cajas flotaban.
+   2ª: 40px con la base 24px dentro — seguían flotando «unas partes de la caja»
+   (Saulo, 13-sep-2026). Medido sobre las 37 fotos de caja: están tomadas desde
+   arriba, en tres cuartos, y la esquina TRASERA de la base queda hasta un 28 %
+   del alto de la foto por encima de su punto más bajo (PMC 9mm: 0.28; Águila
+   30-06: 0.27). La cubierta tiene que llegar más atrás que esa esquina.
+   Ahora la cubierta sube el 34 % del alto de la foto por detrás de su base, y
+   la base queda 8px antes del canto. La madera trae la cubierta en su 80 % de
+   arriba y el canto en el 20 % de abajo, de ahí el `/ .8`.
+   Se descartó redibujar las fotos con un ángulo menos picado: son cajas de
+   marca, y generarlas de nuevo arriesga deformar etiquetas y logotipos. */
+.amx-v2 .amx-repisa-fila { --fondo-repisa: calc(var(--alto-foto) * .34); }
+.amx-v2 .amx-repisa-carril::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: calc(10px + var(--alto-foto) - var(--fondo-repisa));
+  height: calc((var(--fondo-repisa) + 8px) / .8);
+  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
+  box-shadow: 0 4px 6px -3px rgba(23, 27, 25, .4);
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-repisa-fila { --alto-foto: 128px; overflow: visible; margin: 0; padding: 0; }
+  .amx-v2 .amx-repisa-carril {
+    display: grid;
+    grid-template-columns: repeat(var(--por-fila, 6), minmax(0, 1fr));
+    width: auto;
+  }
+}
+.amx-v2 .amx-articulo-celda { flex: 0 0 136px; min-width: 0; scroll-snap-align: start; }
+.amx-v2 .amx-articulo {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.amx-v2 .amx-articulo-foto {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: var(--alto-foto);
+  transition: transform .18s;
+}
+.amx-v2 .amx-articulo:hover .amx-articulo-foto,
+.amx-v2 .amx-articulo:focus-visible .amx-articulo-foto { transform: translateY(-4px); }
+.amx-v2 .amx-articulo-foto img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(0 3px 2px rgba(23, 27, 25, .42)) drop-shadow(0 8px 8px rgba(23, 27, 25, .22));
+}
+/* Accesorio sin fotografía: la silueta de su tipo, apoyada, con su sello. */
+.amx-v2 .amx-articulo-vacio {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+/* Las siluetas de accesorio son largas (el cargador mide 4.5 de proporción):
+   tumbadas quedaban en una raya gris debajo del sello. Van giradas, como las
+   cartas de lotería, y el sello baja a la esquina. */
+.amx-v2 .amx-articulo-vacio .amx-silueta-acc {
+  width: 96%; height: 80%;
+  background-color: var(--copia-silueta);
+  transform: rotate(-28deg);
+}
+.amx-v2 .amx-articulo-vacio .amx-sello {
+  position: absolute;
+  right: 0; bottom: 10px;
+  margin: 0;
+  font-size: 11px;
+  padding: 3px 6px 4px;
+  transform: rotate(-8deg);
+}
+/* La etiqueta de precio: cartón claro pegado al canto con cinta canela. */
+.amx-v2 .amx-etiqueta {
+  position: relative;
+  z-index: 2;
+  display: block;
+  /* la cinta pisa el canto: la tabla acaba 8px + su canto por debajo de la base */
+  margin-top: calc((var(--fondo-repisa) + 8px) / .8 - var(--fondo-repisa) - 4px);
+  padding: 11px 9px 9px;
+  background: var(--etiqueta);
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .24), 0 3px 6px -3px rgba(23, 27, 25, .2);
+  transform: rotate(var(--giro-etq, -1deg));
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-articulo-celda:nth-child(4n + 1) .amx-etiqueta { --giro-etq: -1.3deg; }
+.amx-v2 .amx-articulo-celda:nth-child(4n + 2) .amx-etiqueta { --giro-etq: .9deg; }
+.amx-v2 .amx-articulo-celda:nth-child(4n + 3) .amx-etiqueta { --giro-etq: -.4deg; }
+.amx-v2 .amx-articulo-celda:nth-child(4n)     .amx-etiqueta { --giro-etq: 1.4deg; }
+.amx-v2 .amx-etiqueta::before {
+  content: '';
+  position: absolute;
+  top: -7px; left: 50%;
+  width: 40px; height: 14px;
+  margin-left: -20px;
+  background: rgba(205, 168, 106, .62);
+  box-shadow: 0 0 0 .5px rgba(120, 90, 40, .18);
+  transform: rotate(-3deg);
+}
+.amx-v2 .amx-etiqueta-marca {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.amx-v2 .amx-etiqueta-marca span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.amx-v2 .amx-etiqueta-marca i { font-style: normal; font-weight: 400; font-size: 10.5px; letter-spacing: .06em; white-space: nowrap; }
+.amx-v2 .amx-etiqueta-marca .es-civil { color: var(--sello-civil); }
+.amx-v2 .amx-etiqueta-marca .es-restr { color: var(--sello-restr); }
+.amx-v2 .amx-etiqueta-nombre {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--etiqueta-tinta-2);
+}
+.amx-v2 .amx-etiqueta-precio {
+  display: block;
+  margin-top: 5px;
+  font-weight: 700;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.amx-v2 .amx-etiqueta-precio small { font-weight: 400; font-size: 11px; color: var(--etiqueta-tinta-2); }
+
+/* ── LA TELE DE LOS 80 — el video del modelo ───────────────────────────────
+   Mueble de madera, pantalla de tubo con sus esquinas redondas y el panel con
+   dos perillas y la bocina. La pantalla es el <button> que carga el video; el
+   iframe no se pide hasta que el visitante lo toca. */
+.amx-v2 .amx-tele {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e3);
+  max-width: 860px;
+  padding: 12px;
+  background: linear-gradient(180deg, #6C4B30 0%, var(--tele-mueble) 60%, #4A311D 100%);
+  border-radius: 14px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .14), inset 0 -3px 0 rgba(0, 0, 0, .35), var(--sombra);
+}
+@media (min-width: 720px) {
+  .amx-v2 .amx-tele { grid-template-columns: minmax(0, 1fr) 92px; gap: 18px; padding: 18px; border-radius: 18px; }
+}
+.amx-v2 .amx-tele :focus-visible { outline-color: var(--crema); }
+.amx-v2 .amx-tele-marco {
+  padding: 12px;
+  background: var(--tele-marco);
+  border-radius: 20px;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .06);
+}
+.amx-v2 .amx-tele-pantalla {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  overflow: hidden;
+  background: #0B0C0C;
+  border: 0;
+  border-radius: 18px / 26px;
+  cursor: pointer;
+}
+.amx-v2 .amx-tele-pantalla img,
+.amx-v2 .amx-tele-pantalla iframe {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border: 0;
+}
+/* El cristal del tubo: un brillo arriba y el borde que se oscurece. */
+.amx-v2 .amx-tele-pantalla::after {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(ellipse at 30% 12%, rgba(255, 255, 255, .16), transparent 45%);
+  box-shadow: inset 0 0 36px rgba(0, 0, 0, .65);
+  pointer-events: none;
+}
+/* Velo sobre la miniatura: el sello va en tinta clara y una miniatura clara lo
+   borraría. Sin `filter` en la foto: es una capa encima. */
+.amx-v2 button.amx-tele-pantalla::before {
+  content: '';
+  position: absolute; inset: 0; z-index: 1;
+  background: rgba(8, 9, 9, .42);
+}
+.amx-v2 .amx-tele-sello {
+  position: absolute;
+  z-index: 2;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.amx-v2 .amx-tele-sello .amx-sello { color: var(--dymo-letra); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; }
+.amx-v2 .amx-tele-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding: 0 var(--e2);
+}
+@media (min-width: 720px) {
+  .amx-v2 .amx-tele-panel { flex-direction: column; padding: var(--e2) 0; }
+}
+.amx-v2 .amx-tele-perilla {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #E6E0D2, var(--tele-perilla) 45%, #7C7568 100%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .45), inset 0 -2px 2px rgba(0, 0, 0, .25);
+}
+.amx-v2 .amx-tele-perilla::after {
+  content: '';
+  position: absolute;
+  top: 5px; left: 50%;
+  width: 3px; height: 11px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: #3B3630;
+}
+.amx-v2 .amx-tele-perilla + .amx-tele-perilla { transform: rotate(120deg); }
+.amx-v2 .amx-tele-bocina {
+  flex: 1 1 auto;
+  align-self: stretch;
+  min-height: 14px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(90deg, #2B241E 0 3px, transparent 3px 7px);
+}
+@media (min-width: 720px) {
+  .amx-v2 .amx-tele-bocina { width: 100%; background: repeating-linear-gradient(180deg, #2B241E 0 3px, transparent 3px 7px); }
+}
+.amx-v2 .amx-tele-canal {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--e2);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--tinta-2);
+}
+
+/* ── LA TARJETA DE COMENTARIOS — ¿Recomiendas esta arma? ───────────────────
+   Tarjeta de buzón con su renglón rojo. El voto son dos sellos de goma: sin
+   usar se ven como el contorno de un sello sin tinta; el elegido se estampa. */
+/* Centrada en la ficha, con las opiniones publicadas y el recuento a la misma
+   medida debajo (Saulo, 13-sep-2026: «no está centrada en escritorio»). */
+.amx-v2 .amx-comentarios-marco { max-width: 780px; margin: 0 auto; }
+.amx-v2 .amx-comentarios {
+  position: relative;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 18px 20px;
+  background-color: var(--oficio);
+  background-image: linear-gradient(var(--fichero-rojo), var(--fichero-rojo));
+  background-size: 100% 2px;
+  background-position: 0 40px;
+  background-repeat: no-repeat;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 8px 14px -6px rgba(23, 27, 25, .22);
+  color: var(--manila-tinta);
+  transform: rotate(-.3deg);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-comentarios { padding: 0 26px 24px; } }
+.amx-v2 .amx-comentarios-cab {
+  height: 40px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding-bottom: 7px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-comentarios-pregunta {
+  margin: var(--e4) 0 var(--e3);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.amx-v2 .amx-votos { display: flex; flex-wrap: wrap; gap: var(--e3) var(--e4); }
+.amx-v2 .amx-sello-voto {
+  flex: 1 1 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  padding: 6px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.amx-v2 .amx-sello-voto .amx-sello {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  padding: 9px 14px 10px;
+  border-width: 3px;
+  border-style: dashed;
+  color: var(--oficio-tinta-2);
+  -webkit-mask: none;
+          mask: none;
+  transform: rotate(-2deg);
+  transition: transform .16s;
+}
+/* Al pasar el ratón, el sello se entinta de su color antes de estamparse: verde
+   para «Sí la recomiendo», rojo para «No la recomiendo» (Saulo, 13-sep-2026).
+   Solo con ratón: en un teléfono el hover se queda pegado tras tocar. */
+@media (hover: hover) {
+  .amx-v2 .amx-sello-voto:hover .amx-sello { transform: rotate(-1deg) scale(1.03); }
+  .amx-v2 .amx-sello-voto--si:hover .amx-sello { color: var(--sello-civil); }
+  .amx-v2 .amx-sello-voto--no:hover .amx-sello { color: var(--sello-restr); }
+}
+.amx-v2 .amx-sello-voto[aria-pressed="true"] .amx-sello {
+  border-style: solid;
+  -webkit-mask-image: url(imagenes/sello-desgaste.webp);
+          mask-image: url(imagenes/sello-desgaste.webp);
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+  animation: amx-estampa-voto .3s cubic-bezier(.3, .7, .2, 1) both;
+}
+.amx-v2 .amx-sello-voto--si[aria-pressed="true"] .amx-sello { color: var(--sello-civil); }
+.amx-v2 .amx-sello-voto--no[aria-pressed="true"] .amx-sello { color: var(--sello-restr); }
+@keyframes amx-estampa-voto {
+  0%   { transform: rotate(-6deg) scale(1.3); }
+  100% { transform: rotate(-6deg) scale(1); }
+}
+.amx-v2 .amx-sello-voto[aria-pressed="true"] .amx-sello { transform: rotate(-6deg); }
+
+.amx-v2 .amx-renglon-etq {
+  display: block;
+  margin: var(--e4) 0 2px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-renglon {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 2px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px solid var(--fichero-azul);
+  border-radius: 0;
+  font-family: var(--sans);
+  font-size: 16px;                    /* 16px: por debajo, iOS hace zoom al enfocar */
+  line-height: 1.5;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-renglon::placeholder { color: var(--oficio-tinta-2); opacity: .85; }
+.amx-v2 textarea.amx-renglon {
+  min-height: 128px;
+  padding: 0 2px;
+  line-height: 32px;
+  border-bottom: 0;
+  resize: vertical;
+  background-image: repeating-linear-gradient(180deg, transparent 0 31px, var(--fichero-azul) 31px 32px);
+  background-attachment: local;
+}
+.amx-v2 .amx-renglon-ayuda {
+  margin: 4px 0 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-renglon-ayuda.es-ok { color: var(--sello-civil); }
+.amx-v2 .amx-renglones-2 { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--e4); }
+@media (min-width: 720px) { .amx-v2 .amx-renglones-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.amx-v2 .amx-comentarios-pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-top: var(--e4);
+  padding-top: var(--e3);
+  border-top: 1px dashed var(--oficio-tinta-2);
+}
+.amx-v2 .amx-comentarios-pie p { flex: 1 1 240px; margin: 0; font-family: var(--sans); font-size: 13.5px; line-height: 1.55; color: var(--oficio-tinta-2); }
+.amx-v2 .amx-enlace-tinta {
+  padding: 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  color: var(--manila-tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.amx-v2 .amx-boton-tinta {
+  min-height: 48px;
+  padding: 0 22px;
+  background: var(--manila-tinta);
+  border: 1.5px solid var(--manila-tinta);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--oficio);
+  cursor: pointer;
+}
+.amx-v2 .amx-boton-tinta:disabled {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--oficio-tinta-2);
+  color: var(--oficio-tinta-2);
+  cursor: not-allowed;
+}
+.amx-v2 .amx-comentarios-enviado { padding-top: var(--e4); }
+.amx-v2 .amx-comentarios-enviado .amx-sello { color: var(--sello-civil); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; }
+.amx-v2 .amx-comentarios-enviado p { margin: var(--e4) 0 0; font-family: var(--sans); font-size: 15.5px; line-height: 1.6; }
+
+/* ── ARMAS SIMILARES — folders del mismo tamaño ─────────────────────────────
+   «Estandariza los tamaños de los folders para que todos se vean iguales en tamaño
+   y no dependan del texto contenido» (Saulo, 13-sep-2026). Lo único que variaba
+   era el nombre, a uno o dos renglones: se le reservan siempre los dos (ya estaba
+   cortado a dos con elipsis), así que el folder mide lo mismo con cualquier arma.
+   Solo aquí: el Home usa la misma tarjeta y no se tocó. */
+.amx-v2 .amx-similares .amx-exp-nombre { min-height: calc(2em * 1.14); }
+
+/* Las opiniones publicadas: tarjetitas llenas, cada una a su ángulo. */
+.amx-v2 .amx-tarjetitas { display: grid; gap: var(--e4); margin: 0; padding: var(--e2) 0 0; list-style: none; }
+@media (min-width: 720px) { .amx-v2 .amx-tarjetitas { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.amx-v2 .amx-tarjetita {
+  padding: 12px 16px 14px;
+  background: var(--oficio);
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 5px 10px -5px rgba(23, 27, 25, .2);
+  color: var(--manila-tinta);
+  transform: rotate(var(--giro-t, -.4deg));
+}
+.amx-v2 .amx-tarjetita:nth-child(even) { --giro-t: .5deg; }
+.amx-v2 .amx-tarjetita-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e2);
+  margin-bottom: var(--e2);
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-tarjetita-cab .amx-sello { font-size: 11px; padding: 3px 7px 4px; }
+.amx-v2 .amx-tarjetita p { margin: 0 0 6px; font-family: var(--sans); font-size: 15.5px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.amx-v2 .amx-tarjetita footer { font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; color: var(--oficio-tinta-2); }

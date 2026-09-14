@@ -1,7 +1,7 @@
 // PUT /api/admin/state/:domain — reemplazo COMPLETO de un dominio (solo admin).
 // Lo usa el panel para persistir cualquier edición (páginas, promos, catálogo,
-// favoritos, branding, inventarios, historial de precios, y la gestión de la
-// cola: aprobar/rechazar propuestas y sugerencias).
+// favoritos, branding, inventarios, historial de precios, y la moderación de
+// reseñas y denuncias).
 //
 // SEGURIDAD: esta ruta vive bajo /api/admin/* y debe estar cubierta por una
 // política de Cloudflare Access (igual que /admin.html). Además, la Function

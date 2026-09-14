@@ -20,7 +20,7 @@
 // ES OBLIGATORIO: ya no hay SALTAR. «Menos accesible, pero es imprescindible
 // esta información por legalidad» (Saulo). A cambio solo se abre para quien
 // entra por la PORTADA —la puerta la guarda app.jsx—, no para quien llega
-// desde un buscador a una de las 322 páginas prerenderizadas: sin SALTAR,
+// desde un buscador a una de las 321 páginas prerenderizadas: sin SALTAR,
 // atravesar cuatro pantallas antes de ver la ficha que venía a leer sería
 // castigar al que llega por la puerta de atrás.
 //

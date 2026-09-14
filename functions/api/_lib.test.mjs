@@ -7,7 +7,7 @@
 // entero en cada carga de página. Sin esta prueba, subir un tope o tocar
 // sanitizeItem rompe la protección en silencio.
 import assert from 'node:assert/strict';
-import { mergeAppend, RESENA_MIN, RESENA_MAX } from './_lib.js';
+import { mergeAppend, APPEND_DOMAINS, RESENA_MIN, RESENA_MAX } from './_lib.js';
 
 const pesa = (v) => JSON.stringify(v).length;
 let n = 0;
@@ -17,7 +17,7 @@ const ok = (msg) => { n++; console.log('  ok', msg); };
 {
   const specs = {};
   for (let i = 0; i < 2500; i++) specs['k' + i] = 'x'.repeat(100);   // ~276 KB
-  const out = mergeAppend('pending', [], { nombre: 'Prueba', specs });
+  const out = mergeAppend('reports', [], { nombre: 'Prueba', specs });
   assert.equal(out.length, 1, 'el item debe guardarse');
   assert.equal(out[0].specs, undefined, 'specs de 276 KB debe descartarse');
   assert.equal(out[0].nombre, 'Prueba', 'los campos normales sobreviven');
@@ -26,17 +26,17 @@ const ok = (msg) => { n++; console.log('  ok', msg); };
 
 // ── Un objeto anidado razonable SÍ entra (no romper el caso legítimo) ────────
 {
-  const out = mergeAppend('pending', [], {
-    nombre: 'Glock 19', specs: { calibre: '9mm', capacidad: '15+1', peso: '670g' },
+  const out = mergeAppend('reports', [], {
+    motivo: 'spam', detalle: { entidad: 'arma', entidadId: 40, resenaId: 'r_1' },
   });
-  assert.equal(out[0].specs.calibre, '9mm', 'las specs normales deben conservarse');
-  ok('specs legítimas conservadas');
+  assert.equal(out[0].detalle.entidadId, 40, 'un objeto anidado normal debe conservarse');
+  ok('objeto anidado legítimo conservado');
 }
 
 // ── Un array de objetos gordos tampoco pasa por el hueco del slice(0,100) ───
 {
   const fotos = Array.from({ length: 100 }, () => ({ b64: 'x'.repeat(1000) }));  // ~100 KB
-  const out = mergeAppend('pending', [], { nombre: 'A', fotos });
+  const out = mergeAppend('reports', [], { nombre: 'A', fotos });
   assert.equal(out[0].fotos, undefined, 'array de 100 KB debe descartarse');
   ok('array grande descartado (slice por elementos no bastaba)');
 }
@@ -45,13 +45,23 @@ const ok = (msg) => { n++; console.log('  ok', msg); };
 {
   let lista = [];
   for (let i = 0; i < 300; i++) {
-    lista = mergeAppend('pending', lista, { nombre: 'n' + i, texto: 'y'.repeat(5000) });
+    lista = mergeAppend('reports', lista, { nombre: 'n' + i, texto: 'y'.repeat(5000) });
   }
   const bytes = pesa(lista);
   assert.ok(bytes <= 512 * 1024, `el dominio debe quedar bajo 512 KB, mide ${bytes}`);
   assert.ok(lista.length > 20, `debe conservar items utiles, conserva ${lista.length}`);
   assert.equal(lista[0].nombre, 'n299', 'el mas reciente va primero');
   ok(`dominio acotado a ${bytes} bytes con ${lista.length} items, el mas nuevo primero`);
+}
+
+// ── Los envíos de «Proponer arma» y «Sugerir cambios» ya no se aceptan ─────
+// Salieron el 13-sep-2026. Si alguien vuelve a añadirlos a APPEND_DOMAINS, la
+// API pública volvería a guardar lo que ninguna pantalla revisa.
+{
+  assert.ok(!APPEND_DOMAINS.includes('pending'), 'pending no admite escritura publica');
+  assert.ok(!APPEND_DOMAINS.includes('suggestions'), 'suggestions no admite escritura publica');
+  assert.deepEqual(mergeAppend('pending', [], { nombre: 'x' }), [], 'mergeAppend no conoce pending');
+  ok('pending y suggestions retirados de la escritura publica');
 }
 
 // ── visits: tope por arma, y la fila entera cabe en D1 ──────────────────────

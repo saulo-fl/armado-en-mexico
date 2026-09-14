@@ -1042,7 +1042,7 @@ Dos condiciones, las dos aprendidas a golpes:
 - **En la tinta del sitio `rgba(23,27,25,…)`, nunca teñida con el verde.** Una sombra de color es
   un halo cromático: otro tic de interfaz generada. El detector lo marca como `dark-glow`.
 - **Máximo 18px de blur** (24px en hover, y solo ahí). El coste de una sombra escala con el
-  cuadrado del radio, y son 322 páginas con muchas tarjetas.
+  cuadrado del radio, y son 321 páginas con muchas tarjetas.
 
 ### 5.2 Escala de espaciado — 6 valores, no 36
 
@@ -1098,6 +1098,49 @@ como instrumentación y no como texto.
 - **Asimetría sistemática, no aleatoria:** siempre la misma esquina cortada, siempre los mismos
   dos corchetes. Rompe el rectángulo conservando el escaneo predecible.
 
+### 5.5 La papelería del expediente — la ficha de arma (13-sep-2026)
+
+Cómo se resolvió §4.3, decidido con Saulo sección por sección. El detalle de cada pieza, con sus
+medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al final de `ui.jsx`.
+
+- **Cada dato es un papel de oficina distinto dentro del folder manila.** La copia instantánea con
+  clip y el sello legal estampado encima; el talón de comprobante rosa (precio y Comparar); la
+  ficha de fichero (ficha técnica); la tarjeta de almacén (existencias por sucursal); el papel
+  milimétrico con su registro y los anexos grapados (historial y PDFs); los separadores con la
+  hoja de oficio (Legalidad · Usos · Antecedentes). Fuera del folder: la vitrina con dos repisas
+  (munición y accesorios), la tele de los 80 (video), la tarjeta de comentarios y los expedientes
+  de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra.
+- **Intensidad: papelería física, sin texturas.** Se permiten clips, grapas, cinta canela,
+  perforaciones, papel autocopiante, cinta rotuladora y líneas de corte, dibujados en CSS o como
+  recortes ligeros. Sigue prohibido lo de §27 («texturas de papel fuertes») y lo de §3: ningún
+  filtro de envejecido, ninguna fuente nueva. Una cuadrícula de milimétrico o el rayado de una
+  ficha no son texturas: son el papel mismo.
+- **El folder es la foto de la Home como 9-slice** (`border-image`, igual que el tutorial): crece
+  con la ficha sin torcer la pestaña. Saulo rechazó dos veces el folder dibujado en CSS.
+- **Excepción a la regla diegética: manila en penumbra.** Los papeles no siguen al tema (§5.1b),
+  pero el folder ocupa casi toda la pantalla y en oscuro deslumbraba. En oscuro baja el BRILLO de
+  la foto al 68 % (`--manila-luz`), no su color; los papeles de dentro siguen claros. Lo escrito
+  directamente sobre el manila usa la tinta plena en oscuro: la secundaria no llega a 4.5:1.
+- **Dos colores legales, no tres** (decisión del 8-sep-2026, se mantiene): verde para CIVIL, rojo
+  para SEGURIDAD y EXCLUSIVO; las distingue la palabra. La tinta azul de sello es para lo que no
+  es legal (usos, foto pendiente).
+- **Un solo corte, 1024px.** Por encima, las dos solapas se leen POR FILAS: foto | ficha técnica y
+  comprobante | tarjeta de almacén a la vista al abrir, y al bajar, Legalidad · Usos · Antecedentes |
+  historial. **Nada se queda fijo al hacer scroll** en el folder: hubo una columna izquierda fija y
+  Saulo la retiró porque rompía la estética diegética (un papel no persigue a quien lee). Por
+  debajo de 1024px: pila en ese mismo orden y talón fijo abajo —ese sí, es la barra del pulgar—, que
+  aparece cuando el talón de la ficha sale de pantalla y se retira al asomar el pie.
+- **La situación legal se dice una vez:** el sello sobre la copia y la hoja de Legalidad. Sin línea
+  de texto ni enlace «§ Ver situación legal» bajo la foto.
+- **Las pestañas no mueven el fondo:** las tres hojas de oficio comparten celda y la pila mide lo
+  que la más larga. La tableta no es objetivo; el móvil sí, medido en los anchos reales de México
+  (Statcounter, ago-2026): 360 · 384 · 390 · 393 · 402 · 412 · 414 · 440.
+- **Una sola animación de entrada:** el sello que se estampa sobre la copia. Todo lo demás solo
+  responde a una acción.
+- **Dentro de un papel no se usa `PALETTE` ni `CLARO`** (siguen al tema y en oscuro dejarían tinta
+  clara sobre papel claro): solo los tokens de la papelería, auditados por `contraste.mjs` en el
+  grupo «LA PAPELERÍA DE LA FICHA DE ARMA». El anillo de foco sobre los papeles va en tinta.
+
 ---
 
 ## 6. Prohibiciones explícitas
@@ -1110,7 +1153,7 @@ Restricciones negativas: sin ellas el modelo vuelve al promedio.
 - ❌ **`backdrop-filter: blur()`** en cualquier cosa que haga scroll.
 - ❌ **`box-shadow` con blur > 24px** en listas: el costo escala con el cuadrado del radio.
 - ❌ **augmented-ui en la grilla.** Como recetario de `clip-path` para 3-6 elementos hero, sí; como
-  librería en 322 tarjetas, no — crea un contexto de apilamiento por elemento.
+  librería en 321 tarjetas, no — crea un contexto de apilamiento por elemento.
 - ❌ **Tailwind por CDN.** Compila en runtime; deshace el prerender del que dependen los crawlers.
 - ❌ **Animar `background-position`.** Si algo rota, se anima con `transform`.
 - ❌ **Todo centrado.** Y nada de `border-radius` uniforme en todo.
@@ -1152,7 +1195,7 @@ Es un sitio publicado, divulgativo y con contenido de referencia legal.
 
 ## 8. Cómo se trabaja
 
-1. **Nunca sobre las 322 páginas.** Se itera en una página de galería con todos los primitivos.
+1. **Nunca sobre las 321 páginas.** Se itera en una página de galería con todos los primitivos.
 2. **Las primitivas antes que las pantallas.** Las ~15 de `ui.jsx` (`ArmaCard`, `FilterChip`,
    `AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`…) propagan solas a todo el sitio.
    Las pantallas solo las componen.

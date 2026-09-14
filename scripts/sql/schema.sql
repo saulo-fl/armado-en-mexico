@@ -1,8 +1,8 @@
 -- Armado en México — esquema de la base D1 (Cloudflare)
 -- =============================================================================
--- El backend usa un "document store" por DOMINIO: cada dominio de curaduría que
+-- El backend usa un "document store" por DOMINIO: cada dominio de contenido editable que
 -- hoy vive en localStorage (páginas, promos, favoritos, branding, catálogo,
--- historial de precios, inventarios, propuestas, sugerencias, reseñas, denuncias, visitas)
+-- historial de precios, inventarios, reseñas, denuncias, visitas)
 -- se guarda como UNA fila con su JSON. Esto refleja exactamente la forma que ya
 -- maneja store.js, así que la sincronización es trivial y la API es mínima.
 --

@@ -28,16 +28,17 @@ wrangler.toml                   binding D1 (env.DB) + config de Pages
 
 **Modelo de datos:** un *document store* por **dominio**. Cada dominio que store.js ya
 maneja (`armas`, `pages`, `promos`, `favorites`, `appConfig`, `manuales`, `priceHist`,
-`suggestions`, `pending`, `rejected`, `visits`, `reviews`, `reviewsQueue`, `reports`;
+`rejected`, `visits`, `reviews`, `reviewsQueue`, `reports`;
 lista canónica en `ALL_DOMAINS` de `functions/api/_lib.js`) es **una fila** con su JSON,
 con el mismo shape que en `localStorage`. La contraseña/sesión (`admin`) **nunca** viaja.
 
 - **Escritura admin** (`PUT /api/admin/state/:domain`): reemplaza el blob del dominio.
   La usa todo el panel (editar páginas/promos/catálogo/favoritos/branding/inventarios y
-  gestionar la cola: aprobar/rechazar propuestas y sugerencias).
-- **Escritura pública** (`POST /api/append/:domain`, solo `suggestions`/`pending`/`visits`/`reviewsQueue`/`reports`):
-  manda **un item**; el servidor hace el *read-modify-write* para que reseñas y propuestas
-  concurrentes no se pisen. Reproduce exactamente el shape que la app espera.
+  moderar reseñas y denuncias).
+- **Escritura pública** (`POST /api/append/:domain`, solo `visits`/`reviewsQueue`/`reports`):
+  manda **un item**; el servidor hace el *read-modify-write* para que reseñas y denuncias
+  concurrentes no se pisen.
+  `suggestions` y `pending` («Sugerir cambios» y «Proponer arma») se retiraron el 13-sep-2026. Reproduce exactamente el shape que la app espera.
 
 ## Alta (una sola vez)
 

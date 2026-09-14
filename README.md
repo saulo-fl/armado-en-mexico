@@ -6,7 +6,7 @@
 
 <!-- cifras:inicio -->
 Catálogo actual: **192 armas · 36 accesorios · 71 municiones**,
-servidas como **322 páginas HTML prerenderizadas** para que los buscadores y los
+servidas como **321 páginas HTML prerenderizadas** para que los buscadores y los
 bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap declara
 **317 URLs**, 310 de ellas con la fecha real de su inventario (la última, 2026-07-06).
 
@@ -104,29 +104,29 @@ el sello de su clasificación legal al pie de la foto. Su botón ⇄ la añade a
 Cada arma tiene su página (la tercera captura de arriba), ordenada según las preguntas de quien
 la está considerando:
 
-- **El expediente.** Un folder abierto con la pestaña de su tipo. A la izquierda, la foto en una
-  copia instantánea con marca, país —con su bandera— y año anotados al pie, y bajo ella el precio
-  de referencia con la armería que lo publicó y la fecha de su inventario. A la derecha, el
-  mecanismo, la ficha técnica (calibre, capacidad, longitud, peso, origen y año), el sello de su
-  clasificación legal y el botón **⇄ Comparar**.
-- **Precio de referencia.** El precio actual con IVA, la armería y la fecha, y las existencias por
-  sede: cuántas piezas marcó el último inventario de la DCAM y el de la OTCA, o AGOTADO si el arma
-  ya no aparece en él. «Detalle de la fuente» da la descripción literal con la que figura en el
-  inventario y el enlace al PDF oficial, con el aviso de que las existencias son un dato
-  histórico, no en tiempo real.
-- **Historial de precios.** Cada inventario oficial en el que aparece el arma deja un punto: la
-  gráfica enseña cómo se ha movido el precio y cuánto ha variado en porcentaje desde el primer
-  registro, y el desglose lista cada inventario con su precio, su fecha y su PDF. Solo sale cuando
-  hay más de un registro.
-- **Munición y accesorios compatibles.** Los cartuchos del inventario de su mismo calibre y los
-  accesorios que le corresponden —por calibre, por tipo de arma o universales—, cada uno con su
-  ficha.
-- **Usos, Legalidad e Historia**, en pestañas: para qué se emplea (defensa del hogar, tiro
-  deportivo, cacería…), su clasificación con un enlace a la sección de legalidad, y la historia
-  del modelo.
-- **Para cerrar**, el video del modelo cuando lo hay; «¿Recomiendas esta arma?», un sí o no con
-  reseña escrita que solo se publica después de moderarla; armas similares del mismo tipo, y
-  «Sugerir cambios» para proponer una corrección.
+- **El expediente.** Todo va dentro de un folder manila abierto, con su tipo rotulado en la
+  pestaña. A la izquierda, la foto en una copia instantánea sujeta con un clip, con marca, país
+  —con su bandera— y año anotados al pie y el **sello de su clasificación legal** estampado encima;
+  a la derecha, la ficha técnica. Al abrir el folder se ven también el comprobante y la tarjeta de
+  almacén, y al bajar aparecen las hojas de legalidad y el historial.
+- **Ficha técnica**, mecanografiada en una ficha de fichero: calibre, capacidad, mecanismo,
+  longitud, peso, origen y año.
+- **Comprobante de precio**: la cifra con IVA, la armería que la publicó, la fecha de su inventario
+  y la casilla **Comparar**. En el teléfono vuelve a aparecer abajo en cuanto sale de la pantalla.
+- **Tarjeta de almacén.** Las existencias por sede: cuántas piezas marcó el último inventario de la
+  DCAM y el de la OTCA, o AGOTADO si el arma ya no aparece en él, con la descripción literal con la
+  que figura en el inventario, el enlace a cada PDF y el aviso de que es un dato histórico.
+- **Historial de precios**, en papel milimétrico. Cada inventario oficial en el que aparece el arma
+  deja un punto: la gráfica enseña cómo se ha movido el precio y el registro lista cada inventario
+  con su fecha, su armería, su precio y cuánto cambió respecto al anterior. Los PDFs oficiales van
+  grapados al pie como anexos. Con un solo inventario sale solo su registro.
+- **Legalidad, Usos y Antecedentes**, en los separadores de una hoja de oficio: la clasificación
+  con dónde se consigue y un enlace a la guía legal, los usos del arma y su historia.
+- **Munición y accesorios compatibles**, en una vitrina: los cartuchos del inventario de su mismo
+  calibre y los accesorios que le corresponden, cada uno con su etiqueta de precio y su ficha.
+- **Para cerrar**, el video del modelo cuando lo hay; la tarjeta de «¿Recomiendas esta arma?», un
+  sí o no con reseña escrita que solo se publica después de moderarla, y armas similares del
+  mismo tipo.
 
 ### Comparador
 
@@ -181,7 +181,7 @@ varían según marca y munición, y la guía lo advierte.
   de Armas de Fuego y Explosivos, y **preguntas frecuentes** sobre licencias y portación.
 - **Armas traumáticas** — defensa menos letal por CO₂, que no son armas de fuego y no piden
   permiso; la duda más repetida del público.
-- **Prerender.** La app pinta con JavaScript, y hasta las 322 páginas el sitio era invisible
+- **Prerender.** La app pinta con JavaScript, y hasta las 321 páginas el sitio era invisible
   para quien no lo ejecuta: Googlebot no renderiza JS en respuestas 4xx y los crawlers de IA
   (GPTBot, ClaudeBot, PerplexityBot) no lo ejecutan nunca. El build emite un `.html` real por
   URL, con su `<title>`, canonical, Open Graph y JSON-LD. El porqué, con fuentes, en
