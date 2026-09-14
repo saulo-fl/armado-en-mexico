@@ -788,12 +788,16 @@ function HubPolaroid({ img, label, sub, onClick, stamp, stampSub, style: extraSt
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hair-hi)', fontSize: 30 }}>▦</div>
           )
         }
-        {/* Sello de ubicación — timbre postal circular */}
+        {/* Sello de ubicación — imagen generada (CDMX / N.L.) */}
         {stamp && (
-          <span className="amx-polaroid-sello" style={{ '--sello-texto': stamp, '--sello-sub': stampSub || '' }}>
-            <span className="amx-polaroid-sello-aro">{stamp}</span>
-            {stampSub && <span className="amx-polaroid-sello-sub">{stampSub}</span>}
-          </span>
+          <img
+            className="amx-polaroid-sello-img"
+            src={`imagenes/sello-${stamp.toLowerCase()}.webp`}
+            alt={`${stamp} · ${stampSub || ''}`}
+            style={stamp === 'CDMX'
+              ? { top: 8, right: 8 }
+              : { top: 8, left: 8 }}
+          />
         )}
       </div>
       <div className="amx-polaroid-pie">
@@ -813,6 +817,10 @@ function HubPolaroid({ img, label, sub, onClick, stamp, stampSub, style: extraSt
 // distinto para que no se vean gemelas. Se usa `Math.sin` del índice como
 // generador simple: valores entre -3 y +3 grados.
 const ARMERIA_GIROS = [-2.5, 1.8];
+
+// Rotaciones deterministas para las polaroids de Usos — grid 2×2 con jittering.
+// Cada valor entre -1.5° y +1.5° para que no se vean gemelas.
+const USO_GIROS = [-1.2, 0.8, -0.5, 1.3];
 
 // Potencia relativa de cada calibre — de menor a mayor. Sirve para dimensionar
 // las tarjetas en la estantería del Hub (más potente = más ancho).
@@ -843,6 +851,33 @@ const calibreWidth = (id) => {
   const p = CALIBRE_POTENCIA[id] || 7; // medio si no se conoce
   return Math.round(80 + (p / 14) * 80); // 80–160px
 };
+
+// Calibre ID → nombre de archivo de silueta en public/imagenes/cartuchos/
+const CALIBRE_IMG = {
+  '.22 LR': '22lr.webp',
+  '.380 ACP': '380acp.webp',
+  '.38 Special': '38special.webp',
+  '.38 Super': '38super.webp',
+  '9mm Parabellum': '9mm.webp',
+  '.40 S&W': '40sw.webp',
+  '.243 Winchester': '243win.webp',
+  '.270 Winchester': '270win.webp',
+  '.308 Winchester': '308win.webp',
+  '.30-06 Sprg': '3006.webp',
+  '7mm Rem Mag': '7mmrem.webp',
+  '.300 Win Mag': '300wm.webp',
+  '6.5 PRC': '65prc.webp',
+  '12 GA': '12ga.webp',
+  '20 GA': '20ga.webp',
+  '.410 Bore': '410.webp',
+  '5.56x45mm': '556.webp',
+  '7.62x39mm': '762x39.webp',
+  '7.62x51mm': '762x51.webp',
+};
+
+function calibreImgPath(calibreId) {
+  return `imagenes/cartuchos/${CALIBRE_IMG[calibreId] || 'silueta-municion.webp'}`;
+}
 
 function ArsenalHubScreen({ onNav }) {
   const vp = window.useViewport();
@@ -941,24 +976,25 @@ function ArsenalHubScreen({ onNav }) {
 
       {/* ── USO: polaroids apaisadas (16:9) como EXPERIENCIAS del HOME ─ */}
       <SectionHdr>Uso</SectionHdr>
-      <div style={gridN(3)}>
-        {window.CATEGORIES.uso.map((u) => usoCount(u.id) ? (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 'var(--e3)' }}>
+        {window.CATEGORIES.uso.map((u, i) => usoCount(u.id) ? (
           <HubPolaroid key={u.id} label={u.label} sub={u.desc}
             img={`imagenes/uso-${u.id}.webp`} onClick={() => onNav('category', { mode: 'uso', value: u.id })}
-            style={{ '--giro': 0, width: '100%', aspectRatio: '16 / 9' }}
+            style={{ '--giro': USO_GIROS[i % USO_GIROS.length], width: '100%', aspectRatio: '16 / 9' }}
             pozoStyle={{ aspectRatio: '16 / 9' }} />
         ) : null)}
       </div>
 
-      {/* ── CALIBRE: estantería de transparentes por tamaño/potencia ─ */}
+      {/* ── CALIBRE: mesa de exhibición con siluetas de cartucho ─ */}
       <SectionHdr>Calibre</SectionHdr>
       <div className="amx-arsenal-calibre-shelf">
         {window.CATEGORIES.calibre.map((c) => {
           const n = DB.filter((a) => a.calibre === c.id).length;
           return n ? (
             <button key={c.id} className="amx-arsenal-calibre-item"
-              style={{ width: calibreWidth(c.id) }}
+              style={{ '--calibre-w': calibreWidth(c.id) + 'px', width: calibreWidth(c.id) }}
               onClick={() => onNav('category', { mode: 'calibre', value: c.id })}>
+              <img className="amx-arsenal-calibre-foto" src={calibreImgPath(c.id)} alt={c.label} loading="lazy" />
               <span className="amx-arsenal-calibre-ficha">{c.label}</span>
               <span className="amx-arsenal-calibre-num">{n}</span>
             </button>
