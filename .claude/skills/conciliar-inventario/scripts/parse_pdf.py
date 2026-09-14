@@ -4,7 +4,8 @@
 Detecta el formato solo y extrae [{idx, name, qty, priceN}] (+ desc en DCAM).
 Uso:  python3 parse_pdf.py <ruta.pdf> [--json salida.json]
 
-- DCAM (SEDENA): tabla posicional. precio x>505, existencia 440<x<500,
+- DCAM (SEDENA): tabla posicional. Columnas relativas a las cabeceras "Existencia" y
+  "Precio" de la pag. 1 (en oct-2025 estan mas a la izquierda que en 2026),
   nombre/descripcion x<200; precio+existencia comparten la fila 'y' del nombre corto.
   desc = la descripcion larga bajo el nombre corto, aunque se derrame a la pagina
   siguiente. Es lo unico que distingue dos renglones con el MISMO nombre corto.
@@ -15,7 +16,7 @@ import sys, re, json
 from collections import defaultdict, Counter
 import fitz  # PyMuPDF
 
-PRICE = re.compile(r'^\d{1,3}(?:,\d{3})*\.\d{2}$')
+PRICE = re.compile(r'^\d{1,3}(?:,\d{3})*\.\d{2}(?![\d,])')
 DCAM_HDR = ("SECRETARIA", "DIRECCION DE COMERCIALIZACION", "EXISTENCIA DE ",  # ARMAS/MUNICIONES/ACCESORIOS
             "LAS EXISTENCIAS", "LA ADQUISIC", "52 DE LA LEY", "al cierre",
             "Descripción", "Existencia", "Precio en")
@@ -28,8 +29,18 @@ def is_hdr(t):
 INT = re.compile(r'[\d,]+')  # la EXISTENCIA puede traer coma: "3,500"
 
 
-def _rows(page):
+def _cols(doc):
+    """x0 de las cabeceras Existencia y Precio (la mas a la derecha): el PDF de
+    oct-2025 tiene las columnas mas a la izquierda que los de 2026."""
+    ws = doc[0].get_text("words")
+    ex = max(w[0] for w in ws if w[4].upper() == "EXISTENCIA")
+    pr = max(w[0] for w in ws if w[4].upper() == "PRECIO")
+    return ex - 20, pr - 30
+
+
+def _rows(page, cols=(440, 505)):
     """(precios, existencias, descripciones) de una pagina, por posicion."""
+    qx, px = cols
     d = defaultdict(list)
     for w in page.get_text("words"):
         d[(w[5], w[6])].append(w)
@@ -38,12 +49,14 @@ def _rows(page):
         x0 = min(t[0] for t in v)
         y = (min(t[1] for t in v) + max(t[3] for t in v)) / 2
         L.append((y, x0, " ".join(t[4] for t in sorted(v, key=lambda t: t[0]))))
-    prices = [(y, t) for y, x, t in L if x > 505 and PRICE.match(t.strip())]
-    qtys = [(y, t) for y, x, t in L if 440 < x < 500 and INT.fullmatch(t.strip())]
+    # match (no fullmatch): en oct-2025 un precio sale pegado al texto que se le encima
+    # ("11,930.34REVOLVER.F.A.TAU", Taurus 856 Tungsten); se toma solo el numero
+    prices = [(y, m.group()) for y, x, t in L if x > px and (m := PRICE.match(t.strip()))]
+    qtys = [(y, t) for y, x, t in L if qx < x < px + 30 and INT.fullmatch(t.strip())]
     # columna Descripcion entera (sin encabezado ni el numero de pagina del pie, y~767;
     # por posicion: un codigo suelto como "75" o "23715" es texto de la descripcion)
     left = sorted((y, x, t) for y, x, t in L
-                  if x < 440 and y < 755 and t.strip() and not is_hdr(t))
+                  if x < qx and y < 755 and t.strip() and not is_hdr(t))
     descs = [(y, t) for y, x, t in left if x < 200]
     return prices, qtys, descs, left
 
@@ -54,7 +67,8 @@ def parse_dcam(doc):
     # +1.6 en los de 2026). Se calibra con la moda del documento en vez de
     # fijarlo: asi el "mas cercano" no se lleva una linea de descripcion larga
     # que se derrame justo sobre el renglon del precio.
-    pages = [_rows(page) for page in doc]
+    cols = _cols(doc)
+    pages = [_rows(page, cols) for page in doc]
     off = Counter()
     for prices, _q, descs, _l in pages:
         for py, _pt in prices:
@@ -67,6 +81,8 @@ def parse_dcam(doc):
         for py, pt in sorted(prices):
             q = min(qtys, key=lambda e: abs(e[0] - py))[1] if qtys else '0'
             ny, nm = min(descs, key=lambda e: abs(e[0] - (py + dy))) if descs else (py, '?')
+            if abs(ny - (py + dy)) > 10:  # oct-2025: nombre con matriz rota (revolveres Taurus); leelo renderizando
+                nm = '?'
             recs.append({"name": nm.strip(), "qty": int(q.replace(",", "")),
                          "priceN": float(pt.replace(",", ""))})
             pos.append((pn, ny))
@@ -121,13 +137,18 @@ def parse_otca(doc):
     return recs
 
 
+def formato(doc):
+    """La OTCA pone "$" en los precios; la DCAM (2025 y 2026) no. La cabecera no sirve:
+    oct-2025 dice "DIRECCIÓN DE COMERCIALIZACIÓN" (con acentos, al pie) y "EXISTENCIAS"."""
+    return "OTCA" if "$" in doc[0].get_text() else "DCAM"
+
+
 def main():
     if len(sys.argv) < 2:
         print("uso: parse_pdf.py <ruta.pdf> [--json salida.json]"); sys.exit(1)
     path = sys.argv[1]
     doc = fitz.open(path)
-    head = "".join(doc[0].get_text()[:400])
-    fmt = "DCAM" if "DIRECCION DE COMERCIALIZACION" in head or "EXISTENCIA DE ARMAS" in head else "OTCA"
+    fmt = formato(doc)
     recs = parse_dcam(doc) if fmt == "DCAM" else parse_otca(doc)
     for i, r in enumerate(recs, 1):
         r["idx"] = i
