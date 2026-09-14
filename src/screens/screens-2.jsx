@@ -867,7 +867,7 @@ function LegalScreen({ onNav }) {
   const pasos = page?.pasos || [
   { t: 'Registro en plataforma SEDENA', d: 'Crear cuenta en el portal oficial de Defensa Nacional y completar perfil con tus datos.' },
   { t: 'Solicitud de permiso', d: 'Pedir el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040), para protección de domicilio o parcela, actividades cinegéticas o tiro deportivo y caza, según el caso. Pago de derechos.' },
-  { t: 'Visita a la DCAM u OTCA', d: 'La DCAM atiende en persona en Av. Industria Militar 1111, Col. Lomas de Tecamachalco, Naucalpan, Edo. Méx.: las personas físicas con permiso extraordinario entran sin cita, y se otorgan 80 turnos de 08:00 a 13:00, de lunes a viernes (las personas morales piden cita en facturas.dcam@defensa.gob.mx). A la OTCA, en Monterrey, N.L., agendar visita. Llevar documentación completa.' },
+  { t: 'Visita a la DCAM u OTCA', d: 'La DCAM atiende en persona en el Campo Militar No. 1-D (Av. Industria Militar 1111, Col. Lomas de Tecamachalco, Naucalpan, Edo. Méx.): las personas físicas con permiso extraordinario entran sin cita, y se otorgan 80 turnos de 08:00 a 13:00, de lunes a viernes (las personas morales piden cita en facturas.dcam@defensa.gob.mx). A la OTCA, en Monterrey, N.L., agendar visita. Llevar documentación completa.' },
   { t: 'Selección y compra', d: 'Elegir arma del catálogo oficial. La adquisición civil solo puede hacerse por los canales oficiales: la DCAM o la OTCA.' },
   { t: 'Registro federal del arma', d: 'Toda arma adquirida queda registrada a tu nombre en el Registro Federal de Armas (RFA).' }];
 
@@ -1520,7 +1520,7 @@ function FAQScreen() {
   const padX = vp.isDesktop ? 28 : 16;
   const [open, setOpen] = useState2(0);
   const faqs = window.Store ? window.Store.getPages().faq : [
-  { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México un arma de fuego solo puede adquirirse por los canales oficiales: la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), en Naucalpan, Estado de México (Av. Industria Militar 1111, Col. Lomas de Tecamachalco), y la OTCA, en Monterrey, N.L.' }];
+  { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México un arma de fuego solo puede adquirirse por los canales oficiales: la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), en el Campo Militar No. 1-D, en Naucalpan, Estado de México (Av. Industria Militar 1111, Col. Lomas de Tecamachalco), y la OTCA, en Monterrey, N.L.' }];
 
   return (
     <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>

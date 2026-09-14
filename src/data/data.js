@@ -90,8 +90,8 @@ const _legalFor = (avail) => {
   if (avail === 'dcam') return {
     availLabel: "Uso civil — DCAM",
     legalTit:   "Civil — Adquisición directa en DCAM",
-    legalDesc:  "Adquisición legal para civiles mexicanos mayores de edad con permiso extraordinario de adquisición vigente (DEFENSA-02-040), que expide la SEDENA y pide, entre otros, identificación oficial, comprobante de domicilio, constancia de antecedentes penales y certificado de salud mental. Compra exclusiva en DCAM (Naucalpan, Edo. Méx.) u OTCA (Monterrey, N.L.).",
-    disponibilidad: ["DCAM — Naucalpan, Edo. Méx.","OTCA — Monterrey, N.L."],
+    legalDesc:  "Adquisición legal para civiles mexicanos mayores de edad con permiso extraordinario de adquisición vigente (DEFENSA-02-040), que expide la SEDENA y pide, entre otros, identificación oficial, comprobante de domicilio, constancia de antecedentes penales y certificado de salud mental. Compra exclusiva en DCAM Campo Militar No. 1-D (Naucalpan, Edo. Méx.) u OTCA (Monterrey, N.L.).",
+    disponibilidad: ["DCAM Campo Militar No. 1-D — Naucalpan, Edo. Méx.","OTCA — Monterrey, N.L."],
   };
   if (avail === 'seguridad') return {
     availLabel: "Policía / Seguridad",
