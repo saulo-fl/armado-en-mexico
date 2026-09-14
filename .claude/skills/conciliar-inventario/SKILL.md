@@ -25,8 +25,11 @@ Usa `scripts/parse_pdf.py` (PyMuPDF/`fitz`, ya instalado). Detecta el formato so
   apilado. Por ítem: descripción (multi-línea) → existencia (entero) → precio ($N).
 
 Comando: `python3 .claude/skills/conciliar-inventario/scripts/parse_pdf.py <ruta.pdf>`
-Salida: JSON con `[{idx, name, qty, priceN}]`. Separa armas de accesorios/cartuchos
-por prefijo (`CARG|CART|CULATA|SISTEMA|CLIPS|CAÑON` = accesorio/munición).
+Salida: JSON con `[{idx, name, qty, priceN, desc}]` (`desc` = descripción larga, solo DCAM).
+Desde sep-2026 la DCAM publica **tres PDFs** (armas, cartuchos, accesorios): cópialos como
+`dcam-existencias-`, `dcam-municiones-` y `dcam-accesorios-AAAA-MM-DD.pdf`. Si llega uno
+combinado, separa por prefijo (`CARG|CART|CULATA|SISTEMA|CLIPS|CAÑON` = accesorio/munición).
+Autochequeo del parser: `python3 .claude/skills/conciliar-inventario/scripts/test_parse_pdf.py`.
 
 ## 2) Mapear PDF → catálogo (VERIFICADO, no fuzzy)
 - El campo `dcamRef` en `data.js` es el nombre-corto del PDF, pero **normalizado a
@@ -56,6 +59,12 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
 - **Accesorios/municiones**: mismo patrón. La existencia vive en el `qty` del último
   registro del historial (no en un mapa aparte). Municiones DCAM y OTCA suelen ser
   sets DISTINTOS (nacionales vs. españolas de competencia) → casi todo es alta nueva.
+- **Inventario fuente** («Ver inventario fuente» de la ficha): es el `priceManualId`, y
+  tiene que ser el inventario del **último registro del historial**. En accesorios y
+  municiones se deriva solo al final de `data-accesorios.js` / `data-municiones.js`: al
+  añadir un registro NO hay que tocar el `priceManualId` de la ficha, pero tampoco borres
+  esa derivación. En armas no se escribe (la ficha cae al último registro). `auditar.js`
+  falla si alguna ficha apunta a otro inventario o a uno que no existe.
 
 ## Decisiones de producto (CONVENCIÓN FIJA — el usuario ya las tomó)
 - **Modelos nuevos → SIEMPRE se dan de alta como fichas** (no omitir). Specs derivadas
@@ -67,6 +76,39 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
   cartucho; si OTCA vende por caja (p. ej. PMC 9mm: 17,700 existencia / $406.19), lo
   registras por caja. Por eso DCAM y OTCA van SEPARADOS. **Marca distinta del mismo
   calibre = ficha propia** (no consolidar marcas). Existencia = la del inventario.
+- **(13-sep-2026) Variantes: «un mismo arma no puede estar cambiando de calibre; si son
+  diferentes se crean las variantes pero no se sobrescriben modelos».** Una ficha =
+  **modelo + calibre**. Si en un inventario coexisten varias variantes de acabado/cañón
+  del mismo modelo y calibre, van en la MISMA ficha, que suma existencias, y su precio
+  sigue a una **variante representativa fija**, siempre la misma (la de la ficha: su
+  `dcamRef`/nombre/specs; si no discrimina, la de su primer registro). **Cuando esa
+  variante desaparece y solo queda otra, la ficha queda AGOTADA con su último precio y la
+  variante que queda entra como FICHA NUEVA** con su propio historial (incluidos los
+  renglones anteriores de esa variante). Nunca se «pasa» una ficha a la variante nueva:
+  eso da saltos de precio que no son subidas (DT11 +24.6 %, 694 +21 %).
+- **(13-sep-2026) La presentación (número de cargadores, estuche, kit) no es variante:
+  misma ficha, suma existencias.** Dos renglones del mismo modelo y calibre que solo
+  cambian lo que trae la caja nunca separan fichas ni dejan una agotada; el precio sigue a
+  una presentación representativa fija (la que la ficha publica y sigue en el inventario).
+  Casos: Springfield XD-M 36 (1 o 2 cargadores adicionales), Taurus GX4 24 (2×11 o 3×13).
+- **(13-sep-2026) Un historial no mezcla modelos ni calibres.** Cada registro tiene que
+  corresponder a un renglón del PDF de ESE modelo y ESE calibre. Si aparece uno ajeno, se
+  mueve a la ficha correcta (existente o variante nueva) sin tocar el modelo ni el calibre
+  de la ficha original. Vale para armas, accesorios y municiones (en municiones, DCAM y
+  OTCA separadas y marca distinta = ficha propia NO son mezcla). Mismo cargador para otra
+  pistola = otro modelo (113 CZ Shadow 2 vs 134 CZ P-07).
+- **(13-sep-2026) Municiones TAL CUAL el PDF aunque el fabricante no publique esa
+  combinación** (perdigón/gramaje de catálogo inexistente: Saga Gold 28 BB, Magnum 50 BB,
+  GB Express P4, Rio Game Load P4, Saga Sporting 32). Sin nota. Sí se añade lo que el PDF
+  dice y la ficha omitía (p. ej. «eslabonado»).
+- **(13-sep-2026) Erratas de precio de la DCAM.** Si el precio publicado es una errata
+  evidente, se publica el **último precio conocido** con una nota visible junto al precio
+  («probablemente es un error de la publicación de la Secretaría de la Defensa»); **si no
+  hay precio anterior, se publica el del PDF con la misma nota**. Contrato de datos: el
+  registro del historial lleva `errata: '<precio tal como lo publicó la DCAM>'` (string,
+  mismo formato que `price`) y `price` es el que se publica. En accesorios:
+  `_h(mid, price, date, qty, errata)`. Solo lo marca Saulo: si la conciliación o una
+  auditoría encuentra otra errata, se LISTA en el PR, no se marca.
 
 ## 4) Verificar (obligatorio antes de commitear)
 Invoca el skill `verificar-app` o corre `scripts/auditar.js`:
@@ -74,6 +116,7 @@ Invoca el skill `verificar-app` o corre `scripts/auditar.js`:
 - Los `data-*.js` cargan juntos en Node sin error.
 - `priceExact == último registro del historial` para TODAS las armas.
 - Existencias solo de presentes; agotadas removidas; historiales cronológicos.
+- Inventario fuente (`priceManualId`) = el del último registro, en armas, accesorios y municiones.
 - Mapeo semántico revisado; simulación por sucursal (presentes, agotados, solo-OTCA).
 
 ## 5) Publicar
@@ -126,3 +169,62 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
 - 2026-07: un modelo agotado puede REGRESAR (Taurus TH380/PT59, SIG MCX, Weatherby
   Vanguard .243). Antes de dar de alta una ficha nueva, contrasta el renglón contra el
   catálogo COMPLETO, no solo contra las fichas con existencia.
+- 2026-09 (11-sep, CALIBRACIÓN de `parse_pdf.py`): la DCAM separó el anexo en **3 PDFs**
+  (armas 204 · cartuchos 42 · accesorios 30). El layout es el mismo (offset del nombre
+  +1.6, encabezado a y=159.9 o 153.9 según página), así que nombre/qty/precio salían bien;
+  se verificó renglón a renglón contra el 6-jul re-parseado (0 diferencias). Lo que faltaba:
+  (1) **`desc`**: 7 nombres cortos se repiten con productos distintos («ARMSAN P612 A.C.» ×3,
+  una es la A612 semiautomática; «PHENOMA A.S.N.» ×2) y la descripción es lo único que los
+  separa. Se recoge entre el nombre y el siguiente, cruzando de página (armas págs. 12, 18,
+  19, 20, 24; cartuchos pág. 3), cortando 14 pt antes del siguiente nombre para dejar fuera
+  su línea en negrita («(Venta exclusiva para Oficiales…)» se encima con el nombre). El pie
+  de página se quita por POSICIÓN (y≥755), no por ser dígitos: «75» o «23715» sueltos son
+  códigos de la descripción. (2) `--json` escribía cp1252 en Windows (HEFESTO): ahora UTF-8.
+  (3) `EXISTENCIA DE ` genérico en el encabezado (antes solo «…DE ARMAS»).
+- 2026-09: la **existencia agregada por ficha no es uniforme**. Muchas fichas toman UN
+  renglón y dejan fuera sus variantes (CZ 457 con 13 variantes → solo «American»; Glock 17,
+  P320 Full Size, Taurus 82S, PT58…); otras suman todas (Atrox, Maxus, Fair SLX800P, Stribog,
+  Arex Delta L, B525, OPT-200, Stoeger M3000/P3500, Vanguard). Reconstruido con la suma
+  exacta de qty del 6-jul contra `AMX_ARMAS_EXISTENCIAS`. Conserva el
+  grupo que ya tenía cada ficha; si su representativo desaparece, suma las variantes que
+  queden del mismo modelo (precedente Maxus). Unificar el criterio es decisión de Saulo.
+- 2026-09: cambiar de variante representativa mueve el precio aunque no haya subida
+  (DT11 32" → DT11 Black DLC Pro +24.6 %, 694 Sporting → 694 Pro B-Fast +21 %, Renova VBN
+  → camo +5.4 %). Y al revés: un precio puede encadenar EXACTO con otro modelo (92FS 6-jul ×
+  0.98693 = «92A1» 11-sep, 5 u.). Manda la descripción (marca+modelo+calibre); señálalo.
+- 2026-09: dos factores de ajuste conviven: −2.88 % general y −1.31 % en Beretta, Benelli,
+  AYA, Stoeger, Grand Power y Chiappa (Franchi entra nuevo). Caesar Guerini +3.51 %.
+  Municiones Águila de pistola/.30 Carbine/5.56 sin cambio.
+- 2026-09: el PDF puede traer precios imposibles (cargador Tanfoglio FT-9-FS a $2.56): se
+  registra TAL CUAL y se señala en el PR; no se corrige a mano. (13-sep: Saulo lo marcó como
+  errata con el campo `errata`; ver «Decisiones de producto».)
+- 2026-09-13 (AUDITORÍA de los 7 PDFs de armas + accesorios y municiones): el método que
+  encontró las mezclas fue **encadenar precios con el factor de cada transición**
+  (oct-25→16-jun ×0.89960 general / ×0.89447 grupo Beretta; 16→18-jun ×0.999326 / ×0.998077;
+  18-jun→6-jul ×1.016673 / ×1.003131; 6-jul→11-sep ×0.971179 / ×0.986928; OTCA 26-sep ≈
+  DCAM 3-oct ×1.00105; OTCA 26-sep→18-jun ×0.89804). Un registro que no encadena y cuyo
+  «precio esperado» SÍ aparece en otro renglón del PDF es casi siempre un mapeo cruzado:
+  Glock 19 (oct = 19X), GX4 ↔ GX4 Carry, Maxus (CF Negra → Hunter → Black Gold), Atrox
+  (sintética → camo), XD-M (dos presentaciones), System Defence (C9 FS ↔ C9 Compact).
+- 2026-09-13: **el nombre corto no basta ni para la marca**: el renglón DCAM 18-jun «ATROX
+  SINT» describe una Huglu Renova camo (y encadena con ella); «ATROX C.» se usa para la
+  sintética Y la camo. Manda la descripción larga + el encadenado.
+- 2026-09-13: **el PDF OTCA 26-sep-2025 tiene descripciones que no salen como texto**
+  (renglón $12,290.81 = SIG P322, solo visible renderizando la página). Si un renglón OTCA
+  sale con descripción vacía, renderízalo (`page.get_pixmap(clip=…)`) antes de mapearlo.
+- 2026-09-13: **`parse_pdf.py` no lee los PDFs de oct-2025** (DCAM existencias y accesorios
+  3-oct: formato apilado sin «$»; detecta OTCA y devuelve 0 renglones). Para auditar se usó
+  un lector apilado ad hoc (descripción → existencia → precio); pierde algún renglón cuando
+  el texto se encima (XD-M $11,426.20, Taurus 856 Tungsten). Pendiente llevarlo al parser.
+- 2026-09-13: una qty de municiones del 16-jun seguía mal por el bug viejo del parser
+  (2023 Águila .308: 540 → 1,780). Si auditas municiones, compara (precio, qty) exactos.
+- 2026-09-13 (revisor del PR #158): **«Ver inventario fuente» abría PDFs viejos** en 34
+  accesorios y 34 municiones: la pantalla usa `priceManualId` antes que el último registro,
+  y cada conciliación añadía registros sin actualizar ese campo escrito a mano. Ahora se
+  deriva del historial en los propios `data-*.js` y `auditar.js` lo comprueba.
+- 2026-09-13: **un mismo producto puede venir en dos renglones** (Águila .38 Super, código
+  1E382112, en jun y jul) o cambiar de rótulo entre inventarios (Águila .270). Antes de
+  dar un salto de existencia por «otro renglón», compara código y descripción larga.
+- 2026-09-13: fichas creadas por acabado antes de la regla de variantes (Taurus 856 Inox /
+  Pavón Mate / Tungsten; Mendoza RM22-6000 Black/Squad/Safari/Commander) se dejaron como
+  están: la regla prohíbe sobrescribir modelos, no obliga a fusionar lo publicado.

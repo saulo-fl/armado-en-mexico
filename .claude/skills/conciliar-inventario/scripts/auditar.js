@@ -66,5 +66,26 @@ rotas.length
   : ok('imagenes: ' + DB.filter((a) => String(a.img || '').startsWith('imagenes/')).length + ' rutas, todas existen');
 console.log(win.ACCESORIOS ? '  ✅ accesorios ' + win.ACCESORIOS.length + ' · municiones ' + (win.MUNICIONES || []).length : '');
 
+// 5) inventario fuente: el `priceManualId` de cada ficha (lo que abre «Ver inventario
+//    fuente») tiene que ser el del ÚLTIMO registro de su historial y existir en su lista
+//    de inventarios. Antes las conciliaciones lo dejaban apuntando a un PDF viejo.
+const porFecha = (h) => (h || []).slice().sort((x, y) => String(x.date).localeCompare(String(y.date)));
+const fuente = (lista, hist, manuales, etiqueta) => {
+  const ids = new Set((manuales || []).map((m) => m.id));
+  const mal = [];
+  (lista || []).forEach((f) => {
+    const h = porFecha(hist[f.id]);
+    if (!f.priceManualId && !h.length) return;
+    const ult = h.length ? h[h.length - 1].manualId : null;
+    if ((f.priceManualId && ult && f.priceManualId !== ult) || (f.priceManualId && !ids.has(f.priceManualId)) || (ult && !ids.has(ult))) mal.push(f.id);
+  });
+  mal.length
+    ? bad(mal.length + ' ' + etiqueta + ' con inventario fuente distinto del último registro: ' + mal.slice(0, 8).join(', '))
+    : ok('inventario fuente = último registro (' + etiqueta + ')');
+};
+fuente(DB, H, win.AMX_MANUALES_SEED, 'armas');
+fuente(win.ACCESORIOS, win.ACCESORIOS_PRICE_HISTORY || {}, win.ACCESORIOS_MANUALES, 'accesorios');
+fuente(win.MUNICIONES, win.MUNICIONES_PRICE_HISTORY || {}, win.MUNICIONES_MANUALES, 'municiones');
+
 console.log('\n' + (fail === 0 ? '✔✔ AUDITORÍA SIN HALLAZGOS' : '✘ ' + fail + ' HALLAZGOS'));
 process.exit(fail ? 1 : 0);
