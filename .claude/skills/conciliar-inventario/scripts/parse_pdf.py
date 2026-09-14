@@ -84,7 +84,7 @@ def parse_dcam(doc):
             if abs(ny - (py + dy)) > 10:  # oct-2025: nombre con matriz rota (revolveres Taurus); leelo renderizando
                 nm = '?'
             recs.append({"name": nm.strip(), "qty": int(q.replace(",", "")),
-                         "priceN": float(pt.replace(",", ""))})
+                         "priceN": float(pt.replace(",", "")), "pagina": pn})
             pos.append((pn, ny))
     # Descripcion larga: lo que hay entre el nombre corto y el siguiente, cruzando
     # paginas. Sobre cada nombre hay una linea en negrita (casi siempre vacia; a veces
