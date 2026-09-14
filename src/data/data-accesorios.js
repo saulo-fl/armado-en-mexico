@@ -174,177 +174,177 @@ window.ACCESORIOS = [
   // ── cargadores ──
   amx(101, 'Cargador .22 LR · Nordic Components', 'Nordic Components', 'EUA', 'cargadores', 'dcam', 590.63,
     'CARGADOR 22 LR NORDIC COMPONENTS',
-    ['Rifle .22 LR'],
+    [],
     [['Calibre', '.22 LR'], ['Tipo', 'Fuego anular']],
     'Cargador de repuesto para rifle de fuego anular .22 LR, el calibre de iniciación y entrenamiento más común.'),
   amx(102, 'Cargador .22 LR · Mossberg', 'Mossberg', 'EUA', 'cargadores', 'dcam', 295.32,
     'CARGADOR CAL.22 LR MOSSBERG',
-    ['Rifle Mossberg .22 LR'],
+    ['Mossberg 702 Plinkster (cód. 95702)'],
     [['Calibre', '.22 LR'], ['Marca', 'Mossberg']],
     'Cargador de fábrica para rifle Mossberg en .22 LR. Económico y de adquisición civil directa en la DCAM.'),
   amx(103, 'Cargador 5.56x45 · CZ 805', 'Česká Zbrojovka', 'Rep. Checa', 'cargadores', 'seguridad', 123.05,
     'CARG. P/RIFLE 5.56X45 CESKA CZ805',
-    ['Rifle CZ 805 Bren', '5.56x45'],
+    ['CZ 805 BREN A1/A2'],
     [['Calibre', '5.56x45 OTAN'], ['Plataforma', 'CZ 805 Bren']],
     'Cargador para fusil CZ 805 Bren en 5.56. Plataforma restringida a corporaciones de seguridad con licencia colectiva.'),
   amx(104, 'Cargador · Benelli MR1 (5 cart.)', 'Benelli', 'Italia', 'cargadores', 'seguridad', 1304.78,
     'CARG. P/RIFLE BENELLI MR1 CAP 5 CART',
-    ['Rifle Benelli MR1', '5.56 / .223'],
+    [],
     [['Capacidad', '5 cartuchos'], ['Plataforma', 'Benelli MR1']],
     'Cargador de 5 cartuchos para el rifle semiautomático Benelli MR1.'),
   amx(105, 'Cargador .380 ACP · Grand Power', 'Grand Power', 'Eslovaquia', 'cargadores', 'dcam', 320.50,
     'CARGADOR P/PIST. 0.380 GRAND POWER',
-    ['Pistola Grand Power .380'],
+    ['Grand Power CP380'],
     [['Calibre', '.380 ACP'], ['Marca', 'Grand Power']],
     'Cargador para pistola Grand Power en .380 ACP, calibre de libre adquisición civil para defensa de domicilio.'),
   amx(106, 'Cargador · IWI Jericho', 'IWI', 'Israel', 'cargadores', 'dcam', 492.19,
     'CARGADOR PPISTOLA IWI M JERICHO II',
-    ['Pistola IWI Jericho'],
+    [],
     [['Plataforma', 'IWI Jericho']],
     'Cargador de repuesto para pistola IWI Jericho.'),
   amx(107, 'Cargador 9mm · IWI Masada', 'IWI', 'Israel', 'cargadores', 'dcam', 492.19,
     'CARGADOR PPISTOLA IWI M MASADA 9mm',
-    ['Pistola IWI Masada 9mm'],
+    [],
     [['Calibre', '9mm Parabellum'], ['Plataforma', 'IWI Masada']],
     'Cargador para pistola IWI Masada en 9mm.'),
   amx(108, 'Cargador 9mm · Springfield XD-M', 'Springfield Armory', 'EUA', 'cargadores', 'dcam', 492.19,
     'CARGADOR SPRINGFIELD CAL. 9 mm XD-M',
-    ['Pistola Springfield XD-M 9mm'],
+    [],
     [['Calibre', '9mm Parabellum'], ['Plataforma', 'XD-M']],
     'Cargador de fábrica para pistola Springfield XD-M en 9mm.'),
   amx(109, 'Cargador 9mm · Springfield', 'Springfield Armory', 'EUA', 'cargadores', 'dcam', 661.68,
     'CARGADOR SPRINGFIELD CAL. 9 mm',
-    ['Pistola Springfield 9mm'],
+    [],
     [['Calibre', '9mm Parabellum'], ['Marca', 'Springfield']],
     'Cargador para pistola Springfield en 9mm.'),
   amx(110, 'Cargador 9mm · SIG Sauer P320 (17)', 'SIG Sauer', 'EUA', 'cargadores', 'dcam', 558.31,
     'CARGADOR CAL.9 mm SIG SAUER P320 17',
-    ['Pistola SIG Sauer P320'],
+    [],
     [['Calibre', '9mm Parabellum'], ['Capacidad', '17 cartuchos'], ['Plataforma', 'P320']],
     'Cargador de 17 cartuchos para pistola SIG Sauer P320 en 9mm.'),
   amx(111, 'Cargador .22 LR · Tippmann (25)', 'Tippmann Arms', 'EUA', 'cargadores', 'dcam', 935.17,
     'CARGADOR TIPPMANN 0.22" L.R. 25 CART.',
-    ['Rifle Tippmann .22 LR'],
+    [],
     [['Calibre', '.22 LR'], ['Capacidad', '25 cartuchos']],
     'Cargador de alta capacidad (25 cartuchos) para carabina Tippmann en .22 LR.'),
   amx(112, 'Cargador .380 ACP · Browning 1911', 'Browning', 'Bélgica', 'cargadores', 'dcam', 615.24,
     'CARGADOR P/PIST. 380 BROWNING 1911-',
-    ['Pistola Browning 1911-380', '.380 ACP'],
+    [],
     [['Calibre', '.380 ACP'], ['Plataforma', '1911-380']],
     'Cargador para la pistola Browning 1911 en versión .380 ACP.'),
   amx(113, 'Cargador .380 ACP · Česká CZ', 'Česká Zbrojovka', 'Rep. Checa', 'cargadores', 'dcam', 488.85,
     'CARGADOR CAL..380,CESKA  MOD.CZ',
-    ['Pistola CZ .380'],
+    [],
     [['Calibre', '.380 ACP'], ['Marca', 'Česká Zbrojovka']],
     'Cargador para pistola CZ en .380 ACP.'),
   amx(114, 'Cargador 9mm · AMSAC', 'AMSAC', 'México', 'cargadores', 'dcam', 368.86,
     'CARGADOR P/PISTOLA 9 MM, AMSAC',
-    ['Pistola 9mm'],
+    [],
     [['Calibre', '9mm Parabellum'], ['Origen', 'México']],
     'Cargador para pistola en 9mm, fabricación nacional (AMSAC).'),
   amx(115, 'Cargador 5.56 · polímero', '—', '', 'cargadores', 'seguridad', 546.20,
     'CARGADOR P/FUSIL 5.56 POLIMERO',
-    ['Fusil 5.56'],
+    [],
     [['Calibre', '5.56x45'], ['Material', 'Polímero']],
     'Cargador de polímero para fusil en 5.56. Plataforma restringida a corporaciones de seguridad.'),
   amx(116, 'Sistema C-MAG · HK G36', 'Beta Company', 'EUA', 'cargadores', 'ejercito', 8367.29,
     'SISTEMA C-MAG P/HK G36 MOD. MHGP06',
-    ['Fusil HK G36', '5.56'],
+    ['HK G36'],
     [['Tipo', 'Tambor (C-MAG)'], ['Plataforma', 'HK G36'], ['Calibre', '5.56x45']],
     'Cargador de tambor C-MAG para fusil HK G36. Uso exclusivo de las Fuerzas Armadas.'),
   amx(117, 'Sistema C-MAG · Colt AR15 / M4 / M16', 'Beta Company', 'EUA', 'cargadores', 'seguridad', 6152.42,
     'SISTEMA C-MAG P/COLT AR15/M4M16',
-    ['AR-15 / M4 / M16', '5.56'],
+    [],
     [['Tipo', 'Tambor (C-MAG)'], ['Plataforma', 'AR-15 / M4 / M16'], ['Calibre', '5.56x45']],
     'Cargador de tambor C-MAG para plataformas AR-15/M4/M16. Restringido a corporaciones de seguridad.'),
   // ── opticas ──
   amx(201, 'Mira réflex · Meprolight MEPRO MOR', 'Meprolight', 'Israel', 'opticas', 'seguridad', 25840.17,
     'MIRA REFLEX MEPROLIGHT MEPRO MOR',
-    ['Carabina', 'Riel Picatinny'],
+    ['Riel Picatinny'],
     [['Tipo', 'Réflex multi-retícula'], ['Modelo', 'MEPRO MOR'], ['Montura', 'Picatinny']],
     'Mira réflex táctica Meprolight MEPRO MOR con retícula tritio/fibra/punto rojo. Restringida a corporaciones de seguridad.'),
   amx(202, 'Mira réflex · Meprolight MEPRO GLS', 'Meprolight', 'Israel', 'opticas', 'seguridad', 21902.62,
     'MIRA REFLEX MEPROLIGHT MEPRO GLS',
-    ['Pistola', 'Carabina'],
+    ['Lanzagranadas'],
     [['Tipo', 'Réflex punto rojo'], ['Modelo', 'MEPRO GLS']],
     'Mira réflex de punto rojo Meprolight MEPRO GLS para adquisición rápida de blanco.'),
   // ── empunaduras ──
   amx(301, 'Culata TSK · Beretta DT11', 'TSK', 'Italia', 'empunaduras', 'dcam', 5723.24,
     'CULATA TSK PARA DT11 CODIGO E02352',
-    ['Escopeta Beretta DT11', 'Tiro deportivo'],
+    [],
     [['Tipo', 'Culata de competencia'], ['Plataforma', 'Beretta DT11'], ['Código', 'E02352']],
     'Culata de competencia TSK para escopeta Beretta DT11 de tiro deportivo (plato).'),
   // ── refacciones ──
   amx(401, 'Cañón · escopeta de bomba Mod. 500', 'Mossberg', 'EUA', 'refacciones', 'dcam', 4478.96,
     'CAÑON ESCOPETA BOMBA MOD500',
-    ['Escopeta Mossberg 500', 'Calibre 12'],
+    ['Mossberg 500'],
     [['Tipo', 'Cañón de repuesto'], ['Plataforma', 'Mossberg 500'], ['Calibre', '12']],
     'Cañón de repuesto para escopeta de acción de bomba Mossberg 500, calibre 12.'),
   amx(402, 'Clips luna · revólver Rhino .38', 'Chiappa', 'Italia', 'refacciones', 'dcam', 715.40,
     'CLIPS P/REVOLVER RHINO 0.38" CHIAPPA',
-    ['Revólver Chiappa Rhino .38'],
+    ['Chiappa Rhino .38 Special'],
     [['Tipo', 'Moon clips'], ['Calibre', '.38'], ['Plataforma', 'Chiappa Rhino']],
     'Juego de moon clips para recarga rápida del revólver Chiappa Rhino en .38.'),
 
   // ── OTCA (Monterrey · 26-sep) ──
   { ...amx(118, 'Cargador .380 ACP · Taurus TH380', 'Taurus', 'Brasil', 'cargadores', 'dcam', 521.02,
-    'CARGADOR CALIBRE 0.380" MARCA TAURUS PARA PISTOLA MODELO TH380', ['Pistola Taurus TH380', '.380 ACP'], [['Calibre', '.380 ACP'], ['Plataforma', 'Taurus TH380']],
+    'CARGADOR CALIBRE 0.380" MARCA TAURUS PARA PISTOLA MODELO TH380', [], [['Calibre', '.380 ACP'], ['Plataforma', 'Taurus TH380']],
     'Cargador para pistola Taurus TH380 en .380 ACP. Inventario OTCA (Monterrey).'), priceManualId: 'man_acc_2025_09_26' },
   { ...amx(119, 'Cargador .22 LR · CZ P-09', 'Česká Zbrojovka', 'Rep. Checa', 'cargadores', 'dcam', 206.72,
-    'CARGADOR P/ PISTOLA CAL. 0.22" L.R. MARCA CESKA ZBROJOVKA MOD. CZ P-09', ['Pistola CZ P-09 .22', '.22 LR'], [['Calibre', '.22 LR'], ['Plataforma', 'CZ P-09 Kadet']],
+    'CARGADOR P/ PISTOLA CAL. 0.22" L.R. MARCA CESKA ZBROJOVKA MOD. CZ P-09', ['CZ P-09 en .22 LR (kit Kadet)'], [['Calibre', '.22 LR'], ['Plataforma', 'CZ P-09 Kadet']],
     'Cargador para pistola CZ P-09 en conversión .22 LR. Inventario OTCA (Monterrey).'), priceManualId: 'man_acc_2025_09_26' },
 
   // ── NUEVOS (DCAM · 16-jun-2026) ──
   amx(120, 'Cargador 9mm · Glock 17 (17 cart.)', 'Glock', 'Austria', 'cargadores', 'dcam', 461.48,
-    'CARG. PIST. 9MM GLOCK MOD. 17', ['Pistola Glock 17', '9mm'], [['Calibre', '9mm Parabellum'], ['Plataforma', 'Glock 17']],
+    'CARG. PIST. 9MM GLOCK MOD. 17', [], [['Calibre', '9mm Parabellum'], ['Plataforma', 'Glock 17']],
     'Cargador de fábrica para pistola Glock 17 en 9mm.'),
   amx(121, 'Cargador 9mm · Glock 19 (17 cart.)', 'Glock', 'Austria', 'cargadores', 'dcam', 461.48,
-    'CARG. PIST. 9MM GLOCK MOD. 19', ['Pistola Glock 19', '9mm'], [['Calibre', '9mm Parabellum'], ['Plataforma', 'Glock 19']],
+    'CARG. PIST. 9MM GLOCK MOD. 19', [], [['Calibre', '9mm Parabellum'], ['Plataforma', 'Glock 19']],
     'Cargador de fábrica para pistola Glock 19 en 9mm.'),
   amx(122, 'Cargador .40 S&W · Glock 22 (16 cart.)', 'Glock', 'Austria', 'cargadores', 'dcam', 461.48,
-    'CARG. PIST. CAL. 40 GLOCK MOD. 22', ['Pistola Glock 22', '.40 S&W'], [['Calibre', '.40 S&W'], ['Plataforma', 'Glock 22']],
+    'CARG. PIST. CAL. 40 GLOCK MOD. 22', [], [['Calibre', '.40 S&W'], ['Plataforma', 'Glock 22']],
     'Cargador de fábrica para pistola Glock 22 en .40 S&W.'),
   amx(123, 'Cargador 9mm · Beretta 92FS (15 cart.)', 'Beretta', 'Italia', 'cargadores', 'dcam', 570.95,
-    'CARGADOR BERETTA 92FS CAL. 9MM 15 CART', ['Pistola Beretta 92FS', '9mm'], [['Calibre', '9mm Parabellum'], ['Plataforma', 'Beretta 92FS']],
+    'CARGADOR BERETTA 92FS CAL. 9MM 15 CART', [], [['Calibre', '9mm Parabellum'], ['Plataforma', 'Beretta 92FS']],
     'Cargador de 15 cartuchos para pistola Beretta 92FS en 9mm.'),
   amx(124, 'Cargador .22 LR · Beretta 92FS (10 cart.)', 'Beretta', 'Italia', 'cargadores', 'dcam', 530.73,
-    'CARG. P/PISTOLA BERETTA 22LR 92FS', ['Pistola Beretta 92FS .22', '.22 LR'], [['Calibre', '.22 LR'], ['Plataforma', 'Beretta 92FS .22']],
+    'CARG. P/PISTOLA BERETTA 22LR 92FS', [], [['Calibre', '.22 LR'], ['Plataforma', 'Beretta 92FS .22']],
     'Cargador para pistola Beretta 92FS en versión .22 LR (entrenamiento).'),
   amx(125, 'Cargador .22 LR · Browning 1911-22', 'Browning', 'Bélgica', 'cargadores', 'dcam', 615.24,
-    'CARG. SEMIA. CAL. .22 L.R. BROWNING 1911-22', ['Pistola Browning 1911-22', '.22 LR'], [['Calibre', '.22 LR'], ['Plataforma', 'Browning 1911-22']],
+    'CARG. SEMIA. CAL. .22 L.R. BROWNING 1911-22', [], [['Calibre', '.22 LR'], ['Plataforma', 'Browning 1911-22']],
     'Cargador para pistola Browning 1911 en versión .22 LR.'),
   amx(126, 'Cargador 12 GA · Optimum OPT VM G2 (10 cart.)', 'Optimum Arms', 'Turquía', 'cargadores', 'dcam', 964.70,
-    'CARGADOR 10 CARTS CAL. 12 GA OPT VM G2', ['Escopeta Optimum OPT VM G2', '12 GA'], [['Calibre', '12 GA'], ['Capacidad', '10 cartuchos'], ['Plataforma', 'OPT VM G2']],
+    'CARGADOR 10 CARTS CAL. 12 GA OPT VM G2', [], [['Calibre', '12 GA'], ['Capacidad', '10 cartuchos'], ['Plataforma', 'OPT VM G2']],
     'Cargador de 10 cartuchos para escopeta Optimum Arms OPT VM G2 en calibre 12.'),
   amx(127, 'Cargador 20 GA · Optimum OPT VM G2 (10 cart.)', 'Optimum Arms', 'Turquía', 'cargadores', 'dcam', 964.70,
-    'CARGADOR 10 CARTS CAL. 20 GA OPT VM G2', ['Escopeta Optimum OPT VM G2', '20 GA'], [['Calibre', '20 GA'], ['Capacidad', '10 cartuchos'], ['Plataforma', 'OPT VM G2']],
+    'CARGADOR 10 CARTS CAL. 20 GA OPT VM G2', ['Optimum Arms OPT VM G2 cal. 20'], [['Calibre', '20 GA'], ['Capacidad', '10 cartuchos'], ['Plataforma', 'OPT VM G2']],
     'Cargador de 10 cartuchos para escopeta Optimum Arms OPT VM G2 en calibre 20.'),
 
   { ...amx(128, "Cargador 9mm · Beretta PX4 (20 cart.)", "Beretta", "Italia", 'cargadores', "dcam", 619.95,
-    "CARGADOR PARA PISTOLA MARCA BERETTA MODELO PX4 CAL. 9x19MM CON CAPACIDAD DE 20 CARTUCHOS", ["Pistola Beretta PX4 9mm","9mm Parabellum"], [["Calibre","9mm Parabellum"],["Capacidad","20 cartuchos"],["Plataforma","Beretta PX4"]],
+    "CARGADOR PARA PISTOLA MARCA BERETTA MODELO PX4 CAL. 9x19MM CON CAPACIDAD DE 20 CARTUCHOS", [], [["Calibre","9mm Parabellum"],["Capacidad","20 cartuchos"],["Plataforma","Beretta PX4"]],
     "Cargador de 20 cartuchos para pistola Beretta PX4 Storm en 9mm. Existencia y precio del inventario OTCA 18-jun-2026."), priceManualId: 'man_acc_2026_06_18' },
   { ...amx(129, "Cargador .380 ACP · Taurus PT58 (19 cart.)", "Taurus", "Brasil", 'cargadores', "dcam", 521.02,
-    "CARGADOR CALIBRE 0.380\", MARCA TAURUS, PARA PISTOLA MODELO PT 58 HC PLUS, CON CAPACIDAD DE 19 CARTUCHOS", ["Pistola Taurus PT58 HC Plus",".380 ACP"], [["Calibre",".380 ACP"],["Capacidad","19 cartuchos"],["Plataforma","Taurus PT58 HC Plus"]],
+    "CARGADOR CALIBRE 0.380\", MARCA TAURUS, PARA PISTOLA MODELO PT 58 HC PLUS, CON CAPACIDAD DE 19 CARTUCHOS", [], [["Calibre",".380 ACP"],["Capacidad","19 cartuchos"],["Plataforma","Taurus PT58 HC Plus"]],
     "Cargador de 19 cartuchos para pistola Taurus PT58 HC Plus en .380 ACP. Existencia y precio del inventario OTCA 18-jun-2026."), priceManualId: 'man_acc_2026_06_18' },
   { ...amx(130, "Cargador .22 LR · Browning Buck Mark (10 cart.)", "Browning", "Bélgica", 'cargadores', "dcam", 615.24,
-    "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA CALIBRE 0.22\" L.R., MARCA BROWNING, MODELO BUCKMARK, DE 10 CARTUCHOS DE CAPACIDAD", ["Pistola Browning Buck Mark",".22 LR"], [["Calibre",".22 LR"],["Capacidad","10 cartuchos"],["Plataforma","Browning Buck Mark"]],
+    "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA CALIBRE 0.22\" L.R., MARCA BROWNING, MODELO BUCKMARK, DE 10 CARTUCHOS DE CAPACIDAD", [], [["Calibre",".22 LR"],["Capacidad","10 cartuchos"],["Plataforma","Browning Buck Mark"]],
     "Cargador de 10 cartuchos para pistola Browning Buck Mark en .22 LR. Existencia y precio del inventario OTCA 18-jun-2026."), priceManualId: 'man_acc_2026_06_18' },
   { ...amx(131, "Cargador .22 LR · CZ 457/512 (10 cart.)", "Ceska Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 1107.44,
-    "CARGADOR CALIBRE 22 LR, CON CAPACIDAD DE 10 CARTUCHOS PARA RIFLE MODELO CZ 457/512, MARCA CESKA ZBROJOVKA A.S.", ["Rifle CZ 457","Rifle CZ 512",".22 LR"], [["Calibre",".22 LR"],["Capacidad","10 cartuchos"],["Plataforma","CZ 457 / CZ 512"]],
+    "CARGADOR CALIBRE 22 LR, CON CAPACIDAD DE 10 CARTUCHOS PARA RIFLE MODELO CZ 457/512, MARCA CESKA ZBROJOVKA A.S.", [], [["Calibre",".22 LR"],["Capacidad","10 cartuchos"],["Plataforma","CZ 457 / CZ 512"]],
     "Cargador de 10 cartuchos para rifles Ceska Zbrojovka CZ 457 / CZ 512 en .22 LR. Existencia y precio del inventario OTCA 18-jun-2026."), priceManualId: 'man_acc_2026_06_18' },
 
   // ── NUEVOS (DCAM · 11-sep-2026) ──
   { ...amx(132, "Cargador .380 ACP · Tanfoglio FT-9-FS (18 cart.)", "Tanfoglio", "Italia", 'cargadores', "dcam", 2.56,
-    "CARGADOR 0.380\" TANFOGLIO FT-9-FS CAR SP", ["Pistola Tanfoglio FT-9-FS (Full Size y Carry)", ".380 ACP"], [["Calibre", ".380 ACP"], ["Capacidad", "18 cartuchos"], ["Plataforma", "Tanfoglio FT-9-FS"]],
+    "CARGADOR 0.380\" TANFOGLIO FT-9-FS CAR SP", ["Tanfoglio FT-9-FS Carry y Sport"], [["Calibre", ".380 ACP"], ["Capacidad", "18 cartuchos"], ["Plataforma", "Tanfoglio FT-9-FS"]],
     "Cargador de 18 cartuchos para pistola Tanfoglio FT-9-FS en versiones Full Size y Carry, calibre .380 ACP."), priceManualId: 'man_acc_2026_09_11' },
   { ...amx(133, "Cargador 5.56x45 · IWI Galil ACE 21/22 (35 cart.)", "IWI", "Israel", 'cargadores', "seguridad", 664.46,
-    "CARGADOR P/FUSIL 5.56 P/ACE 21 y ACE 22", ["Fusil IWI Galil ACE 21", "Fusil IWI Galil ACE 22", "5.56x45"], [["Calibre", "5.56x45 OTAN"], ["Capacidad", "35 cartuchos"], ["Plataforma", "Galil ACE 21 / ACE 22"]],
+    "CARGADOR P/FUSIL 5.56 P/ACE 21 y ACE 22", ["IWI Galil ACE 21", "IWI Galil ACE 22"], [["Calibre", "5.56x45 OTAN"], ["Capacidad", "35 cartuchos"], ["Plataforma", "Galil ACE 21 / ACE 22"]],
     "Cargador de 35 cartuchos para los fusiles IWI Galil ACE 21 y ACE 22 en 5.56x45. Plataforma restringida a corporaciones de seguridad."), priceManualId: 'man_acc_2026_09_11' },
 
   // ── Separado en la revisión del 13-sep-2026: el registro OTCA 26-sep de la 113 era
   //    el cargador de la CZ P-07; la 113 sigue el de la CZ Shadow 2 (DCAM) ──
   { ...amx(134, "Cargador .380 ACP · CZ P-07 (15 cart.)", "Česká Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 666.10,
-    "CARGADOR PARA PISTOLA CAL. 0.380\" MARCA CESKA ZBROJOVKA MOD. CZ P-07, CAP. 15 CARTS.", ["Pistola CZ P-07 .380"], [["Calibre", ".380 ACP"], ["Capacidad", "15 cartuchos"], ["Plataforma", "CZ P-07"]],
+    "CARGADOR PARA PISTOLA CAL. 0.380\" MARCA CESKA ZBROJOVKA MOD. CZ P-07, CAP. 15 CARTS.", [], [["Calibre", ".380 ACP"], ["Capacidad", "15 cartuchos"], ["Plataforma", "CZ P-07"]],
     "Cargador de 15 cartuchos para pistola Česká Zbrojovka CZ P-07 en .380 ACP. Existencia y precio del inventario OTCA 26-sep-2025 (Monterrey)."), priceManualId: 'man_acc_2025_09_26' },
 ];
 
@@ -355,8 +355,10 @@ window.ACCESORIOS = [
 //    sacada de la descripción del PDF DCAM/OTCA y verificada con el fabricante
 //    (fuentes en el PR). Lista vacía = no se muestra ninguna: mejor nada que algo
 //    falso. El calibre NO cuenta para estos.
-//  · UNIVERSAL (óptica de riel) → `tipos` (y `calibres` si aplica).
-// Sin entrada tampoco se muestra nada. Al dar de alta un accesorio o una arma,
+//  · UNIVERSAL (óptica de riel) → `tipos` (y `calibres` si aplica); con `riel: true`
+//    solo sale en las fichas marcadas `riel` en data.js (verificado con el fabricante).
+// Sin entrada tampoco se muestra nada. «Compatible con» (`compatibilidad`) sale de
+// los nombres de las fichas de la lista; sin fichas, de la plataforma que nombra el PDF. Al dar de alta un accesorio o una arma,
 // actualiza estas listas (skill conciliar-inventario, «Decisiones de producto»);
 // auditar.js falla si una lista apunta a un id de arma que no existe.
 const ACC_COMPAT = {
@@ -365,7 +367,7 @@ const ACC_COMPAT = {
   103: { armas: [] },                  // CZ 805 BREN A1/A2: propio del 805; la BREN 2 usa STANAG
   104: { armas: [143] },               // Benelli MR1 5 cart.
   105: { armas: [] },                  // Grand Power CP380 (sin capacidad en el PDF): no confirmado en la LP380
-  106: { armas: [38] },                // IWI Jericho PL/PSL/II/II M
+  106: { armas: [38, 39] },            // IWI Jericho PL/PSL/II/II M; F-9 según IWI (Saulo, 14-sep)
   107: { armas: [37] },                // IWI Masada
   108: { armas: [36] },                // Springfield XD-M Elite 19+3
   109: { armas: [125] },               // Springfield Echelon 17+3
@@ -383,7 +385,7 @@ const ACC_COMPAT = {
   121: { armas: [40] },                // Glock 19+2 (17 cart.): G19
   122: { armas: [47, 131] },           // Glock 22+1 (16 cart.): G22, G27
   123: { armas: [135, 130] },          // Beretta 92FS 15 cart.: 92FS, 92A1
-  124: { armas: [134] },               // Beretta 92 FS .22 LR
+  124: { armas: [] },                  // Beretta 92 FS .22 LR: Beretta tiene dos cargadores .22 no intercambiables; no se arriesga (Saulo, 14-sep)
   125: { armas: [16] },                // Browning 1911-22
   126: { armas: [167] },               // Optimum Arms OPT VM G2 cal. 12
   127: { armas: [] },                  // OPT VM G2 cal. 20: no hay ficha en cal. 20
@@ -394,19 +396,24 @@ const ACC_COMPAT = {
   132: { armas: [] },                  // Tanfoglio FT-9-FS: no hay ficha
   133: { armas: [] },                  // Galil ACE 21/22: la ACE 21N del catálogo usa STANAG
   134: { armas: [8] },                 // CZ P-07 .380
-  201: { tipos: ['carabina','rifle','escopeta'] }, // MEPRO MOR: óptica de riel Picatinny (universal)
+  201: { tipos: ['carabina','rifle','escopeta'], riel: true }, // MEPRO MOR: óptica de riel Picatinny, solo armas con `riel` (data.js)
   202: { armas: [] },                  // MEPRO GLS: mira de lanzagranadas 40 mm; no hay ficha
   301: { armas: [100, 223] },          // Culata TSK para DT11/DT10
   401: { armas: [] },                  // Cañón Mossberg 500: no hay ficha
   402: { armas: [] },                  // Clips Chiappa Rhino: no hay ficha
 };
-window.ACCESORIOS.forEach(a => { a.compat = ACC_COMPAT[a.id] || {}; });
+window.ACCESORIOS.forEach(a => {
+  a.compat = ACC_COMPAT[a.id] || {};
+  const nombres = (a.compat.armas || []).map(id => (window.DB.find(x => x.id === id) || {}).nombre).filter(Boolean);
+  if (nombres.length) a.compatibilidad = nombres;
+});
 
 // ¿el accesorio es compatible con esta arma? (determinista, sin invención)
 window.accesorioFitsArma = function (acc, arma) {
   if (!acc || !arma) return false;
   const c = acc.compat || {};
   if (c.armas) return c.armas.includes(Number(arma.id));
+  if (c.riel && !arma.riel) return false;
   if (c.universal) return true;
   const hasCal = c.calibres && c.calibres.length;
   const hasTipo = c.tipos && c.tipos.length;
