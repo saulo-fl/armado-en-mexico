@@ -126,7 +126,8 @@ const mk = (id, nombre, marca, tipo, pais, calibre, capacidad, peso, longitud, m
   const priceN = parseFloat((priceExact||'0').replace(/[^\d.]/g,''));
   return {
     id, nombre, marca, tipo, pais, calibre, capacidad, peso, longitud, mecanismo, anio,
-    era: anio >= 2015 ? 'vanguardia' : anio >= 1990 ? 'moderno' : 'clasico',
+    // anio null = año sin verificar con el fabricante: sin era, para no caer en «clásico»
+    era: anio == null ? '' : anio >= 2015 ? 'vanguardia' : anio >= 1990 ? 'moderno' : 'clasico',
     img: img || '',
     historia,
     avail, ...legal,
@@ -381,7 +382,8 @@ window.DB = [
     "imagenes/026_Mendoza_RM22-6000_Safari.webp?v=2",
     "Acabado camuflaje safari. Ideal para cacería menor y plinking."),
 
-  mk(54, "Mendoza RM22-3000 Ergonómico", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2850g", "1020mm", "Semi-auto, culata ergonómica", 2021, "dcam", "11863.10", "RIFLE 22 MENDOZA RM22-3000 ERG",
+  // capacidad: «Magazine: Tubular 17 rounds», https://www.mendozafa.com/en-us/productss/rm22-3000 (#161)
+  mk(54, "Mendoza RM22-3000 Ergonómico", "Mendoza", "rifle", "México", ".22 LR", "17", "2850g", "1020mm", "Semi-auto, culata ergonómica", 2021, "dcam", "11863.10", "RIFLE 22 MENDOZA RM22-3000 ERG",
     "imagenes/027_Mendoza_RM22-3000_Ergonomico.webp?v=2",
     "Línea ergonómica de Mendoza con empuñadura pistola. Mayor comodidad para sesiones largas."),
 
@@ -393,7 +395,9 @@ window.DB = [
     "imagenes/029_Mendoza_Centenario.webp",
     "Edición conmemorativa del centenario de la Revolución Mexicana. Pieza de colección y deporte."),
 
-  mk(57, "CZ 457", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2750g", "1010mm", "Cerrojo de precisión", 2019, "dcam", "12772.43", "RIFLE CAL .22 LR CESKA Z. MOD CZ 457",
+  // 57 = CZ 457 American (+ American LH, que suma). Las demás líneas de la serie 457 son
+  // modelos, como las vende CZ (Saulo, 14-sep-2026, #161): Varmint MTR 227, Synthetic 228, Stainless 229.
+  mk(57, "CZ 457", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2750g", "1010mm", "Cerrojo de precisión", 2019, "dcam", "12772.43", "RIFLE CAL.0.22\" L.R CESKA CZ 457 AMERICA",
     "imagenes/030_CZ_457.webp",
     "Rifle de cerrojo de precisión checo, referencia internacional. Excelente para tiro a 50m y caza menor."),
 
@@ -412,7 +416,7 @@ window.DB = [
     "imagenes/033_Franchi_Horizon_Elite.webp",
     "Rifle italiano de cerrojo con excelente acabado. Cañón flotante. Ideal para cazadores que valoran la estética europea."),
 
-  mk(61, "Weatherby Vanguard .243", "Weatherby", "rifle", "EE.UU.", ".243 Winchester", "5", "3100g", "1100mm", "Cerrojo bolt-action", 2008, "dcam", "22001.06", "RIFLE 243 WIN WEATHERBY VANGUARD",
+  mk(61, "Weatherby Vanguard .243", "Weatherby", "rifle", "EE.UU.", ".243 Winchester", "5", "3100g", "1100mm", "Cerrojo bolt-action", 2008, "dcam", "18506.91", "RIFLE 243 WIN WEATHERBY VANGUARD",
     "imagenes/034_Weatherby_Vanguard_.243.webp",
     "Línea de entrada de Weatherby. .243 Win: calibre versátil para varmint y venado mediano."),
 
@@ -1002,6 +1006,35 @@ window.DB = [
   mk(226, "Huglu Renova Camo", "Huglu", "escopeta", "Turquía", "12 GA", "4+1", "3.0 kg", "1230mm", "Semi-auto inercial", 2017, "dcam", "17502.41", "ESCOPETA SEMIAUT CAL12 HUGLU RENOV CAMO",
     "",
     "Escopeta semiautomática inercial turca Huglu Renova calibre 12 en versión camo, con culata y guardamano camuflados y cañón de 71 cm (28 pulgadas). Adquisición civil."),
+
+  // ── ALTAS del issue #161 (decisiones de Saulo, 14-sep-2026) ──────────────
+  // Specs con el fabricante; "" o año null = sin verificar (no se inventa).
+  //  227-229 CZ: https://www.czfirearms.com/en-us/products/rimfire-rifles/cz-457-series/cz-457-mtr
+  //    (…/cz-457-synthetic, …/cz-457-stainless). MTR y Synthetic tienen dos cañones en .22 LR y el
+  //    PDF no dice cuál: peso y longitud van con el rango de las dos. Año: sin verificar.
+  //  230 https://weatherby.com/vanguard-outfitter/ (.243, 24" = 22"+2" de freno, como el PDF). Año: sin verificar.
+  //  231 https://www.benelli.it/en/arma/mr1 (cargador de 5; 3,700 g con cañón de 40.6 cm y culata
+  //    pistol grip; «Scope mounting rail»). Longitud total y año: sin verificar.
+  //  232 https://optimumarms.com.tr/opt-vm-g2-20-compact-desert-sand (20 GA 3", 13", 5+1/10+1, 3,4 kg).
+  //    Longitud total, riel y año: sin verificar.
+  mk(227, "CZ 457 Varmint MTR", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.5–3.7 kg", "859–976mm", "Cerrojo, cañón pesado Varmint Match", null, "dcam", "19097.12", "RIFLE 0.22\" L.R. CESKA CZ 457 VARMINTMTR",
+    "",
+    "Versión de tiro de precisión de la serie CZ 457 (CZ la vende hoy como CZ 457 MTR): cañón pesado con recámara match y culata de nogal, con precisión de 1 MOA según el fabricante. Cargador de 5 cartuchos. Adquisición civil."),
+  mk(228, "CZ 457 Synthetic", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.3–2.5 kg", "865–977mm", "Cerrojo", null, "dcam", "13155.40", "RIFLE MARCA CESKA ZBROJOVKA MODELO CZ 457 SYNTHETIC CALIBRE 22 LR",
+    "",
+    "Versión de la serie CZ 457 con culata de polímero de acabado soft-touch, resistente a la humedad, el frío y el calor. Cañones intercambiables por el usuario y precisión de 1 MOA según el fabricante. Adquisición civil."),
+  mk(229, "CZ 457 Stainless", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.5 kg", "977mm", "Cerrojo, cañón de acero inoxidable", null, "dcam", "14125.96", "RIFLE CESKA Z. CZ 457 STAINLESS CAL. 22",
+    "",
+    "Versión de la serie CZ 457 con cañón ligero de acero inoxidable de 525 mm y culata de polímero soft-touch con camuflaje digital. Precisión de 1 MOA según el fabricante. Adquisición civil."),
+  mk(230, "Weatherby Vanguard Outfitter .243", "Weatherby", "rifle", "EE.UU.", ".243 Winchester", "4+1", "3.1 kg", "1067mm", "Cerrojo bolt-action, freno de boca", null, "dcam", "22001.06", "RIFLE 243WIN WEATHERBY VANGUARD OUTFITTE",
+    "",
+    "Versión Outfitter del Weatherby Vanguard en .243 Win: culata Monte Carlo de polímero color arena con pintura esponjada café y blanca, acabado Cerakote negro grafito y freno de boca de 2 pulgadas. Weatherby garantiza agrupaciones de menos de 1 MOA. Adquisición civil."),
+  mk(231, "Benelli MR1 16\" culata fija", "Benelli", "carabina", "Italia", "5.56x45mm", "5", "3.7 kg", "", "Semi-auto, pistón de gas (A.R.G.O.)", null, "ejercito", "35140.68", "RIFLE BENELLI CAL. 223REM MR1 CAÑ. 16\"",
+    "",
+    "Configuración de la Benelli MR1 con cañón de 16 pulgadas (40.6 cm), culata fija y riel Picatinny, con cargadores de 5 cartuchos. Usa el sistema de gas autorregulable A.R.G.O. derivado de la escopeta Benelli M4. Calibre .223 Rem/5.56: restringido a Fuerzas Armadas."),
+  mk(232, "Optimum Arms OPT VM G2 cal. 20", "Optimum Arms", "escopeta", "Turquía", "20 GA", "5+1", "3.4 kg", "", "Semi-auto, operada por gas", null, "dcam", "22877.17", "ESCP.OPTIMUMARMS.OPTVMG2.CAL.20,13\"ND",
+    "",
+    "Versión en calibre 20 (recámara de 3 pulgadas) de la escopeta semiautomática de cargador Optimum Arms OPT VM G2: cañón de 13 pulgadas, culata retráctil, receptor inferior de aluminio y acabado negro con arena del desierto, con dos cargadores de 5 cartuchos. Adquisición civil."),
 ];
 
 // ──────────────────────────────────────────────────────────────
@@ -1034,7 +1067,8 @@ window.DB.forEach(a => { if (!a.img) a.img = window.armaPlaceholder(a); });
 // sin riel. Solo con riel salen las ópticas universales (MEPRO MOR, data-accesorios.js).
 // Al dar de alta un arma, decide aquí su riel.
 const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-  112, 113, 114, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221];
+  112, 113, 114, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221,
+  231]; // MR1 16": PDF «riel Picatinny» + Benelli «Scope mounting rail», mismas fuentes que la 143 (#161)
 window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 
 // helper de búsqueda usado por screens / admin

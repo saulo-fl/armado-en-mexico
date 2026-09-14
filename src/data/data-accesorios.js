@@ -317,7 +317,7 @@ window.ACCESORIOS = [
     'CARGADOR 10 CARTS CAL. 12 GA OPT VM G2', [], [['Calibre', '12 GA'], ['Capacidad', '10 cartuchos'], ['Plataforma', 'OPT VM G2']],
     'Cargador de 10 cartuchos para escopeta Optimum Arms OPT VM G2 en calibre 12.'),
   amx(127, 'Cargador 20 GA · Optimum OPT VM G2 (10 cart.)', 'Optimum Arms', 'Turquía', 'cargadores', 'dcam', 964.70,
-    'CARGADOR 10 CARTS CAL. 20 GA OPT VM G2', ['Optimum Arms OPT VM G2 cal. 20'], [['Calibre', '20 GA'], ['Capacidad', '10 cartuchos'], ['Plataforma', 'OPT VM G2']],
+    'CARGADOR 10 CARTS CAL. 20 GA OPT VM G2', [], [['Calibre', '20 GA'], ['Capacidad', '10 cartuchos'], ['Plataforma', 'OPT VM G2']],
     'Cargador de 10 cartuchos para escopeta Optimum Arms OPT VM G2 en calibre 20.'),
 
   { ...amx(128, "Cargador 9mm · Beretta PX4 (20 cart.)", "Beretta", "Italia", 'cargadores', "dcam", 619.95,
@@ -365,7 +365,7 @@ const ACC_COMPAT = {
   101: { armas: [] },                  // Nordic Components 25: para uppers .22 de AR-15 (NC-22); no hay ficha
   102: { armas: [] },                  // Mossberg 95702: 702/802 Plinkster; no hay ficha
   103: { armas: [] },                  // CZ 805 BREN A1/A2: propio del 805; la BREN 2 usa STANAG
-  104: { armas: [143] },               // Benelli MR1 5 cart.
+  104: { armas: [143, 231] },          // Benelli MR1 5 cart.: la MR1 trae cargador de 5 (benelli.it/en/arma/mr1), también la 16" (#161)
   105: { armas: [] },                  // Grand Power CP380 (sin capacidad en el PDF): no confirmado en la LP380
   106: { armas: [38, 39] },            // IWI Jericho PL/PSL/II/II M; F-9 según IWI (Saulo, 14-sep)
   107: { armas: [37] },                // IWI Masada
@@ -388,11 +388,11 @@ const ACC_COMPAT = {
   124: { armas: [] },                  // Beretta 92 FS .22 LR: Beretta tiene dos cargadores .22 no intercambiables; no se arriesga (Saulo, 14-sep)
   125: { armas: [16] },                // Browning 1911-22
   126: { armas: [167] },               // Optimum Arms OPT VM G2 cal. 12
-  127: { armas: [] },                  // OPT VM G2 cal. 20: no hay ficha en cal. 20
+  127: { armas: [232] },               // OPT VM G2 cal. 20 (alta #161; 5+1/10+1 en optimumarms.com.tr)
   128: { armas: [45] },                // Beretta PX4 9 mm, 20 cart.
   129: { armas: [2] },                 // Taurus PT 58 HC Plus
   130: { armas: [17] },                // Browning Buck Mark
-  131: { armas: [57] },                // CZ 457/455/512 .22 LR
+  131: { armas: [57, 227, 228, 229] }, // CZ 457/455/512 .22 LR: CZ-USA SKU 12004 sirve a toda la serie 457 en .22 LR (#161)
   132: { armas: [] },                  // Tanfoglio FT-9-FS: no hay ficha
   133: { armas: [] },                  // Galil ACE 21/22: la ACE 21N del catálogo usa STANAG
   134: { armas: [8] },                 // CZ P-07 .380
