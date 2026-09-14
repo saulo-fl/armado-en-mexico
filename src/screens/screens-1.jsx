@@ -772,14 +772,11 @@ window.CatalogScreen = CatalogScreen;
 // Polaroid reutilizable para secciones sin enlace de producto
 // (Armería, etc.). Reusa los estilos .amx-polaroid de estilo.css y solo
 // añade el onClick — la geometría (faldón, marco, giro) ya vive en CSS.
-function HubPolaroid({ img, label, sub, onClick }) {
+function HubPolaroid({ img, label, sub, onClick, stamp, stampSub, style: extraStyle, pozoStyle }) {
   const [err, setErr] = useState(false);
   return (
-    <button className="amx-polaroid amx-polaroid--hub" onClick={onClick} style={{
-      '--giro': '-2.5deg', // un poco más de giro que la ficha
-      width: '100%', aspectRatio: '4 / 5',
-    }}>
-      <div className="amx-polaroid-pozo" style={{ aspectRatio: '4 / 5' }}>
+    <button className="amx-polaroid amx-polaroid--hub" onClick={onClick} style={extraStyle}>
+      <div className="amx-polaroid-pozo" style={pozoStyle}>
         {img && !err ? (
           <img src={img} alt={label} loading="lazy" onError={() => setErr(true)}
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
@@ -791,6 +788,13 @@ function HubPolaroid({ img, label, sub, onClick }) {
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hair-hi)', fontSize: 30 }}>▦</div>
           )
         }
+        {/* Sello de ubicación — timbre postal circular */}
+        {stamp && (
+          <span className="amx-polaroid-sello" style={{ '--sello-texto': stamp, '--sello-sub': stampSub || '' }}>
+            <span className="amx-polaroid-sello-aro">{stamp}</span>
+            {stampSub && <span className="amx-polaroid-sello-sub">{stampSub}</span>}
+          </span>
+        )}
       </div>
       <div className="amx-polaroid-pie">
         {sub && <span className="amx-polaroid-datos">{sub}</span>}
@@ -802,8 +806,44 @@ function HubPolaroid({ img, label, sub, onClick }) {
 
 // ════════════════════════════════════════════════════════════════
 // ARSENAL HUB — Explorador por categorías
-// Misma estética que HOME: polaroids para fotos, tarjetas documento para textos.
+// Misma estética que HOME: polaroids para fotos, lotería para cartas.
 // ════════════════════════════════════════════════════════════════
+
+// Jittering determinista para polaroids de armería — cada una con un ángulo
+// distinto para que no se vean gemelas. Se usa `Math.sin` del índice como
+// generador simple: valores entre -3 y +3 grados.
+const ARMERIA_GIROS = [-2.5, 1.8];
+
+// Potencia relativa de cada calibre — de menor a mayor. Sirve para dimensionar
+// las tarjetas en la estantería del Hub (más potente = más ancho).
+const CALIBRE_POTENCIA = {
+  '.22 LR':          1,
+  '.380 ACP':        2,
+  '.38 Special':     3,
+  '.38 Super':       3,
+  '.40 S&W':         4,
+  '9mm Parabellum':  5,
+  '.243 Winchester': 6,
+  '.270 Winchester': 7,
+  '.308 Winchester': 8,
+  '.30-06 Sprg':     9,
+  '7mm Rem Mag':    10,
+  '.300 Win Mag':   11,
+  '6.5 PRC':        12,
+  '5.56x45mm':      8,
+  '7.62x39mm':      9,
+  '7.62x51mm':     10,
+  '20 GA':          13,
+  '.410 Bore':      13,
+  '12 GA':          14,
+};
+
+// Calibre ID → factor de ancho (min 80px, max 160px). Se escala linealmente.
+const calibreWidth = (id) => {
+  const p = CALIBRE_POTENCIA[id] || 7; // medio si no se conoce
+  return Math.round(80 + (p / 14) * 80); // 80–160px
+};
+
 function ArsenalHubScreen({ onNav }) {
   const vp = window.useViewport();
   const DB = window.DB || [];
@@ -851,69 +891,78 @@ function ArsenalHubScreen({ onNav }) {
       </h1>
       <p className="amx-arsenal-prosa">Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</p>
 
-      {/* ── ARMERÍA: dos polaroids, una por sede ─────────────────────── */}
+      {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
       <SectionHdr>Armería</SectionHdr>
       <div style={gridN(2)}>
-        <HubPolaroid label="DCAM" sub="Ciudad de México"
-          img="imagenes/armeria-dcam.webp"
-          onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
-        <HubPolaroid label="OTCA" sub="Nuevo León"
-          img="imagenes/armeria-otca.webp"
-          onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
+        <HubPolaroid label="DCAM" sub="Ciudad de México" stamp="CDMX" stampSub="México"
+          img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
+          style={{ '--giro': ARMERIA_GIROS[0], width: '100%', aspectRatio: '4 / 5' }} />
+        <HubPolaroid label="OTCA" sub="Nuevo León" stamp="N.L." stampSub="México"
+          img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })}
+          style={{ '--giro': ARMERIA_GIROS[1], width: '100%', aspectRatio: '4 / 5' }} />
       </div>
 
-      {/* ── DISPONIBILIDAD: una tarjeta documento ────────────────────── */}
+      {/* ── DISPONIBILIDAD: banner ticket ancho, sin maxWidth fijo ─── */}
       <SectionHdr>Disponibilidad</SectionHdr>
-      <div style={{ ...gridN(1), maxWidth: 480 }}>
-        <DocCard label="Disponibles actualmente"
-          sub="En existencia en el último inventario de su sucursal"
-          count={dispCount}
-          accent="var(--ok)"
-          onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
+      <div style={{ ...gridN(1) }}>
+        <button className="amx-arsenal-disp-banner" onClick={() => onNav('category', { mode: 'disponible', value: 'si' })}>
+          <span className="amx-arsenal-disp-label">Disponibles actualmente</span>
+          <span className="amx-arsenal-disp-sub">En existencia en el último inventario de su sucursal</span>
+          <span className="amx-arsenal-disp-count">{dispCount}</span>
+        </button>
       </div>
 
-      {/* ── CLASIFICACIÓN LEGAL: tres tarjetas con color de categoría ─ */}
+      {/* ── CLASIFICACIÓN LEGAL: pestaletas tipo archivador ─────────── */}
       <SectionHdr>Clasificación legal</SectionHdr>
-      <div style={{ ...gridN(3), maxWidth: 680 }}>
+      <div className="amx-arsenal-legal-grid">
         {window.CATEGORIES.disponibilidad.map((d) => availCount(d.id)
-          ? <DocCard key={d.id} label={d.label} sub={d.desc}
-              accent={`var(--${d.id === 'civil' ? 'ok' : 'alerta'})`}
-              count={availCount(d.id)}
-              onClick={() => onNav('category', { mode: 'avail', value: d.id })} />
+          ? <button key={d.id} className={`amx-arsenal-legal-tab amx-arsenal-legal-tab--${d.id}`}
+              onClick={() => onNav('category', { mode: 'avail', value: d.id })}>
+              <span className="amx-arsenal-legal-pegs">{d.label}</span>
+              <span className="amx-arsenal-legal-desc">{d.desc}</span>
+              <span className="amx-arsenal-legal-count">{availCount(d.id)}</span>
+            </button>
           : null)}
       </div>
 
-      {/* ── TIPO DE ARMA: polaroids con fotos hero de categoría ─────── */}
+      {/* ── TIPO DE ARMA: lotería (reusa HOME) + accesorios ─────────── */}
       <SectionHdr>Tipo de arma</SectionHdr>
-      <div style={gridN(5)}>
+      <div className="amx-arsenal-loteria-mesa">
         {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
-          ? <HubPolaroid key={c.id} label={c.label}
-              img={HEROS[c.id]}
+          ? <window.CartaLoteria key={c.id} nombre={c.label} cuenta={tipoCount(c.id)} unidad="armas"
+              forma={`imagenes/silueta-${c.id}.webp`}
               onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
           : null)}
+        {/* Accesorios en la misma mesa */}
+        {window.HomeAccesoriosSection &&
+          <window.HomeAccesoriosSection onNav={onNav} />
+        }
       </div>
 
-      {/* ── USO: tres tarjetas ─────────────────────────────────────── */}
+      {/* ── USO: polaroids apaisadas (16:9) como EXPERIENCIAS del HOME ─ */}
       <SectionHdr>Uso</SectionHdr>
       <div style={gridN(3)}>
-        <DocCard label="Tiro deportivo" sub="Clubes y polígonos"
-          count={usoCount('club')}
-          onClick={() => onNav('category', { mode: 'uso', value: 'club' })} />
-        <DocCard label="Cacería" sub="Caza mayor y menor"
-          count={usoCount('caza')}
-          onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
-        <DocCard label="Defensa del hogar" sub="Uso en domicilio"
-          count={usoCount('domicilio')}
-          onClick={() => onNav('category', { mode: 'uso', value: 'domicilio' })} />
+        {window.CATEGORIES.uso.map((u) => usoCount(u.id) ? (
+          <HubPolaroid key={u.id} label={u.label} sub={u.desc}
+            img={`imagenes/uso-${u.id}.webp`} onClick={() => onNav('category', { mode: 'uso', value: u.id })}
+            style={{ '--giro': 0, width: '100%', aspectRatio: '16 / 9' }}
+            pozoStyle={{ aspectRatio: '16 / 9' }} />
+        ) : null)}
       </div>
 
-      {/* ── CALIBRE: tarjetas con contador ─────────────────────────── */}
+      {/* ── CALIBRE: estantería de transparentes por tamaño/potencia ─ */}
       <SectionHdr>Calibre</SectionHdr>
-      <div style={gridN(4)}>
+      <div className="amx-arsenal-calibre-shelf">
         {window.CATEGORIES.calibre.map((c) => {
           const n = DB.filter((a) => a.calibre === c.id).length;
-          return n ? <DocCard key={c.id} label={c.label} count={n}
-              onClick={() => onNav('category', { mode: 'calibre', value: c.id })} /> : null;
+          return n ? (
+            <button key={c.id} className="amx-arsenal-calibre-item"
+              style={{ width: calibreWidth(c.id) }}
+              onClick={() => onNav('category', { mode: 'calibre', value: c.id })}>
+              <span className="amx-arsenal-calibre-ficha">{c.label}</span>
+              <span className="amx-arsenal-calibre-num">{n}</span>
+            </button>
+          ) : null;
         })}
       </div>
 
