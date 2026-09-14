@@ -3078,6 +3078,13 @@
   }
 }
 
+/* ── Disponibilidad — card a ancho completo en móvil ─────────────── */
+.amx-v2 .amx-arsenal-dispo-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e3);
+}
+
 /* ── Título del Hub ─────────────────────────────────────────────── */
 .amx-v2 .amx-arsenal-titulo {
   /* Más espacio abajo que arriba: jerarquía de heading (§5.3, craft-floor) */
@@ -3258,21 +3265,24 @@
   line-height: 1;
 }
 
-/* Colores por tipo — tokens del sistema, sin barras (§5.4). Dos tonos legales: civil + restr. */
-.amx-v2 .amx-arsenal-legal-tab--dcam .amx-arsenal-legal-pegs {
-  color: var(--sello-civil); /* 6.02:1 sobre papel claro (§7) */
+/* Colores por tipo — tokens con versión oscura (§7). Dos tonos legales: civil + restr. */
+.amx-v2 .amx-arsenal-legal-tab--dcam {
+  border-color: var(--ok);
 }
+.amx-v2 .amx-arsenal-legal-tab--dcam .amx-arsenal-legal-pegs,
 .amx-v2 .amx-arsenal-legal-tab--dcam .amx-arsenal-legal-count {
-  color: var(--sello-civil);
+  color: var(--ok); /* claro: #2F6B33 · oscuro: #63C07C → ≥5.08:1 en ambos temas */
 }
 
-.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs,
-.amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-pegs {
-  color: var(--sello-restr); /* 6.42:1 sobre papel claro (§7) */
+.amx-v2 .amx-arsenal-legal-tab--seguridad,
+.amx-v2 .amx-arsenal-legal-tab--ejercito {
+  border-color: var(--alerta);
 }
+.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs,
+.amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-pegs,
 .amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-count,
 .amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-count {
-  color: var(--sello-restr);
+  color: var(--alerta); /* claro: #A3341F · oscuro: #F0907E → ≥4.88:1 en ambos temas */
 }
 
 /* ── Tipo de arma — lotería (reusa HOME amx-loteria-mesa) ─────────────── */
@@ -3315,6 +3325,7 @@
   font-size: 24px;
   flex-shrink: 0;
   color: var(--sello-azul); /* tinta de sello para lo no legal (§7) */
+  font-family: var(--sans); /* glifos consistentes, sin Arial/Cambria Math */
 }
 .amx-v2 .amx-arsenal-uso-label {
   font-family: var(--sans);
@@ -3335,7 +3346,7 @@
 /* ── Calibre — mesa de exhibición con siluetas de cartucho (grid compacta) ─ */
 .amx-v2 .amx-arsenal-calibre-shelf {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
   gap: var(--e3);
   background: var(--lienzo);
   padding: var(--e3) var(--e4); /* aire interno de la bandeja */
@@ -3402,12 +3413,20 @@
   color: var(--sobre-marca);
   padding-bottom: var(--e3);
   padding-left: var(--e3); /* móvil: que el buscador no empiece en x=0 */
+  padding-right: var(--e3); /* que los controles no toquen el borde derecho */
+}
+/* Textos internos del header verde — todos sobre --marca deben usar --sobre-marca (§7) */
+.amx-v2 .amx-catalogo-header * {
+  color: inherit; /* hereda de .amx-catalogo-header → --sobre-marca */
 }
 /* En desktop, sticky en la parte superior (debajo del TopNav) */
 @media (min-width: 1024px) {
   .amx-v2 .amx-catalogo-header { position: sticky; top: 64px; z-index: 30; }
 }
-/* En móvil, el buscador ya es sticky por sí mismo en la banda verde */
+/* En móvil, también sticky para que los filtros no se pierdan al hacer scroll */
+@media (max-width: 1023px) {
+  .amx-v2 .amx-catalogo-header { position: sticky; top: 0; z-index: 30; }
+}
 
 .amx-v2 .amx-catalogo-busq {
   margin-bottom: var(--e2);

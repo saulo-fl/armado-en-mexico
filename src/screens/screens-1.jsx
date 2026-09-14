@@ -887,7 +887,7 @@ function ArsenalHubScreen({ onNav }) {
 
       {/* ── DISPONIBILIDAD: DocCard reutilizable (buen contraste, accesible) ─ */}
       <SectionHdr>Disponibilidad</SectionHdr>
-      <div style={{ ...gridN(1) }}>
+      <div className="amx-arsenal-dispo-card">
         <DocCard label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" count={dispCount} accent="var(--ok)" onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
       </div>
 
