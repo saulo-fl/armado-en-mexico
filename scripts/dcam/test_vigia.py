@@ -42,6 +42,31 @@ def test_nombre_archivo():
     assert vigia.nombre_archivo(url) == "1103069_ARMAS_11_SEP._2026.pdf"
 
 
+def test_comparar():
+    prev = {"a": {"sha256": "1"}, "b": {"sha256": "2"}, "c": {"sha256": "3"}, "d": {"sha256": "4"}}
+    act = {"a": {"sha256": "1"}, "b": {"sha256": "X"}, "e": {"sha256": "5"}}
+    r = vigia.comparar(prev, act, fallidos={"d"})
+    assert r == {"nuevos": ["e"], "cambiados": ["b"], "retirados": ["c"]}, r
+
+
+def test_diff_ignora_espacios():
+    assert vigia.diff_texto("Lunes a  Viernes\n08:00", "Lunes a Viernes \n 08:00") == []
+    assert vigia.diff_texto("Tel 1\nTel 2", "Tel 1\nTel 3") == ["- Tel 2", "+ Tel 3"]
+
+
+def test_estado_ida_y_vuelta():
+    with tempfile.TemporaryDirectory() as tmp:
+        ruta = Path(tmp) / "estado.json"
+        assert vigia.cargar_estado(ruta) is None
+        vigia.guardar_estado(ruta, {"textos": {"x": "Número"}})
+        assert vigia.cargar_estado(ruta) == {"textos": {"x": "Número"}}
+        assert not ruta.with_suffix(".tmp").exists()
+
+
+def test_fecha():
+    assert vigia.fecha(datetime(2026, 9, 4, 20, 0)) == "04-SEP-2026"
+
+
 if __name__ == "__main__":
     pruebas = [f for n, f in sorted(globals().items()) if n.startswith("test_")]
     for f in pruebas:

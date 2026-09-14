@@ -139,3 +139,37 @@ def documentos(cuerpo: dict) -> dict:
         if _es_upload(url):
             docs.setdefault(url, {"tipo": "imagen", "etiqueta": nombre_archivo(url)})
     return docs
+
+
+def comparar(previos: dict, actuales: dict, fallidos: set) -> dict:
+    """previos/actuales: url → {…, sha256}. fallidos: urls de la página que no bajaron
+    (no cuentan como retiradas: siguen publicadas, solo falló la descarga)."""
+    return {
+        "nuevos": [u for u in actuales if u not in previos],
+        "cambiados": [u for u in actuales if u in previos and actuales[u]["sha256"] != previos[u]["sha256"]],
+        "retirados": [u for u in previos if u not in actuales and u not in fallidos],
+    }
+
+
+def diff_texto(anterior: str, actual: str) -> list[str]:
+    if _limpia(anterior) == _limpia(actual):
+        return []
+    a = [_limpia(l) for l in anterior.splitlines() if _limpia(l)]
+    b = [_limpia(l) for l in actual.splitlines() if _limpia(l)]
+    return [l for l in difflib.ndiff(a, b) if l[:2] in ("- ", "+ ")]
+
+
+def cargar_estado(ruta: Path) -> dict | None:
+    if not ruta.exists():
+        return None
+    return json.loads(ruta.read_text(encoding="utf-8"))
+
+
+def guardar_estado(ruta: Path, estado: dict) -> None:
+    tmp = ruta.with_suffix(".tmp")
+    tmp.write_text(json.dumps(estado, ensure_ascii=False, indent=1), encoding="utf-8")
+    os.replace(tmp, ruta)   # atómico: un corte a medias no deja el estado corrupto
+
+
+def fecha(dt: datetime) -> str:
+    return f"{dt.day:02d}-{MESES[dt.month - 1]}-{dt.year}"
