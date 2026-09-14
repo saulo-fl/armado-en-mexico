@@ -32,6 +32,8 @@ def clave(renglon: dict) -> dict:
 def leer_inventario(ruta) -> dict:
     nombre = Path(ruta).name
     doc = fitz.open(str(ruta))
+    if doc.page_count == 0:
+        raise ValueError(f"PDF sin páginas: {nombre}")
     portada = doc[0].get_text()
     corte = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})", portada)
     if "DIRECCION DE COMERCIALIZACION" not in portada or not corte:

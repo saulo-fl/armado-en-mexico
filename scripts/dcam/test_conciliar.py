@@ -36,6 +36,48 @@ def test_lee_municiones_y_accesorios_del_11_sep():
     assert len(mun["municiones"]) == 42 and len(acc["accesorios"]) == 30
 
 
+def test_pdf_sin_paginas_es_valueerror():
+    # PyMuPDF se niega a guardar un PDF de 0 páginas ("cannot save with zero pages"),
+    # así que se simula con un doble mínimo que solo expone page_count.
+    original = conciliar.fitz.open
+    conciliar.fitz.open = lambda *a, **k: type("DocVacio", (), {"page_count": 0})()
+    try:
+        try:
+            conciliar.leer_inventario("vacio.pdf")
+        except ValueError as e:
+            assert "sin páginas" in str(e), e
+        else:
+            raise AssertionError("no lanzó ValueError")
+    finally:
+        conciliar.fitz.open = original
+
+
+def test_pdf_que_no_es_dcam_es_valueerror():
+    with tempfile.TemporaryDirectory() as tmp:
+        ruta = Path(tmp) / "no-dcam.pdf"
+        doc = conciliar.fitz.open()
+        pagina = doc.new_page()
+        pagina.insert_text((72, 72), "Hola")
+        doc.save(str(ruta))
+        try:
+            conciliar.leer_inventario(ruta)
+        except ValueError as e:
+            assert "formato no reconocido" in str(e), e
+        else:
+            raise AssertionError("no lanzó ValueError")
+
+
+def test_layout_oct_2025_se_detiene():
+    # El bot solo lee inventarios nuevos en el layout 2026; el de oct-2025 usa la
+    # cabecera acentuada "DIRECCIÓN DE COMERCIALIZACIÓN" y se detiene a propósito.
+    try:
+        conciliar.leer_inventario(INV / "dcam-existencias-2025-10-03.pdf")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("no lanzó ValueError")
+
+
 if __name__ == "__main__":
     pruebas = [f for n, f in sorted(globals().items()) if n.startswith("test_")]
     for f in pruebas:
