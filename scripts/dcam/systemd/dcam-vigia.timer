@@ -1,0 +1,10 @@
+[Unit]
+Description=Dispara el vigía DCAM todos los días a las 20:00
+
+[Timer]
+OnCalendar=*-*-* 20:00:00
+Persistent=true
+Unit=dcam-vigia.service
+
+[Install]
+WantedBy=timers.target
