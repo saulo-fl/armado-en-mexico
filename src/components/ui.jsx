@@ -2141,9 +2141,52 @@ function CintaDymo({ children, nivel = 2, id }) {
 window.CintaDymo = CintaDymo;
 
 // ──────────────────────────────────────────────────────────────
+// NOTA DE ERRATA — el precio que la DCAM publicó mal
+// Saulo, 13-sep-2026: «Cuando pase eso hay que colocar el último precio
+// conocido y una nota indicando que probablemente sea un error de la
+// publicación de la Secretaría de Defensa». La conciliación deja en el
+// registro de ese inventario `errata` (el precio tal como salió en el PDF) y en
+// `price` el que se publica. Si hay un registro anterior con ese mismo precio,
+// la nota cita su fecha; si no, `price` es el del PDF y la nota solo avisa.
+// Sale junto al precio en las tres fichas y solo si el ÚLTIMO registro, el del
+// precio actual, trae `errata`.
+// ──────────────────────────────────────────────────────────────
+function amxErrataPrecio(historial) {
+  const h = historial || [];
+  const ultimo = h[h.length - 1];
+  if (!ultimo || !ultimo.errata) return null;
+  const v = amxPrecioNum(ultimo.price);
+  let anterior = null;
+  for (let i = h.length - 2; i >= 0 && v != null; i--) {
+    if (amxPrecioNum(h[i].price) === v) { anterior = h[i]; break; }
+  }
+  return { publicado: ultimo.errata, fecha: ultimo.date, fechaAnterior: anterior ? anterior.date : null };
+}
+window.amxErrataPrecio = amxErrataPrecio;
+
+function NotaErrata({ historial }) {
+  const e = amxErrataPrecio(historial);
+  if (!e) return null;
+  const publicado = String(e.publicado).replace(' MXN', '');
+  return (
+    <p className="amx-errata">
+      {/* U+FE0E: el signo en texto, no como emoji (iOS lo pinta a color). */}
+      <span className="amx-errata-signo" aria-hidden="true">{'⚠︎'}</span>
+      <span>
+        {e.fechaAnterior
+          ? `Precio del inventario ${amxFmtManualDate(e.fechaAnterior)}. El publicado el ${amxFmtManualDate(e.fecha)} (${publicado}) probablemente es un error de la publicación de la Secretaría de la Defensa.`
+          : `El precio publicado el ${amxFmtManualDate(e.fecha)} probablemente es un error de la publicación de la Secretaría de la Defensa.`}
+      </span>
+    </p>
+  );
+}
+window.NotaErrata = NotaErrata;
+
+// ──────────────────────────────────────────────────────────────
 // TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
 // En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
 // casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
+// `historial` es solo para la nota de errata (ver NotaErrata).
 //
 // `ultimoConocido`: el precio viene de un inventario ANTERIOR al último de su
 // sucursal, es decir, el arma ya no aparece en el más reciente. El talón lleva
@@ -2153,7 +2196,7 @@ window.CintaDymo = CintaDymo;
 // 26-sep-2025 y la tarjeta de almacén en AGOTADO al inventario OTCA del
 // 18-jun-2026. Con los datos del 13-sep-2026 son 52 armas.
 // ──────────────────────────────────────────────────────────────
-function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false }) {
+function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false, historial }) {
   return (
     <div ref={talonRef} className={'amx-talon' + (fijo ? ' amx-talon--fijo' : '')}>
       <div className="amx-talon-papel">
@@ -2166,6 +2209,7 @@ function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fi
           <React.Fragment>
             <div className="amx-talon-cab"><span>Comprobante de precio</span><span>Con IVA</span></div>
             <span className="amx-talon-cifra">{precio}</span>
+            <NotaErrata historial={historial} />
             {ultimoConocido &&
               <span className="amx-sello amx-sello--restr amx-talon-sello">Último precio conocido</span>}
             <dl className="amx-talon-datos">

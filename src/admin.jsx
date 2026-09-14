@@ -399,7 +399,9 @@ function ArmaForm({ arma, mode, onSave, onCancel }) {
     // Si hay historial de inventarios, el precio actual = entrada más reciente
     const cleanHist = priceHist
       .filter(h => h.price && String(h.price).trim())
-      .map(h => ({ price: String(h.price).trim(), manualId: h.manualId || '', date: h.date || '', note: h.note || '' }))
+      // `errata` (el precio mal publicado por la DCAM) viaja tal cual: sin él la
+      // ficha perdería la nota junto al precio al guardar desde aquí.
+      .map(h => ({ price: String(h.price).trim(), manualId: h.manualId || '', date: h.date || '', note: h.note || '', ...(h.errata ? { errata: h.errata } : {}) }))
       .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
     const latest = cleanHist[cleanHist.length - 1];
     if (latest) {

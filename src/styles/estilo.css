@@ -1873,6 +1873,24 @@
   -webkit-mask-composite: source-over;
           mask-composite: add;
 }
+/* La nota de errata DCAM (NotaErrata en ui.jsx): prosa junto a la cifra, con
+   el signo en rojo. Fuera del talón (fichas de munición y accesorio) sigue al
+   tema: --tinta-dim 8.24:1 / 7.03:1 y --alerta 5.63:1 / 5.26:1 sobre el papel.
+   Dentro del talón, su tinta: 13.18:1 y el rojo impreso 5.19:1. */
+.amx-v2 .amx-errata {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px;
+  margin: 6px 0 8px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--tinta-dim);
+  text-wrap: pretty;
+}
+.amx-v2 .amx-errata-signo { font-weight: 700; color: var(--alerta); }
+.amx-v2 .amx-talon .amx-errata { color: var(--talon-tinta); }
+.amx-v2 .amx-talon .amx-errata-signo { color: var(--talon-rojo); }
 /* La casilla de Comparar: se tacha a máquina. El estado lo dice la X Y el
    texto, no un color. */
 .amx-v2 .amx-talon-casilla {
