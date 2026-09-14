@@ -208,6 +208,8 @@ Los precios oficiales se alimentan desde los **PDFs de existencias de la DCAM**.
 Toda la conciliación vive en **código versionado**, no en `localStorage`:
 
 - Los PDFs van en la carpeta **`public/inventarios/`** con nombre `dcam-existencias-AAAA-MM-DD.pdf`.
+  Desde el 11-sep-2026 la DCAM los publica por separado: armas → `dcam-existencias-`, cartuchos →
+  `dcam-municiones-`, accesorios → `dcam-accesorios-AAAA-MM-DD.pdf` (skill `conciliar-inventario`).
 - El registro de inventarios y el historial de precios por arma viven en **`data-precios.js`**
   (`window.AMX_MANUALES_SEED` y `window.AMX_PRICE_HISTORY_SEED`). Ese archivo tiene el
   esquema completo y las reglas documentadas en su cabecera — léelo antes de editar.

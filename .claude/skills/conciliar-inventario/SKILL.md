@@ -25,8 +25,11 @@ Usa `scripts/parse_pdf.py` (PyMuPDF/`fitz`, ya instalado). Detecta el formato so
   apilado. Por ítem: descripción (multi-línea) → existencia (entero) → precio ($N).
 
 Comando: `python3 .claude/skills/conciliar-inventario/scripts/parse_pdf.py <ruta.pdf>`
-Salida: JSON con `[{idx, name, qty, priceN}]`. Separa armas de accesorios/cartuchos
-por prefijo (`CARG|CART|CULATA|SISTEMA|CLIPS|CAÑON` = accesorio/munición).
+Salida: JSON con `[{idx, name, qty, priceN, desc}]` (`desc` = descripción larga, solo DCAM).
+Desde sep-2026 la DCAM publica **tres PDFs** (armas, cartuchos, accesorios): cópialos como
+`dcam-existencias-`, `dcam-municiones-` y `dcam-accesorios-AAAA-MM-DD.pdf`. Si llega uno
+combinado, separa por prefijo (`CARG|CART|CULATA|SISTEMA|CLIPS|CAÑON` = accesorio/munición).
+Autochequeo del parser: `python3 .claude/skills/conciliar-inventario/scripts/test_parse_pdf.py`.
 
 ## 2) Mapear PDF → catálogo (VERIFICADO, no fuzzy)
 - El campo `dcamRef` en `data.js` es el nombre-corto del PDF, pero **normalizado a
@@ -126,3 +129,31 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
 - 2026-07: un modelo agotado puede REGRESAR (Taurus TH380/PT59, SIG MCX, Weatherby
   Vanguard .243). Antes de dar de alta una ficha nueva, contrasta el renglón contra el
   catálogo COMPLETO, no solo contra las fichas con existencia.
+- 2026-09 (11-sep, CALIBRACIÓN de `parse_pdf.py`): la DCAM separó el anexo en **3 PDFs**
+  (armas 204 · cartuchos 42 · accesorios 30). El layout es el mismo (offset del nombre
+  +1.6, encabezado a y=159.9 o 153.9 según página), así que nombre/qty/precio salían bien;
+  se verificó renglón a renglón contra el 6-jul re-parseado (0 diferencias). Lo que faltaba:
+  (1) **`desc`**: 7 nombres cortos se repiten con productos distintos («ARMSAN P612 A.C.» ×3,
+  una es la A612 semiautomática; «PHENOMA A.S.N.» ×2) y la descripción es lo único que los
+  separa. Se recoge entre el nombre y el siguiente, cruzando de página (armas págs. 12, 18,
+  19, 20, 24; cartuchos pág. 3), cortando 14 pt antes del siguiente nombre para dejar fuera
+  su línea en negrita («(Venta exclusiva para Oficiales…)» se encima con el nombre). El pie
+  de página se quita por POSICIÓN (y≥755), no por ser dígitos: «75» o «23715» sueltos son
+  códigos de la descripción. (2) `--json` escribía cp1252 en Windows (HEFESTO): ahora UTF-8.
+  (3) `EXISTENCIA DE ` genérico en el encabezado (antes solo «…DE ARMAS»).
+- 2026-09: la **existencia agregada por ficha no es uniforme**. Muchas fichas toman UN
+  renglón y dejan fuera sus variantes (CZ 457 con 13 variantes → solo «American»; Glock 17,
+  P320 Full Size, Taurus 82S, PT58…); otras suman todas (Atrox, Maxus, Fair SLX800P, Stribog,
+  Arex Delta L, B525, OPT-200, Stoeger M3000/P3500, Vanguard). Reconstruido con la suma
+  exacta de qty del 6-jul contra `AMX_ARMAS_EXISTENCIAS`. Conserva el
+  grupo que ya tenía cada ficha; si su representativo desaparece, suma las variantes que
+  queden del mismo modelo (precedente Maxus). Unificar el criterio es decisión de Saulo.
+- 2026-09: cambiar de variante representativa mueve el precio aunque no haya subida
+  (DT11 32" → DT11 Black DLC Pro +24.6 %, 694 Sporting → 694 Pro B-Fast +21 %, Renova VBN
+  → camo +5.4 %). Y al revés: un precio puede encadenar EXACTO con otro modelo (92FS 6-jul ×
+  0.98693 = «92A1» 11-sep, 5 u.). Manda la descripción (marca+modelo+calibre); señálalo.
+- 2026-09: dos factores de ajuste conviven: −2.88 % general y −1.31 % en Beretta, Benelli,
+  AYA, Stoeger, Grand Power y Chiappa (Franchi entra nuevo). Caesar Guerini +3.51 %.
+  Municiones Águila de pistola/.30 Carbine/5.56 sin cambio.
+- 2026-09: el PDF puede traer precios imposibles (cargador Tanfoglio FT-9-FS a $2.56): se
+  registra TAL CUAL y se señala en el PR; no se corrige a mano.
