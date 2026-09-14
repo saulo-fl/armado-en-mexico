@@ -3064,7 +3064,8 @@
 
 /* ── Título del Hub ─────────────────────────────────────────────── */
 .amx-v2 .amx-arsenal-titulo {
-  margin: 8px 0 4px;
+  /* Más espacio abajo que arriba: jerarquía de heading (§5.3, craft-floor) */
+  margin: var(--e2) 0 var(--e4);
   font-family: var(--sans);
   font-weight: 700;
   font-size: 26px;
@@ -3115,7 +3116,7 @@
   justify-content: space-between;
   align-items: center;
   gap: var(--e3);
-  padding: 14px 16px;
+  padding: var(--e2) var(--e3); /* escala 4·8·12·20·32·52 (§5.2) */
   background: var(--papel);
   border: 1px solid var(--hair);
   border-left: 3px solid var(--accent, var(--tinta-2));
@@ -3161,22 +3162,23 @@
 /* ── Botón "Ver todas" del Hub ─────────────────────────────────── */
 .amx-v2 .amx-arsenal-ver-todo {
   margin-top: var(--e4);
-  background: none;
-  border: 1px dashed var(--hair);
-  color: var(--tinta-dim);
-  padding: 12px 16px;
+  background: var(--acento);
+  border: none;
+  color: var(--papel);
+  padding: var(--e2) var(--e3);
   font-family: var(--mono);
   font-size: 13px;
-  letter-spacing: .12em;
+  font-weight: 700;
+  letter-spacing: .14em;
   text-transform: uppercase;
   cursor: pointer;
   width: 100%;
-  transition: border-color .18s, color .18s;
+  transition: background-color .18s, transform .12s ease;
 }
 .amx-v2 .amx-arsenal-ver-todo:hover {
-  border-style: solid;
-  border-color: var(--acento);
-  color: var(--tinta);
+  background: var(--tinta);
+  color: var(--papel);
+  transform: translateY(-1px);
 }
 
 /* ── Sello de ubicación en polaroid de armería — imagen generada ─ */
@@ -3252,13 +3254,13 @@
   line-height: 1;
 }
 
-/* Colores por tipo — pestaleta + contador */
+/* Colores por tipo — pestaleta + contador. Fondos sólidos para ≥4.5:1 (§7) */
 .amx-v2 .amx-arsenal-legal-tab--civil {
   border-top: 4px solid var(--ok);
 }
 .amx-v2 .amx-arsenal-legal-tab--civil .amx-arsenal-legal-pegs {
-  background: rgba(34, 170, 85, .12);
-  color: #1a6b38;
+  background: #C8E6C9; /* sólido, no rgba — contraste predecible */
+  color: #1B5E20;      /* ≥4.5:1 sobre #C8E6C9 */
 }
 .amx-v2 .amx-arsenal-legal-tab--civil .amx-arsenal-legal-count {
   color: var(--ok);
@@ -3268,8 +3270,8 @@
   border-top: 4px solid var(--seguridad);
 }
 .amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs {
-  background: color-mix(in srgb, var(--seguridad) 15%, transparent);
-  color: var(--seguridad);
+  background: #EF9A9A; /* sólido, no color-mix — contraste predecible */
+  color: #5D1A10;      /* ≥4.5:1 sobre #EF9A9A */
 }
 .amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-count {
   color: var(--seguridad);
@@ -3279,8 +3281,8 @@
   border-top: 4px solid var(--alerta);
 }
 .amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-pegs {
-  background: rgba(200, 50, 50, .12);
-  color: #8b1a1a;
+  background: #E57373; /* sólido, no rgba — contraste predecible */
+  color: #6B1515;      /* ≥4.5:1 sobre #E57373 */
 }
 .amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-count {
   color: var(--alerta);
@@ -3290,10 +3292,10 @@
 .amx-v2 .amx-arsenal-loteria-mesa {
   display: grid;
   gap: var(--e3);
-  /* Desktop: 6 columnas (5 tipos + accesorios), móvil: 2 */
-  grid-template-columns: repeat(6, 1fr);
+  /* Desktop: 4 columnas (5 tipos + accesorios = aire), móvil: 2 */
+  grid-template-columns: repeat(4, 1fr);
 }
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .amx-v2 .amx-arsenal-loteria-mesa {
     grid-template-columns: repeat(3, 1fr);
   }
@@ -3309,7 +3311,7 @@
   display: flex;
   align-items: center;
   gap: var(--e2);
-  padding: 14px 16px;
+  padding: var(--e2) var(--e3); /* escala 4·8·12·20·32·52 (§5.2) */
   background: var(--papel);
   border: 1px solid var(--hair);
   box-shadow: var(--sombra);
@@ -3317,11 +3319,14 @@
   text-align: left;
   width: 100%;
   transition: transform .18s, box-shadow .18s;
+  /* Jittering determinista — cada tarjeta con ángulo distinto (§5.4) */
+  transform: rotate(var(--giro, 0));
 }
 .amx-v2 .amx-arsenal-uso-card:hover {
-  transform: translateY(-2px);
+  transform: rotate(var(--giro, 0)) translateY(-2px);
   box-shadow: var(--sombra-hover);
 }
+/* Jittering determinista — cada tarjeta con ángulo distinto (§5.4 asimetría sistemática) */
 .amx-v2 .amx-arsenal-uso-icon {
   font-size: 28px;
   flex-shrink: 0;
@@ -3341,6 +3346,10 @@
   flex-wrap: wrap;
   gap: var(--e3);
   align-items: stretch;
+  background: var(--lienzo);
+  padding: var(--e3) var(--e4); /* aire interno de la bandeja */
+  border-radius: var(--e1);
+  box-shadow: inset 0 1px 4px rgba(23,27,25,.08); /* profundidad sutil (§5.1b) */
 }
 
 /* Carta individual — fondo token del tema (buen contraste) */
@@ -3388,7 +3397,7 @@
   margin-top: 4px;
   font-family: var(--mono);
   font-size: 11px;
-  color: rgba(255,255,255,.55);
+  color: var(--tinta-dim); /* ≥4.5:1 sobre papel claro (§7 no negociable) */
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
