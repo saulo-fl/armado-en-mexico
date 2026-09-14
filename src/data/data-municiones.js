@@ -448,6 +448,13 @@
   window.getMunicionManual = function (id) { return (window.MUNICIONES_MANUALES || []).find(function (m) { return m.id === id; }) || null; };
   window.getMunicionPrimaryManual = function () { return (window.MUNICIONES_MANUALES || []).find(function (m) { return m.primary; }) || (window.MUNICIONES_MANUALES || [])[0] || null; };
   window.getMunicionPriceHistory = function (id) { return (window.MUNICIONES_PRICE_HISTORY[Number(id)] || []).slice(); };
+  // Inventario fuente («Ver inventario fuente») = el del ÚLTIMO registro del historial.
+  // Se deriva aquí y pisa el `priceManualId` escrito a mano: las conciliaciones añadían
+  // registros sin tocarlo y el botón abría un PDF viejo.
+  (window.MUNICIONES || []).forEach(function (m) {
+    var h = window.getMunicionPriceHistory(m.id).sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+    if (h.length) m.priceManualId = h[h.length - 1].manualId;
+  });
   window.getMunicionExistencias = function (id) { var h = window.getMunicionPriceHistory(id); var last = h[h.length - 1]; return (last && last.qty != null) ? { qty: last.qty, date: last.date, manualId: last.manualId } : null; };
   // Compatibilidad por calibre exacto (determinista, sin invención)
   window.getMunicionesParaArma = function (arma) { if (!arma) return []; return (window.MUNICIONES || []).filter(function (m) { return m.calibre === arma.calibre; }); };

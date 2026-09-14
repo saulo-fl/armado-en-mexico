@@ -26,6 +26,8 @@ Debe terminar en `✔✔ AUDITORÍA SIN HALLAZGOS` (sale con código !=0 si fall
 - Los `data-*.js` cargan juntos en Node (shim de `window`).
 - `priceExact == último registro del historial` para las 192 armas.
 - ids contiguos, existencias > 0, historiales cronológicos, conteo por sucursal.
+- Inventario fuente (`priceManualId`, el botón «Ver inventario fuente») = el del último
+  registro del historial, en armas, accesorios y municiones (13-sep-2026).
 
 ## Transpilar un archivo suelto (al iterar una pantalla)
 ```bash

@@ -522,3 +522,11 @@ window.getAccesorioExistencias = function (id) {
 // Los accesorios no traen foto todavía: se muestran con un aviso discreto
 // "sin imagen disponible por el momento" hasta cargar fotografías reales.
 window.ACCESORIOS.forEach(a => { if (!window.isRealImage(a.img)) a.img = ''; });
+
+// Inventario fuente («Ver inventario fuente») = el del ÚLTIMO registro del historial.
+// Se deriva aquí y pisa el `priceManualId` escrito a mano en cada ficha: las
+// conciliaciones añadían registros sin tocarlo y el botón abría un PDF viejo.
+window.ACCESORIOS.forEach(a => {
+  const h = window.getAccesorioPriceHistory(a.id);
+  if (h.length) a.priceManualId = h[h.length - 1].manualId;
+});

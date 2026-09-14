@@ -59,6 +59,12 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
 - **Accesorios/municiones**: mismo patrón. La existencia vive en el `qty` del último
   registro del historial (no en un mapa aparte). Municiones DCAM y OTCA suelen ser
   sets DISTINTOS (nacionales vs. españolas de competencia) → casi todo es alta nueva.
+- **Inventario fuente** («Ver inventario fuente» de la ficha): es el `priceManualId`, y
+  tiene que ser el inventario del **último registro del historial**. En accesorios y
+  municiones se deriva solo al final de `data-accesorios.js` / `data-municiones.js`: al
+  añadir un registro NO hay que tocar el `priceManualId` de la ficha, pero tampoco borres
+  esa derivación. En armas no se escribe (la ficha cae al último registro). `auditar.js`
+  falla si alguna ficha apunta a otro inventario o a uno que no existe.
 
 ## Decisiones de producto (CONVENCIÓN FIJA — el usuario ya las tomó)
 - **Modelos nuevos → SIEMPRE se dan de alta como fichas** (no omitir). Specs derivadas
@@ -105,6 +111,7 @@ Invoca el skill `verificar-app` o corre `scripts/auditar.js`:
 - Los `data-*.js` cargan juntos en Node sin error.
 - `priceExact == último registro del historial` para TODAS las armas.
 - Existencias solo de presentes; agotadas removidas; historiales cronológicos.
+- Inventario fuente (`priceManualId`) = el del último registro, en armas, accesorios y municiones.
 - Mapeo semántico revisado; simulación por sucursal (presentes, agotados, solo-OTCA).
 
 ## 5) Publicar
@@ -206,6 +213,13 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   el texto se encima (XD-M $11,426.20, Taurus 856 Tungsten). Pendiente llevarlo al parser.
 - 2026-09-13: una qty de municiones del 16-jun seguía mal por el bug viejo del parser
   (2023 Águila .308: 540 → 1,780). Si auditas municiones, compara (precio, qty) exactos.
+- 2026-09-13 (revisor del PR #158): **«Ver inventario fuente» abría PDFs viejos** en 34
+  accesorios y 34 municiones: la pantalla usa `priceManualId` antes que el último registro,
+  y cada conciliación añadía registros sin actualizar ese campo escrito a mano. Ahora se
+  deriva del historial en los propios `data-*.js` y `auditar.js` lo comprueba.
+- 2026-09-13: **un mismo producto puede venir en dos renglones** (Águila .38 Super, código
+  1E382112, en jun y jul) o cambiar de rótulo entre inventarios (Águila .270). Antes de
+  dar un salto de existencia por «otro renglón», compara código y descripción larga.
 - 2026-09-13: fichas creadas por acabado antes de la regla de variantes (Taurus 856 Inox /
   Pavón Mate / Tungsten; Mendoza RM22-6000 Black/Squad/Safari/Commander) se dejaron como
   están: la regla prohíbe sobrescribir modelos, no obliga a fusionar lo publicado.
