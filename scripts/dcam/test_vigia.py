@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Pruebas del vigía DCAM. Correr: python3 scripts/dcam/test_vigia.py"""
+import http.client
 import sys
 import tempfile
 from datetime import datetime
@@ -135,6 +136,141 @@ def test_akamai_no_toca_el_estado():
         assert codigo == 1 and len(msgs) == 1, msgs
         assert "roto" in msgs[0]["texto"] and "Challenge Validation" in msgs[0]["texto"], msgs
         assert not (base / "estado.json").exists()
+
+
+class _BotFalso:
+    def __init__(self, resultado):
+        self.resultado = resultado
+
+    def send_message(self, texto):
+        return self.resultado
+
+    def send_document(self, ruta, caption):
+        return self.resultado
+
+
+def test_enviar_devuelve_si_todo_se_mando():
+    msgs = [{"texto": "hola"}, {"texto": "adjunto", "archivo": "x.pdf"}]
+    assert vigia.enviar(msgs, _BotFalso(False)) is False
+    assert vigia.enviar(msgs, _BotFalso(True)) is True
+    assert vigia.enviar(msgs, None) is True
+
+
+def test_error_de_red_no_oser_en_adjunto_no_rompe_la_corrida():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        caido = next(iter(archivos))
+
+        def bajar(url, _caido=caido):
+            if url == _caido:
+                raise http.client.IncompleteRead(b"")
+            return _bajador(paginas, archivos)(url)
+
+        codigo, msgs = vigia.correr(bajar, base, datetime(2026, 9, 15, 20), reintento_seg=0)
+        latido = msgs[-1]["texto"]
+        assert codigo == 0 and "no se pudieron bajar: 1" in latido and "retirados" not in latido, latido
+
+
+def test_akamai_en_adjunto_no_se_archiva():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        estado_antes = vigia.cargar_estado(base / "estado.json")["documentos"]
+        aka_archivos = {u: AKA.encode() for u in archivos}
+        codigo, msgs = vigia.correr(_bajador(paginas, aka_archivos), base, datetime(2026, 9, 15, 20), reintento_seg=0)
+        assert codigo == 0 and len(msgs) == 1, msgs   # solo el latido: nada nuevo/cambiado que avisar
+        latido = msgs[-1]["texto"]
+        assert "no se pudieron bajar: 16" in latido, latido
+        estado_despues = vigia.cargar_estado(base / "estado.json")["documentos"]
+        for u, d in estado_antes.items():
+            assert estado_despues[u]["sha256"] == d["sha256"], u
+
+
+def test_dir_trabajo_seco_usa_tempdir_si_no_hay_dcam_dir():
+    d = vigia.dir_trabajo(True, {})
+    assert d.name.startswith("dcam-seco-") and d.exists(), d
+
+
+def test_dir_trabajo_respeta_dcam_dir():
+    assert vigia.dir_trabajo(True, {"DCAM_DIR": "/tmp/algo"}) == Path("/tmp/algo")
+    assert vigia.dir_trabajo(False, {"DCAM_DIR": "/tmp/algo"}) == Path("/tmp/algo")
+
+
+def test_costos_roto_no_bloquea():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        costos_antes = vigia.cargar_estado(base / "estado.json")["textos"]["costos"]
+
+        paginas2 = dict(paginas)
+        paginas2[vigia.PAGINAS["costos"]] = AKA
+        codigo, msgs = vigia.correr(_bajador(paginas2, archivos), base, datetime(2026, 9, 15, 20), reintento_seg=0)
+        assert codigo == 0
+        assert any("no se pudo leer la página «costos»" in m["texto"] for m in msgs), msgs
+        assert "costos sin leer" in msgs[-1]["texto"], msgs[-1]["texto"]
+        assert vigia.cargar_estado(base / "estado.json")["textos"]["costos"] == costos_antes
+
+
+def test_es_upload_solo_gob_mx_https():
+    assert not vigia._es_upload("http://192.168.1.10/cms/uploads/attachment/file/1/x.pdf")
+    assert not vigia._es_upload("file:///cms/uploads/image/file/1/x.jpg")
+    assert vigia._es_upload("https://www.gob.mx/cms/uploads/attachment/file/1/x.pdf")
+
+
+def test_imagen_por_ruta_aunque_venga_de_enlace():
+    html = '<div class="article-body"><a href="/cms/uploads/image/file/5/aviso.jpg">Ver aviso</a></div>'
+    docs = vigia.documentos(vigia.leer_cuerpo(html))
+    assert list(docs.values())[0]["tipo"] == "imagen", docs
+
+
+def test_diff_truncado():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        marca = '<div class="article-body">'
+        cos_larga = COS.replace(marca, marca + "<p>" + "X" * 5000 + "</p>", 1)
+        paginas2 = dict(paginas)
+        paginas2[vigia.PAGINAS["costos"]] = cos_larga
+        codigo, msgs = vigia.correr(_bajador(paginas2, archivos), base, datetime(2026, 9, 15, 20), reintento_seg=0)
+        diff_msg = next(m for m in msgs if "Cambió el texto" in m["texto"])
+        assert diff_msg["texto"].endswith("…(truncado)"), diff_msg["texto"][-40:]
+
+
+def test_akamai_con_estado_previo_no_lo_toca():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        antes = (base / "estado.json").read_bytes()
+        paginas2 = {vigia.PAGINAS["comercializacion"]: AKA, vigia.PAGINAS["costos"]: COS}
+        codigo, msgs = vigia.correr(_bajador(paginas2, {}), base, datetime(2026, 9, 15, 20), reintento_seg=0)
+        assert codigo == 1
+        assert (base / "estado.json").read_bytes() == antes
+
+
+def test_documento_cambiado_manda_inventario_cambiado():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        u = next(u for u in archivos if "1103069" in u)   # ARMAS_11_SEP._2026.pdf, tipo existencias
+        archivos2 = dict(archivos)
+        archivos2[u] = b"CONTENIDO NUEVO"
+        codigo, msgs = vigia.correr(_bajador(paginas, archivos2), base, datetime(2026, 9, 15, 20), reintento_seg=0)
+        cambiado = [m for m in msgs if m["texto"].startswith("📦 Inventario cambiado DCAM:")]
+        assert len(cambiado) == 1 and "archivo" in cambiado[0], msgs
+        assert "cambiados: 1" in msgs[-1]["texto"], msgs[-1]["texto"]
 
 
 if __name__ == "__main__":
