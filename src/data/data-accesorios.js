@@ -348,51 +348,57 @@ window.ACCESORIOS = [
     "Cargador de 15 cartuchos para pistola Česká Zbrojovka CZ P-07 en .380 ACP. Existencia y precio del inventario OTCA 26-sep-2025 (Monterrey)."), priceManualId: 'man_acc_2025_09_26' },
 ];
 
-// ── COMPATIBILIDAD ESTRUCTURADA (derivada de la compatibilidad declarada) ────
-// Permite cruzar accesorios ↔ armas del inventario SIN inventar nada: cada
-// accesorio declara los tipos y/o calibres de arma con los que es compatible.
-// Semántica de coincidencia: si declara calibres Y tipos, deben cumplirse ambos;
-// si declara solo uno, basta ese; 'universal' aplica a todas las armas.
+// ── COMPATIBILIDAD ACCESORIO ↔ ARMA (14-sep-2026) ────────────────────────────
+// Antes iba por tipo+calibre y salían cosas falsas (el cargador de la IWI Masada
+// «compatible» con 36 pistolas 9 mm). Ahora hay dos clases:
+//  · ESPECÍFICO (cargador, cañón, culata, refacción) → `armas: [ids de ficha]`,
+//    sacada de la descripción del PDF DCAM/OTCA y verificada con el fabricante
+//    (fuentes en el PR). Lista vacía = no se muestra ninguna: mejor nada que algo
+//    falso. El calibre NO cuenta para estos.
+//  · UNIVERSAL (óptica de riel) → `tipos` (y `calibres` si aplica).
+// Sin entrada tampoco se muestra nada. Al dar de alta un accesorio o una arma,
+// actualiza estas listas (skill conciliar-inventario, «Decisiones de producto»);
+// auditar.js falla si una lista apunta a un id de arma que no existe.
 const ACC_COMPAT = {
-  101: { tipos: ['rifle','carabina'], calibres: ['.22 LR'] },
-  102: { tipos: ['rifle','carabina'], calibres: ['.22 LR'] },
-  103: { tipos: ['carabina','rifle'], calibres: ['5.56x45mm'] },
-  104: { tipos: ['rifle','carabina'], calibres: ['5.56x45mm'] },
-  105: { tipos: ['pistola'], calibres: ['.380 ACP'] },
-  106: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  107: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  108: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  109: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  110: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  111: { tipos: ['carabina','rifle'], calibres: ['.22 LR'] },
-  112: { tipos: ['pistola'], calibres: ['.380 ACP'] },
-  113: { tipos: ['pistola'], calibres: ['.380 ACP'] },
-  114: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  115: { tipos: ['carabina','rifle'], calibres: ['5.56x45mm'] },
-  116: { tipos: ['carabina','rifle'], calibres: ['5.56x45mm'] },
-  117: { tipos: ['carabina','rifle'], calibres: ['5.56x45mm'] },
-  201: { tipos: ['carabina','rifle','escopeta'] },
-  202: { tipos: ['pistola','carabina'] },
-  301: { tipos: ['escopeta'] },
-  401: { tipos: ['escopeta'], calibres: ['12 GA'] },
-  402: { tipos: ['revolver'], calibres: ['.38 Special'] },
-  118: { tipos: ['pistola'], calibres: ['.380 ACP'] },
-  119: { tipos: ['pistola'], calibres: ['.22 LR'] },
-  120: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  121: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  122: { tipos: ['pistola'], calibres: ['.40 S&W'] },
-  123: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  124: { tipos: ['pistola'], calibres: ['.22 LR'] },
-  125: { tipos: ['pistola'], calibres: ['.22 LR'] },
-  126: { tipos: ['escopeta'], calibres: ['12 GA'] },
-  127: { tipos: ['escopeta'], calibres: ['20 GA'] },
-  128: { tipos: ['pistola'], calibres: ['9mm Parabellum'] },
-  129: { tipos: ['pistola'], calibres: ['.380 ACP'] },
-  130: { tipos: ['pistola'], calibres: ['.22 LR'] },
-  131: { tipos: ['rifle','carabina'], calibres: ['.22 LR'] },
-  // 132 (Tanfoglio FT-9-FS) y 133 (Galil ACE 21/22) sin entrada a propósito: por
-  // tipo+calibre se mostraban compatibles con armas del catálogo que no los aceptan.
-  // Sin entrada no se muestra ninguna; la compatibilidad por modelo llega aparte.
+  101: { armas: [] },                  // Nordic Components 25: para uppers .22 de AR-15 (NC-22); no hay ficha
+  102: { armas: [] },                  // Mossberg 95702: 702/802 Plinkster; no hay ficha
+  103: { armas: [] },                  // CZ 805 BREN A1/A2: propio del 805; la BREN 2 usa STANAG
+  104: { armas: [143] },               // Benelli MR1 5 cart.
+  105: { armas: [] },                  // Grand Power CP380 (sin capacidad en el PDF): no confirmado en la LP380
+  106: { armas: [38] },                // IWI Jericho PL/PSL/II/II M
+  107: { armas: [37] },                // IWI Masada
+  108: { armas: [36] },                // Springfield XD-M Elite 19+3
+  109: { armas: [125] },               // Springfield Echelon 17+3
+  110: { armas: [41, 42, 43, 44] },    // SIG P320 Full Size 17
+  111: { armas: [80, 81, 82] },        // Tippmann Arms M4-22, 25 cart.
+  112: { armas: [14] },                // Browning 1911-380
+  113: { armas: [10] },                // CZ Shadow 2 .380
+  114: { armas: [] },                  // AMSAC KTGP17: el PDF no dice para qué pistola
+  115: { armas: [] },                  // 5.56 polímero A.R.&T.: el PDF no dice para qué fusil
+  116: { armas: [] },                  // C-MAG HK G36: no hay ficha
+  117: { armas: [69, 70, 71, 72, 73, 150] }, // C-MAG AR-15/M4/M16
+  118: { armas: [1] },                 // Taurus TH380
+  119: { armas: [] },                  // CZ P-09 Kadet .22: ni la P-09 9 mm (sin adaptador) ni la P-07 Kadet
+  120: { armas: [132, 40, 124] },      // Glock 17+2 (19 cart.): G17, G19, G19X
+  121: { armas: [40] },                // Glock 19+2 (17 cart.): G19
+  122: { armas: [47, 131] },           // Glock 22+1 (16 cart.): G22, G27
+  123: { armas: [135, 130] },          // Beretta 92FS 15 cart.: 92FS, 92A1
+  124: { armas: [134] },               // Beretta 92 FS .22 LR
+  125: { armas: [16] },                // Browning 1911-22
+  126: { armas: [167] },               // Optimum Arms OPT VM G2 cal. 12
+  127: { armas: [] },                  // OPT VM G2 cal. 20: no hay ficha en cal. 20
+  128: { armas: [45] },                // Beretta PX4 9 mm, 20 cart.
+  129: { armas: [2] },                 // Taurus PT 58 HC Plus
+  130: { armas: [17] },                // Browning Buck Mark
+  131: { armas: [57] },                // CZ 457/455/512 .22 LR
+  132: { armas: [] },                  // Tanfoglio FT-9-FS: no hay ficha
+  133: { armas: [] },                  // Galil ACE 21/22: la ACE 21N del catálogo usa STANAG
+  134: { armas: [8] },                 // CZ P-07 .380
+  201: { tipos: ['carabina','rifle','escopeta'] }, // MEPRO MOR: óptica de riel Picatinny (universal)
+  202: { armas: [] },                  // MEPRO GLS: mira de lanzagranadas 40 mm; no hay ficha
+  301: { armas: [100, 223] },          // Culata TSK para DT11/DT10
+  401: { armas: [] },                  // Cañón Mossberg 500: no hay ficha
+  402: { armas: [] },                  // Clips Chiappa Rhino: no hay ficha
 };
 window.ACCESORIOS.forEach(a => { a.compat = ACC_COMPAT[a.id] || {}; });
 
@@ -400,6 +406,7 @@ window.ACCESORIOS.forEach(a => { a.compat = ACC_COMPAT[a.id] || {}; });
 window.accesorioFitsArma = function (acc, arma) {
   if (!acc || !arma) return false;
   const c = acc.compat || {};
+  if (c.armas) return c.armas.includes(Number(arma.id));
   if (c.universal) return true;
   const hasCal = c.calibres && c.calibres.length;
   const hasTipo = c.tipos && c.tipos.length;

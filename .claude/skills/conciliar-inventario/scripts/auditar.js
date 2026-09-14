@@ -87,5 +87,14 @@ fuente(DB, H, win.AMX_MANUALES_SEED, 'armas');
 fuente(win.ACCESORIOS, win.ACCESORIOS_PRICE_HISTORY || {}, win.ACCESORIOS_MANUALES, 'accesorios');
 fuente(win.MUNICIONES, win.MUNICIONES_PRICE_HISTORY || {}, win.MUNICIONES_MANUALES, 'municiones');
 
+// 6) compatibilidad explícita de accesorios (14-sep-2026): cada id de `compat.armas`
+//    tiene que ser una ficha que exista, o la lista enseñaría un hueco en silencio.
+const idsArma = new Set(DB.map((a) => a.id));
+const huerfanas = [];
+(win.ACCESORIOS || []).forEach((a) => ((a.compat || {}).armas || []).forEach((id) => { if (!idsArma.has(id)) huerfanas.push(a.id + '→' + id); }));
+huerfanas.length
+  ? bad(huerfanas.length + ' compatibilidades apuntan a un id de arma inexistente: ' + huerfanas.slice(0, 8).join(', '))
+  : ok('compatibilidad explícita: ' + (win.ACCESORIOS || []).filter((a) => (a.compat || {}).armas).length + ' accesorios, todos los ids de arma existen');
+
 console.log('\n' + (fail === 0 ? '✔✔ AUDITORÍA SIN HALLAZGOS' : '✘ ' + fail + ' HALLAZGOS'));
 process.exit(fail ? 1 : 0);
