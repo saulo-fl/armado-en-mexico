@@ -411,8 +411,12 @@ tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se si
 ## RESUELTO (27-ago-2026) — «DCAM Monterrey» y por qué tardó dos días
 
 **Se queda aquí porque el error de método se repite, no el dato.** La DCAM está
-**solo** en el Campo Militar No. 1 (CDMX); la sede de Monterrey es de **OTCA**, otra
-institución. El 25-ago se corrigió en `data.js` y se dio por cerrado **sin grepear el
+**solo** en el **Campo Militar No. 1-D, en Naucalpan, Edo. Méx.** (Av. Industria Militar
+1111, Col. Lomas de Tecamachalco, C.P. 53950; planta baja del edificio principal de la
+Dirección General de Industria Militar), según gob.mx/defensa/acciones-y-programas/comercializacion-de-armas
+y la «Ubicación de módulos de registro» del RFA (módulo RFA-DCAM-1: «Campo Militar 1-D»).
+No está en la CDMX, como dijo el sitio hasta sep-2026. La sede de Monterrey es de **OTCA**,
+otra institución. El 25-ago se corrigió en `data.js` y se dio por cerrado **sin grepear el
 resto**: el texto vivía en cuatro archivos más. Al hacerlo bien aparecieron **doce**
 sitios, no cinco, porque había un segundo error encadenado — varias respuestas
 declaraban que la DCAM es el **único** punto legal de adquisición, omitiendo a OTCA,
