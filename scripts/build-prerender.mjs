@@ -60,6 +60,9 @@ const histAcc = (id) => (typeof win.getAccesorioPriceHistory === 'function'
   ? win.getAccesorioPriceHistory(id) : (win.ACCESORIOS_PRICE_HISTORY || {})[id]);
 const histMun = (id) => (typeof win.getMunicionPriceHistory === 'function'
   ? win.getMunicionPriceHistory(id) : (win.MUNICIONES_PRICE_HISTORY || {})[id]);
+// Ordenado como lo sirve Store.getPriceHistory: el último es el precio actual.
+const histArma = (id) => ((win.AMX_PRICE_HISTORY_SEED || {})[id] || []).slice()
+  .sort((x, y) => String(x.date || '').localeCompare(String(y.date || '')));
 const fechaArma = (a) => ultimaFecha((win.AMX_PRICE_HISTORY_SEED || {})[a.id]);
 const fechaAcc = (c) => ultimaFecha(histAcc(c.id));
 const fechaMun = (m) => ultimaFecha(histMun(m.id));
@@ -109,6 +112,39 @@ const recorta = (s, n) => {
 };
 const dl = (pares) => `<dl>${pares.filter(([, v]) => v).map(
   ([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
+
+// La nota de errata DCAM junto al precio: el último registro del historial trae
+// `errata` (el precio tal como salió en el PDF) y `price` es el que se publica.
+// LOS DOS TEXTOS SON EL MISMO: es `amxTextoErrata` de ui.jsx, duplicado porque
+// aquí no hay ui.jsx. Si tocas uno, toca el otro. Los metadatos (description,
+// og:description, JSON-LD) no la llevan: ya citan el precio que se publica.
+const MESES_ERRATA = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+const fechaErrata = (f) => {
+  const [a, m, d] = String(f || '').slice(0, 10).split('-');
+  return MESES_ERRATA[m - 1] ? `${d}-${MESES_ERRATA[m - 1]}-${a}` : String(f || '');
+};
+const precioNum = (s) => {
+  const n = parseFloat(String(s == null ? '' : s).replace(/[^\d.]/g, ''));
+  return isFinite(n) ? n : null;
+};
+function textoErrata(hist) {
+  const h = Array.isArray(hist) ? hist : [];
+  const ultimo = h[h.length - 1];
+  if (!ultimo || !ultimo.errata) return null;
+  const v = precioNum(ultimo.price);
+  let anterior = null;
+  for (let i = h.length - 2; i >= 0 && v != null; i--) {
+    if (precioNum(h[i].price) === v) { anterior = h[i]; break; }
+  }
+  const error = 'probablemente es un error de la publicación de la Secretaría de la Defensa.';
+  return anterior
+    ? `Precio del inventario ${fechaErrata(anterior.date)}. El publicado el ${fechaErrata(ultimo.date)} (${String(ultimo.errata).replace(' MXN', '')}) ${error}`
+    : `El precio publicado el ${fechaErrata(ultimo.date)} ${error}`;
+}
+const notaErrata = (hist) => {
+  const t = textoErrata(hist);
+  return t ? `<p>⚠ ${esc(t)}</p>` : '';
+};
 
 const migas = (items) => ({
   '@type': 'BreadcrumbList',
@@ -240,6 +276,7 @@ ${dl([['Marca', a.marca], ['Tipo', mayus(tipoNom)], ['Calibre', a.calibre], ['Ca
       ['Mecanismo', a.mecanismo], ['Peso', a.peso], ['Longitud', a.longitud],
       ['País de origen', a.pais], ['Año', a.anio], ['Clasificación legal', a.availLabel],
       ['Precio de referencia', a.priceExact]])}
+${notaErrata(histArma(a.id))}
 ${a.legalTit ? `<h2>Situación legal en México</h2><p><strong>${esc(a.legalTit)}.</strong> ${esc(a.legalDesc || '')}</p>` : ''}
 ${a.historia ? `<h2>Contexto</h2><p>${esc(a.historia)}</p>` : ''}
 <p><small>Información divulgativa basada en la Ley Federal de Armas de Fuego y Explosivos y en el catálogo oficial DCAM/SEDENA. No se comercializan armas de fuego.</small></p>
@@ -269,6 +306,7 @@ for (const c of ACCESORIOS) {
 ${dl([['Marca', c.marca], ['Categoría', CAT_LABEL[rama] || c.categoria], ['País', c.pais],
       ['Compatibilidad', c.compatibilidad], ['Especificaciones', c.specs],
       ['Clasificación', c.avail], ['Precio de referencia', c.priceExact]])}
+${notaErrata(histAcc(c.id))}
 </article>`,
   });
   fechaPorRuta.set(ruta, fechaAcc(c));
@@ -293,6 +331,7 @@ for (const m of MUNICIONES) {
 <p>${esc(recorta(resumen, 400))}</p>
 ${dl([['Calibre', m.calibre], ['Marca', m.marca], ['Tipo de bala', m.bala], ['Grano', m.grano],
       ['Uso', m.tipo], ['País', m.pais], ['Clasificación', m.avail], ['Precio de referencia', m.priceExact]])}
+${notaErrata(histMun(m.id))}
 </article>`,
   });
   fechaPorRuta.set(ruta, fechaMun(m));

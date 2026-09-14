@@ -137,7 +137,10 @@ Todo va dentro del **folder manila** (`.amx-carpeta`, la foto de la Home en 9-sl
 - **Orden de las celdas** (el del DOM y el de la pila en móvil): copia instantánea
   con clip y el **sello legal estampado encima** (la única animación de entrada) →
   `FichaTecnica` (ficha de fichero, con `mecanismo`) → **talón de comprobante**
-  rosa (precio, fuente, fecha, casilla Comparar, y debajo la etiqueta de opiniones)
+  rosa (precio, fuente, fecha, casilla Comparar, y debajo la etiqueta de opiniones;
+  con `ultimoConocido` lleva el sello «ÚLTIMO PRECIO CONOCIDO»: el inventario del
+  precio es anterior al último de su sucursal, la misma regla que el AGOTADO del
+  kárdex)
   → `TarjetaAlmacen` (kárdex por sucursal, absorbe «Detalle de la fuente») →
   separadores **Legalidad · Usos · Antecedentes** (`FichaTabs` controlada, Legalidad
   abierta, hoja de oficio) → `HistorialPrecios` (milimétrico + registro + anexos;

@@ -501,6 +501,7 @@ function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
               fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23,
               color: P.amber, letterSpacing: '0.02em',
             }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : acc.priceExact}</div>
+            <window.NotaErrata historial={priceHistory} />
             {acc.dcamRef &&
               <div style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted,

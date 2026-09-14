@@ -1130,6 +1130,12 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   Saulo la retiró porque rompía la estética diegética (un papel no persigue a quien lee). Por
   debajo de 1024px: pila en ese mismo orden y talón fijo abajo —ese sí, es la barra del pulgar—, que
   aparece cuando el talón de la ficha sale de pantalla y se retira al asomar el pie.
+- **Último precio conocido** (13-sep-2026). Si el inventario de donde sale el precio es anterior al
+  último de la misma sucursal, el arma ya no aparece en este y la tarjeta de almacén dice AGOTADO.
+  Los dos datos son ciertos, pero juntos parecían contradecirse. El talón lleva entonces el sello
+  rojo «ÚLTIMO PRECIO CONOCIDO» junto a la cifra, y en la barra fija del móvil el rótulo pasa a
+  «Último precio OTCA» o «DCAM». Es la misma regla que el AGOTADO del kárdex, así que nunca sale
+  uno sin el otro.
 - **La situación legal se dice una vez:** el sello sobre la copia y la hoja de Legalidad. Sin línea
   de texto ni enlace «§ Ver situación legal» bajo la foto.
 - **Las pestañas no mueven el fondo:** las tres hojas de oficio comparten celda y la pila mide lo

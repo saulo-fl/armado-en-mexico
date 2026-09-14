@@ -2141,23 +2141,89 @@ function CintaDymo({ children, nivel = 2, id }) {
 window.CintaDymo = CintaDymo;
 
 // ──────────────────────────────────────────────────────────────
+// NOTA DE ERRATA — el precio que la DCAM publicó mal
+// Saulo, 13-sep-2026: «Cuando pase eso hay que colocar el último precio
+// conocido y una nota indicando que probablemente sea un error de la
+// publicación de la Secretaría de Defensa». La conciliación deja en el
+// registro de ese inventario `errata` (el precio tal como salió en el PDF) y en
+// `price` el que se publica. Si hay un registro anterior con ese mismo precio,
+// la nota cita su fecha; si no, `price` es el del PDF y la nota solo avisa.
+// Sale junto al precio en las tres fichas y solo si el ÚLTIMO registro, el del
+// precio actual, trae `errata`. Va también en la barra fija del móvil.
+//
+// EL TEXTO ESTÁ DUPLICADO en scripts/build-prerender.mjs (`textoErrata`), que
+// corre en Node sin ui.jsx: si tocas uno, toca el otro. Las fechas van como en
+// el boceto de Saulo, «06-JUL-2026», con meses fijos y no con toLocaleDateString:
+// así la app y el prerender escriben lo mismo sea cual sea el ICU.
+// ──────────────────────────────────────────────────────────────
+const AMX_MESES_ERRATA = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+function amxFechaErrata(f) {
+  const [a, m, d] = String(f || '').slice(0, 10).split('-');
+  return AMX_MESES_ERRATA[m - 1] ? `${d}-${AMX_MESES_ERRATA[m - 1]}-${a}` : String(f || '');
+}
+
+function amxTextoErrata(historial) {
+  const h = historial || [];
+  const ultimo = h[h.length - 1];
+  if (!ultimo || !ultimo.errata) return null;
+  const v = amxPrecioNum(ultimo.price);
+  let anterior = null;
+  for (let i = h.length - 2; i >= 0 && v != null; i--) {
+    if (amxPrecioNum(h[i].price) === v) { anterior = h[i]; break; }
+  }
+  const error = 'probablemente es un error de la publicación de la Secretaría de la Defensa.';
+  return anterior
+    ? `Precio del inventario ${amxFechaErrata(anterior.date)}. El publicado el ${amxFechaErrata(ultimo.date)} (${String(ultimo.errata).replace(' MXN', '')}) ${error}`
+    : `El precio publicado el ${amxFechaErrata(ultimo.date)} ${error}`;
+}
+window.amxTextoErrata = amxTextoErrata;
+
+function NotaErrata({ historial }) {
+  const texto = amxTextoErrata(historial);
+  if (!texto) return null;
+  return (
+    <p className="amx-errata">
+      {/* U+FE0E: el signo en texto, no como emoji (iOS lo pinta a color). */}
+      <span className="amx-errata-signo" aria-hidden="true">{'⚠︎'}</span>
+      {/* Las fechas no se parten en su guion («11-» / «SEP-2026»). */}
+      <span>{texto.split(/(\d{2}-[A-Z]{3}-\d{4})/).map((t, i) =>
+        i % 2 ? <span key={i} className="amx-errata-fecha">{t}</span> : t)}</span>
+    </p>
+  );
+}
+window.NotaErrata = NotaErrata;
+
+// ──────────────────────────────────────────────────────────────
 // TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
 // En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
 // casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
+// `historial` es solo para la nota de errata (ver NotaErrata); en el fijo va en
+// un renglón propio bajo la cifra y la casilla.
+//
+// `ultimoConocido`: el precio viene de un inventario ANTERIOR al último de su
+// sucursal, es decir, el arma ya no aparece en el más reciente. El talón lleva
+// entonces el sello «ÚLTIMO PRECIO CONOCIDO». Saulo, 13-sep-2026: «ambos datos
+// son ciertos pero hace falta aclararlo en la ficha con Último precio
+// conocido». El caso que lo motivó: la Galil ACE 21N, con precio OTCA del
+// 26-sep-2025 y la tarjeta de almacén en AGOTADO al inventario OTCA del
+// 18-jun-2026. Con los datos del 13-sep-2026 son 52 armas.
 // ──────────────────────────────────────────────────────────────
-function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef }) {
+function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false, historial }) {
   return (
     <div ref={talonRef} className={'amx-talon' + (fijo ? ' amx-talon--fijo' : '')}>
       <div className="amx-talon-papel">
         {fijo ? (
           <div className="amx-talon-resumen">
-            <span className="amx-talon-mini">Precio {fuente}{fecha && <span className="amx-talon-mini-fecha"> · {fecha}</span>}</span>
+            <span className="amx-talon-mini">{ultimoConocido ? 'Último precio' : 'Precio'} {fuente}{fecha && <span className="amx-talon-mini-fecha"> · {fecha}</span>}</span>
             <span className="amx-talon-cifra">{String(precio || '').replace(' MXN', '')}</span>
           </div>
         ) : (
           <React.Fragment>
             <div className="amx-talon-cab"><span>Comprobante de precio</span><span>Con IVA</span></div>
             <span className="amx-talon-cifra">{precio}</span>
+            <NotaErrata historial={historial} />
+            {ultimoConocido &&
+              <span className="amx-sello amx-sello--restr amx-talon-sello">Último precio conocido</span>}
             <dl className="amx-talon-datos">
               <dt>Fuente</dt><dd>{fuente}</dd>
               {fecha && <React.Fragment><dt>Fecha</dt><dd>{fecha}</dd></React.Fragment>}
@@ -2168,6 +2234,7 @@ function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fi
           <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
           {enComparacion ? 'En comparación' : 'Comparar'}
         </button>
+        {fijo && <NotaErrata historial={historial} />}
       </div>
     </div>
   );

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Parser de inventarios DCAM/OTCA de "Armado en México".
 
-Detecta el formato solo y extrae [{idx, name, qty, priceN}].
+Detecta el formato solo y extrae [{idx, name, qty, priceN}] (+ desc en DCAM).
 Uso:  python3 parse_pdf.py <ruta.pdf> [--json salida.json]
 
 - DCAM (SEDENA): tabla posicional. precio x>505, existencia 440<x<500,
   nombre/descripcion x<200; precio+existencia comparten la fila 'y' del nombre corto.
+  desc = la descripcion larga bajo el nombre corto, aunque se derrame a la pagina
+  siguiente. Es lo unico que distingue dos renglones con el MISMO nombre corto.
 - OTCA (anexo Monterrey): columnas apiladas DESCRIPCIÓN / EXISTENCIA / PRECIO.
   Por item: texto(desc) -> entero(existencia) -> "$ numero"(precio).
 """
@@ -14,7 +16,7 @@ from collections import defaultdict, Counter
 import fitz  # PyMuPDF
 
 PRICE = re.compile(r'^\d{1,3}(?:,\d{3})*\.\d{2}$')
-DCAM_HDR = ("SECRETARIA", "DIRECCION DE COMERCIALIZACION", "EXISTENCIA DE ARMAS",
+DCAM_HDR = ("SECRETARIA", "DIRECCION DE COMERCIALIZACION", "EXISTENCIA DE ",  # ARMAS/MUNICIONES/ACCESORIOS
             "LAS EXISTENCIAS", "LA ADQUISIC", "52 DE LA LEY", "al cierre",
             "Descripción", "Existencia", "Precio en")
 
@@ -38,8 +40,12 @@ def _rows(page):
         L.append((y, x0, " ".join(t[4] for t in sorted(v, key=lambda t: t[0]))))
     prices = [(y, t) for y, x, t in L if x > 505 and PRICE.match(t.strip())]
     qtys = [(y, t) for y, x, t in L if 440 < x < 500 and INT.fullmatch(t.strip())]
-    descs = [(y, t) for y, x, t in L if x < 200 and not is_hdr(t) and t.strip()]
-    return prices, qtys, descs
+    # columna Descripcion entera (sin encabezado ni el numero de pagina del pie, y~767;
+    # por posicion: un codigo suelto como "75" o "23715" es texto de la descripcion)
+    left = sorted((y, x, t) for y, x, t in L
+                  if x < 440 and y < 755 and t.strip() and not is_hdr(t))
+    descs = [(y, t) for y, x, t in left if x < 200]
+    return prices, qtys, descs, left
 
 
 def parse_dcam(doc):
@@ -50,19 +56,30 @@ def parse_dcam(doc):
     # que se derrame justo sobre el renglon del precio.
     pages = [_rows(page) for page in doc]
     off = Counter()
-    for prices, _q, descs in pages:
+    for prices, _q, descs, _l in pages:
         for py, _pt in prices:
             if descs:
                 off[round(min(descs, key=lambda e: abs(e[0] - py))[0] - py, 1)] += 1
     dy = off.most_common(1)[0][0] if off else 0.0
 
-    recs = []
-    for prices, qtys, descs in pages:
-        for py, pt in prices:
+    recs, pos = [], []
+    for pn, (prices, qtys, descs, _l) in enumerate(pages):
+        for py, pt in sorted(prices):
             q = min(qtys, key=lambda e: abs(e[0] - py))[1] if qtys else '0'
-            nm = min(descs, key=lambda e: abs(e[0] - (py + dy)))[1] if descs else '?'
+            ny, nm = min(descs, key=lambda e: abs(e[0] - (py + dy))) if descs else (py, '?')
             recs.append({"name": nm.strip(), "qty": int(q.replace(",", "")),
                          "priceN": float(pt.replace(",", ""))})
+            pos.append((pn, ny))
+    # Descripcion larga: lo que hay entre el nombre corto y el siguiente, cruzando
+    # paginas. Sobre cada nombre hay una linea en negrita (casi siempre vacia; a veces
+    # "(Venta exclusiva para Oficiales...)") que llega a ~13 pt por encima y se encima
+    # con el nombre: el corte a 14 pt la deja fuera de la descripcion anterior.
+    lines = [(pn, y, t) for pn, pg in enumerate(pages) for y, _x, t in pg[3]]
+    for i, r in enumerate(recs):
+        ini = pos[i]
+        fin = (pos[i + 1][0], pos[i + 1][1] - 14) if i + 1 < len(recs) else (len(pages), 0)
+        r["desc"] = re.sub(r'\s+', ' ', " ".join(
+            t for pn, y, t in lines if (ini[0], ini[1] + 1) < (pn, y) < fin)).strip()
     return recs
 
 
@@ -117,7 +134,7 @@ def main():
     out = {"formato": fmt, "paginas": doc.page_count, "total": len(recs), "items": recs}
     if "--json" in sys.argv:
         dest = sys.argv[sys.argv.index("--json") + 1]
-        json.dump(out, open(dest, "w"), ensure_ascii=False, indent=0)
+        json.dump(out, open(dest, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
         print(f"[{fmt}] {len(recs)} renglones -> {dest}")
     else:
         print(f"# formato={fmt} paginas={doc.page_count} renglones={len(recs)}")
