@@ -29,7 +29,7 @@ resembrar D1**.
    viejo: `git rebase --onto origin/main <base-vieja> <rama>` antes de empujar.
 2. **Verifica antes de commitear:**
    ```bash
-   npm run build                                              # 322 páginas · sitemap 317
+   npm run build                                              # 321 páginas · sitemap 317
    node .claude/skills/conciliar-inventario/scripts/auditar.js  # sin hallazgos
    ```
 3. **`git add` con rutas explícitas, NUNCA `git add -A`.** Lo generado ya va entero

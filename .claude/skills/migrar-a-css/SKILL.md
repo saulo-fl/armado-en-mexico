@@ -38,7 +38,7 @@ Mover una propiedad al CSS significa **borrarla del objeto `style`**, no duplica
 
 ### 1 · Elegir la primitiva, no la pantalla
 
-Las de `ui.jsx` propagan a las 322 páginas: `ArmaCard`, `FilterChip`, `AvailBadge`,
+Las de `ui.jsx` propagan a las 321 páginas: `ArmaCard`, `FilterChip`, `AvailBadge`,
 `TacticalCorners`, `SectionHeader`, `PriceLevel`, `AppHeader`, `TopNav`,
 `BottomNav`, `HCarousel`, `SpecRow`, `MiniSpec`, `Disclosure`, `CompareFloat`.
 
@@ -101,5 +101,5 @@ Y a ojo, en este orden:
   propósito. Si añades una: la regla, el `?v=`, y su línea en
   `scripts/copiar-estaticos.mjs`, que copia `estilo.css` **por nombre** a `out/`.
 - **El prerender no estorba.** `emitir()` usa `index.html` como shell y solo sustituye seis
-  marcas; un `<link>` viaja solo a las 322 páginas. No hay que tocar el script para eso.
+  marcas; un `<link>` viaja solo a las 321 páginas. No hay que tocar el script para eso.
 - **No toques** el orden de carga de scripts ni los `integrity` de unpkg.

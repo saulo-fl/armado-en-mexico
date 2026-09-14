@@ -112,8 +112,6 @@ window.AdminLogin = AdminLogin;
 // ════════════════════════════════════════════════════════════════
 function AdminShell({ onLogout, children, tab, setTab, stats }) {
   const tabs = [
-    { id: 'queue',      label: 'COLA',         badge: stats.pending },
-    { id: 'suggests',   label: 'SUGERENCIAS',  badge: stats.suggestions },
     { id: 'reviews',    label: 'RESEÑAS',      badge: stats.reviews },
     { id: 'reports',    label: 'DENUNCIAS',    badge: stats.reports },
     { id: 'catalog',    label: 'CATÁLOGO',     badge: null },
@@ -209,151 +207,6 @@ function AdminShell({ onLogout, children, tab, setTab, stats }) {
   );
 }
 window.AdminShell = AdminShell;
-
-// ════════════════════════════════════════════════════════════════
-// QUEUE — Cola de aprobación
-// ════════════════════════════════════════════════════════════════
-function QueueTab({ onEdit }) {
-  const [pending, setPending] = useState(window.Store.getPending());
-  const [rejected, setRejected] = useState(window.Store.getRejected());
-  const [showRejected, setShowRejected] = useState(false);
-  const refresh = () => { setPending(window.Store.getPending()); setRejected(window.Store.getRejected()); };
-  useEffect(() => window.Store.onChange(refresh), []);
-
-  const approve = (p) => {
-    if (!confirm(`¿Aprobar "${p.nombre}" y publicar en el catálogo?`)) return;
-    window.Store.approvePending(p.id);
-    refresh();
-  };
-  const reject = (p) => {
-    const reason = prompt('Razón del rechazo (opcional):', '');
-    if (reason === null) return;
-    window.Store.rejectPending(p.id, reason);
-    refresh();
-  };
-
-  return (
-    <div>
-      <SectionHead title="Cola de envíos" sub={`${pending.length} propuestas de usuarios esperando revisión`} action={
-        <button onClick={() => setShowRejected(s => !s)} style={btnGhost}>
-          {showRejected ? '▼ Ocultar rechazados' : `▶ Ver rechazados (${rejected.length})`}
-        </button>
-      }/>
-
-      {pending.length === 0 ? (
-        <Empty icon="✓" title="Sin envíos pendientes" sub="Cuando un usuario proponga un arma desde la app pública, aparecerá aquí." />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {pending.map(p => (
-            <SubmissionCard key={p.id} sub={p}
-              onApprove={() => approve(p)}
-              onReject={() => reject(p)}
-              onEdit={() => onEdit(p, 'pending')} />
-          ))}
-        </div>
-      )}
-
-      {showRejected && rejected.length > 0 && (
-        <div style={{ marginTop: 32 }}>
-          <SectionHead title="Rechazados" sub={`${rejected.length} envíos rechazados (histórico)`} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {rejected.map(r => (
-              <div key={r.id} style={{
-                background: P.bgCard,
-                border: `1px solid ${P.border}`,
-                padding: '12px 14px',
-                opacity: 0.7,
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
-                  <div>
-                    <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 14, textTransform: 'uppercase' }}>{r.nombre}</div>
-                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textMuted, marginTop: 2 }}>
-                      Por {r.submitterName} · {new Date(r.rejectedAt).toLocaleDateString()}
-                      {r.rejectionReason && <span style={{ color: P.red }}> · "{r.rejectionReason}"</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-window.QueueTab = QueueTab;
-
-function SubmissionCard({ sub, onApprove, onReject, onEdit }) {
-  return (
-    <div style={{
-      background: P.bgCard,
-      border: `1px solid ${P.amber}`,
-      padding: 18,
-      display: 'grid',
-      gridTemplateColumns: '120px 1fr auto',
-      gap: 18, alignItems: 'flex-start',
-      position: 'relative',
-    }}>
-      <TC color={P.amber} />
-      <div style={{
-        height: 100,
-        background: `radial-gradient(circle, ${P.bgElev} 0%, ${P.bg} 100%)`,
-        border: `1px solid ${P.border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden', position: 'relative',
-      }}>
-        <img src={sub.img || window.armaPlaceholder(sub)}
-          onError={(e) => { e.target.src = window.armaPlaceholder(sub); e.target.onerror = null; }}
-          style={{ maxWidth: '90%', maxHeight: '90%', filter: 'grayscale(0.2) contrast(1.1)' }} />
-      </div>
-      <div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 9, color: P.amber,
-          letterSpacing: '0.18em', textTransform: 'uppercase',
-          marginBottom: 4,
-        }}>NUEVO ENVÍO · {new Date(sub.submittedAt).toLocaleString('es-MX')}</div>
-        <div style={{
-          fontFamily: 'Oswald, sans-serif',
-          fontWeight: 700, fontSize: 20,
-          color: P.text, textTransform: 'uppercase',
-          letterSpacing: '0.02em',
-          marginBottom: 4,
-        }}>{sub.nombre || '(sin nombre)'}</div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 11, color: P.textDim,
-          marginBottom: 10,
-        }}>
-          {sub.marca || '?'} · {sub.tipo || '?'} · {sub.calibre || '?'} · {sub.pais || '?'}
-        </div>
-
-        <div style={{
-          background: P.bg,
-          border: `1px solid ${P.border}`,
-          padding: 10,
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 10, color: P.textDim,
-          lineHeight: 1.6,
-        }}>
-          <div style={{ color: P.amber, marginBottom: 4 }}>━ SUBMITTER</div>
-          <div><b style={{ color: P.text }}>{sub.submitterName || '(anónimo)'}</b></div>
-          {sub.submitterEmail && <div>✉ {sub.submitterEmail}</div>}
-          {sub.submitterMessage && (
-            <div style={{ marginTop: 6, paddingTop: 6, borderTop: `1px dashed ${P.border}`, color: P.textDim }}>
-              "{sub.submitterMessage}"
-            </div>
-          )}
-        </div>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 140 }}>
-        <button onClick={onApprove} style={btnPrimary}>✓ Aprobar</button>
-        <button onClick={onEdit} style={btnSecondary}>✎ Editar y aprobar</button>
-        <button onClick={onReject} style={btnDanger}>✕ Rechazar</button>
-      </div>
-    </div>
-  );
-}
 
 // ════════════════════════════════════════════════════════════════
 // CATALOG — Tabla de armas
@@ -465,11 +318,10 @@ function CatalogTab({ onEdit }) {
 window.CatalogTab = CatalogTab;
 
 // ════════════════════════════════════════════════════════════════
-// FORM — Editor de arma (usado para crear, editar, y aprobar pending)
+// FORM — Editor de arma (usado para crear y editar)
 // ════════════════════════════════════════════════════════════════
-function ArmaForm({ arma, mode, source, onSave, onCancel }) {
-  // mode: 'new' | 'edit' | 'pending'
-  // source: pending sub object (when mode === 'pending')
+function ArmaForm({ arma, mode, onSave, onCancel }) {
+  // mode: 'new' | 'edit'
   const [f, setF] = useState(() => {
     const base = arma || {};
     return {
@@ -554,13 +406,7 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
       out.priceExact = latest.price;
       out.priceManualId = latest.manualId || '';
     }
-    let savedArma;
-    if (mode === 'pending') {
-      // aprobar la submission con overrides
-      savedArma = window.Store.approvePending(source.id, out);
-    } else {
-      savedArma = window.Store.upsertArma(out);
-    }
+    const savedArma = window.Store.upsertArma(out);
     // Persistir historial curado (sobrescribe cualquier auto-registro)
     if (savedArma && savedArma.id) {
       window.Store.setPriceHistory(savedArma.id, cleanHist);
@@ -588,7 +434,7 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
         }}>
           <div>
             <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: P.amber, letterSpacing: '0.2em' }}>
-              {mode === 'new' ? '＋ NUEVA ARMA' : mode === 'pending' ? '◆ APROBAR ENVÍO' : '✎ EDITAR ARMA'}
+              {mode === 'new' ? '＋ NUEVA ARMA' : '✎ EDITAR ARMA'}
             </div>
             <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 22, textTransform: 'uppercase' }}>
               {f.nombre || 'Sin nombre'}
@@ -809,13 +655,11 @@ function ArmaForm({ arma, mode, source, onSave, onCancel }) {
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10,
         }}>
           <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textMuted }}>
-            {mode === 'pending' ? '◆ Al guardar, se publica en el catálogo y se borra de la cola.' : '◆ Los cambios persisten en este navegador (localStorage).'}
+            ◆ Los cambios persisten en este navegador (localStorage).
           </span>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={onCancel} style={btnGhost}>Cancelar</button>
-            <button onClick={save} style={btnPrimary}>
-              {mode === 'pending' ? '✓ Aprobar y publicar' : '💾 Guardar'}
-            </button>
+            <button onClick={save} style={btnPrimary}>💾 Guardar</button>
           </div>
         </div>
       </div>
@@ -1074,8 +918,6 @@ function SettingsTab() {
           <p style={txtMuted}>Datos guardados localmente (localStorage). Para sincronizar entre dispositivos, exporta JSON regularmente.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8, fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textDim }}>
             <div>◆ Armas en catálogo: <b style={{ color: P.amber }}>{window.Store.getArmas().length}</b></div>
-            <div>◆ Envíos pendientes: <b style={{ color: P.amber }}>{window.Store.getPending().length}</b></div>
-            <div>◆ Sugerencias pendientes: <b style={{ color: P.amber }}>{window.Store.getSuggestions().length}</b></div>
             <div>◆ Promos activas: <b style={{ color: P.amber }}>{window.Store.getPromos().length}</b></div>
           </div>
         </Card>
@@ -1257,11 +1099,9 @@ const txtMuted = {
 // ════════════════════════════════════════════════════════════════
 function AdminApp() {
   const [authed, setAuthed] = useState(window.Store.isLoggedIn());
-  const [tab, setTab] = useState('queue');
+  const [tab, setTab] = useState('reviews');
   const [editing, setEditing] = useState(null);
   const leerStats = () => ({
-    pending: window.Store.getPending().length,
-    suggestions: window.Store.getSuggestions().length,
     manuales: window.Store.getManuales().length,
     reviews: window.Store.getReviewQueue().length,
     reports: window.Store.getReports().length,
@@ -1277,11 +1117,9 @@ function AdminApp() {
       onLogout={() => { window.Store.logout(); setAuthed(false); }}
       tab={tab} setTab={setTab} stats={stats}
     >
-      {tab === 'queue'    && <QueueTab onEdit={(p, mode) => setEditing({ arma: p, mode, source: p })} />}
-      {tab === 'suggests' && <SuggestionsTab />}
       {tab === 'reviews'  && <ReviewsTab />}
       {tab === 'reports'  && <ReportsTab />}
-      {tab === 'catalog'  && <CatalogTab onEdit={(a, mode) => setEditing({ arma: a, mode, source: null })} />}
+      {tab === 'catalog'  && <CatalogTab onEdit={(a, mode) => setEditing({ arma: a, mode })} />}
       {tab === 'manuales' && <ManualesTab />}
       {tab === 'favorites'&& <FavoritesTab />}
       {tab === 'bulk'     && <BulkImportTab />}
@@ -1293,7 +1131,6 @@ function AdminApp() {
       {editing && <ArmaForm
         arma={editing.arma}
         mode={editing.mode}
-        source={editing.source}
         onSave={() => setEditing(null)}
         onCancel={() => setEditing(null)}
       />}
@@ -1303,115 +1140,10 @@ function AdminApp() {
 window.AdminApp = AdminApp;
 
 // ════════════════════════════════════════════════════════════════
-// SUGGESTIONS TAB — cola de sugerencias de cambios a fichas
-// ════════════════════════════════════════════════════════════════
-function SuggestionsTab() {
-  const [items, setItems] = useState(window.Store.getSuggestions());
-  const refresh = () => setItems(window.Store.getSuggestions());
-  useEffect(() => window.Store.onChange(refresh), []);
-
-  const accept = (s) => {
-    const arma = window.findArma(s.armaId);
-    if (!arma) { alert('El arma referenciada ya no existe.'); return; }
-    if (s.field === 'precio') {
-      if (!confirm(`¿Actualizar precio de "${arma.nombre}" a "${s.suggestedValue}"? Se guardará el anterior en el historial.`)) return;
-      arma.priceExact = s.suggestedValue;
-      window.Store.upsertArma(arma);
-      window.Store.deleteSuggestion(s.id);
-      alert('✓ Precio actualizado y registrado en historial.');
-      return;
-    }
-    if (s.field === 'historia') {
-      if (!confirm(`¿Reemplazar la historia de "${arma.nombre}"?`)) return;
-      arma.historia = s.suggestedValue;
-      window.Store.upsertArma(arma);
-      window.Store.deleteSuggestion(s.id);
-      return;
-    }
-    alert('Esta sugerencia requiere edición manual. Abre la ficha del arma en la tab CATÁLOGO y aplica el cambio.');
-  };
-
-  const reject = (s) => {
-    if (!confirm('¿Descartar esta sugerencia?')) return;
-    window.Store.deleteSuggestion(s.id);
-  };
-
-  return (
-    <div>
-      <SectionHead title="Sugerencias de cambios" sub={`${items.length} sugerencias a fichas existentes esperando revisión`} />
-      {items.length === 0 ? (
-        <Empty icon="✓" title="Sin sugerencias pendientes" sub="Cuando un usuario sugiera un cambio a una ficha desde la app pública, aparecerá aquí." />
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {items.map(s => (
-            <div key={s.id} style={{
-              background: P.bgCard, border: `1px solid ${P.amber}`,
-              padding: 18, position: 'relative',
-            }}>
-              <TC color={P.amber} />
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 140px', gap: 18, alignItems: 'flex-start',
-              }}>
-                <div>
-                  <div style={{
-                    fontFamily: 'JetBrains Mono, monospace',
-                    fontSize: 9, color: P.amber,
-                    letterSpacing: '0.18em', textTransform: 'uppercase',
-                    marginBottom: 4,
-                  }}>✎ SUGERENCIA · {new Date(s.submittedAt).toLocaleString('es-MX')} · CAMPO: {s.field}</div>
-                  <div style={{
-                    fontFamily: 'Oswald, sans-serif',
-                    fontWeight: 700, fontSize: 18,
-                    color: P.text, textTransform: 'uppercase',
-                    marginBottom: 8,
-                  }}>{s.armaNombre} <span style={{ color: P.textDim, fontSize: 12 }}>· #{String(s.armaId).padStart(3,'0')}</span></div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 10 }}>
-                    <div style={{ background: P.bg, border: `1px solid ${P.border}`, padding: 10 }}>
-                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: P.textMuted, letterSpacing: '0.15em', marginBottom: 4 }}>VALOR ACTUAL</div>
-                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.text, lineHeight: 1.5 }}>{s.currentValue || '(no proporcionado)'}</div>
-                    </div>
-                    <div style={{ background: P.bg, border: `1px solid ${P.amber}`, padding: 10 }}>
-                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: P.amber, letterSpacing: '0.15em', marginBottom: 4 }}>SUGERIDO</div>
-                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.text, lineHeight: 1.5 }}>{s.suggestedValue}</div>
-                    </div>
-                  </div>
-
-                  {s.source && (
-                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textDim, marginBottom: 6 }}>
-                      <b style={{ color: P.amber }}>FUENTE:</b> {s.source}
-                    </div>
-                  )}
-                  {s.notes && (
-                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, color: P.textDim, marginBottom: 6, fontStyle: 'italic' }}>
-                      "{s.notes}"
-                    </div>
-                  )}
-                  <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: P.textMuted, marginTop: 8 }}>
-                    ━ POR <b style={{ color: P.text }}>{s.submitterName}</b>
-                    {s.submitterEmail && <span> · ✉ {s.submitterEmail}</span>}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <button onClick={() => accept(s)} style={btnPrimary}>✓ Aplicar</button>
-                  <button onClick={() => reject(s)} style={btnDanger}>✕ Descartar</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-window.SuggestionsTab = SuggestionsTab;
-
-// ════════════════════════════════════════════════════════════════
 // RESEÑAS — moderación previa. NADA se publica sin pasar por aquí.
 // Aprobar mueve la reseña al dominio público `reviews` RETIRANDO el correo
 // (lo hace Store.approveReview); rechazar la archiva en `rejected` con su
-// motivo, como las propuestas de arma — no se borra, para poder revisar una
+// motivo — no se borra, para poder revisar una
 // apelación después.
 // ════════════════════════════════════════════════════════════════
 function ReviewsTab() {
@@ -1848,7 +1580,6 @@ function PromoEditor({ promo, onSave, onCancel }) {
             <select value={f.ctaTarget} onChange={(e) => set('ctaTarget', e.target.value)} style={selStyle()}>
               <option value="catalog">Catálogo</option>
               <option value="legal">Legalidad</option>
-              <option value="submit">Proponer arma</option>
               <option value="faq">FAQ</option>
               <option value="about">Acerca</option>
               <option value="compare">Comparador</option>

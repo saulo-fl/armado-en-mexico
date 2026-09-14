@@ -293,7 +293,6 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
     { id: 'faq',     label: 'FAQ' },
     { id: 'about',   label: 'ACERCA' },
     { id: 'menu',    label: 'MÁS', dropdown: true },
-    { id: 'submit',  label: '＋ PROPONER', accent: true },
   ];
   return (
     <div className="amx-sobre-verde" style={{
@@ -372,17 +371,16 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
           }
           return (
             <button key={it.id} onClick={() => onNav(it.id)} style={{
-              background: it.accent ? (active ? '#DDD5C4' : 'transparent') : 'none',
-              border: it.accent ? `1px solid ${'#DDD5C4'}` : 'none', cursor: 'pointer',
-              padding: it.accent ? '8px 12px' : '8px 14px',
+              background: 'none',
+              border: 'none', cursor: 'pointer',
+              padding: '8px 14px',
               fontFamily: 'Archivo, sans-serif',
               fontSize: 14, fontWeight: 600,
               letterSpacing: '0.12em', textTransform: 'uppercase',
-              color: active ? (it.accent ? '#000' : '#DDD5C4') : (it.accent ? '#DDD5C4' : PALETTE.sobreMarcaDim),
-              borderBottom: active && !it.accent ? `2px solid ${'#DDD5C4'}` : (it.accent ? `1px solid ${'#DDD5C4'}` : '2px solid transparent'),
+              color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
+              borderBottom: active ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
               position: 'relative',
               transition: 'color 0.15s',
-              marginLeft: it.accent ? 8 : 0,
               whiteSpace: 'nowrap',
             }}>
               {it.label}
@@ -916,7 +914,9 @@ function PieDeSitio({ onNav }) {
   );
 
   return (
-    <footer className="amx-sobre-verde" style={{ marginTop: 32 }}>
+    // `amx-pie-sitio` es la seña del pie para quien lo busca desde fuera (el talón
+    // fijo de la ficha): hay otros <footer> en la página, como el de cada opinión.
+    <footer className="amx-sobre-verde amx-pie-sitio" style={{ marginTop: 32 }}>
       {/* Línea tricolor — DESIGN.md §6b la autoriza expresamente («líneas
           tricolor»), y es lo único mexicano que se puede usar sin caer en
           iconografía oficial. Va SOBRE el lienzo claro, no dentro de la banda:
@@ -1099,7 +1099,10 @@ window.armaSinFoto = armaSinFoto;
 //              escritos del lado izquierdo en el folder».
 //   'sello'  — solo el sello de legalidad. La tarjeta, donde el nombre y los
 //              datos ya están mecanografiados en el folder de al lado.
-function ArmaPolaroid({ arma, pie = 'rotulo' }) {
+// `selloSinFoto` (la ficha de arma, 13-sep-2026): sin fotografía, en vez de la
+// leyenda va el sello «FOTOGRAFÍA PENDIENTE» sobre la silueta. Por defecto no
+// cambia nada, porque las tarjetas y el destacado del Home usan la leyenda.
+function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
   // El fallback cubre los dos casos: el arma que nunca tuvo foto y el .webp
   // que existe en `data.js` pero no llega (404, red caída, formato no
   // soportado). En ambos se ve lo mismo, que es lo que hace que el `alt` y el
@@ -1127,7 +1130,9 @@ function ArmaPolaroid({ arma, pie = 'rotulo' }) {
             <div className="amx-polaroid-silueta" role="img"
               aria-label={'Silueta de ' + tipoSil + '. Sin fotografía en el expediente.'}
               style={{ '--silueta-forma': `url(imagenes/silueta-${tipoSil}.webp)` }} />
-            <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>
+            {selloSinFoto
+              ? <span className="amx-sello amx-sello--pendiente" aria-hidden="true">Fotografía pendiente</span>
+              : <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>}
           </div>
         ) : (
           <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high"
@@ -1213,17 +1218,20 @@ const SELLOS = {
   ejercito:  { texto: 'EXCLUSIVO', tono: 'restr' },
 };
 
-function SelloLegal({ avail, etiqueta, grande = false }) {
+function SelloLegal({ avail, etiqueta, grande = false, className = '' }) {
   const s = SELLOS[avail] || SELLOS.dcam;
   return (
     // El nombre accesible es la etiqueta LARGA de los datos («Uso civil —
     // DCAM»), no la palabra del sello: fuera del contexto visual del folder,
     // «CIVIL» a secas no dice de qué habla.
-    <span className={'amx-sello amx-sello--' + s.tono + (grande ? ' amx-sello--grande' : '')}
+    <span className={'amx-sello amx-sello--' + s.tono + (grande ? ' amx-sello--grande' : '') + (className ? ' ' + className : '')}
       role="img" aria-label={etiqueta || s.texto}>{s.texto}</span>
   );
 }
 window.SelloLegal = SelloLegal;
+// La palabra y el tono de cada categoría, para quien estampa sin el componente
+// (la banda de la hoja de oficio, las etiquetas de la vitrina).
+window.SELLOS_LEGALES = SELLOS;
 
 // ──────────────────────────────────────────────────────────────
 // ARMA EXPEDIENTE — el formato ÚNICO de tarjeta (Home y Arsenal)
@@ -1331,35 +1339,44 @@ function ArmaDestacada({ arma, onOpen }) {
 window.ArmaDestacada = ArmaDestacada;
 
 // ──────────────────────────────────────────────────────────────
-// FICHA TÉCNICA — la columna derecha del folder
-// Reusa la tabla `.specs` que ya estaba bien resuelta (zebra + hairline, `th`
-// en versalitas, `td` en mono con tabular-nums). Los seis campos son los que
-// pide §4.3; `mecanismo` va como prosa bajo el título y `tipo` en la pestaña
-// del folder, así que aquí serían una tercera copia.
+// FICHA TÉCNICA — la ficha de fichero del expediente (13-sep-2026)
+// «La ficha de información va con estilo de ficha bibliográfica antigua»
+// (tablero de Saulo). Cartulina con renglón rojo, rayado y perforación; cada
+// dato en su renglón, con puntos guía hasta el valor.
+// La cabecera lleva la MARCA a la derecha y no un número de ficha: un «No. 040»
+// sacado del id sería el folio `AR-####` que Saulo retiró el 7-sep-2026 —un
+// código que no corresponde a ningún registro real—.
+// `mecanismo` entra aquí y ya no bajo el título: dicho una sola vez.
 // ──────────────────────────────────────────────────────────────
 function FichaTecnica({ arma }) {
   const filas = [
     ['Calibre',   arma.calibre],
     ['Capacidad', arma.capacidad],
+    ['Mecanismo', arma.mecanismo],
     ['Longitud',  arma.longitud],
     ['Peso',      arma.peso],
     ['Origen',    arma.pais],
     ['Año',       arma.anio],
   ].filter(([, v]) => v != null && v !== '');
   return (
-    <div className="amx-ficha">
-      <div className="amx-ficha-rotulo">Ficha técnica</div>
-      <div style={{ overflowX: 'auto' }}>
-        {/* El rótulo es un div, no un `caption`, para que la zebra empiece en
-            la primera fila de datos: el nombre accesible de la tabla lo pone
-            el aria-label, que además dice de qué arma es. */}
-        <table className="specs" aria-label={'Ficha técnica de ' + arma.nombre}>
-          <tbody>
-            {filas.map(([k, v]) => <tr key={k}><th scope="row">{k}</th><td>{v}</td></tr>)}
-          </tbody>
-        </table>
+    <section className="amx-papel amx-fichero" style={{ '--giro-papel': '.35deg' }}
+      aria-label={'Ficha técnica de ' + arma.nombre}>
+      <div className="amx-fichero-carton">
+        <div className="amx-fichero-cab">
+          <h2 className="amx-papel-tit">Ficha técnica</h2>
+          <span>{arma.marca}</span>
+        </div>
+        <dl className="amx-fichero-lista">
+          {filas.map(([k, v]) => (
+            <div key={k} className="amx-fichero-fila">
+              <dt>{k}</dt>
+              <span className="amx-fichero-guia" aria-hidden="true" />
+              <dd>{v}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
-    </div>
+    </section>
   );
 }
 window.FichaTecnica = FichaTecnica;
@@ -1887,7 +1904,14 @@ function amxFechaCorta(f) {
 }
 window.amxFechaCorta = amxFechaCorta;
 
-function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
+// `tintas` (13-sep-2026): la ficha de arma dibuja la gráfica sobre papel
+// milimétrico, que es un objeto y no sigue al tema. Con PALETTE, en oscuro los
+// rótulos salían en tinta clara sobre el papel claro. Sin `tintas` no cambia.
+function PriceChart({ history, color = PALETTE.amber, height = 150, tintas }) {
+  const t = Object.assign({
+    baja: PALETTE.green, sube: PALETTE.redHi, igual: PALETTE.textMuted,
+    eje: PALETTE.border, fondo: PALETTE.bg, texto: PALETTE.textDim, texto2: PALETTE.textMuted,
+  }, tintas || {});
   const uid = React.useId().replace(/:/g, '');
   const wrapRef = React.useRef(null);
   const [w, setW] = React.useState(640);
@@ -1946,17 +1970,17 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
   // Color POR TRAMO: verde si el precio bajó entre esos dos inventarios, rojo
   // si subió. El color no es el único canal — el <desc>, el pie de la sección
   // y la lista de precios dicen lo mismo en texto (WCAG 1.4.1).
-  const colorTramo = (a, b) => (b.v < a.v ? PALETTE.green : b.v > a.v ? PALETTE.redHi : PALETTE.textMuted);
+  const colorTramo = (a, b) => (b.v < a.v ? t.baja : b.v > a.v ? t.sube : t.igual);
   const tramos = xy.slice(1).map((c, i) => ({
     d: `M${xy[i].x.toFixed(1)},${xy[i].y.toFixed(1)} L${c.x.toFixed(1)},${c.y.toFixed(1)}`,
     color: colorTramo(xy[i].p, c.p)
   }));
-  const bajadas = tramos.filter((t) => t.color === PALETTE.green).length;
-  const subidas = tramos.filter((t) => t.color === PALETTE.redHi).length;
+  const bajadas = tramos.filter((tr) => tr.color === t.baja).length;
+  const subidas = tramos.filter((tr) => tr.color === t.sube).length;
 
   const ini = pts[0], fin = pts[pts.length - 1];
   const deltaPct = ini.v ? ((fin.v - ini.v) / ini.v) * 100 : 0;
-  const colorFin = fin.v < ini.v ? PALETTE.green : fin.v > ini.v ? PALETTE.redHi : color;
+  const colorFin = fin.v < ini.v ? t.baja : fin.v > ini.v ? t.sube : color;
   const plural = (n, s1, s2) => `${n} ${n === 1 ? s1 : s2}`;
   const resumen = `${pts.length} registros entre ${amxFechaCorta(ini.date)} y ${amxFechaCorta(fin.date)}: ` +
     `de ${ini.price} a ${fin.price}, ${deltaPct >= 0 ? '+' : '−'}${Math.abs(deltaPct).toFixed(1)}%. ` +
@@ -1970,7 +1994,7 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
   // irregular, y aquí fallaría en silencio dejando el texto en negro por
   // defecto sobre el lienzo oscuro.
   const HALO = { paintOrder: 'stroke', fontVariantNumeric: 'tabular-nums',
-                 stroke: PALETTE.bg, strokeWidth: 3.5 };
+                 stroke: t.fondo, strokeWidth: 3.5 };
 
   return (
     <div ref={wrapRef} style={{ width: '100%' }}>
@@ -1987,10 +2011,10 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
             <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
           </linearGradient>
         </defs>
-        <line x1={x0} y1={y1} x2={x1} y2={y1} style={{ stroke: PALETTE.border }} strokeWidth="1" />
+        <line x1={x0} y1={y1} x2={x1} y2={y1} style={{ stroke: t.eje }} strokeWidth="1" />
         <path d={area} fill={`url(#pcG${uid})`} />
-        {tramos.map((t, i) =>
-          <path key={i} d={t.d} fill="none" style={{ stroke: t.color }} strokeWidth="2.5"
+        {tramos.map((tr, i) =>
+          <path key={i} d={tr.d} fill="none" style={{ stroke: tr.color }} strokeWidth="2.5"
             strokeLinejoin="round" strokeLinecap="round" />
         )}
         {xy.map((c, i) => {
@@ -1999,21 +2023,21 @@ function PriceChart({ history, color = PALETTE.amber, height = 150 }) {
           const cc = tramos[Math.max(0, i - 1)].color;
           return (
             <circle key={i} cx={c.x} cy={c.y} r={ext ? 4.5 : 3}
-              style={{ fill: ext ? cc : PALETTE.bg, stroke: cc }} strokeWidth="2" />
+              style={{ fill: ext ? cc : t.fondo, stroke: cc }} strokeWidth="2" />
           );
         })}
         <text x={x0} y={15} textAnchor="start"
           fontFamily={MONO} fontSize="13"
-          style={{ ...HALO, fill: PALETTE.textDim }}>{String(ini.price).replace(' MXN', '')}</text>
+          style={{ ...HALO, fill: t.texto }}>{String(ini.price).replace(' MXN', '')}</text>
         <text x={x1} y={15} textAnchor="end"
           fontFamily={MONO} fontSize="13" fontWeight="700"
           style={{ ...HALO, fill: colorFin }}>{String(fin.price).replace(' MXN', '')}</text>
         <text x={x0} y={height - 7} textAnchor="start"
           fontFamily={MONO} fontSize="12" letterSpacing="0.1em"
-          style={{ ...HALO, fill: PALETTE.textMuted }}>{amxFechaCorta(ini.date).toUpperCase()}</text>
+          style={{ ...HALO, fill: t.texto2 }}>{amxFechaCorta(ini.date).toUpperCase()}</text>
         <text x={x1} y={height - 7} textAnchor="end"
           fontFamily={MONO} fontSize="12" letterSpacing="0.1em"
-          style={{ ...HALO, fill: PALETTE.textMuted }}>{amxFechaCorta(fin.date).toUpperCase()}</text>
+          style={{ ...HALO, fill: t.texto2 }}>{amxFechaCorta(fin.date).toUpperCase()}</text>
       </svg>
     </div>
   );
@@ -2063,3 +2087,304 @@ function ThumbIcon({ up = true, size = 22 }) {
   );
 }
 window.ThumbIcon = ThumbIcon;
+
+// ══════════════════════════════════════════════════════════════
+// LA PAPELERÍA DEL EXPEDIENTE — primitivas de la ficha de arma
+// Rediseño del 13-sep-2026 (rama opus-5/red-fichas-de-armas). Viven aquí y no
+// en screens-2.jsx porque las fichas de accesorio y de munición van a portear
+// este mismo diseño: el talón, la tarjeta de almacén, el historial y la repisa
+// les sirven tal cual. La piel está en estilo.css, bloque «LA FICHA DE ARMA».
+// ══════════════════════════════════════════════════════════════
+
+// Fecha de un inventario (AAAA-MM-DD) en es-MX: «06 jul 2026». Vivía en
+// screens-2.jsx; sube aquí porque la usan el talón, el kárdex y el historial.
+function amxFmtManualDate(f) {
+  if (!f) return '';
+  const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
+  if (isNaN(d)) return String(f);
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+window.amxFmtManualDate = amxFmtManualDate;
+
+// ──────────────────────────────────────────────────────────────
+// CINTA DYMO — los títulos de sección fuera del folder
+// Cada letra lleva un salto de medio píxel, siempre el mismo para la misma
+// posición (nada aleatorio: el título no «tiembla» al re-renderizar). El
+// nombre accesible va entero en un span oculto; las letras sueltas se ocultan
+// al lector de pantalla, que si no las leería una por una.
+// ──────────────────────────────────────────────────────────────
+const DYMO_SALTOS = [0, -0.6, 0.4, -0.2, 0.7, -0.4, 0.2, -0.7, 0.5];
+
+function CintaDymo({ children, nivel = 2, id }) {
+  const texto = String(children == null ? '' : children);
+  const Tag = 'h' + nivel;
+  let n = 0;
+  return (
+    <Tag className="amx-dymo" id={id}>
+      <span className="amx-sr">{texto}</span>
+      <span aria-hidden="true">
+        {texto.split(' ').map((palabra, i) => (
+          <React.Fragment key={i}>
+            {i > 0 && ' '}
+            <span className="amx-dymo-palabra">
+              {Array.from(palabra).map((c) => {
+                const dy = DYMO_SALTOS[n++ % DYMO_SALTOS.length];
+                return <span key={n} className="amx-dymo-letra" style={{ '--dy': dy + 'px' }}>{c}</span>;
+              })}
+            </span>
+          </React.Fragment>
+        ))}
+      </span>
+    </Tag>
+  );
+}
+window.CintaDymo = CintaDymo;
+
+// ──────────────────────────────────────────────────────────────
+// TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
+// En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
+// casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
+// ──────────────────────────────────────────────────────────────
+function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef }) {
+  return (
+    <div ref={talonRef} className={'amx-talon' + (fijo ? ' amx-talon--fijo' : '')}>
+      <div className="amx-talon-papel">
+        {fijo ? (
+          <div className="amx-talon-resumen">
+            <span className="amx-talon-mini">Precio {fuente}{fecha && <span className="amx-talon-mini-fecha"> · {fecha}</span>}</span>
+            <span className="amx-talon-cifra">{String(precio || '').replace(' MXN', '')}</span>
+          </div>
+        ) : (
+          <React.Fragment>
+            <div className="amx-talon-cab"><span>Comprobante de precio</span><span>Con IVA</span></div>
+            <span className="amx-talon-cifra">{precio}</span>
+            <dl className="amx-talon-datos">
+              <dt>Fuente</dt><dd>{fuente}</dd>
+              {fecha && <React.Fragment><dt>Fecha</dt><dd>{fecha}</dd></React.Fragment>}
+            </dl>
+          </React.Fragment>
+        )}
+        <button type="button" className="amx-talon-casilla" aria-pressed={!!enComparacion} onClick={onComparar}>
+          <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
+          {enComparacion ? 'En comparación' : 'Comparar'}
+        </button>
+      </div>
+    </div>
+  );
+}
+window.TalonComprobante = TalonComprobante;
+
+// ──────────────────────────────────────────────────────────────
+// TARJETA DE ALMACÉN — existencias por sucursal (kárdex)
+// `filas`: [{ sigla, qty, manual, agotado }], la misma lista que ya calculaba
+// la ficha. Absorbe lo que iba en «Detalle de la fuente»: la referencia del
+// inventario, el aviso de dato histórico y el nivel de precio.
+// ──────────────────────────────────────────────────────────────
+function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio }) {
+  const lvl = Math.max(0, Math.min(5, Number(nivelPrecio) || 0));
+  return (
+    <section className="amx-papel amx-kardex" style={{ '--giro-papel': '-.4deg' }} aria-labelledby="amx-kardex-tit">
+      <div className="amx-kardex-carton">
+        <div className="amx-kardex-cab">
+          <h2 className="amx-papel-tit" id="amx-kardex-tit">Tarjeta de almacén</h2>
+          <small>Existencias por sucursal</small>
+        </div>
+        {referencia &&
+          <p className="amx-kardex-articulo"><span>Artículo · {sigla}</span>{referencia}</p>}
+        {filas.length > 0 ? (
+          <table className="amx-kardex-tabla">
+            <thead>
+              <tr><th scope="col">Sucursal</th><th scope="col" className="num">Exist.</th><th scope="col">Inventario</th><th scope="col"><span className="amx-sr">Documento</span></th></tr>
+            </thead>
+            <tbody>
+              {filas.map((b, i) => {
+                const aut = window.manualAutoridad ? window.manualAutoridad(b.manual) : null;
+                return (
+                  <tr key={b.sigla + i}>
+                    <td className="amx-kardex-suc"><b>{b.sigla}</b>{aut && <small>{aut.nombre}</small>}</td>
+                    <td className="num">
+                      {b.agotado
+                        ? <span className="amx-sello amx-sello--restr">Agotado</span>
+                        : Number(b.qty).toLocaleString('es-MX')}
+                    </td>
+                    <td>{b.manual ? amxFmtManualDate(b.manual.fecha) : '—'}</td>
+                    <td>{b.manual && b.manual.url
+                      ? <a className="amx-kardex-pdf" href={b.manual.url} target="_blank" rel="noopener"
+                          aria-label={'PDF del inventario ' + b.sigla}>PDF ↗</a>
+                      : '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <p className="amx-kardex-articulo">Existencias pendientes de conciliar con el inventario oficial.</p>
+        )}
+        <p className="amx-kardex-nota">
+          Dato histórico por sucursal, no en tiempo real: la disponibilidad actual puede variar.
+          {lvl > 0 &&
+            <React.Fragment>{' '}Nivel de precio:{' '}
+              <span className="amx-nivel" role="img" aria-label={`${lvl} de 5`}>
+                <b>{'$'.repeat(lvl)}</b><span>{'$'.repeat(5 - lvl)}</span>
+              </span>.
+            </React.Fragment>}
+        </p>
+      </div>
+    </section>
+  );
+}
+window.TarjetaAlmacen = TarjetaAlmacen;
+
+// ──────────────────────────────────────────────────────────────
+// HISTORIAL DE PRECIOS — papel milimétrico, registro y anexos grapados
+// Con dos fechas distintas o más: la gráfica y el registro (en escritorio a la
+// par; en móvil el registro se pliega). Con UNA sola fecha no hay tendencia que
+// dibujar: sale solo el registro, que antes directamente se ocultaba y dejaba
+// sin fecha ni PDF a la mitad de las armas.
+// ──────────────────────────────────────────────────────────────
+const TINTAS_MILIMETRICO = {
+  baja: '#2F6B33', sube: '#A3341F', igual: '#4E5B63',
+  eje: '#8FB2C4', fondo: '#F6F9F5', texto: '#171B19', texto2: '#4E5B63',
+};
+
+function HistorialPrecios({ historial, manualById, plegarRegistro }) {
+  const hist = historial || [];
+  const fechas = [];
+  hist.forEach((h) => { if (fechas.indexOf(h.date) < 0) fechas.push(h.date); });
+  const hayGrafica = fechas.length >= 2;
+
+  // Variación de cada registro contra el anterior (el orden ya es cronológico).
+  const filas = hist.map((h, i) => {
+    const man = manualById(h.manualId);
+    const aut = window.manualAutoridad ? window.manualAutoridad(man) : null;
+    const v = amxPrecioNum(h.price);
+    const prev = i > 0 ? amxPrecioNum(hist[i - 1].price) : null;
+    const delta = (v != null && prev) ? ((v - prev) / prev) * 100 : null;
+    return { h: h, sigla: aut ? aut.sigla : '—', delta: delta, actual: i === hist.length - 1 };
+  }).reverse();
+
+  const pIni = hist.length ? amxPrecioNum(hist[0].price) : null;
+  const pFin = hist.length ? amxPrecioNum(hist[hist.length - 1].price) : null;
+  const total = (hayGrafica && pIni && pFin != null) ? ((pFin - pIni) / pIni) * 100 : null;
+  const fmtDelta = (d) => (d > 0 ? '▲ +' : d < 0 ? '▼ −' : '= ') + Math.abs(d).toFixed(1) + ' %';
+
+  // Los anexos: un PDF por inventario citado, del más reciente al más viejo.
+  const vistos = {};
+  const anexos = [];
+  hist.slice().reverse().forEach((h) => {
+    const man = manualById(h.manualId);
+    if (!man || !man.url || vistos[man.id]) return;
+    vistos[man.id] = true;
+    anexos.push(man);
+  });
+
+  const registro = (
+    <table className="amx-registro">
+      <thead>
+        <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
+      </thead>
+      <tbody>
+        {filas.map((f, i) => (
+          <tr key={i} className={f.actual ? 'es-actual' : undefined}>
+            <td>{amxFmtManualDate(f.h.date) || '—'}</td>
+            <td>{f.sigla}</td>
+            <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
+            <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
+              {f.delta == null ? '—' : fmtDelta(f.delta)}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
+  return (
+    <section className="amx-historial" aria-labelledby="amx-historial-tit">
+      <div className="amx-papel" style={{ '--giro-papel': '.3deg' }}>
+        <div className="amx-milimetrico">
+          <div className="amx-historial-cab">
+            <h2 className="amx-papel-tit" id="amx-historial-tit">Historial de precios</h2>
+            <small>{fechas.length} {fechas.length === 1 ? 'inventario oficial' : 'inventarios oficiales'} DCAM / OTCA</small>
+          </div>
+          <div className={'amx-historial-cuerpo' + (hayGrafica ? ' amx-historial-cuerpo--doble' : '')}>
+            {hayGrafica && <PriceChart history={hist} height={170} tintas={TINTAS_MILIMETRICO} />}
+            {hayGrafica && plegarRegistro
+              ? <details className="amx-plegable"><summary>Ver el registro ({hist.length})</summary>{registro}</details>
+              : registro}
+          </div>
+          {total != null &&
+            <p className="amx-historial-variacion">
+              Variación total
+              <b className={total < 0 ? 'amx-baja' : total > 0 ? 'amx-sube' : undefined}>{fmtDelta(total)}</b>
+            </p>}
+        </div>
+      </div>
+      {anexos.length > 0 &&
+        <ul className="amx-anexos" aria-label="Inventarios oficiales en PDF">
+          {anexos.map((m, i) => {
+            const aut = window.manualAutoridad ? window.manualAutoridad(m) : null;
+            return (
+              <li key={m.id} className="amx-anexo">
+                <span className="amx-grapa" aria-hidden="true" />
+                <a href={m.url} target="_blank" rel="noopener">
+                  <b>Anexo {i + 1}</b>
+                  Inventario {aut ? aut.sigla : ''}<br />
+                  {amxFmtManualDate(m.fecha)}<br />
+                  <u>Ver PDF ↗</u>
+                </a>
+              </li>
+            );
+          })}
+        </ul>}
+    </section>
+  );
+}
+window.HistorialPrecios = HistorialPrecios;
+
+// ──────────────────────────────────────────────────────────────
+// REPISA — una fila de la vitrina (munición, accesorios)
+// `porFila` reparte los artículos en filas de N, cada una con su tabla
+// (escritorio); sin él va todo en una tira que hace scroll de lado (móvil).
+// `renderArticulo(item, i)` devuelve un <RepisaArticulo>.
+// ──────────────────────────────────────────────────────────────
+function Repisa({ rotulo, items, porFila, renderArticulo }) {
+  const filas = [];
+  if (porFila) for (let i = 0; i < items.length; i += porFila) filas.push(items.slice(i, i + porFila));
+  else filas.push(items);
+  return (
+    <div className="amx-repisa">
+      <p className="amx-repisa-placa">{rotulo}</p>
+      {filas.map((fila, f) => (
+        <div key={f} className="amx-repisa-fila" style={porFila ? { '--por-fila': porFila } : undefined}>
+          <ul className="amx-repisa-carril">
+            {fila.map((it, i) => renderArticulo(it, f * (porFila || 0) + i))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+window.Repisa = Repisa;
+
+// Un artículo de la repisa: la caja (o la silueta con su sello) apoyada en la
+// tabla y la etiqueta pegada al canto. Si la foto no llega, cae a la silueta.
+function RepisaArticulo({ foto, silueta, alt, etiqueta, ariaLabel, onClick }) {
+  const [fallo, setFallo] = React.useState(false);
+  const conFoto = foto && !fallo;
+  return (
+    <li className="amx-articulo-celda">
+      <button type="button" className="amx-articulo" onClick={onClick} aria-label={ariaLabel}>
+        <span className="amx-articulo-foto">
+          {conFoto
+            ? <img src={foto} alt={alt || ''} loading="lazy" decoding="async" onError={() => setFallo(true)} />
+            : <span className="amx-articulo-vacio">
+                {silueta && <span className="amx-silueta-acc" aria-hidden="true" style={{ '--silueta-forma': `url(${silueta})` }} />}
+                <span className="amx-sello amx-sello--pendiente" aria-hidden="true">Foto pendiente</span>
+              </span>}
+        </span>
+        <span className="amx-etiqueta" aria-hidden="true">{etiqueta}</span>
+      </button>
+    </li>
+  );
+}
+window.RepisaArticulo = RepisaArticulo;

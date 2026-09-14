@@ -11,14 +11,14 @@ atrape, así que la verificación es manual pero automatizable.
 
 ## Rápido (dos órdenes)
 ```bash
-npm run build                                              # .jsx -> .js  +  prerender de las 322 páginas, todo a out/
+npm run build                                              # .jsx -> .js  +  prerender de las 321 páginas, todo a out/
 node .claude/skills/conciliar-inventario/scripts/auditar.js
 ```
 Si `npm run build` falla, NO sigas: el deploy publicaría HTML apuntando a `.js`
 que no existen. Corre `npm install` primero si no hay `node_modules/`.
 
 `build:html` (prerender) falla a propósito si `index.html` cambió de forma. Tras
-tocar datos o pantallas, comprueba también el recuento que imprime (322 páginas /
+tocar datos o pantallas, comprueba también el recuento que imprime (321 páginas /
 317 URLs en sitemap, a 12-sep-2026) y que `out/sitemap.xml` y `out/robots.txt` se
 regeneraron.
 Debe terminar en `✔✔ AUDITORÍA SIN HALLAZGOS` (sale con código !=0 si falla). Cubre:

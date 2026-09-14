@@ -249,15 +249,6 @@ function CamposScreen({ onNav }) {
             Pronto podrás suscribirte para acceder a campos y clubes de tiro aliados con beneficios y reservación. Estos son ejemplos de lo que vendrá.
           </div>
         </div>
-        <button onClick={() => onNav && onNav('submit')} style={{
-          // El texto era '#173A32' sobre PALETTE.amber, que en claro ES #173A32:
-          // 1.00:1, el botón salía en blanco. La tinta de un relleno de acento
-          // la decide `tintaSobreMarca`, que cambia con el tema.
-          flexShrink: 0, background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',   // 10.83:1 claro / 9.17:1 oscuro
-          padding: '11px 18px', cursor: 'pointer',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-        }}>Avísame</button>
       </div>
 
       {/* grid de campos */}
@@ -357,16 +348,6 @@ function CursoCard({ curso, onNav, vp }) {
             <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 15, fontWeight: 700, color: PALETTE.amber, marginTop: 2 }}>{curso.precio}</div>
           </div>
         </div>
-        <button onClick={() => onNav && onNav('submit')} style={{
-          marginTop: 12, width: '100%', background: 'transparent', color: PALETTE.amber,
-          border: `1.5px solid ${PALETTE.amber}`, padding: '10px', cursor: 'pointer',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-          letterSpacing: '0.12em', textTransform: 'uppercase',
-        }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = PALETTE.amber; e.currentTarget.style.color = PALETTE.tintaSobreMarca; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = PALETTE.amber; }}>
-          Me interesa
-        </button>
       </div>
     </div>
   );

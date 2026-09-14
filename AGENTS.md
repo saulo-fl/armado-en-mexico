@@ -127,7 +127,7 @@ siguieran valiendo. Al leer una ruta en este documento, fíjate en si habla del
 1. `build:static` — vacía `out/` y copia `public/` + los archivos que no se
    compilan. Va **primero** porque vacía: si fuera después, borraría lo demás.
 2. `build:js` — Babel compila los `.jsx` a `out/`, planos.
-3. `build:html` — el prerender emite las 322 páginas, `sitemap.xml` y `robots.txt`.
+3. `build:html` — el prerender emite las 321 páginas, `sitemap.xml` y `robots.txt`.
 
 ## Cómo se trabaja aquí
 
@@ -138,7 +138,7 @@ merges se hacen por la API y tu `origin/main` local se queda viejo).
 
 ```bash
 npm install                 # una vez
-npm run build               # estáticos + .jsx -> .js + prerender de las 322 páginas, todo en out/
+npm run build               # estáticos + .jsx -> .js + prerender de las 321 páginas, todo en out/
 npx serve out               # o cualquier servidor HTTP sobre out/: no carga desde file://
 node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
 ```
@@ -246,7 +246,7 @@ Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que correspon
 ## Prerender: un .html real por URL (`scripts/build-prerender.mjs`)
 
 `npm run build` son tres pasos (ver «Estructura del repo»): **`build:static`**, **`build:js`**
-(Babel) y **`build:html`** (`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 322 — con su
+(Babel) y **`build:html`** (`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 321 — con su
 `<title>`, `description`, `canonical`, Open Graph, JSON-LD y el contenido **en HTML
 crudo** dentro de `#app-root`.
 
@@ -263,7 +263,7 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
 - El script **falla ruidosamente** si `index.html` cambia de forma (busca el cálculo
   de `APP_BASE`, el `<base>`, el `<title>`, la `description` y `#app-root`). Si tocas
   esas líneas, actualiza las marcas del script — es a propósito: mejor romper el
-  build que publicar 322 páginas mal generadas.
+  build que publicar 321 páginas mal generadas.
 
 **Dos trampas ya resueltas — no las reintroduzcas:**
 
@@ -388,7 +388,7 @@ Lo editado en el admin ya puede compartirse entre visitantes mediante un backend
 
 - Las **Functions** viven en `functions/api/` y Cloudflare Pages las despliega solas:
   `GET /api/state` (snapshot público), `POST /api/append/:domain` (escritura pública de
-  `suggestions`/`pending`/`reviewsQueue`/`reports`/`visits` con merge atómico y
+  `reviewsQueue`/`reports`/`visits` con merge atómico y
   **validación** en el server) y
   `PUT /api/admin/state/:domain` (reemplazo de un dominio, **solo admin**).
 - **D1** guarda un *document store* por dominio: una fila `state(domain, data, updated_at)`
@@ -458,7 +458,7 @@ resiembra D1 y compruébalo como visitante, no por la API.
   identidad. Con reseñas de texto libre, la cola de moderación se puede inundar.
   Mitigación actual: nada se publica sin aprobación humana, así que el daño se queda
   en el panel. La vía natural es **Cloudflare Turnstile** (el sitio ya vive en
-  Cloudflare Pages): widget en `OpinionBlock`, `SuggestChangesModal` y la denuncia de
+  Cloudflare Pages): widget en `OpinionBlock` y la denuncia de
   `SoporteScreen`, y verificación del token dentro de la Function de `append` **antes**
   de tocar D1 — mismo sitio donde ya se valida el mínimo de caracteres. Pedido
   explícito de Saulo (26-ago-2026) al rediseñar el bloque de opinión.

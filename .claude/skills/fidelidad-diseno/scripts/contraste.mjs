@@ -147,6 +147,36 @@ const PLACA = [
   ['silueta (gráfico) sobre la placa', '--silueta', '--papel-hi', 3],
 ];
 
+// La papelería de la ficha de arma (13-sep-2026). Son objetos y no siguen al
+// tema… salvo el manila, que en oscuro baja a penumbra: por eso sus pares SÍ
+// cambian entre temas y el resto da lo mismo en los dos.
+const PAPELERIA = [
+  ['tinta sobre el manila',            '--manila-tinta', '--manila-medido', 4.5],
+  ['tinta-2 sobre el manila',          '--manila-tinta-2', '--manila-medido', 4.5],
+  ['tinta sobre el talón',             '--talon-tinta', '--talon', 4.5],
+  ['tinta-2 sobre el talón',           '--talon-tinta-2', '--talon', 4.5],
+  ['rojo impreso sobre el talón',      '--talon-rojo', '--talon', 4.5],
+  ['tinta-2 de ficha sobre el fichero','--ficha-tinta-2', '--fichero', 4.5],
+  ['tinta-2 de ficha sobre el rayado', '--ficha-tinta-2', '--fichero-azul', 4.5],
+  ['impreso sobre el kárdex',          '--kardex-imp', '--kardex', 4.5],
+  ['tinta-2 sobre el kárdex',          '--kardex-tinta-2', '--kardex', 4.5],
+  ['sello restr. sobre el kárdex',     '--sello-restr', '--kardex', 4.5],
+  ['tinta-2 sobre el milimétrico',     '--milimetrico-tinta-2', '--milimetrico', 4.5],
+  ['sello civil sobre el milimétrico', '--sello-civil', '--milimetrico', 4.5],
+  ['sello restr. sobre el milimétrico','--sello-restr', '--milimetrico', 4.5],
+  ['tinta-2 sobre el oficio',          '--oficio-tinta-2', '--oficio', 4.5],
+  ['tinta-2 sobre el separador',       '--oficio-tinta-2', '--oficio-2', 4.5],
+  ['oficio sobre la banda civil',      '--oficio', '--sello-civil', 4.5],
+  ['oficio sobre la banda restr.',     '--oficio', '--sello-restr', 4.5],
+  ['sello azul sobre el oficio',       '--sello-azul', '--oficio', 4.5],
+  ['sello azul sobre la placa',        '--sello-azul', '--copia-placa', 4.5],
+  ['tinta-2 sobre la etiqueta',        '--etiqueta-tinta-2', '--etiqueta', 4.5],
+  ['sello restr. sobre la etiqueta',   '--sello-restr', '--etiqueta', 4.5],
+  ['sello civil sobre la etiqueta',    '--sello-civil', '--etiqueta', 4.5],
+  ['tinta sobre la placa de latón',    '--manila-tinta', '--laton', 4.5],
+  ['letra sobre la cinta Dymo',        '--dymo-letra', '--dymo', 4.5],
+];
+
 // Las superficies NO se miden con el umbral de WCAG —dos fondos no son texto—
 // y su mínimo DEPENDE DEL TEMA, que es la asimetría de fondo de todo esto:
 //
@@ -196,6 +226,7 @@ function auditar(nombre, P) {
   grupo('TEXTO Y ESTADO sobre las superficies de contenido', TEXTO);
   grupo('SOBRE LAS SUPERFICIES DE MARCA', MARCA);
   grupo('SOBRE LA PLACA FOTOGRÁFICA (clara en los dos temas)', PLACA);
+  grupo('LA PAPELERÍA DE LA FICHA DE ARMA (el manila baja a penumbra en oscuro)', PAPELERIA);
   return fallos;
 }
 

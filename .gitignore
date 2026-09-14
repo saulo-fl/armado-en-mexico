@@ -2,7 +2,7 @@ node_modules
 
 # ── Generado por `npm run build` — NO se commitea ───────────────────────────
 # La fuente vive en src/ y public/. El build deja TODO lo publicable en out/:
-# los .js que Babel saca de los .jsx, las 322 páginas del prerender, el sitemap
+# los .js que Babel saca de los .jsx, las 321 páginas del prerender, el sitemap
 # y el robots, más la copia de public/. Es lo que Cloudflare Pages sirve
 # (pages_build_output_dir en wrangler.toml) y lo regenera en cada deploy.
 /out/

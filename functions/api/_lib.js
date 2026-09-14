@@ -5,14 +5,16 @@
 // NOTA: el dominio 'admin' (contraseña/sesión) NUNCA viaja al servidor.
 export const ALL_DOMAINS = [
   'armas', 'pages', 'promos', 'favorites', 'appConfig', 'manuales',
-  'priceHist', 'suggestions', 'pending', 'rejected', 'visits',
+  'priceHist', 'rejected', 'visits',
   'reviews', 'reviewsQueue', 'reports',
 ];
 
 // Dominios con escritura PÚBLICA por "append" (el servidor hace el merge atómico).
 // 'reviews' NO está: las reseñas aprobadas solo las escribe el admin al moderar.
 // Si estuviera aquí, cualquiera publicaría texto sin pasar por la cola.
-export const APPEND_DOMAINS = ['suggestions', 'pending', 'visits', 'reviewsQueue', 'reports'];
+// 'suggestions' y 'pending' (Sugerir cambios / Proponer arma) salieron el
+// 13-sep-2026: el catálogo sale de los inventarios oficiales, no de envíos.
+export const APPEND_DOMAINS = ['visits', 'reviewsQueue', 'reports'];
 
 // Una reseña sin cuerpo no puede influir en el agregado: el texto es lo que el
 // moderador juzga. El máximo es MUY inferior a los 5000 del saneador genérico
@@ -55,20 +57,6 @@ export async function writeDomain(db, domain, value) {
 
 // ── Merge de "append" público (replica el shape que espera store.js) ────────
 export function mergeAppend(domain, current, item) {
-  if (domain === 'suggestions' || domain === 'pending') {
-    const arr = Array.isArray(current) ? current.slice() : [];
-    const prefix = domain === 'pending' ? 'p_' : 's_';
-    const clean = sanitizeItem(item);
-    clean.id = prefix + Date.now() + '_' + Math.floor(Math.random() * 1000);
-    clean.submittedAt = new Date().toISOString();
-    clean.status = 'pending';
-    arr.unshift(clean);
-    // Doble tope: por número de items y por bytes. Solo el de items dejaba un
-    // techo de 1000 × el tamaño de cada uno, que era ilimitado antes de acotar
-    // los campos anidados. Los más recientes van primero, así que el recorte
-    // descarta los más viejos.
-    return recortarPorBytes(arr.slice(0, 1000), MAX_DOMINIO);
-  }
   if (domain === 'reviewsQueue') {
     // Validación en el SERVIDOR, no solo en el formulario: este endpoint es
     // público y se puede llamar con curl. Una reseña que no cumpla se descarta
@@ -99,6 +87,10 @@ export function mergeAppend(domain, current, item) {
     clean.submittedAt = new Date().toISOString();
     clean.status = 'pending';
     arr.unshift(clean);
+    // Doble tope: por número de items y por bytes. Solo el de items dejaba un
+    // techo de 1000 × el tamaño de cada uno, que era ilimitado antes de acotar
+    // los campos anidados. Los más recientes van primero, así que el recorte
+    // descarta los más viejos.
     return recortarPorBytes(arr.slice(0, 1000), MAX_DOMINIO);
   }
   if (domain === 'visits') {
@@ -128,7 +120,7 @@ const TIPOS_RESENA = ['arma', 'accesorio', 'municion', 'campo', 'curso'];
 // elemento es un objeto de 50 KB. Sin esto, un solo POST anónimo mete cientos de
 // KB en la fila del dominio — y /api/state la sirve entera en CADA carga de
 // página, a todos los visitantes.
-const MAX_CAMPO = 8 * 1024;    // un campo anidado (specs de un arma propuesta, etc.)
+const MAX_CAMPO = 8 * 1024;    // un campo anidado (un objeto o array dentro de una denuncia, etc.)
 const MAX_ITEM = 16 * 1024;    // el item completo ya saneado
 const MAX_DOMINIO = 512 * 1024; // la lista acumulada de un dominio
 

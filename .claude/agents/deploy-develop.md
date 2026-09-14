@@ -27,7 +27,7 @@ comprueba antes de commitear). Aquí solo va lo que cambia respecto a ellas.
    npm run build                                              # transpila + prerender
    node .claude/skills/conciliar-inventario/scripts/auditar.js
    ```
-   El build tiene que decir **322 páginas** y el sitemap **317 URLs** (a
+   El build tiene que decir **321 páginas** y el sitemap **317 URLs** (a
    31-ago-2026, con Campos y Experiencias congeladas). Si esos números bajan sin
    que hayas quitado contenido a propósito, para: algo dejó de generarse.
 3. **`git add` con rutas explícitas. NUNCA `git add -A`.** Lo generado ya va entero
