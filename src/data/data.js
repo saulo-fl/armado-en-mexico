@@ -252,7 +252,7 @@ window.DB = [
     "imagenes/069_Taurus_TS9.webp",
     "Pistola full-size 9mm brasileña con mira tipo Glock. Calibre de uso restringido en México — únicamente Fuerzas Armadas y corporaciones autorizadas."),
 
-  mk(24, "Taurus GX4", "Taurus", "pistola", "Brasil", "9mm Parabellum", "11+1", "530g", "158mm", "Semi-auto, striker-fired", 2021, "ejercito", "7956.41", "PISTOLA CAL 9mm TAURUS GX4",
+  mk(24, "Taurus GX4", "Taurus", "pistola", "Brasil", "9mm Parabellum", "11+1", "530g", "158mm", "Semi-auto, striker-fired", 2021, "ejercito", "8377.14", "PISTOLA CAL 9mm TAURUS GX4",
     "imagenes/070_Taurus_GX4.webp?v=2",
     "Pistola compacta 9mm de Taurus para portar oculto. Calibre 9mm: uso reservado a Fuerzas Armadas en México."),
 
@@ -300,7 +300,7 @@ window.DB = [
     "imagenes/081_Canik_SFX_Rival.webp",
     "Versión de competición premium con armazón metálico parcial. Calibre 9mm: restringido en México."),
 
-  mk(36, "Springfield XD-M", "Springfield", "pistola", "Croacia", "9mm Parabellum", "19+1", "800g", "198mm", "Semi-auto, striker-fired", 2008, "ejercito", "9944.81", "PISTOLA SEMI 9mm SPRINGFIELD XD-M",
+  mk(36, "Springfield XD-M", "Springfield", "pistola", "Croacia", "9mm Parabellum", "19+1", "800g", "198mm", "Semi-auto, striker-fired", 2008, "ejercito", "10142.34", "PISTOLA SEMI 9mm SPRINGFIELD XD-M",
     "imagenes/082_Springfield_XD-M.webp",
     "Fabricada por HS Produkt en Croacia. Indicador de cartucho visible. Calibre 9mm: restringido a Fuerzas Armadas."),
 
@@ -981,9 +981,6 @@ window.DB = [
   mk(218, "Beretta 80X Cheetah Bronce", "Beretta", "pistola", "Italia", ".380 ACP", "13+1", "780g", "182mm", "Semi-auto, DA/SA", 2023, "dcam", "13793.00", "PISTOLA CAL .380 BERETTA 80X BRONCE",
     "imagenes/013_Beretta_80x_Cheetah.webp?v=2",
     "Versión en acabado bronce de la Beretta 80X Cheetah en .380 ACP (9 corto), con un cargador de servicio y uno adicional de 13 cartuchos. Renacimiento moderno de la serie 80, fabricada en Italia. Adquisición civil."),
-  mk(219, "Springfield XD-M Elite 4.5 (3 cargadores)", "Springfield", "pistola", "Croacia", "9mm Parabellum", "19+1", "800g", "198mm", "Semi-auto, striker-fired", 2008, "ejercito", "10142.34", "PISTOLASEMI CAL9 mm SPRINGFIELD XD-M 4.5",
-    "",
-    "Pistola Springfield Armory XD-M Elite de 4.5 pulgadas en 9mm, en la presentación con cargador de servicio y dos adicionales de 19+3 cartuchos y mira frontal de fibra óptica. Fabricada por HS Produkt en Croacia. Calibre 9mm: restringido a Fuerzas Armadas."),
   mk(220, "System Defence C9 Compact", "System Defence", "pistola", "Israel", "9mm Parabellum", "15+1", "780g", "188mm", "Semi-auto, striker-fired", 2020, "ejercito", "10299.25", "PISTOLA CAL 9mm SYSTEM DEFENCE C102mm",
     "",
     "Versión compacta de la pistola C9 de System Defence en 9x19 mm, con cañón de 102 mm. Calibre 9mm: restringido a Fuerzas Armadas."),

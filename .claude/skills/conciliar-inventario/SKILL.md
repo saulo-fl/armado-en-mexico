@@ -86,6 +86,11 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
   variante que queda entra como FICHA NUEVA** con su propio historial (incluidos los
   renglones anteriores de esa variante). Nunca se «pasa» una ficha a la variante nueva:
   eso da saltos de precio que no son subidas (DT11 +24.6 %, 694 +21 %).
+- **(13-sep-2026) La presentación (número de cargadores, estuche, kit) no es variante:
+  misma ficha, suma existencias.** Dos renglones del mismo modelo y calibre que solo
+  cambian lo que trae la caja nunca separan fichas ni dejan una agotada; el precio sigue a
+  una presentación representativa fija (la que la ficha publica y sigue en el inventario).
+  Casos: Springfield XD-M 36 (1 o 2 cargadores adicionales), Taurus GX4 24 (2×11 o 3×13).
 - **(13-sep-2026) Un historial no mezcla modelos ni calibres.** Cada registro tiene que
   corresponder a un renglón del PDF de ESE modelo y ESE calibre. Si aparece uno ajeno, se
   mueve a la ficha correcta (existente o variante nueva) sin tocar el modelo ni el calibre
