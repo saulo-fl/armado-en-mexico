@@ -2144,20 +2144,30 @@ window.CintaDymo = CintaDymo;
 // TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
 // En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
 // casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
+//
+// `ultimoConocido`: el precio viene de un inventario ANTERIOR al último de su
+// sucursal, es decir, el arma ya no aparece en el más reciente. El talón lleva
+// entonces el sello «ÚLTIMO PRECIO CONOCIDO». Saulo, 13-sep-2026: «ambos datos
+// son ciertos pero hace falta aclararlo en la ficha con Último precio
+// conocido». El caso que lo motivó: la Galil ACE 21N, con precio OTCA del
+// 26-sep-2025 y la tarjeta de almacén en AGOTADO al inventario OTCA del
+// 18-jun-2026. Con los datos del 13-sep-2026 son 52 armas.
 // ──────────────────────────────────────────────────────────────
-function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef }) {
+function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false }) {
   return (
     <div ref={talonRef} className={'amx-talon' + (fijo ? ' amx-talon--fijo' : '')}>
       <div className="amx-talon-papel">
         {fijo ? (
           <div className="amx-talon-resumen">
-            <span className="amx-talon-mini">Precio {fuente}{fecha && <span className="amx-talon-mini-fecha"> · {fecha}</span>}</span>
+            <span className="amx-talon-mini">{ultimoConocido ? 'Último precio' : 'Precio'} {fuente}{fecha && <span className="amx-talon-mini-fecha"> · {fecha}</span>}</span>
             <span className="amx-talon-cifra">{String(precio || '').replace(' MXN', '')}</span>
           </div>
         ) : (
           <React.Fragment>
             <div className="amx-talon-cab"><span>Comprobante de precio</span><span>Con IVA</span></div>
             <span className="amx-talon-cifra">{precio}</span>
+            {ultimoConocido &&
+              <span className="amx-sello amx-sello--restr amx-talon-sello">Último precio conocido</span>}
             <dl className="amx-talon-datos">
               <dt>Fuente</dt><dd>{fuente}</dd>
               {fecha && <React.Fragment><dt>Fecha</dt><dd>{fecha}</dd></React.Fragment>}
