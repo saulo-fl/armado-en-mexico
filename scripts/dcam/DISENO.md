@@ -13,6 +13,7 @@ la **pieza 1 (vigía)**; las piezas 2 y 3 tendrán su propio diseño antes de co
 |---|---|
 | Automatismo del inventario | **Completo**: concilia, publica en `main` + `develop` y resiembra D1 solo |
 | Anomalías | Lo que pasa todas las verificaciones se publica solo; lo dudoso (modelo nuevo, Δ% fuera de la distribución, formato desconocido) va a un **PR** y avisa por Telegram. Si `auditar.js` falla o el PDF no se entiende, no publica nada |
+| Erratas de precio de la DCAM | Se publica el **último precio conocido** con una nota visible **junto al precio**: «Precio del inventario <fecha>. El publicado el <fecha> ($X) probablemente es un error de la publicación de la Secretaría de la Defensa». Si **no hay precio anterior**, se publica el del PDF con la misma nota. (Caso origen: cargador Tanfoglio FT-9-FS a $2.56, 11-sep-2026) |
 | Motor de conciliación | **Script fijo** para lo ya catalogado; `claude -p` solo **redacta** lo dudoso dentro del PR. La IA nunca decide un precio publicado |
 | Frecuencia | **Una vez al día, 20:00** (America/Mexico_City) |
 | Avisos por Telegram | Publicación automática · bot roto · cambios en avisos/requisitos · latido diario · PR por revisar |
