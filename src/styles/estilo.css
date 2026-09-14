@@ -3036,6 +3036,9 @@
    de categoría son verticales. El giro se controla inline por `--giro`.
    La clase .amx-polaroid--hub no es estrictamente necesaria (el 4/5 va inline),
    pero da un punto de anclaje para estilos futuros si cambia el formato. */
+.amx-v2 .amx-polaroid--hub .amx-polaroid-foto {
+  aspect-ratio: 4 / 5; /* mueve el ratio del JSX al CSS para responsive */
+}
 .amx-v2 .amx-polaroid--hub .amx-polaroid-pozo img {
   object-fit: cover;
 }
@@ -3052,7 +3055,7 @@
 }
 /* Armería — nombre en negrita y grande para DCAM/OTCA */
 .amx-v2 .amx-polaroid--hub .amx-polaroid-nombre {
-  font-weight: 800;
+  font-weight: 700;
   font-size: 36px;
   letter-spacing: .08em;
 }
@@ -3060,6 +3063,19 @@
 /* Faldón más alto para los sellos DCAM/OTCA — texto grande */
 .amx-v2 .amx-polaroid--hub .amx-polaroid-pie {
   min-height: 80px;
+}
+
+/* ── Armería — grid responsive (1 col en móvil) ─────────────────── */
+.amx-v2 .amx-arsenal-armeteria {
+  display: grid;
+  gap: var(--e3);
+}
+@media (max-width: 600px) {
+  .amx-v2 .amx-arsenal-armeteria {
+    grid-template-columns: 1fr;
+    max-width: 340px;
+    margin-inline: auto;
+  }
 }
 
 /* ── Título del Hub ─────────────────────────────────────────────── */
@@ -3119,8 +3135,7 @@
   padding: var(--e2) var(--e3); /* escala 4·8·12·20·32·52 (§5.2) */
   background: var(--papel);
   border: 1px solid var(--hair);
-  border-left: 3px solid var(--accent, var(--tinta-2));
-  box-shadow: var(--sombra);
+  box-shadow: var(--sombra); /* superficie y sombra distinguen (§5.1b, sin barras laterales) */
   cursor: pointer;
   text-align: left;
   width: 100%;
@@ -3164,7 +3179,7 @@
   margin-top: var(--e4);
   background: var(--acento);
   border: none;
-  color: var(--papel);
+  color: var(--tinta-sobre-marca); /* ≥4.5:1 sobre --acento en ambos temas */
   padding: var(--e2) var(--e3);
   font-family: var(--mono);
   font-size: 13px;
@@ -3179,17 +3194,6 @@
   background: var(--tinta);
   color: var(--papel);
   transform: translateY(-1px);
-}
-
-/* ── Sello de ubicación en polaroid de armería — imagen generada ─ */
-.amx-v2 .amx-polaroid-sello-img {
-  position: absolute;
-  width: var(--sello-size, 64px);
-  height: auto;
-  opacity: 0.85;
-  /* screen: texto blanco sobre transparente → visible en fondo claro */
-  mix-blend-mode: screen;
-  z-index: 2; /* sobre el velo verde y la foto */
 }
 
 /* ── Clasificación legal — pestaletas tipo archivador ─────────────────── */
@@ -3230,7 +3234,7 @@
 /* Pestaleta de color arriba — folder archivador */
 .amx-v2 .amx-arsenal-legal-pegs {
   font-family: var(--sans);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 15px;
   text-transform: uppercase;
   letter-spacing: .06em;
@@ -3249,43 +3253,26 @@
 
 .amx-v2 .amx-arsenal-legal-count {
   font-family: var(--sans);
-  font-weight: 800;
+  font-weight: 700;
   font-size: 28px;
   line-height: 1;
 }
 
-/* Colores por tipo — pestaleta + contador. Fondos sólidos para ≥4.5:1 (§7) */
-.amx-v2 .amx-arsenal-legal-tab--civil {
-  border-top: 4px solid var(--ok);
+/* Colores por tipo — tokens del sistema, sin barras (§5.4). Dos tonos legales: civil + restr. */
+.amx-v2 .amx-arsenal-legal-tab--dcam .amx-arsenal-legal-pegs {
+  color: var(--sello-civil); /* 6.02:1 sobre papel claro (§7) */
 }
-.amx-v2 .amx-arsenal-legal-tab--civil .amx-arsenal-legal-pegs {
-  background: #C8E6C9; /* sólido, no rgba — contraste predecible */
-  color: #1B5E20;      /* ≥4.5:1 sobre #C8E6C9 */
-}
-.amx-v2 .amx-arsenal-legal-tab--civil .amx-arsenal-legal-count {
-  color: var(--ok);
+.amx-v2 .amx-arsenal-legal-tab--dcam .amx-arsenal-legal-count {
+  color: var(--sello-civil);
 }
 
-.amx-v2 .amx-arsenal-legal-tab--seguridad {
-  border-top: 4px solid var(--seguridad);
-}
-.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs {
-  background: #EF9A9A; /* sólido, no color-mix — contraste predecible */
-  color: #5D1A10;      /* ≥4.5:1 sobre #EF9A9A */
-}
-.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-count {
-  color: var(--seguridad);
-}
-
-.amx-v2 .amx-arsenal-legal-tab--ejercito {
-  border-top: 4px solid var(--alerta);
-}
+.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs,
 .amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-pegs {
-  background: #E57373; /* sólido, no rgba — contraste predecible */
-  color: #6B1515;      /* ≥4.5:1 sobre #E57373 */
+  color: var(--sello-restr); /* 6.42:1 sobre papel claro (§7) */
 }
+.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-count,
 .amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-count {
-  color: var(--alerta);
+  color: var(--sello-restr);
 }
 
 /* ── Tipo de arma — lotería (reusa HOME amx-loteria-mesa) ─────────────── */
@@ -3306,7 +3293,7 @@
   }
 }
 
-/* ── Uso — tarjetas informativas sin foto ─────────────────────── */
+/* ── Uso — tarjetas informativas sin foto (sin giro, son controles sobre --papel) ─ */
 .amx-v2 .amx-arsenal-uso-card {
   display: flex;
   align-items: center;
@@ -3319,17 +3306,15 @@
   text-align: left;
   width: 100%;
   transition: transform .18s, box-shadow .18s;
-  /* Jittering determinista — cada tarjeta con ángulo distinto (§5.4) */
-  transform: rotate(var(--giro, 0));
 }
 .amx-v2 .amx-arsenal-uso-card:hover {
-  transform: rotate(var(--giro, 0)) translateY(-2px);
+  transform: translateY(-2px);
   box-shadow: var(--sombra-hover);
 }
-/* Jittering determinista — cada tarjeta con ángulo distinto (§5.4 asimetría sistemática) */
 .amx-v2 .amx-arsenal-uso-icon {
-  font-size: 28px;
+  font-size: 24px;
   flex-shrink: 0;
+  color: var(--sello-azul); /* tinta de sello para lo no legal (§7) */
 }
 .amx-v2 .amx-arsenal-uso-label {
   font-family: var(--sans);
@@ -3339,34 +3324,39 @@
   letter-spacing: .04em;
   color: var(--tinta);
 }
+.amx-v2 .amx-arsenal-uso-count {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta-dim);
+  flex-shrink: 0;
+}
 
-/* ── Calibre — mesa de exhibición con siluetas de cartucho ───────────── */
+/* ── Calibre — mesa de exhibición con siluetas de cartucho (grid compacta) ─ */
 .amx-v2 .amx-arsenal-calibre-shelf {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--e3);
-  align-items: stretch;
   background: var(--lienzo);
   padding: var(--e3) var(--e4); /* aire interno de la bandeja */
   border-radius: var(--e1);
   box-shadow: inset 0 1px 4px rgba(23,27,25,.08); /* profundidad sutil (§5.1b) */
 }
 
-/* Carta individual — fondo token del tema (buen contraste) */
+/* Carta individual — fondo token del tema (buen contraste), ancho controlado por grid */
 .amx-v2 .amx-arsenal-calibre-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 8px;
-  min-height: 140px;
+  padding: var(--e2);
+  min-height: 120px;
   background: var(--papel);
   border: 1px solid var(--hair);
   box-shadow: var(--sombra);
   cursor: pointer;
   text-align: center;
   transition: transform .18s, box-shadow .18s;
-  flex-shrink: 0;
 }
 .amx-v2 .amx-arsenal-calibre-item:hover {
   transform: translateY(-3px) scale(1.02);
@@ -3375,9 +3365,9 @@
 
 /* Silueta del cartucho — sin filtros vetados (§4) */
 .amx-v2 .amx-arsenal-calibre-foto {
-  width: calc(var(--calibre-w, 100px) * 0.7);
+  width: 70%;
   height: auto;
-  max-height: 60px;
+  max-height: 56px;
   object-fit: contain;
 }
 
@@ -3411,6 +3401,7 @@
   background: var(--marca);
   color: var(--sobre-marca);
   padding-bottom: var(--e3);
+  padding-left: var(--e3); /* móvil: que el buscador no empiece en x=0 */
 }
 /* En desktop, sticky en la parte superior (debajo del TopNav) */
 @media (min-width: 1024px) {
@@ -3483,12 +3474,12 @@
 /* Track — barra neutra */
 .amx-v2 .amx-price-range::-webkit-slider-runnable-track {
   height: 4px;
-  background: var(--hair);
+  background: transparent; /* no tapar el tramo seleccionado del range */
   border-radius: 2px;
 }
 .amx-v2 .amx-price-range::-moz-range-track {
   height: 4px;
-  background: var(--hair);
+  background: transparent; /* no tapar el tramo seleccionado del range */
   border-radius: 2px;
 }
 /* Thumb — manija verde marca */

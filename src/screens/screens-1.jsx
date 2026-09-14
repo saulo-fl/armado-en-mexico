@@ -876,13 +876,13 @@ function ArsenalHubScreen({ onNav }) {
 
       {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
       <SectionHdr>Armería</SectionHdr>
-      <div style={gridN(2)}>
+      <div className="amx-arsenal-armeteria" style={gridN(2)}>
         <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
           img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
-          style={{ '--giro': ARMERIA_GIROS[0], width: '100%', aspectRatio: '4 / 5' }} />
-        <HubPolaroid label="OTCA" stamp="N.L." stampSub="México" sub="Nuevo León"
+          style={{ '--giro': ARMERIA_GIROS[0], width: '100%' }} />
+        <HubPolaroid label="OTCA" sub="Nuevo León"
           img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })}
-          style={{ '--giro': ARMERIA_GIROS[1], width: '100%', aspectRatio: '4 / 5' }} />
+          style={{ '--giro': ARMERIA_GIROS[1], width: '100%' }} />
       </div>
 
       {/* ── DISPONIBILIDAD: DocCard reutilizable (buen contraste, accesible) ─ */}
@@ -921,12 +921,12 @@ function ArsenalHubScreen({ onNav }) {
       {/* ── USO: tarjetas informativas (sin foto) ───────────────────── */}
       <SectionHdr>Uso</SectionHdr>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 'var(--e3)' }}>
-        {window.CATEGORIES.uso.map((u, i) => usoCount(u.id) ? (
+        {window.CATEGORIES.uso.map((u) => usoCount(u.id) ? (
           <button key={u.id} className="amx-arsenal-uso-card"
-            style={{ '--giro': USO_GIROS[i % USO_GIROS.length] }}
             onClick={() => onNav('category', { mode: 'uso', value: u.id })}>
-            <span className="amx-arsenal-uso-icon">{u.icon}</span>
+            <span className="amx-arsenal-uso-icon" aria-hidden="true">{u.icon}</span>
             <span className="amx-arsenal-uso-label">{u.label}</span>
+            <span className="amx-arsenal-uso-count">{usoCount(u.id)}</span>
           </button>
         ) : null)}
       </div>
@@ -938,7 +938,6 @@ function ArsenalHubScreen({ onNav }) {
           const n = DB.filter((a) => a.calibre === c.id).length;
           return n ? (
             <button key={c.id} className="amx-arsenal-calibre-item"
-              style={{ width: 'var(--calibre-w, 100%)' }}
               onClick={() => onNav('category', { mode: 'calibre', value: c.id })}>
               <img className="amx-arsenal-calibre-foto" src={calibreImgPath(c.id)} alt={c.label} loading="lazy" />
               <span className="amx-arsenal-calibre-ficha">{c.label}</span>
