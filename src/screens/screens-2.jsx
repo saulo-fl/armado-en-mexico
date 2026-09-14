@@ -182,6 +182,11 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       branches.push({ sigla: 'OTCA', qty: null, manual: latestOtca, agotado: true });
     }
   }
+  // ¿Hay un inventario de la MISMA sucursal más reciente que el del precio? Si lo
+  // hay, el arma ya no aparece en él y el precio es el último conocido: el talón
+  // lo sella (ver TalonComprobante). Fechas AAAA-MM-DD, comparables como texto.
+  const ultimoSuc = latestByBranch(curSigla);
+  const ultimoConocido = !!(currentManual && ultimoSuc && String(ultimoSuc.fecha || '') > String(currentManual.fecha || ''));
 
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
   const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
@@ -252,6 +257,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             <div className="amx-carpeta-talon">
               <window.TalonComprobante talonRef={talonRef}
                 precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
+                ultimoConocido={ultimoConocido}
                 enComparacion={inCmp} onComparar={comparar} />
               {/* Lo que opina la comunidad, junto al precio: la pregunta «¿vale
                   la pena?» se responde aquí y no al final de la página. */}
@@ -401,6 +407,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {!ancho && talonFuera && !pieVisible && compareIds.length === 0 &&
         <window.TalonComprobante fijo
           precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
+          ultimoConocido={ultimoConocido}
           enComparacion={inCmp} onComparar={comparar} />}
     </div>);
 
