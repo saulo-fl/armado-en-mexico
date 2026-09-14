@@ -1033,8 +1033,8 @@ window.DB.forEach(a => { if (!a.img) a.img = window.armaPlaceholder(a); });
 // verificado con el fabricante el 14-sep-2026 (fuentes en el PR #164). Sin verificar =
 // sin riel. Solo con riel salen las ópticas universales (MEPRO MOR, data-accesorios.js).
 // Al dar de alta un arma, decide aquí su riel.
-const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
-  112, 113, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221];
+const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
+  112, 113, 114, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221];
 window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 
 // helper de búsqueda usado por screens / admin
