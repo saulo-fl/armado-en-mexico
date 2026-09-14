@@ -67,6 +67,76 @@ def test_fecha():
     assert vigia.fecha(datetime(2026, 9, 4, 20, 0)) == "04-SEP-2026"
 
 
+def _bajador(paginas: dict, archivos: dict):
+    def bajar(url):
+        if url in paginas:
+            return paginas[url].encode("utf-8")
+        if url in archivos:
+            return archivos[url]
+        raise OSError(f"sin fixture: {url}")
+    return bajar
+
+
+def _archivos_de(html):
+    return {u: u.encode() for u in vigia.documentos(vigia.leer_cuerpo(html))}
+
+
+def test_corrida_completa():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        dia1 = datetime(2026, 9, 14, 20, 0)
+
+        codigo, msgs = vigia.correr(_bajador(paginas, archivos), base, dia1, reintento_seg=0)
+        assert codigo == 0
+        assert len(msgs) == 1 and "estado inicial: 16 documentos" in msgs[0]["texto"], msgs
+        assert len(list((base / "archivo" / "2026-09-14").iterdir())) == 16
+
+        codigo, msgs = vigia.correr(_bajador(paginas, archivos), base, dia1, reintento_seg=0)
+        assert codigo == 0 and len(msgs) == 1 and "sin cambios" in msgs[0]["texto"], msgs
+
+        # Sale un inventario nuevo de armas (otro id, otro nombre) y cambia el horario.
+        com2 = (COM.replace("1103069/ARMAS_11_SEP._2026.pdf", "1200000/ARMAS_20_SEP._2026.pdf")
+                   .replace("08:00 a 14:00", "08:00 a 13:00"))
+        paginas[vigia.PAGINAS["comercializacion"]] = com2
+        dia2 = datetime(2026, 9, 20, 20, 0)
+        codigo, msgs = vigia.correr(_bajador(paginas, _archivos_de(com2)), base, dia2, reintento_seg=0)
+        assert codigo == 0
+        inv = [m for m in msgs if m["texto"].startswith("📦 Inventario nuevo DCAM: Existencias de Armas.")]
+        assert len(inv) == 1 and inv[0]["archivo"].endswith("1200000_ARMAS_20_SEP._2026.pdf"), msgs
+        assert any("Cambió el texto" in m["texto"] and "+ Lunes a Viernes de 08:00 a 13:00 horas." in m["texto"]
+                   for m in msgs), msgs
+        latido = msgs[-1]["texto"]
+        assert "nuevos: 1" in latido and "retirados: 1" in latido and "20-SEP-2026" in latido, latido
+        assert (base / "archivo" / "2026-09-20" / "1200000_ARMAS_20_SEP._2026.pdf").exists()
+
+
+def test_documento_que_no_baja_no_se_da_por_retirado():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        sin_uno = dict(archivos)
+        caido = next(u for u in sin_uno if "969507" in u)
+        del sin_uno[caido]
+        codigo, msgs = vigia.correr(_bajador(paginas, sin_uno), base, datetime(2026, 9, 15, 20), reintento_seg=0)
+        latido = msgs[-1]["texto"]
+        assert codigo == 0 and "no se pudieron bajar: 1" in latido and "retirados" not in latido, latido
+        assert caido in vigia.cargar_estado(base / "estado.json")["documentos"]
+
+
+def test_akamai_no_toca_el_estado():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: AKA, vigia.PAGINAS["costos"]: COS}
+        codigo, msgs = vigia.correr(_bajador(paginas, {}), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        assert codigo == 1 and len(msgs) == 1, msgs
+        assert "roto" in msgs[0]["texto"] and "Challenge Validation" in msgs[0]["texto"], msgs
+        assert not (base / "estado.json").exists()
+
+
 if __name__ == "__main__":
     pruebas = [f for n, f in sorted(globals().items()) if n.startswith("test_")]
     for f in pruebas:

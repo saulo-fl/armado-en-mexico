@@ -173,3 +173,136 @@ def guardar_estado(ruta: Path, estado: dict) -> None:
 
 def fecha(dt: datetime) -> str:
     return f"{dt.day:02d}-{MESES[dt.month - 1]}-{dt.year}"
+
+
+class LecturaInvalida(Exception):
+    pass
+
+
+def bajar_http(url: str) -> bytes:
+    req = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(req, timeout=60) as r:
+        return r.read()
+
+
+def _leer_pagina(bajar, pagina: str, url: str, reintento_seg: float) -> dict:
+    """Cuerpo de una lectura válida; un reintento y luego LecturaInvalida."""
+    motivo = None
+    for intento in range(2):
+        if intento:
+            time.sleep(reintento_seg)
+        try:
+            html = bajar(url).decode("utf-8", errors="replace")
+        except OSError as e:   # URLError, HTTPError y timeouts heredan de OSError
+            motivo = f"error de red al leer «{pagina}»: {e}"
+            continue
+        cuerpo = leer_cuerpo(html)
+        motivo = validar(html, pagina, cuerpo)
+        if motivo is None:
+            return cuerpo
+    raise LecturaInvalida(motivo)
+
+
+_TITULOS = {
+    "existencias": "📦 Inventario {verbo} DCAM: {etiqueta}",
+    "requisitos": "📄 Requisitos · {verbo}: {etiqueta}",
+    "imagen": "📢 Aviso o imagen · {verbo}: {etiqueta}",
+    "documento": "📄 Documento · {verbo}: {etiqueta}",
+}
+
+
+def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -> tuple[int, list[dict]]:
+    ruta_estado = dir_base / "estado.json"
+    previo = cargar_estado(ruta_estado)
+    try:
+        cuerpos = {p: _leer_pagina(bajar, p, u, reintento_seg) for p, u in PAGINAS.items()}
+    except LecturaInvalida as e:
+        return 1, [{"texto": f"⚠️ DCAM vigía roto: {e}"}]   # el estado no se toca
+
+    prev_docs = previo["documentos"] if previo else {}
+    carpeta = dir_base / "archivo" / ahora.strftime("%Y-%m-%d")
+    actuales, fallidos, archivos = {}, set(), {}
+    for url, info in documentos(cuerpos["comercializacion"]).items():
+        try:
+            datos = bajar(url)
+        except OSError:
+            fallidos.add(url)
+            continue
+        sha = hashlib.sha256(datos).hexdigest()
+        actuales[url] = {**info, "sha256": sha, "desde": prev_docs.get(url, {}).get("desde") or fecha(ahora)}
+        if prev_docs.get(url, {}).get("sha256") != sha:
+            carpeta.mkdir(parents=True, exist_ok=True)
+            archivos[url] = carpeta / nombre_archivo(url)
+            archivos[url].write_bytes(datos)
+    textos = {p: c["texto"] for p, c in cuerpos.items()}
+
+    nuevo_estado = {"actualizado": ahora.isoformat(timespec="seconds"), "textos": textos,
+                    "documentos": {**{u: prev_docs[u] for u in fallidos if u in prev_docs}, **actuales}}
+
+    if previo is None:
+        msg = f"✅ DCAM vigía · {fecha(ahora)} · estado inicial: {len(actuales)} documentos archivados"
+        if fallidos:
+            msg += f" · no se pudieron bajar: {len(fallidos)}"
+        guardar_estado(ruta_estado, nuevo_estado)
+        return 0, [{"texto": msg}]
+
+    cambios = comparar(prev_docs, actuales, fallidos)
+    msgs = []
+    for url in cambios["nuevos"] + cambios["cambiados"]:
+        verbo = "nuevo" if url in cambios["nuevos"] else "cambiado"
+        titulo = _TITULOS[actuales[url]["tipo"]].format(verbo=verbo, etiqueta=actuales[url]["etiqueta"])
+        msgs.append({"texto": f"{titulo}\n{url}", "archivo": str(archivos[url])})
+    diffs = {p: diff_texto(previo["textos"].get(p, ""), t) for p, t in textos.items()}
+    for p, lineas in diffs.items():
+        if lineas:
+            msgs.append({"texto": f"✏️ Cambió el texto de la página «{p}»\n{PAGINAS[p]}\n\n" + "\n".join(lineas)[:3500]})
+
+    partes = [f"{k}: {len(v)}" for k, v in cambios.items() if v]
+    if cambios["retirados"]:
+        partes[-1] += " (" + ", ".join(prev_docs[u]["etiqueta"] for u in cambios["retirados"]) + ")"
+    n_diffs = sum(1 for l in diffs.values() if l)
+    if n_diffs:
+        partes.append(f"texto cambiado en {n_diffs} página(s)")
+    if fallidos:
+        partes.append(f"no se pudieron bajar: {len(fallidos)}")
+    exist = ", ".join(nombre_archivo(u).split("_", 1)[1] for u, d in actuales.items() if d["tipo"] == "existencias")
+    n_img = sum(1 for d in actuales.values() if d["tipo"] == "imagen")
+    msgs.append({"texto": f"✅ DCAM vigía · {fecha(ahora)} · {' · '.join(partes) or 'sin cambios'}"
+                          f" · existencias: {exist} · {n_img} imágenes"})
+    guardar_estado(ruta_estado, nuevo_estado)
+    return 0, msgs
+
+
+def enviar(msgs: list[dict], bot) -> None:
+    for m in msgs:
+        print(m["texto"] + (f"\n[adjunto: {m['archivo']}]" if "archivo" in m else ""), end="\n\n", flush=True)
+        if bot is None:
+            continue
+        if "archivo" in m:
+            bot.send_document(m["archivo"], caption=m["texto"][:1024])
+        else:
+            bot.send_message(m["texto"])
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Vigía DCAM (gob.mx → Telegram)")
+    ap.add_argument("--sin-telegram", action="store_true", help="imprime los mensajes en vez de mandarlos")
+    args = ap.parse_args()
+    dir_base = Path(os.environ.get("DCAM_DIR", str(Path.home() / "apps" / "dcam-bot")))
+    dir_base.mkdir(parents=True, exist_ok=True)
+    bot = None
+    if not args.sin_telegram:
+        from quiron_telegram import Bot
+        bot = Bot.desde_env(os.environ["DCAM_TG_ENV"])
+    try:
+        codigo, msgs = correr(bajar_http, dir_base, datetime.now(), float(os.environ.get("DCAM_REINTENTO_SEG", "600")))
+    except Exception:
+        traceback.print_exc()
+        codigo = 1
+        msgs = [{"texto": "⚠️ DCAM vigía roto: excepción no prevista\n" + "".join(traceback.format_exc().splitlines(True)[-12:])}]
+    enviar(msgs, bot)
+    return codigo
+
+
+if __name__ == "__main__":
+    sys.exit(main())
