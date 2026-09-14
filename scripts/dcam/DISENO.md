@@ -4,8 +4,9 @@ Sistema que mantiene armado.mx sincronizado con la página oficial de la Secreta
 Defensa: <https://www.gob.mx/defensa/acciones-y-programas/comercializacion-de-armas>.
 Corre en **APOLO** (siempre encendido), no en HEFESTO.
 
-Decidido con Saulo el **13-sep-2026**. Este documento cubre el sistema entero y detalla
-la **pieza 1 (vigía)**; las piezas 2 y 3 tendrán su propio diseño antes de construirse.
+Decidido con Saulo el **13-sep-2026** (pieza 1) y el **14-sep-2026** (pieza 2). Este
+documento cubre el sistema entero y detalla la **pieza 1 (vigía)** y la **pieza 2
+(conciliación y publicación automáticas)**; la pieza 3 tendrá su propio diseño.
 
 ## Decisiones del sistema
 
@@ -27,15 +28,21 @@ la **pieza 1 (vigía)**; las piezas 2 y 3 tendrán su propio diseño antes de co
 | Info legal sincronizada | Avisos de la DCAM · requisitos de compra · costos de derechos · dirección, horario y contacto |
 | Publicación legal | El **dato oficial literal** se publica solo (con fecha y enlace a gob.mx) en un bloque nuevo de Legalidad; la **redacción propia** (FAQ, pasos) va por PR |
 | Dónde vive el código | En este repo, `scripts/dcam/`. Estado, archivo y credenciales, solo en APOLO |
+| Qué se publica solo (pieza 2) | Solo el renglón **idéntico** (nombre corto, n.º de ocurrencia y descripción larga) al del inventario anterior sobre una ficha existente, cuyo cambio de precio es 0 % o cae en un **ajuste general** (grupo de ≥ 5 renglones con el mismo %, ±0.05 pp). Todo lo demás —altas, agotados, regresos, variantes, erratas, % fuera de grupo— va a PR (14-sep-2026) |
+| Cómo se publica (pieza 2) | **PR que se mergea solo** tras `auditar.js`, build y preview de Cloudflare Pages en verde; luego resembrado de D1 y sondas como visitante. **Automático desde el primer inventario**, sin ensayo previo (14-sep-2026) |
+| Credencial de GitHub (pieza 2) | Token **fine-grained solo de `armado-en-mexico`** en `~/apps/dcam-bot/github.env` (600). No se usa la sesión de `gh` de APOLO, que alcanza todos los repos (14-sep-2026) |
+| PR de lo dudoso (pieza 2) | `claude -p` en APOLO lo deja **investigado contra el fabricante** (URL por dato; lo no encontrado, vacío y marcado), con la evidencia del PDF y la regla aplicada. Saulo revisa y mergea (14-sep-2026) |
+| Código del bot en APOLO | Cada corrida hace `git fetch` + reset del clon a `origin/main`; si el fetch falla, sigue y avisa «corriendo con código de <fecha>» (14-sep-2026) |
+| Vigilante externo | **No**: basta con el latido diario (14-sep-2026) |
 | Bot de Telegram | El vigía tiene **su propio bot** (regla del ecosistema: un bot por dominio). No reusa el bot/`.env` de `tg-notify`/panoptes-watchdog. Credenciales en `/home/saulo/apps/dcam-bot/telegram.env` (600), fuera del repo (14-sep-2026) |
 
 ## Piezas y orden
 
 | # | Pieza | Estado |
 |---|---|---|
-| 0 | Puesta al día en sesión: conciliar el inventario del 11-sep-2026 y corregir los 6 textos legales que chocaban con la fuente oficial | En curso (PR aparte) |
-| 1 | **Vigía**: detectar, archivar y avisar | Este documento |
-| 2 | Conciliación y publicación automáticas | Diseño pendiente |
+| 0 | Puesta al día en sesión: conciliar el inventario del 11-sep-2026 y corregir los textos legales que chocaban con la fuente oficial | Hecha (#154/#155, #158/#159, #164/#165; D1 resembrado) |
+| 1 | **Vigía**: detectar, archivar y avisar | Hecha e instalada en APOLO el 14-sep-2026 (#166/#167) |
+| 2 | Conciliación y publicación automáticas | Diseñada (sección «Pieza 2»); pendiente de plan e implementación |
 | 3 | Sincronización legal + bloque de Legalidad (entrevista de diseño con bocetos) | Diseño pendiente |
 
 ## Hechos medidos (13-sep-2026)
@@ -230,3 +237,177 @@ Para leer los logs después: `journalctl -u dcam-vigia.service -n 50 --no-pager`
 
 Conciliación y publicación (pieza 2) · extracción de avisos a datos y bloque de Legalidad
 (pieza 3) · monitor externo de «último OK» tipo Healthchecks (el latido cubre el hueco).
+
+## Pieza 2 — Conciliación y publicación automáticas
+
+Diseñada con Saulo el **14-sep-2026**. Objetivo: cuando el vigía archiva un inventario de
+existencias nuevo, que lo que ya está catalogado y cambió de forma predecible llegue solo a
+armado.mx, y que todo lo que pide criterio llegue a Saulo como PR investigado.
+
+### Arquitectura
+
+```
+APOLO · 20:00 · dcam-vigia.service
+  ├─ ExecStart: scripts/dcam/correr.sh
+  │     ├─ git fetch + reset --hard origin/main del clon que ejecuta
+  │     │   (si falla: DCAM_CODIGO_VIEJO=<fecha del commit> y sigue)
+  │     └─ exec python3 scripts/dcam/vigia.py
+  └─ vigia.py ── archiva ──► ¿existencias nuevas o cambiadas?
+                                └─ sí → conciliar.py, en la misma corrida, por catálogo
+
+conciliar.py  (scripts/dcam/)
+  1. Lee cada PDF nuevo con .claude/skills/conciliar-inventario/scripts/parse_pdf.py.
+     Armas, municiones y accesorios se procesan por separado (la DCAM no siempre los
+     sube a la vez).
+  2. Encadena cada renglón con el inventario anterior de ese catálogo usando
+     scripts/dcam/mapeo-dcam.json.
+  3. Clasifica cada cambio en SEGURO o DUDOSO (ver «Reglas»).
+  4. SEGURO → rama bot/dcam-<catalogo>-AAAA-MM-DD en el clon de TRABAJO
+     (~/apps/dcam-bot/trabajo, distinto del clon que ejecuta):
+       · aplicador: PDF a public/inventarios/, registro del inventario (primary),
+         historial, priceExact, existencias, ?v= de los data-*.js y mapeo actualizado
+       · puertas: ajuste general, auditar.js, npm ci + npm run build
+       · PR a main y gemelo a develop → preview de Cloudflare Pages en verde → merge de
+         ambos → despliegue del merge en verde → resembrado de D1 `armas` → sondas
+         como visitante → Telegram «publicado»
+  5. DUDOSO → rama bot/dcam-<catalogo>-AAAA-MM-DD-revision creada desde el main YA
+     publicado:
+       · claude -p con prompt fijo + skill conciliar-inventario + web del fabricante
+       · PR a main y gemelo a develop SIN merge → Telegram «PR por revisar»
+```
+
+- **Dos clones en APOLO.** `~/apps/dcam-bot/repo` ejecuta el código y se resetea a `main`
+  en cada corrida; `~/apps/dcam-bot/trabajo` es donde el bot crea ramas y commits. Así un
+  reset nunca se lleva trabajo a medias.
+- **El PR dudoso sale siempre después del merge del seguro**: los dos tocan las mismas
+  líneas de `data.js`/`data-precios.js` y, en paralelo, chocarían.
+- **Credenciales** en `~/apps/dcam-bot/` (chmod 600, fuera del repo): `telegram.env` (ya
+  existe), `github.env` (token fine-grained solo de `armado-en-mexico`), `cloudflare.env`
+  (token de API con D1:Edit). Se escriben con el comando que valida antes de guardar (vacío
+  → no escribe; la API rechaza el token → no escribe).
+- **Resembrado de D1 sin wrangler**: `resembrar.js` hoy obtiene el token con
+  `wrangler auth token`; se adapta de forma mínima para aceptar `CLOUDFLARE_API_TOKEN` del
+  entorno. APOLO no instala ni inicia sesión en wrangler.
+
+### Mapa de renglones (`scripts/dcam/mapeo-dcam.json`)
+
+Hoy los datos no guardan a qué renglón del PDF corresponde cada ficha (el historial tiene
+precio y fecha, no renglón). El mapa lo guarda, versionado en el repo y **no servido** (vive
+en `scripts/`, fuera de `out/`):
+
+- Por catálogo y por inventario: ficha → lista de renglones `{nombre_corto, ocurrencia,
+  descripcion}` (una ficha puede sumar varios renglones; uno está marcado como
+  `representativo`).
+- **Construcción inicial, una sola vez**, con el inventario del 11-sep-2026 ya conciliado:
+  cada ficha se empareja con el renglón cuyo precio **y** existencia coinciden exactamente
+  con su registro del 11-sep. Lo que quede ambiguo (varios renglones con el mismo precio y
+  existencia) o sin pareja se presenta a Saulo para decidirlo **antes** de activar la
+  pieza 2.
+- Cada publicación (automática o mergeada desde el PR dudoso) añade el inventario nuevo al
+  mapa. Así el encadenado aguanta inventarios saltados: siempre se compara con el último
+  inventario del catálogo que está en el mapa.
+
+### Reglas: seguro, dudoso y detenido
+
+**SEGURO — se publica solo** (se cumple todo):
+1. El renglón es **idéntico** (nombre corto, n.º de ocurrencia y descripción larga) al que el
+   mapa asigna a una ficha existente en el **inventario anterior** de ese catálogo.
+2. El cambio de precio es **0 %** o cae en un **ajuste general**: un grupo de ≥ 5 renglones
+   encadenados con el mismo % (tolerancia ±0.05 pp), calculado juntando los catálogos que
+   tengan la **misma fecha de corte** (la del encabezado «al cierre del día DD/MM/AAAA»),
+   aunque se hayan subido en días distintos; si un catálogo llega solo, el grupo se calcula
+   con los que ya estén en el mapa para esa fecha más el nuevo. Referencia real: el 11-sep
+   el 97 % de las armas cayó en −2.88 % y −1.31 %.
+3. Si la ficha suma varios renglones, **todos** cumplen 1 y 2; el precio sigue al
+   representativo.
+4. Entra: registro en el historial, `priceExact` (armas), existencia (mapa DCAM en armas,
+   `qty` del registro en accesorios y municiones), registro del inventario con `primary` y
+   el PDF en `public/inventarios/` con la convención de nombres de `AGENTS.md`.
+
+**DUDOSO — va a PR** (cualquiera):
+- renglón nuevo (alta, variante nueva o ficha que regresa de un inventario más viejo);
+- renglón que desaparece (agotado; si queda otra variante, regla de variantes);
+- cambio de precio fuera de los ajustes generales, incluidas las posibles erratas (Claude
+  aplica en el PR la regla de erratas);
+- mismo nombre corto y ocurrencia con descripción distinta.
+
+**DETENIDO — no se publica nada de ese catálogo** y llega «⚠️ conciliación detenida:
+<motivo>» si: el parser no reconoce el formato; el número de renglones leídos no cuadra con
+el de precios del PDF; falla `auditar.js` o el build; o la aplicación deja un historial que
+no cumple las invariantes de la skill.
+
+### Publicación de lo seguro
+
+1. Commit por pathspec en la rama del bot, push con el token de `github.env`, PR a `main` y
+   gemelo a `develop`, con la tabla de cambios en la descripción.
+2. `auditar.js` y `npm ci && npm run build` en el clon de trabajo; espera el check de
+   Cloudflare Pages del PR en verde (hasta 20 min). Merge del PR a `main` y del gemelo a
+   `develop`.
+3. Espera el despliegue del commit del merge en verde → resembrado de D1 `armas`. Si
+   `resembrar.js` avisa de ids que solo existen en D1 (ediciones del admin), **no aplica** y
+   avisa.
+4. Sondas como visitante: `/api/state` con el número de armas esperado, el precio nuevo de
+   una ficha cambiada y el `?v=` de `data-precios.js` que sirve `index.html`.
+5. Telegram: «✅ Publicado inventario DCAM (<catálogo>) del DD-MMM-AAAA: N precios, M
+   existencias · PR #x».
+
+### PR de lo dudoso
+
+- `claude -p` con un prompt fijo versionado en `scripts/dcam/` que: lee la skill
+  `conciliar-inventario`, recibe la lista de casos dudosos con sus renglones y la regla que
+  aplica a cada uno, verifica especificaciones de fichas nuevas en la web del fabricante (URL
+  por dato; lo que no encuentre queda vacío y marcado) y propone listas de compatibilidad si
+  entra un accesorio o un arma. Commits por pathspec, PR a `main` y `develop` **sin merge**.
+- Límite propio de 45 min. Si se pasa, o si falla la sesión o la suscripción, el PR sale
+  **igual** con los datos del PDF y la marca «investigación incompleta», y se avisa.
+- Telegram: «🔎 PR por revisar #y (<catálogo> del DD-MMM-AAAA): K altas, J agotados, E
+  posibles erratas, V variantes».
+
+### Errores y reanudación
+
+- **Una publicación se procesa una vez.** `estado.json` guarda, por catálogo y fecha, el paso
+  alcanzado (`rama`, `pr`, `mergeado`, `d1`, `sondas`, `dudoso_pr`). Una corrida que muere a
+  medias deja ese paso escrito y la siguiente continúa desde ahí (encuentra rama o PR por su
+  nombre) en vez de empezar de nuevo.
+- **Merge hecho pero D1 sin resembrar** es el caso grave (el código está publicado pero quien
+  ya visitó el sitio ve lo viejo): «⚠️ publicado sin resembrar D1» y la siguiente corrida
+  reintenta el resembrado.
+- **Preview o despliegue que no llega a verde** en su plazo: el PR queda abierto sin merge,
+  con un comentario del motivo, y se avisa.
+- **Código viejo**: si `correr.sh` no pudo actualizar el clon, el latido incluye «⚠️
+  corriendo con código de <fecha>».
+- `dcam-vigia.service` sube a `TimeoutStartSec=3h` (espera del preview + `claude -p`).
+
+### Pruebas
+
+- **Reproducción con datos reales**: encadenar `dcam-existencias-2026-07-06.pdf` →
+  `dcam-existencias-2026-09-11.pdf` (y los de municiones/accesorios equivalentes) con un
+  mapa construido desde el 6-jul. En armas, la existencia de cada ficha en el 6-jul no está
+  en los datos actuales (`AMX_ARMAS_EXISTENCIAS` solo guarda la del último inventario): se
+  toma de los `data-*.js` tal como quedaron en git en el commit que concilió el 6-jul. Lo que el bot clasifique como seguro, aplicado sobre los
+  datos del 6-jul, debe coincidir con lo publicado hoy en `main` para esas fichas; y lo
+  dudoso debe contener los casos que se decidieron a mano (DT11, 694, Renova, SXP, BREN 2,
+  92FS, Tanfoglio…).
+- Pruebas pequeñas del aplicador sobre copias de los `data-*.js`, de la detección de
+  ajustes generales y de la reanudación por pasos.
+- **Modo `--seco`**: hace todo en el clon de trabajo (aplicador y puertas incluidos) pero sin
+  push, merge, D1, `claude -p` ni Telegram; imprime el plan y el diff.
+
+### Instalación (tras mergear la pieza 2)
+
+1. Saulo crea el token fine-grained de GitHub (Contents y Pull requests lectura/escritura,
+   Metadata lectura y el permiso mínimo para leer checks — se confirma en la
+   implementación) y el token de API de Cloudflare (D1:Edit); los escribe en
+   `~/apps/dcam-bot/github.env` y `cloudflare.env` con el comando que valida.
+2. Clon de trabajo `~/apps/dcam-bot/trabajo` con `npm ci`; comprobar que `claude -p`
+   responde en APOLO con el usuario `saulo`.
+3. Construcción inicial del mapa desde el 11-sep y decisión de Saulo sobre lo ambiguo.
+4. `--seco` contra el último inventario archivado (no debe haber nada que publicar) y la
+   prueba de reproducción 6-jul → 11-sep en verde.
+5. Unidad actualizada (`correr.sh`, `TimeoutStartSec=3h`) y `daemon-reload`. Desde ahí, el
+   próximo inventario se publica solo.
+
+### Fuera de la pieza 2
+
+Pieza 3 (sincronización legal y bloque de Legalidad) · inventarios de OTCA (el vigía no los
+lee) · fotos de fichas nuevas (siguen con marcador de posición) · vigilante externo.
