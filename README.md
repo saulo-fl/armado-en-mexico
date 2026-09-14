@@ -5,10 +5,10 @@
 </div>
 
 <!-- cifras:inicio -->
-Catálogo actual: **192 armas · 36 accesorios · 71 municiones**,
-servidas como **321 páginas HTML prerenderizadas** para que los buscadores y los
+Catálogo actual: **225 armas · 39 accesorios · 92 municiones**,
+servidas como **378 páginas HTML prerenderizadas** para que los buscadores y los
 bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap declara
-**317 URLs**, 310 de ellas con la fecha real de su inventario (la última, 2026-07-06).
+**374 URLs**, 367 de ellas con la fecha real de su inventario (la última, 2026-09-11).
 
 <sub>Bloque generado por `npm run cifras` desde el propio build. No editar a mano.</sub>
 <!-- cifras:fin -->
@@ -112,7 +112,9 @@ la está considerando:
 - **Ficha técnica**, mecanografiada en una ficha de fichero: calibre, capacidad, mecanismo,
   longitud, peso, origen y año.
 - **Comprobante de precio**: la cifra con IVA, la armería que la publicó, la fecha de su inventario
-  y la casilla **Comparar**. En el teléfono vuelve a aparecer abajo en cuanto sale de la pantalla.
+  y la casilla **Comparar**. Si el arma ya no aparece en el inventario más reciente de esa armería,
+  lleva el sello **ÚLTIMO PRECIO CONOCIDO**. En el teléfono vuelve a aparecer abajo en cuanto sale
+  de la pantalla.
 - **Tarjeta de almacén.** Las existencias por sede: cuántas piezas marcó el último inventario de la
   DCAM y el de la OTCA, o AGOTADO si el arma ya no aparece en él, con la descripción literal con la
   que figura en el inventario, el enlace a cada PDF y el aviso de que es un dato histórico.
