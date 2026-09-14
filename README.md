@@ -5,10 +5,10 @@
 </div>
 
 <!-- cifras:inicio -->
-Catálogo actual: **192 armas · 36 accesorios · 71 municiones**,
-servidas como **321 páginas HTML prerenderizadas** para que los buscadores y los
+Catálogo actual: **225 armas · 39 accesorios · 92 municiones**,
+servidas como **378 páginas HTML prerenderizadas** para que los buscadores y los
 bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap declara
-**317 URLs**, 310 de ellas con la fecha real de su inventario (la última, 2026-07-06).
+**374 URLs**, 367 de ellas con la fecha real de su inventario (la última, 2026-09-11).
 
 <sub>Bloque generado por `npm run cifras` desde el propio build. No editar a mano.</sub>
 <!-- cifras:fin -->
