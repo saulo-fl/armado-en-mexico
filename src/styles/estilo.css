@@ -1889,6 +1889,7 @@
   text-wrap: pretty;
 }
 .amx-v2 .amx-errata-signo { font-weight: 700; color: var(--alerta); }
+.amx-v2 .amx-errata-fecha { white-space: nowrap; }
 .amx-v2 .amx-talon .amx-errata { color: var(--talon-tinta); }
 .amx-v2 .amx-talon .amx-errata-signo { color: var(--talon-rojo); }
 /* La casilla de Comparar: se tacha a máquina. El estado lo dice la X Y el
@@ -1943,11 +1944,14 @@
 }
 .amx-v2 .amx-talon--fijo .amx-talon-papel {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--e3);
   padding: 6px 14px 11px;
 }
-.amx-v2 .amx-talon-resumen { flex: 1 1 auto; min-width: 0; }
+/* Base 0 y no auto: con flex-wrap (por la nota de errata) el ancho natural del
+   rótulo en nowrap mandaba la casilla al renglón de abajo. */
+.amx-v2 .amx-talon-resumen { flex: 1 1 0; min-width: 0; }
 .amx-v2 .amx-talon-mini {
   display: block;
   font-family: var(--mono);
@@ -1968,6 +1972,14 @@
   padding: 0 0 0 var(--e3);
   border-top: 0;
   border-left: 1px dashed var(--talon-filo);
+}
+/* La nota de errata en la barra: renglón propio a todo el ancho, al piso de 12px
+   para que la barra crezca lo menos posible (3 renglones a 360px). */
+.amx-v2 .amx-talon--fijo .amx-errata {
+  flex: 1 0 100%;
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.35;
 }
 @media (min-width: 1024px) {
   .amx-v2 .amx-talon--fijo { display: none; }

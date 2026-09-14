@@ -2149,9 +2149,20 @@ window.CintaDymo = CintaDymo;
 // `price` el que se publica. Si hay un registro anterior con ese mismo precio,
 // la nota cita su fecha; si no, `price` es el del PDF y la nota solo avisa.
 // Sale junto al precio en las tres fichas y solo si el ÚLTIMO registro, el del
-// precio actual, trae `errata`.
+// precio actual, trae `errata`. Va también en la barra fija del móvil.
+//
+// EL TEXTO ESTÁ DUPLICADO en scripts/build-prerender.mjs (`textoErrata`), que
+// corre en Node sin ui.jsx: si tocas uno, toca el otro. Las fechas van como en
+// el boceto de Saulo, «06-JUL-2026», con meses fijos y no con toLocaleDateString:
+// así la app y el prerender escriben lo mismo sea cual sea el ICU.
 // ──────────────────────────────────────────────────────────────
-function amxErrataPrecio(historial) {
+const AMX_MESES_ERRATA = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+function amxFechaErrata(f) {
+  const [a, m, d] = String(f || '').slice(0, 10).split('-');
+  return AMX_MESES_ERRATA[m - 1] ? `${d}-${AMX_MESES_ERRATA[m - 1]}-${a}` : String(f || '');
+}
+
+function amxTextoErrata(historial) {
   const h = historial || [];
   const ultimo = h[h.length - 1];
   if (!ultimo || !ultimo.errata) return null;
@@ -2160,23 +2171,23 @@ function amxErrataPrecio(historial) {
   for (let i = h.length - 2; i >= 0 && v != null; i--) {
     if (amxPrecioNum(h[i].price) === v) { anterior = h[i]; break; }
   }
-  return { publicado: ultimo.errata, fecha: ultimo.date, fechaAnterior: anterior ? anterior.date : null };
+  const error = 'probablemente es un error de la publicación de la Secretaría de la Defensa.';
+  return anterior
+    ? `Precio del inventario ${amxFechaErrata(anterior.date)}. El publicado el ${amxFechaErrata(ultimo.date)} (${String(ultimo.errata).replace(' MXN', '')}) ${error}`
+    : `El precio publicado el ${amxFechaErrata(ultimo.date)} ${error}`;
 }
-window.amxErrataPrecio = amxErrataPrecio;
+window.amxTextoErrata = amxTextoErrata;
 
 function NotaErrata({ historial }) {
-  const e = amxErrataPrecio(historial);
-  if (!e) return null;
-  const publicado = String(e.publicado).replace(' MXN', '');
+  const texto = amxTextoErrata(historial);
+  if (!texto) return null;
   return (
     <p className="amx-errata">
       {/* U+FE0E: el signo en texto, no como emoji (iOS lo pinta a color). */}
       <span className="amx-errata-signo" aria-hidden="true">{'⚠︎'}</span>
-      <span>
-        {e.fechaAnterior
-          ? `Precio del inventario ${amxFmtManualDate(e.fechaAnterior)}. El publicado el ${amxFmtManualDate(e.fecha)} (${publicado}) probablemente es un error de la publicación de la Secretaría de la Defensa.`
-          : `El precio publicado el ${amxFmtManualDate(e.fecha)} probablemente es un error de la publicación de la Secretaría de la Defensa.`}
-      </span>
+      {/* Las fechas no se parten en su guion («11-» / «SEP-2026»). */}
+      <span>{texto.split(/(\d{2}-[A-Z]{3}-\d{4})/).map((t, i) =>
+        i % 2 ? <span key={i} className="amx-errata-fecha">{t}</span> : t)}</span>
     </p>
   );
 }
@@ -2186,7 +2197,8 @@ window.NotaErrata = NotaErrata;
 // TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
 // En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
 // casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
-// `historial` es solo para la nota de errata (ver NotaErrata).
+// `historial` es solo para la nota de errata (ver NotaErrata); en el fijo va en
+// un renglón propio bajo la cifra y la casilla.
 //
 // `ultimoConocido`: el precio viene de un inventario ANTERIOR al último de su
 // sucursal, es decir, el arma ya no aparece en el más reciente. El talón lleva
@@ -2222,6 +2234,7 @@ function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fi
           <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
           {enComparacion ? 'En comparación' : 'Comparar'}
         </button>
+        {fijo && <NotaErrata historial={historial} />}
       </div>
     </div>
   );

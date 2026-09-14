@@ -407,7 +407,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
       {!ancho && talonFuera && !pieVisible && compareIds.length === 0 &&
         <window.TalonComprobante fijo
           precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
-          ultimoConocido={ultimoConocido}
+          ultimoConocido={ultimoConocido} historial={priceHistory}
           enComparacion={inCmp} onComparar={comparar} />}
     </div>);
 
