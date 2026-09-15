@@ -408,6 +408,49 @@ window.ACCESORIOS.forEach(a => {
   if (nombres.length) a.compatibilidad = nombres;
 });
 
+// ── Nombre de letrero (15-sep-2026) ──────────────────────────────────────────
+// Lo que va rotulado en el letrero de su puesto en la vitrina de /accesorios: la
+// plataforma a la que sirve, con marca si cabe, y el calibre solo para
+// desempatar. Máximo 2 renglones a 360 px. Lista propuesta a Saulo; el nombre
+// completo sigue en la ficha y en el aria-label del puesto. auditar.js exige uno
+// por accesorio y sin repetir: al dar de alta un accesorio, añádelo aquí.
+const ACC_CORTO = {
+  101: 'Nordic .22 LR',        102: 'Mossberg 702',        103: 'CZ 805 Bren',
+  104: 'Benelli MR1',          105: 'Grand Power CP380',   106: 'IWI Jericho',
+  107: 'IWI Masada',           108: 'Springfield XD-M',    109: 'Springfield Echelon',
+  110: 'SIG P320',             111: 'Tippmann M4-22',      112: 'Browning 1911-380',
+  113: 'CZ Shadow 2',          114: 'AMSAC 9mm',           115: '5.56 polímero',
+  116: 'C-MAG G36',            117: 'C-MAG AR-15',         118: 'Taurus TH380',
+  119: 'CZ P-09 .22',          120: 'Glock 17',            121: 'Glock 19',
+  122: 'Glock 22',             123: 'Beretta 92FS',        124: 'Beretta 92FS .22',
+  125: 'Browning 1911-22',     126: 'OPT VM G2 12 GA',     127: 'OPT VM G2 20 GA',
+  128: 'Beretta PX4',          129: 'Taurus PT58',         130: 'Browning Buck Mark',
+  131: 'CZ 457',               132: 'Tanfoglio FT-9',      133: 'IWI Galil ACE',
+  134: 'CZ P-07',
+  201: 'Mepro MOR',            202: 'Mepro GLS',
+  301: 'Culata DT11',
+  401: 'Cañón Mossberg 500',   402: 'Clips Rhino .38',
+};
+window.ACCESORIOS.forEach(a => { a.corto = ACC_CORTO[a.id] || ''; });
+
+// ── La vitrina del catálogo (15-sep-2026) ────────────────────────────────────
+// Las secciones de /accesorios: solo categorías con piezas, en el orden de
+// ACCESORIO_CATEGORIES, y dentro de cada una por nombre corto. Si `categoria` no
+// es una sección con piezas ('all', vacía, desconocida) devuelve todas. Pura:
+// sin DOM ni React. Prueba: scripts/vitrina.test.mjs.
+window.accesoriosVitrina = function (categoria, lista = window.ACCESORIOS, cats = window.ACCESORIO_CATEGORIES.categoria) {
+  const todas = cats
+    .map((c) => ({
+      id: c.id,
+      label: c.label,
+      piezas: lista.filter((a) => a.categoria === c.id)
+        .sort((x, y) => String(x.corto).localeCompare(String(y.corto), 'es')),
+    }))
+    .filter((s) => s.piezas.length);
+  const una = todas.filter((s) => s.id === categoria);
+  return una.length ? una : todas;
+};
+
 // ¿el accesorio es compatible con esta arma? (determinista, sin invención)
 window.accesorioFitsArma = function (acc, arma) {
   if (!acc || !arma) return false;

@@ -125,6 +125,10 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
   lista; sin fichas, escribe en `amx()` la plataforma que nombra el PDF («Mossberg 500»),
   nunca un genérico («Pistola 9mm»). `auditar.js` falla si una lista apunta a un id de
   arma inexistente.
+- **(15-sep-2026) Nombre de letrero `corto`.** Al dar de alta un accesorio, añade su entrada
+  en `ACC_CORTO` (`data-accesorios.js`): lo que rotula el letrero de su puesto en la vitrina de
+  `/accesorios` — la plataforma a la que sirve, con marca si cabe, calibre solo para
+  desempatar, máximo 2 renglones a 360 px. `auditar.js` falla si falta o se repite.
 
 ## 4) Verificar (obligatorio antes de commitear)
 Invoca el skill `verificar-app` o corre `scripts/auditar.js`:
