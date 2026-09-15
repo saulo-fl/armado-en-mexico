@@ -1741,14 +1741,21 @@
 }
 
 /* El sello legal, estampado encima de la copia: pisa la esquina de la foto y
-   el faldón, como un sello real que nadie alinea. */
+   el faldón, como un sello real que nadie alinea.
+   Va anclado a la FOTO, no al alto de la copia. Con `bottom` en %, un faldón de
+   dos renglones («Ceska Zbrojovka · Rep. Checa · 2013») estiraba la copia y
+   EXCLUSIVO bajaba sobre el nombre (−11 px en la CZ P-09 a 390; −19 a 1024;
+   15-sep-2026). El pozo es cuadrado, así que su canto inferior queda a «ancho
+   de la copia − 15 px», y un margin-top en % se mide contra ese mismo ancho. */
 .amx-v2 .amx-copia-sello {
   position: absolute;
   z-index: 4;
-  right: -14px; bottom: 24%;          /* en móvil, sobre la foto: más abajo tapaba el nombre del faldón */
+  top: 0; right: -14px;
+  margin-top: calc(100% - 54px);      /* móvil: donde ya estaba; 9-11 px libres sobre el nombre */
   pointer-events: none;
 }
-@media (min-width: 1024px) { .amx-v2 .amx-copia-sello { right: -12px; bottom: 15%; } }
+/* En escritorio el sello es de 18 px: con 60 px quedan 9-10 px libres a 1024 y 1280. */
+@media (min-width: 1024px) { .amx-v2 .amx-copia-sello { right: -12px; margin-top: calc(100% - 60px); } }
 .amx-v2 .amx-copia-sello .amx-sello {
   font-size: 15px;
   padding: 5px 12px 6px;
