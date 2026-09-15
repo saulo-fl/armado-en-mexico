@@ -397,10 +397,14 @@ build; o la aplicación deja un historial que no cumple las invariantes de la sk
 
 ### Errores y reanudación
 
-- **Una publicación se procesa una vez.** `estado.json` guarda, por catálogo y fecha, el paso
-  alcanzado (`rama`, `pr`, `mergeado`, `d1`, `sondas`, `dudoso_pr`). Una corrida que muere a
-  medias deja ese paso escrito y la siguiente continúa desde ahí (encuentra rama o PR por su
-  nombre) en vez de empezar de nuevo.
+- **Una publicación se procesa una vez.** El paso alcanzado, por catálogo y fecha, se guarda
+  en `/home/saulo/apps/dcam-bot/conciliacion.json` — aparte de `estado.json` del vigía, que
+  se reescribe entero en cada corrida y borraría claves ajenas. Los pasos de lo seguro son
+  los de `publicar_seguro`: `rama` → `aplicado` → `puertas` → `pr` → `preview` → `mergeado`
+  → `produccion` → `d1` → `sondas` → `hecho`; lo dudoso lleva su propio registro
+  (`pub["dudoso"] = {"paso": "hecho", "pr": n}`, o `{"paso": "issue", "issue": n}` si
+  `claude -p` no pudo). Una corrida que muere a medias deja ese paso escrito y la siguiente
+  continúa desde ahí (encuentra rama o PR por su nombre) en vez de empezar de nuevo.
 - **Merge hecho pero D1 sin resembrar** es el caso grave (el código está publicado pero quien
   ya visitó el sitio ve lo viejo): «⚠️ publicado sin resembrar D1» y la siguiente corrida
   reintenta el resembrado.
