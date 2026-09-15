@@ -1,9 +1,10 @@
 // Armado en México — Pantallas de ACCESORIOS DCAM
-// Card, carrusel de Home, catálogo con filtros, y ficha de detalle con el bloque
-// de precio + historial de inventarios (mismo patrón que las armas).
+// Card, carrusel de Home, la vitrina del catálogo (rediseño del 15-sep-2026), y
+// ficha de detalle con el bloque de precio + historial de inventarios (mismo
+// patrón que las armas).
 // Expone en window: AccesorioCard, HomeAccesoriosSection, AccesoriosScreen, AccesorioFicha
 
-const { useState: useStateAcc, useMemo: useMemoAcc, useEffect: useEffectAcc } = React;
+const { useState: useStateAcc } = React;
 
 // Fecha de inventario (YYYY-MM-DD) → texto es-MX
 function accFmtDate(f) {
@@ -158,183 +159,44 @@ function HomeAccesoriosSection({ onNav }) {
 window.HomeAccesoriosSection = HomeAccesoriosSection;
 
 // ════════════════════════════════════════════════════════════════
-// CATÁLOGO DE ACCESORIOS — filtros + buscador + grid responsivo
+// CATÁLOGO DE ACCESORIOS — la vitrina (rediseño del 15-sep-2026)
+// Un puesto de tianguis como el de Municiones del Home: toldo de lona,
+// separadores de fichero por categoría y un puesto por pieza con SOLO su nombre
+// corto. Decidido con Saulo pregunta por pregunta (docs/DESIGN.md §5.7); él
+// retiró el buscador, los desplegables y el aviso de esta pantalla.
+// La categoría activa vive en la URL (app.jsx): aquí solo se lee y se avisa con
+// `onCategoria` al cambiar de separador.
 // ════════════════════════════════════════════════════════════════
-function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
-  const P = window.PALETTE;
+function AccesoriosScreen({ initialFilter, onOpenAccesorio, onCategoria }) {
   const vp = window.useViewport();
-  const cols = vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr';
-  const padX = vp.isDesktop ? 28 : 16;
-
-  const [query, setQuery] = useStateAcc('');
-  const [categoria, setCategoria] = useStateAcc((initialFilter && initialFilter.categoria) || 'all');
-  const [avail, setAvail] = useStateAcc('all');
-  const [marca, setMarca] = useStateAcc('all');
-  const [precio, setPrecio] = useStateAcc('all');
-
-  const todos = window.ACCESORIOS || [];
-  const marcas = useMemoAcc(() => Array.from(new Set(todos.map(a => a.marca))).sort(), [todos]);
-  const cats = window.ACCESORIO_CATEGORIES.categoria;
-  const disp = window.ACCESORIO_CATEGORIES.disponibilidad;
-
-  const filtered = useMemoAcc(() => {
-    return todos.filter(a => {
-      if (categoria !== 'all' && a.categoria !== categoria) return false;
-      if (avail !== 'all' && a.avail !== avail) return false;
-      if (marca !== 'all' && a.marca !== marca) return false;
-      if (precio !== 'all' && String(a.priceLvl) !== precio) return false;
-      if (query) {
-        const q = query.toLowerCase();
-        const hay = (a.nombre + ' ' + a.marca + ' ' + a.dcamRef + ' ' + accCatMeta(a.categoria).label).toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [query, categoria, avail, marca, precio, todos]);
-
-  const clearAll = () => { setQuery(''); setCategoria('all'); setAvail('all'); setMarca('all'); setPrecio('all'); };
-  const anyFilter = query || categoria !== 'all' || avail !== 'all' || marca !== 'all' || precio !== 'all';
-
-  const selStyle = {
-    background: P.bg, color: P.text, border: `1px solid ${P.border}`,
-    padding: '11px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
-    letterSpacing: '0.04em', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    flex: '1 1 160px', minWidth: 0,
-  };
-  const chip = (active) => ({
-    // Activo = fondo P.amber, que es el VERDE de marca #173A32, no un ambar:
-    // el negro encima daba 1.69:1. Crema sobre el verde: 10.83:1.
-    background: active ? P.amber : 'transparent',
-    color: active ? P.tintaSobreMarca : P.textDim,
-    border: `1px solid ${active ? P.amber : P.border}`,
-    padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
-    letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-    display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: active ? 700 : 400,
-  });
+  // 2 por fila en móvil, 4 en tableta (solo para que no se rompa) y 6 desde el
+  // corte único de 1024 px.
+  const porFila = vp.width < 720 ? 2 : vp.width < 1024 ? 4 : 6;
+  const secciones = window.accesoriosVitrina('all');
+  const pedida = initialFilter && initialFilter.categoria;
+  const activo = secciones.some((s) => s.id === pedida) ? pedida : 'all';
+  const visibles = window.accesoriosVitrina(activo);
+  const opciones = [{ id: 'all', label: 'Todas' }].concat(secciones.map((s) => ({ id: s.id, label: s.label })));
 
   return (
-    <div style={{ paddingBottom: 90 }}>
-      {/* Encabezado + encuadre legal */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `20px ${padX}px 0`, boxSizing: 'border-box' }}>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
-          color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05,
-        }}>Accesorios DCAM</div>
-        <div style={{
-          marginTop: 12, background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
-          boxShadow: window.CLARO.sombra, padding: '11px 14px',
-          ...window.amxProsa({ fontSize: 16, color: P.textDim, lineHeight: 1.6 }),
-        }}>
-          Accesorios de adquisición legal a través de la <b style={{ color: P.text }}>DCAM</b> (nacional) y la <b style={{ color: P.text }}>OTCA</b> (Monterrey, catálogo propio).
-          Información con fines de transparencia; <b style={{ color: P.text }}>no los comercializamos</b>.
-          Cada precio cita su inventario fuente y la autoridad que lo emite.
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `16px ${padX}px 0`, boxSizing: 'border-box' }}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar accesorio, marca o referencia…"
-          style={{
-            width: '100%', boxSizing: 'border-box', background: P.bg, color: P.text,
-            border: `1px solid ${P.border}`, padding: '11px 14px', marginBottom: 12,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 17, letterSpacing: '0.03em',
-          }} />
-
-        {/* categorías (chips con swipe táctil, sin barra) */}
-        <div className="amx-hscroll" style={{
-          display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 4,
-          WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity',
-        }}>
-          <button onClick={() => setCategoria('all')} style={chip(categoria === 'all')}>Todas</button>
-          {cats.map(c => (
-            <button key={c.id} onClick={() => setCategoria(c.id)} style={chip(categoria === c.id)}>
-              <span style={{ color: categoria === c.id ? '#000' : P.amber }}>{c.icon}</span>{c.label}
-            </button>
-          ))}
-        </div>
-
-        {/* selects: disponibilidad / marca / precio */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-          <select value={avail} onChange={(e) => setAvail(e.target.value)} style={selStyle}>
-            <option value="all">Toda disponibilidad</option>
-            {disp.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
-          </select>
-          <select value={marca} onChange={(e) => setMarca(e.target.value)} style={selStyle}>
-            <option value="all">Todas las marcas</option>
-            {marcas.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-          <select value={precio} onChange={(e) => setPrecio(e.target.value)} style={selStyle}>
-            <option value="all">Todo nivel de precio</option>
-            <option value="1">$ · Económico</option>
-            <option value="2">$$ · Medio-bajo</option>
-            <option value="3">$$$ · Medio</option>
-            <option value="4">$$$$ · Alto</option>
-            <option value="5">$$$$$ · Premium</option>
-          </select>
-          {anyFilter &&
-            <button onClick={clearAll} style={{
-              background: 'transparent', color: P.redHi, border: `1px solid ${P.redHi}`,
-              padding: '11px 14px', minHeight: 44, boxSizing: 'border-box', cursor: 'pointer',
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 15, letterSpacing: '0.08em', textTransform: 'uppercase',
-            }}>✕ Limpiar</button>
-          }
-        </div>
-
-        {/* contador */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
-          letterSpacing: '0.12em', margin: '16px 0 10px', textTransform: 'uppercase',
-        }}>
-          <span>▸ {filtered.length} {filtered.length === 1 ? 'ACCESORIO' : 'ACCESORIOS'}</span>
-          <span style={{ color: P.textMuted }}>{todos.length} TOTAL</span>
-        </div>
-      </div>
-
-      {/* grid (agrupado por categoría cuando no hay categoría ni búsqueda activa) */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `0 ${padX}px`, boxSizing: 'border-box' }}>
-        {filtered.length ? (
-          (categoria === 'all' && !query) ? (
-            cats.map(c => {
-              const list = filtered.filter(a => a.categoria === c.id);
-              if (!list.length) return null;
-              return (
-                <div key={c.id}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 0 12px' }}>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 21.5, color: P.amber, lineHeight: 1 }}>{c.icon}</span>
-                    <h2 style={{
-                      fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: P.text,
-                      textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0, whiteSpace: 'nowrap',
-                    }}>{c.label}</h2>
-                    <span style={{ flex: 1, height: 1, background: P.border }} />
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.textMuted }}>{list.length}</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 14 }}>
-                    {list.map(a => <AccesorioCard key={a.id} acc={a} onClick={() => onOpenAccesorio(a.id)} />)}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 14 }}>
-              {filtered.map(a => <AccesorioCard key={a.id} acc={a} onClick={() => onOpenAccesorio(a.id)} />)}
-            </div>
-          )
-        ) : (
-          <div style={{
-            border: `1px dashed ${P.border}`, padding: '40px 20px', textAlign: 'center',
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5, color: P.textMuted,
-          }}>
-            ◇ Sin resultados con estos filtros.
-            <button onClick={clearAll} style={{
-              display: 'block', margin: '12px auto 0', background: 'none', border: 'none',
-              color: P.amber, cursor: 'pointer', fontFamily: 'inherit', fontSize: 15.5, textDecoration: 'underline',
-            }}>Limpiar filtros</button>
-          </div>
-        )}
+    <div className="amx-vitrina-acc">
+      <window.ToldoLona>Accesorios</window.ToldoLona>
+      <window.SeparadoresFiltro etiqueta="Categorías de accesorios" opciones={opciones}
+        activo={activo} controla="vitrina-acc-panel" onCambiar={(id) => onCategoria && onCategoria(id)} />
+      <div id="vitrina-acc-panel" role="tabpanel" aria-labelledby={'separador-' + activo}>
+        {visibles.map((s) => (
+          <section key={s.id} className="amx-vitrina-acc-seccion" aria-labelledby={'vitrina-acc-' + s.id}>
+            <window.CintaDymo id={'vitrina-acc-' + s.id}>{s.label}</window.CintaDymo>
+            <window.MesaPuestos items={s.piezas} porFila={porFila} renderPuesto={(a) => (
+              <window.PuestoPieza key={a.id}
+                rotulo={a.corto}
+                ariaLabel={a.corto + ' — ' + a.nombre}
+                foto={window.isRealImage(a.img) ? a.img : null}
+                silueta={window.accesorioPlaceholder(a)}
+                onClick={() => onOpenAccesorio(a.id)} />
+            )} />
+          </section>
+        ))}
       </div>
     </div>
   );
