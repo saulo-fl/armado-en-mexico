@@ -429,7 +429,7 @@ const ACC_CORTO = {
   134: 'CZ P-07',
   201: 'Mepro MOR',            202: 'Mepro GLS',
   301: 'Culata DT11',
-  401: 'Cañón Mossberg 500',   402: 'Clips Rhino .38',
+  401: 'Mossberg 500',         402: 'Clips Rhino .38',
 };
 window.ACCESORIOS.forEach(a => { a.corto = ACC_CORTO[a.id] || ''; });
 
