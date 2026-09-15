@@ -86,3 +86,91 @@ test('números: solo compiten valores únicos y exactos', () => {
   assert.equal(N.precio('$0.00 MXN'), null);
   assert.equal(N.precio(undefined), null);
 });
+
+const cot = (a, b) => window.amxCotejar(a, b, inv(a), b ? inv(b) : null);
+const claves = (fs) => fs.map((f) => f.clave);
+
+test('cotejo: LCP contra LCP Max', () => {
+  const c = cot(LCP, MAX);
+  assert.deepEqual(claves(c.arriba), ['capacidad', 'peso', 'longitud', 'precio', 'existencias', 'anio']);
+  assert.deepEqual(claves(c.iguales), ['calibre', 'mecanismo', 'origen']);
+  const gana = Object.fromEntries(c.arriba.map((f) => [f.clave, f.gana]));
+  assert.deepEqual(gana, { capacidad: 'b', peso: 'a', longitud: 'a', precio: 'a', existencias: null, anio: null });
+  const precio = c.arriba.find((f) => f.clave === 'precio');
+  assert.equal(precio.a.texto, '$9,110.35');
+  assert.equal(precio.a.fecha, '2026-06-18');
+  assert.equal(precio.b.ultimoConocido, true);
+  assert.deepEqual(c.arriba.find((f) => f.clave === 'existencias').siglas, ['DCAM', 'OTCA']);
+});
+
+test('cotejo: un empate va a iguales', () => {
+  const c = cot(LCP, Object.assign({}, MAX, { peso: '270 g' }));
+  assert.ok(claves(c.iguales).includes('peso'));
+});
+
+test('cotejo: un rango no compite', () => {
+  const c = cot(Object.assign({}, LCP, { peso: '3.5–3.7 kg' }), MAX);
+  const peso = c.arriba.find((f) => f.clave === 'peso');
+  assert.equal(peso.comparable, false);
+  assert.equal(peso.gana, null);
+});
+
+test('cotejo: g contra kg', () => {
+  const c = cot(Object.assign({}, LCP, { peso: '900g' }), Object.assign({}, MAX, { peso: '1.2 kg' }));
+  assert.equal(c.arriba.find((f) => f.clave === 'peso').gana, 'a');
+});
+
+test('cotejo: con una sola arma, todo arriba y sin ventaja', () => {
+  const c = cot(LCP, null);
+  assert.deepEqual(claves(c.arriba),
+    ['calibre', 'capacidad', 'peso', 'longitud', 'precio', 'existencias', 'mecanismo', 'origen', 'anio']);
+  assert.deepEqual(c.iguales, []);
+  assert.ok(c.arriba.every((f) => f.gana === null));
+});
+
+test('tira: LCP Max frente a LCP', () => {
+  const t = window.amxTiraCotejo(LCP, MAX, cot(LCP, MAX));
+  assert.equal(t.nombreA, 'LCP');
+  assert.equal(t.nombreB, 'LCP Max');
+  assert.deepEqual(t.partes, ['+4 cartuchos', '+27 g', '+4 mm', '+$5,765.48']);
+  assert.equal(t.avisoFechas, true);
+});
+
+test('tira: marcas distintas, singular, signo menos y kg', () => {
+  const A = arma(20, { nombre: 'Glock 25', marca: 'Glock', capacidad: '15+1', peso: '3.2 kg', longitud: '185mm', anio: 2003, priceExact: '$20,000.00 MXN' });
+  const B = arma(21, { nombre: 'Bersa Thunder 380', marca: 'Bersa', capacidad: '16+1', peso: '4.5 kg', longitud: '165mm', anio: 1995, priceExact: '$10,000.00 MXN' });
+  const t = window.amxTiraCotejo(A, B, cot(A, B));
+  assert.equal(t.nombreA, 'Glock 25');
+  assert.equal(t.nombreB, 'Bersa Thunder 380');
+  assert.deepEqual(t.partes, ['+1 cartucho', '+1.3 kg', '−20 mm', '−$10,000.00']);
+  assert.equal(t.avisoFechas, false);
+});
+
+test('tira: sin diferencias numéricas', () => {
+  const gemela = Object.assign({}, LCP, { id: 7, nombre: 'Ruger LCP II' });
+  assert.deepEqual(window.amxTiraCotejo(LCP, gemela, cot(LCP, gemela)).partes, []);
+});
+
+test('búsqueda: todas las palabras, sin acentos, con exclusión y alfabética', () => {
+  const armas = [MAX, LCP, arma(8, { nombre: 'CZ P-07', marca: 'Ceska Zbrojovka' })];
+  const nombres = (xs) => xs.map((x) => x.nombre);
+  assert.deepEqual(nombres(window.amxBuscarArmas(armas, 'lcp max', [])), ['Ruger LCP Max']);
+  assert.deepEqual(nombres(window.amxBuscarArmas(armas, 'RÚGER', [])), ['Ruger LCP', 'Ruger LCP Max']);
+  assert.deepEqual(nombres(window.amxBuscarArmas(armas, 'ruger', [5])), ['Ruger LCP Max']);
+  assert.deepEqual(nombres(window.amxBuscarArmas(armas, '', [])), ['CZ P-07', 'Ruger LCP', 'Ruger LCP Max']);
+  assert.deepEqual(nombres(window.amxBuscarArmas(armas, '.380', [])), ['CZ P-07', 'Ruger LCP', 'Ruger LCP Max']);
+});
+
+test('enlace: ida y vuelta, cortes ambiguos y slugs inválidos', () => {
+  const porSlug = { 'ruger-lcp': 5, 'ruger-lcp-max': 6, 'a-vs-b': 1, c: 2 };
+  const slugPorId = { 5: 'ruger-lcp', 6: 'ruger-lcp-max' };
+  assert.deepEqual(window.amxParComparar('ruger-lcp-vs-ruger-lcp-max', porSlug), [5, 6]);
+  assert.deepEqual(window.amxParComparar('ruger-lcp', porSlug), [5]);
+  assert.deepEqual(window.amxParComparar('ruger-lcp-vs-no-existe', porSlug), [5]);
+  assert.deepEqual(window.amxParComparar('no-existe', porSlug), []);
+  assert.deepEqual(window.amxParComparar('ruger-lcp-vs-ruger-lcp', porSlug), [5]);
+  assert.deepEqual(window.amxParComparar('a-vs-b-vs-c', porSlug), [1, 2]);
+  assert.equal(window.amxRutaComparar([5, 6], slugPorId), 'comparar/ruger-lcp-vs-ruger-lcp-max');
+  assert.equal(window.amxRutaComparar([6], slugPorId), 'comparar/ruger-lcp-max');
+  assert.equal(window.amxRutaComparar([], slugPorId), 'comparar');
+});

@@ -95,7 +95,148 @@
     },
   };
 
+  // ── EL COTEJO ─────────────────────────────────────────────────────────────
+  // Los datos en el orden de la ficha técnica. `gana`: qué valor se circula;
+  // sin `gana`, el dato nunca tiene ventaja (regla fija, decisión de Saulo).
+  const DATOS = [
+    { clave: 'calibre', etiqueta: 'Calibre', corta: 'Cal.', tipo: 'texto', de: (x) => x.calibre },
+    { clave: 'capacidad', etiqueta: 'Capacidad', corta: 'Cap.', tipo: 'num', de: (x) => x.capacidad, num: amxCotejoNum.capacidad, gana: 'mayor' },
+    { clave: 'peso', etiqueta: 'Peso', corta: 'Peso', tipo: 'num', de: (x) => x.peso, num: amxCotejoNum.peso, gana: 'menor' },
+    { clave: 'longitud', etiqueta: 'Longitud', corta: 'Long.', tipo: 'num', de: (x) => x.longitud, num: amxCotejoNum.longitud, gana: 'menor' },
+    { clave: 'precio', etiqueta: 'Precio', corta: 'Precio', tipo: 'precio', num: amxCotejoNum.precio, gana: 'menor' },
+    { clave: 'existencias', etiqueta: 'Existencias', corta: 'Existencias', tipo: 'existencias' },
+    { clave: 'mecanismo', etiqueta: 'Mecanismo', corta: 'Mec.', tipo: 'texto', de: (x) => x.mecanismo },
+    { clave: 'origen', etiqueta: 'Origen', corta: 'Origen', tipo: 'texto', de: (x) => x.pais },
+    { clave: 'anio', etiqueta: 'Año', corta: 'Año', tipo: 'texto', de: (x) => x.anio },
+  ];
+  const SUCURSALES = ['DCAM', 'OTCA'];
+  const mostrar = (v) => (texto(v).trim() === '' ? '—' : texto(v).trim());
+
+  function ladoDe(d, arma, inv) {
+    if (d.tipo === 'existencias') return { sucursales: inv.sucursales };
+    if (d.tipo === 'precio') {
+      return {
+        texto: mostrar(texto(inv.precio).replace(/\s*MXN\s*$/i, '')),
+        num: d.num(inv.precio),
+        sigla: inv.sigla,
+        fecha: inv.manual ? texto(inv.manual.fecha) : '',
+        ultimoConocido: inv.ultimoConocido,
+      };
+    }
+    const v = d.de(arma);
+    return { texto: mostrar(v), num: d.num ? d.num(v) : null };
+  }
+
+  // Una fila por dato. Con `b` null (una sola arma) todas van arriba, sin
+  // igualdad ni ventaja. Existencias va SIEMPRE arriba: es estado del
+  // inventario, no atributo del arma.
+  function amxCotejar(a, b, invA, invB) {
+    const arriba = [];
+    const iguales = [];
+    DATOS.forEach((d) => {
+      const fila = {
+        clave: d.clave, etiqueta: d.etiqueta, corta: d.corta, tipo: d.tipo,
+        a: ladoDe(d, a, invA), b: b ? ladoDe(d, b, invB) : null,
+        igual: false, gana: null, comparable: false,
+      };
+      if (d.tipo === 'existencias') {
+        const hay = (s) => [fila.a, fila.b].some((x) => x && x.sucursales.some((y) => y.sigla === s));
+        fila.siglas = SUCURSALES.filter(hay);
+        arriba.push(fila);
+        return;
+      }
+      if (!b) { arriba.push(fila); return; }
+      fila.comparable = fila.a.num != null && fila.b.num != null;
+      fila.igual = fila.comparable ? fila.a.num === fila.b.num : fila.a.texto === fila.b.texto;
+      if (d.gana && fila.comparable && !fila.igual) {
+        const aMayor = fila.a.num > fila.b.num;
+        fila.gana = (d.gana === 'mayor') === aMayor ? 'a' : 'b';
+      }
+      (fila.igual ? iguales : arriba).push(fila);
+    });
+    return { arriba, iguales };
+  }
+
+  // ── LA TIRA DE DIFERENCIAS ────────────────────────────────────────────────
+  // La SEGUNDA arma frente a la primera (el orden de la URL). Solo los datos
+  // numéricos comparables que difieren. Formato fijo, sin toLocaleString: la
+  // salida no depende del ICU del navegador ni del de Node.
+  const MENOS = '−';
+  const miles = (s) => {
+    const partes = s.split('.');
+    return partes[0].replace(/\B(?=(\d{3})+$)/g, ',') + (partes[1] ? '.' + partes[1] : '');
+  };
+  const CIFRA = {
+    capacidad: (n) => n + (n === 1 ? ' cartucho' : ' cartuchos'),
+    peso: (g) => (g < 1000 ? Math.round(g) + ' g' : Number((g / 1000).toFixed(2)) + ' kg'),
+    longitud: (mm) => Number(mm.toFixed(1)) + ' mm',
+    precio: (n) => '$' + miles(n.toFixed(2)),
+  };
+  // Con la misma marca, sin la marca: «LCP Max frente a LCP».
+  function nombreCorto(x, otra) {
+    const marca = texto(x.marca);
+    if (!marca || marca !== otra.marca || texto(x.nombre).indexOf(marca + ' ') !== 0) return x.nombre;
+    return x.nombre.slice(marca.length + 1);
+  }
+  function amxTiraCotejo(a, b, cotejo) {
+    const partes = [];
+    let avisoFechas = false;
+    cotejo.arriba.forEach((f) => {
+      if (!CIFRA[f.clave] || !f.comparable || f.igual) return;
+      const d = f.b.num - f.a.num;
+      partes.push((d > 0 ? '+' : MENOS) + CIFRA[f.clave](Math.abs(d)));
+      if (f.clave === 'precio' && f.a.fecha && f.b.fecha && f.a.fecha !== f.b.fecha) avisoFechas = true;
+    });
+    return { nombreA: nombreCorto(a, b), nombreB: nombreCorto(b, a), partes, avisoFechas };
+  }
+
+  // ── LA BÚSQUEDA ───────────────────────────────────────────────────────────
+  // Por nombre, marca y calibre, sin mayúsculas ni acentos, con TODAS las
+  // palabras escritas. Vacía = el catálogo entero en orden alfabético.
+  const normal = (s) => texto(s).normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  function amxBuscarArmas(armas, consulta, excluir) {
+    const fuera = new Set(excluir || []);
+    const palabras = normal(consulta).split(/\s+/).filter(Boolean);
+    return (armas || [])
+      .filter((x) => !fuera.has(x.id))
+      .filter((x) => {
+        const h = normal([x.nombre, x.marca, x.calibre].join(' '));
+        return palabras.every((p) => h.indexOf(p) >= 0);
+      })
+      .sort((x, y) => texto(x.nombre).localeCompare(texto(y.nombre), 'es'));
+  }
+
+  // ── EL ENLACE ─────────────────────────────────────────────────────────────
+  // /comparar/<slug-a>-vs-<slug-b>. Los slugs son los del NOMBRE, sin la rama de
+  // tipo, y los arma amxSlugIndex() en app.jsx (`nPorSlug` / `slugNPorA`). Un
+  // slug podría contener «-vs-», así que se prueban todos los cortes; lo que no
+  // existe se ignora.
+  const tiene = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  function amxParComparar(segmento, porSlug) {
+    const s = texto(segmento);
+    if (!s) return [];
+    if (tiene(porSlug, s)) return [porSlug[s]];
+    let parcial = null;
+    for (let i = s.indexOf('-vs-'); i >= 0; i = s.indexOf('-vs-', i + 1)) {
+      const izq = s.slice(0, i);
+      const der = s.slice(i + 4);
+      if (tiene(porSlug, izq) && tiene(porSlug, der) && porSlug[izq] !== porSlug[der]) return [porSlug[izq], porSlug[der]];
+      if (!parcial && tiene(porSlug, izq)) parcial = [porSlug[izq]];
+      if (!parcial && tiene(porSlug, der)) parcial = [porSlug[der]];
+    }
+    return parcial || [];
+  }
+  function amxRutaComparar(ids, slugPorId) {
+    const slugs = (ids || []).map((id) => slugPorId[id]).filter(Boolean);
+    return 'comparar' + (slugs.length ? '/' + slugs.join('-vs-') : '');
+  }
+
   window.amxInventarioArma = amxInventarioArma;
   window.amxInventarioDe = amxInventarioDe;
   window.amxCotejoNum = amxCotejoNum;
+  window.amxCotejar = amxCotejar;
+  window.amxTiraCotejo = amxTiraCotejo;
+  window.amxBuscarArmas = amxBuscarArmas;
+  window.amxParComparar = amxParComparar;
+  window.amxRutaComparar = amxRutaComparar;
 })();
