@@ -652,8 +652,8 @@ function AppHeader({ title, back, onBack, onHome, right }) {
       paddingTop: 'env(safe-area-inset-top)',
     }}>
       {/* Los dos lados pesan igual (flex:1 cada uno) para que la marca quede
-          centrada de verdad: antes se centraba en el espacio SOBRANTE, asi que
-          con la insignia SLOT presente se desplazaba a la izquierda. */}
+          centrada de verdad: antes se centraba en el espacio SOBRANTE, no en
+          el ancho total. */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
         {back && (
           <button onClick={onBack} aria-label="Volver" style={{
@@ -1669,8 +1669,13 @@ window.FilterChip = FilterChip;
 // ──────────────────────────────────────────────────────────────
 // COMPARE FLOATING BAR — barra flotante de comparación
 // ──────────────────────────────────────────────────────────────
-function CompareFloat({ ids, onOpen, onClear }) {
+function CompareFloat({ ids, onOpen, onElegir, onClear }) {
   if (!ids || !ids.length) return null;
+  const armas = ids.map((id) => window.findArma(id)).filter(Boolean);
+  if (!armas.length) return null;
+  // Con una: «Comparando la Ruger LCP · Elegir otra». Con dos, sus nombres y
+  // «Ver». El texto va entero en el DOM (lo lee el lector); solo se recorta a la vista.
+  const texto = armas.length === 1 ? 'Comparando la ' + armas[0].nombre : armas.map((x) => x.nombre).join(' y ');
   return (
     <div style={{
       // --amx-nav-h la publica BottomNav (ya incluye el safe-area). El +8 es
@@ -1685,25 +1690,19 @@ function CompareFloat({ ids, onOpen, onClear }) {
       zIndex: 60,
       animation: 'slideUp 0.25s ease',
     }}>
-      <span style={{
+      <span title={texto} style={{
         fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 14.5, color: PALETTE.amber,
-        letterSpacing: '0.1em', fontWeight: 700,
-      }}>⇄ {ids.length}/2</span>
-      <span style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 14.5, color: PALETTE.textDim, flex: 1,
-      }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
-      {ids.length === 2 && (
-        <button onClick={onOpen} style={{
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-          padding: '5px 10px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
-          letterSpacing: '0.1em', textTransform: 'uppercase',
-          cursor: 'pointer',
-        }}>Ver</button>
-      )}
-      <button onClick={onClear} style={{
+        fontSize: 14.5, color: PALETTE.textDim, flex: 1, minWidth: 0,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>{texto}</span>
+      <button onClick={armas.length === 1 ? onElegir : onOpen} style={{
+        background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
+        padding: '5px 10px',
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
+        letterSpacing: '0.1em', textTransform: 'uppercase',
+        cursor: 'pointer', flex: 'none',
+      }}>{armas.length === 1 ? 'Elegir otra' : 'Ver'}</button>
+      <button onClick={onClear} aria-label="Vaciar la comparación" style={{
         background: 'none', border: 'none', cursor: 'pointer',
         color: PALETTE.textDim, fontSize: 19, padding: 2,
       }}>✕</button>
@@ -2599,3 +2598,55 @@ function CotejoVacio({ onArsenal }) {
   );
 }
 window.CotejoVacio = CotejoVacio;
+
+// LA BÚSQUEDA — elegir un arma sin salir del comparador. `<dialog>` nativo con
+// showModal(): el foco, el Esc y el fondo inerte los pone el navegador. Sustituye
+// al «modo selección», que mandaba al Arsenal y dejaba al usuario en la ficha
+// del arma elegida en vez de devolverlo aquí.
+function BuscarArma({ abierta, titulo, excluir, onElegir, onCerrar }) {
+  const ref = React.useRef(null);
+  const origen = React.useRef(null);
+  const [consulta, setConsulta] = React.useState('');
+  React.useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (abierta && !d.open) {
+      origen.current = document.activeElement;
+      setConsulta('');
+      d.showModal();
+    } else if (!abierta && d.open) {
+      d.close();
+    }
+  }, [abierta]);
+  // Al cerrar (Cerrar, Esc o tras elegir), el foco vuelve a quien abrió la
+  // búsqueda si sigue en la página; la ficha en blanco desaparece al elegir.
+  const alCerrar = () => {
+    onCerrar();
+    const o = origen.current;
+    if (o && document.contains(o)) o.focus();
+  };
+  const resultados = abierta ? window.amxBuscarArmas(window.DB || [], consulta, excluir) : [];
+  return (
+    <dialog ref={ref} className="amx-busqueda" aria-labelledby="amx-busqueda-titulo" onClose={alCerrar}>
+      <div className="amx-busqueda-papel">
+        <h2 id="amx-busqueda-titulo" className="amx-busqueda-titulo">{titulo}</h2>
+        <label htmlFor="amx-busqueda-consulta" className="amx-sr">Buscar por nombre, marca o calibre</label>
+        <input id="amx-busqueda-consulta" className="amx-busqueda-campo" type="search" autoComplete="off"
+          value={consulta} onChange={(e) => setConsulta(e.target.value)} />
+        {resultados.length > 0
+          ? <ul className="amx-busqueda-lista">
+              {resultados.map((x) => (
+                <li key={x.id}>
+                  <button type="button" className="amx-busqueda-item" onClick={() => onElegir(x.id)}>
+                    <span>{x.nombre}</span><small>{x.calibre}</small>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          : <p className="amx-busqueda-nada">Ninguna arma coincide con «{consulta}».</p>}
+        <button type="button" className="amx-busqueda-cerrar" onClick={() => ref.current.close()}>Cerrar</button>
+      </div>
+    </dialog>
+  );
+}
+window.BuscarArma = BuscarArma;

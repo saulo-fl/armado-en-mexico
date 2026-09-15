@@ -3316,3 +3316,95 @@
   cursor: pointer;
 }
 .amx-v2 .amx-cotejo-boton:focus-visible { outline: 2px solid var(--ficha-tinta); outline-offset: 3px; }
+
+/* LA BÚSQUEDA DEL COMPARADOR: un <dialog> nativo. El navegador pone el foco, el
+   Esc y el fondo inerte; aquí solo va la hoja de oficio. */
+.amx-v2 .amx-busqueda {
+  width: min(100% - 16px, 560px);
+  max-width: none;
+  max-height: min(84vh, 680px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-busqueda::backdrop { background: rgba(23, 27, 25, .55); }
+.amx-v2 .amx-busqueda-papel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(84vh, 680px);
+  box-sizing: border-box;
+  padding: var(--e4);
+  background: var(--oficio);
+  border-radius: 2px;
+  box-shadow: 0 12px 18px -8px rgba(23, 27, 25, .28);
+}
+.amx-v2 .amx-busqueda-titulo {
+  margin: 0 0 var(--e3);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.3;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.amx-v2 .amx-busqueda-campo {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1.5px solid var(--ficha-tinta);
+  border-radius: 2px;
+  background: var(--copia-placa);
+  color: var(--ficha-tinta);
+  font-family: var(--mono);
+  font-size: 16px;   /* con menos, Safari del iPhone hace zoom al enfocar */
+}
+.amx-v2 .amx-busqueda-campo:focus-visible { outline: 2px solid var(--ficha-tinta); outline-offset: 2px; }
+.amx-v2 .amx-busqueda-lista {
+  flex: 1;
+  min-height: 0;
+  margin: var(--e3) 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+.amx-v2 .amx-busqueda-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e3);
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 4px;
+  border: 0;
+  border-bottom: 1px solid var(--oficio-2);
+  background: none;
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--ficha-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-busqueda-item small { flex: none; font-size: 12px; color: var(--oficio-tinta-2); }
+.amx-v2 .amx-busqueda-item:hover { background: var(--oficio-2); }
+.amx-v2 .amx-busqueda-item:focus-visible { outline: 2px solid var(--ficha-tinta); outline-offset: -2px; }
+.amx-v2 .amx-busqueda-nada { margin: var(--e3) 0 0; font-family: var(--mono); font-size: 14px; color: var(--oficio-tinta-2); }
+.amx-v2 .amx-busqueda-cerrar {
+  align-self: flex-end;
+  min-height: 44px;
+  margin-top: var(--e3);
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--ficha-tinta);
+  cursor: pointer;
+}

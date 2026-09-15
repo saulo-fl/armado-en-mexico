@@ -178,7 +178,8 @@ function App() {
   const [municionId, setMunicionId] = useStateApp(_init.municionId);
   const [catalogFilter, setCatalogFilter] = useStateApp(_init.catalogFilter);
   const [compareIds, setCompareIds] = useStateApp(_init.compareIds);
-  const [pickerSlot, setPickerSlot] = useStateApp(null);
+  // El lado del comparador que se está eligiendo en la búsqueda ('a', 'b' o null).
+  const [buscarLado, setBuscarLado] = useStateApp(null);
   const [history, setHistory] = useStateApp([]);
   const skipPush = useRefApp(false);
 
@@ -260,14 +261,6 @@ function App() {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     setProductId(id);
     setScreen('product');
-    if (pickerSlot !== null) {
-      setCompareIds(ids => {
-        const next = [...ids];
-        next[pickerSlot] = id;
-        return next.filter(Boolean);
-      });
-      setPickerSlot(null);
-    }
   };
 
   const openAccesorio = (id) => {
@@ -321,12 +314,19 @@ function App() {
 
   const clearCompare = () => setCompareIds([]);
   const removeFromCompare = (id) => setCompareIds(ids => ids.filter(x => x !== id));
-  const openPickerForSlot = (slot) => {
-    setPickerSlot(slot);
-    setHistory(h => [...h, { screen, productId, catalogFilter }]);
-    setCatalogFilter({ mode: 'all' }); // mostrar el listado (no el hub) para elegir arma
-    setScreen('catalog');
-  };
+
+  // Elegir desde la búsqueda del comparador: el arma entra en SU lado ('a' la
+  // primera, 'b' la segunda) y sustituye a la que hubiera. El orden importa: la
+  // tira compara la segunda contra la primera y la URL lo escribe así.
+  const ponerEnComparacion = (lado, id) => setCompareIds((ids) => {
+    const next = ids.slice(0, 2);
+    const i = lado === 'b' ? 1 : 0;
+    if (i < next.length) next[i] = id; else next.push(id);
+    return next.filter((x, k) => next.indexOf(x) === k);
+  });
+
+  // Una búsqueda abierta no sobrevive a salir del comparador (atrás del navegador).
+  useEffectApp(() => { if (screen !== 'compare') setBuscarLado(null); }, [screen]);
 
   const titles = {
     home: '', catalog: 'Arsenal', product: 'Ficha',
@@ -372,9 +372,10 @@ function App() {
     content = <window.CompareScreen ids={compareIds}
       onOpenArma={openArma}
       onNav={navigate}
+      onPoner={ponerEnComparacion}
       onQuitar={removeFromCompare}
-      onCambiar={(lado) => openPickerForSlot(lado === 'b' ? 1 : 0)}
-      onElegir={(lado) => openPickerForSlot(lado === 'b' ? 1 : 0)} />;
+      buscarLado={buscarLado}
+      onBuscar={setBuscarLado} />;
   } else if (screen === 'legal') {
     content = <window.LegalScreen onNav={navigate} />;
   } else if (screen === 'about') {
@@ -426,21 +427,6 @@ function App() {
           back={isInternal}
           onBack={goBack}
           onHome={() => navTab('home')}
-          right={pickerSlot !== null ? (
-            <span style={{
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 13,
-              // Iba en PALETTE.amber, que es el VERDE de marca: sobre el header
-              // verde daba 1.68:1 y su borde 1.28:1 — invisible. Ahora que la
-              // barra no lleva titulo, esta insignia es medio contenido.
-              color: PALETTE.sobreMarca,
-              letterSpacing: '0.15em',
-              background: 'rgba(250,249,245,0.12)',
-              border: '1px solid rgba(250,249,245,.35)',
-              borderRadius: 4,
-              padding: '4px 7px',
-            }}>SLOT {pickerSlot === 0 ? 'A' : 'B'}</span>
-          ) : null}
         />
       ) : (
         <window.TopNav
@@ -448,30 +434,6 @@ function App() {
           onNav={navTab}
           compareCount={compareIds.length}
         />
-      )}
-
-      {/* Picker mode banner on desktop */}
-      {!vp.isMobile && pickerSlot !== null && (
-        <div style={{
-          position: 'sticky', top: 64, zIndex: 40,
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
-          padding: '8px 28px',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 15.5, letterSpacing: '0.15em',
-          textTransform: 'uppercase',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <span>◆ MODO SELECCIÓN — Slot {pickerSlot === 0 ? 'A' : 'B'} · elige un arma para añadirla al comparador</span>
-          <button onClick={() => { window.cancelPicker && window.cancelPicker(); }} style={{
-            // Va DENTRO del banner verde, así que hereda su problema: negro sobre
-            // #173A32 da 1.69:1. En claro sobre el mismo verde, 11.81:1.
-            background: 'rgba(250,249,245,0.14)', color: PALETTE.bgCard,
-            border: '1px solid rgba(250,249,245,0.55)',
-            padding: '3px 8px', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 14.5, letterSpacing: '0.1em',
-            textTransform: 'uppercase', fontWeight: 700,
-          }}>Cancelar</button>
-        </div>
       )}
 
       {/* Scroll body */}
@@ -496,6 +458,7 @@ function App() {
       {vp.isMobile && compareIds.length > 0 && screen !== 'compare' && (
         <window.CompareFloat ids={compareIds}
           onOpen={() => { setHistory(h => [...h, { screen, productId, catalogFilter }]); setScreen('compare'); }}
+          onElegir={() => { setHistory(h => [...h, { screen, productId, catalogFilter }]); setScreen('compare'); setBuscarLado('b'); }}
           onClear={clearCompare} />
       )}
 
@@ -512,7 +475,7 @@ function App() {
           zIndex: 50,
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          ⇄ Comparar · {compareIds.length}/2
+          Ver comparador · {compareIds.length} {compareIds.length === 1 ? 'arma' : 'armas'}
         </button>
       )}
 

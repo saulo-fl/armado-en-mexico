@@ -650,13 +650,15 @@ function sInpStyle() {
 // Qué se compara, quién gana y cómo se escribe la tira: src/lib/cotejo.js.
 // Las piezas: ui.jsx, bloque «EL COMPARADOR». Las reglas: docs/DESIGN.md §5.6.
 // ════════════════════════════════════════════════════════════════
-function CompareScreen({ ids, onOpenArma, onNav, onQuitar, onCambiar, onElegir }) {
+function CompareScreen({ ids, onOpenArma, onNav, onPoner, onQuitar, buscarLado, onBuscar }) {
   const vp = window.useViewport();
   // Un solo corte, el del expediente: 1024px, como la ficha de arma.
   const ancho = vp.width >= 1024;
-  const a = ids[0] ? window.findArma(ids[0]) : null;
-  const b = ids[1] ? window.findArma(ids[1]) : null;
+  // La que no existe se ignora y la que queda pasa a ser la primera (spec §8).
+  const [a = null, b = null] = ids.map((id) => window.findArma(id)).filter(Boolean);
   const cotejo = a ? window.amxCotejar(a, b, window.amxInventarioDe(a), b ? window.amxInventarioDe(b) : null) : null;
+  // La búsqueda se titula con el arma del OTRO lado.
+  const otra = buscarLado === 'b' ? a : buscarLado === 'a' ? b : null;
   return (
     <div className="amx-cotejo-pantalla">
       <window.CintaDymo nivel={1}>Comparador</window.CintaDymo>
@@ -664,9 +666,14 @@ function CompareScreen({ ids, onOpenArma, onNav, onQuitar, onCambiar, onElegir }
         ? <window.CotejoVacio onArsenal={() => onNav('catalog')} />
         : <React.Fragment>
             <window.CotejoFichas a={a} b={b} cotejo={cotejo} ancho={ancho}
-              onAbrir={onOpenArma} onCambiar={onCambiar} onQuitar={onQuitar} onElegir={onElegir} />
+              onAbrir={onOpenArma} onCambiar={onBuscar} onQuitar={onQuitar} onElegir={onBuscar} />
             {b && <window.TiraCotejo tira={window.amxTiraCotejo(a, b, cotejo)} />}
           </React.Fragment>}
+      <window.BuscarArma abierta={buscarLado !== null}
+        titulo={otra ? 'Comparar con la ' + otra.nombre : 'Elegir arma'}
+        excluir={ids}
+        onElegir={(id) => { onPoner(buscarLado, id); onBuscar(null); }}
+        onCerrar={() => onBuscar(null)} />
     </div>
   );
 }
