@@ -796,9 +796,17 @@ function HubPolaroid({ img, label, sub, onClick, style: extraStyle, pozoStyle })
 // Giro fijo de cada polaroid de armería, distinto para que no se vean gemelas.
 const ARMERIA_GIROS = ['-2.5deg', '1.8deg'];
 
-// Fotos de los usos, en polaroid apaisada. Vacío hasta que Saulo apruebe las de
-// banco libre: mientras, cada polaroid sale con el pozo y el velo.
-const USO_FOTOS = {};
+// Fotos de los usos, en polaroid apaisada. De banco libre (licencia Pexels: uso
+// comercial, sin atribución obligatoria), elegidas por Saulo el 15-sep-2026 en hoja
+// de contactos. La fuente se anota aquí porque no está en ninguna otra parte:
+//   domicilio — Terrance Barksdale · pexels.com/photo/gun-with-ammunition-15264966/
+//   club      — Artem Zhukov · pexels.com/photo/a-person-aiming-with-a-gun-17314913/
+//   caza      — Arian Fernandez · pexels.com/photo/hunter-standing-in-open-field-with-rifle-29374213/
+const USO_FOTOS = {
+  domicilio: 'imagenes/usos/domicilio.webp',
+  club: 'imagenes/usos/club.webp',
+  caza: 'imagenes/usos/caza.webp',
+};
 
 function ArsenalHubScreen({ onNav = () => {} }) {
   const vp = window.useViewport();
