@@ -1147,6 +1147,30 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   clara sobre papel claro): solo los tokens de la papelería, auditados por `contraste.mjs` en el
   grupo «LA PAPELERÍA DE LA FICHA DE ARMA». El anillo de foco sobre los papeles va en tinta.
 
+### 5.6 El comparador — dos fichas de fichero (14-sep-2026)
+
+Decidido con Saulo sección por sección (rama `Opus-5/RED-Comparar`). La regla de datos vive en
+`src/lib/cotejo.js`, con su prueba (`node --test scripts/cotejo.test.mjs`); las piezas, en `ui.jsx`, bloque
+«EL COMPARADOR»; la piel, en `estilo.css`, con el mismo nombre.
+
+- **Dos expedientes lado a lado, también en móvil:** la copia con grapa y sello legal encima de su ficha de
+  fichero, y «Cambiar · Quitar» debajo. Tocar la copia abre la ficha del arma. Título en cinta Dymo
+  «Comparador». Sin folder manila. En escritorio, la misma pila centrada y más grande (corte único 1024).
+- **El mismo dato a la misma altura** en las dos fichas (`subgrid`). Arriba lo que difiere, en el orden de la
+  ficha técnica; después «— iguales —» y lo que coincide. Existencias, siempre arriba.
+- **La ventaja se circula con rotulador rojo** (`--rotulador`), por regla fija: más capacidad (cargador +
+  recámara); menos peso, longitud y precio. Calibre, mecanismo, origen, año y existencias, nunca. Solo compite
+  un valor único y exacto: un rango, un «≈», un «varía» o un dato ausente se muestran sin círculo.
+  **Nunca una valoración que no salga de un dato de la ficha** (#130 retiró las barras por eso).
+- **La tira de diferencias:** la segunda arma frente a la primera, solo en cifras («+4 cartuchos · +27 g ·
+  +4 mm · +$5,765.48»), con «precios de fechas distintas» si los inventarios de los dos precios no son del
+  mismo día. El precio de «último conocido» compite, y su ficha lleva el sello.
+- **Elegir un arma es un `<dialog>`** con búsqueda por nombre, marca y calibre, sin salir de la pantalla. No
+  hay «modo selección» ni rótulos genéricos («SLOT A/B», «LOADOUT»): cada lado lleva el nombre de su arma.
+- **Estados:** sin armas, una hoja con «Ir al Arsenal»; con una, su expediente y una ficha en blanco.
+- **El enlace** `/comparar/<a>-vs-<b>` guarda la comparación; su orden es el de las armas. Fuera de Google
+  hasta la parte 2 (indexación), que tiene su propio spec.
+
 ---
 
 ## 6. Prohibiciones explícitas

@@ -209,6 +209,17 @@ Todo va dentro del **folder manila** (`.amx-carpeta`, la foto de la Home en 9-sl
   por cartucho. Lo usan la tarjeta y la ficha.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-09: **en este Chrome compartido del DevTools MCP, `resize_page` no baja de
+  ~500px reales** aunque se le pida menos (comprobado de nuevo en la tarea 6 del
+  comparador). Para anchos de móvil usa `emulate` con
+  `viewport: "<ancho>x844x3,mobile,touch"` y confirma `window.innerWidth`; para
+  escritorio, `viewport: "1440x900x1"`; oscuro con `colorScheme: "dark"`
+  (`"auto"` para volver).
+- 2026-09: **el `click` del MCP por `uid` puede aterrizar en la barra fija
+  «DEBUG» de `dev-viewport.js`** (abajo a la izquierda), que tapa el elemento de
+  verdad si coincide en pantalla. Si un click falla o toca lo que no debía,
+  `scrollIntoView()` el elemento y clicarlo por `evaluate_script` en vez de por
+  `uid`.
 - 2026-09: **un IntersectionObserver no dispara si el objetivo SALTA la ventana.** Un
   centinela al final de la ficha pasaba de «debajo» a «encima» con un salto de scroll
   (ir al final, un fling largo) sin cruzar nunca la ventana: su estado seguía siendo
