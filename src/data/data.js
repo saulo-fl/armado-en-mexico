@@ -90,7 +90,7 @@ const _legalFor = (avail) => {
   if (avail === 'dcam') return {
     availLabel: "Uso civil — DCAM",
     legalTit:   "Civil — Adquisición directa en DCAM",
-    legalDesc:  "Adquisición legal para civiles mexicanos mayores de edad con permiso extraordinario de adquisición vigente (DEFENSA-02-040), que expide la SEDENA y pide, entre otros, identificación oficial, comprobante de domicilio, constancia de antecedentes penales y certificado de salud mental. Compra exclusiva en DCAM Campo Militar No. 1-D (Naucalpan, Edo. Méx.) u OTCA (Monterrey, N.L.).",
+    legalDesc:  "Adquisición legal para civiles mayores de edad con permiso extraordinario de adquisición vigente (DEFENSA-02-040), que expide la SEDENA y pide, entre otros, identificación oficial, comprobante de domicilio, constancia de antecedentes penales y certificado de salud mental. Compra exclusiva en DCAM Campo Militar No. 1-D (Naucalpan, Edo. Méx.) u OTCA (Monterrey, N.L., solo para el público que radica en Coahuila, Nuevo León, San Luis Potosí y Tamaulipas).",
     disponibilidad: ["DCAM Campo Militar No. 1-D — Naucalpan, Edo. Méx.","OTCA — Monterrey, N.L."],
   };
   if (avail === 'seguridad') return {
@@ -126,7 +126,8 @@ const mk = (id, nombre, marca, tipo, pais, calibre, capacidad, peso, longitud, m
   const priceN = parseFloat((priceExact||'0').replace(/[^\d.]/g,''));
   return {
     id, nombre, marca, tipo, pais, calibre, capacidad, peso, longitud, mecanismo, anio,
-    era: anio >= 2015 ? 'vanguardia' : anio >= 1990 ? 'moderno' : 'clasico',
+    // anio null = año sin verificar con el fabricante: sin era, para no caer en «clásico»
+    era: anio == null ? '' : anio >= 2015 ? 'vanguardia' : anio >= 1990 ? 'moderno' : 'clasico',
     img: img || '',
     historia,
     avail, ...legal,
@@ -381,7 +382,8 @@ window.DB = [
     "imagenes/026_Mendoza_RM22-6000_Safari.webp?v=2",
     "Acabado camuflaje safari. Ideal para cacería menor y plinking."),
 
-  mk(54, "Mendoza RM22-3000 Ergonómico", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2850g", "1020mm", "Semi-auto, culata ergonómica", 2021, "dcam", "11863.10", "RIFLE 22 MENDOZA RM22-3000 ERG",
+  // capacidad: «Magazine: Tubular 17 rounds», https://www.mendozafa.com/en-us/productss/rm22-3000 (#161)
+  mk(54, "Mendoza RM22-3000 Ergonómico", "Mendoza", "rifle", "México", ".22 LR", "17", "2850g", "1020mm", "Semi-auto, culata ergonómica", 2021, "dcam", "11863.10", "RIFLE 22 MENDOZA RM22-3000 ERG",
     "imagenes/027_Mendoza_RM22-3000_Ergonomico.webp?v=2",
     "Línea ergonómica de Mendoza con empuñadura pistola. Mayor comodidad para sesiones largas."),
 
@@ -393,7 +395,11 @@ window.DB = [
     "imagenes/029_Mendoza_Centenario.webp",
     "Edición conmemorativa del centenario de la Revolución Mexicana. Pieza de colección y deporte."),
 
-  mk(57, "CZ 457", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2750g", "1010mm", "Cerrojo de precisión", 2019, "dcam", "12772.43", "RIFLE CAL .22 LR CESKA Z. MOD CZ 457",
+  // 57 = CZ 457 American (+ American LH, que suma). Las demás líneas de la serie 457 son
+  // modelos, como las vende CZ (Saulo, 14-sep-2026, #161): Varmint MTR 227, Synthetic 228, Stainless 229;
+  // y desde #180: Lux 235, Premium 236, Varmint 237, Varmint Synthetic 238, LRP Black 239, MDT 240,
+  // Thumbhole 241, AT-ONE 242, Training Rifle XII 243.
+  mk(57, "CZ 457", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2750g", "1010mm", "Cerrojo de precisión", 2019, "dcam", "12772.43", "RIFLE CAL.0.22\" L.R CESKA CZ 457 AMERICA",
     "imagenes/030_CZ_457.webp",
     "Rifle de cerrojo de precisión checo, referencia internacional. Excelente para tiro a 50m y caza menor."),
 
@@ -412,7 +418,7 @@ window.DB = [
     "imagenes/033_Franchi_Horizon_Elite.webp",
     "Rifle italiano de cerrojo con excelente acabado. Cañón flotante. Ideal para cazadores que valoran la estética europea."),
 
-  mk(61, "Weatherby Vanguard .243", "Weatherby", "rifle", "EE.UU.", ".243 Winchester", "5", "3100g", "1100mm", "Cerrojo bolt-action", 2008, "dcam", "22001.06", "RIFLE 243 WIN WEATHERBY VANGUARD",
+  mk(61, "Weatherby Vanguard .243", "Weatherby", "rifle", "EE.UU.", ".243 Winchester", "5", "3100g", "1100mm", "Cerrojo bolt-action", 2008, "dcam", "18506.91", "RIFLE 243 WIN WEATHERBY VANGUARD",
     "imagenes/034_Weatherby_Vanguard_.243.webp",
     "Línea de entrada de Weatherby. .243 Win: calibre versátil para varmint y venado mediano."),
 
@@ -578,7 +584,7 @@ window.DB = [
 
   mk(99, "Huglu Atrox cal 12 (Bomba)", "Huglu", "escopeta", "Turquía", "12 GA", "5+1", "3100g", "1140mm", "Acción de bomba (pump)", 2018, "dcam", "11300.77", "ESCOPETA BOMBA 12 HUGLU ATROX",
     "imagenes/056_Huglu_Atrox_cal_12_Bomba.webp",
-    "Escopeta de corredera (pump-action). Confiable, económica. Excelente para defensa de hogar y campo."),
+    "Escopeta de corredera (pump-action). Confiable, económica. Excelente para el campo. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
 
   mk(100, "Beretta DT11 Sport", "Beretta", "escopeta", "Italia", "12 GA", "2", "3900g", "1280mm", "Superpuesta competición", 2012, "dcam", "170201.91", "ESCOPETA CAL 12 BERETTA DT11 SPORT",
     "imagenes/057_Beretta_DT11_Sport.webp",
@@ -602,7 +608,7 @@ window.DB = [
 
   mk(105, "Derya CR-101 (Bomba)", "Derya", "escopeta", "Turquía", "12 GA", "5+1", "3000g", "1150mm", "Acción de bomba (pump)", 2019, "dcam", "13120.17", "ESCOPETA BOMBA 12 DERYA CR-101 C28\"",
     "imagenes/062_Derya_CR-101_Bomba.webp",
-    "Escopeta de corredera turca. Económica, confiable. Ideal para defensa de hogar."),
+    "Escopeta de corredera turca. Económica, confiable. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
 
   mk(106, "Retay Masai Mara cal 12", "Retay", "escopeta", "Turquía", "12 GA", "4+1", "3200g", "1240mm", "Semi-auto inercial premium", 2017, "dcam", "22667.85", "ESCOPETA CAL 12 RETAY MASAI MARA",
     "imagenes/063_Retay_Masai_Mara_cal_12.webp",
@@ -618,7 +624,7 @@ window.DB = [
 
   mk(109, "Retay GPSX (Bomba)", "Retay", "escopeta", "Turquía", "12 GA", "5+1", "3000g", "1150mm", "Acción de bomba (pump)", 2019, "dcam", "8228.74", "ESCOPETA BOMBA CAL 12 RETAY GPSX",
     "imagenes/066_Retay_GPSX_Bomba.webp",
-    "Pump-action Retay accesible. Robusta para defensa y campo."),
+    "Pump-action Retay accesible. Robusta para el campo. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
 
   mk(110, "Fair Lincoln G.", "Fair", "escopeta", "Italia", "12 GA", "2", "3300g", "1180mm", "Yuxtapuesta dos cañones", 2015, "dcam", "36197.87", "ESCOPETA 2 CAÑS FAIR LINCOLN G CM CAL 12",
     "imagenes/067_Fair_Lincoln_G..webp",
@@ -655,7 +661,7 @@ window.DB = [
     "Escopeta semiautomática versátil con el sistema de inercia Benelli, muy popular para cacería y tiro deportivo por su fiabilidad y ligereza. Versión calibre 12."),
   mk(120, "Benelli Nova", "Benelli", "escopeta", "Italia", "12 GA", "4+1", "3.6 kg", "1257 mm", "Acción de bomba", 1999, "dcam", "21070.03", "ESCOPETA A BOMBA CAL. 12 G.A. MARCA BENELLI MODELO NOVA, CAÑÓN DE 28\", CULATA ESTÁNDAR",
     "imagenes/Benelli_Nova.webp",
-    "Escopeta de acción de bomba (corredera) con armazón técnico-polimérico de una pieza, robusta y económica. Popular para cacería y defensa de domicilio."),
+    "Escopeta de acción de bomba (corredera) con armazón técnico-polimérico de una pieza, robusta y económica. Popular para cacería. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
   mk(121, "Benelli Super Nova", "Benelli", "escopeta", "Italia", "12 GA", "4+1", "3.8 kg", "1257 mm", "Acción de bomba", 2006, "dcam", "22782.15", "ESCOPETA A BOMBA CAL. 12 G.A. MARCA BENELLI MODELO SUPER NOVA, CAÑÓN DE 28\", SISTEMA COMFORTECH",
     "",
     "Versión reforzada de la Nova con recámara de 3½\" y sistema ComforTech para reducir el retroceso de cargas magnum. Escopeta de corredera para uso intensivo."),
@@ -664,7 +670,7 @@ window.DB = [
     "Escopeta sobrepuesta turca de Derya Arms, alternativa accesible en el segmento over/under para tiro deportivo de plato y cacería."),
   mk(123, "Derya AG12", "Derya Arms", "escopeta", "Turquía", "12 GA", "4+1", "3.4 kg", "1200 mm", "Acción de bomba", 2017, "dcam", "12561.87", "ESCOPETA ACCIÓN DE BOMBA MARCA DERYA, MODELO AG12, CALIBRE 12, CAÑÓN DE 28\"",
     "",
-    "Escopeta de corredera turca de Derya Arms en calibre 12, opción económica y fiable para cacería y defensa de domicilio."),
+    "Escopeta de corredera turca de Derya Arms en calibre 12, opción económica y fiable para cacería. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
   mk(124, "Glock 19X", "Glock", "pistola", "Austria", "9mm Parabellum", "17+1", "0.80 kg", "187 mm", "Semi-auto, striker (Safe Action)", 2018, "ejercito", "13166.18", "PISTOLA SEMIAUTOMÁTICA CALIBRE 9X19 MM MARCA GLOCK MODELO 19X, COLOR COYOTE",
     "",
     "Pistola de Glock que combina la corredera compacta de la G19 con la empuñadura de tamaño completo de la G17, en acabado coyote. Derivada del concurso militar MHS de EE.UU."),
@@ -736,7 +742,7 @@ window.DB = [
   mk(144, "Benelli Argo-E", "Benelli", "rifle", "Italia", ".300 Win Mag", "3+1", "3.2 kg", "1100mm", "Semi-auto, pistón de gas A.R.G.O.", 2003, "dcam", "27013.68", "RIFLE CAL .300 WIN BENELLI ARGO-E",
     "imagenes/Benelli_Argo-E.webp",
     "Rifle de caza semiautomático con sistema de gas A.R.G.O. de doble pistón, preciso y suave. Calibre de cacería, adquisición civil."),
-  mk(145, "Winchester XPERT .22", "Winchester", "rifle", "EE.UU.", ".22 LR", "10+1", "2.6 kg", "1020mm", "Cerrojo, culata sintética/thumbhole", 2021, "dcam", "12678.91", "RIFLE CAL .22 LR WINCHESTER XPERT",
+  mk(145, "Winchester XPERT .22", "Winchester", "rifle", "EE.UU.", ".22 LR", "10+1", "2.6 kg", "1020mm", "Cerrojo, culata sintética", 2021, "dcam", "12678.91", "RIFLE CAL .22 LR WINCHESTER XPERT",
     "",
     "Rifle de cerrojo en .22 LR, económico y preciso para iniciación y plinking. De libre adquisición civil."),
   mk(146, "Winchester Ranger .22", "Winchester", "rifle", "EE.UU.", ".22 LR", "15+1", "2.5 kg", "1000mm", "Acción de palanca", 2020, "dcam", "16262.08", "RIFLE CAL .22 LR WINCHESTER RANGER",
@@ -786,7 +792,7 @@ window.DB = [
     "Clásica sobrepuesta Browning de báscula baja, muy apreciada para sporting y caza. Adquisición civil."),
   mk(161, "Winchester SXP", "Winchester", "escopeta", "Turquía", "12 GA", "4+1", "3.2 kg", "1232mm", "Acción de bomba (corredera)", 2009, "dcam", "14048.45", "ESC. A BOMBA WINCHESTER SXP",
     "",
-    "Escopeta de corredera Winchester SXP calibre 12 en versión sintética, fabricada en Turquía para Winchester. Su acción asistida por inercia permite un ciclo muy rápido. Económica y versátil para caza y defensa. Adquisición civil."),
+    "Escopeta de corredera Winchester SXP calibre 12 en versión sintética, fabricada en Turquía para Winchester. Su acción asistida por inercia permite un ciclo muy rápido. Económica y versátil para caza. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio. Adquisición civil."),
   mk(162, "Benelli M4", "Benelli", "escopeta", "Italia", "12 GA", "5+1", "3.8 kg", "886mm", "Semi-auto, pistón de gas (ARGO), táctica", 1998, "dcam", "35197.91", "ESC. SEMI. BENELLI M4 CAÑÓN 14\"",
     "imagenes/Benelli_M4.webp",
     "Escopeta semiautomática táctica de doble pistón ARGO, adoptada por cuerpos militares. Robusta y fiable."),
@@ -804,10 +810,10 @@ window.DB = [
     "Escopeta semiautomática turca económica para caza y tiro recreativo. Adquisición civil."),
   mk(167, "Optimum Arms OPT VM G2", "Optimum Arms", "escopeta", "Turquía", "12 GA", "5+1", "3.3 kg", "varía", "Semi-auto", 2022, "dcam", "22050.28", "ESC. SEMI. OPTIMUM ARMS OPT VM G2",
     "",
-    "Escopeta semiautomática de defensa/utilidad con cañón corto, en calibres 12 y 20. Adquisición civil."),
+    "Escopeta semiautomática con cañón corto, en calibres 12 y 20. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio. Adquisición civil."),
   mk(168, "Optimum Arms OPT-100", "Optimum Arms", "escopeta", "Turquía", "12 GA", "4+1", "3.2 kg", "1170mm", "Acción de bomba (corredera)", 2021, "dcam", "12954.54", "ESC. A BOMBA OPTIMUM ARMS OPT 100-1 CAL 12",
     "",
-    "Escopeta de corredera económica y robusta para caza y defensa de domicilio. Adquisición civil."),
+    "Escopeta de corredera económica y robusta para caza. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio. Adquisición civil."),
 
   // ═══════════════════════════════════════════════════════════
   //  ALTAS 18-jun-2026 — modelos nuevos DCAM / OTCA
@@ -1002,6 +1008,87 @@ window.DB = [
   mk(226, "Huglu Renova Camo", "Huglu", "escopeta", "Turquía", "12 GA", "4+1", "3.0 kg", "1230mm", "Semi-auto inercial", 2017, "dcam", "17502.41", "ESCOPETA SEMIAUT CAL12 HUGLU RENOV CAMO",
     "",
     "Escopeta semiautomática inercial turca Huglu Renova calibre 12 en versión camo, con culata y guardamano camuflados y cañón de 71 cm (28 pulgadas). Adquisición civil."),
+
+  // ── ALTAS del issue #161 (decisiones de Saulo, 14-sep-2026) ──────────────
+  // Specs con el fabricante; "" o año null = sin verificar (no se inventa).
+  //  227-229 CZ: https://www.czfirearms.com/en-us/products/rimfire-rifles/cz-457-series/cz-457-mtr
+  //    (…/cz-457-synthetic, …/cz-457-stainless). MTR y Synthetic tienen dos cañones en .22 LR y el
+  //    PDF no dice cuál: peso y longitud van con el rango de las dos. Año: sin verificar.
+  //  230 https://weatherby.com/vanguard-outfitter/ (.243, 24" = 22"+2" de freno, como el PDF). Año: sin verificar.
+  //  231 https://www.benelli.it/en/arma/mr1 (cargador de 5; 3,700 g con cañón de 40.6 cm y culata
+  //    pistol grip; «Scope mounting rail»). Longitud total y año: sin verificar.
+  //  232 https://optimumarms.com.tr/opt-vm-g2-20-compact-desert-sand (20 GA 3", 13", 5+1/10+1, 3,4 kg).
+  //    Longitud total, riel y año: sin verificar.
+  mk(227, "CZ 457 Varmint MTR", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.5–3.7 kg", "859–976mm", "Cerrojo, cañón pesado Varmint Match", null, "dcam", "19097.12", "RIFLE 0.22\" L.R. CESKA CZ 457 VARMINTMTR",
+    "",
+    "Versión de tiro de precisión de la serie CZ 457 (CZ la vende hoy como CZ 457 MTR): cañón pesado con recámara match y culata de nogal, con precisión de 1 MOA según el fabricante. Cargador de 5 cartuchos. Adquisición civil."),
+  mk(228, "CZ 457 Synthetic", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.3–2.5 kg", "865–977mm", "Cerrojo", null, "dcam", "13155.40", "RIFLE MARCA CESKA ZBROJOVKA MODELO CZ 457 SYNTHETIC CALIBRE 22 LR",
+    "",
+    "Versión de la serie CZ 457 con culata de polímero de acabado soft-touch, resistente a la humedad, el frío y el calor. Cañones intercambiables por el usuario y precisión de 1 MOA según el fabricante. Adquisición civil."),
+  mk(229, "CZ 457 Stainless", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.5 kg", "977mm", "Cerrojo, cañón de acero inoxidable", null, "dcam", "14125.96", "RIFLE CESKA Z. CZ 457 STAINLESS CAL. 22",
+    "",
+    "Versión de la serie CZ 457 con cañón ligero de acero inoxidable de 525 mm y culata de polímero soft-touch con camuflaje digital. Precisión de 1 MOA según el fabricante. Adquisición civil."),
+  mk(230, "Weatherby Vanguard Outfitter .243", "Weatherby", "rifle", "EE.UU.", ".243 Winchester", "4+1", "3.1 kg", "1067mm", "Cerrojo bolt-action, freno de boca", null, "dcam", "22001.06", "RIFLE 243WIN WEATHERBY VANGUARD OUTFITTE",
+    "",
+    "Versión Outfitter del Weatherby Vanguard en .243 Win: culata Monte Carlo de polímero color arena con pintura esponjada café y blanca, acabado Cerakote negro grafito y freno de boca de 2 pulgadas. Weatherby garantiza agrupaciones de menos de 1 MOA. Adquisición civil."),
+  mk(231, "Benelli MR1 16\" culata fija", "Benelli", "carabina", "Italia", "5.56x45mm", "5", "3.7 kg", "", "Semi-auto, pistón de gas (A.R.G.O.)", null, "ejercito", "35140.68", "RIFLE BENELLI CAL. 223REM MR1 CAÑ. 16\"",
+    "",
+    "Configuración de la Benelli MR1 con cañón de 16 pulgadas (40.6 cm), culata fija y riel Picatinny, con cargadores de 5 cartuchos. Usa el sistema de gas autorregulable A.R.G.O. derivado de la escopeta Benelli M4. Calibre .223 Rem/5.56: restringido a Fuerzas Armadas."),
+  mk(232, "Optimum Arms OPT VM G2 cal. 20", "Optimum Arms", "escopeta", "Turquía", "20 GA", "5+1", "3.4 kg", "", "Semi-auto, operada por gas", null, "dcam", "22877.17", "ESCP.OPTIMUMARMS.OPTVMG2.CAL.20,13\"ND",
+    "",
+    "Versión en calibre 20 (recámara de 3 pulgadas) de la escopeta semiautomática de cargador Optimum Arms OPT VM G2: cañón de 13 pulgadas, culata retráctil, receptor inferior de aluminio y acabado negro con arena del desierto, con dos cargadores de 5 cartuchos. Adquisición civil."),
+
+  // ── ALTAS del issue #180, existencias clase B (decisiones de Saulo, 14-sep-2026) ──────
+  // Jerarquía de fuentes que fijó Saulo: 1) fabricante, 2) Wikipedia, 3) SEDENA (descripción del PDF).
+  // "" o año null = ninguna de las tres lo publica. Dos cañones sin que el PDF diga cuál = rango.
+  //  233 https://www.czfirearms.com/en-us/products/pistols/cz-p-09-nocturne-series/cz-p-09-f-nocturne
+  //    (19 cart., 830 g, 208 mm, cañón 115 mm como el PDF); año: nota de CZ del 15-ago-2024
+  //    (…/news/cz-presents-the-new-cz-p-09-nocturne-series). Sin riel superior: corredera para
+  //    mira réflex (RMS / Holosun K); el riel MIL-STD-1913 va bajo el armazón.
+  //  234 Winchester vende tres Xpert Thumbhole .22 LR y el PDF no dice cuál: Gray SR y Brown SR
+  //    (winchesterguns.com/products/rifles/xpert/xpert-thumbhole-target-sr.html, 2.49 kg, 38¼")
+  //    y la europea (winchester.eu/…/xpert/xpert-thumbhole.html, 3.00 kg, sin longitud). Peso en
+  //    rango; longitud y riel solo los publica una de las tres: vacíos. País y año: sin publicar.
+  //  235-243 CZ 457: https://www.czfirearms.com/products/rimfire-rifles/cz-457-series/cz-457-<línea>
+  //    (lux, premium, varmint, varmint-synthetic, lrp-black, mdt, thumbhole, training-rifle-xii;
+  //    AT-ONE en /es/productos/carabinas-de-fuego-anular/linea-cz-457/cz-457-at-one). País:
+  //    Wikipedia (CZ 457, origin = Czech Republic). Cola de milano de 11 mm (manual CZ 457 05/2025)
+  //    salvo LRP Black y MDT, que traen riel Picatinny de 25 MOA. Años: catálogos y noticias de CZ
+  //    (Lux/Premium/Varmint 2019, Thumbhole 2020, AT-ONE global 2021, LRP Black y MDT 2022,
+  //    Varmint Synthetic 2023); Training Rifle XII sin fecha publicada. Premium y Varmint suman su LH.
+  mk(233, "CZ P-09 F Nocturne", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "19+1", "830g", "208mm", "Semi-auto, DA/SA Omega", 2024, "ejercito", "12034.14", "PISTOLA CESKA CZ P-09F NOC CAL. 9MM 115",
+    "",
+    "Serie Nocturne (2024) de la CZ P-09 en tamaño completo: corredera lista para mira réflex, miras luminiscentes de tres puntos, nueva textura de empuñadura y seguro y desamartillador rediseñados, con el mismo cañón de 115 mm y cargador de 19 cartuchos. Calibre 9mm: restringido en México."),
+  mk(234, "Winchester Xpert Thumbhole .22", "Winchester", "rifle", "", ".22 LR", "10+1", "2.49–3.00 kg", "", "Cerrojo, culata thumbhole laminada", null, "dcam", "16124.27", "RIFLE CAL. 22\"LR WINCHESTER XPERT THUMBH",
+    "",
+    "Versión thumbhole del rifle de cerrojo Winchester Xpert en .22 LR: culata de madera laminada con carrillera ajustable, cañón pesado roscado para supresor y disparador ajustable Rimfire M.O.A. Adquisición civil."),
+  mk(235, "CZ 457 Lux", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.9 kg", "1088mm", "Cerrojo, miras abiertas", 2019, "dcam", "16193.18", "RIFLE CESKA Z. CZ 457 LUX CAL. 0.22 LR",
+    "",
+    "Versión clásica de la serie CZ 457: culata de nogal turco barnizado de estilo europeo con carrillera, miras abiertas de serie y cañón ligero de 630 mm. Adquisición civil."),
+  mk(236, "CZ 457 Premium", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.2 kg", "1085mm", "Cerrojo, alza tangente", 2019, "dcam", "19810.80", "RIFLE CESKA Z.,CZ 457 PREMIUM, C. 22 LR",
+    "",
+    "Versión de lujo de la serie CZ 457: culata de nogal selecto con acabado al aceite y carrillera, alza tangente, guion de fibra óptica y cañón de 630 mm roscado. También se vende para zurdos (Premium LH). Adquisición civil."),
+  mk(237, "CZ 457 Varmint", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.3 kg", "981mm", "Cerrojo, cañón pesado", 2019, "dcam", "15159.57", "RIFLE CESKA Z. CZ 457 VARMINT CAL. 22 LR",
+    "",
+    "Versión de cañón pesado de 525 mm de la serie CZ 457, sin miras y con cola de milano de 11 mm para la óptica, en culata de nogal barnizado de estilo americano. También se vende para zurdos (Varmint LH). Adquisición civil."),
+  mk(238, "CZ 457 Varmint Synthetic", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.6–3.0 kg", "865–977mm", "Cerrojo, cañón pesado", 2023, "dcam", "13313.84", "RIFLE CESKA457 VARMINT SYNTET CAL. 22 LR",
+    "",
+    "Versión de la serie CZ 457 que une el cañón pesado Varmint (16 o 20 pulgadas) con una culata de polímero reforzado con fibra y acabado soft-touch, resistente a la intemperie. CZ la presentó en 2023 a petición de sus clientes. Adquisición civil."),
+  mk(239, "CZ 457 LRP Black", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.9 kg", "1010mm", "Cerrojo, cañón pesado acanalado, recámara match", 2022, "dcam", "27341.76", "RIFLE CESKA Z. CZ 457 LRP BLACK CAL. 22",
+    "",
+    "Versión de tiro a larga distancia de la serie CZ 457: cañón pesado acanalado de 20 pulgadas con recámara match y compensador, culata negra de haya con carrillera y largo ajustables y riel Picatinny de 25 MOA. Adquisición civil."),
+  mk(240, "CZ 457 MDT Chassis", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.4 kg", "1010mm", "Cerrojo, chasis de aluminio MDT", 2022, "dcam", "32952.37", "RIFLE CESKA Z. CZ 457 MDT CAL. 22 LR",
+    "",
+    "Versión de tiro deportivo de la serie CZ 457 en chasis de duraluminio MDT con Cerakote: cañón pesado acanalado de 20 pulgadas con recámara match y compensador, carrillera y largo de culata regulables y riel Picatinny de 25 MOA. Adquisición civil."),
+  mk(241, "CZ 457 Thumbhole", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.2–3.6 kg", "885–997mm", "Cerrojo, cañón pesado, culata thumbhole", 2020, "dcam", "18555.71", "RIFLE .22 CESKA ZBRO M CZ 457 THUMBHOLE",
+    "",
+    "Versión de la serie CZ 457 con culata thumbhole ambidiestra de madera laminada gris y café con guardamonte integrado, y cañón pesado de 16 o 20 pulgadas con compensador. Adquisición civil."),
+  mk(242, "CZ 457 AT-ONE", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.5 kg", "935–982mm", "Cerrojo, cañón Varmint Match", 2021, "dcam", "22124.11", "RIFLE CESKA Z. CZ 457 AT-ONE CAL. 22 LR",
+    "",
+    "Versión de la serie CZ 457 con culata laminada Boyd's AT-ONE de largo y carrillera ajustables y cañón Varmint de 20 pulgadas con recámara match. Nació como exclusiva de CZ-USA y entró al catálogo global de CZ en 2021. Adquisición civil."),
+  mk(243, "CZ 457 Training Rifle XII", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.1 kg", "1085mm", "Cerrojo, ánima de 12 estrías", null, "dcam", "12550.94", "RIFLE CESKA Z., CZ 457 TRAINING XII C.22",
+    "",
+    "Versión de entrenamiento de la serie CZ 457 con ánima de 12 estrías (como la CZ 457 Jaguar XII), miras abiertas de fábrica, culata de haya barnizada y cañón ligero de 630 mm. Adquisición civil."),
 ];
 
 // ──────────────────────────────────────────────────────────────
@@ -1028,6 +1115,16 @@ window.armaPlaceholder = function (arma) {
 
 // si un arma no tiene imagen, asigna su placeholder al cargar
 window.DB.forEach(a => { if (!a.img) a.img = window.armaPlaceholder(a); });
+
+// `riel`: trae de fábrica riel Picatinny/Weaver superior (integrado o base incluida),
+// verificado con el fabricante el 14-sep-2026 (fuentes en el PR #164). Sin verificar =
+// sin riel. Solo con riel salen las ópticas universales (MEPRO MOR, data-accesorios.js).
+// Al dar de alta un arma, decide aquí su riel.
+const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
+  112, 113, 114, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221,
+  231, // MR1 16": PDF «riel Picatinny» + Benelli «Scope mounting rail», mismas fuentes que la 143 (#161)
+  239, 240]; // CZ 457 LRP Black y MDT Chassis: «Picatinny mounting rail with 25 MOA inclination» (czfirearms.com, #180)
+window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 
 // helper de búsqueda usado por screens / admin
 window.findArma = function(id) {
