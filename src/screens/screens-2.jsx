@@ -148,45 +148,19 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const priceHistory = window.Store ? window.Store.getPriceHistory(arma.id) : [];
   const manuales = window.Store ? window.Store.getManuales() : [];
   const manualById = (id) => (id ? manuales.find((m) => m.id === id) : null) || null;
-  // Inventario fuente del precio actual: el ligado al arma, el del registro más
-  // reciente, o el inventario principal del repo (fuente general de precios)
-  const currentManual = manualById(arma.priceManualId) ||
-    (priceHistory.length ? manualById(priceHistory[priceHistory.length - 1].manualId) : null) ||
-    (window.Store ? window.Store.getPrimaryManual() : null);
-  const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
-  const curSigla = curAut ? curAut.sigla : 'DCAM';
-  const precioActual = priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact;
-  const fechaPrecio = currentManual ? amxFmtManualDate(currentManual.fecha) : '';
-
-  // Existencias POR SUCURSAL (no hay primaria/secundaria): DCAM y OTCA se
-  // muestran por separado, cada una con su inventario fuente. Regla: SOLO
-  // cuenta el ÚLTIMO inventario de cada sucursal. Si el arma no aparece en él,
-  // se asume AGOTADA en esa sede.
-  const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'DCAM'))) || 'DCAM';
-  const latestByBranch = (sigla) => manuales.find((m) => autOf(m) === sigla) || null; // manuales: más reciente primero
-  const everIn = (sigla) => priceHistory.some((h) => autOf(manualById(h.manualId)) === sigla);
-  const branches = [];
-  const dcamQty = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
-  const latestDcam = latestByBranch('DCAM');
-  if (dcamQty != null) {
-    branches.push({ sigla: 'DCAM', qty: dcamQty, manual: latestDcam, agotado: false });
-  } else if (everIn('DCAM') && latestDcam) {
-    branches.push({ sigla: 'DCAM', qty: null, manual: latestDcam, agotado: true });
-  }
-  const latestOtca = latestByBranch('OTCA');
-  if (latestOtca) {
-    const rec = priceHistory.find((h) => h.manualId === latestOtca.id);
-    if (rec && rec.qty != null) {
-      branches.push({ sigla: 'OTCA', qty: rec.qty, manual: latestOtca, agotado: false });
-    } else if (everIn('OTCA')) {
-      branches.push({ sigla: 'OTCA', qty: null, manual: latestOtca, agotado: true });
-    }
-  }
-  // ¿Hay un inventario de la MISMA sucursal más reciente que el del precio? Si lo
-  // hay, el arma ya no aparece en él y el precio es el último conocido: el talón
-  // lo sella (ver TalonComprobante). Fechas AAAA-MM-DD, comparables como texto.
-  const ultimoSuc = latestByBranch(curSigla);
-  const ultimoConocido = !!(currentManual && ultimoSuc && String(ultimoSuc.fecha || '') > String(currentManual.fecha || ''));
+  // Precio vigente, su fuente, «último precio conocido» y existencias por
+  // sucursal. La regla vive en src/lib/cotejo.js porque el comparador enseña lo
+  // mismo, y dos copias acabarían diciendo cosas distintas de la misma arma.
+  const inv = window.amxInventarioArma(arma, {
+    priceHistory, manuales,
+    existenciasDCAM: window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null,
+    autoridad: window.manualAutoridad,
+  });
+  const curSigla = inv.sigla;
+  const precioActual = inv.precio;
+  const fechaPrecio = inv.manual ? amxFmtManualDate(inv.manual.fecha) : '';
+  const branches = inv.sucursales;
+  const ultimoConocido = inv.ultimoConocido;
 
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
   const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
@@ -672,184 +646,36 @@ function sInpStyle() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// COMPARE — Vista lado a lado tipo loadout
+// COMPARE — dos fichas de fichero lado a lado (rediseño del 14-sep-2026)
+// Qué se compara, quién gana y cómo se escribe la tira: src/lib/cotejo.js.
+// Las piezas: ui.jsx, bloque «EL COMPARADOR». Las reglas: docs/DESIGN.md §5.6.
 // ════════════════════════════════════════════════════════════════
-function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerForSlot }) {
+function CompareScreen({ ids, onOpenArma, onNav, onPoner, onQuitar, buscarLado, onBuscar }) {
   const vp = window.useViewport();
-  const a = ids[0] ? window.findArma(ids[0]) : null;
-  const b = ids[1] ? window.findArma(ids[1]) : null;
-
-  if (!a && !b) {
-    return (
-      <div style={{
-        padding: '60px 24px', textAlign: 'center',
-        fontFamily: 'JetBrains Mono, monospace',
-        color: PALETTE.textMuted
-      }}>
-        <div style={{ fontSize: 57.5, color: PALETTE.border, marginBottom: 16 }}>⇄</div>
-        <div style={{ fontSize: 17, marginBottom: 8, color: PALETTE.text }}>COMPARADOR VACÍO</div>
-        <div style={{ fontSize: 14.5, lineHeight: 1.6, marginBottom: 18 }}>
-          Selecciona armas desde el catálogo<br />tocando el botón ⇄ en cada tarjeta.
-        </div>
-        <button onClick={() => onNav('catalog')} style={{
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-          padding: '10px 22px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-          letterSpacing: '0.15em', textTransform: 'uppercase',
-          cursor: 'pointer'
-        }}>Ir al Arsenal</button>
-      </div>);
-
-  }
-
-  const padX = vp.isDesktop ? 28 : 12;
+  // Un solo corte, el del expediente: 1024px, como la ficha de arma.
+  const ancho = vp.width >= 1024;
+  // La que no existe se ignora y la que queda pasa a ser la primera (spec §8).
+  const [a = null, b = null] = ids.map((id) => window.findArma(id)).filter(Boolean);
+  const cotejo = a ? window.amxCotejar(a, b, window.amxInventarioDe(a), b ? window.amxInventarioDe(b) : null) : null;
+  // La búsqueda se titula con el arma del OTRO lado.
+  const otra = buscarLado === 'b' ? a : buscarLado === 'a' ? b : null;
   return (
-    <div style={{ paddingBottom: 90, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{
-        padding: `${vp.isDesktop ? 22 : 14}px ${padX}px 10px`,
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.amber,
-        letterSpacing: '0.2em', textTransform: 'uppercase',
-        textAlign: 'center'
-      }}>━━━ LOADOUT · COMPARATIVA ━━━</div>
-
-      {/* HEADERS LADO A LADO */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: vp.isDesktop ? 16 : 4,
-        padding: `0 ${padX}px 12px`
-      }}>
-        {[a, b].map((x, idx) =>
-        <CompareSlot key={idx} arma={x} side={idx === 0 ? 'A' : 'B'}
-        onOpen={() => x && onOpenArma(x.id)}
-        onRemove={() => x && removeFromCompare(x.id)}
-        onPick={() => openPickerForSlot(idx)} />
-        )}
-      </div>
-
-      {a && b &&
-      <div style={{ padding: `0 ${padX}px 16px` }}>
-          {/* SPEC ROWS */}
-          <SectionHeader>Ficha técnica</SectionHeader>
-          <div style={{
-          background: PALETTE.bgCard,
-          border: `1px solid ${PALETTE.border}`
-        }}>
-            {[
-          { l: 'Calibre', av: a.calibre, bv: b.calibre },
-          { l: 'Capacidad', av: a.capacidad, bv: b.capacidad },
-          { l: 'Peso', av: a.peso, bv: b.peso },
-          { l: 'Longitud', av: a.longitud, bv: b.longitud },
-          { l: 'Origen', av: a.pais, bv: b.pais },
-          { l: 'Año', av: a.anio, bv: b.anio },
-          { l: 'Mecanismo', av: a.mecanismo, bv: b.mecanismo },
-          { l: 'Precio', av: a.priceExact, bv: b.priceExact },
-          { l: 'Disponib.', av: a.availLabel, bv: b.availLabel }].
-          map((row, i) =>
-          <div key={i} style={{
-            display: 'grid', gridTemplateColumns: '1fr 80px 1fr',
-            borderBottom: `1px solid ${PALETTE.border}`,
-            padding: '8px 10px', alignItems: 'center', gap: 8,
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 14.5}}>
-                <div style={{ color: PALETTE.text, textAlign: 'right', lineHeight: 1.3 }}>{row.av}</div>
-                <div style={{
-              color: PALETTE.textMuted,
-              textAlign: 'center', letterSpacing: '0.1em',
-              textTransform: 'uppercase', fontSize: 12}}>{row.l}</div>
-                <div style={{ color: PALETTE.text, lineHeight: 1.3 }}>{row.bv}</div>
-              </div>
-          )}
-          </div>
-        </div>
-      }
-    </div>);
-
-}
-function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
-  if (!arma) {
-    return (
-      <button onClick={onPick} style={{
-        height: 230,
-        background: 'transparent',
-        border: `2px dashed ${PALETTE.border}`,
-        cursor: 'pointer',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        gap: 6,
-        fontFamily: 'JetBrains Mono, monospace',
-        color: PALETTE.textMuted
-      }}>
-        <div style={{ fontSize: 38.5, color: PALETTE.border }}>+</div>
-        <div style={{
-          fontSize: 13, letterSpacing: '0.18em', textTransform: 'uppercase'
-        }}>SLOT {side}</div>
-        <div style={{ fontSize: 13, color: PALETTE.textDim }}>Añadir arma</div>
-      </button>);
-
-  }
-  return (
-    <div style={{
-      background: PALETTE.bgCard,
-      border: `1px solid ${PALETTE.border}`,
-      padding: 10,
-      position: 'relative'
-    }}>
-      <TacticalCorners size={8} color={PALETTE.amber} />
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        marginBottom: 4
-      }}>
-        <span style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 12, color: PALETTE.amber,
-          letterSpacing: '0.2em'
-        }}>◆ SLOT {side}</span>
-        <button onClick={onRemove} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.textMuted, fontSize: 15.5, padding: 0
-        }}>✕</button>
-      </div>
-      <div style={{
-        height: 90,
-        background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-        border: `1px solid ${PALETTE.border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: 8, overflow: 'hidden'
-      }}>
-        <img src={arma.img} alt={arma.nombre} loading="lazy" decoding="async" style={{
-          maxWidth: '90%', maxHeight: '85%',
-          filter: 'grayscale(0.15) contrast(1.1)'
-        }} onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-      </div>
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 12, color: PALETTE.amber,
-        letterSpacing: '0.1em', textTransform: 'uppercase',
-        marginBottom: 2
-      }}>{arma.marca}</div>
-      <div style={{
-        fontFamily: 'Archivo, sans-serif',
-        fontSize: 15, fontWeight: 600,
-        color: PALETTE.text,
-        textTransform: 'uppercase',
-        lineHeight: 1.1, marginBottom: 4
-      }}>{arma.nombre}</div>
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.textDim,
-        marginBottom: 6
-      }}>{arma.calibre.replace(' Parabellum', '').replace('Winchester', 'Win')}</div>
-      <AvailBadge avail={arma.avail} compact />
-      <button onClick={onOpen} style={{
-        marginTop: 8, width: '100%',
-        background: 'transparent', border: `1px solid ${PALETTE.border}`,
-        color: PALETTE.text,
-        padding: '5px',
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, letterSpacing: '0.1em',
-        cursor: 'pointer', textTransform: 'uppercase'
-      }}>Ver ficha →</button>
-    </div>);
-
+    <div className="amx-cotejo-pantalla">
+      <window.CintaDymo nivel={1}>Comparador</window.CintaDymo>
+      {!a
+        ? <window.CotejoVacio onArsenal={() => onNav('catalog')} />
+        : <React.Fragment>
+            <window.CotejoFichas a={a} b={b} cotejo={cotejo} ancho={ancho}
+              onAbrir={onOpenArma} onCambiar={onBuscar} onQuitar={onQuitar} onElegir={onBuscar} />
+            {b && <window.TiraCotejo tira={window.amxTiraCotejo(a, b, cotejo)} />}
+          </React.Fragment>}
+      <window.BuscarArma abierta={buscarLado !== null}
+        titulo={otra ? 'Comparar con la ' + otra.nombre : 'Elegir arma'}
+        excluir={ids}
+        onElegir={(id) => { onPoner(buscarLado, id); onBuscar(null); }}
+        onCerrar={() => onBuscar(null)} />
+    </div>
+  );
 }
 window.CompareScreen = CompareScreen;
 
