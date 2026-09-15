@@ -4023,7 +4023,7 @@
 }
 .amx-v2 .amx-almacen-renglon b { font-weight: 700; letter-spacing: .08em; }
 .amx-v2 .amx-almacen-renglon:hover b { text-decoration: underline; text-underline-offset: 3px; }
-.amx-v2 .amx-almacen .num { text-align: right; }
+.amx-v2 .amx-almacen .num { text-align: right; padding-right: var(--e3); }
 
 /* CLASIFICACIÓN LEGAL — la hoja de oficio con un sello por renglón. */
 .amx-v2 .amx-clasif { margin: 0; padding: 4px 18px 6px; list-style: none; border-radius: 3px; }
@@ -4085,8 +4085,15 @@
    se desliza también en escritorio (en la vitrina, desde 1024 px, se parte en
    filas) y sin el marco de la vitrina. El cartucho mide lo que su largo real. */
 .amx-v2 .amx-mostrador { --alto-foto: 150px; margin: 0; padding: 0 0 8px; }
+/* En móvil la mesa llega al borde derecho de la pantalla: asoma el siguiente
+   calibre y se lee que la mesa sigue (a 390 px cabían tres justos y nada invitaba
+   a deslizar). */
+@media (max-width: 1023px) { .amx-v2 .amx-mostrador { margin-right: -16px; } }
 .amx-v2 .amx-mostrador .amx-repisa-carril { display: flex; width: max-content; min-width: 100%; }
-.amx-v2 .amx-mostrador-celda { flex: 0 0 104px; }
+/* El ancho de la celda sale del de la pantalla para que en cualquier teléfono se
+   vean 3,4 calibres: el que asoma a medias es lo que dice que la mesa se desliza.
+   Con 104 px fijos, a 384 y 390 px solo asomaban 8 y 14 px. */
+.amx-v2 .amx-mostrador-celda { flex: 0 0 clamp(84px, calc((100vw - 22px) / 3.4 - 14px), 112px); }
 @media (min-width: 1024px) {
   .amx-v2 .amx-mostrador { --alto-foto: 190px; overflow-x: auto; }
   .amx-v2 .amx-mostrador-celda { flex-basis: 128px; }
@@ -4096,6 +4103,8 @@
   z-index: 1;
   height: calc(var(--alto-foto) * var(--escala, 1));
   max-height: none;
+  max-width: none;                    /* el casco del calibre 12 es más ancho que la
+                                         celda más estrecha: si encoge, rompe la escala */
 }
 .amx-v2 .amx-mostrador .amx-puesto-luz { bottom: 0; }
 .amx-v2 .amx-mostrador .amx-articulo:hover .amx-puesto-luz,
