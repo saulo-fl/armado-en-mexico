@@ -31,6 +31,22 @@ class Entorno:
     def __init__(self, secretos: dict | None = None, bot=None):
         self.secretos, self.bot = secretos or {}, bot
 
+    @classmethod
+    def real(cls, dir_bot: Path, seco: bool = False):
+        secretos = {}
+        for nombre in ("github.env", "cloudflare.env"):
+            ruta = dir_bot / nombre
+            if ruta.exists():
+                for linea in ruta.read_text(encoding="utf-8").splitlines():
+                    if "=" in linea and not linea.lstrip().startswith("#"):
+                        k, v = linea.split("=", 1)
+                        secretos[k.strip()] = v.strip()
+        bot = None
+        if not seco:
+            from quiron_telegram import Bot   # PYTHONPATH=/home/saulo/apps/quiron/lib
+            bot = Bot.desde_env(str(dir_bot / "telegram.env"))
+        return cls(secretos, bot)
+
     def sh(self, args, cwd=None, env=None, timeout=1800):
         e = dict(os.environ, **self.secretos, **(env or {}))
         p = subprocess.run([str(a) for a in args], cwd=cwd, env=e, capture_output=True, text=True, timeout=timeout)

@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Pruebas de la conciliación automática. Correr: python3 scripts/dcam/test_conciliar.py"""
+import hashlib
 import json
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
@@ -282,6 +284,255 @@ def test_reproduccion_armas_6_jul_a_11_sep():
     assert not fallos, fallos
     dudosos = {d.get("id") for d in cl[0]["dudosos"]}
     assert {77, 100, 135, 155, 161, 178}.issubset(dudosos), sorted(i for i in dudosos if i)
+
+
+# ── Orquestación (Task 7) ────────────────────────────────────────────────────
+
+URL_OCT = "https://www.gob.mx/cms/uploads/attachment/file/1200000/ARMAS_01_OCT._2026.pdf"
+
+
+def test_pendientes_lee_el_estado_del_vigia():
+    with tempfile.TemporaryDirectory() as t:
+        d = Path(t)
+        url = URL_OCT
+        (d / "archivo" / "2026-10-01").mkdir(parents=True)
+        pdf = d / "archivo" / "2026-10-01" / "1200000_ARMAS_01_OCT._2026.pdf"
+        pdf.write_bytes(b"%PDF")
+        (d / "estado.json").write_text(json.dumps({"documentos": {
+            url: {"tipo": "existencias", "etiqueta": "Existencias de Armas.", "sha256": "abc", "desde": "01-OCT-2026"},
+            "https://www.gob.mx/cms/uploads/image/file/1/a.jpg": {"tipo": "imagen", "etiqueta": "a", "sha256": "zzz", "desde": "x"}}}), encoding="utf-8")
+        assert conciliar.pendientes(d, {"procesados": {}}) == [("abc", pdf)]
+        assert conciliar.pendientes(d, {"procesados": {"abc": {"paso": "hecho"}}}) == []
+
+
+def test_entorno_real_lee_secretos_y_en_seco_no_abre_telegram():
+    import publicar
+    with tempfile.TemporaryDirectory() as t:
+        d = Path(t)
+        (d / "github.env").write_text("GH_TOKEN=gh_abc\n# COMENTARIO=no\n", encoding="utf-8")
+        (d / "cloudflare.env").write_text("CLOUDFLARE_API_TOKEN = cf=def\n", encoding="utf-8")
+        ent = publicar.Entorno.real(d, seco=True)
+        assert ent.secretos == {"GH_TOKEN": "gh_abc", "CLOUDFLARE_API_TOKEN": "cf=def"}, ent.secretos
+        assert ent.bot is None
+
+
+class _EntFalso:
+    """Entorno de correr() sin red, git, gh ni Telegram: registra comandos y avisos."""
+
+    def __init__(self):
+        self.llamadas, self.avisos = [], []
+
+    def sh(self, args, cwd=None, env=None, timeout=1800):
+        self.llamadas.append(" ".join(map(str, args)))
+        return 0, ""
+
+    def avisar(self, texto):
+        self.avisos.append(texto)
+
+
+def _renglon(i, precio):
+    return {"nombre": f"R{i}", "ocurrencia": 1, "descripcion": f"r{i}", "representativo": True, "precio": precio}
+
+
+def _correr(t: Path, nuevos: dict, conc=None, pendientes_mapa=(), seco=False, publicar_seguro=None, pr_revision=None,
+            clasificar=None, catalogos=("armas",)):
+    """Monta un vigía y un clon de trabajo falsos (7 fichas a $100 en el mapa del 11-sep, iguales en cada catálogo)
+    y corre la conciliación con un inventario del 1-oct cuyo renglón Ri vale nuevos[i]; el resto no cambia."""
+    import publicar
+    bot, trabajo = t / "bot", t / "trabajo"
+    (bot / "archivo" / "2026-10-01").mkdir(parents=True)
+    (bot / "archivo" / "2026-10-01" / "1200000_ARMAS_01_OCT._2026.pdf").write_bytes(b"%PDF")
+    (bot / "estado.json").write_text(json.dumps({"documentos": {URL_OCT: {
+        "tipo": "existencias", "etiqueta": "Existencias de Armas.", "sha256": "sha-oct", "desde": "01-OCT-2026"}}}), encoding="utf-8")
+    if conc is not None:
+        (bot / "conciliacion.json").write_text(json.dumps(conc), encoding="utf-8")
+    (trabajo / "scripts" / "dcam").mkdir(parents=True)
+    mapa = {"pendientes": list(pendientes_mapa)}
+    mapa.update({cat: {"2026-09-11": {"manual": "man_dcam_2026_09_11", "fichas": {str(i): [_renglon(i, 100.0)] for i in range(1, 8)}}}
+                 for cat in catalogos})
+    (trabajo / conciliar.MAPA).write_text(json.dumps(mapa), encoding="utf-8")
+    filas = [_fila(f"R{i}", 1, f"r{i}", 3, nuevos.get(i, 100.0)) for i in range(1, 8)]
+    inv = {"fecha": "2026-10-01", "catalogos": {cat: filas + [_fila("NUEVA", 1, "alta", 2, 55.0)] for cat in catalogos}}
+    datos = {cat: [_ficha(i, 100.0, manual="man_dcam_2026_09_11", existencia=3) for i in range(1, 8)] for cat in ("armas",) + tuple(catalogos)}
+
+    def no_llamar(*a, **k):
+        raise AssertionError("no debía llamarse")
+
+    ent = _EntFalso()
+    en_conciliar = {"leer_inventario": lambda ruta: inv, "leer_datos": lambda raiz: datos}
+    if clasificar:
+        en_conciliar["clasificar"] = clasificar
+    with mock.patch.multiple(conciliar, **en_conciliar), \
+            mock.patch.multiple(publicar, create=True, publicar_seguro=publicar_seguro or no_llamar,
+                                pr_revision=pr_revision or no_llamar):
+        conciliar.correr(seco=seco, dir_bot=bot, trabajo=trabajo, ent=ent)
+    ruta_conc = bot / "conciliacion.json"
+    conc_final = json.loads(ruta_conc.read_text(encoding="utf-8")) if ruta_conc.exists() else None
+    return ent, conc_final, mapa, trabajo
+
+
+def test_correr_publica_seguros_con_mapa_y_guardar_y_despues_revision():
+    with tempfile.TemporaryDirectory() as t:
+        vistos = {}
+
+        def publicar_seguro(ent, trabajo, pub, plan, guardar=None):
+            # el llamador no escribe el mapa en el clon: publicar_seguro lo hace tras su checkout forzado
+            vistos["mapa_en_clon"] = json.loads((trabajo / conciliar.MAPA).read_text(encoding="utf-8"))
+            pub["paso"] = "pr"
+            guardar(pub)
+            vistos["guardado"] = json.loads((Path(t) / "bot" / "conciliacion.json").read_text(encoding="utf-8"))
+            vistos["plan"] = plan
+            pub["paso"] = "hecho"
+            return pub
+
+        def pr_revision(ent, trabajo, pub, plan_dudoso, timeout_seg=2700):
+            vistos["dudoso"] = plan_dudoso
+            vistos["pub_al_revisar"] = dict(pub)
+            pub["dudoso"] = {"paso": "hecho", "pr": 9}
+            return pub
+
+        # 1-5 bajan 2.88 % (ajuste general), 6 no cambia, 7 sube 50 % (fuera de grupo) y entra un renglón nuevo
+        ent, conc, mapa, trabajo = _correr(Path(t), {1: 97.12, 2: 97.12, 3: 97.12, 4: 97.12, 5: 97.12, 7: 150.0},
+                                           publicar_seguro=publicar_seguro, pr_revision=pr_revision)
+        plan = vistos["plan"]
+        assert vistos["mapa_en_clon"] == mapa, vistos["mapa_en_clon"]
+        assert [s["id"] for s in plan["seguros"]] == [1, 2, 3, 4, 5, 6], plan["seguros"]
+        assert plan["seguros"][0] == {"id": 1, "precio": 97.12, "existencia": 3}, plan["seguros"][0]
+        assert (plan["catalogo"], plan["fecha"], plan["v"], plan["esperado_armas"]) == ("armas", "2026-10-01", "dcam20261001", 7)
+        assert plan["pdf"].endswith("1200000_ARMAS_01_OCT._2026.pdf"), plan["pdf"]
+        assert plan["mapa"]["manual"] == "man_dcam_2026_10_01", plan["mapa"]
+        assert sorted(plan["mapa"]["fichas"]) == ["1", "2", "3", "4", "5", "6", "7"], plan["mapa"]   # seguros + fuera de grupo
+        assert plan["mapa"]["fichas"]["7"] == [_renglon(7, 150.0)], plan["mapa"]["fichas"]["7"]      # con el precio nuevo
+        assert "| 1 | F1 |" in plan["cuerpo_pr"], plan["cuerpo_pr"]
+        assert vistos["guardado"]["procesados"]["sha-oct"]["catalogos"]["armas"]["paso"] == "pr", vistos["guardado"]
+        assert vistos["pub_al_revisar"]["paso"] == "hecho"
+        assert sorted(d["tipo"] for d in vistos["dudoso"]["dudosos"]) == ["precio_fuera_de_grupo", "renglon_nuevo"], vistos
+        reg = conc["procesados"]["sha-oct"]
+        assert reg["paso"] == "hecho" and reg["catalogos"]["armas"]["dudoso"] == {"paso": "hecho", "pr": 9}, reg
+        # % sin redondear de lo que cambia (sin los ceros), para los ajustes generales de otros catálogos
+        assert reg["fecha"] == "2026-10-01" and sorted(reg["pcts"]["armas"]) == sorted([conciliar._pct(97.12, 100.0)] * 5 + [50.0]), reg
+        assert conciliar._pct(97.12, 100.0) != -2.88
+        assert ent.avisos == [], ent.avisos
+
+
+def test_correr_grupo_con_otros_catalogos_de_la_misma_fecha_y_no_con_el_propio():
+    tres = {1: 97.12, 2: 97.12, 3: 97.12}
+    p = conciliar._pct(97.12, 100.0)
+
+    def publicar_seguro(ent, trabajo, pub, plan, guardar=None):
+        pub.update(paso="hecho", seguros=[s["id"] for s in plan["seguros"]])
+        return pub
+
+    def pr_revision(ent, trabajo, pub, plan_dudoso, timeout_seg=2700):
+        pub["dudoso"] = {"paso": "hecho", "pr": 9}
+        return pub
+
+    casos = [  # (conciliacion.json previa, seguros esperados)
+        ({"procesados": {}}, [4, 5, 6, 7]),
+        # restos de un intento anterior del MISMO inventario: no cuentan dos veces para el grupo
+        ({"procesados": {"sha-oct": {"paso": "leido", "catalogos": {}, "fecha": "2026-10-01", "pcts": {"armas": [p] * 5}}}},
+         [4, 5, 6, 7]),
+        # municiones de la misma fecha, ya procesadas: 2 + 3 = 5 con el mismo %
+        ({"procesados": {"sha-mun": {"paso": "hecho", "fecha": "2026-10-01", "pcts": {"municiones": [p, p, 0.0]}},
+                         "sha-vieja": {"paso": "hecho", "fecha": "2026-09-11", "pcts": {"municiones": [p] * 9}}}},
+         [1, 2, 3, 4, 5, 6, 7]),
+    ]
+    for previa, esperados in casos:
+        with tempfile.TemporaryDirectory() as t:
+            ent, conc, _m, _tr = _correr(Path(t), tres, conc=previa, publicar_seguro=publicar_seguro, pr_revision=pr_revision)
+            assert ent.avisos == [] and conc["procesados"]["sha-oct"]["catalogos"]["armas"]["seguros"] == esperados, (previa, conc)
+
+
+def test_correr_seco_no_publica_ni_deja_estado():
+    with tempfile.TemporaryDirectory() as t:
+        ent, conc, _m, _tr = _correr(Path(t), {1: 97.12, 2: 97.12, 3: 97.12, 4: 97.12, 5: 97.12}, seco=True)
+        assert conc is None and ent.avisos == [], ent.avisos           # sin conciliacion.json ni publicar
+        i = next(n for n, l in enumerate(ent.llamadas) if "datos.js aplicar" in l)
+        assert any(l.startswith("git checkout") and l.endswith("-- .") for l in ent.llamadas[i:]), ent.llamadas
+        assert not any(("push" in l or l.startswith("gh ")) for l in ent.llamadas), ent.llamadas
+
+
+def test_correr_detenido_avisa_y_no_marca_hecho():
+    def bloqueado(ent, trabajo, pub, plan, guardar=None):
+        pub.update(paso="aplicado", bloqueado="auditar.js con hallazgos")
+        guardar(pub)
+        return pub
+
+    real = conciliar.clasificar
+
+    def revienta_accesorios(cat, *a):   # sin fila representativa: StopIteration en ese catálogo
+        if cat == "accesorios":
+            raise StopIteration
+        return real(cat, *a)
+
+    def hecho(ent, trabajo, pub, plan, guardar=None):
+        pub["paso"] = "hecho"
+        return pub
+
+    def revisado(ent, trabajo, pub, plan_dudoso, timeout_seg=2700):
+        pub["dudoso"] = {"paso": "hecho", "pr": 9}
+        return pub
+
+    cambios = {1: 97.12, 2: 97.12, 3: 97.12, 4: 97.12, 5: 97.12, 7: 150.0}
+    casos = [  # (argumentos de _correr, texto esperado en el aviso o None)
+        (dict(pendientes_mapa=[{"id": 1}]), "ambiguas"),
+        # la excepción detiene solo su catálogo: armas se publica igual
+        (dict(clasificar=revienta_accesorios, catalogos=("armas", "accesorios"), publicar_seguro=hecho, pr_revision=revisado),
+         "(accesorios 2026-10-01): StopIteration"),
+        (dict(publicar_seguro=bloqueado), None),          # el aviso lo da publicar_seguro; lo dudoso espera
+    ]
+    for kw, aviso in casos:
+        with tempfile.TemporaryDirectory() as t:
+            ent, conc, _m, _tr = _correr(Path(t), cambios, **kw)
+            reg = (conc or {"procesados": {}})["procesados"].get("sha-oct", {})
+            assert reg.get("paso") != "hecho", (kw, conc)
+            if aviso:
+                assert len(ent.avisos) == 1 and aviso in ent.avisos[0] and "detenida" in ent.avisos[0], ent.avisos
+            else:   # ni pr_revision llamado (su falso lanza y correr lo convertiría en aviso)
+                assert ent.avisos == [] and "dudoso" not in reg["catalogos"]["armas"], (ent.avisos, reg)
+            if "catalogos" in kw:
+                assert reg["catalogos"] == {"armas": {"paso": "hecho", "dudoso": {"paso": "hecho", "pr": 9}}}, reg
+
+
+def test_correr_cierra_el_inventario_cuando_cada_parte_llega_a_su_final():
+    def pr_revision(ent, trabajo, pub, plan_dudoso, timeout_seg=2700):
+        pub["dudoso"] = {"paso": "issue", "issue": 88}
+        return pub
+
+    with tempfile.TemporaryDirectory() as t:   # solo dudosos: no hay nada que publicar y el issue lo cierra
+        ent, conc, _m, _tr = _correr(Path(t), {i: 100.0 + 10 * i for i in range(1, 8)}, pr_revision=pr_revision)
+        reg = conc["procesados"]["sha-oct"]
+        assert ent.avisos == [] and reg["paso"] == "hecho" and reg["catalogos"]["armas"] == {"dudoso": {"paso": "issue", "issue": 88}}, reg
+
+    def ya_publicado(ent, trabajo, pub, plan, guardar=None):
+        assert pub["paso"] == "hecho"
+        return pub
+
+    previa = {"procesados": {"sha-oct": {"paso": "leido", "catalogos": {"armas": {"paso": "hecho", "dudoso": {"paso": "issue", "issue": 88}}}}}}
+    with tempfile.TemporaryDirectory() as t:   # reanudar: ni se repite la revisión ni se abre otro issue
+        ent, conc, _m, _tr = _correr(Path(t), {1: 97.12, 2: 97.12, 3: 97.12, 4: 97.12, 5: 97.12, 7: 150.0}, conc=previa,
+                                     publicar_seguro=ya_publicado)
+        assert ent.avisos == [] and conc["procesados"]["sha-oct"]["paso"] == "hecho", (ent.avisos, conc)
+
+
+def test_semilla_mapea_marca_y_no_duplica_pendientes():
+    with tempfile.TemporaryDirectory() as t:
+        raiz, bot = Path(t) / "repo", Path(t) / "bot"
+        (raiz / "scripts" / "dcam").mkdir(parents=True)
+        bot.mkdir()
+        pdf = Path(t) / "inv.pdf"
+        pdf.write_bytes(b"%PDF-11-sep")
+        filas = [_fila("A", 1, "a", 5, 100.0), _fila("C", 1, "c", 1, 300.0), _fila("D", 1, "d", 1, 300.0)]
+        datos = {"armas": [_ficha(1, 100.0, "man_dcam_2026_09_11", existencia=5), _ficha(3, 300.0, "man_dcam_2026_09_11", existencia=1)]}
+        with mock.patch.multiple(conciliar, leer_inventario=lambda r: {"fecha": "2026-09-11", "catalogos": {"armas": filas}},
+                                 leer_datos=lambda r: datos):
+            for _ in range(2):
+                conciliar.semilla([pdf], marcar=True, raiz=raiz, dir_bot=bot)
+        mapa = json.loads((raiz / conciliar.MAPA).read_text(encoding="utf-8"))
+        assert mapa["armas"]["2026-09-11"]["manual"] == "man_dcam_2026_09_11" and list(mapa["armas"]["2026-09-11"]["fichas"]) == ["1"], mapa
+        assert [(p["id"], p["catalogo"], p["fecha"]) for p in mapa["pendientes"]] == [(3, "armas", "2026-09-11")], mapa["pendientes"]
+        conc = json.loads((bot / "conciliacion.json").read_text(encoding="utf-8"))
+        assert conc["procesados"][hashlib.sha256(b"%PDF-11-sep").hexdigest()]["paso"] == "hecho", conc
 
 
 if __name__ == "__main__":
