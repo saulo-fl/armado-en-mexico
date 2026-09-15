@@ -279,3 +279,9 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
     cabeceras y separa el precio del texto que lleva pegado. Los 14 nombres ilegibles salen
     «?»: léelos renderizando. La salida de los 8 PDFs de 2026 y OTCA quedó idéntica byte a
     byte, y `test_parse_pdf.py` fija 177 armas y 22 accesorios de oct-2025.
+- 2026-09-14: existe una **conciliación automática** de los inventarios DCAM (pieza 2 del
+  bot DCAM, `scripts/dcam/`): sola publica lo ya catalogado que cambia de forma predecible
+  y manda a PR investigado lo que pide criterio (altas, agotados, variantes, erratas, % fuera
+  de grupo); esta skill sigue aplicando a esos PR y a lo que el bot no cubre (OTCA, altas por
+  mano). El mapeo renglón del PDF ↔ ficha vive versionado en `scripts/dcam/mapeo-dcam.json`.
+  Diseño completo: `scripts/dcam/DISENO.md`.

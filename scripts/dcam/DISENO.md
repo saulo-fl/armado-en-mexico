@@ -42,7 +42,7 @@ documento cubre el sistema entero y detalla la **pieza 1 (vigía)** y la **pieza
 |---|---|---|
 | 0 | Puesta al día en sesión: conciliar el inventario del 11-sep-2026 y corregir los textos legales que chocaban con la fuente oficial | Hecha (#154/#155, #158/#159, #164/#165; D1 resembrado) |
 | 1 | **Vigía**: detectar, archivar y avisar | Hecha e instalada en APOLO el 14-sep-2026 (#166/#167) |
-| 2 | Conciliación y publicación automáticas | Diseñada (sección «Pieza 2»); pendiente de plan e implementación |
+| 2 | Conciliación y publicación automáticas | Implementada (14-sep-2026); pendiente de instalación en APOLO (ver «Instalación» abajo) |
 | 3 | Sincronización legal + bloque de Legalidad (entrevista de diseño con bocetos) | Diseño pendiente |
 
 ## Hechos medidos (13-sep-2026)
@@ -288,6 +288,17 @@ conciliar.py  (scripts/dcam/)
 - **Resembrado de D1 sin wrangler**: `resembrar.js` hoy obtiene el token con
   `wrangler auth token`; se adapta de forma mínima para aceptar `CLOUDFLARE_API_TOKEN` del
   entorno. APOLO no instala ni inicia sesión en wrangler.
+- **Sección de cada renglón por página.** `leer_inventario` asigna armas/municiones/
+  accesorios comparando, página por página, contra el encabezado repetido «EXISTENCIA DE
+  …»; el parser (`parse_dcam`) agrega el campo `pagina` a cada renglón solo para esto. El
+  parser OTCA no lo trae — la pieza 2 no concilia OTCA; habría que añadirlo si algún día se
+  hace.
+- **El aplicador protege el orden del historial.** `datos.js aplicar` lanza si la fecha del
+  inventario es igual o anterior a la del inventario DCAM más reciente ya registrado en ese
+  catálogo, y exige que la existencia de cada renglón seguro sea un entero **≥ 1** en los
+  tres catálogos (una existencia en 0 ya es dudosa — «agotado» — en `clasificar`, no llega
+  aquí como seguro). Dirección segura: si el chequeo se equivoca, detiene el catálogo en vez
+  de publicar mal.
 
 ### Mapa de renglones (`scripts/dcam/mapeo-dcam.json`)
 
@@ -296,13 +307,24 @@ precio y fecha, no renglón). El mapa lo guarda, versionado en el repo y **no se
 en `scripts/`, fuera de `out/`):
 
 - Por catálogo y por inventario: ficha → lista de renglones `{nombre_corto, ocurrencia,
-  descripcion}` (una ficha puede sumar varios renglones; uno está marcado como
-  `representativo`).
+  descripcion, precio}` (el `precio` es el de ESE renglón en ese inventario — lo usa
+  `clasificar` para detectar un mapa desincronizado, ver «Reglas» abajo; una ficha puede
+  sumar varios renglones; uno está marcado como `representativo`).
 - **Construcción inicial, una sola vez**, con el inventario del 11-sep-2026 ya conciliado:
-  cada ficha se empareja con el renglón cuyo precio **y** existencia coinciden exactamente
-  con su registro del 11-sep. Lo que quede ambiguo (varios renglones con el mismo precio y
-  existencia) o sin pareja se presenta a Saulo para decidirlo **antes** de activar la
-  pieza 2.
+  cada ficha se empareja, primero, con el renglón cuyo precio **y** existencia coinciden
+  exactamente con su registro del 11-sep. Si no hay coincidencia exacta pero la suma de
+  existencias de varios renglones sí cuadra con la de la ficha —todos al precio de la
+  ficha, o variantes del mismo nombre corto a precios distintos que solo cuadran en un
+  grupo (caso real: la ficha 178, Huglu Renova del 6-jul, sumaba «RENOVA VBN» madera al
+  precio de la ficha y sintética a otro precio)— también se mapea, con el renglón de precio
+  conocido como representativo. Estos mapeos por suma **también** se devuelven como
+  ambiguos (motivo `confirmar suma`, con la `propuesta`): `semilla` los deja en
+  `pendientes` para que Saulo los confirme antes de activar la pieza 2 (la semilla del
+  11-sep trae 12 casos así en armas: 2, 10, 49, 54, 57, 136, 137, 141, 166, 169, 221, 223).
+  Lo que quede sin pareja, o con varios renglones que podrían serlo, se presenta a Saulo
+  aparte para decidirlo. Si el representativo elegido no fuera el correcto, el inventario
+  siguiente lo delata solo: el % de cambio sale fuera del ajuste general y la ficha cae en
+  `precio_fuera_de_grupo` (dudoso), nunca se publica mal.
 - Cada publicación (automática o mergeada desde el PR dudoso) añade el inventario nuevo al
   mapa. Así el encadenado aguanta inventarios saltados: siempre se compara con el último
   inventario del catálogo que está en el mapa.
@@ -317,9 +339,16 @@ en `scripts/`, fuera de `out/`):
    tengan la **misma fecha de corte** (la del encabezado «al cierre del día DD/MM/AAAA»),
    aunque se hayan subido en días distintos; si un catálogo llega solo, el grupo se calcula
    con los que ya estén en el mapa para esa fecha más el nuevo. Referencia real: el 11-sep
-   el 97 % de las armas cayó en −2.88 % y −1.31 %.
+   el 97 % de las armas cayó en −2.88 % y −1.31 %. El **0 %** se decide comparando precios
+   (`abs(precio - anterior) < 0.005`), no el porcentaje redondeado, y las fichas **sin
+   cambio no cuentan** para formar un ajuste general — un grupo son ≥ 5 renglones con un
+   cambio real al mismo %. Así, un cambio real de menos de 5 artículos (o una errata) no se
+   cuela sin grupo: va a PR.
 3. Si la ficha suma varios renglones, **todos** cumplen 1 y 2; el precio sigue al
-   representativo.
+   representativo, y el precio anterior de ese representativo, tal como quedó guardado en
+   el mapa, tiene que coincidir con el registro vigente de la ficha — si no coincide (por
+   ejemplo, un PR dudoso cambió el precio sin actualizar el mapa), la ficha es dudosa
+   (`mapa_desincronizado`) en vez de pisar esa decisión.
 4. Entra: registro en el historial, `priceExact` (armas), existencia (mapa DCAM en armas,
    `qty` del registro en accesorios y municiones), registro del inventario con `primary` y
    el PDF en `public/inventarios/` con la convención de nombres de `AGENTS.md`.
@@ -332,9 +361,12 @@ en `scripts/`, fuera de `out/`):
 - mismo nombre corto y ocurrencia con descripción distinta.
 
 **DETENIDO — no se publica nada de ese catálogo** y llega «⚠️ conciliación detenida:
-<motivo>» si: el parser no reconoce el formato; el número de renglones leídos no cuadra con
-el de precios del PDF; falla `auditar.js` o el build; o la aplicación deja un historial que
-no cumple las invariantes de la skill.
+<motivo>» si: el parser no reconoce el formato (incluido el layout de oct-2025 — cabecera
+«DIRECCIÓN DE COMERCIALIZACIÓN» acentuada, distinta de la de 2026 sin acento —, a propósito:
+el mapa arranca en 11-sep y el bot solo lee inventarios nuevos del vigía; si la DCAM
+volviera a ese layout viejo, detenerse y avisar es lo correcto, y no se le añade soporte);
+el número de renglones leídos no cuadra con el de precios del PDF; falla `auditar.js` o el
+build; o la aplicación deja un historial que no cumple las invariantes de la skill.
 
 ### Publicación de lo seguro
 
@@ -365,10 +397,14 @@ no cumple las invariantes de la skill.
 
 ### Errores y reanudación
 
-- **Una publicación se procesa una vez.** `estado.json` guarda, por catálogo y fecha, el paso
-  alcanzado (`rama`, `pr`, `mergeado`, `d1`, `sondas`, `dudoso_pr`). Una corrida que muere a
-  medias deja ese paso escrito y la siguiente continúa desde ahí (encuentra rama o PR por su
-  nombre) en vez de empezar de nuevo.
+- **Una publicación se procesa una vez.** El paso alcanzado, por catálogo y fecha, se guarda
+  en `/home/saulo/apps/dcam-bot/conciliacion.json` — aparte de `estado.json` del vigía, que
+  se reescribe entero en cada corrida y borraría claves ajenas. Los pasos de lo seguro son
+  los de `publicar_seguro`: `rama` → `aplicado` → `puertas` → `pr` → `preview` → `mergeado`
+  → `produccion` → `d1` → `sondas` → `hecho`; lo dudoso lleva su propio registro
+  (`pub["dudoso"] = {"paso": "hecho", "pr": n}`, o `{"paso": "issue", "issue": n}` si
+  `claude -p` no pudo). Una corrida que muere a medias deja ese paso escrito y la siguiente
+  continúa desde ahí (encuentra rama o PR por su nombre) en vez de empezar de nuevo.
 - **Merge hecho pero D1 sin resembrar** es el caso grave (el código está publicado pero quien
   ya visitó el sitio ve lo viejo): «⚠️ publicado sin resembrar D1» y la siguiente corrida
   reintenta el resembrado.
@@ -395,17 +431,36 @@ no cumple las invariantes de la skill.
 
 ### Instalación (tras mergear la pieza 2)
 
-1. Saulo crea el token fine-grained de GitHub (Contents y Pull requests lectura/escritura,
-   Metadata lectura y el permiso mínimo para leer checks — se confirma en la
-   implementación) y el token de API de Cloudflare (D1:Edit); los escribe en
-   `~/apps/dcam-bot/github.env` y `cloudflare.env` con el comando que valida.
-2. Clon de trabajo `~/apps/dcam-bot/trabajo` con `npm ci`; comprobar que `claude -p`
-   responde en APOLO con el usuario `saulo`.
-3. Construcción inicial del mapa desde el 11-sep y decisión de Saulo sobre lo ambiguo.
-4. `--seco` contra el último inventario archivado (no debe haber nada que publicar) y la
-   prueba de reproducción 6-jul → 11-sep en verde.
-5. Unidad actualizada (`correr.sh`, `TimeoutStartSec=3h`) y `daemon-reload`. Desde ahí, el
-   próximo inventario se publica solo.
+Cada paso que escribe en APOLO se confirma con Saulo; `sudo` sin contraseña está disponible
+para `saulo`.
+
+1. **Credenciales (Saulo).** Saulo crea el token fine-grained de GitHub (repo
+   `saulo-fl/armado-en-mexico`: Contents RW, Pull requests RW, Issues RW, Metadata R) y el
+   token de API de Cloudflare (D1:Edit), y los escribe en APOLO con el comando que valida
+   antes de guardar (vacío → no escribe; el servicio rechaza el token → no escribe):
+
+   ```bash
+   ( read -rsp "Token de GitHub: " T; echo; if [ -z "$T" ]; then echo "Vacío: no se guardó"; elif curl -fsS -H "Authorization: Bearer $T" https://api.github.com/repos/saulo-fl/armado-en-mexico >/dev/null; then umask 077; printf 'GH_TOKEN=%s\n' "$T" > ~/apps/dcam-bot/github.env; echo "listo github"; else echo "GitHub rechazó el token"; fi; unset T )
+   ( read -rsp "Token de Cloudflare: " T; echo; if [ -z "$T" ]; then echo "Vacío: no se guardó"; elif curl -fsS -H "Authorization: Bearer $T" https://api.cloudflare.com/client/v4/user/tokens/verify | grep -q '"success":true'; then umask 077; printf 'CLOUDFLARE_API_TOKEN=%s\n' "$T" > ~/apps/dcam-bot/cloudflare.env; echo "listo cloudflare"; else echo "Cloudflare rechazó el token"; fi; unset T )
+   ```
+
+   Verificación (sin imprimir tokens): `stat -c %a` = 600 en ambos archivos;
+   `GH_TOKEN=… gh api repos/saulo-fl/armado-en-mexico --jq .full_name`; `resembrar.js armas`
+   (sin `--aplicar`) con `CLOUDFLARE_API_TOKEN` corre sin pedir wrangler.
+2. **Clon de trabajo.** `git clone` en `~/apps/dcam-bot/trabajo` con el helper del token,
+   `npm ci`, y `claude -p "responde OK"` como `saulo` devuelve `OK`.
+3. **Semilla.** `python3 scripts/dcam/conciliar.py semilla <los 3 PDFs del 11-sep> --marcar`
+   en el clon de trabajo; se muestra a Saulo la tabla de ambiguos y se resuelve con él
+   (editando `mapeo-dcam.json` y vaciando `pendientes`) en un PR corto que Saulo mergea. La
+   semilla del 11-sep trae 12 casos «confirmar suma» en armas (ids 2, 10, 49, 54, 57, 136,
+   137, 141, 166, 169, 221, 223) además de los que queden sin pareja — ver «Mapa de
+   renglones» arriba.
+4. **Ensayo.** `python3 scripts/dcam/conciliar.py correr --seco` (no debe haber pendientes:
+   los 3 PDFs ya están marcados).
+5. **Unidad.** Copiar `dcam-vigia.service` actualizado a `/etc/systemd/system/`,
+   `daemon-reload`, y una corrida manual `sudo systemctl start dcam-vigia.service`: salida
+   0, latido sin «código viejo», conciliación sin nada que hacer.
+6. **Documentar.** Memoria del proyecto y, al cerrar la sesión, Vault y Notion (curadores).
 
 ### Fuera de la pieza 2
 
