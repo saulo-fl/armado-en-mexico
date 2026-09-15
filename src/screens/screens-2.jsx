@@ -241,7 +241,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
             <div className="amx-carpeta-almacen">
               <window.TarjetaAlmacen filas={branches} referencia={arma.dcamRef}
-                sigla={curSigla} nivelPrecio={arma.priceLvl} />
+                sigla={curSigla} nivelPrecio={arma.priceLvl} movil={!ancho} />
             </div>
 
             <div className="amx-carpeta-legal amx-separadores">
