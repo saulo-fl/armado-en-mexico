@@ -301,6 +301,10 @@ Rutas legibles y jerárquicas, pensadas para SEO/GEO. Todo el ruteo vive en la
 cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParsePath`):
 
 ```
+/arsenal                                  base de la sección (el hub)
+/arsenal/catalogo                         el catálogo completo
+/arsenal/catalogo/dcam                    catálogo filtrado por armería DCAM (filtro rápido)
+/arsenal/catalogo/otca                    catálogo filtrado por armería OTCA (filtro rápido)
 /pistolas                                  listado del tipo (filtro aplicado)
 /pistolas/glock-19                         ficha del arma
   tipos: pistolas · revolveres · rifles · escopetas · carabinas

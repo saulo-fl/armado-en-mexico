@@ -353,21 +353,48 @@ const listados = [
   { ruta: 'municiones', nombre: 'Municiones', fuente: 'mun',
     items: MUNICIONES.map((m) => ({ nombre: m.nombre, ruta: rutaMun.get(m.id) })),
     intro: 'Cartuchos y munición del inventario oficial DCAM/OTCA, por calibre, marca y tipo de bala.' },
+  // El arsenal se separa en base y catálogo: /arsenal (el hub) va en FIJAS;
+  // el catálogo y los filtros rápidos por armería son listados de verdad —
+  // tienen contenido: un ItemList de fichas. La misma getArmaSucursales de
+  // data-precios.js decide qué arma sale en cada armería, como en la app.
+  { ruta: 'arsenal/catalogo', nombre: 'Arsenal', h1: 'Arsenal completo',
+    miga: { nombre: 'Arsenal', ruta: 'arsenal' },
+    titulo: 'Arsenal completo — armas legales en México | Armado en México',
+    fuente: 'armas',
+    items: ARMAS.map((a) => ({ nombre: a.nombre, ruta: rutaArma.get(a.id) })),
+    intro: 'El catálogo completo de armas de fuego de los inventarios oficiales DCAM y OTCA, con su calibre, características, precio de referencia y clasificación legal en México.' },
+  { ruta: 'arsenal/catalogo/dcam', nombre: 'Arsenal DCAM', h1: 'Arsenal DCAM',
+    miga: { nombre: 'Arsenal', ruta: 'arsenal' },
+    titulo: 'Arsenal DCAM — armas legales en México | Armado en México',
+    fuente: 'armas',
+    items: ARMAS.filter((a) => win.getArmaSucursales(a.id).dcam).map((a) => ({ nombre: a.nombre, ruta: rutaArma.get(a.id) })),
+    intro: 'Armas de fuego registradas en el inventario oficial de la DCAM (Campo Militar No. 1-D, Naucalpan, Edo. Méx.), con su calibre, características, precio de referencia y clasificación legal en México.' },
+  { ruta: 'arsenal/catalogo/otca', nombre: 'Arsenal OTCA', h1: 'Arsenal OTCA',
+    miga: { nombre: 'Arsenal', ruta: 'arsenal' },
+    titulo: 'Arsenal OTCA — armas legales en México | Armado en México',
+    fuente: 'armas',
+    items: ARMAS.filter((a) => win.getArmaSucursales(a.id).otca).map((a) => ({ nombre: a.nombre, ruta: rutaArma.get(a.id) })),
+    intro: 'Armas de fuego registradas en el inventario oficial de la OTCA (Monterrey, Nuevo León), con su calibre, características, precio de referencia y clasificación legal en México.' },
 ].filter((l) => l.items.length);
 
 for (const l of listados) {
+  // Las ramas del arsenal llevan `miga` (su padre, /arsenal), `h1` y `titulo`
+  // propios; los listados clásicos siguen usando los valores por defecto.
+  const migaPadre = l.miga ? ` › <a href="/${l.miga.ruta}">${esc(l.miga.nombre)}</a>` : '';
   emitir(l.ruta, {
-    titulo: `${l.nombre} legales en México — catálogo DCAM | Armado en México`,
+    titulo: l.titulo || `${l.nombre} legales en México — catálogo DCAM | Armado en México`,
     desc: recorta(l.intro, 155),
     jsonld: { '@context': 'https://schema.org', '@graph': [
       { '@type': 'ItemList', name: `${l.nombre} en México`, numberOfItems: l.items.length,
         itemListElement: l.items.map((it, i) => ({
           '@type': 'ListItem', position: i + 1, name: it.nombre, url: `${SITIO}/${it.ruta}` })) },
-      migas([{ nombre: 'Inicio', ruta: '' }, { nombre: l.nombre }]),
+      migas(l.miga
+        ? [{ nombre: 'Inicio', ruta: '' }, { nombre: l.miga.nombre, ruta: l.miga.ruta }, { nombre: l.nombre }]
+        : [{ nombre: 'Inicio', ruta: '' }, { nombre: l.nombre }]),
     ] },
     cuerpo: `<article>
-<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(l.nombre)}</nav>
-<h1>${esc(l.nombre)} legales en México</h1>
+<nav aria-label="Ruta"><a href="/">Inicio</a> ›${migaPadre} ${esc(l.nombre)}</nav>
+<h1>${esc(l.h1 || `${l.nombre} legales en México`)}</h1>
 <p>${esc(l.intro)}</p>
 <ul>${l.items.map((it) => `<li><a href="/${it.ruta}">${esc(it.nombre)}</a></li>`).join('')}</ul>
 </article>`,
@@ -378,8 +405,11 @@ for (const l of listados) {
 
 // 5e. Páginas fijas de la app
 const FIJAS = [
-  { ruta: 'arsenal', titulo: 'Arsenal completo — armas legales en México', enSitemap: true,
-    desc: 'Catálogo completo de armas de fuego del inventario oficial DCAM/SEDENA, con filtros por tipo, calibre, uso y disponibilidad.' },
+  // /arsenal es la BASE de la sección (el hub). El catálogo completo vive en
+  // /arsenal/catalogo y los filtros rápidos por armería en /arsenal/catalogo/dcam
+  // y /arsenal/catalogo/otca — los tres salen de `listados` arriba.
+  { ruta: 'arsenal', titulo: 'Arsenal — armas legales en México', enSitemap: true,
+    desc: 'La sección Arsenal: los tipos de armas, las armerías DCAM y OTCA, y el catálogo completo con filtros por tipo, calibre, uso, precio y disponibilidad.' },
   { ruta: 'calibres', titulo: 'Guía de calibres', enSitemap: true,
     desc: 'Guía divulgativa de los calibres presentes en el catálogo DCAM: uso típico, velocidad, energía y retroceso.' },
   { ruta: 'legalidad', titulo: 'Tenencia legal de armas en México — requisitos y trámite SEDENA', enSitemap: true,
