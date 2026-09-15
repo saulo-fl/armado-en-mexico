@@ -584,7 +584,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
 
   const clearAll = () => {
     setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
-    setMarca('all');setEra('all');setPrecioLo((p) => priceBounds.min);setPrecioHi((p) => priceBounds.max);setMecanismo('all');setDisponible('all');
+    setMarca('all');setEra('all');setPrecioLo(priceBounds.min);setPrecioHi(priceBounds.max);setMecanismo('all');setDisponible('all');
     setQuery('');
   };
 
@@ -759,8 +759,6 @@ window.CatalogScreen = CatalogScreen;
 // ════════════════════════════════════════════════════════════════
 // ARSENAL HUB — al entrar al arsenal se elige una categoría (no lista plana)
 // ════════════════════════════════════════════════════════════════
-// Tarjeta con foto (fondo de imagen + overlay) para el hub del arsenal
-// `color` es el acento DECORATIVO de las esquinas. No sirve para el subtítulo:
 // Polaroid reutilizable para secciones sin enlace de producto
 // (Armería, etc.). Reusa los estilos .amx-polaroid de estilo.css y solo
 // añade el onClick — la geometría (faldón, marco, giro) ya vive en CSS.
@@ -794,14 +792,8 @@ function HubPolaroid({ img, label, sub, onClick, style: extraStyle, pozoStyle })
 // Misma estética que HOME: polaroids para fotos, lotería para cartas.
 // ════════════════════════════════════════════════════════════════
 
-// Jittering determinista para polaroids de armería — cada una con un ángulo
-// distinto para que no se vean gemelas. Se usa `Math.sin` del índice como
-// generador simple: valores entre -3 y +3 grados.
+// Giro fijo de cada polaroid de armería, distinto para que no se vean gemelas.
 const ARMERIA_GIROS = ['-2.5deg', '1.8deg'];
-
-// Rotaciones deterministas para las polaroids de Usos — grid 2×2 con jittering.
-// Cada valor entre -1.5° y +1.5° para que no se vean gemelas.
-const USO_GIROS = ['-1.2deg', '0.8deg', '-0.5deg', '1.3deg'];
 
 function calibreImgPath(calibreId) {
   return (window.CALIBRES || []).find(x => x.id === calibreId)?.cartucho || 'imagenes/cartuchos/silueta-municion.webp';
@@ -812,7 +804,6 @@ function ArsenalHubScreen({ onNav = () => {} }) {
   const DB = window.DB || [];
   const PAD = vp.isDesktop ? 28 : 16;
   const max = { maxWidth: 1100, margin: '0 auto', width: '100%' };
-  const HEROS = window.CATEGORY_HEROS || {}; // dead code: migración a siluetas incompleta
 
   // Contadores por categoría
   const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
@@ -852,7 +843,7 @@ function ArsenalHubScreen({ onNav = () => {} }) {
 
       {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
       <SectionHdr>Armería</SectionHdr>
-      <div className="amx-arsenal-armeteria">
+      <div className="amx-arsenal-armeria">
         <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
           img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
           style={{ '--giro': ARMERIA_GIROS[0], width: '100%' }} />
@@ -890,18 +881,16 @@ function ArsenalHubScreen({ onNav = () => {} }) {
           : null)}
         {/* Accesorios en la misma mesa */}
         {window.HomeAccesoriosSection &&
-          <window.HomeAccesoriosSection key="accesorios" onNav={onNav} />
+          <window.HomeAccesoriosSection onNav={onNav} />
         }
       </div>
 
       {/* ── USO: tarjetas informativas (sin foto) ───────────────────── */}
       <SectionHdr>Uso</SectionHdr>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 'var(--e3)' }}>
-        {window.CATEGORIES.uso.map((u, i) => usoCount(u.id) ? (
+        {window.CATEGORIES.uso.map((u) => usoCount(u.id) ? (
           <button key={u.id} className="amx-arsenal-uso-card"
-            style={{ '--giro': USO_GIROS[i] }}
             onClick={() => onNav('category', { mode: 'uso', value: u.id })}>
-            <span className="amx-arsenal-uso-icon" aria-hidden="true">{u.icon}</span>
             <span className="amx-arsenal-uso-label">{u.label}</span>
             <span className="amx-arsenal-uso-count">{usoCount(u.id)}</span>
           </button>

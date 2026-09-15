@@ -3046,9 +3046,8 @@
 .amx-v2 .amx-polaroid--hub .amx-polaroid-velo {
   background: linear-gradient(180deg, rgba(23,58,50,.06) 0%, rgba(23,58,50,.24) 60%, rgba(23,58,50,.48) 100%);
 }
-/* En el Hub el faldón lleva sub + nombre (armería: "DCAM / Ciudad de México")
-   y en categoría solo el nombre. El orden es sub primero para que la ubicación
-   (armería: "DCAM / Estado de México") se muestre correctamente. */
+/* En el Hub el faldón lleva sub + nombre (armería: ubicación arriba, «DCAM»
+   debajo) y en categoría solo el nombre. */
 .amx-v2 .amx-polaroid--hub .amx-polaroid-datos {
   font-size: 11px;
 }
@@ -3064,17 +3063,11 @@
   min-height: 80px;
 }
 
-/* ── Armería — grid responsive (1 col en móvil) ─────────────────── */
-.amx-v2 .amx-arsenal-armeteria {
+/* ── Armería — dos polaroids lado a lado en todos los anchos ─────── */
+.amx-v2 .amx-arsenal-armeria {
   display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--e3);
-}
-@media (max-width: 600px) {
-  .amx-v2 .amx-arsenal-armeteria {
-    grid-template-columns: 1fr;
-    max-width: 340px;
-    margin-inline: auto;
-  }
 }
 
 /* ── Disponibilidad — card a ancho completo en móvil ─────────────── */
@@ -3319,12 +3312,6 @@
 .amx-v2 .amx-arsenal-uso-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--sombra-hover);
-}
-.amx-v2 .amx-arsenal-uso-icon {
-  font-size: 24px;
-  flex-shrink: 0;
-  color: var(--sello-azul); /* tinta de sello para lo no legal (§7) */
-  font-family: var(--sans); /* glifos consistentes, sin Arial/Cambria Math */
 }
 .amx-v2 .amx-arsenal-uso-label {
   font-family: var(--sans);
