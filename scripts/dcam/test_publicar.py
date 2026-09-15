@@ -206,6 +206,7 @@ def test_gh_pr_list_con_texto_de_stderr_antes_del_json_se_lee():
     ent = Falso(resp, PAGINAS)
     pub = publicar.publicar_seguro(ent, Path("/trabajo"), {"paso": "puertas", "rama": rama, "pr_main": 301}, PLAN)
     assert pub["paso"] == "hecho" and pub["pr_develop"] == 302, pub
+    assert not any(l.startswith("gh pr create") for l in ent.llamadas), ent.llamadas
 
 
 def test_gh_pr_list_con_basura_sin_json_bloquea_sin_crear():
@@ -218,12 +219,12 @@ def test_gh_pr_list_con_basura_sin_json_bloquea_sin_crear():
 
 
 def test_gh_pr_view_con_texto_de_stderr_antes_del_json_se_lee():
-    resp = dict(RESP, **{"gh pr view 301": (0, "aviso de gh\n{\"state\": \"OPEN\"}\n")})
+    resp = dict(RESP, **{"gh pr view 301": (0, "aviso de gh\n{\"state\": \"MERGED\"}\n")})
     ent = Falso(resp, PAGINAS)
     pub = {"paso": "preview", "rama": "bot/dcam-arm-20261001", "pr_main": 301, "pr_develop": 302}
     pub2 = publicar.publicar_seguro(ent, Path("/trabajo"), pub, PLAN)
     assert pub2["paso"] == "hecho", pub2
-    assert any(l.startswith("gh pr merge 301") for l in ent.llamadas), ent.llamadas
+    assert not any(l.startswith("gh pr merge 301") for l in ent.llamadas), ent.llamadas
 
 
 def test_gh_pr_view_con_basura_sin_json_bloquea_sin_mergear():
