@@ -839,10 +839,8 @@ function ArsenalHubScreen({ onNav = () => {} }) {
       <h1 className="amx-arsenal-titulo">
         <span>Arsenal</span>
       </h1>
-      <p className="amx-arsenal-prosa">Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</p>
-
       {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
-      <SectionHdr>Armería</SectionHdr>
+      <SectionHdr style={{ textAlign: 'center', marginTop: '16px' }}>Armería</SectionHdr>
       <div className="amx-arsenal-armeria">
         <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
           img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
