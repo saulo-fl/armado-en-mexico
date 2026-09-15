@@ -2122,6 +2122,14 @@
   text-transform: uppercase;
   color: var(--kardex-imp);
 }
+/* En teléfono no cabe (encabezados y AGOTADO): se desliza dentro del cartón,
+   como el registro de precios, con la barra en la tinta impresa de la tarjeta. */
+.amx-v2 .amx-kardex-desliza {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--kardex-imp) transparent;
+}
+.amx-v2 .amx-kardex-fecha { white-space: nowrap; }   /* «11 sep 26» en un renglón, no en tres */
 .amx-v2 .amx-kardex-tabla {
   width: 100%;
   border-collapse: collapse;
