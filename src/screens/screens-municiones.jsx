@@ -696,7 +696,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
                   color: window.amxColorAvail(availMeta.color), textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
                 }}>{availMeta.label}</div>
                 <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
-                  {availMeta.desc} La adquisición de municiones requiere licencia y registro vigentes del arma correspondiente.
+                  {availMeta.desc} Para personal civil, la tabla de requisitos de la DCAM pide: cartucho para escopeta, para protección a domicilio o parcela, la hoja de manifestación de registro del arma; cartucho de fuego anular (.22 LR y .22 Short), para actividades cinegéticas, tiro deportivo y caza, esa hoja, el Volante de Adquisición de Cartuchos del mes y la credencial vigente del club; cartucho de alto poder y de fuego central, el permiso extraordinario de adquisición vigente. En todos los casos, una identificación oficial vigente.
                 </div>
               </div>
             </React.Fragment>
