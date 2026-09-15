@@ -49,7 +49,7 @@ function amxSlugIndex() {
   const key = DB.length + ':' + AC.length + ':' + MU.length;
   if (_slugIdx && _slugKey === key) return _slugIdx;
 
-  const idx = { aPorSlug: {}, slugPorA: {}, cPorSlug: {}, slugPorC: {}, mPorSlug: {}, slugPorM: {} };
+  const idx = { aPorSlug: {}, slugPorA: {}, cPorSlug: {}, slugPorC: {}, mPorSlug: {}, slugPorM: {}, nPorSlug: {}, slugNPorA: {} };
   // Desempate determinista: recorremos por id, y al repetirse un slug se le
   // añade -2, -3… Así la URL de una ficha no cambia al añadir otras.
   const unico = (mapa, base) => {
@@ -64,6 +64,12 @@ function amxSlugIndex() {
     const rama = TIPO_TO_PATH[a.tipo] || 'otras';
     const s = unico(idx.aPorSlug, rama + '/' + amxSlug(a.nombre));
     idx.aPorSlug[s] = a.id; idx.slugPorA[a.id] = s;
+  });
+  // Comparador: el slug del NOMBRE, sin la rama de tipo
+  // (/comparar/ruger-lcp-vs-ruger-lcp-max). Mismo desempate por id que las fichas.
+  porId(DB).forEach((a) => {
+    const s = unico(idx.nPorSlug, amxSlug(a.nombre));
+    idx.nPorSlug[s] = a.id; idx.slugNPorA[a.id] = s;
   });
   porId(AC).forEach((c) => {
     const s = unico(idx.cPorSlug, amxSlug(c.categoria || 'accesorios') + '/' + amxSlug(c.nombre));
@@ -82,8 +88,9 @@ function amxSlugIndex() {
 }
 window.amxSlugIndex = amxSlugIndex;
 
-function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter) {
+function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter, compareIds) {
   const idx = amxSlugIndex();
+  if (screen === 'compare') return window.amxRutaComparar(compareIds, idx.slugNPorA);
   if (screen === 'product') return idx.slugPorA[productId] || 'arsenal';
   if (screen === 'accesorio') return idx.slugPorC[accesorioId] || 'accesorios';
   if (screen === 'municion') return 'municiones/' + (idx.slugPorM[municionId] || '');
@@ -96,11 +103,11 @@ function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter)
   }
   return SCREEN_TO_PATH[screen] || '';
 }
-function amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter) {
-  return APP_BASE + amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter);
+function amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter, compareIds) {
+  return APP_BASE + amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter, compareIds);
 }
 
-const VACIO = { screen: 'home', productId: null, accesorioId: null, municionId: null, catalogFilter: null };
+const VACIO = { screen: 'home', productId: null, accesorioId: null, municionId: null, catalogFilter: null, compareIds: [] };
 function amxParsePath(pathname) {
   let rel = pathname || '';
   if (APP_BASE !== '/' && rel.indexOf(APP_BASE) === 0) rel = rel.slice(APP_BASE.length);
@@ -115,6 +122,10 @@ function amxParsePath(pathname) {
   // dejar huerfana una URL ya indexada; el canonico es /experiencias.
   if (seg.length === 1 && seg[0] === 'cursos') {
     return Object.assign({}, VACIO, { screen: 'experiencias' });
+  }
+  // Comparador con armas: /comparar/<slug>[-vs-<slug>]
+  if (seg[0] === SCREEN_TO_PATH.compare && seg[1]) {
+    return Object.assign({}, VACIO, { screen: 'compare', compareIds: window.amxParComparar(seg[1], idx.nPorSlug) });
   }
   // Pantallas con nombre propio (/arsenal, /calibres…) y el listado de municiones
   if (seg.length === 1 && PATH_TO_SCREEN[seg[0]]) {
@@ -166,20 +177,28 @@ function App() {
   const [accesorioId, setAccesorioId] = useStateApp(_init.accesorioId);
   const [municionId, setMunicionId] = useStateApp(_init.municionId);
   const [catalogFilter, setCatalogFilter] = useStateApp(_init.catalogFilter);
-  const [compareIds, setCompareIds] = useStateApp([]);
+  const [compareIds, setCompareIds] = useStateApp(_init.compareIds);
   const [pickerSlot, setPickerSlot] = useStateApp(null);
   const [history, setHistory] = useStateApp([]);
   const skipPush = useRefApp(false);
 
-  // URL ↔ pantalla: empuja una nueva dirección al cambiar de pantalla
+  // URL ↔ pantalla: empuja una nueva dirección al cambiar de pantalla. Dentro del
+  // comparador, cambiar o quitar un arma REEMPLAZA la dirección en vez de apilar
+  // una por toque; y al llegar por un enlace con un slug que no existe, la
+  // normaliza sin dejar la mala en el historial.
+  const pantallaAnterior = useRefApp(_init.screen);
   useEffectApp(() => {
+    const reemplazar = screen === 'compare' && pantallaAnterior.current === 'compare';
+    pantallaAnterior.current = screen;
     if (skipPush.current) { skipPush.current = false; return; }
     // Basta comparar la dirección que toca con la que hay. Al depender también
     // del filtro, /arsenal y /pistolas son direcciones distintas.
-    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter);
+    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter, compareIds);
     if (window.location.pathname === url) return;
-    try { window.history.pushState({ screen, productId, accesorioId, municionId }, '', url); } catch (e) {}
-  }, [screen, productId, accesorioId, municionId, catalogFilter]);
+    try {
+      window.history[reemplazar ? 'replaceState' : 'pushState']({ screen, productId, accesorioId, municionId }, '', url);
+    } catch (e) {}
+  }, [screen, productId, accesorioId, municionId, catalogFilter, compareIds]);
 
   // Botón atrás/adelante del navegador → aplica la pantalla de la URL
   useEffectApp(() => {
@@ -192,6 +211,7 @@ function App() {
       setAccesorioId(s.accesorioId);
       setMunicionId(s.municionId);
       setCatalogFilter(s.catalogFilter);
+      if (s.screen === 'compare') setCompareIds(s.compareIds);
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
