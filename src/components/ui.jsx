@@ -2530,12 +2530,16 @@ function CotejoFichas({ a, b, cotejo, ancho, onAbrir, onCambiar, onQuitar, onEle
     <div className="amx-cotejo">
       {[['a', a], ['b', b]].map(([lado, arma]) => arma ? (
         <article key={lado} className="amx-cotejo-exp" style={pistasExp} aria-labelledby={'cotejo-cab-' + lado}>
-          <div className="amx-cotejo-copia" role="button" tabIndex={0}
-            aria-label={'Abrir la ficha de ' + arma.nombre}
-            onClick={() => onAbrir(arma.id)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAbrir(arma.id); } }}>
-            <ArmaPolaroid arma={arma} pie="ninguno" />
-            <span className="amx-grapa" aria-hidden="true" />
+          {/* El sello va FUERA del botón: dentro, su nombre («Uso civil — DCAM»)
+              quedaría tapado por el del botón y el lector no diría la categoría. */}
+          <div className="amx-cotejo-copia">
+            <div className="amx-cotejo-abrir" role="button" tabIndex={0}
+              aria-label={'Abrir la ficha de ' + arma.nombre}
+              onClick={() => onAbrir(arma.id)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAbrir(arma.id); } }}>
+              <ArmaPolaroid arma={arma} pie="ninguno" />
+              <span className="amx-grapa" aria-hidden="true" />
+            </div>
             <span className="amx-cotejo-sello"><SelloLegal avail={arma.avail} etiqueta={arma.availLabel} /></span>
           </div>
           <div className="amx-cotejo-carton" style={pistasCarton}>
