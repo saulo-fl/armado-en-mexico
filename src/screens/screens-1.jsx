@@ -497,7 +497,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
-  const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : 'all');
+  const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : (initialFilter?.sucursal || 'all'));
   const [calibre, setCalibre] = useState(initialFilter?.mode === 'calibre' ? initialFilter.value : 'all');
   const [uso, setUso] = useState(initialFilter?.mode === 'uso' ? initialFilter.value : 'all');
   const [showAdv, setShowAdv] = useState(false);
@@ -519,8 +519,9 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         if (sucursal === 'OTCA' && !s.otca) return false;
       }
       if (disponible !== 'all') {
-        const inStock = (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
-          (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id));
+        // Con una armería elegida, las existencias son las de ESA sucursal (Saulo,
+        // 15-sep-2026, docs/DESIGN.md §5.8). Con «Todas», las de cualquiera.
+        const inStock = window.amxTieneExistencia(a.id, sucursal);
         if (disponible === 'si' && !inStock) return false;
         if (disponible === 'no' && inStock) return false;
       }
