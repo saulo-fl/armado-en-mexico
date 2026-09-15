@@ -178,6 +178,7 @@ const PAPELERIA = [
   ['rotulador (trazo) sobre el fichero','--rotulador', '--fichero', 3],
   ['cifras de la tira sobre el oficio', '--sello-restr', '--oficio', 4.5],
   ['tinta-2 de ficha sobre el oficio',  '--ficha-tinta-2', '--oficio', 4.5],
+  ['rótulo del toldo sobre la lona',    '--lona-crema', '--lona-verde', 4.5],
 ];
 
 // Las superficies NO se miden con el umbral de WCAG —dos fondos no son texto—
