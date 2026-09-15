@@ -494,7 +494,6 @@ function promoBtnStyle() {
 // ════════════════════════════════════════════════════════════════
 function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare }) {
   const vp = window.useViewport();
-  const cols = vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr';
   const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
@@ -585,27 +584,25 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
 
   const clearAll = () => {
     setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
-    setMarca('all');setEra('all');setPrecioLo(priceBounds.min);setPrecioHi(priceBounds.max);setMecanismo('all');setDisponible('all');
+    setMarca('all');setEra('all');setPrecioLo((p) => priceBounds.min);setPrecioHi((p) => priceBounds.max);setMecanismo('all');setDisponible('all');
     setQuery('');
   };
 
   const activeCount = [tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo].filter((v) => v !== 'all').length + ((precioLo > priceBounds.min || precioHi < priceBounds.max) ? 1 : 0);
 
   const innerMax = { maxWidth: 1400, margin: '0 auto', width: '100%' };
-  const padX = vp.isDesktop ? 28 : 14;
   const stickyTop = vp.isMobile ? 50 : 64;
 
   return (
     <div>
       {/* ── HEADER VERDE — buscador + filtros colapsables ─────────────── */}
-      <div className="amx-catalogo-header amx-sobre-verde">
+      <div className="amx-catalogo-header amx-sobre-verde" style={{ position: 'sticky', top: stickyTop, zIndex: 30 }}>
         <div style={innerMax}>
           {/* Buscador estilo pill cristal (sobre verde, como en HOME) */}
           <div className="amx-buscador amx-catalogo-busq">
             <span aria-hidden="true" style={{ fontSize: 17, lineHeight: 1 }}>⌕</span>
             <input value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') {/* search already reactive */} }}
               placeholder="Nombre, marca, calibre, país..."
               aria-label="Buscar armas, marcas, calibres" />
             {(query || activeCount > 0) &&
@@ -618,7 +615,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
           </div>
 
           {/* Contador de resultados */}
-          <div className="amx-catalogo-contador">
+          <div className="amx-catalogo-contador" aria-live="polite">
             <span>▸ {filtered.length} {filtered.length === 1 ? 'ARMA' : 'ARMAS'}
               {activeCount > 0 && ` · ${activeCount} filtro${activeCount > 1 ? 's' : ''} activo${activeCount > 1 ? 's' : ''}`}
             </span>
@@ -632,7 +629,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             <FilterSelect label="Calibre" value={calibre} onChange={setCalibre}
               options={[{ value: 'all', label: 'Todos' }].concat(window.CATEGORIES.calibre.map((c) => ({ value: c.id, label: c.label })))} />
             <FilterSelect label="Armería" value={sucursal} onChange={setSucursal}
-              options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Ciudad de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
+              options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Estado de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
             <FilterSelect label="Disponibilidad" value={disponible} onChange={setDisponible}
               options={[{ value: 'all', label: 'Todas' }, { value: 'si', label: 'Con existencias' }, { value: 'no', label: 'Agotadas' }]} />
           </div>
@@ -696,12 +693,12 @@ function PriceRange({ min, max, lo, hi, step, capped, onChange }) {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {hiLabel}</span>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.sobreMarcaMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
+        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: P.sobreMarca }}>{fmt(lo)} — {hiLabel}</span>
       </div>
       <div style={{ position: 'relative', height: 28 }}>
-        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: P.border }} />
-        <div style={{ position: 'absolute', top: 12, left: loPct + '%', width: (hiPct - loPct) + '%', height: 4, background: P.amber }} />
+        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: P.sobreMarcaMuted }} />
+        <div style={{ position: 'absolute', top: 12, left: loPct + '%', width: (hiPct - loPct) + '%', height: 4, background: P.sobreMarca }} />
         <input type="range" className="amx-price-range" min={min} max={max} step={step} value={lo} aria-label="Precio mínimo"
           onChange={(e) => { const v = Math.min(Number(e.target.value), hi - step); onChange(Math.max(min, v), hi); }} />
         <input type="range" className="amx-price-range" min={min} max={max} step={step} value={hi} aria-label="Precio máximo"
@@ -718,14 +715,14 @@ function FilterSelect({ label, value, onChange, options }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
       <span style={{
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.textMuted,
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.sobreMarcaMuted,
         letterSpacing: '0.14em', textTransform: 'uppercase',
       }}>{label}</span>
       <div style={{ position: 'relative' }}>
         <select value={value} onChange={(e) => onChange(e.target.value)} style={{
           width: '100%', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
           background: PALETTE.bg, color: active ? PALETTE.amber : PALETTE.text,
-          border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
+          border: `1px solid ${active ? PALETTE.sobreMarca : PALETTE.sobreMarcaMuted}`,
           padding: '10px 28px 10px 10px', borderRadius: 0, cursor: 'pointer', outline: 'none',
           fontFamily: 'JetBrains Mono, monospace', fontSize: 14, letterSpacing: '0.02em',
         }}>
@@ -735,7 +732,7 @@ function FilterSelect({ label, value, onChange, options }) {
         </select>
         <span aria-hidden="true" style={{
           position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)',
-          pointerEvents: 'none', color: active ? PALETTE.amber : PALETTE.textMuted, fontSize: 12,
+          pointerEvents: 'none', color: active ? PALETTE.sobreMarca : PALETTE.sobreMarcaMuted, fontSize: 12,
         }}>▾</span>
       </div>
     </label>
@@ -767,7 +764,7 @@ window.CatalogScreen = CatalogScreen;
 // Polaroid reutilizable para secciones sin enlace de producto
 // (Armería, etc.). Reusa los estilos .amx-polaroid de estilo.css y solo
 // añade el onClick — la geometría (faldón, marco, giro) ya vive en CSS.
-function HubPolaroid({ img, label, sub, onClick, stamp, stampSub, style: extraStyle, pozoStyle }) {
+function HubPolaroid({ img, label, sub, onClick, style: extraStyle, pozoStyle }) {
   const [err, setErr] = useState(false);
   return (
     <button className="amx-polaroid amx-polaroid--hub" onClick={onClick} style={extraStyle}>
@@ -783,17 +780,6 @@ function HubPolaroid({ img, label, sub, onClick, stamp, stampSub, style: extraSt
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hair-hi)', fontSize: 30 }}>▦</div>
           )
         }
-        {/* Sello de ubicación — imagen generada (CDMX / N.L.) */}
-        {stamp && (
-          <img
-            className="amx-polaroid-sello-img"
-            src={`imagenes/${SELLO_IMG[stamp] || `sello-${stamp.toLowerCase()}.webp`}`}
-            alt={`${stamp} · ${stampSub || ''}`}
-            style={stamp === 'CDMX'
-              ? { top: 8, right: 8 }
-              : { top: 8, left: 8 }}
-          />
-        )}
       </div>
       <div className="amx-polaroid-pie">
         {sub && <span className="amx-polaroid-datos">{sub}</span>}
@@ -817,19 +803,16 @@ const ARMERIA_GIROS = ['-2.5deg', '1.8deg'];
 // Cada valor entre -1.5° y +1.5° para que no se vean gemelas.
 const USO_GIROS = ['-1.2deg', '0.8deg', '-0.5deg', '1.3deg'];
 
-// Mapeo stamp postal → archivo de imagen (evita path roto con espacios/puntos).
-const SELLO_IMG = { 'CDMX': 'sello-cdmx.webp', 'N.L.': 'sello-otca.webp' };
-
 function calibreImgPath(calibreId) {
-  return window.CALIBRES.find(x => x.id === calibreId)?.cartucho || 'imagenes/cartuchos/silueta-municion.webp';
+  return (window.CALIBRES || []).find(x => x.id === calibreId)?.cartucho || 'imagenes/cartuchos/silueta-municion.webp';
 }
 
-function ArsenalHubScreen({ onNav }) {
+function ArsenalHubScreen({ onNav = () => {} }) {
   const vp = window.useViewport();
   const DB = window.DB || [];
   const PAD = vp.isDesktop ? 28 : 16;
   const max = { maxWidth: 1100, margin: '0 auto', width: '100%' };
-  const HEROS = window.CATEGORY_HEROS || {};
+  const HEROS = window.CATEGORY_HEROS || {}; // dead code: migración a siluetas incompleta
 
   // Contadores por categoría
   const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
@@ -842,13 +825,6 @@ function ArsenalHubScreen({ onNav }) {
     (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
     (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id))).length;
 
-  // Grid responsivo: desktop = N columnas, tablet/mobile = 2
-  const gridN = (cols) => ({
-    display: 'grid',
-    gridTemplateColumns: vp.isDesktop ? `repeat(${cols},1fr)` : 'repeat(2,1fr)',
-    gap: 'var(--e3)',
-  });
-
   // Sección header — estilo documento: palabra + hairline
   const SectionHdr = ({ children }) => (
     <div className="amx-arsenal-sect-hdr">
@@ -859,7 +835,7 @@ function ArsenalHubScreen({ onNav }) {
   // Tarjeta de texto plano (disponibilidad, legal, uso, calibre)
   const DocCard = ({ label, sub, count, accent, onClick }) => (
     <button className="amx-arsenal-doc-card" onClick={onClick}
-      style={{ '--accent': accent || undefined }}>
+      style={accent ? { '--accent': accent } : {}}>
       <div className="amx-arsenal-doc-label">{label}</div>
       {sub && <div className="amx-arsenal-doc-sub">{sub}</div>}
       <div className="amx-arsenal-doc-count">{count ?? '—'}</div>
@@ -876,7 +852,7 @@ function ArsenalHubScreen({ onNav }) {
 
       {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
       <SectionHdr>Armería</SectionHdr>
-      <div className="amx-arsenal-armeteria" style={gridN(2)}>
+      <div className="amx-arsenal-armeteria">
         <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
           img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
           style={{ '--giro': ARMERIA_GIROS[0], width: '100%' }} />
@@ -914,15 +890,16 @@ function ArsenalHubScreen({ onNav }) {
           : null)}
         {/* Accesorios en la misma mesa */}
         {window.HomeAccesoriosSection &&
-          <window.HomeAccesoriosSection onNav={onNav} />
+          <window.HomeAccesoriosSection key="accesorios" onNav={onNav} />
         }
       </div>
 
       {/* ── USO: tarjetas informativas (sin foto) ───────────────────── */}
       <SectionHdr>Uso</SectionHdr>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 'var(--e3)' }}>
-        {window.CATEGORIES.uso.map((u) => usoCount(u.id) ? (
+        {window.CATEGORIES.uso.map((u, i) => usoCount(u.id) ? (
           <button key={u.id} className="amx-arsenal-uso-card"
+            style={{ '--giro': USO_GIROS[i] }}
             onClick={() => onNav('category', { mode: 'uso', value: u.id })}>
             <span className="amx-arsenal-uso-icon" aria-hidden="true">{u.icon}</span>
             <span className="amx-arsenal-uso-label">{u.label}</span>

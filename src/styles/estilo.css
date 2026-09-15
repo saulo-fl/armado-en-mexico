@@ -3028,7 +3028,6 @@
 
 /* ══════════════════════════════════════════════════════════════════════════
    ARSENAL HUB — secciones y tarjetas propias del explorador de categorías
-   (RED-Arsenal, Qwen-3.6-Q3)
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* Polaroid usada dentro del Hub: misma geometría que .amx-polaroid pero con
@@ -3042,14 +3041,14 @@
 .amx-v2 .amx-polaroid--hub .amx-polaroid-pozo img {
   object-fit: cover;
 }
-/* El velas verde es opcional en las fotos del Hub (las hero ya tienen su
+/* El velo verde es opcional en las fotos del Hub (las hero ya tienen su
    tratamiento), pero no hace daño y mantiene la consistencia visual. */
 .amx-v2 .amx-polaroid--hub .amx-polaroid-velo {
   background: linear-gradient(180deg, rgba(23,58,50,.06) 0%, rgba(23,58,50,.24) 60%, rgba(23,58,50,.48) 100%);
 }
 /* En el Hub el faldón lleva sub + nombre (armería: "DCAM / Ciudad de México")
    y en categoría solo el nombre. El orden es sub primero para que la ubicación
-   quede arriba del rótulo principal, como una anotación al pie de copia. */
+   (armería: "DCAM / Estado de México") se muestre correctamente. */
 .amx-v2 .amx-polaroid--hub .amx-polaroid-datos {
   font-size: 11px;
 }
@@ -3343,7 +3342,7 @@
   flex-shrink: 0;
 }
 
-/* ── Calibre — mesa de exhibición con siluetas de cartucho (grid compacta) ─ */
+/* ── Calibre — mesa de exhibición con siluetas de cartucho (rejilla compacta) ─ */
 .amx-v2 .amx-arsenal-calibre-shelf {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -3406,7 +3405,9 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* Header verde con buscador — mismo patrón que HOME pero sin curva inferior
-   porque los filtros van pegados debajo. Va sticky en móvil y fijo en desktop.
+   porque los filtros van pegados debajo.
+   El sticky se aplica INLINE desde el JSX (top 50 móvil / 64 desktop,
+   una sola fuente, igual que producción) — no aquí.
    La altura se ajusta al contenido (buscador + contador + filtros). */
 .amx-v2 .amx-catalogo-header {
   background: var(--marca);
@@ -3418,14 +3419,6 @@
 /* Textos internos del header verde — todos sobre --marca deben usar --sobre-marca (§7) */
 .amx-v2 .amx-catalogo-header * {
   color: inherit; /* hereda de .amx-catalogo-header → --sobre-marca */
-}
-/* En desktop, sticky en la parte superior (debajo del TopNav) */
-@media (min-width: 1024px) {
-  .amx-v2 .amx-catalogo-header { position: sticky; top: 64px; z-index: 30; }
-}
-/* En móvil, también sticky para que los filtros no se pierdan al hacer scroll */
-@media (max-width: 1023px) {
-  .amx-v2 .amx-catalogo-header { position: sticky; top: 0; z-index: 30; }
 }
 
 .amx-v2 .amx-catalogo-busq {
@@ -3526,11 +3519,12 @@
 }
 
 /* ── Toggle filtros avanzados ─────────────────────────────────── */
+/* Sobre la banda verde (--marca): colores --sobre-marca-* (§7), en los dos temas */
 .amx-v2 .amx-catalogo-filtros-toggle {
   margin-top: var(--e3);
   background: none;
-  border: 1px dashed var(--hair-hi);
-  color: var(--tinta-dim);
+  border: 1px dashed var(--sobre-marca-muted);
+  color: var(--sobre-marca-muted);
   padding: 6px 12px;
   font-family: var(--mono);
   font-size: 12.5px;
@@ -3542,8 +3536,8 @@
 }
 .amx-v2 .amx-catalogo-filtros-toggle:hover {
   border-style: solid;
-  border-color: var(--acento);
-  color: var(--tinta);
+  border-color: var(--sobre-marca);
+  color: var(--sobre-marca);
 }
 
 /* ── Filtros avanzados — grid de selects ─────────────────────── */
