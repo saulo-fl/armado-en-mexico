@@ -396,7 +396,9 @@ window.DB = [
     "Edición conmemorativa del centenario de la Revolución Mexicana. Pieza de colección y deporte."),
 
   // 57 = CZ 457 American (+ American LH, que suma). Las demás líneas de la serie 457 son
-  // modelos, como las vende CZ (Saulo, 14-sep-2026, #161): Varmint MTR 227, Synthetic 228, Stainless 229.
+  // modelos, como las vende CZ (Saulo, 14-sep-2026, #161): Varmint MTR 227, Synthetic 228, Stainless 229;
+  // y desde #180: Lux 235, Premium 236, Varmint 237, Varmint Synthetic 238, LRP Black 239, MDT 240,
+  // Thumbhole 241, AT-ONE 242, Training Rifle XII 243.
   mk(57, "CZ 457", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2750g", "1010mm", "Cerrojo de precisión", 2019, "dcam", "12772.43", "RIFLE CAL.0.22\" L.R CESKA CZ 457 AMERICA",
     "imagenes/030_CZ_457.webp",
     "Rifle de cerrojo de precisión checo, referencia internacional. Excelente para tiro a 50m y caza menor."),
@@ -740,7 +742,7 @@ window.DB = [
   mk(144, "Benelli Argo-E", "Benelli", "rifle", "Italia", ".300 Win Mag", "3+1", "3.2 kg", "1100mm", "Semi-auto, pistón de gas A.R.G.O.", 2003, "dcam", "27013.68", "RIFLE CAL .300 WIN BENELLI ARGO-E",
     "imagenes/Benelli_Argo-E.webp",
     "Rifle de caza semiautomático con sistema de gas A.R.G.O. de doble pistón, preciso y suave. Calibre de cacería, adquisición civil."),
-  mk(145, "Winchester XPERT .22", "Winchester", "rifle", "EE.UU.", ".22 LR", "10+1", "2.6 kg", "1020mm", "Cerrojo, culata sintética/thumbhole", 2021, "dcam", "12678.91", "RIFLE CAL .22 LR WINCHESTER XPERT",
+  mk(145, "Winchester XPERT .22", "Winchester", "rifle", "EE.UU.", ".22 LR", "10+1", "2.6 kg", "1020mm", "Cerrojo, culata sintética", 2021, "dcam", "12678.91", "RIFLE CAL .22 LR WINCHESTER XPERT",
     "",
     "Rifle de cerrojo en .22 LR, económico y preciso para iniciación y plinking. De libre adquisición civil."),
   mk(146, "Winchester Ranger .22", "Winchester", "rifle", "EE.UU.", ".22 LR", "15+1", "2.5 kg", "1000mm", "Acción de palanca", 2020, "dcam", "16262.08", "RIFLE CAL .22 LR WINCHESTER RANGER",
@@ -1035,6 +1037,58 @@ window.DB = [
   mk(232, "Optimum Arms OPT VM G2 cal. 20", "Optimum Arms", "escopeta", "Turquía", "20 GA", "5+1", "3.4 kg", "", "Semi-auto, operada por gas", null, "dcam", "22877.17", "ESCP.OPTIMUMARMS.OPTVMG2.CAL.20,13\"ND",
     "",
     "Versión en calibre 20 (recámara de 3 pulgadas) de la escopeta semiautomática de cargador Optimum Arms OPT VM G2: cañón de 13 pulgadas, culata retráctil, receptor inferior de aluminio y acabado negro con arena del desierto, con dos cargadores de 5 cartuchos. Adquisición civil."),
+
+  // ── ALTAS del issue #180, existencias clase B (decisiones de Saulo, 14-sep-2026) ──────
+  // Jerarquía de fuentes que fijó Saulo: 1) fabricante, 2) Wikipedia, 3) SEDENA (descripción del PDF).
+  // "" o año null = ninguna de las tres lo publica. Dos cañones sin que el PDF diga cuál = rango.
+  //  233 https://www.czfirearms.com/en-us/products/pistols/cz-p-09-nocturne-series/cz-p-09-f-nocturne
+  //    (19 cart., 830 g, 208 mm, cañón 115 mm como el PDF); año: nota de CZ del 15-ago-2024
+  //    (…/news/cz-presents-the-new-cz-p-09-nocturne-series). Sin riel superior: corredera para
+  //    mira réflex (RMS / Holosun K); el riel MIL-STD-1913 va bajo el armazón.
+  //  234 Winchester vende tres Xpert Thumbhole .22 LR y el PDF no dice cuál: Gray SR y Brown SR
+  //    (winchesterguns.com/products/rifles/xpert/xpert-thumbhole-target-sr.html, 2.49 kg, 38¼")
+  //    y la europea (winchester.eu/…/xpert/xpert-thumbhole.html, 3.00 kg, sin longitud). Peso en
+  //    rango; longitud y riel solo los publica una de las tres: vacíos. País y año: sin publicar.
+  //  235-243 CZ 457: https://www.czfirearms.com/products/rimfire-rifles/cz-457-series/cz-457-<línea>
+  //    (lux, premium, varmint, varmint-synthetic, lrp-black, mdt, thumbhole, training-rifle-xii;
+  //    AT-ONE en /es/productos/carabinas-de-fuego-anular/linea-cz-457/cz-457-at-one). País:
+  //    Wikipedia (CZ 457, origin = Czech Republic). Cola de milano de 11 mm (manual CZ 457 05/2025)
+  //    salvo LRP Black y MDT, que traen riel Picatinny de 25 MOA. Años: catálogos y noticias de CZ
+  //    (Lux/Premium/Varmint 2019, Thumbhole 2020, AT-ONE global 2021, LRP Black y MDT 2022,
+  //    Varmint Synthetic 2023); Training Rifle XII sin fecha publicada. Premium y Varmint suman su LH.
+  mk(233, "CZ P-09 F Nocturne", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "19+1", "830g", "208mm", "Semi-auto, DA/SA Omega", 2024, "ejercito", "12034.14", "PISTOLA CESKA CZ P-09F NOC CAL. 9MM 115",
+    "",
+    "Serie Nocturne (2024) de la CZ P-09 en tamaño completo: corredera lista para mira réflex, miras luminiscentes de tres puntos, nueva textura de empuñadura y seguro y desamartillador rediseñados, con el mismo cañón de 115 mm y cargador de 19 cartuchos. Calibre 9mm: restringido en México."),
+  mk(234, "Winchester Xpert Thumbhole .22", "Winchester", "rifle", "", ".22 LR", "10+1", "2.49–3.00 kg", "", "Cerrojo, culata thumbhole laminada", null, "dcam", "16124.27", "RIFLE CAL. 22\"LR WINCHESTER XPERT THUMBH",
+    "",
+    "Versión thumbhole del rifle de cerrojo Winchester Xpert en .22 LR: culata de madera laminada con carrillera ajustable, cañón pesado roscado para supresor y disparador ajustable Rimfire M.O.A. Adquisición civil."),
+  mk(235, "CZ 457 Lux", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.9 kg", "1088mm", "Cerrojo, miras abiertas", 2019, "dcam", "16193.18", "RIFLE CESKA Z. CZ 457 LUX CAL. 0.22 LR",
+    "",
+    "Versión clásica de la serie CZ 457: culata de nogal turco barnizado de estilo europeo con carrillera, miras abiertas de serie y cañón ligero de 630 mm. Adquisición civil."),
+  mk(236, "CZ 457 Premium", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.2 kg", "1085mm", "Cerrojo, alza tangente", 2019, "dcam", "19810.80", "RIFLE CESKA Z.,CZ 457 PREMIUM, C. 22 LR",
+    "",
+    "Versión de lujo de la serie CZ 457: culata de nogal selecto con acabado al aceite y carrillera, alza tangente, guion de fibra óptica y cañón de 630 mm roscado. También se vende para zurdos (Premium LH). Adquisición civil."),
+  mk(237, "CZ 457 Varmint", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.3 kg", "981mm", "Cerrojo, cañón pesado", 2019, "dcam", "15159.57", "RIFLE CESKA Z. CZ 457 VARMINT CAL. 22 LR",
+    "",
+    "Versión de cañón pesado de 525 mm de la serie CZ 457, sin miras y con cola de milano de 11 mm para la óptica, en culata de nogal barnizado de estilo americano. También se vende para zurdos (Varmint LH). Adquisición civil."),
+  mk(238, "CZ 457 Varmint Synthetic", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.6–3.0 kg", "865–977mm", "Cerrojo, cañón pesado", 2023, "dcam", "13313.84", "RIFLE CESKA457 VARMINT SYNTET CAL. 22 LR",
+    "",
+    "Versión de la serie CZ 457 que une el cañón pesado Varmint (16 o 20 pulgadas) con una culata de polímero reforzado con fibra y acabado soft-touch, resistente a la intemperie. CZ la presentó en 2023 a petición de sus clientes. Adquisición civil."),
+  mk(239, "CZ 457 LRP Black", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.9 kg", "1010mm", "Cerrojo, cañón pesado acanalado, recámara match", 2022, "dcam", "27341.76", "RIFLE CESKA Z. CZ 457 LRP BLACK CAL. 22",
+    "",
+    "Versión de tiro a larga distancia de la serie CZ 457: cañón pesado acanalado de 20 pulgadas con recámara match y compensador, culata negra de haya con carrillera y largo ajustables y riel Picatinny de 25 MOA. Adquisición civil."),
+  mk(240, "CZ 457 MDT Chassis", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.4 kg", "1010mm", "Cerrojo, chasis de aluminio MDT", 2022, "dcam", "32952.37", "RIFLE CESKA Z. CZ 457 MDT CAL. 22 LR",
+    "",
+    "Versión de tiro deportivo de la serie CZ 457 en chasis de duraluminio MDT con Cerakote: cañón pesado acanalado de 20 pulgadas con recámara match y compensador, carrillera y largo de culata regulables y riel Picatinny de 25 MOA. Adquisición civil."),
+  mk(241, "CZ 457 Thumbhole", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.2–3.6 kg", "885–997mm", "Cerrojo, cañón pesado, culata thumbhole", 2020, "dcam", "18555.71", "RIFLE .22 CESKA ZBRO M CZ 457 THUMBHOLE",
+    "",
+    "Versión de la serie CZ 457 con culata thumbhole ambidiestra de madera laminada gris y café con guardamonte integrado, y cañón pesado de 16 o 20 pulgadas con compensador. Adquisición civil."),
+  mk(242, "CZ 457 AT-ONE", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.5 kg", "935–982mm", "Cerrojo, cañón Varmint Match", 2021, "dcam", "22124.11", "RIFLE CESKA Z. CZ 457 AT-ONE CAL. 22 LR",
+    "",
+    "Versión de la serie CZ 457 con culata laminada Boyd's AT-ONE de largo y carrillera ajustables y cañón Varmint de 20 pulgadas con recámara match. Nació como exclusiva de CZ-USA y entró al catálogo global de CZ en 2021. Adquisición civil."),
+  mk(243, "CZ 457 Training Rifle XII", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.1 kg", "1085mm", "Cerrojo, ánima de 12 estrías", null, "dcam", "12550.94", "RIFLE CESKA Z., CZ 457 TRAINING XII C.22",
+    "",
+    "Versión de entrenamiento de la serie CZ 457 con ánima de 12 estrías (como la CZ 457 Jaguar XII), miras abiertas de fábrica, culata de haya barnizada y cañón ligero de 630 mm. Adquisición civil."),
 ];
 
 // ──────────────────────────────────────────────────────────────
@@ -1068,7 +1122,8 @@ window.DB.forEach(a => { if (!a.img) a.img = window.armaPlaceholder(a); });
 // Al dar de alta un arma, decide aquí su riel.
 const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
   112, 113, 114, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221,
-  231]; // MR1 16": PDF «riel Picatinny» + Benelli «Scope mounting rail», mismas fuentes que la 143 (#161)
+  231, // MR1 16": PDF «riel Picatinny» + Benelli «Scope mounting rail», mismas fuentes que la 143 (#161)
+  239, 240]; // CZ 457 LRP Black y MDT Chassis: «Picatinny mounting rail with 25 MOA inclination» (czfirearms.com, #180)
 window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 
 // helper de búsqueda usado por screens / admin
