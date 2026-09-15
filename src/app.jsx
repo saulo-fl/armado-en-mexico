@@ -372,8 +372,9 @@ function App() {
     content = <window.CompareScreen ids={compareIds}
       onOpenArma={openArma}
       onNav={navigate}
-      removeFromCompare={removeFromCompare}
-      openPickerForSlot={openPickerForSlot} />;
+      onQuitar={removeFromCompare}
+      onCambiar={(lado) => openPickerForSlot(lado === 'b' ? 1 : 0)}
+      onElegir={(lado) => openPickerForSlot(lado === 'b' ? 1 : 0)} />;
   } else if (screen === 'legal') {
     content = <window.LegalScreen onNav={navigate} />;
   } else if (screen === 'about') {

@@ -1099,6 +1099,8 @@ window.armaSinFoto = armaSinFoto;
 //              escritos del lado izquierdo en el folder».
 //   'sello'  — solo el sello de legalidad. La tarjeta, donde el nombre y los
 //              datos ya están mecanografiados en el folder de al lado.
+//   'ninguno'— sin faldón escrito. El comparador, donde el nombre ya va en la
+//              cabecera de la ficha de fichero.
 // `selloSinFoto` (la ficha de arma, 13-sep-2026): sin fotografía, en vez de la
 // leyenda va el sello «FOTOGRAFÍA PENDIENTE» sobre la silueta. Por defecto no
 // cambia nada, porque las tarjetas y el destacado del Home usan la leyenda.
@@ -1146,16 +1148,18 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
           La bandera es ahora lo único que dice la nacionalidad del arma: la
           franja tricolor que había bajo el título se retiró porque, siendo
           mexicana, hacía parecer mexicana un arma checa o italiana. */}
-      <figcaption className="amx-polaroid-pie">
-        {pie === 'sello'
-          ? <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} />
-          : <span className="amx-polaroid-nombre">{arma.nombre}</span>}
-        {pie === 'rotulo' &&
-          <span className="amx-polaroid-datos">
-            <CountryFlag pais={arma.pais} height={9} />
-            <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
-          </span>}
-      </figcaption>
+      {pie !== 'ninguno' && (
+        <figcaption className="amx-polaroid-pie">
+          {pie === 'sello'
+            ? <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} />
+            : <span className="amx-polaroid-nombre">{arma.nombre}</span>}
+          {pie === 'rotulo' &&
+            <span className="amx-polaroid-datos">
+              <CountryFlag pais={arma.pais} height={9} />
+              <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
+            </span>}
+        </figcaption>
+      )}
     </figure>
   );
 }
@@ -2455,3 +2459,139 @@ function RepisaArticulo({ foto, silueta, alt, etiqueta, ariaLabel, onClick }) {
   );
 }
 window.RepisaArticulo = RepisaArticulo;
+
+// ══════════════════════════════════════════════════════════════
+// EL COMPARADOR — dos fichas de fichero lado a lado (14-sep-2026)
+// Decidido con Saulo sección por sección (docs/DESIGN.md §5.6). Qué se compara
+// y quién gana vive en src/lib/cotejo.js; aquí solo se pinta. La piel está en
+// estilo.css, bloque «EL COMPARADOR».
+// ══════════════════════════════════════════════════════════════
+
+// El valor que gana, circulado con rotulador rojo. El círculo es CSS; lo que
+// dice «ventaja» al lector de pantalla es el texto oculto.
+function CirculoVentaja({ children }) {
+  return <span className="amx-circulo">{children}<span className="amx-sr"> (ventaja)</span></span>;
+}
+
+// «18 jun 26» en la ficha estrecha del móvil; «18 jun 2026» en escritorio.
+function amxFechaCotejo(f, ancho) {
+  if (!f) return '';
+  const larga = amxFmtManualDate(f);
+  return ancho ? larga : larga.replace(/\d{2}(\d{2})$/, '$1');
+}
+
+// Una fila de la ficha: un dato con su etiqueta. Precio y existencias apilan
+// varias líneas en la MISMA fila, y la rejilla (subgrid) hace que la fila mida
+// lo que la más alta de las dos fichas: así lo de abajo sigue alineado.
+function CotejoFila({ f, lado, ancho }) {
+  const x = f[lado];
+  const etq = ancho ? f.etiqueta : f.corta;
+  const valor = (v) => (f.gana === lado ? <CirculoVentaja>{v}</CirculoVentaja> : v);
+  if (f.tipo === 'precio') {
+    return (
+      <div className="amx-cotejo-fila amx-cotejo-fila--pila">
+        <dt>{etq}</dt>
+        <dd>{valor(x.texto)}</dd>
+        <dd className="amx-cotejo-nota">{[x.sigla, amxFechaCotejo(x.fecha, ancho)].filter(Boolean).join(' · ')}</dd>
+        {x.ultimoConocido &&
+          <dd className="amx-cotejo-conocido"><span className="amx-sello amx-sello--restr">Último precio conocido</span></dd>}
+      </div>
+    );
+  }
+  if (f.tipo === 'existencias') {
+    return (
+      <div className="amx-cotejo-fila amx-cotejo-fila--pila">
+        <dt>{etq}</dt>
+        {f.siglas.length ? f.siglas.map((s) => {
+          const suc = x.sucursales.find((y) => y.sigla === s);
+          return (
+            <dd key={s} className="amx-cotejo-suc">
+              <span>{s}</span>
+              {!suc ? '—'
+                : suc.agotado ? <span className="amx-sello amx-sello--restr">Agotado</span>
+                : Number(suc.qty).toLocaleString('es-MX')}
+            </dd>
+          );
+        }) : <dd>Pendiente</dd>}
+      </div>
+    );
+  }
+  return <div className="amx-cotejo-fila"><dt>{etq}</dt><dd>{valor(x.texto)}</dd></div>;
+}
+
+// Los dos expedientes. Cada uno ocupa en la rejilla común las filas de: la
+// copia, la cabecera, cada dato (+ el separador de iguales) y las acciones; y las
+// hereda con `subgrid`. El `span` va inline porque sale de contar las filas.
+function CotejoFichas({ a, b, cotejo, ancho, onAbrir, onCambiar, onQuitar, onElegir }) {
+  const nFilas = cotejo.arriba.length + (cotejo.iguales.length ? 1 + cotejo.iguales.length : 0);
+  const pistasExp = { gridRow: 'span ' + (nFilas + 3) };
+  const pistasCarton = { gridRow: 'span ' + (nFilas + 1) };
+  return (
+    <div className="amx-cotejo">
+      {[['a', a], ['b', b]].map(([lado, arma]) => arma ? (
+        <article key={lado} className="amx-cotejo-exp" style={pistasExp} aria-labelledby={'cotejo-cab-' + lado}>
+          <div className="amx-cotejo-copia" role="button" tabIndex={0}
+            aria-label={'Abrir la ficha de ' + arma.nombre}
+            onClick={() => onAbrir(arma.id)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAbrir(arma.id); } }}>
+            <ArmaPolaroid arma={arma} pie="ninguno" />
+            <span className="amx-grapa" aria-hidden="true" />
+            <span className="amx-cotejo-sello"><SelloLegal avail={arma.avail} etiqueta={arma.availLabel} /></span>
+          </div>
+          <div className="amx-cotejo-carton" style={pistasCarton}>
+            <h2 className="amx-cotejo-cab" id={'cotejo-cab-' + lado}>{arma.nombre}</h2>
+            <dl className="amx-cotejo-lista">
+              {cotejo.arriba.map((f) => <CotejoFila key={f.clave} f={f} lado={lado} ancho={ancho} />)}
+            </dl>
+            {cotejo.iguales.length > 0 && <p className="amx-cotejo-sep">— iguales —</p>}
+            {cotejo.iguales.length > 0 &&
+              <dl className="amx-cotejo-lista">
+                {cotejo.iguales.map((f) => <CotejoFila key={f.clave} f={f} lado={lado} ancho={ancho} />)}
+              </dl>}
+          </div>
+          <p className="amx-cotejo-acciones">
+            <button type="button" onClick={() => onCambiar(lado)}>Cambiar</button>
+            <span aria-hidden="true">·</span>
+            <button type="button" onClick={() => onQuitar(arma.id)}>Quitar</button>
+          </p>
+        </article>
+      ) : (
+        <article key={lado} className="amx-cotejo-exp" style={pistasExp} aria-label="Ficha en blanco">
+          <span className="amx-cotejo-copia amx-cotejo-copia--vacia" aria-hidden="true" />
+          <div className="amx-cotejo-carton amx-cotejo-carton--blanco" style={pistasCarton}>
+            <button type="button" className="amx-cotejo-elegir" onClick={() => onElegir(lado)}>+ Elegir arma</button>
+          </div>
+          <span className="amx-cotejo-acciones" aria-hidden="true" />
+        </article>
+      ))}
+    </div>
+  );
+}
+window.CotejoFichas = CotejoFichas;
+
+// La tira de diferencias: la segunda arma frente a la primera, en cifras.
+function TiraCotejo({ tira }) {
+  return (
+    <p className="amx-cotejo-tira">
+      <b>{tira.nombreB}</b> frente a <b>{tira.nombreA}</b>:{' '}
+      <span className="amx-cotejo-tira-cifras">
+        {tira.partes.length
+          ? tira.partes.join(' · ') + (tira.avisoFechas ? ' · precios de fechas distintas' : '')
+          : 'Sin diferencias en capacidad, peso, longitud ni precio.'}
+      </span>
+    </p>
+  );
+}
+window.TiraCotejo = TiraCotejo;
+
+// Sin armas: una hoja que dice cómo empezar.
+function CotejoVacio({ onArsenal }) {
+  return (
+    <section className="amx-cotejo-vacio" aria-label="Comparador sin armas">
+      <p><b>Todavía no hay armas.</b></p>
+      <p>Marca «Comparar» en el talón de cualquier ficha para empezar.</p>
+      <button type="button" className="amx-cotejo-boton" onClick={onArsenal}>Ir al Arsenal</button>
+    </section>
+  );
+}
+window.CotejoVacio = CotejoVacio;
