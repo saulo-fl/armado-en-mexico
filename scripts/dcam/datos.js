@@ -81,9 +81,30 @@ function editar(texto, ediciones) {   // [{ini, fin, txt}] sin solaparse; se apl
   return ediciones.sort((a, b) => b.ini - a.ini).reduce((t, e) => t.slice(0, e.ini) + e.txt + t.slice(e.fin), texto);
 }
 
+// Inserta al final de un ArrayExpression/ObjectExpression sin crear huecos ni comas dobles:
+// después del último elemento real (antes de una coma final ya existente, si la hay), nunca
+// justo antes del ']'/'}' de cierre.
+function alFinal(nodo, elementos, txt) {
+  if (elementos.length) { const u = elementos[elementos.length - 1]; return { ini: u.end, fin: u.end, txt: `, ${txt}` }; }
+  return { ini: nodo.start + 1, fin: nodo.start + 1, txt };
+}
+
+function validarPlan(plan) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(plan.fecha)) throw new Error(`fecha con formato inválido (se espera AAAA-MM-DD): ${plan.fecha}`);
+  if (typeof plan.v !== 'string' || !plan.v || /[$'"\s]/.test(plan.v)) throw new Error(`v con formato inválido: ${JSON.stringify(plan.v)}`);
+  const ids = new Set();
+  for (const s of plan.seguros) {
+    if (ids.has(s.id)) throw new Error(`id repetido en seguros: ${s.id}`);
+    ids.add(s.id);
+    if (!Number.isFinite(s.precio) || s.precio <= 0) throw new Error(`precio inválido para id ${s.id}: ${s.precio}`);
+    if (!Number.isInteger(s.existencia) || s.existencia < 1) throw new Error(`existencia inválida para id ${s.id}: ${s.existencia}`);
+  }
+}
+
 function aplicar(plan, raiz = RAIZ_REPO) {
   const cat = CATALOGOS[plan.catalogo];
   if (!cat) throw new Error(`catálogo desconocido: ${plan.catalogo}`);
+  validarPlan(plan);
   const manualId = cat.manual(plan.fecha);
   const pdfNombre = cat.pdf(plan.fecha);
   const archivos = {};
@@ -94,12 +115,17 @@ function aplicar(plan, raiz = RAIZ_REPO) {
   {
     const a = leerArchivo(cat.manuales[0]);
     const lista = asignacion(ast(cat.manuales[0]), cat.manuales[1]);
+    let fechaMaxDCAM = null;
     for (const el of lista.elements) {
       const props = Object.fromEntries(el.properties.map((p) => [clave(p), p.value]));
       if (props.id && props.id.value === manualId) throw new Error(`inventario ya registrado: ${manualId}`);
-      if (props.autoridad && props.autoridad.value === 'DCAM' && props.primary && props.primary.value === true)
-        a.ed.push({ ini: props.primary.start, fin: props.primary.end, txt: 'false' });
+      if (props.autoridad && props.autoridad.value === 'DCAM') {
+        if (props.fecha && (!fechaMaxDCAM || props.fecha.value > fechaMaxDCAM)) fechaMaxDCAM = props.fecha.value;
+        if (props.primary && props.primary.value === true) a.ed.push({ ini: props.primary.start, fin: props.primary.end, txt: 'false' });
+      }
     }
+    if (fechaMaxDCAM && plan.fecha <= fechaMaxDCAM)
+      throw new Error(`fecha ${plan.fecha} no es más nueva que el último inventario DCAM registrado (${fechaMaxDCAM})`);
     const nuevo = `{ id: '${manualId}', nombre: 'Existencias de ${cat.etiqueta} DCAM · ${fechaLarga(plan.fecha)}', autoridad: 'DCAM', ` +
       `fecha: '${plan.fecha}', url: 'inventarios/${pdfNombre}', fileName: '${pdfNombre}', primary: true },`;
     a.ed.push({ ini: lista.start + 1, fin: lista.start + 1, txt: `\n  ${nuevo}` });
@@ -112,23 +138,27 @@ function aplicar(plan, raiz = RAIZ_REPO) {
   const f = leerArchivo(cat.ficha[0]);
   const llamadas = new Map();
   recorrer(ast(cat.ficha[0]), (n) => {
-    if (n.type === 'CallExpression' && n.callee.name === cat.ficha[1] && n.arguments[0] && n.arguments[0].type === 'NumericLiteral')
-      llamadas.set(n.arguments[0].value, n);
+    if (n.type === 'CallExpression' && n.callee.name === cat.ficha[1] && n.arguments[0] && n.arguments[0].type === 'NumericLiteral') {
+      const id = n.arguments[0].value;
+      if (llamadas.has(id)) throw new Error(`${cat.ficha[1]}(${id}, ...) aparece más de una vez en ${cat.ficha[0]}`);
+      llamadas.set(id, n);
+    }
   });
   let existencias = null;
   if (plan.catalogo === 'armas') existencias = asignacion(ast('src/data/data-precios.js'), 'AMX_ARMAS_EXISTENCIAS');
   for (const s of plan.seguros) {
+    const precio = Math.round(s.precio * 100) / 100;   // una sola redondeada: mismo valor en historial y ficha
     const arr = porId.get(s.id);
     const llamada = llamadas.get(s.id);
     if (!arr || arr.type !== 'ArrayExpression' || !llamada) throw new Error(`ficha ${s.id} sin historial o sin ${cat.ficha[1]}(...) en ${plan.catalogo}`);
-    const reg = `{ manualId: '${manualId}', price: '${pesos(s.precio)}', date: '${plan.fecha}'${cat.conQty ? `, qty: ${Number(s.existencia)}` : ''} }`;
-    h.ed.push({ ini: arr.end - 1, fin: arr.end - 1, txt: `${arr.elements.length ? ', ' : ''}${reg}` });
+    const reg = `{ manualId: '${manualId}', price: '${pesos(precio)}', date: '${plan.fecha}'${cat.conQty ? `, qty: ${Number(s.existencia)}` : ''} }`;
+    h.ed.push(alFinal(arr, arr.elements, reg));
     const arg = llamada.arguments[cat.ficha[2]];
-    f.ed.push({ ini: arg.start, fin: arg.end, txt: cat.ficha[3](s.precio) });
+    f.ed.push({ ini: arg.start, fin: arg.end, txt: cat.ficha[3](precio) });
     if (existencias) {
       const p = existencias.properties.find((x) => Number(clave(x)) === s.id);
       if (p) h.ed.push({ ini: p.value.start, fin: p.value.end, txt: String(Number(s.existencia)) });
-      else h.ed.push({ ini: existencias.end - 1, fin: existencias.end - 1, txt: `${existencias.properties.length ? ', ' : ''}${s.id}: ${Number(s.existencia)} ` });
+      else h.ed.push(alFinal(existencias, existencias.properties, `${s.id}: ${Number(s.existencia)}`));
     }
   }
 
@@ -141,11 +171,21 @@ function aplicar(plan, raiz = RAIZ_REPO) {
     }
   }
 
-  // 4) escribir (todo o nada: si algo lanzó antes, no se escribió nada)
-  fs.copyFileSync(plan.pdf, path.join(raiz, 'public', 'inventarios', pdfNombre));
-  const tocados = [];
+  // 4) calcular el texto final y validar que los .js editados sigan siendo JS válido, ANTES de escribir nada
+  const nuevos = {};
   for (const [rel, a] of Object.entries(archivos)) {
     const nuevo = editar(a.texto, a.ed);
+    if (rel.endsWith('.js')) {
+      try { parse(nuevo, { sourceType: 'script', ranges: false }); }
+      catch (e) { throw new Error(`la edición dejaría ${rel} con sintaxis inválida: ${e.message}`); }
+    }
+    nuevos[rel] = nuevo;
+  }
+
+  // 5) escribir (todo o nada: si algo lanzó antes, no se escribió nada)
+  fs.copyFileSync(plan.pdf, path.join(raiz, 'public', 'inventarios', pdfNombre));
+  const tocados = [];
+  for (const [rel, nuevo] of Object.entries(nuevos)) {
     if (nuevo !== fs.readFileSync(path.join(raiz, rel), 'utf8')) { fs.writeFileSync(path.join(raiz, rel), nuevo); tocados.push(rel); }
   }
   return { archivos: [...tocados, `public/inventarios/${pdfNombre}`] };
