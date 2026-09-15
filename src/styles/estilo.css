@@ -2247,8 +2247,19 @@
 }
 .amx-v2 .amx-historial-variacion b { margin-left: 8px; font-size: 14px; letter-spacing: .02em; }
 
-/* El registro plegado en móvil: un <details> nativo, sin librería. */
-.amx-v2 .amx-plegable summary {
+/* La fuente de cada fila abre su inventario oficial en PDF. */
+.amx-v2 .amx-registro a {
+  display: inline-block;
+  padding: 4px 0;   /* ≥ 24 px de alto: se atina con el dedo */
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+/* El registro plegado en móvil: un <details> nativo, sin librería. El botón
+   «Ver todo el registro» de escritorio se viste igual. */
+.amx-v2 .amx-registro-mas { width: 100%; padding: 0; border: 0; background: none; }
+.amx-v2 .amx-plegable summary,
+.amx-v2 .amx-registro-mas {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2263,43 +2274,12 @@
   border-top: 1px dashed var(--milimetrico-tinta-2);
 }
 .amx-v2 .amx-plegable summary::-webkit-details-marker { display: none; }
-.amx-v2 .amx-plegable summary::after { content: '+'; font-size: 18px; line-height: 1; }
-.amx-v2 .amx-plegable[open] summary::after { content: '−'; }
+.amx-v2 .amx-plegable summary::after,
+.amx-v2 .amx-registro-mas::after { content: '+'; font-size: 18px; line-height: 1; }
+.amx-v2 .amx-plegable[open] summary::after,
+.amx-v2 .amx-registro-mas[aria-expanded="true"]::after { content: '−'; }
 
-/* Los anexos: hojas pequeñas grapadas al pie del historial, que asoman por
-   debajo de su borde. Cada una abre su PDF oficial. */
-.amx-v2 .amx-anexos {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));   /* en móvil, de dos en dos */
-  gap: var(--e4) var(--e3);
-  margin: -14px 0 0;
-  padding: 0 var(--e3);
-  list-style: none;
-}
-@media (min-width: 600px) { .amx-v2 .amx-anexos { display: flex; flex-wrap: wrap; } }
-.amx-v2 .amx-anexo { position: relative; min-width: 0; }
-@media (min-width: 600px) { .amx-v2 .amx-anexo { flex: 0 0 auto; width: 148px; } }
-.amx-v2 .amx-anexo:nth-child(3n + 1) { --giro-anexo: -1.4deg; }
-.amx-v2 .amx-anexo:nth-child(3n + 2) { --giro-anexo: 1.1deg; }
-.amx-v2 .amx-anexo:nth-child(3n)     { --giro-anexo: -.5deg; }
-.amx-v2 .amx-anexo a {
-  display: block;
-  min-height: 44px;
-  padding: 18px 10px 10px;
-  background: var(--oficio);
-  box-shadow: 0 1px 2px rgba(23, 27, 25, .16), 0 4px 8px -3px rgba(23, 27, 25, .2);
-  transform: rotate(var(--giro-anexo));
-  font-family: var(--mono);
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--manila-tinta);
-  text-decoration: none;
-  transition: transform .16s;
-}
-.amx-v2 .amx-anexo a:hover { transform: rotate(var(--giro-anexo)) translateY(-3px); }
-.amx-v2 .amx-anexo a b { display: block; letter-spacing: .14em; text-transform: uppercase; color: var(--oficio-tinta-2); font-weight: 400; }
-.amx-v2 .amx-anexo a u { display: inline-block; margin-top: 4px; text-underline-offset: 3px; }
-/* La grapa: una barrita de metal que muerde el anexo y el borde del historial. */
+/* La grapa: una barrita de metal que muerde una hoja (hoy, la copia del cotejo). */
 .amx-v2 .amx-grapa {
   position: absolute;
   z-index: 2;
@@ -2309,7 +2289,6 @@
   border-radius: 2px;
   background: linear-gradient(180deg, #E6E9EB 0%, #A5AAAE 60%, #7F8589 100%);
   box-shadow: 0 1px 1px rgba(23, 27, 25, .4);
-  transform: rotate(var(--giro-anexo));
   pointer-events: none;
 }
 
