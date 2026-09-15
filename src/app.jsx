@@ -202,6 +202,8 @@ function App() {
   }, [screen, productId, accesorioId, municionId, catalogFilter, compareIds]);
 
   // Botón atrás/adelante del navegador → aplica la pantalla de la URL
+  const idsVivos = useRefApp(compareIds);   // para onPop, que se registra una sola vez
+  idsVivos.current = compareIds;
   useEffectApp(() => {
     const onPop = () => {
       const s = amxParsePath(window.location.pathname);
@@ -212,7 +214,20 @@ function App() {
       setAccesorioId(s.accesorioId);
       setMunicionId(s.municionId);
       setCatalogFilter(s.catalogFilter);
-      if (s.screen === 'compare') setCompareIds(s.compareIds);
+      // En el comparador manda la selección EN MEMORIA, no la de la dirección:
+      // la entrada del historial guarda las armas de cuando se escribió, y al
+      // volver con «atrás» pisaba lo marcado después en otra ficha (se veía el
+      // comparador vacío). Se reescribe la dirección con las armas actuales aquí
+      // y no en el efecto de la URL: saltando de un comparador a otro (mantener
+      // pulsado «atrás») no cambia ningún estado y el efecto no correría; y por
+      // eso mismo skipPush vuelve a false, o se tragaría el siguiente pushState.
+      if (s.screen === 'compare') {
+        skipPush.current = false;
+        const url = amxBuildUrl('compare', null, null, null, null, idsVivos.current);
+        if (window.location.pathname !== url) {
+          try { window.history.replaceState(window.history.state, '', url); } catch (e) {}
+        }
+      }
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);

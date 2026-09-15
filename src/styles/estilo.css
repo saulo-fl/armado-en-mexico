@@ -3056,7 +3056,13 @@
 
 .amx-v2 .amx-cotejo {
   --renglon: 28px;
-  --cab: 60px;
+  /* ponytail: alto fijo de cabecera. La copia muerde 18 px y el nombre se apoya
+     abajo: 76 px dejan libres tres líneas (los dos «Weatherby 307 Range XP», los
+     nombres más largos del catálogo, quedan a 2 px de la foto a 360 px; medido el
+     15-sep-2026). Un nombre de cuatro líneas (≈50 caracteres a 360 px) volvería a
+     quedar bajo la foto. Si llega uno: la cabecera a alto automático en su fila
+     de la rejilla y el renglón rojo como borde de la cabecera, no colocado con --cab. */
+  --cab: 76px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   column-gap: var(--e2);
@@ -3091,8 +3097,16 @@
 .amx-v2 .amx-cotejo-copia .amx-grapa { top: auto; bottom: 8px; transform: rotate(-4deg); }
 .amx-v2 .amx-cotejo-abrir { cursor: pointer; }
 .amx-v2 .amx-cotejo-abrir:focus-visible { outline: 2px solid var(--tinta); outline-offset: 4px; }
-.amx-v2 .amx-cotejo-sello { position: absolute; z-index: 4; right: -8px; bottom: 30%; pointer-events: none; }
-@media (min-width: 1024px) { .amx-v2 .amx-cotejo-copia { width: 64%; } }
+/* El sello, a escala de ficha (13 px en móvil, 15 px desde 1024 px) y abajo,
+   sobre el marco claro de la copia: a media foto, con 12 px, la C y la I de
+   CIVIL caían sobre la empuñadura negra de la LCP (capturas del 15-sep-2026).
+   SEGURIDAD y EXCLUSIVO caben en la columna a 360 px. */
+.amx-v2 .amx-cotejo-sello { position: absolute; z-index: 4; right: -8px; bottom: 6px; pointer-events: none; }
+.amx-v2 .amx-cotejo-sello .amx-sello { font-size: 13px; padding: 4px 10px 5px; border-width: 2px; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-cotejo-copia { width: 64%; }
+  .amx-v2 .amx-cotejo-sello .amx-sello { font-size: 15px; padding: 5px 12px 6px; border-width: 3px; }
+}
 
 /* La cartulina del fichero: renglón rojo bajo la cabecera y rayado cada
    `--renglon`. Cada línea de texto mide un renglón (line-height = --renglon), así
@@ -3145,6 +3159,8 @@
   overflow-wrap: anywhere;
 }
 @media (min-width: 1024px) { .amx-v2 .amx-cotejo-cab { font-size: 14px; } }
+/* Recibe el foco tras «Quitar» o tras elegir desde la ficha en blanco. */
+.amx-v2 .amx-cotejo-cab:focus-visible { outline: 2px solid var(--ficha-tinta); outline-offset: 2px; }
 
 .amx-v2 .amx-cotejo-lista { display: contents; }
 .amx-v2 .amx-cotejo-fila {

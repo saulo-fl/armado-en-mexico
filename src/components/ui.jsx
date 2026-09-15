@@ -2542,7 +2542,7 @@ function CotejoFichas({ a, b, cotejo, ancho, onAbrir, onCambiar, onQuitar, onEle
             <span className="amx-cotejo-sello"><SelloLegal avail={arma.avail} etiqueta={arma.availLabel} /></span>
           </div>
           <div className="amx-cotejo-carton" style={pistasCarton}>
-            <h2 className="amx-cotejo-cab" id={'cotejo-cab-' + lado}>{arma.nombre}</h2>
+            <h2 className="amx-cotejo-cab" id={'cotejo-cab-' + lado} tabIndex={-1}>{arma.nombre}</h2>
             <dl className="amx-cotejo-lista">
               {cotejo.arriba.map((f) => <CotejoFila key={f.clave} f={f} lado={lado} ancho={ancho} />)}
             </dl>
@@ -2555,7 +2555,14 @@ function CotejoFichas({ a, b, cotejo, ancho, onAbrir, onCambiar, onQuitar, onEle
           <p className="amx-cotejo-acciones">
             <button type="button" onClick={() => onCambiar(lado)}>Cambiar</button>
             <span aria-hidden="true">·</span>
-            <button type="button" onClick={() => onQuitar(arma.id)}>Quitar</button>
+            {/* El botón desaparece (o pasa a ser el «Quitar» de la otra arma, y un
+                segundo Enter vaciaría la comparación): el foco va a la primera
+                cabecera. flushSync para que exista ya pintada. */}
+            <button type="button" onClick={() => {
+              ReactDOM.flushSync(() => onQuitar(arma.id));
+              const cab = document.getElementById('cotejo-cab-a');
+              if (cab) cab.focus();
+            }}>Quitar</button>
           </p>
         </article>
       ) : (
@@ -2619,11 +2626,14 @@ function BuscarArma({ abierta, titulo, excluir, onElegir, onCerrar }) {
     }
   }, [abierta]);
   // Al cerrar (Cerrar, Esc o tras elegir), el foco vuelve a quien abrió la
-  // búsqueda si sigue en la página; la ficha en blanco desaparece al elegir.
+  // búsqueda si sigue en la página. La ficha en blanco desaparece al elegir:
+  // entonces va a la primera cabecera del comparador. El evento `close` llega en
+  // una tarea aparte, con el render de la elección ya hecho.
   const alCerrar = () => {
     onCerrar();
     const o = origen.current;
-    if (o && document.contains(o)) o.focus();
+    const destino = o && document.contains(o) ? o : document.getElementById('cotejo-cab-a');
+    if (destino) destino.focus();
   };
   const resultados = abierta ? window.amxBuscarArmas(window.DB || [], consulta, excluir) : [];
   return (
