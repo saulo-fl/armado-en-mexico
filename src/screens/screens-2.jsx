@@ -148,45 +148,19 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const priceHistory = window.Store ? window.Store.getPriceHistory(arma.id) : [];
   const manuales = window.Store ? window.Store.getManuales() : [];
   const manualById = (id) => (id ? manuales.find((m) => m.id === id) : null) || null;
-  // Inventario fuente del precio actual: el ligado al arma, el del registro más
-  // reciente, o el inventario principal del repo (fuente general de precios)
-  const currentManual = manualById(arma.priceManualId) ||
-    (priceHistory.length ? manualById(priceHistory[priceHistory.length - 1].manualId) : null) ||
-    (window.Store ? window.Store.getPrimaryManual() : null);
-  const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
-  const curSigla = curAut ? curAut.sigla : 'DCAM';
-  const precioActual = priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact;
-  const fechaPrecio = currentManual ? amxFmtManualDate(currentManual.fecha) : '';
-
-  // Existencias POR SUCURSAL (no hay primaria/secundaria): DCAM y OTCA se
-  // muestran por separado, cada una con su inventario fuente. Regla: SOLO
-  // cuenta el ÚLTIMO inventario de cada sucursal. Si el arma no aparece en él,
-  // se asume AGOTADA en esa sede.
-  const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'DCAM'))) || 'DCAM';
-  const latestByBranch = (sigla) => manuales.find((m) => autOf(m) === sigla) || null; // manuales: más reciente primero
-  const everIn = (sigla) => priceHistory.some((h) => autOf(manualById(h.manualId)) === sigla);
-  const branches = [];
-  const dcamQty = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
-  const latestDcam = latestByBranch('DCAM');
-  if (dcamQty != null) {
-    branches.push({ sigla: 'DCAM', qty: dcamQty, manual: latestDcam, agotado: false });
-  } else if (everIn('DCAM') && latestDcam) {
-    branches.push({ sigla: 'DCAM', qty: null, manual: latestDcam, agotado: true });
-  }
-  const latestOtca = latestByBranch('OTCA');
-  if (latestOtca) {
-    const rec = priceHistory.find((h) => h.manualId === latestOtca.id);
-    if (rec && rec.qty != null) {
-      branches.push({ sigla: 'OTCA', qty: rec.qty, manual: latestOtca, agotado: false });
-    } else if (everIn('OTCA')) {
-      branches.push({ sigla: 'OTCA', qty: null, manual: latestOtca, agotado: true });
-    }
-  }
-  // ¿Hay un inventario de la MISMA sucursal más reciente que el del precio? Si lo
-  // hay, el arma ya no aparece en él y el precio es el último conocido: el talón
-  // lo sella (ver TalonComprobante). Fechas AAAA-MM-DD, comparables como texto.
-  const ultimoSuc = latestByBranch(curSigla);
-  const ultimoConocido = !!(currentManual && ultimoSuc && String(ultimoSuc.fecha || '') > String(currentManual.fecha || ''));
+  // Precio vigente, su fuente, «último precio conocido» y existencias por
+  // sucursal. La regla vive en src/lib/cotejo.js porque el comparador enseña lo
+  // mismo, y dos copias acabarían diciendo cosas distintas de la misma arma.
+  const inv = window.amxInventarioArma(arma, {
+    priceHistory, manuales,
+    existenciasDCAM: window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null,
+    autoridad: window.manualAutoridad,
+  });
+  const curSigla = inv.sigla;
+  const precioActual = inv.precio;
+  const fechaPrecio = inv.manual ? amxFmtManualDate(inv.manual.fecha) : '';
+  const branches = inv.sucursales;
+  const ultimoConocido = inv.ultimoConocido;
 
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
   const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
