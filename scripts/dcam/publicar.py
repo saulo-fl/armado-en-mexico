@@ -84,9 +84,14 @@ def _esperar(ent, url, marca, plazo_seg, cada=60):
         restante -= pausa
 
 
-def _bloquear(ent, pub, motivo):
+def _bloquear(ent, pub, motivo, guardar=None):
     pub["bloqueado"] = motivo
-    ent.avisar(f"⚠️ DCAM conciliación detenida ({pub.get('rama', '?')}): {motivo}")
+    if guardar:   # se guarda ANTES de avisar: si avisar() lanza, el bloqueo no se pierde
+        guardar(pub)
+    try:
+        ent.avisar(f"⚠️ DCAM conciliación detenida ({pub.get('rama', '?')}): {motivo}")
+    except Exception:
+        pass   # un aviso que falla (Telegram caído) no puede tumbar la corrida
     return pub
 
 
@@ -101,6 +106,29 @@ def _archivos_de_salida(salida):
         if isinstance(d, dict) and "archivos" in d:
             return d["archivos"]
     return None
+
+
+def _primer_json(salida):
+    """Primera línea de `salida` que sea JSON válido (objeto o arreglo); ignora texto de
+    stderr pegado antes o después (p. ej. un warning de `gh`). None si ninguna lo es."""
+    for linea in salida.splitlines():
+        s = linea.strip()
+        if s[:1] in "[{":
+            try:
+                return json.loads(s)
+            except ValueError:
+                continue
+    return None
+
+
+def _manual(plan):
+    """El id del inventario tal como lo calcula `datos.js` (tabla CATALOGOS): desde
+    `plan["mapa"]["manual"]` si el plan lo trae, si no derivado igual que datos.js."""
+    mapa = plan.get("mapa")
+    if isinstance(mapa, dict) and mapa.get("manual"):
+        return mapa["manual"]
+    prefijo = {"armas": "man_dcam_", "accesorios": "man_acc_", "municiones": "man_mun_dcam_"}[plan["catalogo"]]
+    return prefijo + plan["fecha"].replace("-", "_")
 
 
 def publicar_seguro(ent: Entorno, trabajo: Path, pub: dict, plan: dict, plazo_seg: int = 1200, guardar=None) -> dict:
@@ -125,9 +153,7 @@ def publicar_seguro(ent: Entorno, trabajo: Path, pub: dict, plan: dict, plazo_se
         except Exception as e:  # cualquier excepción inesperada bloquea y avisa, no rompe la corrida
             motivo = f"{nombre}: {e!r}"
         if motivo:
-            _bloquear(ent, pub, motivo)
-            if guardar:
-                guardar(pub)
+            _bloquear(ent, pub, motivo, guardar)
             return False
         pub["paso"] = nombre
         if guardar:
@@ -225,10 +251,11 @@ def publicar_seguro(ent: Entorno, trabajo: Path, pub: dict, plan: dict, plazo_se
                              "--state", "all", "--json", "number,state"], cwd=str(trabajo))
             if c:
                 return f"gh pr list ({base}) falló: {out.strip()[-300:]}"
-            try:
-                existentes = json.loads(out.strip() or "[]")
-            except ValueError:
-                existentes = []
+            existentes = []
+            if out.strip():
+                existentes = _primer_json(out)
+                if existentes is None:   # salida rara: nunca crear a ciegas, podría duplicar el PR
+                    return f"gh pr list ({base}): la salida no es JSON: {out.strip()[-300:]}"
             if existentes:
                 pub[campo] = existentes[0]["number"]
             else:
@@ -257,10 +284,12 @@ def publicar_seguro(ent: Entorno, trabajo: Path, pub: dict, plan: dict, plazo_se
             c, out = ent.sh(["gh", "pr", "view", str(n), "--repo", REPO, "--json", "state"], cwd=str(trabajo))
             if c:
                 return f"gh pr view #{n} falló: {out.strip()[-300:]}"
-            try:
-                estado = json.loads(out or "{}").get("state")
-            except ValueError:
-                estado = None
+            estado = None
+            if out.strip():
+                d = _primer_json(out)
+                if d is None:   # salida rara: nunca mergear a ciegas
+                    return f"gh pr view #{n}: la salida no es JSON: {out.strip()[-300:]}"
+                estado = d.get("state")
             if estado == "MERGED":
                 continue
             c, out = ent.sh(["gh", "pr", "merge", str(n), "--repo", REPO, "--merge"], cwd=str(trabajo))
@@ -304,9 +333,12 @@ def publicar_seguro(ent: Entorno, trabajo: Path, pub: dict, plan: dict, plazo_se
                 return f"sonda /api/state: {n} armas, esperaba {plan.get('esperado_armas')}"
         precio_nuevo = f"${plan['seguros'][0]['precio']:,.2f} MXN"
         archivo = ARCHIVO_HISTORIAL[catalogo]
+        # El registro tal como lo escribe datos.js (manualId + price emparejados), no solo el
+        # precio suelto: un precio idéntico ya podría estar en el historial por otro registro.
+        registro = f"manualId: '{_manual(plan)}', price: '{precio_nuevo}'"
         contenido = ent.http(f"{PRODUCCION}{archivo}?v={plan['v']}")
-        if precio_nuevo not in contenido:
-            return f"sonda {archivo}: no encontré el precio nuevo {precio_nuevo}"
+        if registro not in contenido:
+            return f"sonda {archivo}: no encontré el precio nuevo ({registro})"
         return None
 
     for nombre, fn in (("rama", paso_rama), ("aplicado", paso_aplicado), ("puertas", paso_puertas),

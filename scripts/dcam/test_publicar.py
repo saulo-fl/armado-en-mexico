@@ -37,7 +37,8 @@ PLAN = {"catalogo": "armas", "fecha": "2026-10-01", "pdf": "/x.pdf", "v": "dcam2
 VIVO = '<script src="data.js?v=dcam20261001"></script><script src="data-precios.js?v=dcam20261001"></script>'
 PAGINAS = {publicar.alias_preview("bot/dcam-arm-20261001"): VIVO, "https://armado.mx/": VIVO,
            "https://armado.mx/api/state": '{"armas": [' + ",".join(['{"id": %d}' % i for i in range(225)]) + "]}",
-           "https://armado.mx/data-precios.js?v=dcam20261001": "$9,641.23 MXN"}
+           "https://armado.mx/data-precios.js?v=dcam20261001":
+               "{ manualId: 'man_dcam_2026_10_01', price: '$9,641.23 MXN', date: '2026-10-01' }"}
 RESP = {"gh pr create --base main": (0, "https://github.com/saulo-fl/armado-en-mexico/pull/301\n"),
         "gh pr create --base develop": (0, "https://github.com/saulo-fl/armado-en-mexico/pull/302\n"),
         "resembrar.js armas --aplicar": (0, "OK: D1 coincide con el codigo."),
@@ -97,7 +98,8 @@ def test_produccion_no_pasa_con_marca_de_otro_catalogo():
     marca_mun = "data-municiones.js?v=dcam20261001"
     paginas = {publicar.alias_preview(rama): f'<script src="{marca_mun}"></script>',
                "https://armado.mx/": '<script src="data.js?v=dcam20261001"></script>',   # solo armas
-               "https://armado.mx/data-municiones.js?v=dcam20261001": "$350.00 MXN"}
+               "https://armado.mx/data-municiones.js?v=dcam20261001":
+                   "{ manualId: 'man_mun_dcam_2026_10_01', price: '$350.00 MXN', date: '2026-10-01', qty: 10 }"}
     ent = Falso(RESP, paginas)
     pub = publicar.publicar_seguro(ent, Path("/trabajo"), {}, PLAN_MUN, plazo_seg=120)
     assert pub["paso"] == "mergeado" and marca_mun in pub["bloqueado"], pub
@@ -139,10 +141,10 @@ def test_excepcion_en_puertas_bloquea_avisa_y_guarda():
 
     ent = Explota(RESP, PAGINAS)
     guardados = []
-    pub = publicar.publicar_seguro(ent, Path("/trabajo"), {}, PLAN, guardar=guardados.append)
+    pub = publicar.publicar_seguro(ent, Path("/trabajo"), {}, PLAN, guardar=lambda p: guardados.append(dict(p)))
     assert pub["paso"] == "aplicado" and "puertas" in pub["bloqueado"], pub
     assert any("puertas" in a for a in ent.avisos), ent.avisos
-    assert guardados and guardados[-1] is pub
+    assert guardados and "puertas" in guardados[-1].get("bloqueado", ""), guardados
 
 
 def test_resume_aplicado_rehace_desde_rama():
@@ -181,6 +183,77 @@ def test_plan_con_mapa_actualiza_mapeo_y_lo_incluye_en_commit():
         guardado = json.loads(ruta.read_text(encoding="utf-8"))
         assert guardado["armas"]["2026-10-01"] == plan["mapa"], guardado
         assert any(l.startswith("git add") and "mapeo-dcam.json" in l for l in ent.llamadas), ent.llamadas
+
+
+# ── Fix round 2 ──────────────────────────────────────────────────────────────
+
+def test_avisar_que_lanza_no_rompe_el_bloqueo():
+    class Muda(Falso):
+        def avisar(self, texto):
+            raise RuntimeError("telegram caido")
+
+    ent = Muda(dict(RESP, **{"auditar.js": (1, "✘ 2 HALLAZGOS")}), PAGINAS)
+    guardados = []
+    pub = publicar.publicar_seguro(ent, Path("/trabajo"), {}, PLAN, guardar=lambda p: guardados.append(dict(p)))
+    assert pub["paso"] == "aplicado" and "auditar" in pub["bloqueado"], pub
+    assert guardados and "auditar" in guardados[-1].get("bloqueado", ""), guardados
+
+
+def test_gh_pr_list_con_texto_de_stderr_antes_del_json_se_lee():
+    rama = "bot/dcam-arm-20261001"
+    resp = dict(RESP, **{f"gh pr list --repo {publicar.REPO} --head {rama} --base develop":
+                         (0, 'algun aviso de gh en stderr\n[{"number": 302, "state": "OPEN"}]\n')})
+    ent = Falso(resp, PAGINAS)
+    pub = publicar.publicar_seguro(ent, Path("/trabajo"), {"paso": "puertas", "rama": rama, "pr_main": 301}, PLAN)
+    assert pub["paso"] == "hecho" and pub["pr_develop"] == 302, pub
+
+
+def test_gh_pr_list_con_basura_sin_json_bloquea_sin_crear():
+    rama = "bot/dcam-arm-20261001"
+    resp = dict(RESP, **{f"gh pr list --repo {publicar.REPO} --head {rama} --base develop": (0, "no soy json para nada")})
+    ent = Falso(resp, PAGINAS)
+    pub = publicar.publicar_seguro(ent, Path("/trabajo"), {"paso": "puertas", "rama": rama, "pr_main": 301}, PLAN)
+    assert pub["paso"] == "puertas" and "gh pr list" in pub["bloqueado"], pub
+    assert not any(l.startswith("gh pr create") for l in ent.llamadas), ent.llamadas
+
+
+def test_gh_pr_view_con_texto_de_stderr_antes_del_json_se_lee():
+    resp = dict(RESP, **{"gh pr view 301": (0, "aviso de gh\n{\"state\": \"OPEN\"}\n")})
+    ent = Falso(resp, PAGINAS)
+    pub = {"paso": "preview", "rama": "bot/dcam-arm-20261001", "pr_main": 301, "pr_develop": 302}
+    pub2 = publicar.publicar_seguro(ent, Path("/trabajo"), pub, PLAN)
+    assert pub2["paso"] == "hecho", pub2
+    assert any(l.startswith("gh pr merge 301") for l in ent.llamadas), ent.llamadas
+
+
+def test_gh_pr_view_con_basura_sin_json_bloquea_sin_mergear():
+    resp = dict(RESP, **{"gh pr view 301": (0, "esto no es json")})
+    ent = Falso(resp, PAGINAS)
+    pub = {"paso": "preview", "rama": "bot/dcam-arm-20261001", "pr_main": 301, "pr_develop": 302}
+    pub2 = publicar.publicar_seguro(ent, Path("/trabajo"), pub, PLAN)
+    assert pub2["paso"] == "preview" and "gh pr view" in pub2["bloqueado"], pub2
+    assert not any(l.startswith("gh pr merge") for l in ent.llamadas), ent.llamadas
+
+
+def test_d1_resiembra_desde_origin_main_no_desde_la_rama():
+    ent = Falso(RESP, PAGINAS)
+    pub = publicar.publicar_seguro(ent, Path("/trabajo"), {}, PLAN)
+    assert pub["paso"] == "hecho", pub
+    llamadas = ent.llamadas
+    detach = next(i for i, l in enumerate(llamadas) if "checkout -f --detach origin/main" in l)
+    resembrar = next(i for i, l in enumerate(llamadas) if "resembrar.js armas" in l)
+    fetch_antes = any("fetch --quiet origin main" in l for l in llamadas[:detach])
+    assert fetch_antes and detach < resembrar, (detach, resembrar, llamadas)
+
+
+def test_sonda_precio_exige_el_registro_nuevo_no_solo_el_precio_suelto():
+    # El precio ya aparece en el historial por OTRO registro (otro manualId/fecha); sin el
+    # registro nuevo emparejado, la sonda no debe darse por buena.
+    contenido = "{ manualId: 'man_dcam_2026_06_01', price: '$9,641.23 MXN', date: '2026-06-01' }"
+    paginas = dict(PAGINAS, **{"https://armado.mx/data-precios.js?v=dcam20261001": contenido})
+    ent = Falso(RESP, paginas)
+    pub = publicar.publicar_seguro(ent, Path("/trabajo"), {}, PLAN)
+    assert pub["paso"] == "d1" and "precio" in pub["bloqueado"], pub
 
 
 if __name__ == "__main__":
