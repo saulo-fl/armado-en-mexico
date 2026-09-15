@@ -1171,6 +1171,27 @@ Decidido con Saulo sección por sección (rama `Opus-5/RED-Comparar`). La regla 
 - **El enlace** `/comparar/<a>-vs-<b>` guarda la comparación; su orden es el de las armas. Fuera de Google
   hasta la parte 2 (indexación), que tiene su propio spec.
 
+### 5.8 El hub del Arsenal (15-sep-2026)
+
+Decidido con Saulo sección por sección (rama `Opus-5/RED-Arsenal`). Las cuentas viven en `src/lib/arsenal-hub.js`,
+con su prueba (`node --test scripts/arsenal-hub.test.mjs`); las piezas, en `ui.jsx`, bloque «EL HUB DEL ARSENAL»; la
+piel, en `estilo.css`, con el mismo nombre.
+
+- **Títulos en cinta Dymo** en las seis secciones, como fuera del folder de la ficha.
+- **Disponibilidad es la tarjeta de almacén:** un renglón por sucursal con las armas que tienen existencia en el
+  ÚLTIMO inventario de armas de esa sucursal y la fecha de ese inventario. Sin total: un arma puede estar en las dos.
+  Cada renglón abre el catálogo con Armería = esa sucursal y Disponibilidad = Con existencias, y la lista mide lo mismo
+  que el renglón. Las polaroids de Armería siguen abriendo todo lo de su armería, esté disponible o no.
+- **Con una armería elegida, «Con existencias» y «Agotadas» miran esa sucursal** (`amxTieneExistencia`). Antes
+  contaban existencias en cualquiera y se colaban armas que solo tenía la otra (la SIG Sauer P322 en DCAM).
+- **Clasificación legal es una hoja de oficio con los sellos de la ficha:** la palabra corta por debajo de 1024 px, la
+  etiqueta completa por encima; verde civil, rojo seguridad y exclusivo.
+- **Uso son polaroids apaisadas** con solo el nombre y fotos de banco libre, con su fuente anotada junto a
+  `USO_FOTOS`. Militar / Táctico no sale en el hub.
+- **Calibre es un mostrador que se desliza:** una sola tabla con los calibres que tienen armas, cada cartucho a escala
+  de su largo real y con su etiqueta de cartón (nombre y armas). Sin foto, la silueta de pie. El ancho de celda sale
+  del de la pantalla para que siempre asome el siguiente calibre.
+
 ---
 
 ## 6. Prohibiciones explícitas
