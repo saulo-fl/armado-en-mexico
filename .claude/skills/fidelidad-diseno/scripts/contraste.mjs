@@ -175,6 +175,9 @@ const PAPELERIA = [
   ['sello civil sobre la etiqueta',    '--sello-civil', '--etiqueta', 4.5],
   ['tinta sobre la placa de latón',    '--manila-tinta', '--laton', 4.5],
   ['letra sobre la cinta Dymo',        '--dymo-letra', '--dymo', 4.5],
+  ['rotulador (trazo) sobre el fichero','--rotulador', '--fichero', 3],
+  ['cifras de la tira sobre el oficio', '--sello-restr', '--oficio', 4.5],
+  ['tinta-2 de ficha sobre el oficio',  '--ficha-tinta-2', '--oficio', 4.5],
 ];
 
 // Las superficies NO se miden con el umbral de WCAG —dos fondos no son texto—
