@@ -187,15 +187,19 @@ window.CUT_TR_SM = CUT_TR_SM;
 // ──────────────────────────────────────────────────────────────
 // USE VIEWPORT — hook responsivo
 // ──────────────────────────────────────────────────────────────
+// `isMobile` decide el armazón (cabecera y barra inferior de móvil) y corta en
+// 1024, como la ficha: por debajo, la barra superior no cabía y daba scroll
+// horizontal a todo el sitio (necesitaba 1150 px; 15-sep-2026). Las rejillas
+// siguen repartiéndose con `isTablet`/`isDesktop` y sus cortes de 720 y 900.
+function amxMedirViewport(w) {
+  return { width: w, isMobile: w < 1024, isTablet: w >= 720 && w < 900, isDesktop: w >= 900 };
+}
+
 function useViewport() {
-  const [vp, setVp] = React.useState(() => {
-    const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
-    return { width: w, isMobile: w < 720, isTablet: w >= 720 && w < 900, isDesktop: w >= 900 };
-  });
+  const [vp, setVp] = React.useState(() => amxMedirViewport(typeof window !== 'undefined' ? window.innerWidth : 1024));
   React.useEffect(() => {
     function onR() {
-      const w = window.innerWidth;
-      setVp({ width: w, isMobile: w < 720, isTablet: w >= 720 && w < 900, isDesktop: w >= 900 });
+      setVp(amxMedirViewport(window.innerWidth));
     }
     window.addEventListener('resize', onR);
     return () => window.removeEventListener('resize', onR);
@@ -272,7 +276,7 @@ function LogoMarca({ size = 28, conTexto = false, src = null }) {
 window.LogoMarca = LogoMarca;
 
 // ──────────────────────────────────────────────────────────────
-// TOP NAV — barra superior para escritorio/tablet
+// TOP NAV — barra superior para escritorio (desde 1024 px)
 // ──────────────────────────────────────────────────────────────
 function TopNav({ current, onNav, compareCount, onSearch }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
@@ -327,10 +331,10 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                 onMouseLeave={() => setMoreOpen(false)}>
                 <button onClick={() => setMoreOpen(o => !o)} style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  padding: '8px 14px',
+                  padding: '8px 8px',
                   fontFamily: 'Archivo, sans-serif',
                   fontSize: 14, fontWeight: 600,
-                  letterSpacing: '0.12em', textTransform: 'uppercase',
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
                   color: (dActive || moreOpen) ? '#DDD5C4' : PALETTE.sobreMarcaDim,
                   borderBottom: dActive ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
                   whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
@@ -373,10 +377,12 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
             <button key={it.id} onClick={() => onNav(it.id)} style={{
               background: 'none',
               border: 'none', cursor: 'pointer',
-              padding: '8px 14px',
+              // Compacta (antes 14 px y .12em): así los ocho botones caben
+              // desde 1009 px, por debajo del corte de 1024 donde empieza esta barra.
+              padding: '8px 8px',
               fontFamily: 'Archivo, sans-serif',
               fontSize: 14, fontWeight: 600,
-              letterSpacing: '0.12em', textTransform: 'uppercase',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
               color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
               borderBottom: active ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
               position: 'relative',
@@ -2250,8 +2256,10 @@ window.TalonComprobante = TalonComprobante;
 // `filas`: [{ sigla, qty, manual, agotado }], la misma lista que ya calculaba
 // la ficha. Absorbe lo que iba en «Detalle de la fuente»: la referencia del
 // inventario, el aviso de dato histórico y el nivel de precio.
+// En teléfono, como el registro de precios: fecha corta y la tabla se desliza
+// dentro del cartón si aún no cabe (con AGOTADO sobran ~70 px a 360).
 // ──────────────────────────────────────────────────────────────
-function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio }) {
+function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio, movil }) {
   const lvl = Math.max(0, Math.min(5, Number(nivelPrecio) || 0));
   return (
     <section className="amx-papel amx-kardex" style={{ '--giro-papel': '-.4deg' }} aria-labelledby="amx-kardex-tit">
@@ -2263,31 +2271,34 @@ function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio }) {
         {referencia &&
           <p className="amx-kardex-articulo"><span>Artículo · {sigla}</span>{referencia}</p>}
         {filas.length > 0 ? (
-          <table className="amx-kardex-tabla">
-            <thead>
-              <tr><th scope="col">Sucursal</th><th scope="col" className="num">Exist.</th><th scope="col">Inventario</th><th scope="col"><span className="amx-sr">Documento</span></th></tr>
-            </thead>
-            <tbody>
-              {filas.map((b, i) => {
-                const aut = window.manualAutoridad ? window.manualAutoridad(b.manual) : null;
-                return (
-                  <tr key={b.sigla + i}>
-                    <td className="amx-kardex-suc"><b>{b.sigla}</b>{aut && <small>{aut.nombre}</small>}</td>
-                    <td className="num">
-                      {b.agotado
-                        ? <span className="amx-sello amx-sello--restr">Agotado</span>
-                        : Number(b.qty).toLocaleString('es-MX')}
-                    </td>
-                    <td>{b.manual ? amxFmtManualDate(b.manual.fecha) : '—'}</td>
-                    <td>{b.manual && b.manual.url
-                      ? <a className="amx-kardex-pdf" href={b.manual.url} target="_blank" rel="noopener"
-                          aria-label={'PDF del inventario ' + b.sigla}>PDF ↗</a>
-                      : '—'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="amx-kardex-desliza" tabIndex={movil ? 0 : undefined}
+            role={movil ? 'region' : undefined} aria-label={movil ? 'Existencias por sucursal' : undefined}>
+            <table className="amx-kardex-tabla">
+              <thead>
+                <tr><th scope="col">Sucursal</th><th scope="col" className="num">Exist.</th><th scope="col">Inventario</th><th scope="col"><span className="amx-sr">Documento</span></th></tr>
+              </thead>
+              <tbody>
+                {filas.map((b, i) => {
+                  const aut = window.manualAutoridad ? window.manualAutoridad(b.manual) : null;
+                  return (
+                    <tr key={b.sigla + i}>
+                      <td className="amx-kardex-suc"><b>{b.sigla}</b>{aut && <small>{aut.nombre}</small>}</td>
+                      <td className="num">
+                        {b.agotado
+                          ? <span className="amx-sello amx-sello--restr">Agotado</span>
+                          : Number(b.qty).toLocaleString('es-MX')}
+                      </td>
+                      <td className="amx-kardex-fecha">{b.manual ? amxFmtManualDate(b.manual.fecha, movil) : '—'}</td>
+                      <td>{b.manual && b.manual.url
+                        ? <a className="amx-kardex-pdf" href={b.manual.url} target="_blank" rel="noopener"
+                            aria-label={'PDF del inventario ' + b.sigla}>PDF ↗</a>
+                        : '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <p className="amx-kardex-articulo">Existencias pendientes de conciliar con el inventario oficial.</p>
         )}
