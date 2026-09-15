@@ -2101,11 +2101,12 @@ window.ThumbIcon = ThumbIcon;
 
 // Fecha de un inventario (AAAA-MM-DD) en es-MX: «06 jul 2026». Vivía en
 // screens-2.jsx; sube aquí porque la usan el talón, el kárdex y el historial.
-function amxFmtManualDate(f) {
+// `corta`: año a dos cifras («11 sep 26»), para tablas en ancho de teléfono.
+function amxFmtManualDate(f, corta) {
   if (!f) return '';
   const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
   if (isNaN(d)) return String(f);
-  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: corta ? '2-digit' : 'numeric' });
 }
 window.amxFmtManualDate = amxFmtManualDate;
 
@@ -2306,7 +2307,7 @@ function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio }) {
 window.TarjetaAlmacen = TarjetaAlmacen;
 
 // ──────────────────────────────────────────────────────────────
-// HISTORIAL DE PRECIOS — papel milimétrico, registro y anexos grapados
+// HISTORIAL DE PRECIOS — papel milimétrico y registro con el PDF de cada inventario
 // Con dos fechas distintas o más: la gráfica y el registro (en escritorio a la
 // par; en móvil el registro se pliega). Con UNA sola fecha no hay tendencia que
 // dibujar: sale solo el registro, que antes directamente se ocultaba y dejaba
@@ -2317,11 +2318,13 @@ const TINTAS_MILIMETRICO = {
   eje: '#8FB2C4', fondo: '#F6F9F5', texto: '#171B19', texto2: '#4E5B63',
 };
 
-function HistorialPrecios({ historial, manualById, plegarRegistro }) {
+function HistorialPrecios({ historial, manualById, movil }) {
+  const [verTodo, setVerTodo] = React.useState(false);
   const hist = historial || [];
   const fechas = [];
   hist.forEach((h) => { if (fechas.indexOf(h.date) < 0) fechas.push(h.date); });
   const hayGrafica = fechas.length >= 2;
+  const plegado = hayGrafica && movil;
 
   // Variación de cada registro contra el anterior (el orden ya es cronológico).
   const filas = hist.map((h, i) => {
@@ -2330,42 +2333,59 @@ function HistorialPrecios({ historial, manualById, plegarRegistro }) {
     const v = amxPrecioNum(h.price);
     const prev = i > 0 ? amxPrecioNum(hist[i - 1].price) : null;
     const delta = (v != null && prev) ? ((v - prev) / prev) * 100 : null;
-    return { h: h, sigla: aut ? aut.sigla : '—', delta: delta, actual: i === hist.length - 1 };
+    return { h: h, sigla: aut ? aut.sigla : '—', url: man && man.url, delta: delta, actual: i === hist.length - 1 };
   }).reverse();
+
+  // Con el vigía de gob.mx entra un inventario tras otro: a la vista, solo los
+  // últimos; el resto detrás del botón. Plegado (móvil) ya va todo escondido.
+  const RECIENTES = 5;
+  const recortar = !plegado && filas.length > RECIENTES;
+  const visibles = recortar && !verTodo ? filas.slice(0, RECIENTES) : filas;
 
   const pIni = hist.length ? amxPrecioNum(hist[0].price) : null;
   const pFin = hist.length ? amxPrecioNum(hist[hist.length - 1].price) : null;
   const total = (hayGrafica && pIni && pFin != null) ? ((pFin - pIni) / pIni) * 100 : null;
   const fmtDelta = (d) => (d > 0 ? '▲ +' : d < 0 ? '▼ −' : '= ') + Math.abs(d).toFixed(1) + ' %';
 
-  // Los anexos: un PDF por inventario citado, del más reciente al más viejo.
-  const vistos = {};
-  const anexos = [];
-  hist.slice().reverse().forEach((h) => {
-    const man = manualById(h.manualId);
-    if (!man || !man.url || vistos[man.id]) return;
-    vistos[man.id] = true;
-    anexos.push(man);
-  });
-
+  // La fuente de cada fila abre el PDF de su inventario (antes eran hojas
+  // grapadas aparte, una por inventario, que no escalaban).
+  // En teléfono no cabe entera ni con la fecha corta (a 360 px sobran ~50 px):
+  // se desliza de lado dentro del papel, y con teclado se enfoca para deslizarla.
   const registro = (
-    <table className="amx-registro">
-      <thead>
-        <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
-      </thead>
-      <tbody>
-        {filas.map((f, i) => (
-          <tr key={i} className={f.actual ? 'es-actual' : undefined}>
-            <td>{amxFmtManualDate(f.h.date) || '—'}</td>
-            <td>{f.sigla}</td>
-            <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
-            <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
-              {f.delta == null ? '—' : fmtDelta(f.delta)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div>
+      <div className="amx-registro-desliza" tabIndex={movil ? 0 : undefined}
+        role={movil ? 'region' : undefined} aria-label={movil ? 'Registro de precios' : undefined}>
+        <table className="amx-registro">
+          <thead>
+            <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
+          </thead>
+          <tbody>
+            {visibles.map((f, i) => {
+              const fecha = amxFmtManualDate(f.h.date) || '—';
+              return (
+                <tr key={i} className={f.actual ? 'es-actual' : undefined}>
+                  <td>{movil ? amxFmtManualDate(f.h.date, true) || '—' : fecha}</td>
+                  <td>
+                    {f.url
+                      ? <a href={f.url} target="_blank" rel="noopener"
+                          aria-label={'Inventario ' + f.sigla + ' del ' + fecha + ' (PDF, abre en otra pestaña)'}>{f.sigla} ↗</a>
+                      : f.sigla}
+                  </td>
+                  <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
+                  <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
+                    {f.delta == null ? '—' : fmtDelta(f.delta)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {recortar &&
+        <button type="button" className="amx-registro-mas" aria-expanded={verTodo} onClick={() => setVerTodo(!verTodo)}>
+          Ver todo el registro ({filas.length})
+        </button>}
+    </div>
   );
 
   return (
@@ -2378,7 +2398,7 @@ function HistorialPrecios({ historial, manualById, plegarRegistro }) {
           </div>
           <div className={'amx-historial-cuerpo' + (hayGrafica ? ' amx-historial-cuerpo--doble' : '')}>
             {hayGrafica && <PriceChart history={hist} height={170} tintas={TINTAS_MILIMETRICO} />}
-            {hayGrafica && plegarRegistro
+            {plegado
               ? <details className="amx-plegable"><summary>Ver el registro ({hist.length})</summary>{registro}</details>
               : registro}
           </div>
@@ -2389,23 +2409,6 @@ function HistorialPrecios({ historial, manualById, plegarRegistro }) {
             </p>}
         </div>
       </div>
-      {anexos.length > 0 &&
-        <ul className="amx-anexos" aria-label="Inventarios oficiales en PDF">
-          {anexos.map((m, i) => {
-            const aut = window.manualAutoridad ? window.manualAutoridad(m) : null;
-            return (
-              <li key={m.id} className="amx-anexo">
-                <span className="amx-grapa" aria-hidden="true" />
-                <a href={m.url} target="_blank" rel="noopener">
-                  <b>Anexo {i + 1}</b>
-                  Inventario {aut ? aut.sigla : ''}<br />
-                  {amxFmtManualDate(m.fecha)}<br />
-                  <u>Ver PDF ↗</u>
-                </a>
-              </li>
-            );
-          })}
-        </ul>}
     </section>
   );
 }
