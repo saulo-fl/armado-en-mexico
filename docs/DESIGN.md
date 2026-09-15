@@ -1173,7 +1173,7 @@ Decidido con Saulo sección por sección (rama `Opus-5/RED-Comparar`). La regla 
 
 ### 5.7 La vitrina de accesorios — un puesto de tianguis (15-sep-2026)
 
-Decidido con Saulo pregunta por pregunta (rama `opus-5/RED-accesorios`). La regla de datos vive en
+Decidido con Saulo pregunta por pregunta (rama `Opus-5/RED-accesorios`). La regla de datos vive en
 `window.accesoriosVitrina` (`src/data/data-accesorios.js`), con su prueba (`node --test scripts/vitrina.test.mjs`);
 las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estilo.css`, con el mismo nombre.
 
@@ -1184,8 +1184,9 @@ las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estil
   reemplaza la dirección en vez de apilarla.
 - **Secciones por categoría** con cinta Dymo sin número; dentro, **orden alfabético por nombre corto**.
 - **Un puesto por pieza:** letrero de tianguis con **solo el nombre corto** (`corto`, máximo 2 renglones a 360 px; el
-  nombre completo va en el `aria-label`), la vara y la **pieza sola**. Sin precio, sello ni existencias: eso vive en
-  la ficha. Sin foto, la silueta de su categoría, sola.
+  `aria-label` es el nombre corto seguido del nombre completo, para que quien dicta lo que ve pueda activarlo), la
+  vara y la **pieza sola**. Sin precio, sello ni existencias: eso vive en la ficha. Sin foto, la silueta de su
+  categoría, sola.
 - **La mesa cruza la fila entera** aunque falten puestos. 2 por fila en móvil, 4 entre 720 y 1023 px, 6 desde 1024.
 - **Tema oscuro:** lona, madera, letreros y fotos son objetos y no cambian; la silueta de respaldo sigue al tema
   porque se recorta contra el lienzo.

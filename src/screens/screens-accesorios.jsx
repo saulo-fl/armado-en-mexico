@@ -1,6 +1,7 @@
 // Armado en México — Pantallas de ACCESORIOS DCAM
-// Card, carrusel de Home, catálogo con filtros, y ficha de detalle con el bloque
-// de precio + historial de inventarios (mismo patrón que las armas).
+// Card, carrusel de Home, la vitrina del catálogo (rediseño del 15-sep-2026), y
+// ficha de detalle con el bloque de precio + historial de inventarios (mismo
+// patrón que las armas).
 // Expone en window: AccesorioCard, HomeAccesoriosSection, AccesoriosScreen, AccesorioFicha
 
 const { useState: useStateAcc } = React;
@@ -189,7 +190,7 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onCategoria }) {
             <window.MesaPuestos items={s.piezas} porFila={porFila} renderPuesto={(a) => (
               <window.PuestoPieza key={a.id}
                 rotulo={a.corto}
-                ariaLabel={a.nombre}
+                ariaLabel={a.corto + ' — ' + a.nombre}
                 foto={window.isRealImage(a.img) ? a.img : null}
                 silueta={window.accesorioPlaceholder(a)}
                 onClick={() => onOpenAccesorio(a.id)} />

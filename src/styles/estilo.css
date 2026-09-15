@@ -4090,3 +4090,15 @@
   -webkit-mask-position: center bottom;
           mask-position: center bottom;
 }
+
+/* Entre 720 y 1279 px el puesto es más estrecho que en móvil (4 y 6 por fila) y el
+   letrero del Home (16 px, márgenes del 15 %) no deja sitio a dos palabras: se usa la
+   misma geometría de letrero que el Home en móvil. Medido el 15-sep-2026. */
+@media (min-width: 720px) and (max-width: 1279px) {
+  .amx-v2 .amx-mesa-fila .amx-puesto-letrero { left: 11%; right: 11%; padding: 14px 8px 18px; }
+  .amx-v2 .amx-mesa-fila .amx-puesto-rotulo { font-size: 14px; }
+}
+
+/* Con foto: `left/right` no estiran un <img> absoluto —su ancho sale del alto y de la
+   proporción—, así que sin márgenes automáticos se pega a la izquierda de la vara. */
+.amx-v2 .amx-puesto--pieza .amx-puesto-caja { margin-inline: auto; max-width: 88%; }

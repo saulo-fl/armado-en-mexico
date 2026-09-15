@@ -2686,6 +2686,7 @@ function SeparadoresFiltro({ etiqueta, opciones, activo, onCambiar, controla }) 
   const refs = React.useRef({});
   const act = Math.max(0, opciones.findIndex((o) => o.id === activo));
   function onKey(e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
     const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
     if (!d) return;
     e.preventDefault();
