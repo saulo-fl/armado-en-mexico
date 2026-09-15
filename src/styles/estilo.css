@@ -3973,3 +3973,138 @@
   color: var(--hair-hi);
   margin-bottom: var(--e2);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.8)
+   Decidido con Saulo sección por sección. Todo son objetos que ya existen: la
+   tarjeta de almacén del kárdex, la hoja de oficio con los sellos, la polaroid
+   apaisada del Home y la repisa de la vitrina de la ficha con su etiqueta. Aquí
+   solo va lo que cambia en el hub. Los objetos no siguen al tema.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-hub-seccion { margin-top: var(--e5); }
+.amx-v2 .amx-hub-seccion:first-of-type { margin-top: var(--e3); }
+
+/* El anillo de foco sobre los papeles claros va en tinta, como en la ficha. */
+.amx-v2 .amx-almacen :focus-visible,
+.amx-v2 .amx-clasif :focus-visible { outline-color: var(--manila-tinta); }
+
+/* DISPONIBILIDAD — la tarjeta de almacén con un renglón-botón por sucursal. */
+.amx-v2 .amx-almacen-cols,
+.amx-v2 .amx-almacen-renglon {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px 104px;
+  align-items: center;
+  column-gap: var(--e2);
+}
+.amx-v2 .amx-almacen-cols {
+  margin-top: 10px;
+  padding: 6px 6px 5px;
+  border-bottom: 1.5px solid var(--kardex-imp);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--kardex-imp);
+}
+.amx-v2 .amx-almacen-lista { margin: 0; padding: 0; list-style: none; }
+.amx-v2 .amx-almacen-renglon {
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 6px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--kardex-linea);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  color: var(--manila-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-almacen-renglon b { font-weight: 700; letter-spacing: .08em; }
+.amx-v2 .amx-almacen-renglon:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.amx-v2 .amx-almacen .num { text-align: right; }
+
+/* CLASIFICACIÓN LEGAL — la hoja de oficio con un sello por renglón. */
+.amx-v2 .amx-clasif { margin: 0; padding: 4px 18px 6px; list-style: none; border-radius: 3px; }
+@media (min-width: 1024px) { .amx-v2 .amx-clasif { padding: 8px 26px 10px; } }
+.amx-v2 .amx-clasif li + li { border-top: 1px dashed var(--oficio-tinta-2); }
+.amx-v2 .amx-clasif-renglon {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--e3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--e3) 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--manila-tinta);
+  cursor: pointer;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-clasif-renglon { grid-template-columns: 290px minmax(0, 1fr) auto; } }
+.amx-v2 .amx-clasif-sello { justify-self: start; font-size: 13px; padding: 5px 10px 6px; }
+@media (min-width: 1024px) { .amx-v2 .amx-clasif-sello { font-size: 15px; padding: 5px 13px 6px; border-width: 3px; } }
+.amx-v2 .amx-clasif-largo { display: none; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-clasif-corto { display: none; }
+  .amx-v2 .amx-clasif-largo { display: inline; }
+}
+.amx-v2 .amx-clasif-desc { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; }
+.amx-v2 .amx-clasif-renglon:hover .amx-clasif-desc { text-decoration: underline; text-underline-offset: 3px; }
+.amx-v2 .amx-clasif-cifra {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* USO — las polaroids apaisadas del Home, solo con el nombre. Una por fila en
+   móvil; desde 720 px las tres en fila y enteras. El giro lo pone la polaroid
+   desde 1024 px con `--giro`. */
+.amx-v2 .amx-hub-usos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 720px) { .amx-v2 .amx-hub-usos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.amx-v2 .amx-hub-uso {
+  display: block;
+  width: 100%;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* CALIBRE — la repisa de la vitrina convertida en mostrador: una sola tabla que
+   se desliza también en escritorio (en la vitrina, desde 1024 px, se parte en
+   filas) y sin el marco de la vitrina. El cartucho mide lo que su largo real. */
+.amx-v2 .amx-mostrador { --alto-foto: 150px; margin: 0; padding: 0 0 8px; }
+.amx-v2 .amx-mostrador .amx-repisa-carril { display: flex; width: max-content; min-width: 100%; }
+.amx-v2 .amx-mostrador-celda { flex: 0 0 104px; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-mostrador { --alto-foto: 190px; overflow-x: auto; }
+  .amx-v2 .amx-mostrador-celda { flex-basis: 128px; }
+}
+.amx-v2 .amx-mostrador .amx-articulo-foto img {
+  position: relative;
+  z-index: 1;
+  height: calc(var(--alto-foto) * var(--escala, 1));
+  max-height: none;
+}
+.amx-v2 .amx-mostrador .amx-puesto-luz { bottom: 0; }
+.amx-v2 .amx-mostrador .amx-articulo:hover .amx-puesto-luz,
+.amx-v2 .amx-mostrador .amx-articulo:focus-visible .amx-puesto-luz { opacity: .85; }
+.amx-v2 .amx-etiqueta-calibre {
+  display: block;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.amx-v2 .amx-etiqueta-armas { display: block; margin-top: 2px; color: var(--etiqueta-tinta-2); }
