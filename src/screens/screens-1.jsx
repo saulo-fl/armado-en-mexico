@@ -636,7 +636,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
           <FilterSelect label="Calibre" value={calibre} onChange={setCalibre}
             options={[{ value: 'all', label: 'Todos' }].concat(window.CATEGORIES.calibre.map((c) => ({ value: c.id, label: c.label })))} />
           <FilterSelect label="Armería" value={sucursal} onChange={setSucursal}
-            options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Ciudad de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
+            options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Estado de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
           <FilterSelect label="Disponibilidad" value={disponible} onChange={setDisponible}
             options={[{ value: 'all', label: 'Todas' }, { value: 'si', label: 'Con existencias' }, { value: 'no', label: 'Agotadas' }]} />
         </div>
@@ -903,7 +903,7 @@ function ArsenalHubScreen({ onNav }) {
             por debajo del minimo de 640x800 de PLACEHOLDERS.md. Se nota en pantalla
             retina. Entran igual mientras el objetivo sea quitar placeholders; hay que
             resustituirlas cuando haya foto vertical de cada sede. */}
-        <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
+        <ArsenalPhotoCard label="DCAM" sub="Estado de México" img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
         <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
       </div>
 

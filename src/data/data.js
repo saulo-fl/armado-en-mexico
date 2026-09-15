@@ -90,7 +90,7 @@ const _legalFor = (avail) => {
   if (avail === 'dcam') return {
     availLabel: "Uso civil — DCAM",
     legalTit:   "Civil — Adquisición directa en DCAM",
-    legalDesc:  "Adquisición legal para civiles mexicanos mayores de edad con permiso extraordinario de adquisición vigente (DEFENSA-02-040), que expide la SEDENA y pide, entre otros, identificación oficial, comprobante de domicilio, constancia de antecedentes penales y certificado de salud mental. Compra exclusiva en DCAM Campo Militar No. 1-D (Naucalpan, Edo. Méx.) u OTCA (Monterrey, N.L.).",
+    legalDesc:  "Adquisición legal para civiles mayores de edad con permiso extraordinario de adquisición vigente (DEFENSA-02-040), que expide la SEDENA y pide, entre otros, identificación oficial, comprobante de domicilio, constancia de antecedentes penales y certificado de salud mental. Compra exclusiva en DCAM Campo Militar No. 1-D (Naucalpan, Edo. Méx.) u OTCA (Monterrey, N.L., solo para el público que radica en Coahuila, Nuevo León, San Luis Potosí y Tamaulipas).",
     disponibilidad: ["DCAM Campo Militar No. 1-D — Naucalpan, Edo. Méx.","OTCA — Monterrey, N.L."],
   };
   if (avail === 'seguridad') return {
@@ -582,7 +582,7 @@ window.DB = [
 
   mk(99, "Huglu Atrox cal 12 (Bomba)", "Huglu", "escopeta", "Turquía", "12 GA", "5+1", "3100g", "1140mm", "Acción de bomba (pump)", 2018, "dcam", "11300.77", "ESCOPETA BOMBA 12 HUGLU ATROX",
     "imagenes/056_Huglu_Atrox_cal_12_Bomba.webp",
-    "Escopeta de corredera (pump-action). Confiable, económica. Excelente para defensa de hogar y campo."),
+    "Escopeta de corredera (pump-action). Confiable, económica. Excelente para el campo. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
 
   mk(100, "Beretta DT11 Sport", "Beretta", "escopeta", "Italia", "12 GA", "2", "3900g", "1280mm", "Superpuesta competición", 2012, "dcam", "170201.91", "ESCOPETA CAL 12 BERETTA DT11 SPORT",
     "imagenes/057_Beretta_DT11_Sport.webp",
@@ -606,7 +606,7 @@ window.DB = [
 
   mk(105, "Derya CR-101 (Bomba)", "Derya", "escopeta", "Turquía", "12 GA", "5+1", "3000g", "1150mm", "Acción de bomba (pump)", 2019, "dcam", "13120.17", "ESCOPETA BOMBA 12 DERYA CR-101 C28\"",
     "imagenes/062_Derya_CR-101_Bomba.webp",
-    "Escopeta de corredera turca. Económica, confiable. Ideal para defensa de hogar."),
+    "Escopeta de corredera turca. Económica, confiable. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
 
   mk(106, "Retay Masai Mara cal 12", "Retay", "escopeta", "Turquía", "12 GA", "4+1", "3200g", "1240mm", "Semi-auto inercial premium", 2017, "dcam", "22667.85", "ESCOPETA CAL 12 RETAY MASAI MARA",
     "imagenes/063_Retay_Masai_Mara_cal_12.webp",
@@ -622,7 +622,7 @@ window.DB = [
 
   mk(109, "Retay GPSX (Bomba)", "Retay", "escopeta", "Turquía", "12 GA", "5+1", "3000g", "1150mm", "Acción de bomba (pump)", 2019, "dcam", "8228.74", "ESCOPETA BOMBA CAL 12 RETAY GPSX",
     "imagenes/066_Retay_GPSX_Bomba.webp",
-    "Pump-action Retay accesible. Robusta para defensa y campo."),
+    "Pump-action Retay accesible. Robusta para el campo. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
 
   mk(110, "Fair Lincoln G.", "Fair", "escopeta", "Italia", "12 GA", "2", "3300g", "1180mm", "Yuxtapuesta dos cañones", 2015, "dcam", "36197.87", "ESCOPETA 2 CAÑS FAIR LINCOLN G CM CAL 12",
     "imagenes/067_Fair_Lincoln_G..webp",
@@ -659,7 +659,7 @@ window.DB = [
     "Escopeta semiautomática versátil con el sistema de inercia Benelli, muy popular para cacería y tiro deportivo por su fiabilidad y ligereza. Versión calibre 12."),
   mk(120, "Benelli Nova", "Benelli", "escopeta", "Italia", "12 GA", "4+1", "3.6 kg", "1257 mm", "Acción de bomba", 1999, "dcam", "21070.03", "ESCOPETA A BOMBA CAL. 12 G.A. MARCA BENELLI MODELO NOVA, CAÑÓN DE 28\", CULATA ESTÁNDAR",
     "imagenes/Benelli_Nova.webp",
-    "Escopeta de acción de bomba (corredera) con armazón técnico-polimérico de una pieza, robusta y económica. Popular para cacería y defensa de domicilio."),
+    "Escopeta de acción de bomba (corredera) con armazón técnico-polimérico de una pieza, robusta y económica. Popular para cacería. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
   mk(121, "Benelli Super Nova", "Benelli", "escopeta", "Italia", "12 GA", "4+1", "3.8 kg", "1257 mm", "Acción de bomba", 2006, "dcam", "22782.15", "ESCOPETA A BOMBA CAL. 12 G.A. MARCA BENELLI MODELO SUPER NOVA, CAÑÓN DE 28\", SISTEMA COMFORTECH",
     "",
     "Versión reforzada de la Nova con recámara de 3½\" y sistema ComforTech para reducir el retroceso de cargas magnum. Escopeta de corredera para uso intensivo."),
@@ -668,7 +668,7 @@ window.DB = [
     "Escopeta sobrepuesta turca de Derya Arms, alternativa accesible en el segmento over/under para tiro deportivo de plato y cacería."),
   mk(123, "Derya AG12", "Derya Arms", "escopeta", "Turquía", "12 GA", "4+1", "3.4 kg", "1200 mm", "Acción de bomba", 2017, "dcam", "12561.87", "ESCOPETA ACCIÓN DE BOMBA MARCA DERYA, MODELO AG12, CALIBRE 12, CAÑÓN DE 28\"",
     "",
-    "Escopeta de corredera turca de Derya Arms en calibre 12, opción económica y fiable para cacería y defensa de domicilio."),
+    "Escopeta de corredera turca de Derya Arms en calibre 12, opción económica y fiable para cacería. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
   mk(124, "Glock 19X", "Glock", "pistola", "Austria", "9mm Parabellum", "17+1", "0.80 kg", "187 mm", "Semi-auto, striker (Safe Action)", 2018, "ejercito", "13166.18", "PISTOLA SEMIAUTOMÁTICA CALIBRE 9X19 MM MARCA GLOCK MODELO 19X, COLOR COYOTE",
     "",
     "Pistola de Glock que combina la corredera compacta de la G19 con la empuñadura de tamaño completo de la G17, en acabado coyote. Derivada del concurso militar MHS de EE.UU."),
@@ -790,7 +790,7 @@ window.DB = [
     "Clásica sobrepuesta Browning de báscula baja, muy apreciada para sporting y caza. Adquisición civil."),
   mk(161, "Winchester SXP", "Winchester", "escopeta", "Turquía", "12 GA", "4+1", "3.2 kg", "1232mm", "Acción de bomba (corredera)", 2009, "dcam", "14048.45", "ESC. A BOMBA WINCHESTER SXP",
     "",
-    "Escopeta de corredera Winchester SXP calibre 12 en versión sintética, fabricada en Turquía para Winchester. Su acción asistida por inercia permite un ciclo muy rápido. Económica y versátil para caza y defensa. Adquisición civil."),
+    "Escopeta de corredera Winchester SXP calibre 12 en versión sintética, fabricada en Turquía para Winchester. Su acción asistida por inercia permite un ciclo muy rápido. Económica y versátil para caza. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio. Adquisición civil."),
   mk(162, "Benelli M4", "Benelli", "escopeta", "Italia", "12 GA", "5+1", "3.8 kg", "886mm", "Semi-auto, pistón de gas (ARGO), táctica", 1998, "dcam", "35197.91", "ESC. SEMI. BENELLI M4 CAÑÓN 14\"",
     "imagenes/Benelli_M4.webp",
     "Escopeta semiautomática táctica de doble pistón ARGO, adoptada por cuerpos militares. Robusta y fiable."),
@@ -808,10 +808,10 @@ window.DB = [
     "Escopeta semiautomática turca económica para caza y tiro recreativo. Adquisición civil."),
   mk(167, "Optimum Arms OPT VM G2", "Optimum Arms", "escopeta", "Turquía", "12 GA", "5+1", "3.3 kg", "varía", "Semi-auto", 2022, "dcam", "22050.28", "ESC. SEMI. OPTIMUM ARMS OPT VM G2",
     "",
-    "Escopeta semiautomática de defensa/utilidad con cañón corto, en calibres 12 y 20. Adquisición civil."),
+    "Escopeta semiautomática con cañón corto, en calibres 12 y 20. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio. Adquisición civil."),
   mk(168, "Optimum Arms OPT-100", "Optimum Arms", "escopeta", "Turquía", "12 GA", "4+1", "3.2 kg", "1170mm", "Acción de bomba (corredera)", 2021, "dcam", "12954.54", "ESC. A BOMBA OPTIMUM ARMS OPT 100-1 CAL 12",
     "",
-    "Escopeta de corredera económica y robusta para caza y defensa de domicilio. Adquisición civil."),
+    "Escopeta de corredera económica y robusta para caza. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio. Adquisición civil."),
 
   // ═══════════════════════════════════════════════════════════
   //  ALTAS 18-jun-2026 — modelos nuevos DCAM / OTCA
