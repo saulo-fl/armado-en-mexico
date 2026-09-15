@@ -2206,6 +2206,12 @@
   letter-spacing: .08em;
 }
 .amx-v2 .amx-historial-cuerpo { display: grid; gap: var(--e4); }
+.amx-v2 .amx-historial-cuerpo > * { min-width: 0; }   /* si no, la tabla ensancha la rejilla y no hay nada que deslizar */
+.amx-v2 .amx-registro-desliza {
+  overflow-x: auto;
+  scrollbar-width: thin;   /* la barra, con la tinta del papel y no la gris del sistema */
+  scrollbar-color: var(--milimetrico-tinta-2) transparent;
+}
 @container (min-width: 780px) {
   .amx-v2 .amx-historial-cuerpo--doble {
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);

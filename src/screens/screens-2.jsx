@@ -287,7 +287,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             {priceHistory.length > 0 &&
               <div className="amx-carpeta-historial">
                 <window.HistorialPrecios historial={priceHistory} manualById={manualById}
-                  plegarRegistro={!ancho} />
+                  movil={!ancho} />
               </div>}
           </div>
         </article>

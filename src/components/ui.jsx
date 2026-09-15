@@ -2101,11 +2101,12 @@ window.ThumbIcon = ThumbIcon;
 
 // Fecha de un inventario (AAAA-MM-DD) en es-MX: «06 jul 2026». Vivía en
 // screens-2.jsx; sube aquí porque la usan el talón, el kárdex y el historial.
-function amxFmtManualDate(f) {
+// `corta`: año a dos cifras («11 sep 26»), para tablas en ancho de teléfono.
+function amxFmtManualDate(f, corta) {
   if (!f) return '';
   const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
   if (isNaN(d)) return String(f);
-  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: corta ? '2-digit' : 'numeric' });
 }
 window.amxFmtManualDate = amxFmtManualDate;
 
@@ -2317,13 +2318,13 @@ const TINTAS_MILIMETRICO = {
   eje: '#8FB2C4', fondo: '#F6F9F5', texto: '#171B19', texto2: '#4E5B63',
 };
 
-function HistorialPrecios({ historial, manualById, plegarRegistro }) {
+function HistorialPrecios({ historial, manualById, movil }) {
   const [verTodo, setVerTodo] = React.useState(false);
   const hist = historial || [];
   const fechas = [];
   hist.forEach((h) => { if (fechas.indexOf(h.date) < 0) fechas.push(h.date); });
   const hayGrafica = fechas.length >= 2;
-  const plegado = hayGrafica && plegarRegistro;
+  const plegado = hayGrafica && movil;
 
   // Variación de cada registro contra el anterior (el orden ya es cronológico).
   const filas = hist.map((h, i) => {
@@ -2348,33 +2349,38 @@ function HistorialPrecios({ historial, manualById, plegarRegistro }) {
 
   // La fuente de cada fila abre el PDF de su inventario (antes eran hojas
   // grapadas aparte, una por inventario, que no escalaban).
+  // En teléfono no cabe entera ni con la fecha corta (a 360 px sobran ~50 px):
+  // se desliza de lado dentro del papel, y con teclado se enfoca para deslizarla.
   const registro = (
     <div>
-      <table className="amx-registro">
-        <thead>
-          <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
-        </thead>
-        <tbody>
-          {visibles.map((f, i) => {
-            const fecha = amxFmtManualDate(f.h.date) || '—';
-            return (
-              <tr key={i} className={f.actual ? 'es-actual' : undefined}>
-                <td>{fecha}</td>
-                <td>
-                  {f.url
-                    ? <a href={f.url} target="_blank" rel="noopener"
-                        aria-label={'Inventario ' + f.sigla + ' del ' + fecha + ' (PDF, abre en otra pestaña)'}>{f.sigla} ↗</a>
-                    : f.sigla}
-                </td>
-                <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
-                <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
-                  {f.delta == null ? '—' : fmtDelta(f.delta)}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <div className="amx-registro-desliza" tabIndex={movil ? 0 : undefined}
+        role={movil ? 'region' : undefined} aria-label={movil ? 'Registro de precios' : undefined}>
+        <table className="amx-registro">
+          <thead>
+            <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
+          </thead>
+          <tbody>
+            {visibles.map((f, i) => {
+              const fecha = amxFmtManualDate(f.h.date) || '—';
+              return (
+                <tr key={i} className={f.actual ? 'es-actual' : undefined}>
+                  <td>{movil ? amxFmtManualDate(f.h.date, true) || '—' : fecha}</td>
+                  <td>
+                    {f.url
+                      ? <a href={f.url} target="_blank" rel="noopener"
+                          aria-label={'Inventario ' + f.sigla + ' del ' + fecha + ' (PDF, abre en otra pestaña)'}>{f.sigla} ↗</a>
+                      : f.sigla}
+                  </td>
+                  <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
+                  <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
+                    {f.delta == null ? '—' : fmtDelta(f.delta)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
       {recortar &&
         <button type="button" className="amx-registro-mas" aria-expanded={verTodo} onClick={() => setVerTodo(!verTodo)}>
           Ver todo el registro ({filas.length})
