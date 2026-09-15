@@ -309,6 +309,7 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
   categorías: cargadores · opticas · refacciones · empunaduras
 /municiones                                listado (las municiones NO llevan sub-rama)
 /municiones/12-ga-rio-perdigon-7-5-28-gr   ficha de la munición
+/comparar/ruger-lcp-vs-ruger-lcp-max   comparador (slug del nombre, sin la rama de tipo; el orden es el de las armas)
 ```
 
 - **Los slugs se derivan de los datos, no se guardan.** Armas: `tipo/nombre`.
@@ -318,6 +319,10 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
   ascendente**, para que la URL de una ficha no cambie al añadir otras.
 - Si renombras un arma o cambias su tipo, **su URL cambia**. Es el precio de tener
   direcciones legibles; tenlo en cuenta si ya está indexada o compartida.
+- **Comparador:** los slugs son los del NOMBRE, sin la rama de tipo, y el orden de la
+  URL es el orden de las armas (la tira compara la segunda contra la primera).
+  Renombrar un arma rompe los enlaces de comparación ya compartidos. Estas URL **no
+  se prerenderizan** (noindex hasta la parte 2 del comparador).
 - El índice de slugs se memoiza y se reconstruye solo si cambia el tamaño de algún
   catálogo (p. ej. tras hidratar desde el backend).
 - `404.html` es lo que hace funcionar las rutas profundas: Cloudflare no encuentra el

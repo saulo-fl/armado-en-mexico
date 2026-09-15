@@ -146,6 +146,18 @@ test('tira: marcas distintas, singular, signo menos y kg', () => {
   assert.equal(t.avisoFechas, false);
 });
 
+test('tira: precios iguales de inventarios con fechas distintas, sin aviso ni cifra de precio', () => {
+  // Mismo precio que la LCP (OTCA 18-jun-2026), pero del inventario DCAM del 11-sep-2026.
+  HIST[30] = [{ manualId: 'man_dcam_2026_09_11', price: '$9,110.35 MXN', date: '2026-09-11' }];
+  const B = Object.assign({}, LCP, { id: 30, nombre: 'Ruger LCP II', capacidad: '7+1' });
+  const c = cot(LCP, B);
+  const precio = c.iguales.find((f) => f.clave === 'precio');
+  assert.notEqual(precio.a.fecha, precio.b.fecha);
+  const t = window.amxTiraCotejo(LCP, B, c);
+  assert.deepEqual(t.partes, ['+1 cartucho']);
+  assert.equal(t.avisoFechas, false);
+});
+
 test('tira: sin diferencias numéricas', () => {
   const gemela = Object.assign({}, LCP, { id: 7, nombre: 'Ruger LCP II' });
   assert.deepEqual(window.amxTiraCotejo(LCP, gemela, cot(LCP, gemela)).partes, []);
