@@ -392,7 +392,7 @@ const ACC_COMPAT = {
   128: { armas: [45] },                // Beretta PX4 9 mm, 20 cart.
   129: { armas: [2] },                 // Taurus PT 58 HC Plus
   130: { armas: [17] },                // Browning Buck Mark
-  131: { armas: [57, 227, 228, 229] }, // CZ 457/455/512 .22 LR: CZ-USA SKU 12004 sirve a toda la serie 457 en .22 LR (#161)
+  131: { armas: [57, 227, 228, 229, 235, 236, 237, 238, 239, 240, 241, 242, 243] }, // CZ 457/455/512 .22 LR: CZ-USA SKU 12004 sirve a toda la serie 457 en .22 LR (#161); la MDT Chassis usa los cargadores de fábrica según MDT (#180)
   132: { armas: [] },                  // Tanfoglio FT-9-FS: no hay ficha
   133: { armas: [] },                  // Galil ACE 21/22: la ACE 21N del catálogo usa STANAG
   134: { armas: [8] },                 // CZ P-07 .380
