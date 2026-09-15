@@ -4,6 +4,10 @@ const { useState: useStateApp, useEffect: useEffectApp, useRef: useRefApp } = Re
 
 // ─── RUTEO POR URL ───────────────────────────────────────────────────────
 // Direcciones legibles y jerárquicas, pensadas para SEO/GEO:
+//   /arsenal                           inicio de la sección (el hub)
+//   /arsenal/catalogo                  el catálogo completo
+//   /arsenal/catalogo/dcam             catálogo filtrado por armería DCAM
+//   /arsenal/catalogo/otca             catálogo filtrado por armería OTCA
 //   /pistolas                          listado del tipo
 //   /pistolas/glock-19                 ficha del arma
 //   /cargadores                        listado de la categoría
@@ -98,6 +102,17 @@ function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter,
   if (screen === 'catalog' && catalogFilter && catalogFilter.mode === 'tipo' && TIPO_TO_PATH[catalogFilter.value]) {
     return TIPO_TO_PATH[catalogFilter.value];
   }
+  // El arsenal se separa en base y catálogo: /arsenal es el hub (sin filtro)
+  // y el listado vive en /arsenal/catalogo. Cada armería tiene su filtro
+  // rápido: /arsenal/catalogo/dcam y /arsenal/catalogo/otca. Los demás
+  // filtros rápidos del hub (p. ej. «disponibles») caen al catálogo general.
+  if (screen === 'catalog') {
+    if (!catalogFilter) return 'arsenal';
+    if (catalogFilter.mode === 'sucursal' && (catalogFilter.value === 'DCAM' || catalogFilter.value === 'OTCA')) {
+      return 'arsenal/catalogo/' + catalogFilter.value.toLowerCase();
+    }
+    return 'arsenal/catalogo';
+  }
   if (screen === 'accesorios' && catalogFilter && catalogFilter.categoria && catalogFilter.categoria !== 'all') {
     return amxSlug(catalogFilter.categoria);
   }
@@ -126,6 +141,17 @@ function amxParsePath(pathname) {
   // Comparador con armas: /comparar/<slug>[-vs-<slug>]
   if (seg[0] === SCREEN_TO_PATH.compare && seg[1]) {
     return Object.assign({}, VACIO, { screen: 'compare', compareIds: window.amxParComparar(seg[1], idx.nPorSlug) });
+  }
+  // El catálogo del arsenal y sus filtros rápidos por armería. /arsenal solo
+  // (un segmento) es el hub y lo resuelve PATH_TO_SCREEN; aquí son las ramas:
+  //   /arsenal/catalogo            listado completo
+  //   /arsenal/catalogo/dcam|otca  listado con la armería ya filtrada
+  // Una sigla desconocida vuelve al listado completo, no a la portada.
+  if (seg[0] === 'arsenal' && seg[1] === 'catalogo') {
+    const SIGLA = { dcam: 'DCAM', otca: 'OTCA' }[seg[2]];
+    return Object.assign({}, VACIO, { screen: 'catalog', catalogFilter: SIGLA
+      ? { mode: 'sucursal', value: SIGLA }
+      : { mode: 'all' } });
   }
   // Pantallas con nombre propio (/arsenal, /calibres…) y el listado de municiones
   if (seg.length === 1 && PATH_TO_SCREEN[seg[0]]) {
