@@ -215,7 +215,9 @@ function App() {
   // normaliza sin dejar la mala en el historial.
   const pantallaAnterior = useRefApp(_init.screen);
   useEffectApp(() => {
-    const reemplazar = screen === 'compare' && pantallaAnterior.current === 'compare';
+    // Lo mismo al cambiar de separador en la vitrina de accesorios (15-sep-2026):
+    // /accesorios ↔ /cargadores no apila una entrada del historial por pestaña.
+    const reemplazar = (screen === 'compare' || screen === 'accesorios') && pantallaAnterior.current === screen;
     pantallaAnterior.current = screen;
     if (skipPush.current) { skipPush.current = false; return; }
     // Basta comparar la dirección que toca con la que hay. Al depender también
@@ -441,7 +443,8 @@ function App() {
   } else if (screen === 'traumaticas') {
     content = <window.TraumaticasScreen onNav={navigate} />;
   } else if (screen === 'accesorios') {
-    content = <window.AccesoriosScreen initialFilter={catalogFilter} onOpenAccesorio={openAccesorio} onNav={navigate} />;
+    content = <window.AccesoriosScreen initialFilter={catalogFilter} onOpenAccesorio={openAccesorio}
+      onCategoria={(id) => setCatalogFilter(id === 'all' ? null : { categoria: id })} />;
   } else if (screen === 'accesorio') {
     content = <window.AccesorioFicha accesorioId={accesorioId} onOpenAccesorio={openAccesorio} onOpenArma={openArma} onNav={navigate} />;
   } else if (screen === 'municiones') {

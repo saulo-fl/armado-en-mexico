@@ -2676,6 +2676,97 @@ function BuscarArma({ abierta, titulo, excluir, onElegir, onCerrar }) {
 window.BuscarArma = BuscarArma;
 
 // ══════════════════════════════════════════════════════════════
+// LA VITRINA DE ACCESORIOS — el catálogo como puesto de tianguis (15-sep-2026)
+// Decidido con Saulo pregunta por pregunta (docs/DESIGN.md §5.7). El puesto
+// REUTILIZA las clases `.amx-puesto*` del puesto de munición del Home (letrero,
+// vara, luz, caja) sin tocarlo; la mesa, en cambio, va en la FILA para cruzarla
+// entera aunque falten puestos. La piel, en estilo.css, bloque del mismo nombre.
+// ══════════════════════════════════════════════════════════════
+
+// El toldo: lona rayada con el rótulo. Es el <h1> de la pantalla.
+function ToldoLona({ children }) {
+  return (
+    <div className="amx-toldo">
+      <h1 className="amx-toldo-rotulo">{children}</h1>
+    </div>
+  );
+}
+window.ToldoLona = ToldoLona;
+
+// Los separadores de fichero como filtro: las pestañas de la ficha de arma
+// (`.amx-separador`) sobre una tira de oficio. Patrón de pestañas, como
+// FichaTabs: ← → cambian y enfocan, y solo la activa entra en el tabulador.
+function SeparadoresFiltro({ etiqueta, opciones, activo, onCambiar, controla }) {
+  const refs = React.useRef({});
+  const act = Math.max(0, opciones.findIndex((o) => o.id === activo));
+  function onKey(e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const sig = opciones[(act + d + opciones.length) % opciones.length];
+    onCambiar(sig.id);
+    if (refs.current[sig.id]) refs.current[sig.id].focus();
+  }
+  return (
+    <div className="amx-separadores-filtro">
+      <div className="amx-separadores-pestanas" role="tablist" aria-label={etiqueta} onKeyDown={onKey}>
+        {opciones.map((o, i) => (
+          <button key={o.id} type="button" role="tab"
+            id={'separador-' + o.id}
+            ref={(el) => { refs.current[o.id] = el; }}
+            aria-selected={i === act}
+            aria-controls={controla}
+            tabIndex={i === act ? 0 : -1}
+            className="amx-separador"
+            onClick={() => onCambiar(o.id)}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+window.SeparadoresFiltro = SeparadoresFiltro;
+
+// La mesa: reparte los puestos en filas de `porFila`, cada una con su tabla a
+// todo el ancho aunque se quede corta (Saulo, 15-sep-2026).
+function MesaPuestos({ items, porFila, renderPuesto }) {
+  const filas = [];
+  for (let i = 0; i < items.length; i += porFila) filas.push(items.slice(i, i + porFila));
+  return (
+    <div className="amx-mesa">
+      {filas.map((fila, f) => (
+        <div key={f} className="amx-mesa-fila" style={{ '--por-fila': porFila }}>
+          {fila.map(renderPuesto)}
+        </div>
+      ))}
+    </div>
+  );
+}
+window.MesaPuestos = MesaPuestos;
+
+// Un puesto: letrero con SOLO el nombre corto, vara, luz y la pieza. Sin foto,
+// la silueta de su categoría, sola: sin sello «Foto pendiente» (Saulo). El
+// nombre completo va en el aria-label; foto y silueta no se anuncian.
+function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
+  const [fallo, setFallo] = React.useState(false);
+  const conFoto = foto && !fallo;
+  return (
+    <button type="button" className="amx-puesto amx-puesto--pieza" aria-label={ariaLabel} onClick={onClick}>
+      <span className="amx-puesto-letrero">
+        <span className="amx-puesto-rotulo">{rotulo}</span>
+      </span>
+      <span className="amx-puesto-palo" aria-hidden="true" />
+      <span className="amx-puesto-luz" aria-hidden="true" />
+      {conFoto
+        ? <img className="amx-puesto-caja" src={foto} alt="" loading="lazy" decoding="async" onError={() => setFallo(true)} />
+        : <span className="amx-puesto-silueta amx-silueta-acc" aria-hidden="true" style={{ '--silueta-forma': `url(${silueta})` }} />}
+    </button>
+  );
+}
+window.PuestoPieza = PuestoPieza;
+
 // EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.8)
 // Las cuentas salen de src/lib/arsenal-hub.js; aquí solo se dibujan, con los
 // papeles de la ficha: la tarjeta de almacén, la hoja de oficio con los sellos

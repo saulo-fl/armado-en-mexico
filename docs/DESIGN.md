@@ -1171,6 +1171,27 @@ Decidido con Saulo sección por sección (rama `Opus-5/RED-Comparar`). La regla 
 - **El enlace** `/comparar/<a>-vs-<b>` guarda la comparación; su orden es el de las armas. Fuera de Google
   hasta la parte 2 (indexación), que tiene su propio spec.
 
+### 5.7 La vitrina de accesorios — un puesto de tianguis (15-sep-2026)
+
+Decidido con Saulo pregunta por pregunta (rama `Opus-5/RED-accesorios`). La regla de datos vive en
+`window.accesoriosVitrina` (`src/data/data-accesorios.js`), con su prueba (`node --test scripts/vitrina.test.mjs`);
+las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estilo.css`, con el mismo nombre.
+
+- **El catálogo es una vitrina como el puesto de Municiones del Home**, no una rejilla de tarjetas. Arriba, un
+  **toldo de lona rayada en verde de marca y crema** con «Accesorios» rotulado. Sin aviso legal y sin buscador.
+- **Separadores de fichero** (las pestañas de la ficha de arma) filtran por categoría: «Todas» y solo las categorías
+  con piezas, sin número y sin quedarse fijos. La pestaña vive en la URL (`/accesorios`, `/cargadores`…) y cambiarla
+  reemplaza la dirección en vez de apilarla.
+- **Secciones por categoría** con cinta Dymo sin número; dentro, **orden alfabético por nombre corto**.
+- **Un puesto por pieza:** letrero de tianguis con **solo el nombre corto** (`corto`, máximo 2 renglones a 360 px; el
+  `aria-label` es el nombre corto seguido del nombre completo, para que quien dicta lo que ve pueda activarlo), la
+  vara y la **pieza sola**. Sin precio, sello ni existencias: eso vive en la ficha. Sin foto, la silueta de su
+  categoría, sola.
+- **La mesa cruza la fila entera** aunque falten puestos. 2 por fila en móvil, 4 entre 720 y 1023 px, 6 desde 1024.
+- **Tema oscuro:** lona, madera, letreros y fotos son objetos y no cambian; la silueta de respaldo sigue al tema
+  porque se recorta contra el lienzo.
+- **Las fotos** (la pieza sola recortada con alfa) son una entrega aparte, con su propio spec.
+
 ### 5.8 El hub del Arsenal (15-sep-2026)
 
 Decidido con Saulo sección por sección (rama `Opus-5/RED-Arsenal`). Las cuentas viven en `src/lib/arsenal-hub.js`,
