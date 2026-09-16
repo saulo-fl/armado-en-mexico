@@ -446,7 +446,7 @@ function App() {
     content = <window.AccesoriosScreen initialFilter={catalogFilter} onOpenAccesorio={openAccesorio}
       onCategoria={(id) => setCatalogFilter(id === 'all' ? null : { categoria: id })} />;
   } else if (screen === 'accesorio') {
-    content = <window.AccesorioFicha accesorioId={accesorioId} onOpenAccesorio={openAccesorio} onOpenArma={openArma} onNav={navigate} />;
+    content = <window.AccesorioFicha accesorioId={accesorioId} onOpenArma={openArma} onNav={navigate} compareIds={compareIds} />;
   } else if (screen === 'municiones') {
     content = <window.MunicionesScreen initialFilter={catalogFilter} onOpenMunicion={openMunicion} onNav={navigate} />;
   } else if (screen === 'municion') {

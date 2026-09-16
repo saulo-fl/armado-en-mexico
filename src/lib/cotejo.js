@@ -1,4 +1,4 @@
-// Armado en México — el cotejo de dos armas (pantalla Comparar) y el inventario de un arma
+// Armado en México — el cotejo de dos armas (pantalla Comparar) y el inventario y la compatibilidad de un arma o un accesorio
 // ─────────────────────────────────────────────────────────────────────────────
 // JS plano colgado de `window`, como store.js y los data-*.js: sin React ni DOM,
 // para que `node --test scripts/cotejo.test.mjs` lo pruebe tal cual. Se carga
@@ -64,6 +64,48 @@
       existenciasDCAM: window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null,
       autoridad: window.manualAutoridad,
     });
+  }
+
+  // ── INVENTARIO DE UN ACCESORIO ────────────────────────────────────────────
+  // La misma regla que el arma (DESIGN.md §5.5): nunca sale «último precio
+  // conocido» sin el AGOTADO de su sucursal. Los accesorios no tienen un dato
+  // aparte de existencias DCAM: sale del registro del ÚLTIMO inventario DCAM,
+  // si el accesorio aparece en él.
+  //   o.priceHistory  registros del accesorio, del más viejo al más reciente (getAccesorioPriceHistory)
+  //   o.manuales      inventarios de accesorios, en cualquier orden (ACCESORIOS_MANUALES)
+  //   o.autoridad     window.manualAutoridad
+  function amxInventarioAccesorio(acc, o) {
+    const priceHistory = (o && o.priceHistory) || [];
+    const autoridad = (o && o.autoridad) || (() => null);
+    const manuales = ((o && o.manuales) || []).slice()
+      .sort((a, b) => texto(b.fecha).localeCompare(texto(a.fecha)));
+    const siglaDe = (m) => m.autoridad || (autoridad(m) ? autoridad(m).sigla : 'DCAM');
+    const dcam = manuales.find((m) => siglaDe(m) === 'DCAM');
+    const rec = dcam ? priceHistory.find((x) => x.manualId === dcam.id) : null;
+    return amxInventarioArma(acc, {
+      priceHistory, manuales, autoridad,
+      existenciasDCAM: rec && rec.qty != null ? rec.qty : null,
+    });
+  }
+
+  // ── COMPATIBILIDAD DE UN ACCESORIO — la hoja «Compatibilidad» ─────────────
+  // `armas` es window.getArmasCompatibles(acc), ya resuelto por la regla de
+  // data-accesorios.js. Cuatro casos (spec del 15-sep-2026, §3.2):
+  //   fichas      lista explícita (`compat.armas`) con fichas → sus armas
+  //   regla       universal (sin `compat.armas`) con fichas → «cualquier arma con riel Picatinny»
+  //   plataforma  sin fichas, con la plataforma que nombra el PDF → «Mossberg 500»
+  //   nada        ni fichas ni plataforma → la ficha no pinta la pestaña
+  function amxCompatAccesorio(acc, armas) {
+    const lista = armas || [];
+    const nombres = ((acc && acc.compatibilidad) || []).map((n) => texto(n).trim()).filter(Boolean);
+    const explicita = !!(acc && acc.compat && acc.compat.armas);
+    if (lista.length && !explicita && nombres.length) {
+      const regla = nombres.join(', ');
+      return { caso: 'regla', armas: lista, texto: 'cualquier arma con ' + regla.charAt(0).toLowerCase() + regla.slice(1) };
+    }
+    if (lista.length) return { caso: 'fichas', armas: lista, texto: '' };
+    if (nombres.length) return { caso: 'plataforma', armas: [], texto: nombres.join(', ') };
+    return { caso: 'nada', armas: [], texto: '' };
   }
 
   // ── NÚMEROS COMPARABLES ───────────────────────────────────────────────────
@@ -233,6 +275,8 @@
 
   window.amxInventarioArma = amxInventarioArma;
   window.amxInventarioDe = amxInventarioDe;
+  window.amxInventarioAccesorio = amxInventarioAccesorio;
+  window.amxCompatAccesorio = amxCompatAccesorio;
   window.amxCotejoNum = amxCotejoNum;
   window.amxCotejar = amxCotejar;
   window.amxTiraCotejo = amxTiraCotejo;

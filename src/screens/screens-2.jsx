@@ -10,71 +10,6 @@ const { useState: useState2, useMemo: useMemo2 } = React;
 // docs/DESIGN.md §4.3. Aquí solo vive lo que depende del dato.
 // ════════════════════════════════════════════════════════════════
 
-// SEPARADORES de la hoja de oficio: Legalidad · Usos · Antecedentes.
-// Controlados desde fuera, porque el enlace «§ Ver situación legal» de la
-// copia tiene que poder abrir Legalidad. Conservan lo que ya tenían: rol
-// tablist, foco itinerante y flechas ←/→.
-// Viven FUERA de ProductScreen a propósito: un componente definido dentro de
-// otro remonta su subárbol en cada render (la trampa que documenta
-// fidelidad-diseno).
-function Panel({ children }) { return <React.Fragment>{children}</React.Fragment>; }
-
-function FichaTabs({ children, activo, onCambiar }) {
-  const paneles = React.Children.toArray(children).filter(Boolean);
-  const refs = React.useRef([]);
-  if (!paneles.length) return null;
-  const act = Math.min(activo, paneles.length - 1);
-
-  function onKey(e) {
-    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-    if (!d) return;
-    e.preventDefault();
-    const n = (act + d + paneles.length) % paneles.length;
-    onCambiar(n);
-    if (refs.current[n]) refs.current[n].focus();
-  }
-
-  return (
-    <div>
-      <div className="amx-separadores-pestanas" role="tablist" aria-label="Documentos del expediente" onKeyDown={onKey}>
-        {paneles.map((p, i) => (
-          <button
-            key={i}
-            type="button"
-            ref={(el) => { refs.current[i] = el; }}
-            role="tab"
-            id={'ficha-tab-' + i}
-            aria-selected={i === act}
-            aria-controls={'ficha-panel-' + i}
-            tabIndex={i === act ? 0 : -1}
-            className="amx-separador"
-            onClick={() => onCambiar(i)}>
-            {p.props.label}
-          </button>
-        ))}
-      </div>
-      {/* LAS TRES HOJAS SE PINTAN, apiladas en la misma celda, y solo se ve la
-          activa. Antes se pintaba solo la activa y el folder crecía o encogía al
-          cambiar de pestaña —«puede marear o ser incómodo», Saulo, 13-sep-2026—.
-          Así la pila mide siempre lo que la hoja más larga. Las de detrás van
-          con `visibility: hidden` (estilo.css), que las saca del lector de
-          pantalla y del orden del tabulador sin quitarles el alto. */}
-      <div className="amx-oficio-pila">
-        {paneles.map((p, i) => (
-          <div key={i} className="amx-oficio" role="tabpanel" id={'ficha-panel-' + i}
-            aria-labelledby={'ficha-tab-' + i} data-activo={i === act ? 'si' : 'no'}>
-            {/* Membrete genérico del sitio: sin escudo ni emblema oficial (§6b). */}
-            <div className="amx-oficio-membrete" aria-hidden="true">
-              <span>Armado en México</span><span>{p.props.label}</span>
-            </div>
-            {p}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   // Las opiniones llegan en la hidratacion desde /api/state, DESPUES del primer
@@ -86,55 +21,14 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
   // La pestaña abierta: Legalidad (la 0) al llegar y al pasar de un arma a otra.
   const [tab, setTab] = useState2(0);
-  // El talón fijo de abajo (móvil) solo aparece cuando el de la ficha ya salió
-  // de la pantalla por arriba, así que nunca hay dos talones a la vista.
-  const [talonFuera, setTalonFuera] = useState2(false);
-  // …y se retira cuando asoma el pie de sitio, para no taparle el último renglón.
-  const [pieVisible, setPieVisible] = useState2(false);
-  const talonRef = React.useRef(null);
-  const fichaRef = React.useRef(null);
 
   useEffect(() => {
     if (arma && window.Store) window.Store.trackVisit(arma.id);
   }, [arma?.id]);
-  useEffect(() => { setTab(0); setTalonFuera(false); setPieVisible(false); }, [armaId]);
+  useEffect(() => { setTab(0); }, [armaId]);
 
-  // IntersectionObserver con la raíz implícita: recorta por los `overflow` de
-  // los ancestros, así que funciona igual si hace scroll la página que si lo
-  // hace el contenedor interno del shell móvil. Nada de escuchar el scroll.
-  // El margen de arriba descuenta la barra superior (64px), que tapa lo que
-  // pasa por debajo de ella.
-  //
-  // NO BASTA OBSERVAR EL TALÓN. En móvil va debajo de la ficha técnica, fuera
-  // de la pantalla al cargar, y un salto de scroll lo lleva de «debajo» a
-  // «encima» sin cruzar nunca la ventana: su estado no cambia y el observer no
-  // dispara (la misma trampa que obligó a observar el pie). Por eso se observan
-  // también las celdas del folder y las secciones de la ficha, que cubren la
-  // página entera: cualquier salto cambia la visibilidad de alguna, y en cada
-  // aviso se mide dónde quedó el talón.
-  useEffect(() => {
-    const el = talonRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const revisar = () => setTalonFuera(el.getBoundingClientRect().bottom < 64);
-    const io = new IntersectionObserver(revisar, { rootMargin: '-64px 0px 0px 0px' });
-    io.observe(el);
-    const ficha = fichaRef.current;
-    if (ficha) {
-      Array.from(ficha.children).forEach((c) => io.observe(c));
-      ficha.querySelectorAll('.amx-carpeta-grid > *').forEach((c) => io.observe(c));
-    }
-    // Se observa el pie del sitio y no un centinela al final de la ficha: un
-    // salto de scroll (ir al final, un fling largo) lleva el centinela de debajo
-    // de la ventana a encima SIN cruzarla, y el observer no dispara. El pie, al
-    // final de la página, siempre queda dentro.
-    // Se busca por su clase y NO por la etiqueta: cada opinión publicada lleva su
-    // propio <footer>, que va antes en el DOM. Con `querySelector('footer')` el
-    // talón vigilaba la primera opinión (revisión del PR #152).
-    const pie = document.querySelector('.amx-pie-sitio');
-    const ioPie = pie && new IntersectionObserver(([e]) => setPieVisible(e.isIntersecting));
-    if (ioPie) ioPie.observe(pie);
-    return () => { io.disconnect(); if (ioPie) ioPie.disconnect(); };
-  }, [armaId]);
+  // El talón fijo de abajo (móvil): ver useTalonFijo en ui.jsx.
+  const talon = window.useTalonFijo(armaId);
 
   if (!arma) return <div style={{ padding: 40, color: PALETTE.text }}>Arma no encontrada</div>;
 
@@ -184,7 +78,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
   return (
     <div style={{ paddingBottom: 90 }}>
-     <div ref={fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+     <div ref={talon.fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
       {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
       <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
@@ -229,7 +123,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             </div>
 
             <div className="amx-carpeta-talon">
-              <window.TalonComprobante talonRef={talonRef}
+              <window.TalonComprobante talonRef={talon.talonRef}
                 precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
                 ultimoConocido={ultimoConocido} historial={priceHistory}
                 enComparacion={inCmp} onComparar={comparar} />
@@ -245,9 +139,9 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             </div>
 
             <div className="amx-carpeta-legal amx-separadores">
-                <FichaTabs activo={tab} onCambiar={setTab}>
+                <window.FichaTabs activo={tab} onCambiar={setTab}>
 
-                  <Panel label="Legalidad">
+                  <window.FichaPanel label="Legalidad">
                     <div className={'amx-oficio-banda amx-oficio-banda--' + sello.tono}>
                       <span>Clasificación: {sello.texto}</span>
                       <small>{arma.availLabel}</small>
@@ -264,24 +158,24 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     <button type="button" className="amx-oficio-boton" onClick={() => onNav('legal')}>
                       § Guía legal completa
                     </button>
-                  </Panel>
+                  </window.FichaPanel>
 
                   {arma.uses && arma.uses.length > 0 &&
-                    <Panel label="Usos">
+                    <window.FichaPanel label="Usos">
                       <ul className="amx-usos">
                         {arma.uses.map((u) => {
                           const meta = window.CATEGORIES.uso.find((x) => x.id === u);
                           return <li key={u}><span className="amx-sello">{meta ? meta.label : u}</span></li>;
                         })}
                       </ul>
-                    </Panel>}
+                    </window.FichaPanel>}
 
                   {arma.historia &&
-                    <Panel label="Antecedentes">
+                    <window.FichaPanel label="Antecedentes">
                       <p className="amx-oficio-maquina">{arma.historia}</p>
-                    </Panel>}
+                    </window.FichaPanel>}
 
-                </FichaTabs>
+                </window.FichaTabs>
             </div>
 
             {priceHistory.length > 0 &&
@@ -378,7 +272,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* El talón fijo (móvil): el mismo comprobante, en la zona del pulgar.
           Se oculta si el flotante de comparación está activo (mismo hueco). */}
-      {!ancho && talonFuera && !pieVisible && compareIds.length === 0 &&
+      {!ancho && talon.mostrar && compareIds.length === 0 &&
         <window.TalonComprobante fijo
           precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
           ultimoConocido={ultimoConocido} historial={priceHistory}

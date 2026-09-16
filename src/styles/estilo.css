@@ -4102,3 +4102,31 @@
 /* Con foto: `left/right` no estiran un <img> absoluto —su ancho sale del alto y de la
    proporción—, así que sin márgenes automáticos se pega a la izquierda de la vara. */
 .amx-v2 .amx-puesto--pieza .amx-puesto-caja { margin-inline: auto; max-width: 88%; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA FICHA DE ACCESORIO — el mismo expediente que el arma (15-sep-2026)
+   Casi todo viene de «LA FICHA DE ARMA»: aquí solo lo que el arma no tiene.
+   Decidido con Saulo pregunta por pregunta; DESIGN.md §5.8.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* La cabecera: el nombre corto de título, el completo a máquina y la
+   descripción. Sobre el manila, en su tinta (auditada por contraste.mjs). */
+.amx-v2 .amx-carpeta-completo {
+  margin: var(--e2) 0 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  line-height: 1.5;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-carpeta-desc {
+  max-width: 60ch;
+  margin: var(--e3) 0 0;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--manila-tinta);
+  text-wrap: pretty;
+}
+/* La lista de «Compatibilidad»: cada nombre es un botón en tinta subrayada; el
+   renglón da ≥ 24 px de alto para atinarle con el dedo. */
+.amx-v2 .amx-compat-lista .amx-enlace-tinta { padding: 2px 0; text-align: left; }
