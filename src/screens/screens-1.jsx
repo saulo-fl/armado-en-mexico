@@ -520,7 +520,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       }
       if (disponible !== 'all') {
         // Con una armería elegida, las existencias son las de ESA sucursal (Saulo,
-        // 15-sep-2026, docs/DESIGN.md §5.8). Con «Todas», las de cualquiera.
+        // 15-sep-2026, docs/DESIGN.md §5.9). Con «Todas», las de cualquiera.
         const inStock = window.amxTieneExistencia(a.id, sucursal);
         if (disponible === 'si' && !inStock) return false;
         if (disponible === 'no' && inStock) return false;

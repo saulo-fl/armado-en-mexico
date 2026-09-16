@@ -1097,20 +1097,24 @@ window.armaSinFoto = armaSinFoto;
 // fotografía —mismo marco, mismo faldón— con la silueta del tipo sobre el
 // papel. Un expediente incompleto es una cosa que existe; un hueco gris no.
 // ──────────────────────────────────────────────────────────────
-// `pie` decide qué se rotula en el faldón, y son tres cosas distintas porque el
-// tablero de correcciones (8-sep-2026) pide tres:
-//   'rotulo' — nombre y procedencia. La ficha, donde la copia va sola.
-//   'nombre' — solo el nombre. El destacado del Home: «Polaroid solo con foto y
-//              nombre de la pistola. Bandera, país, especificaciones, etc. van
-//              escritos del lado izquierdo en el folder».
-//   'sello'  — solo el sello de legalidad. La tarjeta, donde el nombre y los
-//              datos ya están mecanografiados en el folder de al lado.
-//   'ninguno'— sin faldón escrito. El comparador, donde el nombre ya va en la
-//              cabecera de la ficha de fichero.
+// `pie` decide qué se rotula en el faldón, y son cuatro cosas distintas porque
+// el tablero de correcciones (8-sep-2026) pide tres, y la ficha de accesorio
+// (15-sep-2026) suma la cuarta:
+//   'rotulo'      — nombre y procedencia. La ficha, donde la copia va sola.
+//   'nombre'      — solo el nombre. El destacado del Home: «Polaroid solo con
+//                    foto y nombre de la pistola. Bandera, país,
+//                    especificaciones, etc. van escritos del lado izquierdo en
+//                    el folder».
+//   'sello'       — solo el sello de legalidad. La tarjeta, donde el nombre y
+//                    los datos ya están mecanografiados en el folder de al lado.
+//   'procedencia' — solo bandera y marca · país, sin nombre. La ficha de
+//                    accesorio, que lleva el nombre en la cabecera del folder.
+//   'ninguno'     — sin faldón escrito. El comparador, donde el nombre ya va
+//                    en la cabecera de la ficha de fichero.
 // `selloSinFoto` (la ficha de arma, 13-sep-2026): sin fotografía, en vez de la
 // leyenda va el sello «FOTOGRAFÍA PENDIENTE» sobre la silueta. Por defecto no
 // cambia nada, porque las tarjetas y el destacado del Home usan la leyenda.
-function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
+function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false, silueta = null }) {
   // El fallback cubre los dos casos: el arma que nunca tuvo foto y el .webp
   // que existe en `data.js` pero no llega (404, red caída, formato no
   // soportado). En ambos se ve lo mismo, que es lo que hace que el `alt` y el
@@ -1119,6 +1123,15 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
   const sinFoto = falloCarga || armaSinFoto(arma);
   // `tipo` es un enum cerrado de data.js; el respaldo cubre un dato corrupto.
   const tipoSil = SILUETA_TIPOS.indexOf(arma.tipo) >= 0 ? arma.tipo : 'pistola';
+  // `silueta` (la ficha de accesorio, 15-sep-2026): la forma de su categoría y
+  // su nombre. Va SOLA, sin leyenda ni sello: «Silueta sola, como la vitrina»
+  // (Saulo). En cuanto el accesorio tenga `img`, la foto la sustituye sin más.
+  const forma = silueta ? silueta.forma : `imagenes/silueta-${tipoSil}.webp`;
+  const nombreSil = silueta ? silueta.nombre : tipoSil;
+  // 'procedencia': solo bandera y marca · país, sin nombre (la ficha de
+  // accesorio lleva el nombre en la cabecera del folder). Ni «—» ni vacíos.
+  const datos = (pie === 'procedencia' ? [arma.marca, arma.pais] : [arma.marca, arma.pais, arma.anio])
+    .filter((v) => v != null && v !== '' && v !== '—');
   return (
     <figure className="amx-polaroid">
       <div className="amx-polaroid-pozo">
@@ -1136,11 +1149,12 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
                 `dangerouslySetInnerHTML`. Saulo las descartó por feas; de paso
                 desaparece la única inyección de HTML de la app. */}
             <div className="amx-polaroid-silueta" role="img"
-              aria-label={'Silueta de ' + tipoSil + '. Sin fotografía en el expediente.'}
-              style={{ '--silueta-forma': `url(imagenes/silueta-${tipoSil}.webp)` }} />
-            {selloSinFoto
-              ? <span className="amx-sello amx-sello--pendiente" aria-hidden="true">Fotografía pendiente</span>
-              : <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>}
+              aria-label={'Silueta de ' + nombreSil + '. Sin fotografía en el expediente.'}
+              style={{ '--silueta-forma': `url(${forma})` }} />
+            {silueta ? null
+              : selloSinFoto
+                ? <span className="amx-sello amx-sello--pendiente" aria-hidden="true">Fotografía pendiente</span>
+                : <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>}
           </div>
         ) : (
           <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high"
@@ -1156,13 +1170,12 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
           mexicana, hacía parecer mexicana un arma checa o italiana. */}
       {pie !== 'ninguno' && (
         <figcaption className="amx-polaroid-pie">
-          {pie === 'sello'
-            ? <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} />
-            : <span className="amx-polaroid-nombre">{arma.nombre}</span>}
-          {pie === 'rotulo' &&
+          {pie === 'sello' && <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} />}
+          {(pie === 'rotulo' || pie === 'nombre') && <span className="amx-polaroid-nombre">{arma.nombre}</span>}
+          {(pie === 'rotulo' || pie === 'procedencia') && datos.length > 0 &&
             <span className="amx-polaroid-datos">
-              <CountryFlag pais={arma.pais} height={9} />
-              <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
+              {arma.pais && <CountryFlag pais={arma.pais} height={9} />}
+              <span>{datos.join(' · ')}</span>
             </span>}
         </figcaption>
       )}
@@ -1357,9 +1370,11 @@ window.ArmaDestacada = ArmaDestacada;
 // sacado del id sería el folio `AR-####` que Saulo retiró el 7-sep-2026 —un
 // código que no corresponde a ningún registro real—.
 // `mecanismo` entra aquí y ya no bajo el título: dicho una sola vez.
+// `filas` (la ficha de accesorio, 15-sep-2026): los renglones de las specs
+// del inventario tal cual. Sin ellas, los del arma, como siempre.
 // ──────────────────────────────────────────────────────────────
-function FichaTecnica({ arma }) {
-  const filas = [
+function FichaTecnica({ arma, filas }) {
+  const lista = (filas || [
     ['Calibre',   arma.calibre],
     ['Capacidad', arma.capacidad],
     ['Mecanismo', arma.mecanismo],
@@ -1367,17 +1382,18 @@ function FichaTecnica({ arma }) {
     ['Peso',      arma.peso],
     ['Origen',    arma.pais],
     ['Año',       arma.anio],
-  ].filter(([, v]) => v != null && v !== '');
+  ]).filter(([, v]) => v != null && v !== '');
+  const marca = arma.marca && arma.marca !== '—' ? arma.marca : '';
   return (
     <section className="amx-papel amx-fichero" style={{ '--giro-papel': '.35deg' }}
       aria-label={'Ficha técnica de ' + arma.nombre}>
       <div className="amx-fichero-carton">
         <div className="amx-fichero-cab">
           <h2 className="amx-papel-tit">Ficha técnica</h2>
-          <span>{arma.marca}</span>
+          {marca && <span>{marca}</span>}
         </div>
         <dl className="amx-fichero-lista">
-          {filas.map(([k, v]) => (
+          {lista.map(([k, v]) => (
             <div key={k} className="amx-fichero-fila">
               <dt>{k}</dt>
               <span className="amx-fichero-guia" aria-hidden="true" />
@@ -1548,7 +1564,7 @@ function CountryFlag({ pais, height = 14, style = {} }) {
   const aliases = {
     'Mexico': 'México',
     'Brazil': 'Brasil',
-    'EEUU': 'EE.UU.', 'Estados Unidos': 'EE.UU.', 'USA': 'EE.UU.',
+    'EEUU': 'EE.UU.', 'Estados Unidos': 'EE.UU.', 'USA': 'EE.UU.', 'EUA': 'EE.UU.',
     'Italy': 'Italia',
     'Spain': 'España',
     'República Checa': 'Rep. Checa', 'Czech Republic': 'Rep. Checa',
@@ -2204,6 +2220,131 @@ function NotaErrata({ historial }) {
 window.NotaErrata = NotaErrata;
 
 // ──────────────────────────────────────────────────────────────
+// SEPARADORES de la hoja de oficio: Legalidad · Usos · Antecedentes.
+// Suben a ui.jsx (15-sep-2026) porque la ficha de accesorio también los usa.
+// Antes vivían en screens-2.jsx, «controlados desde fuera» porque el enlace
+// «§ Ver situación legal» de la copia tenía que poder abrir Legalidad; ese
+// enlace ya no existe, pero conservan el control externo. Conservan lo que ya
+// tenían: rol tablist, foco itinerante y flechas ←/→.
+// Se definen fuera de cualquier pantalla a propósito: un componente definido
+// dentro de otro remonta su subárbol en cada render (la trampa que documenta
+// fidelidad-diseno).
+// ──────────────────────────────────────────────────────────────
+function FichaPanel({ children }) { return <React.Fragment>{children}</React.Fragment>; }
+
+function FichaTabs({ children, activo, onCambiar }) {
+  const paneles = React.Children.toArray(children).filter(Boolean);
+  const refs = React.useRef([]);
+  if (!paneles.length) return null;
+  const act = Math.min(activo, paneles.length - 1);
+
+  function onKey(e) {
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const n = (act + d + paneles.length) % paneles.length;
+    onCambiar(n);
+    if (refs.current[n]) refs.current[n].focus();
+  }
+
+  return (
+    <div>
+      <div className="amx-separadores-pestanas" role="tablist" aria-label="Documentos del expediente" onKeyDown={onKey}>
+        {paneles.map((p, i) => (
+          <button
+            key={i}
+            type="button"
+            ref={(el) => { refs.current[i] = el; }}
+            role="tab"
+            id={'ficha-tab-' + i}
+            aria-selected={i === act}
+            aria-controls={'ficha-panel-' + i}
+            tabIndex={i === act ? 0 : -1}
+            className="amx-separador"
+            onClick={() => onCambiar(i)}>
+            {p.props.label}
+          </button>
+        ))}
+      </div>
+      {/* LAS TRES HOJAS SE PINTAN, apiladas en la misma celda, y solo se ve la
+          activa. Antes se pintaba solo la activa y el folder crecía o encogía al
+          cambiar de pestaña —«puede marear o ser incómodo», Saulo, 13-sep-2026—.
+          Así la pila mide siempre lo que la hoja más larga. Las de detrás van
+          con `visibility: hidden` (estilo.css), que las saca del lector de
+          pantalla y del orden del tabulador sin quitarles el alto. */}
+      <div className="amx-oficio-pila">
+        {paneles.map((p, i) => (
+          <div key={i} className="amx-oficio" role="tabpanel" id={'ficha-panel-' + i}
+            aria-labelledby={'ficha-tab-' + i} data-activo={i === act ? 'si' : 'no'}>
+            {/* Membrete genérico del sitio: sin escudo ni emblema oficial (§6b). */}
+            <div className="amx-oficio-membrete" aria-hidden="true">
+              <span>Armado en México</span><span>{p.props.label}</span>
+            </div>
+            {p}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+window.FichaTabs = FichaTabs;
+window.FichaPanel = FichaPanel;
+
+// ──────────────────────────────────────────────────────────────
+// TALÓN FIJO — cuándo se ve el talón de abajo en móvil
+// Sale de ProductScreen (15-sep-2026) porque la ficha de accesorio hace lo
+// mismo. `talonRef` va en el talón del folder y `fichaRef` en el contenedor de
+// la ficha; `mostrar` es true cuando ese talón ya salió por arriba y el pie del
+// sitio no asoma. `clave` (el id de la ficha) lo reinicia al cambiar de ficha.
+//
+// IntersectionObserver con la raíz implícita: recorta por los `overflow` de
+// los ancestros, así que funciona igual si hace scroll la página que si lo
+// hace el contenedor interno del shell móvil. Nada de escuchar el scroll.
+// El margen de arriba descuenta la barra superior (64px), que tapa lo que
+// pasa por debajo de ella.
+//
+// NO BASTA OBSERVAR EL TALÓN. En móvil va debajo de la ficha técnica, fuera
+// de la pantalla al cargar, y un salto de scroll lo lleva de «debajo» a
+// «encima» sin cruzar nunca la ventana: su estado no cambia y el observer no
+// dispara. Por eso se observan también las celdas del folder y las secciones
+// de la ficha, que cubren la página entera: cualquier salto cambia la
+// visibilidad de alguna, y en cada aviso se mide dónde quedó el talón.
+//
+// Se observa el pie del sitio por su CLASE y no un centinela ni la etiqueta:
+// un salto de scroll cruza un centinela sin que el observer dispare, y cada
+// opinión publicada lleva su propio <footer> antes que el del sitio (revisión
+// del PR #152).
+// ──────────────────────────────────────────────────────────────
+function useTalonFijo(clave) {
+  const [talonFuera, setTalonFuera] = React.useState(false);
+  const [pieVisible, setPieVisible] = React.useState(false);
+  const talonRef = React.useRef(null);
+  const fichaRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setTalonFuera(false);
+    setPieVisible(false);
+    const el = talonRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const revisar = () => setTalonFuera(el.getBoundingClientRect().bottom < 64);
+    const io = new IntersectionObserver(revisar, { rootMargin: '-64px 0px 0px 0px' });
+    io.observe(el);
+    const ficha = fichaRef.current;
+    if (ficha) {
+      Array.from(ficha.children).forEach((c) => io.observe(c));
+      ficha.querySelectorAll('.amx-carpeta-grid > *').forEach((c) => io.observe(c));
+    }
+    const pie = document.querySelector('.amx-pie-sitio');
+    const ioPie = pie && new IntersectionObserver(([e]) => setPieVisible(e.isIntersecting));
+    if (ioPie) ioPie.observe(pie);
+    return () => { io.disconnect(); if (ioPie) ioPie.disconnect(); };
+  }, [clave]);
+
+  return { talonRef, fichaRef, mostrar: talonFuera && !pieVisible };
+}
+window.useTalonFijo = useTalonFijo;
+
+// ──────────────────────────────────────────────────────────────
 // TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
 // En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
 // casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
@@ -2217,6 +2358,8 @@ window.NotaErrata = NotaErrata;
 // conocido». El caso que lo motivó: la Galil ACE 21N, con precio OTCA del
 // 26-sep-2025 y la tarjeta de almacén en AGOTADO al inventario OTCA del
 // 18-jun-2026. Con los datos del 13-sep-2026 son 52 armas.
+// Sin `onComparar` no hay casilla: la ficha de accesorio no tiene comparador
+// (15-sep-2026).
 // ──────────────────────────────────────────────────────────────
 function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false, historial }) {
   return (
@@ -2240,10 +2383,12 @@ function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fi
             </dl>
           </React.Fragment>
         )}
-        <button type="button" className="amx-talon-casilla" aria-pressed={!!enComparacion} onClick={onComparar}>
-          <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
-          {enComparacion ? 'En comparación' : 'Comparar'}
-        </button>
+        {onComparar && (
+          <button type="button" className="amx-talon-casilla" aria-pressed={!!enComparacion} onClick={onComparar}>
+            <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
+            {enComparacion ? 'En comparación' : 'Comparar'}
+          </button>
+        )}
         {fijo && <NotaErrata historial={historial} />}
       </div>
     </div>
@@ -2768,7 +2913,7 @@ function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
 window.PuestoPieza = PuestoPieza;
 
 // ══════════════════════════════════════════════════════════════
-// EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.8)
+// EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.9)
 // Las cuentas salen de src/lib/arsenal-hub.js; aquí solo se dibujan, con los
 // papeles de la ficha: la tarjeta de almacén, la hoja de oficio con los sellos
 // y la repisa de la vitrina con su etiqueta.

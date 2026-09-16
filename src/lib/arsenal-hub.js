@@ -2,7 +2,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // JS plano colgado de `window`, como cotejo.js: sin React ni DOM, para que
 // `node --test scripts/arsenal-hub.test.mjs` lo pruebe tal cual. Se carga ANTES
-// que ui.js. Decidido con Saulo el 15-sep-2026: docs/DESIGN.md §5.8.
+// que ui.js. Decidido con Saulo el 15-sep-2026: docs/DESIGN.md §5.9.
 (function () {
   // Las dos lecturas de existencias de data-precios.js. Las pruebas inyectan otras.
   const fxApp = () => ({

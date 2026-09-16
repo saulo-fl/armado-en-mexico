@@ -1192,7 +1192,31 @@ las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estil
   porque se recorta contra el lienzo.
 - **Las fotos** (la pieza sola recortada con alfa) son una entrega aparte, con su propio spec.
 
-### 5.8 El hub del Arsenal (15-sep-2026)
+### 5.8 La ficha de accesorio — el mismo expediente (15-sep-2026)
+
+Decidido con Saulo pregunta por pregunta (rama `Opus-5/RED-ficha-accesorio`). Las reglas de datos viven en
+`src/lib/cotejo.js` (`amxInventarioAccesorio`, `amxCompatAccesorio`), con su prueba (`npm test`); la pantalla, en
+`AccesorioFicha` (`screens-accesorios.jsx`); las primitivas son las de §5.5.
+
+- **Réplica exacta de la ficha de arma:** el mismo folder, los mismos papeles y el mismo reparto por filas desde
+  1024 px. La pestaña del folder lleva la categoría en singular (Cargador, Mira, Refacción, Culata).
+- **Cabecera:** el nombre corto (`corto`, el del letrero de la vitrina) de título, el nombre completo a máquina y la
+  descripción debajo.
+- **La copia lleva la silueta sola** de su categoría y el sello legal estampado; el faldón, bandera · marca · país. En
+  cuanto un accesorio tenga `img`, la foto sustituye a la silueta sin tocar la ficha.
+- **La ficha técnica** son las specs del inventario tal cual, más el origen.
+- **El talón va sin casilla** (no hay comparador de accesorios) y es fijo en móvil, como el arma. Aplica la misma
+  regla de errata y de «último precio conocido».
+- **Hojas: Compatibilidad · Legalidad**, y abre Compatibilidad.
+  - Compatibilidad dice «Sirve a:» con los primeros 6 enlaces y «Ver las N».
+  - Si la regla es universal: «cualquier arma con riel Picatinny. En el Arsenal:».
+  - Sin fichas, la plataforma del PDF «(sin ficha en el Arsenal)».
+  - Sin nada, no hay pestaña.
+  - Los enlaces a armas van sin `↗`: en el sitio `↗` es «abre un PDF».
+- **Debajo del folder:** «Armas compatibles» (todas, en expediente y sin ⇄) y «Opiniones». Sin accesorios
+  relacionados.
+
+### 5.9 El hub del Arsenal (15-sep-2026)
 
 Decidido con Saulo sección por sección (rama `Opus-5/RED-Arsenal`). Las cuentas viven en `src/lib/arsenal-hub.js`,
 con su prueba (`node --test scripts/arsenal-hub.test.mjs`); las piezas, en `ui.jsx`, bloque «EL HUB DEL ARSENAL»; la

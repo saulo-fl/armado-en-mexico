@@ -186,3 +186,71 @@ test('enlace: ida y vuelta, cortes ambiguos y slugs inválidos', () => {
   assert.equal(window.amxRutaComparar([6], slugPorId), 'comparar/ruger-lcp-max');
   assert.equal(window.amxRutaComparar([], slugPorId), 'comparar');
 });
+
+// ── ACCESORIOS (ficha de accesorio, 15-sep-2026) ─────────────────────────────
+// Datos FIJOS copiados de data-accesorios.js del 15-sep-2026. Los inventarios van
+// a propósito del más viejo al más reciente: la función tiene que ordenarlos.
+const MANUALES_ACC = [
+  { id: 'man_acc_2025_09_26', fecha: '2025-09-26', autoridad: 'OTCA' },
+  { id: 'man_acc_2025_10_03', fecha: '2025-10-03', autoridad: 'DCAM' },
+  { id: 'man_acc_2026_06_16', fecha: '2026-06-16', autoridad: 'DCAM' },
+  { id: 'man_acc_2026_06_18', fecha: '2026-06-18', autoridad: 'OTCA' },
+  { id: 'man_acc_2026_07_06', fecha: '2026-07-06', autoridad: 'DCAM' },
+  { id: 'man_acc_2026_09_11', fecha: '2026-09-11', autoridad: 'DCAM' },
+];
+const h = (manualId, price, date, qty) => ({ manualId, price, date, qty });
+const HIST_ACC = {
+  109: [h('man_acc_2025_10_03', '$723.95 MXN', '2025-10-03', 8), h('man_acc_2026_07_06', '$661.68 MXN', '2026-07-06', 1)],
+  112: [h('man_acc_2025_09_26', '$701.44 MXN', '2025-09-26', 5), h('man_acc_2025_10_03', '$693.12 MXN', '2025-10-03', 42),
+        h('man_acc_2026_09_11', '$615.24 MXN', '2026-09-11', 19)],
+  134: [h('man_acc_2025_09_26', '$666.10 MXN', '2025-09-26', 35)],
+  120: [h('man_acc_2026_06_16', '$467.70 MXN', '2026-06-16', 18), h('man_acc_2026_07_06', '$475.17 MXN', '2026-07-06', 14),
+        h('man_acc_2026_09_11', '$461.48 MXN', '2026-09-11', 2)],
+};
+const invAcc = (id) => window.amxInventarioAccesorio({ id, priceExact: '' },
+  { priceHistory: HIST_ACC[id], manuales: MANUALES_ACC, autoridad: AUTORIDAD });
+
+test('accesorio: Springfield Echelon es último precio conocido y DCAM agotada', () => {
+  const i = invAcc(109);
+  assert.equal(i.precio, '$661.68 MXN');
+  assert.equal(i.sigla, 'DCAM');
+  assert.equal(i.ultimoConocido, true);
+  assert.deepEqual(resumen(i.sucursales), [['DCAM', 'AGOTADO']]);
+});
+
+test('accesorio: Browning 1911-380 con 19 en DCAM y agotado en OTCA', () => {
+  const i = invAcc(112);
+  assert.equal(i.ultimoConocido, false);
+  assert.deepEqual(resumen(i.sucursales), [['DCAM', 19], ['OTCA', 'AGOTADO']]);
+});
+
+test('accesorio: CZ P-07 solo en un OTCA viejo', () => {
+  const i = invAcc(134);
+  assert.equal(i.sigla, 'OTCA');
+  assert.equal(i.ultimoConocido, true);
+  assert.deepEqual(resumen(i.sucursales), [['OTCA', 'AGOTADO']]);
+});
+
+test('accesorio: Glock 17 con 2 en el último DCAM', () => {
+  const i = invAcc(120);
+  assert.equal(i.precio, '$461.48 MXN');
+  assert.equal(i.manual.id, 'man_acc_2026_09_11');
+  assert.equal(i.ultimoConocido, false);
+  assert.deepEqual(resumen(i.sucursales), [['DCAM', 2]]);
+});
+
+test('compatibilidad: los cuatro casos de la hoja', () => {
+  const G17 = { id: 132, nombre: 'Glock 17' };
+  const G19 = { id: 40, nombre: 'Glock 19' };
+  const C = window.amxCompatAccesorio;
+  assert.deepEqual(C({ compat: { armas: [132, 40] }, compatibilidad: ['Glock 17', 'Glock 19'] }, [G17, G19]),
+    { caso: 'fichas', armas: [G17, G19], texto: '' });
+  assert.deepEqual(C({ compat: { tipos: ['rifle'], riel: true }, compatibilidad: ['Riel Picatinny'] }, [G17]),
+    { caso: 'regla', armas: [G17], texto: 'cualquier arma con riel Picatinny' });
+  assert.deepEqual(C({ compat: { armas: [] }, compatibilidad: ['Mossberg 500'] }, []),
+    { caso: 'plataforma', armas: [], texto: 'Mossberg 500' });
+  assert.deepEqual(C({ compat: { armas: [] }, compatibilidad: [] }, []),
+    { caso: 'nada', armas: [], texto: '' });
+  assert.deepEqual(C({ compat: {}, compatibilidad: [' '] }, []),
+    { caso: 'nada', armas: [], texto: '' });
+});
