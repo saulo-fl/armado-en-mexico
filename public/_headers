@@ -44,6 +44,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /cotejo.js
   Cache-Control: public, max-age=0, must-revalidate
+/arsenal-hub.js
+  Cache-Control: public, max-age=0, must-revalidate
 /ui.js
   Cache-Control: public, max-age=0, must-revalidate
 /estilo.css

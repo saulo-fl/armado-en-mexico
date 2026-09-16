@@ -497,7 +497,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
-  const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : 'all');
+  const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : (initialFilter?.sucursal || 'all'));
   const [calibre, setCalibre] = useState(initialFilter?.mode === 'calibre' ? initialFilter.value : 'all');
   const [uso, setUso] = useState(initialFilter?.mode === 'uso' ? initialFilter.value : 'all');
   const [showAdv, setShowAdv] = useState(false);
@@ -519,8 +519,9 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         if (sucursal === 'OTCA' && !s.otca) return false;
       }
       if (disponible !== 'all') {
-        const inStock = (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
-          (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id));
+        // Con una armería elegida, las existencias son las de ESA sucursal (Saulo,
+        // 15-sep-2026, docs/DESIGN.md §5.9). Con «Todas», las de cualquiera.
+        const inStock = window.amxTieneExistencia(a.id, sucursal);
         if (disponible === 'si' && !inStock) return false;
         if (disponible === 'no' && inStock) return false;
       }
@@ -795,9 +796,17 @@ function HubPolaroid({ img, label, sub, onClick, style: extraStyle, pozoStyle })
 // Giro fijo de cada polaroid de armería, distinto para que no se vean gemelas.
 const ARMERIA_GIROS = ['-2.5deg', '1.8deg'];
 
-function calibreImgPath(calibreId) {
-  return (window.CALIBRES || []).find(x => x.id === calibreId)?.cartucho || 'imagenes/cartuchos/silueta-municion.webp';
-}
+// Fotos de los usos, en polaroid apaisada. De banco libre (licencia Pexels: uso
+// comercial, sin atribución obligatoria), elegidas por Saulo el 15-sep-2026 en hoja
+// de contactos. La fuente se anota aquí porque no está en ninguna otra parte:
+//   domicilio — Terrance Barksdale · pexels.com/photo/gun-with-ammunition-15264966/
+//   club      — Artem Zhukov · pexels.com/photo/a-person-aiming-with-a-gun-17314913/
+//   caza      — Arian Fernandez · pexels.com/photo/hunter-standing-in-open-field-with-rifle-29374213/
+const USO_FOTOS = {
+  domicilio: 'imagenes/usos/domicilio.webp',
+  club: 'imagenes/usos/club.webp',
+  caza: 'imagenes/usos/caza.webp',
+};
 
 function ArsenalHubScreen({ onNav = () => {} }) {
   const vp = window.useViewport();
@@ -805,111 +814,92 @@ function ArsenalHubScreen({ onNav = () => {} }) {
   const PAD = vp.isDesktop ? 28 : 16;
   const max = { maxWidth: 1100, margin: '0 auto', width: '100%' };
 
-  // Contadores por categoría
+  // Las cuentas (src/lib/arsenal-hub.js y los datos). Militar / Táctico no sale en el hub.
   const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
-  const usoCount = (id) => {
-    if (id === 'militar') return 0; // no se muestra en el Hub del Arsenal
-    return DB.filter((a) => a.uses.includes(id)).length;
-  };
-  const availCount = (id) => DB.filter((a) => a.avail === id).length;
-  const dispCount = DB.filter((a) =>
-    (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
-    (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id))).length;
-
-  // Sección header — estilo documento: palabra + hairline
-  const SectionHdr = ({ children }) => (
-    <div className="amx-arsenal-sect-hdr">
-      <span>{children}</span>
-    </div>
-  );
-
-  // Tarjeta de texto plano (disponibilidad, legal, uso, calibre)
-  const DocCard = ({ label, sub, count, accent, onClick }) => (
-    <button className="amx-arsenal-doc-card" onClick={onClick}
-      style={accent ? { '--accent': accent } : {}}>
-      <div className="amx-arsenal-doc-label">{label}</div>
-      {sub && <div className="amx-arsenal-doc-sub">{sub}</div>}
-      <div className="amx-arsenal-doc-count">{count ?? '—'}</div>
-    </button>
-  );
+  const usoCount = (id) => (id === 'militar' ? 0 : DB.filter((a) => a.uses.includes(id)).length);
+  const sucursales = window.amxArsenalSucursales(DB, window.AMX_MANUALES_SEED || []);
+  const legal = window.CATEGORIES.disponibilidad
+    .map((d) => ({ id: d.id, label: d.label, desc: d.desc, armas: DB.filter((a) => a.avail === d.id).length }))
+    .filter((d) => d.armas > 0);
+  const calibres = window.amxArsenalCalibres(DB, window.CATEGORIES.calibre, window.CALIBRES || []);
 
   return (
     <div style={{ ...max, padding: `8px ${PAD}px 90px` }}>
-      {/* Encabezado — título + prosa */}
       <h1 className="amx-arsenal-titulo">
         <span>Arsenal</span>
       </h1>
-      {/* ── ARMERÍA: dos polaroids con sello y jittering ─────────────── */}
-      <SectionHdr style={{ textAlign: 'center', marginTop: '16px' }}>Armería</SectionHdr>
-      <div className="amx-arsenal-armeria">
-        <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
-          img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
-          style={{ '--giro': ARMERIA_GIROS[0], width: '100%' }} />
-        <HubPolaroid label="OTCA" sub="Nuevo León"
-          img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })}
-          style={{ '--giro': ARMERIA_GIROS[1], width: '100%' }} />
-      </div>
 
-      {/* ── DISPONIBILIDAD: DocCard reutilizable (buen contraste, accesible) ─ */}
-      <SectionHdr>Disponibilidad</SectionHdr>
-      <div className="amx-arsenal-dispo-card">
-        <DocCard label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" count={dispCount} accent="var(--ok)" onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
-      </div>
+      {/* ── ARMERÍA: dos polaroids con jittering ─────────────────────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Armería</window.CintaDymo>
+        <div className="amx-arsenal-armeria">
+          <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
+            img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
+            style={{ '--giro': ARMERIA_GIROS[0], width: '100%' }} />
+          <HubPolaroid label="OTCA" sub="Nuevo León"
+            img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })}
+            style={{ '--giro': ARMERIA_GIROS[1], width: '100%' }} />
+        </div>
+      </section>
 
-      {/* ── CLASIFICACIÓN LEGAL: pestaletas tipo archivador ─────────── */}
-      <SectionHdr>Clasificación legal</SectionHdr>
-      <div className="amx-arsenal-legal-grid">
-        {window.CATEGORIES.disponibilidad.map((d) => availCount(d.id)
-          ? <button key={d.id} className={`amx-arsenal-legal-tab amx-arsenal-legal-tab--${d.id}`}
-              onClick={() => onNav('category', { mode: 'avail', value: d.id })}>
-              <span className="amx-arsenal-legal-pegs">{d.label}</span>
-              <span className="amx-arsenal-legal-desc">{d.desc}</span>
-              <span className="amx-arsenal-legal-count">{availCount(d.id)}</span>
-            </button>
-          : null)}
-      </div>
+      {/* ── DISPONIBILIDAD: la tarjeta de almacén, un renglón por sucursal ─ */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Disponibilidad</window.CintaDymo>
+        <window.AlmacenSucursales filas={sucursales} movil={vp.isMobile}
+          onAbrir={(sigla) => onNav('category', { mode: 'disponible', value: 'si', sucursal: sigla })} />
+      </section>
+
+      {/* ── CLASIFICACIÓN LEGAL: los sellos sobre la hoja de oficio ────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Clasificación legal</window.CintaDymo>
+        <window.HojaClasificacion filas={legal}
+          onAbrir={(id) => onNav('category', { mode: 'avail', value: id })} />
+      </section>
 
       {/* ── TIPO DE ARMA: lotería (reusa HOME) + accesorios ─────────── */}
-      <SectionHdr>Tipo de arma</SectionHdr>
-      <div className="amx-arsenal-loteria-mesa">
-        {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
-          ? <window.CartaLoteria key={c.id} nombre={c.label} cuenta={tipoCount(c.id)} unidad="armas"
-              forma={`imagenes/silueta-${c.id}.webp`}
-              onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
-          : null)}
-        {/* Accesorios en la misma mesa */}
-        {window.HomeAccesoriosSection &&
-          <window.HomeAccesoriosSection onNav={onNav} />
-        }
-      </div>
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Tipo de arma</window.CintaDymo>
+        <div className="amx-arsenal-loteria-mesa">
+          {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
+            ? <window.CartaLoteria key={c.id} nombre={c.label} cuenta={tipoCount(c.id)} unidad="armas"
+                forma={`imagenes/silueta-${c.id}.webp`}
+                onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+            : null)}
+          {/* Accesorios en la misma mesa */}
+          {window.HomeAccesoriosSection &&
+            <window.HomeAccesoriosSection onNav={onNav} />
+          }
+        </div>
+      </section>
 
-      {/* ── USO: tarjetas informativas (sin foto) ───────────────────── */}
-      <SectionHdr>Uso</SectionHdr>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 'var(--e3)' }}>
-        {window.CATEGORIES.uso.map((u) => usoCount(u.id) ? (
-          <button key={u.id} className="amx-arsenal-uso-card"
-            onClick={() => onNav('category', { mode: 'uso', value: u.id })}>
-            <span className="amx-arsenal-uso-label">{u.label}</span>
-            <span className="amx-arsenal-uso-count">{usoCount(u.id)}</span>
-          </button>
-        ) : null)}
-      </div>
+      {/* ── USO: polaroids apaisadas, solo con el nombre ───────────────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Uso</window.CintaDymo>
+        <ul className="amx-hub-usos">
+          {window.CATEGORIES.uso.filter((u) => usoCount(u.id)).map((u, i) => (
+            <li key={u.id}>
+              <button type="button" className="amx-polaroid amx-polaroid--apaisada amx-hub-uso"
+                style={{ '--giro': (window.GIROS_COPIA || [])[i % 5] }}
+                onClick={() => onNav('category', { mode: 'uso', value: u.id })}>
+                <span className="amx-polaroid-pozo">
+                  {USO_FOTOS[u.id] && <img src={USO_FOTOS[u.id]} alt="" loading="lazy" />}
+                  <span className="amx-polaroid-velo" />
+                </span>
+                <span className="amx-polaroid-pie">
+                  <span className="amx-polaroid-nombre">{u.label}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      {/* ── CALIBRE: mesa de exhibición con siluetas de cartucho ─ */}
-      <SectionHdr>Calibre</SectionHdr>
-      <div className="amx-arsenal-calibre-shelf">
-        {window.CATEGORIES.calibre.map((c) => {
-          const n = DB.filter((a) => a.calibre === c.id).length;
-          return n ? (
-            <button key={c.id} className="amx-arsenal-calibre-item"
-              onClick={() => onNav('category', { mode: 'calibre', value: c.id })}>
-              <img className="amx-arsenal-calibre-foto" src={calibreImgPath(c.id)} alt={c.label} loading="lazy" />
-              <span className="amx-arsenal-calibre-ficha">{c.label}</span>
-              <span className="amx-arsenal-calibre-num">{n}</span>
-            </button>
-          ) : null;
-        })}
-      </div>
+      {/* ── CALIBRE: el mostrador que se desliza, cartuchos a escala ─────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Calibre</window.CintaDymo>
+        <window.MostradorCalibres calibres={calibres}
+          onAbrir={(id) => onNav('category', { mode: 'calibre', value: id })} />
+      </section>
 
       {/* ── VER TODO ───────────────────────────────────────────────── */}
       <button className="amx-arsenal-ver-todo" onClick={() => onNav('category', { mode: 'all' })}>

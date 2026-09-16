@@ -238,6 +238,54 @@ es todo lo que publica pmcammo.com). Se quedan porque **son la línea comercial
 correcta**, y en la ficha la foto la limita el alto del panel, no el ancho: el
 reescalado real es de ~1.6×, no de 2.6×. No se escalan hacia arriba nunca (regla 3).
 
+## Accesorios — `accesorios.py`
+
+La pieza sola, recortada con alfa sobre **lienzo 1:1** (mismo encuadre que las armas), que
+la vitrina de `/accesorios` y la ficha muestran en vez de la silueta de su categoría.
+
+```bash
+uv run .claude/skills/fotos-producto/scripts/accesorios.py preparar [--solo 101,120_1]
+uv run .claude/skills/fotos-producto/scripts/accesorios.py aplicar --aprobar 104,121_2
+uv run .claude/skills/fotos-producto/scripts/accesorios.py verificar
+```
+
+- **Carpeta propia: `Catalogo de Armas/accesorios-fuente/<id>.<ext>`.** Los ids de accesorio
+  (101-134, 201, 202…) **chocan con los de arma**: en `fotos-fuente/` la foto del cargador 120
+  se la llevaría el arma 120.
+- **Buscar la foto lo hace el agente** (como en las cajas): web del fabricante primero, del
+  modelo, calibre y capacidad del registro, ≥900 px, sin logo de tienda. Si el registro es
+  ambiguo, no se elige: se bajan candidatas `<id>_1`, `<id>_2` y decide Saulo en la hoja.
+  La procedencia va en `accesorios-fuente/procedencia-*.json` y sale en la hoja.
+- `preparar` deja `fotos-trabajo/accesorios/{2-master,3-final}` y `fotos-trabajo/hoja-accesorios.html`.
+- `aplicar` copia la aprobada como `imagenes/accesorios/<id>.webp` y reescribe el bloque
+  `ACC_FOTO` de `data-accesorios.js` con lo que HAY en esa carpeta (idempotente, no se edita a
+  mano). El `?v=` es el hash del archivo. Tras aplicar: subir el `?v=` de `data-accesorios.js`
+  en `src/pages/index.html`. No hace falta resembrar D1: los accesorios viven en el `.js`.
+- **Semáforo:** el de `fotos.py` con dos reglas apagadas, que son de arma: «sin huecos
+  internos» (un cargador no tiene guardamonte: saldría rojo siempre) y «cañón a la izquierda».
+
+Lo que el QC no ve y salió en la primera tanda (15-sep-2026):
+
+- **El alfa de fábrica puede traer TEXTO.** La culata TSK de Beretta (301_2) venía recortada
+  con «SPORTING / RIGHT HAND / TG SMALL» dentro del alfa: `_alfa_de_fabrica()` la da por buena.
+- **Marca de agua de la tienda del propio fabricante** (`prodejna.czub.cz`, CZ) cruzando la
+  pieza: sobrevive al recorte. Se marcó a resustituir; lo decide Saulo.
+- **Casi todo sale ámbar por halo** (+18…+80): cargadores negros sobre blanco. Es el borde
+  antialias intrínseco que ya documenta el semáforo, no un defecto.
+- **«Foto de escena» con fondo gris degradado** (IWI Masada, σ 38.8) y **«cortada en el
+  origen»** cuando la pieza toca el borde de la foto (Browning 1911-22) salieron rojos con el
+  recorte bien. Mírala antes de descartar.
+- **Registros que no cuadran con la pieza real** (los destapa la búsqueda): capacidades que
+  solo existen con base extendida (Glock 19 «17», Glock 22 «16»), MEPRO GLS descrita como réflex
+  (es mira de lanzagranadas 40 mm), «Culata» TSK cuyo código es la empuñadura.
+
+Dónde se buscó: fabricante sirvió en Browning, IWI (`iwi.us`), Springfield (`store.`), SIG,
+Tippmann, Magpul, Meprolight; `dam.beretta.com` sirve las imágenes aunque `beretta.com` bloquee.
+Tienda cuando el fabricante no publica: eurooptic, galatiinternational (C-MAG), cheaperthandirt.
+Bloquean curl: mossberg.com (Cloudflare), beretta.com (Incapsula), gunmagwarehouse. **Pendiente
+de Saulo:** en la tanda del 15-sep algunos agentes pasaron esos anti-bot con `curl_cffi`
+imitando a Chrome (Meprolight, Chiappa, B&H, Beretta); falta decidir si esas fuentes valen.
+
 ## Bitácora
 
 - **2026-08-27** — piloto de pistolas. Cuatro pasadas de calibración:
