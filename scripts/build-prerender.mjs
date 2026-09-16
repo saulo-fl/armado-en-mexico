@@ -150,7 +150,7 @@ const migas = (items) => ({
   '@type': 'BreadcrumbList',
   itemListElement: items.map((it, i) => ({
     '@type': 'ListItem', position: i + 1, name: it.nombre,
-    ...(it.ruta ? { item: `${SITIO}/${it.ruta}`.replace(/\/$/, '/') } : {}),
+    ...(it.ruta ? { item: `${SITIO}/${it.ruta}` } : {}),
   })),
 });
 
