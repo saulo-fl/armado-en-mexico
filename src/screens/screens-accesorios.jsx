@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Pantallas de ACCESORIOS DCAM
 // Cartas de lotería del Home, la vitrina del catálogo (15-sep-2026) y la ficha
 // de cada accesorio, que desde el 15-sep-2026 es el mismo expediente que la
