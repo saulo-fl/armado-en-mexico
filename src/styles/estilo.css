@@ -3475,7 +3475,6 @@
   gap: var(--e3);
 }
 
-
 /* ── Título del Hub ─────────────────────────────────────────────── */
 .amx-v2 .amx-arsenal-titulo {
   /* Más espacio abajo que arriba: jerarquía de heading (§5.3, craft-floor) */
@@ -3859,6 +3858,7 @@
    proporción—, así que sin márgenes automáticos se pega a la izquierda de la vara. */
 .amx-v2 .amx-puesto--pieza .amx-puesto-caja { margin-inline: auto; max-width: 88%; }
 
+/* ══════════════════════════════════════════════════════════════════════════
    EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.8)
    Decidido con Saulo sección por sección. Todo son objetos que ya existen: la
    tarjeta de almacén del kárdex, la hoja de oficio con los sellos, la polaroid

@@ -2767,6 +2767,7 @@ function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
 }
 window.PuestoPieza = PuestoPieza;
 
+// ══════════════════════════════════════════════════════════════
 // EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.8)
 // Las cuentas salen de src/lib/arsenal-hub.js; aquí solo se dibujan, con los
 // papeles de la ficha: la tarjeta de almacén, la hoja de oficio con los sellos

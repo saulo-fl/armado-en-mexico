@@ -27,6 +27,9 @@
   // fecha de su último inventario de armas. Sin total: un arma puede estar en las
   // dos (Saulo, 15-sep-2026).
   //   manuales: inventarios de armas, en cualquier orden ({ fecha, autoridad })
+  // El hub le pasa AMX_MANUALES_SEED y no Store.getManuales() a propósito: las
+  // existencias de OTCA también salen de la semilla (getArmaExistenciasOTCA), así
+  // que la cifra y la fecha vienen de la misma fuente. La ficha sí usa el Store.
   function amxArsenalSucursales(db, manuales, fx) {
     const f = fx || fxApp();
     const ultimaFecha = (sigla) => (manuales || [])
@@ -62,7 +65,11 @@
       };
     }).filter((fila) => fila.armas > 0);
     const mayor = Math.max(0, ...filas.map((fila) => fila.mm || 0));
-    return filas.map((fila) => Object.assign(fila, { escala: mayor && fila.mm ? fila.mm / mayor : 1 }));
+    // Un calibre del que no se sabe el largo (ni en la guía ni en LARGO_SIN_GUIA) se
+    // dibuja como el más CORTO de la mesa. A escala 1 mentiría: diría que es el
+    // cartucho más largo de todos.
+    const menor = Math.min(...filas.map((fila) => fila.mm).filter(Boolean), mayor);
+    return filas.map((fila) => Object.assign(fila, { escala: mayor ? (fila.mm || menor) / mayor : 1 }));
   }
 
   window.amxTieneExistencia = amxTieneExistencia;

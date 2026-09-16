@@ -72,3 +72,20 @@ test('calibres: los 4 que no están en la guía traen su largo (SAAMI)', () => {
   const db = CATS.map((c, i) => ({ id: i, calibre: c.id }));
   assert.deepEqual(window.amxArsenalCalibres(db, CATS, []).map((c) => c.mm), [59.7, 57.4, 71.8, 70]);
 });
+
+test('calibres: uno sin largo conocido se dibuja como el más corto, no como el más largo', () => {
+  const CATS = [
+    { id: '.380 ACP', label: '.380 ACP' },
+    { id: '.300 Win Mag', label: '.300 Win' },
+    { id: 'Calibre raro', label: 'Calibre raro' },   // ni en la guía ni en LARGO_SIN_GUIA
+  ];
+  const GUIA = [
+    { id: '.380 ACP', mm: 25, cartucho: 'imagenes/cartuchos/380acp.webp' },
+    { id: '.300 Win Mag', mm: 84.8, cartucho: 'imagenes/cartuchos/300wm.webp' },
+  ];
+  const db = [{ id: 1, calibre: '.380 ACP' }, { id: 2, calibre: '.300 Win Mag' }, { id: 3, calibre: 'Calibre raro' }];
+  const r = window.amxArsenalCalibres(db, CATS, GUIA);
+  assert.equal(r[2].mm, null);
+  assert.equal(r[2].escala, r[0].escala);          // el del .380 ACP, que es el más corto
+  assert.ok(r[2].escala < r[1].escala);
+});
