@@ -161,6 +161,12 @@
   --palo:           #B4906A;   /* la vara del cartel */
   --puesto-luz:     #FFE9A8;   /* la luz que se enciende detrás de la caja */
 
+  /* ── LA VITRINA DE ACCESORIOS — diegética (15-sep-2026) ──────────────────
+     La lona del toldo, en el verde de marca y crema (Saulo). Es un objeto: no
+     tiene gemelo oscuro. El rótulo va en crema sobre la banda verde. */
+  --lona-verde:     #173A32;
+  --lona-crema:     #F3EFE4;   /* 10.83:1 sobre la lona verde */
+
   /* ── LA PAPELERÍA DE LA FICHA DE ARMA — diegética (13-sep-2026) ──────────
      El expediente completo: el folder manila de la Home abierto a toda la
      ficha, y dentro los papeles de oficina de cada dato. Todos son OBJETOS,
@@ -3973,3 +3979,154 @@
   color: var(--hair-hi);
   margin-bottom: var(--e2);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LA VITRINA DE ACCESORIOS — el catálogo como puesto de tianguis (15-sep-2026)
+
+   Decidido con Saulo pregunta por pregunta (docs/DESIGN.md §5.7). Primitivas en
+   ui.jsx, bloque del mismo nombre: ToldoLona, SeparadoresFiltro, MesaPuestos y
+   PuestoPieza. El puesto REUTILIZA `.amx-puesto*` del Home sin tocarlo; lo propio
+   de aquí es el toldo, la tira de separadores, la mesa por FILA y la silueta.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-vitrina-acc {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--e4) 16px 90px;       /* 16/28: el margen de las demás pantallas;
+                                         90: aire para la barra inferior */
+  box-sizing: border-box;
+}
+@media (min-width: 900px) {
+  .amx-v2 .amx-vitrina-acc { padding-left: 28px; padding-right: 28px; }
+}
+
+/* EL TOLDO. Lona rayada verde y crema: las rayas son el dibujo de la lona, no
+   una textura. El fleco es la misma lona recortada en medios círculos, uno por
+   raya (28 px), así que cada onda sale de un solo color. */
+.amx-v2 .amx-toldo {
+  position: relative;
+  margin: 0 0 var(--e5);
+  padding: var(--e4) var(--e3);
+  background: repeating-linear-gradient(90deg, var(--lona-verde) 0 28px, var(--lona-crema) 28px 56px);
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 8px 14px -6px rgba(23, 27, 25, .22);
+  text-align: center;
+}
+.amx-v2 .amx-toldo::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 100%;
+  height: 12px;
+  background: repeating-linear-gradient(90deg, var(--lona-verde) 0 28px, var(--lona-crema) 28px 56px);
+  -webkit-mask: radial-gradient(circle at 14px 0, #000 11.5px, transparent 12px) 0 0 / 28px 12px repeat-x;
+          mask: radial-gradient(circle at 14px 0, #000 11.5px, transparent 12px) 0 0 / 28px 12px repeat-x;
+}
+.amx-v2 .amx-toldo-rotulo {
+  display: inline-block;
+  margin: 0;
+  padding: var(--e2) var(--e4);
+  background: var(--lona-verde);
+  color: var(--lona-crema);            /* 10.83:1 */
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.05;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-toldo { padding: var(--e5) var(--e4); }
+  .amx-v2 .amx-toldo-rotulo { font-size: 32px; }
+}
+
+/* LA TIRA DE SEPARADORES. Las pestañas de la ficha de arma apoyadas en el canto
+   de una tarjeta de oficio a todo el ancho: la activa (z-index 1) se une a ella
+   y las de detrás quedan metidas debajo. No es fija (Saulo). */
+.amx-v2 .amx-separadores-filtro { margin: 0 0 var(--e4); }
+.amx-v2 .amx-separadores-filtro::after {
+  content: '';
+  position: relative;
+  display: block;
+  height: 8px;
+  background: var(--oficio);
+  border-radius: 0 0 3px 3px;
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 4px 8px -2px rgba(23, 27, 25, .16);
+}
+.amx-v2 .amx-separadores-filtro .amx-separador:focus-visible {
+  outline: 2px solid var(--manila-tinta);
+  outline-offset: -3px;               /* por dentro: la tira recorta lo de fuera */
+}
+
+.amx-v2 .amx-vitrina-acc-seccion + .amx-vitrina-acc-seccion { margin-top: var(--e5); }
+
+/* LA MESA, POR FILA. En el Home la tabla va en cada puesto (`::after`) y cuatro
+   seguidos forman la mesa; aquí una fila puede quedarse corta —Empuñaduras tiene
+   una pieza— y la mesa cruza igual. La fila mide lo que un puesto (misma
+   relación de aspecto), así que el 24 % de la tabla cae donde en el Home. */
+.amx-v2 .amx-mesa-fila {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--por-fila), minmax(0, 1fr));
+}
+.amx-v2 .amx-mesa-fila::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  height: 24%;
+  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
+}
+.amx-v2 .amx-mesa-fila .amx-puesto { z-index: 1; }            /* el puesto entero, sobre la tabla */
+.amx-v2 .amx-mesa-fila .amx-puesto::after { content: none; }  /* sin la tabla propia del Home */
+
+/* SIN FOTO: la silueta de su categoría, sola, en el hueco de la caja. Toma el
+   color de `.amx-silueta-acc` (--hair-hi, que sigue al tema) porque se recorta
+   contra el lienzo, que en oscuro se oscurece. Provisional hasta las fotos. */
+.amx-v2 .amx-puesto-silueta {
+  position: absolute;
+  left: 14%; right: 14%; bottom: 12%;
+  z-index: 2;
+  width: auto;
+  height: 40%;
+  -webkit-mask-position: center bottom;
+          mask-position: center bottom;
+}
+
+/* Entre 720 y 1279 px el puesto es más estrecho que en móvil (4 y 6 por fila) y el
+   letrero del Home (16 px, márgenes del 15 %) no deja sitio a dos palabras: se usa la
+   misma geometría de letrero que el Home en móvil. Medido el 15-sep-2026. */
+@media (min-width: 720px) and (max-width: 1279px) {
+  .amx-v2 .amx-mesa-fila .amx-puesto-letrero { left: 11%; right: 11%; padding: 14px 8px 18px; }
+  .amx-v2 .amx-mesa-fila .amx-puesto-rotulo { font-size: 14px; }
+}
+
+/* Con foto: `left/right` no estiran un <img> absoluto —su ancho sale del alto y de la
+   proporción—, así que sin márgenes automáticos se pega a la izquierda de la vara. */
+.amx-v2 .amx-puesto--pieza .amx-puesto-caja { margin-inline: auto; max-width: 88%; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA FICHA DE ACCESORIO — el mismo expediente que el arma (15-sep-2026)
+   Casi todo viene de «LA FICHA DE ARMA»: aquí solo lo que el arma no tiene.
+   Decidido con Saulo pregunta por pregunta; DESIGN.md §5.8.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* La cabecera: el nombre corto de título, el completo a máquina y la
+   descripción. Sobre el manila, en su tinta (auditada por contraste.mjs). */
+.amx-v2 .amx-carpeta-completo {
+  margin: var(--e2) 0 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  line-height: 1.5;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-carpeta-desc {
+  max-width: 60ch;
+  margin: var(--e3) 0 0;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--manila-tinta);
+  text-wrap: pretty;
+}
+/* La lista de «Compatibilidad»: cada nombre es un botón en tinta subrayada; el
+   renglón da ≥ 24 px de alto para atinarle con el dedo. */
+.amx-v2 .amx-compat-lista .amx-enlace-tinta { padding: 2px 0; text-align: left; }

@@ -1171,6 +1171,51 @@ Decidido con Saulo sección por sección (rama `Opus-5/RED-Comparar`). La regla 
 - **El enlace** `/comparar/<a>-vs-<b>` guarda la comparación; su orden es el de las armas. Fuera de Google
   hasta la parte 2 (indexación), que tiene su propio spec.
 
+### 5.7 La vitrina de accesorios — un puesto de tianguis (15-sep-2026)
+
+Decidido con Saulo pregunta por pregunta (rama `Opus-5/RED-accesorios`). La regla de datos vive en
+`window.accesoriosVitrina` (`src/data/data-accesorios.js`), con su prueba (`node --test scripts/vitrina.test.mjs`);
+las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estilo.css`, con el mismo nombre.
+
+- **El catálogo es una vitrina como el puesto de Municiones del Home**, no una rejilla de tarjetas. Arriba, un
+  **toldo de lona rayada en verde de marca y crema** con «Accesorios» rotulado. Sin aviso legal y sin buscador.
+- **Separadores de fichero** (las pestañas de la ficha de arma) filtran por categoría: «Todas» y solo las categorías
+  con piezas, sin número y sin quedarse fijos. La pestaña vive en la URL (`/accesorios`, `/cargadores`…) y cambiarla
+  reemplaza la dirección en vez de apilarla.
+- **Secciones por categoría** con cinta Dymo sin número; dentro, **orden alfabético por nombre corto**.
+- **Un puesto por pieza:** letrero de tianguis con **solo el nombre corto** (`corto`, máximo 2 renglones a 360 px; el
+  `aria-label` es el nombre corto seguido del nombre completo, para que quien dicta lo que ve pueda activarlo), la
+  vara y la **pieza sola**. Sin precio, sello ni existencias: eso vive en la ficha. Sin foto, la silueta de su
+  categoría, sola.
+- **La mesa cruza la fila entera** aunque falten puestos. 2 por fila en móvil, 4 entre 720 y 1023 px, 6 desde 1024.
+- **Tema oscuro:** lona, madera, letreros y fotos son objetos y no cambian; la silueta de respaldo sigue al tema
+  porque se recorta contra el lienzo.
+- **Las fotos** (la pieza sola recortada con alfa) son una entrega aparte, con su propio spec.
+
+### 5.8 La ficha de accesorio — el mismo expediente (15-sep-2026)
+
+Decidido con Saulo pregunta por pregunta (rama `Opus-5/RED-ficha-accesorio`). Las reglas de datos viven en
+`src/lib/cotejo.js` (`amxInventarioAccesorio`, `amxCompatAccesorio`), con su prueba (`npm test`); la pantalla, en
+`AccesorioFicha` (`screens-accesorios.jsx`); las primitivas son las de §5.5.
+
+- **Réplica exacta de la ficha de arma:** el mismo folder, los mismos papeles y el mismo reparto por filas desde
+  1024 px. La pestaña del folder lleva la categoría en singular (Cargador, Mira, Refacción, Culata).
+- **Cabecera:** el nombre corto (`corto`, el del letrero de la vitrina) de título, el nombre completo a máquina y la
+  descripción debajo.
+- **La copia lleva la silueta sola** de su categoría y el sello legal estampado; el faldón, bandera · marca · país. En
+  cuanto un accesorio tenga `img`, la foto sustituye a la silueta sin tocar la ficha.
+- **La ficha técnica** son las specs del inventario tal cual, más el origen.
+- **El talón va sin casilla** (no hay comparador de accesorios) y es fijo en móvil, como el arma. Aplica la misma
+  regla de errata y de «último precio conocido».
+- **Hojas: Compatibilidad · Legalidad**, y abre Compatibilidad.
+  - Compatibilidad dice «Sirve a:» con los primeros 6 enlaces y «Ver las N».
+  - Si la regla es universal: «cualquier arma con riel Picatinny. En el Arsenal:».
+  - Sin fichas, la plataforma del PDF «(sin ficha en el Arsenal)».
+  - Sin nada, no hay pestaña.
+  - Los enlaces a armas van sin `↗`: en el sitio `↗` es «abre un PDF».
+- **Debajo del folder:** «Armas compatibles» (todas, en expediente y sin ⇄) y «Opiniones». Sin accesorios
+  relacionados.
+
 ---
 
 ## 6. Prohibiciones explícitas

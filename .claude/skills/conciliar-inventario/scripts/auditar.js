@@ -96,5 +96,16 @@ huerfanas.length
   ? bad(huerfanas.length + ' compatibilidades apuntan a un id de arma inexistente: ' + huerfanas.slice(0, 8).join(', '))
   : ok('compatibilidad explícita: ' + (win.ACCESORIOS || []).filter((a) => (a.compat || {}).armas).length + ' accesorios, todos los ids de arma existen');
 
+// 7) nombre de letrero (15-sep-2026): la vitrina de /accesorios rotula `corto`. Sin
+//    él el letrero sale en blanco, y dos iguales no se distinguen en la mesa.
+const cortos = (win.ACCESORIOS || []).map((a) => String(a.corto || '').trim());
+const sinCorto = (win.ACCESORIOS || []).filter((a, i) => !cortos[i]).map((a) => a.id);
+const repetidos = [...new Set(cortos.filter((c, i) => c && cortos.indexOf(c) !== i))];
+sinCorto.length
+  ? bad(sinCorto.length + ' accesorios sin nombre de letrero (`corto`): ' + sinCorto.slice(0, 8).join(', '))
+  : repetidos.length
+    ? bad('nombres de letrero repetidos: ' + repetidos.join(', '))
+    : ok('nombre de letrero: ' + cortos.length + ' accesorios, todos únicos');
+
 console.log('\n' + (fail === 0 ? '✔✔ AUDITORÍA SIN HALLAZGOS' : '✘ ' + fail + ' HALLAZGOS'));
 process.exit(fail ? 1 : 0);
