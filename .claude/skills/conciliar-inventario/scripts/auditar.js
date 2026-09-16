@@ -53,17 +53,17 @@ if (win.getArmaSucursales) {
   const o = DB.filter((a) => win.getArmaSucursales(a.id).otca).length;
   ok('sucursales: DCAM ' + d + ' / OTCA ' + o);
 }
-// 4) imagenes: que la ruta de cada arma exista en disco. Sin esto se puede
-//    borrar o renombrar una foto y ni el build ni la auditoria se quejan.
+// 4) imagenes: que la ruta de cada arma y de cada accesorio exista en disco. Sin
+//    esto se puede borrar o renombrar una foto y ni el build ni la auditoria se quejan.
 const rotas = [];
-DB.forEach((a) => {
+DB.concat(win.ACCESORIOS || []).forEach((a) => {
   const r = String(a.img || '');
   if (!r.startsWith('imagenes/')) return;   // data-URI del placeholder o URL remota
   if (!fs.existsSync(path.join(ROOT, 'public', r.split('?')[0]))) rotas.push('#' + a.id + ' ' + r);
 });
 rotas.length
-  ? bad(rotas.length + ' armas apuntan a una imagen inexistente: ' + rotas.slice(0, 6).join(', '))
-  : ok('imagenes: ' + DB.filter((a) => String(a.img || '').startsWith('imagenes/')).length + ' rutas, todas existen');
+  ? bad(rotas.length + ' fichas apuntan a una imagen inexistente: ' + rotas.slice(0, 6).join(', '))
+  : ok('imagenes: ' + DB.concat(win.ACCESORIOS || []).filter((a) => String(a.img || '').startsWith('imagenes/')).length + ' rutas, todas existen');
 console.log(win.ACCESORIOS ? '  ✅ accesorios ' + win.ACCESORIOS.length + ' · municiones ' + (win.MUNICIONES || []).length : '');
 
 // 5) inventario fuente: el `priceManualId` de cada ficha (lo que abre «Ver inventario

@@ -112,9 +112,8 @@ window.ACCESORIO_CATEGORIES = {
 };
 
 // ── Imagen de respaldo por categoría ─────────────────────────────────────────
-// Los 36 accesorios del catálogo están HOY sin fotografía propia, así que este
-// respaldo se ve en el 100 % de las fichas y tarjetas de accesorio: no es un
-// caso raro, es la vista por defecto.
+// El respaldo de todo accesorio sin fotografía propia (la foto va en ACC_FOTO,
+// más abajo).
 //
 // Antes construía aquí un SVG en `data:` URI con fondo #1A1A1A y acentos
 // #F5C518: colores del TEMA OSCURO que el sitio abandonó en agosto. Sobre el
@@ -433,6 +432,37 @@ const ACC_CORTO = {
 };
 window.ACCESORIOS.forEach(a => { a.corto = ACC_CORTO[a.id] || ''; });
 
+// ── Foto de la pieza (15-sep-2026) ───────────────────────────────────────────
+// La pieza sola, recortada con alfa sobre lienzo 1:1, aprobada por Saulo en la hoja
+// de contactos. El bloque lo reescribe `accesorios.py aplicar` (skill fotos-producto)
+// con lo que hay en imagenes/accesorios/. Sin entrada, la vitrina y la ficha caen a
+// la silueta de su categoría.
+/* ↓ generado por accesorios.py · no editar a mano ↓ */
+const ACC_FOTO = {
+  104: 'imagenes/accesorios/104.webp?v=3c67d500',
+  106: 'imagenes/accesorios/106.webp?v=0638a236',
+  107: 'imagenes/accesorios/107.webp?v=b36d6d6d',
+  108: 'imagenes/accesorios/108.webp?v=7405378f',
+  109: 'imagenes/accesorios/109.webp?v=81aeb852',
+  111: 'imagenes/accesorios/111.webp?v=4aa5c1f1',
+  112: 'imagenes/accesorios/112.webp?v=6acdc49a',
+  116: 'imagenes/accesorios/116.webp?v=9f4eb61d',
+  117: 'imagenes/accesorios/117.webp?v=23a14219',
+  118: 'imagenes/accesorios/118.webp?v=9be4b000',
+  119: 'imagenes/accesorios/119.webp?v=d8adde0e',
+  120: 'imagenes/accesorios/120.webp?v=729b2552',
+  123: 'imagenes/accesorios/123.webp?v=c625952b',
+  125: 'imagenes/accesorios/125.webp?v=39a93a42',
+  128: 'imagenes/accesorios/128.webp?v=ec2888ff',
+  129: 'imagenes/accesorios/129.webp?v=30bd6adf',
+  130: 'imagenes/accesorios/130.webp?v=95cfa5ef',
+  131: 'imagenes/accesorios/131.webp?v=91ec2a41',
+  133: 'imagenes/accesorios/133.webp?v=98cf239a',
+  201: 'imagenes/accesorios/201.webp?v=4b9973e6',
+};
+/* ↑ fin generado por accesorios.py ↑ */
+window.ACCESORIOS.forEach(a => { if (ACC_FOTO[a.id]) a.img = ACC_FOTO[a.id]; });
+
 // ── La vitrina del catálogo (15-sep-2026) ────────────────────────────────────
 // Las secciones de /accesorios: solo categorías con piezas, en el orden de
 // ACCESORIO_CATEGORIES, y dentro de cada una por nombre corto. Si `categoria` no
@@ -576,8 +606,7 @@ window.getAccesorioExistencias = function (id) {
   return (last && last.qty != null) ? { qty: last.qty, date: last.date, manualId: last.manualId } : null;
 };
 
-// Los accesorios no traen foto todavía: se muestran con un aviso discreto
-// "sin imagen disponible por el momento" hasta cargar fotografías reales.
+// Sin foto real (no está en ACC_FOTO), `img` queda vacío y la vista usa la silueta.
 window.ACCESORIOS.forEach(a => { if (!window.isRealImage(a.img)) a.img = ''; });
 
 // Inventario fuente («Ver inventario fuente») = el del ÚLTIMO registro del historial.
