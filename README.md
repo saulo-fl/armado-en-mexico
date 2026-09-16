@@ -278,3 +278,31 @@ emblemas de ninguna institución. Es la gráfica de todos los días en México, 
 Los valores salen de [`src/styles/estilo.css`](src/styles/estilo.css) y el criterio, de
 [`docs/DESIGN.md`](docs/DESIGN.md). Los colores de los objetos no tienen variante oscura a
 propósito: una carta de lotería es amarilla con la luz encendida o apagada.
+
+## Licencia
+
+Armado en México es **software libre**: el código de este repositorio se publica bajo la
+[**GNU Affero General Public License v3 o posterior**](LICENSE) (`AGPL-3.0-or-later`).
+
+Puedes usarlo, estudiarlo, modificarlo, redistribuirlo y publicarlo en tu propio servidor.
+La condición es recíproca: **quien reciba tu versión —incluso a través de una red— tiene
+derecho a recibir también su código fuente**, bajo esta misma licencia. Por eso AGPL y no
+GPL: esta es una aplicación web, y la GPL no obliga a nada a quien monta un servicio cerrado
+sin distribuir binarios.
+
+A eso se añaden dos términos de la sección 7 de la propia licencia, detallados en
+[`LICENSE-TERMINOS-ADICIONALES.md`](LICENSE-TERMINOS-ADICIONALES.md):
+
+- **§7(c)** — una versión modificada debe marcarse como distinta y no puede presentarse como
+  «Armado en México» ni sugerir que la respalda Armas M&S.
+- **§7(e)** — la licencia no concede ningún derecho sobre las marcas, el logotipo, los sellos
+  de clasificación ni la identidad gráfica del proyecto.
+
+Un fork es bienvenido; solo tiene que llamarse de otra manera.
+
+### Lo que la licencia no cubre
+
+Los **datos del catálogo** (`src/data/`, los PDFs de `public/inventarios/`) son hechos
+recopilados de fuentes públicas —inventarios oficiales de la DCAM y la OTCA, publicaciones
+de los fabricantes— y no son obra de este proyecto. Las **fotografías de producto** y los
+**textos divulgativos** tampoco entran en la AGPL, que es una licencia de software.

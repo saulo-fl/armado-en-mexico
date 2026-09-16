@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores Leon
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // GET /api/state — snapshot de los dominios de contenido editable.
 // La app pública lo lee al arrancar (hydrate) y lo cachea en localStorage.
 // Si D1 no está vinculada todavía, devuelve {} → la app opera con sus seeds.

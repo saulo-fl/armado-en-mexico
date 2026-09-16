@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores Leon
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Copia a out/ todo lo que se sirve tal cual, sin pasar por Babel ni por el
 // prerender: los estáticos de public/ y las fuentes que el navegador consume sin
 // compilar (los data-*.js cuelgan sus catálogos de window, store.js y

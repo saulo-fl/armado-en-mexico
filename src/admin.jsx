@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores Leon
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Admin Panel
 // Backend de gestión para Saulo Flores
 

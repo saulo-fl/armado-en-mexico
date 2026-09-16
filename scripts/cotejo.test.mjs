@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores Leon
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Pruebas de src/lib/cotejo.js — `node --test scripts/cotejo.test.mjs`
 // Va en scripts/ y no junto al módulo porque copiar-estaticos.mjs publica todo
 // src/lib/. Los datos son FIJOS (copiados del catálogo del 14-sep-2026), no los

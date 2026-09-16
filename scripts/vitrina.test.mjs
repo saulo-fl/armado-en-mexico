@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores Leon
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Pruebas de window.accesoriosVitrina (src/data/data-accesorios.js) — `node --test scripts/vitrina.test.mjs`
 // Va en scripts/ por lo mismo que cotejo.test.mjs. Los datos son FIJOS, no el
 // catálogo: una conciliación nueva no debe romper estas pruebas.

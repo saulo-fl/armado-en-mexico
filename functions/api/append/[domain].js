@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores Leon
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // POST /api/append/:domain — escritura PÚBLICA por "append".
 // Sirve para: enviar una reseña a moderación (reviewsQueue), denunciar
 // (reports) y registrar visita (visits). El servidor hace el read-modify-write
