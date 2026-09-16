@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Componentes UI compartidos
 // Estética: oscuro elegante con detalles tácticos (color palette dark/amber/military)
 
@@ -866,6 +871,7 @@ window.BottomNav = BottomNav;
 // cualquiera que no sea Saulo. O se publica el repo, o se quita esta constante.
 const AMX_REPO = 'https://github.com/saulo-fl/armado-en-mexico';
 const AMX_PERFIL = 'https://github.com/saulo-fl';
+const AMX_LICENCIA = AMX_REPO + '/blob/main/LICENSE';
 const AMX_TIENDA = 'https://armasmys.com/';
 
 // Hubo un corazón de matriz de puntos en la línea de crédito —el guiño al ♥ de
@@ -990,6 +996,8 @@ function PieDeSitio({ onNav }) {
               }}>
               <IconoGitHub />GitHub
             </a>
+            <span aria-hidden="true" style={{ margin: '0 8px', color: PALETTE.sobreMarcaMuted }}>·</span>
+            <Externo a={AMX_LICENCIA} etiqueta="Licencia AGPL-3.0 de Armado en México (se abre en una pestaña nueva)">AGPL-3.0</Externo>
           </div>
 
           {/* ── AVISO ─ texto literal del que estaba al final del Home.

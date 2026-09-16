@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Store (persistencia en localStorage)
 // Mantiene catálogo, colas de moderación, contenido editable de páginas y auth admin.
 // Compartido entre app pública y admin via mismo origen + localStorage.

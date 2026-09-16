@@ -1,3 +1,12 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+//
+// LOS DATOS de este fichero —la selección, la estructura y los textos
+// divulgativos— se ofrecen ADEMÁS bajo CC BY-SA 4.0; los hechos que contiene
+// no son de nadie (art. 14 fr. X LFDA). Detalle: LICENSE-CONTENIDO.md.
+
 // Armado en México — base de datos oficial DCAM/SEDENA
 // Fuente: Catálogo de existencias DCAM al 3 de octubre de 2025
 // Clasificación legal según Ley Federal de Armas de Fuego y Explosivos.

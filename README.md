@@ -278,3 +278,47 @@ emblemas de ninguna institución. Es la gráfica de todos los días en México, 
 Los valores salen de [`src/styles/estilo.css`](src/styles/estilo.css) y el criterio, de
 [`docs/DESIGN.md`](docs/DESIGN.md). Los colores de los objetos no tienen variante oscura a
 propósito: una carta de lotería es amarilla con la luz encendida o apagada.
+
+## Licencia
+
+Armado en México es **software libre**: el código de este repositorio se publica bajo la
+[**GNU Affero General Public License v3 o posterior**](LICENSE) (`AGPL-3.0-or-later`).
+
+Puedes usarlo, estudiarlo, modificarlo, redistribuirlo y publicarlo en tu propio servidor.
+La condición es recíproca: **quien reciba tu versión —incluso a través de una red— tiene
+derecho a recibir también su código fuente**, bajo esta misma licencia. Por eso AGPL y no
+GPL: esta es una aplicación web, y la GPL no obliga a nada a quien monta un servicio cerrado
+sin distribuir binarios.
+
+A eso se añaden dos términos de la sección 7 de la propia licencia, detallados en
+[`LICENSE-TERMINOS-ADICIONALES.md`](LICENSE-TERMINOS-ADICIONALES.md):
+
+- **§7(c)** — una versión modificada debe marcarse como distinta y no puede presentarse como
+  «Armado en México» ni sugerir que la respalda Armas M&S.
+- **§7(e)** — la licencia no concede ningún derecho sobre las marcas, el logotipo ni la
+  identidad gráfica del proyecto. Las palabras CIVIL, SEGURIDAD y EXCLUSIVO **no** se
+  reservan: son categorías de la Ley Federal de Armas de Fuego, no marcas.
+
+Un fork es bienvenido; solo tiene que llamarse de otra manera.
+
+### El contenido, que no es código
+
+La AGPL licencia software. Aquí viven además un catálogo, unos PDF oficiales y 243 imágenes,
+y cada cosa tiene un dueño distinto. El mapa completo —con su base en la Ley Federal del
+Derecho de Autor— está en [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md). En resumen:
+
+| Qué | Quién lo tiene | Qué se concede |
+|---|---|---|
+| Compilación del catálogo (`src/data/`) | Saulo Flores León | **CC BY-SA 4.0** |
+| Los hechos: precios, existencias, calibres | Nadie (art. 14 fr. X LFDA) | No hay nada que conceder |
+| Inventarios DCAM y OTCA (`public/inventarios/`) | Fuera del derecho de autor (art. 14 fr. VIII) | Redistribuibles, sin exclusividad |
+| Fotos de producto y texturas (`public/imagenes/`) | Los fabricantes y terceros | **Nada** |
+| Fotos de uso (`public/imagenes/usos/`) | Sus autores (Pexels) | Licencia Pexels |
+| Logotipo, isotipo, retrato | Saulo Flores León | **Nada** — ver §7(e) |
+
+Los ficheros de `src/data/` siguen bajo AGPL como código —son JavaScript y llevan funciones
+dentro—; la concesión CC BY-SA corre en paralelo sobre el conjunto de datos, para quien
+quiera llevarse el catálogo a otro proyecto sin arrastrar la AGPL.
+
+Un fork que borre las fotos ajenas **sigue compilando y funcionando**: `window.isRealImage`
+vacía toda ruta que no exista y la interfaz dibuja su marcador.
