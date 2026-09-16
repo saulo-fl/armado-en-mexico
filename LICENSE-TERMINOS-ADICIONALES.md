@@ -1,12 +1,16 @@
 # Términos adicionales · Additional terms
 
-**Armado en México** — Copyright (C) 2026 Saulo Flores Leon
+**Armado en México** — Copyright (C) 2026 Saulo Flores León
 
 Este proyecto se distribuye bajo la **GNU Affero General Public License, versión 3
 o posterior** (`AGPL-3.0-or-later`). El texto íntegro está en [`LICENSE`](LICENSE).
 
 Conforme a la **sección 7** de dicha licencia, el ejercicio de los derechos que
 concede queda sujeto además a los dos términos siguientes.
+
+La AGPL licencia el **código**. El catálogo, los inventarios oficiales y las imágenes
+tienen cada uno su propio dueño y su propio régimen: eso va en
+[`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
 
 > En caso de discrepancia entre las dos versiones de este documento, **prevalece
 > la versión en español**.
@@ -24,7 +28,7 @@ original. En concreto, debe:
   derivada y no la original;
 - **no** presentarse como «Armado en México»; y
 - **no** dar a entender que está publicada, respaldada, revisada o mantenida por
-  Saulo Flores Leon ni por Armas M&S.
+  Saulo Flores León ni por Armas M&S.
 
 ## 2 · Marcas — AGPL-3.0 §7(e)
 
@@ -33,10 +37,17 @@ logotipos ni avisos comerciales del proyecto, entre ellos:
 
 - «Armado en México» y «Armas M&S»;
 - el logotipo y el isotipo del proyecto;
-- los sellos de clasificación legal (CIVIL, SEGURIDAD, EXCLUSIVO);
+- el **diseño** del sello de clasificación legal — el giro, el filo y el desgaste que
+  le da `src/styles/estilo.css`;
 - los demás elementos distintivos de la identidad gráfica.
 
 Toda versión modificada debe retirarlos o sustituirlos por elementos propios.
+
+**Las palabras CIVIL, SEGURIDAD y EXCLUSIVO no quedan reservadas.** Son categorías de
+la Ley Federal de Armas de Fuego y Explosivos, no marcas de este proyecto, y el artículo
+14 fracción V de la Ley Federal del Derecho de Autor excluye de protección «los nombres
+y títulos o frases aislados». Un fork puede —y debe— seguir clasificando las armas con
+esos términos: lo contrario sería inventar terminología legal.
 
 ---
 
@@ -61,13 +72,17 @@ por la nuestra.
 
 # English translation (unofficial)
 
-**Armado en México** — Copyright (C) 2026 Saulo Flores Leon
+**Armado en México** — Copyright (C) 2026 Saulo Flores León
 
 This project is distributed under the **GNU Affero General Public License, version 3
 or later** (`AGPL-3.0-or-later`). The full text is in [`LICENSE`](LICENSE).
 
 Pursuant to **section 7** of that license, the exercise of the rights it grants is
 further subject to the two terms below.
+
+The AGPL licenses the **code**. The catalog, the official inventories and the images
+each have their own holder and their own regime: see
+[`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
 
 > In case of discrepancy between the two language versions of this document, **the
 > Spanish version prevails**.
@@ -83,7 +98,7 @@ original version. Specifically, it must:
   derived work and not the original;
 - **not** present itself as "Armado en México"; and
 - **not** suggest that it is published, endorsed, reviewed or maintained by
-  Saulo Flores Leon or by Armas M&S.
+  Saulo Flores León or by Armas M&S.
 
 ## 2 · Trademarks — AGPL-3.0 §7(e)
 
@@ -92,10 +107,17 @@ marks of the project, including:
 
 - "Armado en México" and "Armas M&S";
 - the project logo and icon;
-- the legal classification stamps (CIVIL, SEGURIDAD, EXCLUSIVO);
+- the **design** of the legal classification stamp — the tilt, the edge and the wear
+  given to it by `src/styles/estilo.css`;
 - the remaining distinctive elements of its visual identity.
 
 Every modified version must remove or replace them with its own.
+
+**The words CIVIL, SEGURIDAD and EXCLUSIVO are not reserved.** They are categories of
+Mexico's Ley Federal de Armas de Fuego y Explosivos, not marks of this project, and art.
+14(V) of the Ley Federal del Derecho de Autor excludes "isolated names, titles or
+phrases" from protection. A fork may — and should — keep classifying firearms with those
+terms; doing otherwise would mean inventing legal terminology.
 
 ## Why these two terms cannot be stripped
 

@@ -295,14 +295,30 @@ A eso se añaden dos términos de la sección 7 de la propia licencia, detallado
 
 - **§7(c)** — una versión modificada debe marcarse como distinta y no puede presentarse como
   «Armado en México» ni sugerir que la respalda Armas M&S.
-- **§7(e)** — la licencia no concede ningún derecho sobre las marcas, el logotipo, los sellos
-  de clasificación ni la identidad gráfica del proyecto.
+- **§7(e)** — la licencia no concede ningún derecho sobre las marcas, el logotipo ni la
+  identidad gráfica del proyecto. Las palabras CIVIL, SEGURIDAD y EXCLUSIVO **no** se
+  reservan: son categorías de la Ley Federal de Armas de Fuego, no marcas.
 
 Un fork es bienvenido; solo tiene que llamarse de otra manera.
 
-### Lo que la licencia no cubre
+### El contenido, que no es código
 
-Los **datos del catálogo** (`src/data/`, los PDFs de `public/inventarios/`) son hechos
-recopilados de fuentes públicas —inventarios oficiales de la DCAM y la OTCA, publicaciones
-de los fabricantes— y no son obra de este proyecto. Las **fotografías de producto** y los
-**textos divulgativos** tampoco entran en la AGPL, que es una licencia de software.
+La AGPL licencia software. Aquí viven además un catálogo, unos PDF oficiales y 243 imágenes,
+y cada cosa tiene un dueño distinto. El mapa completo —con su base en la Ley Federal del
+Derecho de Autor— está en [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md). En resumen:
+
+| Qué | Quién lo tiene | Qué se concede |
+|---|---|---|
+| Compilación del catálogo (`src/data/`) | Saulo Flores León | **CC BY-SA 4.0** |
+| Los hechos: precios, existencias, calibres | Nadie (art. 14 fr. X LFDA) | No hay nada que conceder |
+| Inventarios DCAM y OTCA (`public/inventarios/`) | Fuera del derecho de autor (art. 14 fr. VIII) | Redistribuibles, sin exclusividad |
+| Fotos de producto y texturas (`public/imagenes/`) | Los fabricantes y terceros | **Nada** |
+| Fotos de uso (`public/imagenes/usos/`) | Sus autores (Pexels) | Licencia Pexels |
+| Logotipo, isotipo, retrato | Saulo Flores León | **Nada** — ver §7(e) |
+
+Los ficheros de `src/data/` siguen bajo AGPL como código —son JavaScript y llevan funciones
+dentro—; la concesión CC BY-SA corre en paralelo sobre el conjunto de datos, para quien
+quiera llevarse el catálogo a otro proyecto sin arrastrar la AGPL.
+
+Un fork que borre las fotos ajenas **sigue compilando y funcionando**: `window.isRealImage`
+vacía toda ruta que no exista y la interfaz dibuja su marcador.
