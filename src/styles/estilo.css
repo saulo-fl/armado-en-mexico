@@ -3974,6 +3974,18 @@
    a deslizar). */
 @media (max-width: 1023px) { .amx-v2 .amx-mostrador { margin-right: -16px; } }
 .amx-v2 .amx-mostrador .amx-repisa-carril { display: flex; width: max-content; min-width: 100%; }
+/* La tabla va como FONDO del carril, no en el `::before` absoluto que usa la vitrina
+   de la ficha: en Safari (iPhone, medido el 15-sep-2026) un absoluto dentro de un
+   contenedor con scroll y `width: max-content` se queda con el ancho VISIBLE, así que
+   la mesa se acababa en la primera pantalla y los últimos calibres quedaban en el
+   aire. Un fondo se pinta sobre todo el contenido desplazable. Mismo sitio y mismo
+   alto que el ::before: el canto de la tabla queda 8 px por debajo de la base de las
+   fotos, y la madera trae la cubierta en su 80 % de arriba (de ahí el `/ .8`). */
+.amx-v2 .amx-mostrador .amx-repisa-carril::before { content: none; }
+.amx-v2 .amx-mostrador .amx-repisa-carril {
+  background: var(--mesa-madera)
+    0 calc(10px + var(--alto-foto) - var(--fondo-repisa)) / auto calc((var(--fondo-repisa) + 8px) / .8) repeat-x;
+}
 /* El ancho de la celda sale del de la pantalla para que en cualquier teléfono se
    vean 3,4 calibres: el que asoma a medias es lo que dice que la mesa se desliza.
    Con 104 px fijos, a 384 y 390 px solo asomaban 8 y 14 px. */
