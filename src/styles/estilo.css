@@ -3475,13 +3475,6 @@
   gap: var(--e3);
 }
 
-/* ── Disponibilidad — card a ancho completo en móvil ─────────────── */
-.amx-v2 .amx-arsenal-dispo-card {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--e3);
-}
-
 /* ── Título del Hub ─────────────────────────────────────────────── */
 .amx-v2 .amx-arsenal-titulo {
   /* Más espacio abajo que arriba: jerarquía de heading (§5.3, craft-floor) */
@@ -3511,72 +3504,6 @@
   color: var(--tinta-dim);
 }
 
-/* ── Encabezado de sección — palabra + hairline degradado ───────── */
-.amx-v2 .amx-arsenal-sect-hdr {
-  display: flex;
-  align-items: center;
-  gap: var(--e3);
-  margin: var(--e4) 0 var(--e3);
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--tinta-2);
-}
-.amx-v2 .amx-arsenal-sect-hdr::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, var(--hair), transparent);
-}
-
-/* ── Tarjeta documento — texto plano con borde lateral de color ─── */
-.amx-v2 .amx-arsenal-doc-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--e3);
-  padding: var(--e2) var(--e3); /* escala 4·8·12·20·32·52 (§5.2) */
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  box-shadow: var(--sombra); /* superficie y sombra distinguen (§5.1b, sin barras laterales) */
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: border-color .18s, transform .18s, box-shadow .18s;
-}
-.amx-v2 .amx-arsenal-doc-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-hover);
-}
-.amx-v2 .amx-arsenal-doc-card:focus-visible {
-  outline: 2px solid var(--rojo-txt);
-  outline-offset: 2px;
-}
-
-/* Partes internas de la tarjeta documento */
-.amx-v2 .amx-arsenal-doc-label {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 15px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--tinta);
-}
-.amx-v2 .amx-arsenal-doc-sub {
-  margin-top: 2px;
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--tinta-dim);
-  line-height: 1.4;
-}
-.amx-v2 .amx-arsenal-doc-count {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 20px;
-  color: var(--accent, var(--tinta));
-  flex-shrink: 0;
-}
 
 /* ── Botón "Ver todas" del Hub ─────────────────────────────────── */
 .amx-v2 .amx-arsenal-ver-todo {
@@ -3600,87 +3527,6 @@
   transform: translateY(-1px);
 }
 
-/* ── Clasificación legal — pestaletas tipo archivador ─────────────────── */
-.amx-v2 .amx-arsenal-legal-grid {
-  display: grid;
-  gap: var(--e3);
-  /* Desktop: 3 columnas iguales, móvil: apilados con aire */
-  grid-template-columns: repeat(3, 1fr);
-}
-@media (max-width: 600px) {
-  .amx-v2 .amx-arsenal-legal-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.amx-v2 .amx-arsenal-legal-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 20px 12px;
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  box-shadow: var(--sombra);
-  cursor: pointer;
-  text-align: center;
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  transition: transform .18s, box-shadow .18s;
-}
-.amx-v2 .amx-arsenal-legal-tab:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--sombra-hover);
-}
-
-/* Pestaleta de color arriba — folder archivador */
-.amx-v2 .amx-arsenal-legal-pegs {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 15px;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: var(--tinta);
-  padding: 4px 12px;
-  border-radius: 3px;
-}
-
-.amx-v2 .amx-arsenal-legal-desc {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  color: var(--tinta-dim);
-  line-height: 1.4;
-  max-width: 200px;
-}
-
-.amx-v2 .amx-arsenal-legal-count {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 28px;
-  line-height: 1;
-}
-
-/* Colores por tipo — tokens con versión oscura (§7). Dos tonos legales: civil + restr. */
-.amx-v2 .amx-arsenal-legal-tab--dcam {
-  border-color: var(--ok);
-}
-.amx-v2 .amx-arsenal-legal-tab--dcam .amx-arsenal-legal-pegs,
-.amx-v2 .amx-arsenal-legal-tab--dcam .amx-arsenal-legal-count {
-  color: var(--ok); /* claro: #2F6B33 · oscuro: #63C07C → ≥5.08:1 en ambos temas */
-}
-
-.amx-v2 .amx-arsenal-legal-tab--seguridad,
-.amx-v2 .amx-arsenal-legal-tab--ejercito {
-  border-color: var(--alerta);
-}
-.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-pegs,
-.amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-pegs,
-.amx-v2 .amx-arsenal-legal-tab--seguridad .amx-arsenal-legal-count,
-.amx-v2 .amx-arsenal-legal-tab--ejercito .amx-arsenal-legal-count {
-  color: var(--alerta); /* claro: #A3341F · oscuro: #F0907E → ≥4.88:1 en ambos temas */
-}
 
 /* ── Tipo de arma — lotería (reusa HOME amx-loteria-mesa) ─────────────── */
 .amx-v2 .amx-arsenal-loteria-mesa {
@@ -3700,97 +3546,6 @@
   }
 }
 
-/* ── Uso — tarjetas informativas sin foto (sin giro, son controles sobre --papel) ─ */
-.amx-v2 .amx-arsenal-uso-card {
-  display: flex;
-  align-items: center;
-  gap: var(--e2);
-  padding: var(--e2) var(--e3); /* escala 4·8·12·20·32·52 (§5.2) */
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  box-shadow: var(--sombra);
-  cursor: pointer;
-  text-align: left;
-  width: 100%;
-  transition: transform .18s, box-shadow .18s;
-}
-.amx-v2 .amx-arsenal-uso-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sombra-hover);
-}
-.amx-v2 .amx-arsenal-uso-label {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--tinta);
-}
-.amx-v2 .amx-arsenal-uso-count {
-  margin-left: auto;
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--tinta-dim);
-  flex-shrink: 0;
-}
-
-/* ── Calibre — mesa de exhibición con siluetas de cartucho (rejilla compacta) ─ */
-.amx-v2 .amx-arsenal-calibre-shelf {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: var(--e3);
-  background: var(--lienzo);
-  padding: var(--e3) var(--e4); /* aire interno de la bandeja */
-  border-radius: var(--e1);
-  box-shadow: inset 0 1px 4px rgba(23,27,25,.08); /* profundidad sutil (§5.1b) */
-}
-
-/* Carta individual — fondo token del tema (buen contraste), ancho controlado por grid */
-.amx-v2 .amx-arsenal-calibre-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--e2);
-  min-height: 120px;
-  background: var(--papel);
-  border: 1px solid var(--hair);
-  box-shadow: var(--sombra);
-  cursor: pointer;
-  text-align: center;
-  transition: transform .18s, box-shadow .18s;
-}
-.amx-v2 .amx-arsenal-calibre-item:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: var(--sombra-hover);
-}
-
-/* Silueta del cartucho — sin filtros vetados (§4) */
-.amx-v2 .amx-arsenal-calibre-foto {
-  width: 70%;
-  height: auto;
-  max-height: 56px;
-  object-fit: contain;
-}
-
-/* Letrero con nombre del calibre */
-.amx-v2 .amx-arsenal-calibre-ficha {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--tinta);
-  line-height: 1.2;
-}
-
-/* Contador — número pequeño abajo */
-.amx-v2 .amx-arsenal-calibre-num {
-  margin-top: 4px;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--tinta-dim); /* ≥4.5:1 sobre papel claro (§7 no negociable) */
-}
 
 /* ══════════════════════════════════════════════════════════════════════════
    CATÁLOGO — Header verde + filtros + grid de armas (RED-Arsenal)
@@ -4130,3 +3885,159 @@
 /* La lista de «Compatibilidad»: cada nombre es un botón en tinta subrayada; el
    renglón da ≥ 24 px de alto para atinarle con el dedo. */
 .amx-v2 .amx-compat-lista .amx-enlace-tinta { padding: 2px 0; text-align: left; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.9)
+   Decidido con Saulo sección por sección. Todo son objetos que ya existen: la
+   tarjeta de almacén del kárdex, la hoja de oficio con los sellos, la polaroid
+   apaisada del Home y la repisa de la vitrina de la ficha con su etiqueta. Aquí
+   solo va lo que cambia en el hub. Los objetos no siguen al tema.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-hub-seccion { margin-top: var(--e5); }
+.amx-v2 .amx-hub-seccion:first-of-type { margin-top: var(--e3); }
+
+/* El anillo de foco sobre los papeles claros va en tinta, como en la ficha. */
+.amx-v2 .amx-almacen :focus-visible,
+.amx-v2 .amx-clasif :focus-visible { outline-color: var(--manila-tinta); }
+
+/* DISPONIBILIDAD — la tarjeta de almacén con un renglón-botón por sucursal. */
+.amx-v2 .amx-almacen-cols,
+.amx-v2 .amx-almacen-renglon {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px 104px;
+  align-items: center;
+  column-gap: var(--e2);
+}
+.amx-v2 .amx-almacen-cols {
+  margin-top: 10px;
+  padding: 6px 6px 5px;
+  border-bottom: 1.5px solid var(--kardex-imp);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--kardex-imp);
+}
+.amx-v2 .amx-almacen-lista { margin: 0; padding: 0; list-style: none; }
+.amx-v2 .amx-almacen-renglon {
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 6px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--kardex-linea);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  color: var(--manila-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-almacen-renglon b { font-weight: 700; letter-spacing: .08em; }
+.amx-v2 .amx-almacen-renglon:hover b { text-decoration: underline; text-underline-offset: 3px; }
+.amx-v2 .amx-almacen .num { text-align: right; padding-right: var(--e3); }
+
+/* CLASIFICACIÓN LEGAL — la hoja de oficio con un sello por renglón. */
+.amx-v2 .amx-clasif { margin: 0; padding: 4px 18px 6px; list-style: none; border-radius: 3px; }
+@media (min-width: 1024px) { .amx-v2 .amx-clasif { padding: 8px 26px 10px; } }
+.amx-v2 .amx-clasif li + li { border-top: 1px dashed var(--oficio-tinta-2); }
+.amx-v2 .amx-clasif-renglon {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--e3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--e3) 0;
+  background: none;
+  border: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--manila-tinta);
+  cursor: pointer;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-clasif-renglon { grid-template-columns: 290px minmax(0, 1fr) auto; } }
+.amx-v2 .amx-clasif-sello { justify-self: start; font-size: 13px; padding: 5px 10px 6px; }
+@media (min-width: 1024px) { .amx-v2 .amx-clasif-sello { font-size: 15px; padding: 5px 13px 6px; border-width: 3px; } }
+.amx-v2 .amx-clasif-largo { display: none; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-clasif-corto { display: none; }
+  .amx-v2 .amx-clasif-largo { display: inline; }
+}
+.amx-v2 .amx-clasif-desc { font-family: var(--mono); font-size: 12.5px; line-height: 1.5; }
+.amx-v2 .amx-clasif-renglon:hover .amx-clasif-desc { text-decoration: underline; text-underline-offset: 3px; }
+.amx-v2 .amx-clasif-cifra {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* USO — las polaroids apaisadas del Home, solo con el nombre. Una por fila en
+   móvil; desde 720 px las tres en fila y enteras. El giro lo pone la polaroid
+   desde 1024 px con `--giro`. */
+.amx-v2 .amx-hub-usos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--e4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 720px) { .amx-v2 .amx-hub-usos { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.amx-v2 .amx-hub-uso {
+  display: block;
+  width: 100%;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* CALIBRE — la repisa de la vitrina convertida en mostrador: una sola tabla que
+   se desliza también en escritorio (en la vitrina, desde 1024 px, se parte en
+   filas) y sin el marco de la vitrina. El cartucho mide lo que su largo real. */
+.amx-v2 .amx-mostrador { --alto-foto: 150px; margin: 0; padding: 0 0 8px; }
+/* En móvil la mesa llega al borde derecho de la pantalla: asoma el siguiente
+   calibre y se lee que la mesa sigue (a 390 px cabían tres justos y nada invitaba
+   a deslizar). */
+@media (max-width: 1023px) { .amx-v2 .amx-mostrador { margin-right: -16px; } }
+.amx-v2 .amx-mostrador .amx-repisa-carril { display: flex; width: max-content; min-width: 100%; }
+/* La tabla va como FONDO del carril, no en el `::before` absoluto que usa la vitrina
+   de la ficha: en Safari (iPhone, medido el 15-sep-2026) un absoluto dentro de un
+   contenedor con scroll y `width: max-content` se queda con el ancho VISIBLE, así que
+   la mesa se acababa en la primera pantalla y los últimos calibres quedaban en el
+   aire. Un fondo se pinta sobre todo el contenido desplazable. Mismo sitio y mismo
+   alto que el ::before: el canto de la tabla queda 8 px por debajo de la base de las
+   fotos, y la madera trae la cubierta en su 80 % de arriba (de ahí el `/ .8`). */
+.amx-v2 .amx-mostrador .amx-repisa-carril::before { content: none; }
+.amx-v2 .amx-mostrador .amx-repisa-carril {
+  background: var(--mesa-madera)
+    0 calc(10px + var(--alto-foto) - var(--fondo-repisa)) / auto calc((var(--fondo-repisa) + 8px) / .8) repeat-x;
+}
+/* El ancho de la celda sale del de la pantalla para que en cualquier teléfono se
+   vean 3,4 calibres: el que asoma a medias es lo que dice que la mesa se desliza.
+   Con 104 px fijos, a 384 y 390 px solo asomaban 8 y 14 px. */
+.amx-v2 .amx-mostrador-celda { flex: 0 0 clamp(84px, calc((100vw - 22px) / 3.4 - 14px), 112px); }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-mostrador { --alto-foto: 190px; overflow-x: auto; }
+  .amx-v2 .amx-mostrador-celda { flex-basis: 128px; }
+}
+.amx-v2 .amx-mostrador .amx-articulo-foto img {
+  position: relative;
+  z-index: 1;
+  height: calc(var(--alto-foto) * var(--escala, 1));
+  max-height: none;
+  max-width: none;                    /* el casco del calibre 12 es más ancho que la
+                                         celda más estrecha: si encoge, rompe la escala */
+}
+.amx-v2 .amx-mostrador .amx-puesto-luz { bottom: 0; }
+.amx-v2 .amx-mostrador .amx-articulo:hover .amx-puesto-luz,
+.amx-v2 .amx-mostrador .amx-articulo:focus-visible .amx-puesto-luz { opacity: .85; }
+.amx-v2 .amx-etiqueta-calibre {
+  display: block;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+.amx-v2 .amx-etiqueta-armas { display: block; margin-top: 2px; color: var(--etiqueta-tinta-2); }

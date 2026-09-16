@@ -2911,3 +2911,101 @@ function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
   );
 }
 window.PuestoPieza = PuestoPieza;
+
+// ══════════════════════════════════════════════════════════════
+// EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.9)
+// Las cuentas salen de src/lib/arsenal-hub.js; aquí solo se dibujan, con los
+// papeles de la ficha: la tarjeta de almacén, la hoja de oficio con los sellos
+// y la repisa de la vitrina con su etiqueta.
+// ══════════════════════════════════════════════════════════════
+
+// DISPONIBILIDAD: un renglón por sucursal y sin total (un arma puede estar en las
+// dos). No es <table>: un renglón entero no puede ser un botón dentro de una
+// tabla; las columnas las dibuja una rejilla con la piel del kárdex.
+function AlmacenSucursales({ filas, movil, onAbrir }) {
+  return (
+    <section className="amx-papel amx-kardex amx-almacen" style={{ '--giro-papel': '-.4deg' }} aria-labelledby="amx-almacen-tit">
+      <div className="amx-kardex-carton">
+        <div className="amx-kardex-cab">
+          <h3 className="amx-papel-tit" id="amx-almacen-tit">Tarjeta de almacén</h3>
+        </div>
+        <div className="amx-almacen-cols" aria-hidden="true">
+          <span>Sucursal</span><span className="num">Armas</span><span>Inventario</span>
+        </div>
+        <ul className="amx-almacen-lista">
+          {filas.map((f) => (
+            <li key={f.sigla}>
+              <button type="button" className="amx-almacen-renglon" onClick={() => onAbrir(f.sigla)}
+                aria-label={`${f.sigla}: ${f.armas} ${f.armas === 1 ? 'arma' : 'armas'} con existencia${f.fecha ? ', inventario del ' + amxFmtManualDate(f.fecha) : ''}`}>
+                <b>{f.sigla}</b>
+                <span className="num">{Number(f.armas).toLocaleString('es-MX')}</span>
+                <span className="amx-kardex-fecha">{f.fecha ? amxFmtManualDate(f.fecha, movil) : '—'}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="amx-kardex-nota">En existencia en el último inventario de su sucursal</p>
+      </div>
+    </section>
+  );
+}
+window.AlmacenSucursales = AlmacenSucursales;
+
+// CLASIFICACIÓN LEGAL: los sellos de la ficha estampados en una hoja de oficio.
+// Por debajo de 1024 px el sello dice la palabra corta (CIVIL…); por encima, la
+// etiqueta completa de los datos. Las dos van en el DOM y el CSS enseña una; el
+// nombre accesible es siempre la etiqueta completa con su cifra.
+function HojaClasificacion({ filas, onAbrir }) {
+  return (
+    <ul className="amx-oficio amx-clasif">
+      {filas.map((f) => {
+        const s = SELLOS[f.id] || SELLOS.dcam;
+        return (
+          <li key={f.id}>
+            <button type="button" className="amx-clasif-renglon" onClick={() => onAbrir(f.id)}
+              aria-label={`${f.label} — ${f.armas} ${f.armas === 1 ? 'arma' : 'armas'}`}
+              aria-describedby={'amx-clasif-desc-' + f.id}>
+              <span className={'amx-sello amx-sello--' + s.tono + ' amx-clasif-sello'} aria-hidden="true">
+                <span className="amx-clasif-corto">{s.texto}</span>
+                <span className="amx-clasif-largo">{f.label}</span>
+              </span>
+              <span className="amx-clasif-desc" id={'amx-clasif-desc-' + f.id}>{f.desc}</span>
+              <span className="amx-clasif-cifra">{Number(f.armas).toLocaleString('es-MX')}</span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+window.HojaClasificacion = HojaClasificacion;
+
+// CALIBRE: un solo mostrador de madera que se desliza de lado (la repisa de la
+// vitrina de la ficha, sin su marco). Cada cartucho de pie sobre la tabla a
+// escala real (`--escala` = largo ÷ el más largo), con su etiqueta de cartón
+// delante y la luz de los puestos detrás. Sin foto, la silueta de pie.
+function MostradorCalibres({ calibres, onAbrir }) {
+  return (
+    <div className="amx-repisa-fila amx-mostrador" role="region" aria-label="Calibres" tabIndex={0}>
+      <ul className="amx-repisa-carril">
+        {calibres.map((c) => (
+          <li key={c.id} className="amx-articulo-celda amx-mostrador-celda">
+            <button type="button" className="amx-articulo" onClick={() => onAbrir(c.id)}
+              aria-label={`${c.label} — ${c.armas} ${c.armas === 1 ? 'arma' : 'armas'}`}>
+              <span className="amx-articulo-foto">
+                <span className="amx-puesto-luz" aria-hidden="true" />
+                <img src={c.foto || 'imagenes/cartuchos/silueta-vertical.webp'} alt="" loading="lazy"
+                  style={{ '--escala': c.escala }} />
+              </span>
+              <span className="amx-etiqueta">
+                <span className="amx-etiqueta-calibre">{c.label}</span>
+                <span className="amx-etiqueta-armas">{c.armas} {c.armas === 1 ? 'arma' : 'armas'}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+window.MostradorCalibres = MostradorCalibres;
