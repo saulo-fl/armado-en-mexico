@@ -38,7 +38,7 @@ Mover una propiedad al CSS significa **borrarla del objeto `style`**, no duplica
 
 ### 1 · Elegir la primitiva, no la pantalla
 
-Las de `ui.jsx` propagan a las 321 páginas: `ArmaCard`, `FilterChip`, `AvailBadge`,
+Las de `ui.jsx` propagan a las 321 páginas: `ArmaCard`, `TiraFiltros`, `AvailBadge`,
 `TacticalCorners`, `SectionHeader`, `PriceLevel`, `AppHeader`, `TopNav`,
 `BottomNav`, `HCarousel`, `SpecRow`, `MiniSpec`, `Disclosure`, `CompareFloat`.
 
