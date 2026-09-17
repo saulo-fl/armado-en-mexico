@@ -1099,7 +1099,7 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   hoja de oficio (Legalidad · Usos · Antecedentes). Fuera del folder: la vitrina con dos repisas
   (munición y accesorios), la tele de los 80 (video), la tarjeta de comentarios y los expedientes
   de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra. Las letras van
-  alineadas: Saulo retiró los saltos por letra de todas las cintas del sitio el 16-sep-2026.
+  alineadas: Saulo retiró los saltos por letra de todas las cintas el 16-sep-2026.
 - **Intensidad: papelería física, sin texturas.** Se permiten clips, grapas, cinta canela,
   perforaciones, papel autocopiante, cinta rotuladora y líneas de corte, dibujados en CSS o como
   recortes ligeros. Sigue prohibido lo de §27 («texturas de papel fuertes») y lo de §3: ningún
