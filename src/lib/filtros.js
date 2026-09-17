@@ -39,15 +39,17 @@
   }
 
   // Las marcas de la regla: una mayor (con número) cada «paso bonito» de un
-  // quinto del rango —1, 2, 2.5, 5 o 10 por potencia de diez— y cuatro menores
+  // quinto del rango —1, 2, 5 o 10 por potencia de diez, nunca más fino que el
+  // paso del filtro (si saldría más fino, se usa el paso)— y cuatro menores
   // entre mayores. Se cuentan por índice para no arrastrar decimales.
-  function amxMarcasRegla(min, max) {
+  function amxMarcasRegla(min, max, paso) {
     const rango = max - min;
     if (!(rango > 0)) return [];
     const bruto = rango / 5;
     const e = Math.pow(10, Math.floor(Math.log10(bruto)));
     const f = bruto / e;
-    const mayor = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e;
+    let mayor = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * e;
+    if (mayor < paso) mayor = paso;
     const menor = mayor / 5;
     const marcas = [];
     for (let k = Math.ceil(min / menor - 1e-9); k * menor <= max + 1e-9; k++) {

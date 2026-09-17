@@ -3031,7 +3031,7 @@ function ReglaPrecio({ uid, precio, formato }) {
   return (
     <div className="amx-regla" style={{ '--lo': pct(lo) + '%', '--hi': pct(hi) + '%' }}>
       <div className="amx-regla-marcas" aria-hidden="true">
-        {window.amxMarcasRegla(min, max).map((m) => {
+        {window.amxMarcasRegla(min, max, paso).map((m) => {
           const x = pct(m.valor);
           return (
             <React.Fragment key={m.valor}>

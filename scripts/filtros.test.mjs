@@ -41,16 +41,31 @@ test('dentro de precio: con el cursor alto en el tope no hay límite superior', 
   assert.equal(window.amxDentroDePrecio(60.5, 10, 60, sinTope), false);
 });
 
-test('marcas: una mayor cada paso bonito de un quinto del rango, cuatro menores entre mayores', () => {
-  const armas = window.amxMarcasRegla(5000, 100000);
+test('marcas: una mayor cada paso bonito de un quinto del rango, cuatro menores entre mayores, nunca más fino que el paso', () => {
+  const armas = window.amxMarcasRegla(5000, 100000, 1000);
   assert.equal(armas.length, 24);
   assert.deepEqual(armas[0], { valor: 8000, mayor: false });
   assert.deepEqual(armas.filter((m) => m.mayor).map((m) => m.valor), [20000, 40000, 60000, 80000, 100000]);
-  const cartucho = window.amxMarcasRegla(5, 407);
+  const cartucho = window.amxMarcasRegla(5, 407, 1);
   assert.deepEqual(cartucho.filter((m) => m.mayor).map((m) => m.valor), [100, 200, 300, 400]);
   assert.equal(cartucho.length, 20);
-  assert.deepEqual(window.amxMarcasRegla(0, 12500).filter((m) => m.mayor).map((m) => m.valor), [0, 2500, 5000, 7500, 10000, 12500]);
-  assert.deepEqual(window.amxMarcasRegla(10, 10), []);
+  assert.deepEqual(window.amxMarcasRegla(0, 12500, 1000).filter((m) => m.mayor).map((m) => m.valor), [0, 5000, 10000]);
+  assert.deepEqual(window.amxMarcasRegla(10, 10, 1), []);
+
+  // Rangos angostos: el paso bonito no debe repetir ni mentir etiquetas
+  // (Bersa, Grand Power y .38 Special de la revisión final, 16-sep-2026).
+  const bersa = window.amxMarcasRegla(12000, 13000, 1000).filter((m) => m.mayor).map((m) => m.valor);
+  assert.deepEqual(bersa, [12000, 13000]);
+  const grandPower = window.amxMarcasRegla(17000, 29000, 1000).filter((m) => m.mayor).map((m) => m.valor);
+  assert.deepEqual(grandPower, [20000, 25000]);
+  const calibre38 = window.amxMarcasRegla(13, 14, 1).filter((m) => m.mayor).map((m) => m.valor);
+  assert.deepEqual(calibre38, [13, 14]);
+
+  const limites = { conTope: false };
+  for (const [valores, formato] of [[bersa, 'miles'], [grandPower, 'miles'], [calibre38, 'pesos']]) {
+    const etiquetas = valores.map((v) => window.amxNumeroMarca(v, limites, formato));
+    assert.equal(new Set(etiquetas).size, etiquetas.length, 'etiquetas de marca sin duplicados');
+  }
 });
 
 test('rótulos del rango: la cinta del chip, la lectura grande y el número de la marca', () => {
