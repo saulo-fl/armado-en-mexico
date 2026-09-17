@@ -497,19 +497,18 @@ function promoBtnStyle() {
 
 // CATALOG — Catálogo principal con todos los filtros
 // ════════════════════════════════════════════════════════════════
+// Los filtros son la tira de chips de TiraFiltros (ui.jsx, docs/DESIGN.md
+// §5.10): aquí solo vive el estado de cada filtro y la regla de qué arma pasa.
 function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare }) {
-  const vp = window.useViewport();
   const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
+  const buscadorRef = React.useRef(null);
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
   const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : (initialFilter?.sucursal || 'all'));
   const [calibre, setCalibre] = useState(initialFilter?.mode === 'calibre' ? initialFilter.value : 'all');
   const [uso, setUso] = useState(initialFilter?.mode === 'uso' ? initialFilter.value : 'all');
-  const [showAdv, setShowAdv] = useState(false);
   const [marca, setMarca] = useState('all');
   const [era, setEra] = useState('all');
-  const [precioLo, setPrecioLo] = useState(0);
-  const [precioHi, setPrecioHi] = useState(100000);
   const [mecanismo, setMecanismo] = useState('all');
   const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible' ? 'si' : 'all'); // 'all' | 'si' | 'no'
 
@@ -553,122 +552,71 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
     });
   }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo]);
 
-  // Límites de precio DINÁMICOS según lo filtrado; tope en $100k (mostrado como "$100k+").
-  const PRICE_CAP = 100000, PRICE_STEP = 1000;
-  const priceBounds = useMemo(() => {
-    const ps = baseFiltered.map(parsePrice).filter((n) => n > 0);
-    if (!ps.length) return { min: 0, max: PRICE_CAP, capped: true };
-    let lo = Math.floor(Math.min(...ps) / PRICE_STEP) * PRICE_STEP;
-    let hi = Math.ceil(Math.max(...ps) / PRICE_STEP) * PRICE_STEP;
-    const capped = hi > PRICE_CAP;
-    if (capped) hi = PRICE_CAP;
-    if (lo > hi) lo = hi;
-    if (hi <= lo) hi = lo + PRICE_STEP;
-    return { min: lo, max: hi, capped: capped };
-  }, [baseFiltered]);
-
-  // Al cambiar los límites dinámicos, reajusta el rango del slider (evita rangos vacíos)
-  const _pbRef = React.useRef(null);
-  if (!_pbRef.current || _pbRef.current.min !== priceBounds.min || _pbRef.current.max !== priceBounds.max) {
-    _pbRef.current = { min: priceBounds.min, max: priceBounds.max };
-    if (precioLo !== priceBounds.min) setPrecioLo(priceBounds.min);
-    if (precioHi !== priceBounds.max) setPrecioHi(priceBounds.max);
-  }
-
-  // Si el tope ($100k) está al máximo, no hay límite superior (incluye todo lo de "$100k+")
-  const noUpper = priceBounds.capped && precioHi >= priceBounds.max;
-  const filtered = useMemo(() => {
-    return baseFiltered.filter((a) => {
-      const p = parsePrice(a);
-      if (p < precioLo) return false;
-      if (!noUpper && p > precioHi) return false;
-      return true;
-    });
-  }, [baseFiltered, precioLo, precioHi, noUpper]);
+  // Límites de precio DINÁMICOS según lo filtrado; paso $1,000 y tope $100,000 («$100,000+»).
+  const precios = useMemo(() => baseFiltered.map(parsePrice), [baseFiltered]);
+  const rango = window.useRangoPrecio(precios, 1000, 100000);
+  const filtered = useMemo(() => baseFiltered.filter((a) => rango.deja(parsePrice(a))),
+    [baseFiltered, rango.lo, rango.hi, rango.limites]);
 
   const marcas = useMemo(() => Array.from(new Set(window.DB.map((a) => a.marca))).sort(), []);
+  const filtros = useMemo(() => {
+    const de = (lista) => lista.map((c) => ({ id: c.id, label: c.label }));
+    return {
+      tipo: { label: 'Tipo de arma', chip: 'Tipo', todos: 'Todas', opciones: de(window.CATEGORIES.tipo) },
+      calibre: { label: 'Calibre', todos: 'Todos', opciones: de(window.CATEGORIES.calibre) },
+      sucursal: { label: 'Armería', todos: 'Todas', opciones: [
+        { id: 'DCAM', label: 'DCAM · Estado de México', corto: 'DCAM' },
+        { id: 'OTCA', label: 'OTCA · Nuevo León', corto: 'OTCA' }] },
+      disponible: { label: 'Disponibilidad', todos: 'Todas', opciones: [
+        { id: 'si', label: 'Con existencias' }, { id: 'no', label: 'Agotadas' }] },
+      uso: { label: 'Uso', todos: 'Cualquiera', opciones: de(window.CATEGORIES.uso) },
+      avail: { label: 'Clasificación legal', todos: 'Todas', opciones: de(window.CATEGORIES.disponibilidad) },
+      marca: { label: 'Marca', todos: 'Todas', opciones: marcas.map((m) => ({ id: m, label: m })) },
+      mecanismo: { label: 'Mecanismo', todos: 'Todos', opciones: [
+        { id: 'semi', label: 'Semi-auto' }, { id: 'cerrojo', label: 'Cerrojo' }, { id: 'bomba', label: 'Bombeo' },
+        { id: 'revolver', label: 'Revólver' }, { id: 'sobrepuesta', label: 'Sobrepuesta' }] },
+      era: { label: 'Era', todos: 'Cualquiera', opciones: [
+        { id: 'clasico', label: 'Clásico' }, { id: 'moderno', label: 'Moderno' }, { id: 'vanguardia', label: 'Vanguardia' }] },
+    };
+  }, [marcas]);
+  const valores = { tipo, calibre, sucursal, disponible, uso, avail, marca, mecanismo, era };
+  const setters = { tipo: setTipo, calibre: setCalibre, sucursal: setSucursal, disponible: setDisponible,
+    uso: setUso, avail: setAvail, marca: setMarca, mecanismo: setMecanismo, era: setEra };
 
+  // «Limpiar» borra filtros, rango y búsqueda; el ✕ del buscador, solo el texto.
   const clearAll = () => {
-    setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
-    setMarca('all');setEra('all');setPrecioLo(priceBounds.min);setPrecioHi(priceBounds.max);setMecanismo('all');setDisponible('all');
+    Object.values(setters).forEach((set) => set('all'));
+    rango.reiniciar();
     setQuery('');
   };
-
-  const activeCount = [tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo].filter((v) => v !== 'all').length + ((precioLo > priceBounds.min || precioHi < priceBounds.max) ? 1 : 0);
-
-  const innerMax = { maxWidth: 1400, margin: '0 auto', width: '100%' };
-  const stickyTop = vp.isMobile ? 50 : 64;
+  const activeCount = Object.values(valores).filter((v) => v !== 'all').length + (rango.activo ? 1 : 0);
 
   return (
-    <div>
-      {/* ── HEADER VERDE — buscador + filtros colapsables ─────────────── */}
-      <div className="amx-catalogo-header amx-sobre-verde" style={{ position: 'sticky', top: stickyTop, zIndex: 30 }}>
-        <div style={innerMax}>
-          {/* Buscador estilo pill cristal (sobre verde, como en HOME) */}
-          <div className="amx-buscador amx-catalogo-busq">
-            <span aria-hidden="true" style={{ fontSize: 17, lineHeight: 1 }}>⌕</span>
-            <input value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Nombre, marca, calibre, país..."
-              aria-label="Buscar armas, marcas, calibres" />
-            {(query || activeCount > 0) &&
-              <button onClick={clearAll} aria-label="Limpiar búsqueda y filtros" style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: PALETTE.sobreMarca, fontSize: 16,
-                width: 44, minHeight: 44, borderRadius: 999
-              }}>✕</button>
-            }
-          </div>
-
-          {/* Contador de resultados */}
-          <div className="amx-catalogo-contador" aria-live="polite">
-            <span>▸ {filtered.length} {filtered.length === 1 ? 'ARMA' : 'ARMAS'}
-              {activeCount > 0 && ` · ${activeCount} filtro${activeCount > 1 ? 's' : ''} activo${activeCount > 1 ? 's' : ''}`}
-            </span>
-            <span>{window.DB.length} TOTAL</span>
-          </div>
-
-          {/* Filtros principales */}
-          <div className="amx-catalogo-filtros-princ">
-            <FilterSelect label="Tipo de arma" value={tipo} onChange={setTipo}
-              options={[{ value: 'all', label: 'Todas' }].concat(window.CATEGORIES.tipo.map((c) => ({ value: c.id, label: c.label })))} />
-            <FilterSelect label="Calibre" value={calibre} onChange={setCalibre}
-              options={[{ value: 'all', label: 'Todos' }].concat(window.CATEGORIES.calibre.map((c) => ({ value: c.id, label: c.label })))} />
-            <FilterSelect label="Armería" value={sucursal} onChange={setSucursal}
-              options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Estado de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
-            <FilterSelect label="Disponibilidad" value={disponible} onChange={setDisponible}
-              options={[{ value: 'all', label: 'Todas' }, { value: 'si', label: 'Con existencias' }, { value: 'no', label: 'Agotadas' }]} />
-          </div>
-
-          {/* Rango de precio */}
-          <div className="amx-catalogo-precio">
-            <PriceRange min={priceBounds.min} max={priceBounds.max} lo={precioLo} hi={precioHi} step={PRICE_STEP} capped={priceBounds.capped}
-              onChange={(lo, hi) => { setPrecioLo(lo); setPrecioHi(hi); }} />
-          </div>
-
-          {/* Toggle avanzados */}
-          <button className="amx-catalogo-filtros-toggle" onClick={() => setShowAdv((s) => !s)}>
-            {showAdv ? '▲ Cerrar filtros avanzados' : '▼ Filtros avanzados'}
-            {activeCount > 0 && ` · ${activeCount} activos`}
-          </button>
-
-          {/* Avanzados */}
-          {showAdv && (
-            <div className="amx-catalogo-filtros-adv">
-              <FilterSelect label="Uso" value={uso} onChange={setUso}
-                options={[{ value: 'all', label: 'Cualquiera' }].concat(window.CATEGORIES.uso.map((u) => ({ value: u.id, label: u.label })))} />
-              <FilterSelect label="Clasificación legal" value={avail} onChange={setAvail}
-                options={[{ value: 'all', label: 'Todas' }].concat(window.CATEGORIES.disponibilidad.map((d) => ({ value: d.id, label: d.label })))} />
-              <FilterSelect label="Marca" value={marca} onChange={setMarca}
-                options={[{ value: 'all', label: 'Todas' }].concat(marcas.map((m) => ({ value: m, label: m })))} />
-              <FilterSelect label="Mecanismo" value={mecanismo} onChange={setMecanismo}
-                options={[{ value: 'all', label: 'Todos' }, { value: 'semi', label: 'Semi-auto' }, { value: 'cerrojo', label: 'Cerrojo' }, { value: 'bomba', label: 'Bombeo' }, { value: 'revolver', label: 'Revólver' }, { value: 'sobrepuesta', label: 'Sobrepuesta' }]} />
-              <FilterSelect label="Era" value={era} onChange={setEra}
-                options={[{ value: 'all', label: 'Cualquiera' }, { value: 'clasico', label: 'Clásico' }, { value: 'moderno', label: 'Moderno' }, { value: 'vanguardia', label: 'Vanguardia' }]} />
-            </div>
-          )}
+    <div className="amx-catalogo">
+      {/* La banda verde, solo con el buscador. Sin sticky (§5.10): en móvil el
+          scroll lo lleva el cuerpo de app.jsx y `top: 50` bajaba la banda 50 px. */}
+      <div className="amx-banda-busqueda amx-sobre-verde">
+        <div className="amx-buscador">
+          <span className="amx-buscador-lupa" aria-hidden="true">⌕</span>
+          <input ref={buscadorRef} value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Nombre, marca, calibre, país..."
+            aria-label="Buscar armas, marcas, calibres" />
+          {query &&
+            <button type="button" className="amx-buscador-borrar"
+              onClick={() => { setQuery(''); buscadorRef.current && buscadorRef.current.focus(); }}
+              aria-label="Borrar la búsqueda">✕</button>
+          }
         </div>
       </div>
+
+      <window.TiraFiltros uid="catalogo"
+        orden={['tipo', 'calibre', 'sucursal', 'disponible', 'precio', 'mas']}
+        mas={['uso', 'avail', 'marca', 'mecanismo', 'era']}
+        filtros={filtros} valores={valores} onCambiar={(id, v) => setters[id](v)}
+        precio={rango} formato="miles" tituloPrecio="Precio"
+        conteo={{ n: filtered.length, nombres: ['arma', 'armas'] }}
+        activos={activeCount} hayTexto={!!query} onLimpiar={clearAll} />
 
       {/* Grid de armas — ya vintage (ArmaCard = expediente) */}
       <div className="amx-catalogo-grid">
@@ -684,78 +632,6 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
             Sin resultados.<br />Ajusta los filtros.
           </div>
         )}
-      </div>
-    </div>);
-
-}
-// Barra de rango de precio (doble manija, estilo Amazon): min–max
-function PriceRange({ min, max, lo, hi, step, capped, onChange }) {
-  const P = PALETTE;
-  const span = max > min ? max - min : 1;
-  const pct = (v) => ((Math.min(max, Math.max(min, v)) - min) / span) * 100;
-  const fmt = (v) => '$' + Math.round(v).toLocaleString('es-MX');
-  const hiLabel = (capped && hi >= max) ? (fmt(max) + '+') : fmt(hi);
-  const loPct = pct(lo), hiPct = pct(hi);
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.sobreMarcaMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: P.sobreMarca }}>{fmt(lo)} — {hiLabel}</span>
-      </div>
-      <div style={{ position: 'relative', height: 28 }}>
-        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: P.sobreMarcaMuted }} />
-        <div style={{ position: 'absolute', top: 12, left: loPct + '%', width: (hiPct - loPct) + '%', height: 4, background: P.sobreMarca }} />
-        <input type="range" className="amx-price-range" min={min} max={max} step={step} value={lo} aria-label="Precio mínimo"
-          onChange={(e) => { const v = Math.min(Number(e.target.value), hi - step); onChange(Math.max(min, v), hi); }} />
-        <input type="range" className="amx-price-range" min={min} max={max} step={step} value={hi} aria-label="Precio máximo"
-          onChange={(e) => { const v = Math.max(Number(e.target.value), lo + step); onChange(lo, Math.min(max, v)); }} />
-      </div>
-    </div>
-  );
-}
-window.PriceRange = PriceRange;
-
-// Menú desplegable de filtro (select nativo estilizado, fácil de navegar en móvil)
-function FilterSelect({ label, value, onChange, options }) {
-  const active = value !== 'all';
-  return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-      <span style={{
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.sobreMarcaMuted,
-        letterSpacing: '0.14em', textTransform: 'uppercase',
-      }}>{label}</span>
-      <div style={{ position: 'relative' }}>
-        <select value={value} onChange={(e) => onChange(e.target.value)} style={{
-          width: '100%', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-          background: PALETTE.bg, color: active ? PALETTE.amber : PALETTE.text,
-          border: `1px solid ${active ? PALETTE.sobreMarca : PALETTE.sobreMarcaMuted}`,
-          padding: '10px 28px 10px 10px', borderRadius: 0, cursor: 'pointer', outline: 'none',
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14, letterSpacing: '0.02em',
-        }}>
-          {options.map((o) => (
-            <option key={String(o.value)} value={o.value} style={{ background: PALETTE.bgElev, color: PALETTE.text }}>{o.label}</option>
-          ))}
-        </select>
-        <span aria-hidden="true" style={{
-          position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)',
-          pointerEvents: 'none', color: active ? PALETTE.sobreMarca : PALETTE.sobreMarcaMuted, fontSize: 12,
-        }}>▾</span>
-      </div>
-    </label>
-  );
-}
-window.FilterSelect = FilterSelect;
-function FilterRow({ label, children }) {
-  return (
-    <div style={{ marginBottom: 6 }}>
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.textMuted,
-        letterSpacing: '0.15em', textTransform: 'uppercase',
-        marginBottom: 4
-      }}>{label}</div>
-      <div style={{ display: 'flex', gap: 5, overflowX: 'auto', flexWrap: 'wrap' }}>
-        {children}
       </div>
     </div>);
 

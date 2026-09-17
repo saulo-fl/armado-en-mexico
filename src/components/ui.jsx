@@ -1667,36 +1667,6 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
 window.MiniSpec = MiniSpec;
 
 // ──────────────────────────────────────────────────────────────
-// FILTER CHIP — chip de filtro
-// ──────────────────────────────────────────────────────────────
-function FilterChip({ children, active, onClick, count }) {
-  return (
-    <button onClick={onClick} style={{
-      background: active ? PALETTE.amber : 'transparent',
-      color: active ? PALETTE.tintaSobreMarca : PALETTE.textDim,   // '#000' daba 1.69:1 sobre el verde
-      border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
-      padding: '10px 12px', minHeight: 44,
-      clipPath: CUT_TR_SM,
-      fontFamily: 'JetBrains Mono, monospace',
-      fontSize: 14.5, fontWeight: 600,
-      letterSpacing: '0.08em', textTransform: 'uppercase',
-      cursor: 'pointer',
-      whiteSpace: 'nowrap',
-      transition: 'all 0.15s',
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-    }}>
-      {children}
-      {count != null && (
-        <span style={{
-          fontSize: 13, opacity: 0.7,
-        }}>· {count}</span>
-      )}
-    </button>
-  );
-}
-window.FilterChip = FilterChip;
-
-// ──────────────────────────────────────────────────────────────
 // COMPARE FLOATING BAR — barra flotante de comparación
 // ──────────────────────────────────────────────────────────────
 function CompareFloat({ ids, onOpen, onElegir, onClear }) {
@@ -2142,35 +2112,13 @@ window.amxFmtManualDate = amxFmtManualDate;
 
 // ──────────────────────────────────────────────────────────────
 // CINTA DYMO — los títulos de sección fuera del folder
-// Cada letra lleva un salto de medio píxel, siempre el mismo para la misma
-// posición (nada aleatorio: el título no «tiembla» al re-renderizar). El
-// nombre accesible va entero en un span oculto; las letras sueltas se ocultan
-// al lector de pantalla, que si no las leería una por una.
+// Las letras van alineadas: Saulo retiró los saltos por letra el 16-sep-2026.
 // ──────────────────────────────────────────────────────────────
-const DYMO_SALTOS = [0, -0.6, 0.4, -0.2, 0.7, -0.4, 0.2, -0.7, 0.5];
-
-function CintaDymo({ children, nivel = 2, id }) {
-  const texto = String(children == null ? '' : children);
+// `chica`: la cinta de un tramo dentro de una sección (los cargadores de la
+// vitrina de accesorios, 16-sep-2026).
+function CintaDymo({ children, nivel = 2, id, chica = false }) {
   const Tag = 'h' + nivel;
-  let n = 0;
-  return (
-    <Tag className="amx-dymo" id={id}>
-      <span className="amx-sr">{texto}</span>
-      <span aria-hidden="true">
-        {texto.split(' ').map((palabra, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && ' '}
-            <span className="amx-dymo-palabra">
-              {Array.from(palabra).map((c) => {
-                const dy = DYMO_SALTOS[n++ % DYMO_SALTOS.length];
-                return <span key={n} className="amx-dymo-letra" style={{ '--dy': dy + 'px' }}>{c}</span>;
-              })}
-            </span>
-          </React.Fragment>
-        ))}
-      </span>
-    </Tag>
-  );
+  return <Tag className={'amx-dymo' + (chica ? ' amx-dymo--chica' : '')} id={id}>{children}</Tag>;
 }
 window.CintaDymo = CintaDymo;
 
@@ -3017,3 +2965,286 @@ function MostradorCalibres({ calibres, onAbrir }) {
   );
 }
 window.MostradorCalibres = MostradorCalibres;
+
+// ──────────────────────────────────────────────────────────────
+// LOS FILTROS DE LOS CATÁLOGOS (16-sep-2026)
+// Decidido con Saulo pregunta por pregunta y con maqueta (docs/DESIGN.md §5.10).
+// Armas y municiones: una tira de chips que se desliza; el chip sin filtro es
+// una etiqueta de papel y con filtro, la cinta Dymo rotulada con el valor y su
+// ✕. Cada chip abre DEBAJO una hoja que empuja el catálogo: casillas de
+// formulario (una sola opción), la regla de precio o los renglones de «Más».
+// Las cuentas viven en src/lib/filtros.js; la piel, en estilo.css, bloque del
+// mismo nombre.
+// ──────────────────────────────────────────────────────────────
+
+// El rango de precio de un catálogo. Los límites salen de los precios que dejan
+// los DEMÁS filtros (`precios`, memoizado por la pantalla) y el rango vuelve a
+// los límites cuando estos cambian: la regla de siempre del catálogo.
+function useRangoPrecio(precios, paso, tope) {
+  const limites = React.useMemo(() => window.amxLimitesPrecio(precios, { paso, tope }), [precios, paso, tope]);
+  const [rango, setRango] = React.useState([limites.min, limites.max]);
+  const previo = React.useRef(limites);
+  const cambio = previo.current.min !== limites.min || previo.current.max !== limites.max;
+  if (cambio) {
+    previo.current = limites;
+    setRango([limites.min, limites.max]);
+  }
+  const lo = cambio ? limites.min : rango[0];
+  const hi = cambio ? limites.max : rango[1];
+  return {
+    limites, lo, hi, paso,
+    activo: lo > limites.min || hi < limites.max,
+    cambiar: (a, b) => setRango([a, b]),
+    reiniciar: () => setRango([limites.min, limites.max]),
+    deja: (p) => window.amxDentroDePrecio(p, lo, hi, limites),
+  };
+}
+window.useRangoPrecio = useRangoPrecio;
+
+// Las opciones de un filtro: casillas de formulario, «Todos» primero. Una sola
+// opción; la marcada lleva ✕ dentro de su casilla (lo pone el CSS).
+function CasillasFiltro({ filtro, valor, onElegir }) {
+  const opciones = [{ id: 'all', label: filtro.todos }].concat(filtro.opciones);
+  return (
+    <div className="amx-casillas" role="radiogroup" aria-label={filtro.label}>
+      {opciones.map((o) => (
+        <button key={o.id} type="button" role="radio" aria-checked={valor === o.id}
+          className="amx-casilla" onClick={() => onElegir(o.id)}>
+          <span className="amx-casilla-caja" aria-hidden="true" />
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+window.CasillasFiltro = CasillasFiltro;
+
+// La regla de precio: marcas con número, el riel con el tramo elegido en tinta y
+// dos cursores sobre <input type="range"> nativos (dedo y teclado). Arriba queda
+// el cursor bajo cuando ya pasó de la mitad, para que siempre se pueda agarrar.
+function ReglaPrecio({ uid, precio, formato }) {
+  const { limites, lo, hi, paso } = precio;
+  const { min, max } = limites;
+  const ancho = max - min || 1;
+  const pct = (v) => ((v - min) / ancho) * 100;
+  const dicho = (v) => '$' + Math.round(v).toLocaleString('es-MX');
+  return (
+    <div className="amx-regla" style={{ '--lo': pct(lo) + '%', '--hi': pct(hi) + '%' }}>
+      <div className="amx-regla-marcas" aria-hidden="true">
+        {window.amxMarcasRegla(min, max, paso).map((m) => {
+          const x = pct(m.valor);
+          return (
+            <React.Fragment key={m.valor}>
+              <span className={'amx-regla-marca' + (m.mayor ? ' amx-regla-marca--mayor' : '')} style={{ '--x': x + '%' }} />
+              {m.mayor && (
+                <span className={'amx-regla-num' + (x < 6 ? ' amx-regla-num--ini' : x > 94 ? ' amx-regla-num--fin' : '')}
+                  style={{ '--x': x + '%' }}>{window.amxNumeroMarca(m.valor, limites, formato)}</span>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+      <div className="amx-regla-riel" aria-hidden="true" />
+      <input type="range" className="amx-regla-cursor" id={uid + '-precio-lo'}
+        min={min} max={max} step={paso} value={lo} aria-label="Precio mínimo"
+        aria-valuetext={dicho(lo)}
+        style={{ '--z': lo - min > ancho / 2 ? 3 : 1 }}
+        onChange={(e) => precio.cambiar(Math.max(min, Math.min(Number(e.target.value), hi - paso)), hi)} />
+      <input type="range" className="amx-regla-cursor" id={uid + '-precio-hi'}
+        min={min} max={max} step={paso} value={hi} aria-label="Precio máximo"
+        aria-valuetext={dicho(hi) + (limites.conTope && hi >= max ? '+' : '')}
+        style={{ '--z': 2 }}
+        onChange={(e) => precio.cambiar(lo, Math.min(max, Math.max(Number(e.target.value), lo + paso)))} />
+    </div>
+  );
+}
+window.ReglaPrecio = ReglaPrecio;
+
+// La tira completa: chips, la hoja del chip abierto y el renglón del conteo.
+//   uid         prefijo de ids (la hoja, los cursores)
+//   orden       ids de los chips en orden; 'precio' y 'mas' son especiales
+//   mas         ids que van en los renglones de «Más»
+//   filtros     { id: { label, chip?, todos, opciones: [{ id, label, corto? }] } }
+//   valores     { id: valor | 'all' } · onCambiar(id, valor)
+//   precio      lo que devuelve useRangoPrecio · formato 'miles' | 'pesos' · tituloPrecio
+//   conteo      { n, nombres: [singular, plural] } · activos · hayTexto · onLimpiar
+function TiraFiltros({ uid, orden, mas = [], filtros, valores, onCambiar, precio, formato, tituloPrecio,
+  conteo, activos, hayTexto, onLimpiar }) {
+  const [abierto, setAbierto] = React.useState(null);
+  const [renglon, setRenglon] = React.useState(null);
+  const tiraRef = React.useRef(null);
+  const hojaRef = React.useRef(null);
+  const chipsRef = React.useRef({});
+  const focoRef = React.useRef(null);
+  const antesRef = React.useRef(null);
+  const entra = abierto !== null && antesRef.current !== abierto;
+  const idHoja = uid + '-hoja';
+
+  const rotulo = (f, v) => { const o = f.opciones.find((x) => x.id === v); return o ? (o.corto || o.label) : v; };
+  const alternar = (id) => { setAbierto(abierto === id ? null : id); setRenglon(null); };
+  const cerrar = () => { focoRef.current = abierto; setAbierto(null); setRenglon(null); };
+  const elegir = (id, v) => { onCambiar(id, v); focoRef.current = id; setAbierto(null); };
+  const quitar = (id) => {
+    if (id === 'precio') precio.reiniciar(); else onCambiar(id, 'all');
+    focoRef.current = id;
+    if (abierto === id) setAbierto(null);
+  };
+
+  // La muesca bajo su chip, la hoja alineada con él en escritorio y el degradado
+  // del borde de la tira. Escribe custom properties: deslizar no re-renderiza.
+  const colocar = React.useCallback(() => {
+    const tira = tiraRef.current;
+    if (!tira) return;
+    tira.parentElement.style.setProperty('--fade', tira.scrollLeft + tira.clientWidth >= tira.scrollWidth - 2 ? '0' : '1');
+    const hoja = hojaRef.current;
+    const chip = abierto && chipsRef.current[abierto];
+    if (!hoja || !chip) return;
+    hoja.style.setProperty('--hoja-x', '0px');
+    const hueco = hoja.parentElement;
+    const h = hueco.getBoundingClientRect();
+    const margen = parseFloat(getComputedStyle(hueco).paddingLeft) || 0;
+    const c = chip.getBoundingClientRect();
+    const ancho = hoja.offsetWidth;
+    const x = Math.max(0, Math.min(c.left - h.left - margen, h.width - 2 * margen - ancho));
+    hoja.style.setProperty('--hoja-x', x + 'px');
+    hoja.style.setProperty('--muesca', Math.max(18, Math.min(c.left + c.width / 2 - (h.left + margen + x), ancho - 18)) + 'px');
+  }, [abierto]);
+
+  React.useLayoutEffect(() => {
+    const tira = tiraRef.current;
+    const chip = abierto && chipsRef.current[abierto];
+    if (entra && tira && chip) {
+      const izq = chip.offsetLeft - 16;
+      const der = chip.offsetLeft + chip.offsetWidth + 16 - tira.clientWidth;
+      if (izq < tira.scrollLeft) tira.scrollLeft = izq;
+      else if (der > tira.scrollLeft) tira.scrollLeft = der;
+    }
+    antesRef.current = abierto;
+    colocar();
+    if (focoRef.current) {
+      const el = chipsRef.current[focoRef.current];
+      focoRef.current = null;
+      const boton = el && (el.tagName === 'BUTTON' ? el : el.querySelector('button'));
+      if (boton) boton.focus({ preventScroll: true });
+    }
+  });
+  React.useEffect(() => {
+    window.addEventListener('resize', colocar);
+    return () => window.removeEventListener('resize', colocar);
+  }, [colocar]);
+
+  const pintarChip = (id) => {
+    const ab = abierto === id;
+    const ref = (el) => { chipsRef.current[id] = el; };
+    const flecha = <span className="amx-chip-flecha" aria-hidden="true">{ab ? '▴' : '▾'}</span>;
+    const abre = { type: 'button', 'aria-expanded': ab, 'aria-controls': idHoja, onClick: () => alternar(id) };
+    if (id === 'mas') {
+      const n = mas.filter((m) => valores[m] !== 'all').length;
+      return (
+        <button key={id} ref={ref} className={'amx-chip' + (ab ? ' amx-chip--abierto' : '')} {...abre}>
+          Más{n > 0 && <span className="amx-chip-n">· {n}</span>}{flecha}
+        </button>
+      );
+    }
+    const f = id === 'precio' ? { label: 'Precio' } : filtros[id];
+    const activo = id === 'precio' ? precio.activo : valores[id] !== 'all';
+    if (!activo) {
+      return (
+        <button key={id} ref={ref} className={'amx-chip' + (ab ? ' amx-chip--abierto' : '')} {...abre}>
+          {f.chip || f.label}{flecha}
+        </button>
+      );
+    }
+    const valor = id === 'precio' ? window.amxRotuloRango(precio.lo, precio.hi, precio.limites, formato) : rotulo(f, valores[id]);
+    return (
+      <span key={id} ref={ref} className={'amx-chip-dymo' + (ab ? ' amx-chip-dymo--abierto' : '')}>
+        <button className="amx-chip-dymo-valor" aria-label={f.label + ': ' + valor + '. Cambiar'} {...abre}>
+          {valor}{flecha}
+        </button>
+        <button type="button" className="amx-chip-dymo-quitar" aria-label={'Quitar ' + f.label} onClick={() => quitar(id)}>✕</button>
+      </span>
+    );
+  };
+
+  let hoja = null;
+  if (abierto) {
+    let titulo;
+    let cuerpo;
+    if (abierto === 'precio') {
+      titulo = tituloPrecio;
+      cuerpo = (
+        <React.Fragment>
+          <output className="amx-regla-lectura" htmlFor={uid + '-precio-lo ' + uid + '-precio-hi'}>
+            {window.amxLecturaRango(precio.lo, precio.hi, precio.limites)}
+          </output>
+          <ReglaPrecio uid={uid} precio={precio} formato={formato} />
+        </React.Fragment>
+      );
+    } else if (abierto === 'mas') {
+      titulo = 'Más filtros';
+      cuerpo = (
+        <div className="amx-mas-renglones">
+          {mas.map((id) => {
+            const f = filtros[id];
+            const ab = renglon === id;
+            const act = valores[id] !== 'all';
+            return (
+              <div key={id} className="amx-mas-grupo">
+                <button type="button" ref={(el) => { chipsRef.current['r-' + id] = el; }}
+                  className={'amx-mas-renglon' + (act ? ' amx-mas-renglon--activo' : '')}
+                  aria-expanded={ab} onClick={() => setRenglon(ab ? null : id)}>
+                  <span className="amx-mas-nombre">{f.label}</span>
+                  <span className="amx-mas-puntos" aria-hidden="true" />
+                  <span className="amx-mas-valor">{act ? rotulo(f, valores[id]) : f.todos}</span>
+                  <span className="amx-chip-flecha" aria-hidden="true">{ab ? '▾' : '▸'}</span>
+                </button>
+                {ab && (
+                  <CasillasFiltro filtro={f} valor={valores[id]}
+                    onElegir={(v) => { onCambiar(id, v); focoRef.current = 'r-' + id; setRenglon(null); }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else {
+      titulo = filtros[abierto].label;
+      cuerpo = <CasillasFiltro filtro={filtros[abierto]} valor={valores[abierto]} onElegir={(v) => elegir(abierto, v)} />;
+    }
+    hoja = (
+      <div className="amx-filtros-hueco">
+        <div ref={hojaRef} id={idHoja} role="region" aria-label={titulo}
+          className={'amx-hoja-filtro' + (entra ? ' amx-hoja-filtro--entra' : '')}>
+          <div className="amx-hoja-filtro-cab">
+            <span className="amx-hoja-filtro-titulo">{titulo}</span>
+            <button type="button" className="amx-filtros-enlace" onClick={cerrar}>Cerrar</button>
+          </div>
+          {cuerpo}
+        </div>
+      </div>
+    );
+  }
+
+  const texto = window.amxTextoConteo(conteo.n, activos, conteo.nombres);
+  return (
+    <div className="amx-filtros"
+      onKeyDown={(e) => { if (e.key === 'Escape' && abierto) { e.stopPropagation(); cerrar(); } }}>
+      <div className="amx-filtros-envoltura">
+        <div ref={tiraRef} className="amx-filtros-tira" role="group" aria-label="Filtros" onScroll={colocar}>
+          {orden.map((id) => pintarChip(id))}
+        </div>
+      </div>
+      {hoja}
+      <div className="amx-filtros-conteo">
+        <p className="amx-filtros-conteo-texto" aria-live="polite">
+          <span aria-hidden="true">▸ </span><b>{texto.cifra}</b> {texto.resto}
+        </p>
+        {(activos > 0 || hayTexto) && (
+          <button type="button" className="amx-filtros-enlace"
+            onClick={() => { setAbierto(null); setRenglon(null); focoRef.current = orden[0]; onLimpiar(); }}>Limpiar</button>
+        )}
+      </div>
+    </div>
+  );
+}
+window.TiraFiltros = TiraFiltros;
