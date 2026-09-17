@@ -2142,35 +2142,13 @@ window.amxFmtManualDate = amxFmtManualDate;
 
 // ──────────────────────────────────────────────────────────────
 // CINTA DYMO — los títulos de sección fuera del folder
-// Cada letra lleva un salto de medio píxel, siempre el mismo para la misma
-// posición (nada aleatorio: el título no «tiembla» al re-renderizar). El
-// nombre accesible va entero en un span oculto; las letras sueltas se ocultan
-// al lector de pantalla, que si no las leería una por una.
+// Las letras van alineadas: Saulo retiró los saltos por letra el 16-sep-2026.
 // ──────────────────────────────────────────────────────────────
-const DYMO_SALTOS = [0, -0.6, 0.4, -0.2, 0.7, -0.4, 0.2, -0.7, 0.5];
-
-function CintaDymo({ children, nivel = 2, id }) {
-  const texto = String(children == null ? '' : children);
+// `chica`: la cinta de un tramo dentro de una sección (los cargadores de la
+// vitrina de accesorios, 16-sep-2026).
+function CintaDymo({ children, nivel = 2, id, chica = false }) {
   const Tag = 'h' + nivel;
-  let n = 0;
-  return (
-    <Tag className="amx-dymo" id={id}>
-      <span className="amx-sr">{texto}</span>
-      <span aria-hidden="true">
-        {texto.split(' ').map((palabra, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && ' '}
-            <span className="amx-dymo-palabra">
-              {Array.from(palabra).map((c) => {
-                const dy = DYMO_SALTOS[n++ % DYMO_SALTOS.length];
-                return <span key={n} className="amx-dymo-letra" style={{ '--dy': dy + 'px' }}>{c}</span>;
-              })}
-            </span>
-          </React.Fragment>
-        ))}
-      </span>
-    </Tag>
-  );
+  return <Tag className={'amx-dymo' + (chica ? ' amx-dymo--chica' : '')} id={id}>{children}</Tag>;
 }
 window.CintaDymo = CintaDymo;
 

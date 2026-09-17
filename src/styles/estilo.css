@@ -2483,9 +2483,8 @@
 .amx-v2 .amx-usos li:nth-child(3n)     .amx-sello { transform: rotate(-2deg); }
 
 /* ── LA CINTA DYMO — los títulos fuera del folder ──────────────────────────
-   Cinta negra y letras en relieve. Cada letra va en su span con un salto de
-   medio píxel —la rotuladora nunca las alinea— y cada PALABRA en una caja que
-   no se parte, para que un título largo baje de línea entre palabras. */
+   Cinta negra y letras en relieve, alineadas en un solo renglón (Saulo retiró
+   el salto por letra el 16-sep-2026). */
 .amx-v2 .amx-dymo {
   display: inline-block;
   max-width: 100%;
@@ -2501,15 +2500,20 @@
   letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--dymo-letra);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .2);
   transform: rotate(-.8deg);
 }
 @media (min-width: 1024px) { .amx-v2 .amx-dymo { font-size: 16px; padding: 8px 16px 7px; } }
-.amx-v2 .amx-dymo-palabra { display: inline-block; white-space: nowrap; }
-.amx-v2 .amx-dymo-letra {
-  display: inline-block;
-  transform: translateY(var(--dy, 0));
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .2);
+
+/* La cinta chica: el tramo dentro de una sección (los cargadores de la vitrina de
+   accesorios por tipo de arma y calibre, 16-sep-2026). Misma cinta, un punto menos. */
+.amx-v2 .amx-dymo--chica {
+  margin-bottom: var(--e3);
+  padding: 5px 10px 4px;
+  font-size: 12px;
+  letter-spacing: .16em;
 }
+@media (min-width: 1024px) { .amx-v2 .amx-dymo--chica { padding: 6px 12px 5px; font-size: 13px; } }
 
 /* ── LA VITRINA — munición y accesorios compatibles ────────────────────────
    Un mueble de tienda con dos repisas: arriba la munición, abajo los
@@ -3817,6 +3821,7 @@
 }
 
 .amx-v2 .amx-vitrina-acc-seccion + .amx-vitrina-acc-seccion { margin-top: var(--e5); }
+.amx-v2 .amx-vitrina-acc-tramo + .amx-vitrina-acc-tramo { margin-top: var(--e4); }
 
 /* LA MESA, POR FILA. En el Home la tabla va en cada puesto (`::after`) y cuatro
    seguidos forman la mesa; aquí una fila puede quedarse corta —Empuñaduras tiene
