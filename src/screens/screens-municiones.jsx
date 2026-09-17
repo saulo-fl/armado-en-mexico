@@ -264,6 +264,7 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
   const padX = vp.isDesktop ? 28 : 16;
 
   const [query, setQuery] = useStateMun('');
+  const buscadorRef = React.useRef(null);
   const [categoria, setCategoria] = useStateMun((initialFilter && initialFilter.categoria) || 'all');
   const [avail, setAvail] = useStateMun('all');
   const [marca, setMarca] = useStateMun('all');
@@ -296,7 +297,7 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
 
   const filtros = useMemoMun(() => ({
     calibre: { label: 'Calibre', todos: 'Todos', opciones: cats.map((c) => ({ id: c.id, label: c.label })) },
-    avail: { label: 'Disponibilidad', todos: 'Toda', opciones: disp.map((d) => ({ id: d.id, label: d.label })) },
+    avail: { label: 'Disponibilidad', todos: 'Todas', opciones: disp.map((d) => ({ id: d.id, label: d.label })) },
     marca: { label: 'Marca', todos: 'Todas', opciones: marcas.map((m) => ({ id: m, label: m })) },
   }), [cats, disp, marcas]);
   const valores = { calibre: categoria, avail, marca };
@@ -326,11 +327,12 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
       <div className="amx-banda-busqueda amx-sobre-verde">
         <div className="amx-buscador">
           <span className="amx-buscador-lupa" aria-hidden="true">⌕</span>
-          <input value={query} onChange={(e) => setQuery(e.target.value)}
+          <input ref={buscadorRef} value={query} onChange={(e) => setQuery(e.target.value)}
             placeholder="Calibre, marca o tipo de bala…"
             aria-label="Buscar municiones por calibre, marca o tipo de bala" />
           {query &&
-            <button type="button" className="amx-buscador-borrar" onClick={() => setQuery('')}
+            <button type="button" className="amx-buscador-borrar"
+              onClick={() => { setQuery(''); buscadorRef.current && buscadorRef.current.focus(); }}
               aria-label="Borrar la búsqueda">✕</button>
           }
         </div>

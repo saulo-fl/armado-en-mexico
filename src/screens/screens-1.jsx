@@ -501,6 +501,7 @@ function promoBtnStyle() {
 // §5.10): aquí solo vive el estado de cada filtro y la regla de qué arma pasa.
 function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare }) {
   const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
+  const buscadorRef = React.useRef(null);
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
   const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : (initialFilter?.sucursal || 'all'));
@@ -597,12 +598,13 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       <div className="amx-banda-busqueda amx-sobre-verde">
         <div className="amx-buscador">
           <span className="amx-buscador-lupa" aria-hidden="true">⌕</span>
-          <input value={query}
+          <input ref={buscadorRef} value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Nombre, marca, calibre, país..."
             aria-label="Buscar armas, marcas, calibres" />
           {query &&
-            <button type="button" className="amx-buscador-borrar" onClick={() => setQuery('')}
+            <button type="button" className="amx-buscador-borrar"
+              onClick={() => { setQuery(''); buscadorRef.current && buscadorRef.current.focus(); }}
               aria-label="Borrar la búsqueda">✕</button>
           }
         </div>

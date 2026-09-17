@@ -3099,6 +3099,7 @@ function TiraFiltros({ uid, orden, mas = [], filtros, valores, onCambiar, precio
     const hoja = hojaRef.current;
     const chip = abierto && chipsRef.current[abierto];
     if (!hoja || !chip) return;
+    hoja.style.setProperty('--hoja-x', '0px');
     const hueco = hoja.parentElement;
     const h = hueco.getBoundingClientRect();
     const margen = parseFloat(getComputedStyle(hueco).paddingLeft) || 0;
@@ -3240,7 +3241,7 @@ function TiraFiltros({ uid, orden, mas = [], filtros, valores, onCambiar, precio
         </p>
         {(activos > 0 || hayTexto) && (
           <button type="button" className="amx-filtros-enlace"
-            onClick={() => { setAbierto(null); setRenglon(null); onLimpiar(); }}>Limpiar</button>
+            onClick={() => { setAbierto(null); setRenglon(null); focoRef.current = orden[0]; onLimpiar(); }}>Limpiar</button>
         )}
       </div>
     </div>
