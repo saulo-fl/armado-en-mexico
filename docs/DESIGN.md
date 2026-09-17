@@ -249,20 +249,9 @@ ARSENAL
 
 [ Buscar... ]
 
-[Filtros]
+[Tipo ▾][Calibre ▾][Armería ▾] →
 ```
-Filtros:
-Tipo.
-Fabricante.
-País.
-Año.
-Calibre.
-Acción.
-Estado/estatus, si aplica.
-No cargar todos los filtros simultáneamente en móvil.
-Usar:
-FILTRAR
-que abre un bottom sheet.
+Filtros: los de §5.10 (16-sep-2026), que sustituyen al «FILTRAR que abre un bottom sheet» que pedía este brief.
 ---
 9. Listado de armas
 Cada resultado debe ser una card.
@@ -1109,7 +1098,8 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   milimétrico con su registro y los anexos grapados (historial y PDFs); los separadores con la
   hoja de oficio (Legalidad · Usos · Antecedentes). Fuera del folder: la vitrina con dos repisas
   (munición y accesorios), la tele de los 80 (video), la tarjeta de comentarios y los expedientes
-  de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra.
+  de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra. Las letras van
+  alineadas: Saulo retiró los saltos por letra de todas las cintas del sitio el 16-sep-2026.
 - **Intensidad: papelería física, sin texturas.** Se permiten clips, grapas, cinta canela,
   perforaciones, papel autocopiante, cinta rotuladora y líneas de corte, dibujados en CSS o como
   recortes ligeros. Sigue prohibido lo de §27 («texturas de papel fuertes») y lo de §3: ningún
@@ -1183,6 +1173,9 @@ las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estil
   con piezas, sin número y sin quedarse fijos. La pestaña vive en la URL (`/accesorios`, `/cargadores`…) y cambiarla
   reemplaza la dirección en vez de apilarla.
 - **Secciones por categoría** con cinta Dymo sin número; dentro, **orden alfabético por nombre corto**.
+- **Los cargadores van en tramos** (16-sep-2026), también con «Todas»: por tipo de arma (Pistolas; Rifles, con los
+  fusiles; Escopetas) y dentro por calibre, cada tramo con su cinta Dymo chica (`<h3>`). `.223 Rem` y `5.56` van
+  aparte. El tramo de cada cargador vive en `ACC_TRAMO` (`data-accesorios.js`) y `auditar.js` falla si falta.
 - **Un puesto por pieza:** letrero de tianguis con **solo el nombre corto** (`corto`, máximo 2 renglones a 360 px; el
   `aria-label` es el nombre corto seguido del nombre completo, para que quien dicta lo que ve pueda activarlo), la
   vara y la **pieza sola**. Sin precio, sello ni existencias: eso vive en la ficha. Sin foto, la silueta de su
@@ -1236,6 +1229,31 @@ piel, en `estilo.css`, con el mismo nombre.
 - **Calibre es un mostrador que se desliza:** una sola tabla con los calibres que tienen armas, cada cartucho a escala
   de su largo real y con su etiqueta de cartón (nombre y armas). Sin foto, la silueta de pie. El ancho de celda sale
   del de la pantalla para que siempre asome el siguiente calibre.
+
+### 5.10 Los filtros de los catálogos (16-sep-2026)
+
+Decidido con Saulo pregunta por pregunta, con maqueta (rama `Opus-5/RED-Filtros`). Las cuentas viven en
+`src/lib/filtros.js`, con su prueba (`node --test scripts/filtros.test.mjs`); las piezas, en `ui.jsx`, bloque «LOS
+FILTROS DE LOS CATÁLOGOS»; la piel, en `estilo.css`, con el mismo nombre. Armas y municiones; Accesorios conserva
+sus separadores (§5.7).
+
+- **La banda verde solo lleva el buscador**, y su ✕ borra solo el texto. **Nada se queda fijo** al bajar. En móvil
+  el scroll lo lleva el cuerpo de `app.jsx`: un `sticky` con `top: 50` dejaba una franja vacía de 50 px.
+- **Una tira de chips que se desliza de lado**, igual en escritorio, con un degradado en el borde mientras hay más.
+  Armas: Tipo · Calibre · Armería · Disponibilidad · Precio · Más. Municiones: Calibre · Disponibilidad · Marca ·
+  Precio; su título y su aviso quedan arriba de la banda.
+- **Chip sin filtro: etiqueta de papel** con sombra, sin borde. **Con filtro: la cinta Dymo** rotulada con el valor y
+  su ✕, que lo quita sin abrir nada.
+- **Cada chip abre debajo una hoja que empuja el catálogo**, con una muesca hacia su chip. Se cierra al elegir, con
+  «Cerrar», con Esc o con su chip; tocar fuera no la cierra. En escritorio mide como máximo 560 px y se alinea bajo
+  su chip.
+- **Las opciones son casillas de formulario** en columnas parejas; una sola por filtro, marcada con ✕.
+- **El precio es una regla** con marcas y dos cursores: paso $1,000 y tope «$100,000+» en armas; por cartucho y sin
+  tope en municiones. Sus límites salen de los demás filtros y cambiar uno reinicia el rango.
+- **«Más»** (armas) abre Uso, Clasificación legal, Marca, Mecanismo y Era como renglones de formulario con puntos
+  guía; elegir cierra el renglón y deja la hoja abierta.
+- **Conteo y «Limpiar»** en un renglón bajo la tira («▸ 227 ARMAS · 1 FILTRO», sin total). «Limpiar» borra filtros,
+  precio y búsqueda, y solo sale si hay algo puesto.
 
 ---
 
@@ -1292,7 +1310,7 @@ Es un sitio publicado, divulgativo y con contenido de referencia legal.
 ## 8. Cómo se trabaja
 
 1. **Nunca sobre las 321 páginas.** Se itera en una página de galería con todos los primitivos.
-2. **Las primitivas antes que las pantallas.** Las ~15 de `ui.jsx` (`ArmaCard`, `FilterChip`,
+2. **Las primitivas antes que las pantallas.** Las ~15 de `ui.jsx` (`ArmaCard`, `TiraFiltros`,
    `AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`…) propagan solas a todo el sitio.
    Las pantallas solo las componen.
 3. **La piel va al CSS, el layout se queda inline.** Una propiedad vive en un sitio o en el otro,
