@@ -2331,10 +2331,15 @@
    archivero: la de delante se une a su hoja; las de detrás van un papel más
    gastadas y un punto más abajo, metidas en el folder. */
 .amx-v2 .amx-separadores { min-width: 0; }
+/* Las de detrás bajan 5px (translateY) y se salían de la tira: con overflow-x
+   auto el navegador pone overflow-y auto, y esos 5px de más dejaban arrastrar
+   la tira hacia arriba en iPhone (Saulo, 17-sep-2026). El padding de abajo los
+   mete dentro de la caja y el margen negativo deja la hoja donde estaba. */
 .amx-v2 .amx-separadores-pestanas {
   display: flex;
   gap: 4px;
-  padding: 0 0 0 10px;
+  padding: 0 0 5px 10px;
+  margin-bottom: -5px;
   overflow-x: auto;
   scrollbar-width: none;
 }
