@@ -441,6 +441,55 @@ const ACC_CORTO = {
 };
 window.ACCESORIOS.forEach(a => { a.corto = ACC_CORTO[a.id] || ''; });
 
+// ── Tramos de los cargadores (16-sep-2026) ───────────────────────────────────
+// Saulo: «los cargadores deben tener sub-separaciones ya que son muchos… agrupado
+// todo por tipo de arma + calibre». La vitrina parte la sección en tramos con su
+// cinta Dymo chica (docs/DESIGN.md §5.7). Tipos: Pistolas, Rifles (los fusiles van
+// aquí) y Escopetas; .223 Rem y 5.56 van separados, como dicen los inventarios.
+// Los dos que no traen calibre en el dato:
+//   106 IWI Jericho  → 9mm      dcam-accesorios-2026-09-11.pdf: «JERICHO II 9mm … CALIBRE 9X19 MM»
+//   104 Benelli MR1  → .223 Rem el único rifle MR1 del inventario, «RIFLE CAL.223" REM BENELLI MR1»
+//                               (dcam-existencias-2026-09-11.pdf); la línea del cargador no lo dice.
+// Al dar de alta un cargador, añade aquí su tramo: auditar.js falla si falta.
+const ACC_TRAMO_ARMAS = [['pistola', 'Pistolas'], ['rifle', 'Rifles'], ['escopeta', 'Escopetas']];
+const ACC_TRAMO_CALIBRES = ['.22 LR', '.380 ACP', '9mm', '.40 S&W', '.223 Rem', '5.56', '12 GA', '20 GA'];
+const ACC_TRAMO = {
+  101: ['rifle', '.22 LR'],      102: ['rifle', '.22 LR'],      103: ['rifle', '5.56'],
+  104: ['rifle', '.223 Rem'],    105: ['pistola', '.380 ACP'],  106: ['pistola', '9mm'],
+  107: ['pistola', '9mm'],       108: ['pistola', '9mm'],       109: ['pistola', '9mm'],
+  110: ['pistola', '9mm'],       111: ['rifle', '.22 LR'],      112: ['pistola', '.380 ACP'],
+  113: ['pistola', '.380 ACP'],  114: ['pistola', '9mm'],       115: ['rifle', '5.56'],
+  116: ['rifle', '5.56'],        117: ['rifle', '5.56'],        118: ['pistola', '.380 ACP'],
+  119: ['pistola', '.22 LR'],    120: ['pistola', '9mm'],       121: ['pistola', '9mm'],
+  122: ['pistola', '.40 S&W'],   123: ['pistola', '9mm'],       124: ['pistola', '.22 LR'],
+  125: ['pistola', '.22 LR'],    126: ['escopeta', '12 GA'],    127: ['escopeta', '20 GA'],
+  128: ['pistola', '9mm'],       129: ['pistola', '.380 ACP'],  130: ['pistola', '.22 LR'],
+  131: ['rifle', '.22 LR'],      132: ['pistola', '.380 ACP'],  133: ['rifle', '5.56'],
+  134: ['pistola', '.380 ACP'],
+};
+window.ACCESORIOS.forEach((a) => {
+  const t = ACC_TRAMO[a.id];
+  if (t) { a.arma = t[0]; a.calibreTramo = t[1]; }
+});
+window.ACCESORIO_TRAMOS = { armas: ACC_TRAMO_ARMAS, calibres: ACC_TRAMO_CALIBRES };
+
+// Los tramos de una sección de cargadores (piezas ya ordenadas por nombre corto):
+// por tipo de arma y, dentro, por calibre, en el orden de arriba. Si alguna pieza
+// no tiene un tramo válido devuelve null —la sección se pinta entera, como antes—
+// para no perderla de la vitrina.
+const _accTramos = (piezas) => {
+  const valido = (a) => ACC_TRAMO_ARMAS.some(([id]) => id === a.arma) && ACC_TRAMO_CALIBRES.includes(a.calibreTramo);
+  if (!piezas.every(valido)) return null;
+  const tramos = [];
+  ACC_TRAMO_ARMAS.forEach(([arma, nombre]) => ACC_TRAMO_CALIBRES.forEach((cal) => {
+    const deTramo = piezas.filter((a) => a.arma === arma && a.calibreTramo === cal);
+    if (deTramo.length) {
+      tramos.push({ id: arma + '-' + cal.replace(/[^a-z0-9]/gi, '').toLowerCase(), label: nombre + ' · ' + cal, piezas: deTramo });
+    }
+  }));
+  return tramos;
+};
+
 // ── Foto de la pieza (15-sep-2026) ───────────────────────────────────────────
 // La pieza sola, recortada con alfa sobre lienzo 1:1, aprobada por Saulo en la hoja
 // de contactos. El bloque lo reescribe `accesorios.py aplicar` (skill fotos-producto)
@@ -476,15 +525,15 @@ window.ACCESORIOS.forEach(a => { if (ACC_FOTO[a.id]) a.img = ACC_FOTO[a.id]; });
 // Las secciones de /accesorios: solo categorías con piezas, en el orden de
 // ACCESORIO_CATEGORIES, y dentro de cada una por nombre corto. Si `categoria` no
 // es una sección con piezas ('all', vacía, desconocida) devuelve todas. Pura:
-// sin DOM ni React. Prueba: scripts/vitrina.test.mjs.
+// sin DOM ni React. Los cargadores llevan además sus tramos (_accTramos); las demás, tramos: null.
+// Prueba: scripts/vitrina.test.mjs.
 window.accesoriosVitrina = function (categoria, lista = window.ACCESORIOS, cats = window.ACCESORIO_CATEGORIES.categoria) {
   const todas = cats
-    .map((c) => ({
-      id: c.id,
-      label: c.label,
-      piezas: lista.filter((a) => a.categoria === c.id)
-        .sort((x, y) => String(x.corto).localeCompare(String(y.corto), 'es')),
-    }))
+    .map((c) => {
+      const piezas = lista.filter((a) => a.categoria === c.id)
+        .sort((x, y) => String(x.corto).localeCompare(String(y.corto), 'es'));
+      return { id: c.id, label: c.label, piezas, tramos: c.id === 'cargadores' ? _accTramos(piezas) : null };
+    })
     .filter((s) => s.piezas.length);
   const una = todas.filter((s) => s.id === categoria);
   return una.length ? una : todas;
