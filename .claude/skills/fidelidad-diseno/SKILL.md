@@ -48,7 +48,7 @@ a CSS, la skill `migrar-a-css`.
   con el acento de un selector de «facción»: el color salía bien en el primer paint y mal a
   partir del segundo render, y ninguna auditoría estática lo veía. Si vuelve a aparecer una
   asignación a `PALETTE.*` fuera de `ui.jsx`, es un bug.
-- Primitivas reutilizables (`ui.jsx`): `FilterChip`, `FilterSelect`, `PriceRange`,
+- Primitivas reutilizables (`ui.jsx`): `TiraFiltros`, `CasillasFiltro`, `ReglaPrecio`,
   `AvailBadge`, `PriceLevel`, `SectionHeader`, `ArmaCard`, `BottomNav`, `HCarousel`,
   `CountryFlag`, `LogoMarca`. Reúsalas; no reinventes estilos por pantalla.
   (`TacticalCorners` y `CUT_TR` siguen existiendo pero **ya no pintan**: eran el esqueleto
@@ -123,8 +123,8 @@ a CSS, la skill `migrar-a-css`.
 ## Decisiones de producto ya tomadas (respétalas)
 - El arsenal abre en un HUB por categorías (`ArsenalHubScreen`), no lista plana.
 - Encabezados del hub sin "Por": Armería, Disponibilidad, Tipo de arma, Uso, Calibre.
-- Filtros del listado = menús desplegables (`FilterSelect`) + barra de precio min/máx
-  dinámica con tope $100k ("$100k+"), NO chips flotantes.
+- Filtros del listado = tira de chips de papel/cinta Dymo con ✕, hoja que empuja con
+  casillas, regla de precio y «Más» (`TiraFiltros`, docs/DESIGN.md §5.10).
 - Las tarjetas de arma ya NO llevan etiqueta de tipo sobre la imagen (redundante).
 - El "precio actual" de la ficha se toma del último registro del historial.
 

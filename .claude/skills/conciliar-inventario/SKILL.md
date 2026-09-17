@@ -129,6 +129,11 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
   en `ACC_CORTO` (`data-accesorios.js`): lo que rotula el letrero de su puesto en la vitrina de
   `/accesorios` — la plataforma a la que sirve, con marca si cabe, calibre solo para
   desempatar, máximo 2 renglones a 360 px. `auditar.js` falla si falta o se repite.
+- **(16-sep-2026) Tramo de los cargadores.** Al dar de alta un cargador, añade su entrada en
+  `ACC_TRAMO` (`data-accesorios.js`): `[tipo de arma, calibre]` con los valores de
+  `ACC_TRAMO_ARMAS` y `ACC_TRAMO_CALIBRES` (un calibre nuevo se añade ahí, en su orden). Si el
+  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente junto a la tabla.
+  `auditar.js` falla si falta.
 
 ## 4) Verificar (obligatorio antes de commitear)
 Invoca el skill `verificar-app` o corre `scripts/auditar.js`:

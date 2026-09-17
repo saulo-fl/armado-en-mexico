@@ -135,6 +135,9 @@ const TEXTO = [
   ['blanco sobre el rojo de relleno',  '--blanco', '--rojo', 4.5],
   ['placeholder sobre el papel',       '--placeholder', '--papel', 4.5],
   ['gris-2 (gráfico) sobre el papel',  '--gris-2', '--papel', 3],
+  ['tinta sobre la hoja de filtro',    '--tinta', '--hoja-filtro', 4.5],
+  ['tinta-2 sobre la hoja de filtro',  '--tinta-2', '--hoja-filtro', 4.5],
+  ['casilla y marca sobre la hoja',    '--hair-hi', '--hoja-filtro', 3],
 ];
 
 const MARCA = [
