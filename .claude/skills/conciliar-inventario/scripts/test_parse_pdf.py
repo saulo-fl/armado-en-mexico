@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# Armado en México — Copyright (C) 2026 Saulo Flores León
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 """Autochequeo de parse_pdf.py contra PDFs ya versionados en public/inventarios/.
 Uso (desde la raiz del repo):  python3 .claude/skills/conciliar-inventario/scripts/test_parse_pdf.py
 Falla con AssertionError si el parser deja de leer bien el formato DCAM de 3 PDFs (11-sep-2026)

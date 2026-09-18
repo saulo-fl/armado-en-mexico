@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — prerender estático + sitemap + robots
 // ============================================================================
 // Emite un .html REAL por cada URL de la app, con su <title>, description,
@@ -150,7 +155,7 @@ const migas = (items) => ({
   '@type': 'BreadcrumbList',
   itemListElement: items.map((it, i) => ({
     '@type': 'ListItem', position: i + 1, name: it.nombre,
-    ...(it.ruta ? { item: `${SITIO}/${it.ruta}`.replace(/\/$/, '/') } : {}),
+    ...(it.ruta ? { item: `${SITIO}/${it.ruta}` } : {}),
   })),
 });
 

@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // GUARDIA DEL ARNÉS — hook PreToolUse para Bash y PowerShell (13-sep-2026).
 //
 // Por qué existe: las reglas `deny` de settings casan por PREFIJO y solo miran la

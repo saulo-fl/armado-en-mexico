@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Pantallas de MUNICIONES (cartuchos)
 // Card, sección de Home (carrusel de calibres de entrada), catálogo con filtros y ficha
 // con precio + historial de inventarios (mismo patrón que armas/accesorios).
@@ -248,8 +253,10 @@ function HomeMunicionesSection({ onNav }) {
 window.HomeMunicionesSection = HomeMunicionesSection;
 
 // ════════════════════════════════════════════════════════════════
-// CATÁLOGO DE MUNICIONES — filtros + buscador + grid agrupado por calibre
+// CATÁLOGO DE MUNICIONES — título, aviso, filtros y listado agrupado por calibre
 // ════════════════════════════════════════════════════════════════
+// Los filtros son la tira de chips de TiraFiltros (ui.jsx, docs/DESIGN.md §5.10);
+// el título y el aviso quedan arriba de la banda del buscador (Saulo, 16-sep-2026).
 function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
   const P = window.PALETTE;
   const vp = window.useViewport();
@@ -257,22 +264,22 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
   const padX = vp.isDesktop ? 28 : 16;
 
   const [query, setQuery] = useStateMun('');
+  const buscadorRef = React.useRef(null);
   const [categoria, setCategoria] = useStateMun((initialFilter && initialFilter.categoria) || 'all');
   const [avail, setAvail] = useStateMun('all');
   const [marca, setMarca] = useStateMun('all');
-  const [precio, setPrecio] = useStateMun('all');
 
   const todos = window.MUNICIONES || [];
   const marcas = useMemoMun(() => Array.from(new Set(todos.map(m => m.marca))).sort(), [todos]);
   const cats = window.MUNICION_CATEGORIES.categoria;
   const disp = window.MUNICION_CATEGORIES.disponibilidad;
 
-  const filtered = useMemoMun(() => {
+  // Todo menos el precio: de aquí salen los límites de la regla.
+  const base = useMemoMun(() => {
     return todos.filter(m => {
       if (categoria !== 'all' && m.calibre !== categoria) return false;
       if (avail !== 'all' && m.avail !== avail) return false;
       if (marca !== 'all' && m.marca !== marca) return false;
-      if (precio !== 'all' && String(m.priceLvl) !== precio) return false;
       if (query) {
         const q = query.toLowerCase();
         const hay = (m.nombre + ' ' + m.marca + ' ' + m.calibre + ' ' + m.bala + ' ' + m.dcamRef).toLowerCase();
@@ -280,29 +287,27 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
       }
       return true;
     });
-  }, [query, categoria, avail, marca, precio, todos]);
+  }, [query, categoria, avail, marca, todos]);
 
-  const clearAll = () => { setQuery(''); setCategoria('all'); setAvail('all'); setMarca('all'); setPrecio('all'); };
-  const anyFilter = query || categoria !== 'all' || avail !== 'all' || marca !== 'all' || precio !== 'all';
+  // Precio por cartucho: paso $1 y sin tope.
+  const precios = useMemoMun(() => base.map((m) => window.amxPrecioNumero(m.priceExact)), [base]);
+  const rango = window.useRangoPrecio(precios, 1, 0);
+  const filtered = useMemoMun(() => base.filter((m) => rango.deja(window.amxPrecioNumero(m.priceExact))),
+    [base, rango.lo, rango.hi, rango.limites]);
 
-  const selStyle = {
-    background: P.bg, color: P.text, border: `1px solid ${P.border}`,
-    padding: '11px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
-    letterSpacing: '0.04em', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    flex: '1 1 160px', minWidth: 0,
-  };
-  const chip = (active) => ({
-    // P.amber es el VERDE de marca #173A32: el negro encima daba 1.69:1. Crema 10.83:1.
-    background: active ? P.amber : 'transparent', color: active ? P.tintaSobreMarca : P.textDim,
-    border: `1px solid ${active ? P.amber : P.border}`,
-    padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
-    letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-    display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: active ? 700 : 400,
-  });
+  const filtros = useMemoMun(() => ({
+    calibre: { label: 'Calibre', todos: 'Todos', opciones: cats.map((c) => ({ id: c.id, label: c.label })) },
+    avail: { label: 'Disponibilidad', todos: 'Todas', opciones: disp.map((d) => ({ id: d.id, label: d.label })) },
+    marca: { label: 'Marca', todos: 'Todas', opciones: marcas.map((m) => ({ id: m, label: m })) },
+  }), [cats, disp, marcas]);
+  const valores = { calibre: categoria, avail, marca };
+  const setters = { calibre: setCategoria, avail: setAvail, marca: setMarca };
+  const activos = Object.values(valores).filter((v) => v !== 'all').length + (rango.activo ? 1 : 0);
+
+  const clearAll = () => { setQuery(''); setCategoria('all'); setAvail('all'); setMarca('all'); rango.reiniciar(); };
 
   return (
-    <div style={{ paddingBottom: 90 }}>
+    <div className="amx-municiones-catalogo" style={{ paddingBottom: 90 }}>
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `20px ${padX}px 0`, boxSizing: 'border-box' }}>
         <div style={{
           fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
@@ -319,62 +324,26 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onNav }) {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `16px ${padX}px 0`, boxSizing: 'border-box' }}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar por calibre, marca o tipo de bala…"
-          style={{
-            width: '100%', boxSizing: 'border-box', background: P.bg, color: P.text,
-            border: `1px solid ${P.border}`, padding: '11px 14px', marginBottom: 12,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 17, letterSpacing: '0.03em',
-          }} />
-
-        <div className="amx-hscroll" style={{
-          display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 4,
-          WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity',
-        }}>
-          <button onClick={() => setCategoria('all')} style={chip(categoria === 'all')}>Todos</button>
-          {cats.map(c => (
-            <button key={c.id} onClick={() => setCategoria(c.id)} style={chip(categoria === c.id)}>
-              <span style={{ color: categoria === c.id ? '#000' : P.amber }}>{c.icon}</span>{c.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-          <select value={avail} onChange={(e) => setAvail(e.target.value)} style={selStyle}>
-            <option value="all">Toda disponibilidad</option>
-            {disp.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
-          </select>
-          <select value={marca} onChange={(e) => setMarca(e.target.value)} style={selStyle}>
-            <option value="all">Todas las marcas</option>
-            {marcas.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-          <select value={precio} onChange={(e) => setPrecio(e.target.value)} style={selStyle}>
-            <option value="all">Todo nivel de precio</option>
-            <option value="1">$ · Económico</option>
-            <option value="2">$$ · Medio-bajo</option>
-            <option value="3">$$$ · Medio</option>
-            <option value="4">$$$$ · Alto</option>
-            <option value="5">$$$$$ · Premium</option>
-          </select>
-          {anyFilter &&
-            <button onClick={clearAll} style={{
-              background: 'transparent', color: P.redHi, border: `1px solid ${P.redHi}`,
-              padding: '11px 14px', minHeight: 44, boxSizing: 'border-box', cursor: 'pointer',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 15, letterSpacing: '0.08em', textTransform: 'uppercase',
-            }}>✕ Limpiar</button>
+      <div className="amx-banda-busqueda amx-sobre-verde">
+        <div className="amx-buscador">
+          <span className="amx-buscador-lupa" aria-hidden="true">⌕</span>
+          <input ref={buscadorRef} value={query} onChange={(e) => setQuery(e.target.value)}
+            placeholder="Calibre, marca o tipo de bala…"
+            aria-label="Buscar municiones por calibre, marca o tipo de bala" />
+          {query &&
+            <button type="button" className="amx-buscador-borrar"
+              onClick={() => { setQuery(''); buscadorRef.current && buscadorRef.current.focus(); }}
+              aria-label="Borrar la búsqueda">✕</button>
           }
         </div>
-
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
-          letterSpacing: '0.12em', margin: '16px 0 10px', textTransform: 'uppercase',
-        }}>
-          <span>▸ {filtered.length} {filtered.length === 1 ? 'CARTUCHO' : 'CARTUCHOS'}</span>
-          <span style={{ color: P.textMuted }}>{todos.length} TOTAL</span>
-        </div>
       </div>
+
+      <window.TiraFiltros uid="municiones"
+        orden={['calibre', 'avail', 'marca', 'precio']}
+        filtros={filtros} valores={valores} onCambiar={(id, v) => setters[id](v)}
+        precio={rango} formato="pesos" tituloPrecio="Precio por cartucho"
+        conteo={{ n: filtered.length, nombres: ['cartucho', 'cartuchos'] }}
+        activos={activos} hayTexto={!!query} onLimpiar={clearAll} />
 
       <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `0 ${padX}px`, boxSizing: 'border-box' }}>
         {filtered.length ? (

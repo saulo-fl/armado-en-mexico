@@ -1,3 +1,8 @@
+/* Armado en México — Copyright (C) 2026 Saulo Flores León
+   SPDX-License-Identifier: AGPL-3.0-or-later
+   Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+   (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio. */
+
 /* ══════════════════════════════════════════════════════════════════════════
    Armado en México — sistema visual «Documento Oficial Mexicano»
    Brief: DESIGN.md · Paleta auditada con .claude/skills/fidelidad-diseno/scripts/contraste.mjs
@@ -48,6 +53,7 @@
      no más clara—: es lo mismo que hace el tema claro y deja la tinta de
      estado con más aire (--alerta pasa de 4.40:1 a 5.97:1 sobre ella). */
   --beige:      #E4E7E0;   --d-beige:    #262E2A;  /* 1.17:1 claro / 1.22:1 oscuro, SOLO con hairline */
+  --hoja-filtro: #FBFAF5;      --d-hoja-filtro: #2E3632;  /* la hoja del filtro abierto (§5.10): el oficio; en oscuro, un punto bajo el papel */
   /* La PLACA FOTOGRÁFICA no se invierte: 87 de las 111 fotos son recortes
      sobre BLANCO OPACO (CLAUDE.md), y sobre una placa oscura se leen como un
      rectángulo blanco pegado — «se leen como un error», ya medido en la época
@@ -223,6 +229,7 @@
   /* La cinta rotuladora: negra, con las letras en relieve. */
   --dymo:           #1C1D1F;
   --dymo-letra:     #F2F1EC;   /* 14.92:1 */
+  --dymo-canto:     rgba(242, 241, 236, 0);   --d-dymo-canto: rgba(242, 241, 236, .16);  /* en oscuro la cinta de los chips se despega del lienzo */
   /* El rotulador rojo del comparador: circula el valor que gana (14-sep-2026).
      Es trazo, no texto: el mínimo es 3:1 (WCAG 1.4.11) sobre el fichero. */
   --rotulador:      #C63A32;
@@ -318,7 +325,7 @@
     --manila-medido: var(--d-manila-medido); --manila-luz: var(--d-manila-luz);
     --manila-tinta-2: var(--d-manila-tinta-2);
     --lienzo: var(--d-lienzo);   --papel: var(--d-papel);       --beige: var(--d-beige);
-    --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi);
+    --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi); --hoja-filtro: var(--d-hoja-filtro); --dymo-canto: var(--d-dymo-canto);
     --tinta: var(--d-tinta);     --tinta-dim: var(--d-tinta-dim); --tinta-2: var(--d-tinta-2);
     --silueta: var(--d-silueta); --acento: var(--d-acento);
     --tinta-sobre-marca: var(--d-tinta-sobre-marca);            --verde-2: var(--d-verde-2);
@@ -337,7 +344,7 @@
   --manila-medido: var(--d-manila-medido); --manila-luz: var(--d-manila-luz);
   --manila-tinta-2: var(--d-manila-tinta-2);
   --lienzo: var(--d-lienzo);   --papel: var(--d-papel);       --beige: var(--d-beige);
-  --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi);
+  --papel-hi: var(--d-papel-hi); --hair: var(--d-hair);       --hair-hi: var(--d-hair-hi); --hoja-filtro: var(--d-hoja-filtro); --dymo-canto: var(--d-dymo-canto);
   --tinta: var(--d-tinta);     --tinta-dim: var(--d-tinta-dim); --tinta-2: var(--d-tinta-2);
   --silueta: var(--d-silueta); --acento: var(--d-acento);
   --tinta-sobre-marca: var(--d-tinta-sobre-marca);            --verde-2: var(--d-verde-2);
@@ -2324,10 +2331,15 @@
    archivero: la de delante se une a su hoja; las de detrás van un papel más
    gastadas y un punto más abajo, metidas en el folder. */
 .amx-v2 .amx-separadores { min-width: 0; }
+/* Las de detrás bajan 5px (translateY) y se salían de la tira: con overflow-x
+   auto el navegador pone overflow-y auto, y esos 5px de más dejaban arrastrar
+   la tira hacia arriba en iPhone (Saulo, 17-sep-2026). El padding de abajo los
+   mete dentro de la caja y el margen negativo deja la hoja donde estaba. */
 .amx-v2 .amx-separadores-pestanas {
   display: flex;
   gap: 4px;
-  padding: 0 0 0 10px;
+  padding: 0 0 5px 10px;
+  margin-bottom: -5px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -2478,9 +2490,8 @@
 .amx-v2 .amx-usos li:nth-child(3n)     .amx-sello { transform: rotate(-2deg); }
 
 /* ── LA CINTA DYMO — los títulos fuera del folder ──────────────────────────
-   Cinta negra y letras en relieve. Cada letra va en su span con un salto de
-   medio píxel —la rotuladora nunca las alinea— y cada PALABRA en una caja que
-   no se parte, para que un título largo baje de línea entre palabras. */
+   Cinta negra y letras en relieve, alineadas en un solo renglón (Saulo retiró
+   el salto por letra el 16-sep-2026). */
 .amx-v2 .amx-dymo {
   display: inline-block;
   max-width: 100%;
@@ -2496,15 +2507,20 @@
   letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--dymo-letra);
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .2);
   transform: rotate(-.8deg);
 }
 @media (min-width: 1024px) { .amx-v2 .amx-dymo { font-size: 16px; padding: 8px 16px 7px; } }
-.amx-v2 .amx-dymo-palabra { display: inline-block; white-space: nowrap; }
-.amx-v2 .amx-dymo-letra {
-  display: inline-block;
-  transform: translateY(var(--dy, 0));
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, .7), 0 1px 0 rgba(255, 255, 255, .2);
+
+/* La cinta chica: el tramo dentro de una sección (los cargadores de la vitrina de
+   accesorios por tipo de arma y calibre, 16-sep-2026). Misma cinta, un punto menos. */
+.amx-v2 .amx-dymo--chica {
+  margin-bottom: var(--e3);
+  padding: 5px 10px 4px;
+  font-size: 12px;
+  letter-spacing: .16em;
 }
+@media (min-width: 1024px) { .amx-v2 .amx-dymo--chica { padding: 6px 12px 5px; font-size: 13px; } }
 
 /* ── LA VITRINA — munición y accesorios compatibles ────────────────────────
    Un mueble de tienda con dos repisas: arriba la munición, abajo los
@@ -3548,155 +3564,9 @@
 
 
 /* ══════════════════════════════════════════════════════════════════════════
-   CATÁLOGO — Header verde + filtros + grid de armas (RED-Arsenal)
+   CATÁLOGO — la rejilla de armas. Los filtros van en «LOS FILTROS DE LOS
+   CATÁLOGOS», al final del archivo (16-sep-2026).
    ══════════════════════════════════════════════════════════════════════════ */
-
-/* Header verde con buscador — mismo patrón que HOME pero sin curva inferior
-   porque los filtros van pegados debajo.
-   El sticky se aplica INLINE desde el JSX (top 50 móvil / 64 desktop,
-   una sola fuente, igual que producción) — no aquí.
-   La altura se ajusta al contenido (buscador + contador + filtros). */
-.amx-v2 .amx-catalogo-header {
-  background: var(--marca);
-  color: var(--sobre-marca);
-  padding-bottom: var(--e3);
-  padding-left: var(--e3); /* móvil: que el buscador no empiece en x=0 */
-  padding-right: var(--e3); /* que los controles no toquen el borde derecho */
-}
-/* Textos internos del header verde — todos sobre --marca deben usar --sobre-marca (§7) */
-.amx-v2 .amx-catalogo-header * {
-  color: inherit; /* hereda de .amx-catalogo-header → --sobre-marca */
-}
-
-.amx-v2 .amx-catalogo-busq {
-  margin-bottom: var(--e2);
-}
-/* El buscador sobre la banda verde hereda los estilos de .amx-buscador,
-   que ya tiene el cristal simulado con gradientes blancos. Solo ajustamos
-   márgenes para compactar la cabecera. */
-
-/* ── Contador de resultados ─────────────────────────────────────── */
-.amx-v2 .amx-catalogo-contador {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--e3);
-  padding: 8px 0;
-  font-size: 12.5px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: rgba(243,239,228,.65);
-}
-.amx-v2 .amx-catalogo-contador > span:first-child {
-  font-weight: 700;
-  color: var(--crema);
-  letter-spacing: .1em;
-}
-/* Móvil: contador centrado, una línea */
-@media (max-width: 719px) {
-  .amx-v2 .amx-catalogo-contador { justify-content: center; font-size: 12px; }
-  .amx-v2 .amx-catalogo-contador > span:first-child { color: var(--dymo-letra); }
-}
-
-/* ── Filtros principales — grid de selects ─────────────────────── */
-.amx-v2 .amx-catalogo-filtros-princ {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--e2);
-}
-@media (max-width: 719px) {
-  .amx-v2 .amx-catalogo-filtros-princ { grid-template-columns: repeat(2, 1fr); }
-}
-/* Los <select> de FilterSelect usan inline styles con var(--token), así que
-   heredan el tema correctamente. Solo ajustamos márgenes si hace falta.
-   El select nativo mantiene su estilo system-ui por defecto.
-   Para un look más vintage, podríamos usar la clase .amx-exp o similar,
-   pero los selects son controles funcionales y no deben parecer documentos. */
-
-/* ── Rango de precio ─────────────────────────────────────────────── */
-.amx-v2 .amx-catalogo-precio {
-  margin-top: var(--e3);
-}
-/* Las barras de rango tienen dos <input type="range"> apilados.
-   El inferior es el visible (el de arriba es un overlay para dar grosor). */
-.amx-v2 .amx-price-range {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  cursor: pointer;
-}
-/* Track — barra neutra */
-.amx-v2 .amx-price-range::-webkit-slider-runnable-track {
-  height: 4px;
-  background: transparent; /* no tapar el tramo seleccionado del range */
-  border-radius: 2px;
-}
-.amx-v2 .amx-price-range::-moz-range-track {
-  height: 4px;
-  background: transparent; /* no tapar el tramo seleccionado del range */
-  border-radius: 2px;
-}
-/* Thumb — manija verde marca */
-.amx-v2 .amx-price-range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  margin-top: -6px; /* centrar en track de 4px */
-  background: var(--marca);
-  border: 2px solid var(--crema);
-  border-radius: 50%;
-  cursor: grab;
-}
-.amx-v2 .amx-price-range::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: var(--marca);
-  border: 2px solid var(--crema);
-  border-radius: 50%;
-  cursor: grab;
-}
-.amx-v2 .amx-price-range::-webkit-slider-thumb:active {
-  cursor: grabbing;
-}
-
-/* ── Toggle filtros avanzados ─────────────────────────────────── */
-/* Sobre la banda verde (--marca): colores --sobre-marca-* (§7), en los dos temas */
-.amx-v2 .amx-catalogo-filtros-toggle {
-  margin-top: var(--e3);
-  background: none;
-  border: 1px dashed var(--sobre-marca-muted);
-  color: var(--sobre-marca-muted);
-  padding: 6px 12px;
-  font-family: var(--mono);
-  font-size: 12.5px;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  width: 100%;
-  transition: border-color .18s, color .18s;
-}
-.amx-v2 .amx-catalogo-filtros-toggle:hover {
-  border-style: solid;
-  border-color: var(--sobre-marca);
-  color: var(--sobre-marca);
-}
-
-/* ── Filtros avanzados — grid de selects ─────────────────────── */
-.amx-v2 .amx-catalogo-filtros-adv {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--e2);
-  margin-top: var(--e2);
-}
-@media (max-width: 719px) {
-  .amx-v2 .amx-catalogo-filtros-adv { grid-template-columns: repeat(2, 1fr); }
-}
 
 /* ── Grid de armas — las tarjetas expediente ──────────────────── */
 .amx-v2 .amx-catalogo-grid {
@@ -3812,6 +3682,7 @@
 }
 
 .amx-v2 .amx-vitrina-acc-seccion + .amx-vitrina-acc-seccion { margin-top: var(--e5); }
+.amx-v2 .amx-vitrina-acc-tramo + .amx-vitrina-acc-tramo { margin-top: var(--e4); }
 
 /* LA MESA, POR FILA. En el Home la tabla va en cada puesto (`::after`) y cuatro
    seguidos forman la mesa; aquí una fila puede quedarse corta —Empuñaduras tiene
@@ -4041,3 +3912,606 @@
   overflow-wrap: anywhere;
 }
 .amx-v2 .amx-etiqueta-armas { display: block; margin-top: 2px; color: var(--etiqueta-tinta-2); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LOS FILTROS DE LOS CATÁLOGOS — armas y municiones (16-sep-2026)
+
+   Decidido con Saulo pregunta por pregunta y con maqueta (docs/DESIGN.md
+   §5.10). Primitivas en ui.jsx, bloque del mismo nombre: TiraFiltros,
+   CasillasFiltro, ReglaPrecio y useRangoPrecio; las cuentas, en
+   src/lib/filtros.js. Cada pantalla fija con --filtros-ancho y
+   --filtros-margen el mismo ancho y margen lateral que su rejilla.
+   ══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-catalogo { --filtros-ancho: 1400px; --filtros-margen: 14px; }
+@media (min-width: 1024px) { .amx-v2 .amx-catalogo { --filtros-margen: 28px; } }
+.amx-v2 .amx-municiones-catalogo { --filtros-ancho: 1280px; --filtros-margen: 16px; }
+@media (min-width: 900px) { .amx-v2 .amx-municiones-catalogo { --filtros-margen: 28px; } }
+
+/* El margen lateral: el de la pantalla, y centrado cuando sobra ancho. */
+.amx-v2 .amx-banda-busqueda,
+.amx-v2 .amx-filtros {
+  --filtros-lado: max(var(--filtros-margen, 16px), calc((100% - var(--filtros-ancho, 1400px)) / 2 + var(--filtros-margen, 16px)));
+}
+
+/* La banda verde: solo el buscador (.amx-buscador, el cristal del Home). */
+.amx-v2 .amx-banda-busqueda {
+  background: var(--marca);
+  color: var(--sobre-marca);
+  padding: var(--e1) var(--filtros-lado) var(--e3);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-banda-busqueda { padding-top: var(--e3); padding-bottom: var(--e4); } }
+.amx-v2 .amx-banda-busqueda .amx-buscador { max-width: 560px; }
+.amx-v2 .amx-municiones-catalogo .amx-banda-busqueda { margin-top: var(--e4); padding-top: var(--e3); }
+.amx-v2 .amx-buscador-lupa { font-size: 17px; line-height: 1; }
+.amx-v2 .amx-buscador-borrar {
+  flex: 0 0 auto;
+  width: 44px;
+  min-height: 44px;
+  margin-right: calc(-1 * var(--e3));
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--sobre-marca);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* La tira: se desliza de lado sin barra. El degradado del borde avisa que hay
+   más y se apaga al llegar al final (--fade lo escribe TiraFiltros). */
+.amx-v2 .amx-filtros-envoltura { position: relative; }
+.amx-v2 .amx-filtros-envoltura::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  background: linear-gradient(90deg, transparent, var(--lienzo));
+  opacity: var(--fade, 1);
+  pointer-events: none;
+  transition: opacity .15s;
+}
+.amx-v2 .amx-filtros-tira {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  overflow-x: auto;
+  padding: var(--e3) var(--filtros-lado) var(--e2);
+  scrollbar-width: none;
+}
+.amx-v2 .amx-filtros-tira::-webkit-scrollbar { display: none; }
+
+/* Chip sin filtro: una etiqueta de papel, sin borde, con sombra corta. */
+.amx-v2 .amx-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: 44px;
+  padding: 0 var(--e3);
+  border: 0;
+  border-radius: 4px;
+  background: var(--papel);
+  box-shadow: 0 1px 1px rgba(23, 27, 25, .12), 0 2px 5px -2px rgba(23, 27, 25, .22);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-chip:hover { background: var(--hoja-filtro); }
+.amx-v2 .amx-chip--abierto {
+  background: var(--hoja-filtro);
+  box-shadow: inset 0 -2px 0 var(--tinta), 0 1px 1px rgba(23, 27, 25, .12);
+}
+.amx-v2 .amx-chip-flecha { font-size: 13px; line-height: 1; color: var(--tinta-2); }
+.amx-v2 .amx-chip-n { font-weight: 700; }
+
+/* Chip con filtro: la cinta Dymo rotulada con el valor y su ✕. Es objeto: igual
+   en los dos temas; en oscuro, un canto claro la despega del lienzo. */
+.amx-v2 .amx-chip-dymo {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: stretch;
+  min-height: 44px;
+  background: linear-gradient(180deg, #2B2C2F 0%, var(--dymo) 45%, #121315 100%);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 -1px 0 rgba(0, 0, 0, .55),
+    0 2px 3px rgba(23, 27, 25, .28), 0 0 0 1px var(--dymo-canto);
+  color: var(--dymo-letra);
+}
+.amx-v2 .amx-chip-dymo--abierto {
+  box-shadow: inset 0 -3px 0 var(--dymo-letra), inset 0 1px 0 rgba(255, 255, 255, .18),
+    0 2px 3px rgba(23, 27, 25, .28), 0 0 0 1px var(--dymo-canto);
+}
+.amx-v2 .amx-chip-dymo button {
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.amx-v2 .amx-chip-dymo button:hover { background: rgba(255, 255, 255, .07); }
+.amx-v2 .amx-chip-dymo button:focus-visible { outline: 2px solid var(--dymo-letra); outline-offset: -4px; }
+.amx-v2 .amx-chip-dymo .amx-chip-dymo-valor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  padding: 0 var(--e2) 0 var(--e3);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.amx-v2 .amx-chip-dymo .amx-chip-flecha { color: rgba(242, 241, 236, .7); }
+.amx-v2 .amx-chip-dymo .amx-chip-dymo-quitar {
+  width: 44px;
+  font-size: 13px;
+  border-left: 1px dashed rgba(242, 241, 236, .32);
+}
+
+/* La hoja: debajo de la tira, dentro del flujo, empuja el catálogo. La muesca
+   apunta a su chip (--muesca) y en escritorio se alinea con él (--hoja-x). */
+.amx-v2 .amx-filtros-hueco { padding: var(--e1) var(--filtros-lado) 0; }
+.amx-v2 .amx-hoja-filtro {
+  position: relative;
+  isolation: isolate;
+  margin: var(--e1) 0 0 var(--hoja-x, 0px);
+  padding: var(--e2) var(--e3) var(--e3);
+  background: var(--hoja-filtro);
+  border-radius: 3px;
+  box-shadow: var(--sombra);
+  color: var(--tinta);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-hoja-filtro { max-width: 560px; } }
+.amx-v2 .amx-hoja-filtro::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -6px;
+  left: calc(var(--muesca, 40px) - 7px);
+  width: 14px;
+  height: 14px;
+  background: var(--hoja-filtro);
+  box-shadow: -1px -1px 1px rgba(23, 27, 25, .07);
+  transform: rotate(45deg);
+}
+.amx-v2 .amx-hoja-filtro--entra { animation: amx-hoja-filtro-entra .14s ease-out; }
+@keyframes amx-hoja-filtro-entra { from { opacity: 0; transform: translateY(-4px); } }
+.amx-v2 .amx-hoja-filtro-cab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+}
+.amx-v2 .amx-hoja-filtro-titulo {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-filtros-enlace {
+  min-height: 44px;
+  margin-right: calc(-1 * var(--e2));
+  padding: 0 var(--e2);
+  border: 0;
+  background: none;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Las opciones: casillas de formulario en columnas parejas. */
+.amx-v2 .amx-casillas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 0 var(--e1);
+}
+.amx-v2 .amx-casilla {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: 44px;
+  padding: 0 var(--e2) 0 var(--e1);
+  border: 0;
+  border-radius: 3px;
+  background: none;
+  font-family: var(--mono);
+  font-size: 14px;
+  text-align: left;
+  color: var(--tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-casilla:hover { background: var(--hover-suave); }
+.amx-v2 .amx-casilla:focus-visible { outline: 2px solid var(--tinta); outline-offset: -2px; }
+.amx-v2 .amx-casilla-caja {
+  position: relative;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--hair-hi);
+  border-radius: 1px;
+}
+.amx-v2 .amx-casilla[aria-checked="true"] { font-weight: 700; }
+.amx-v2 .amx-casilla[aria-checked="true"] .amx-casilla-caja { border-color: var(--tinta); }
+.amx-v2 .amx-casilla[aria-checked="true"] .amx-casilla-caja::after {
+  content: '✕';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--tinta);
+}
+
+/* El precio: la lectura grande y la regla con dos cursores. Marcas y riel van
+   11 px adentro (medio cursor) para caer donde cae el centro del cursor. */
+.amx-v2 .amx-regla-lectura {
+  display: block;
+  margin: var(--e1) 0 var(--e2);
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--tinta);
+}
+.amx-v2 .amx-regla { position: relative; height: 62px; }
+.amx-v2 .amx-regla-marcas,
+.amx-v2 .amx-regla-riel { position: absolute; left: 11px; right: 11px; }
+.amx-v2 .amx-regla-marcas { top: 0; height: 34px; }
+.amx-v2 .amx-regla-marca {
+  position: absolute;
+  bottom: 0;
+  left: var(--x);
+  width: 1px;
+  height: 5px;
+  background: var(--hair-hi);
+}
+.amx-v2 .amx-regla-marca--mayor { height: 11px; background: var(--tinta-2); }
+.amx-v2 .amx-regla-num {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-regla-num--ini { transform: none; }
+.amx-v2 .amx-regla-num--fin { transform: translateX(-100%); }
+.amx-v2 .amx-regla-riel { top: 36px; height: 3px; background: var(--hair); }
+.amx-v2 .amx-regla-riel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--lo);
+  width: calc(var(--hi) - var(--lo));
+  background: var(--tinta);
+}
+.amx-v2 .amx-regla-cursor {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  z-index: var(--z, 2);
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  background: none;
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: none;
+}
+.amx-v2 .amx-regla-cursor:focus { outline: none; }
+.amx-v2 .amx-regla-cursor:focus-visible { outline: 2px solid var(--tinta); outline-offset: 0; }
+.amx-v2 .amx-regla-cursor::-webkit-slider-runnable-track { height: 44px; background: none; }
+.amx-v2 .amx-regla-cursor::-moz-range-track { height: 44px; background: none; }
+.amx-v2 .amx-regla-cursor::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 44px;
+  border: 0;
+  background: linear-gradient(var(--tinta), var(--tinta)) center / 6px 26px no-repeat,
+    linear-gradient(var(--hoja-filtro), var(--hoja-filtro)) center / 12px 30px no-repeat;
+  pointer-events: auto;
+  cursor: grab;
+}
+.amx-v2 .amx-regla-cursor::-moz-range-thumb {
+  width: 22px;
+  height: 44px;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(var(--tinta), var(--tinta)) center / 6px 26px no-repeat,
+    linear-gradient(var(--hoja-filtro), var(--hoja-filtro)) center / 12px 30px no-repeat;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+/* «Más»: renglones de formulario — nombre, puntos guía y valor. */
+.amx-v2 .amx-mas-renglones { display: grid; }
+.amx-v2 .amx-mas-renglon {
+  display: flex;
+  align-items: baseline;
+  gap: var(--e2);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--e3) var(--e1);
+  border: 0;
+  background: none;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-mas-renglon:hover { background: var(--hover-suave); }
+.amx-v2 .amx-mas-nombre { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.amx-v2 .amx-mas-puntos {
+  flex: 1 1 auto;
+  min-width: 12px;
+  border-bottom: 1.5px dotted var(--hair-hi);
+  transform: translateY(-3px);
+}
+.amx-v2 .amx-mas-valor {
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-mas-renglon--activo .amx-mas-valor { font-weight: 700; color: var(--tinta); }
+.amx-v2 .amx-mas-renglon .amx-chip-flecha { width: 12px; text-align: right; }
+.amx-v2 .amx-mas-grupo .amx-casillas { padding-bottom: var(--e2); }
+
+/* El conteo y «Limpiar». */
+.amx-v2 .amx-filtros-conteo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  min-height: 44px;
+  padding: 0 var(--filtros-lado);
+}
+.amx-v2 .amx-filtros-conteo-texto {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-filtros-conteo-texto b { color: var(--tinta); }
+
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-hoja-filtro--entra { animation: none; }
+  .amx-v2 .amx-filtros-envoltura::after { transition: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL GAFETE — la credencial de quien responde por un expediente
+   Funda de plástico con su ranura y la tarjeta dentro. Dibujado en CSS, como
+   el clip de alambre y la grapa: §5.5 permite la papelería física dibujada,
+   no las texturas ni el envejecido.
+   El cordón se retiró el 17-sep-2026: dos cintas planas no se leían como una
+   cinta de verdad. No reintroducir.
+   Papel diegético: SOLO tokens de papelería, nunca PALETTE ni CLARO —siguen al
+   tema y dejarían tinta clara sobre cartón claro en oscuro.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-gafete {
+  position: relative;
+  width: min(100%, 224px);
+  margin-inline: auto;          /* centrado en su columna y en el teléfono */
+  margin-block: 0;
+  color: var(--copia-tinta);
+  transform: rotate(-1deg);
+}
+/* La funda de plástico: translúcida, con la ranura por la que pasa el broche.
+   El blanco va literal —es plástico, no papel— y por eso no sale de un token. */
+.amx-v2 .amx-gafete-funda {
+  position: relative;
+  padding: 20px 6px 7px;
+  background: rgba(255, 255, 255, .5);
+  border: 1px solid var(--copia-filo);
+  border-radius: 9px;
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 9px 16px -7px rgba(23, 27, 25, .26);
+}
+.amx-v2 .amx-gafete-funda::before {   /* la ranura */
+  content: '';
+  position: absolute;
+  top: 8px; left: 50%; width: 46px; height: 6px; margin-left: -23px;
+  border-radius: 3px;
+  background: var(--copia-filo);
+}
+.amx-v2 .amx-gafete-tarjeta {
+  display: grid;
+  justify-items: center;
+  gap: var(--e2);
+  padding: var(--e3) var(--e2) calc(var(--e3) + 2px);
+  background: var(--copia-carton);
+  border-radius: 4px;
+  text-align: center;
+}
+.amx-v2 .amx-gafete-marca {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.amx-v2 .amx-gafete-marca img { width: 22px; height: 22px; border-radius: 4px; display: block; flex-shrink: 0; }
+.amx-v2 .amx-gafete-marca span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.2;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--copia-tinta-2);
+  text-align: left;
+}
+/* Tres franjas duras, sin degradado. No es un emblema: §6b lista las líneas
+   tricolor entre lo permitido. Ver el comentario de `Gafete` en ui.jsx. */
+.amx-v2 .amx-gafete-filete {
+  width: 100%; height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg,
+    var(--sello-civil) 0 33.34%,
+    var(--copia-placa) 33.34% 66.67%,
+    var(--sello-restr) 66.67%);
+}
+.amx-v2 .amx-gafete-foto {
+  width: 116px; height: 116px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--copia-placa);
+  border: 2px solid var(--copia-filo);   /* el canto del retrato, como el pozo de la polaroid */
+}
+.amx-v2 .amx-gafete-foto img {
+  width: 100%; height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center 18%;
+}
+.amx-v2 .amx-gafete-campos { display: grid; gap: 2px; min-width: 0; width: 100%; }
+.amx-v2 .amx-gafete-nombre {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.1;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--copia-tinta);
+}
+.amx-v2 .amx-gafete-cargo {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  letter-spacing: .03em;
+  color: var(--copia-tinta-2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACERCA — el expediente del propio proyecto
+   La pantalla se comporta como una ficha: el folder manila lleva la identidad
+   (cabecera, gafete, declaración) y lo demás cuelga fuera con cinta Dymo.
+   El aviso «no somos gobierno» va AL FINAL por decisión de Saulo (17-sep-2026):
+   Acerca es la sección personal, y el aviso ya está claro en Inicio y Legalidad.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* Una sola columna: cabecera, la banda del gafete y la declaración a todo lo
+   ancho. Con dos columnas la declaración estrechaba y el cartón quedaba con
+   medio folder vacío al lado del gafete.
+   Las áreas SE NOMBRAN siempre —aunque haya una sola columna— porque
+   `.amx-carpeta-cab` declara `grid-area: cab` suelta en su media query: sin un
+   área con ese nombre, la línea implícita abriría una fila de más. */
+.amx-v2 .amx-acerca-grid {
+  display: grid;
+  gap: var(--e5);
+  grid-template-areas: "cab" "identidad" "papeles";
+}
+.amx-v2 .amx-acerca-identidad { grid-area: identidad; display: grid; gap: var(--e5); }
+.amx-v2 .amx-acerca-papeles { grid-area: papeles; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-acerca-grid { row-gap: 40px; }
+  /* La credencial a un lado y la misión al otro: la fila queda simétrica y el
+     cartón no se queda con medio folder vacío. En el teléfono se apilan. */
+  .amx-v2 .amx-acerca-identidad {
+    grid-template-columns: 224px minmax(0, 1fr);
+    gap: var(--e6);
+    align-items: center;
+  }
+}
+.amx-v2 .amx-acerca-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+}
+.amx-v2 .amx-acerca-logo {
+  width: 56px; height: auto;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: block;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-acerca-logo { width: 76px; } }
+/* El rótulo de la pestaña mide 104px en móvil y `◆ ACERCA DE` a 12px roza el
+   corte. `eyebrow` además es editable desde el admin: se le baja el cuerpo para
+   que no se recorte en silencio el día que alguien lo alargue. */
+.amx-v2 .amx-acerca .amx-carpeta-rotulo { font-size: 11px; letter-spacing: .1em; }
+/* La nota de procedencia, dentro de su hoja: va con la tinta del oficio, no con
+   la del cartón —`--manila-tinta-2` coinciden en claro, pero en penumbra la del
+   manila pasa a tinta plena y aquí no hay penumbra que compensar. */
+.amx-v2 .amx-acerca-nota {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-acerca-colofon {
+  margin: var(--e4) 0 0;
+  padding-top: var(--e3);
+  border-top: 1px dashed var(--oficio-tinta-2);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  color: var(--oficio-tinta-2);
+}
+/* El renglón del aviso: rótulo en tinta roja y filete doble. No es una caja con
+   borde rojo ni una banda de canto a canto —no hay clasificación que estampar. */
+.amx-v2 .amx-acerca-filete {
+  margin: 0 0 var(--e3);
+  padding-bottom: 6px;
+  border-bottom: 3px double var(--sello-restr);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 1.4;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--sello-restr);
+}
+.amx-v2 .amx-acerca-duo { display: grid; gap: var(--e4); }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-acerca-duo { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+/* Dos papeles sobre la mesa, no dos cajas alineadas. */
+.amx-v2 .amx-acerca-duo > *:first-child { transform: rotate(-.4deg); }
+.amx-v2 .amx-acerca-duo > *:last-child { transform: rotate(.35deg); }
+.amx-v2 .amx-acerca-duo-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  margin-bottom: var(--e3);
+}
+.amx-v2 .amx-acerca-duo-cab img { width: 40px; height: 40px; border-radius: 7px; display: block; }
+.amx-v2 .amx-acerca-duo-cab .amx-oficio-tit { margin: 0; }
+/* El logo de Armas M&S es un PNG pensado sobre blanco: su placa se queda
+   blanca, igual que el área de imagen de una copia. */
+.amx-v2 .amx-acerca-duo-placa {
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 7px;
+  background: var(--copia-placa);
+}
+.amx-v2 .amx-acerca-duo-placa img { width: 90%; height: auto; display: block; }

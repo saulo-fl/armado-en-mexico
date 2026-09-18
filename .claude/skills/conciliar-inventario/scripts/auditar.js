@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 /* Auditoría de integridad de "Armado en México".
  * Corre desde la raíz del repo:  node .claude/skills/conciliar-inventario/scripts/auditar.js
  * 1) transpila todos los .jsx (Babel standalone)  2) carga los data-*.js
@@ -106,6 +111,16 @@ sinCorto.length
   : repetidos.length
     ? bad('nombres de letrero repetidos: ' + repetidos.join(', '))
     : ok('nombre de letrero: ' + cortos.length + ' accesorios, todos únicos');
+
+// 8) tramos de los cargadores (16-sep-2026): la vitrina parte /cargadores por tipo de
+//    arma y calibre. Un cargador sin tramo válido deshace los tramos de toda la sección.
+const TRAMOS = win.ACCESORIO_TRAMOS || { armas: [], calibres: [] };
+const armasTramo = new Set(TRAMOS.armas.map((x) => x[0]));
+const cargadores = (win.ACCESORIOS || []).filter((a) => a.categoria === 'cargadores');
+const sinTramo = cargadores.filter((a) => !(armasTramo.has(a.arma) && TRAMOS.calibres.includes(a.calibreTramo))).map((a) => a.id);
+sinTramo.length
+  ? bad(sinTramo.length + ' cargadores sin tramo válido (`ACC_TRAMO`): ' + sinTramo.slice(0, 8).join(', '))
+  : ok('tramos: ' + cargadores.length + ' cargadores, todos con tipo de arma y calibre');
 
 console.log('\n' + (fail === 0 ? '✔✔ AUDITORÍA SIN HALLAZGOS' : '✘ ' + fail + ' HALLAZGOS'));
 process.exit(fail ? 1 : 0);

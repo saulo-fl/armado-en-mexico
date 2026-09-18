@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Pantallas de ACCESORIOS DCAM
 // Cartas de lotería del Home, la vitrina del catálogo (15-sep-2026) y la ficha
 // de cada accesorio, que desde el 15-sep-2026 es el mismo expediente que la
@@ -56,6 +61,15 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onCategoria }) {
   const visibles = window.accesoriosVitrina(activo);
   const opciones = [{ id: 'all', label: 'Todas' }].concat(secciones.map((s) => ({ id: s.id, label: s.label })));
 
+  const puesto = (a) => (
+    <window.PuestoPieza key={a.id}
+      rotulo={a.corto}
+      ariaLabel={a.corto + ' — ' + a.nombre}
+      foto={window.isRealImage(a.img) ? a.img : null}
+      silueta={window.accesorioPlaceholder(a)}
+      onClick={() => onOpenAccesorio(a.id)} />
+  );
+
   return (
     <div className="amx-vitrina-acc">
       <window.ToldoLona>Accesorios</window.ToldoLona>
@@ -65,14 +79,14 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onCategoria }) {
         {visibles.map((s) => (
           <section key={s.id} className="amx-vitrina-acc-seccion" aria-labelledby={'vitrina-acc-' + s.id}>
             <window.CintaDymo id={'vitrina-acc-' + s.id}>{s.label}</window.CintaDymo>
-            <window.MesaPuestos items={s.piezas} porFila={porFila} renderPuesto={(a) => (
-              <window.PuestoPieza key={a.id}
-                rotulo={a.corto}
-                ariaLabel={a.corto + ' — ' + a.nombre}
-                foto={window.isRealImage(a.img) ? a.img : null}
-                silueta={window.accesorioPlaceholder(a)}
-                onClick={() => onOpenAccesorio(a.id)} />
-            )} />
+            {s.tramos
+              ? s.tramos.map((t) => (
+                <section key={t.id} className="amx-vitrina-acc-tramo" aria-labelledby={'vitrina-acc-' + t.id}>
+                  <window.CintaDymo nivel={3} chica id={'vitrina-acc-' + t.id}>{t.label}</window.CintaDymo>
+                  <window.MesaPuestos items={t.piezas} porFila={porFila} renderPuesto={puesto} />
+                </section>
+              ))
+              : <window.MesaPuestos items={s.piezas} porFila={porFila} renderPuesto={puesto} />}
           </section>
         ))}
       </div>

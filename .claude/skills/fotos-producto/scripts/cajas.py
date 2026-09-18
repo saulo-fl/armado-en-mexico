@@ -2,6 +2,11 @@
 # requires-python = ">=3.12,<3.13"
 # dependencies = ["rembg[cpu,cli]", "pillow", "numpy"]
 # ///
+# Armado en México — Copyright (C) 2026 Saulo Flores León
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 """
 Fotos de CAJA para las municiones de armado.mx: baja la foto del fabricante,
 le quita el fondo y la deja lista en `imagenes/municiones/`.

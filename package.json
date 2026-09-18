@@ -2,6 +2,7 @@
   "name": "armado-en-mexico",
   "version": "1.0.0",
   "private": true,
+  "license": "AGPL-3.0-or-later",
   "description": "Enciclopedia divulgativa de armas legales en México (DCAM · SEDENA) — app estática. La fuente vive en src/ y public/; el build la deja en out/, que es lo que publica Cloudflare Pages. Babel precompila los .jsx a .js; no hay bundler.",
   "scripts": {
     "build": "npm run build:static && npm run build:js && npm run build:html",
@@ -10,7 +11,7 @@
     "build:html": "node scripts/build-prerender.mjs",
     "watch": "npm run build:js -- --watch",
     "cifras": "node scripts/actualizar-readme.mjs",
-    "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs"
+    "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs scripts/filtros.test.mjs"
   },
   "devDependencies": {
     "@babel/cli": "^8.0.4",

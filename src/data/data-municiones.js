@@ -1,3 +1,12 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+//
+// LOS DATOS de este fichero —la selección, la estructura y los textos
+// divulgativos— se ofrecen ADEMÁS bajo CC BY-SA 4.0; los hechos que contiene
+// no son de nadie (art. 14 fr. X LFDA). Detalle: LICENSE-CONTENIDO.md.
+
 // Armado en México — MUNICIONES (cartuchos) · inventario OTCA (Monterrey)
 // Mismo formato que accesorios: fichas, precio de referencia con autoridad y
 // existencias, historial con enlace al PDF. Compatibilidad arma↔munición por calibre.
@@ -10,10 +19,16 @@
   var JUN18M = 'man_mun_otca_2026_06_18', JUN18Md = '2026-06-18';
   var JUL = 'man_mun_dcam_2026_07_06', JULd = '2026-07-06';
   var SEP11 = 'man_mun_dcam_2026_09_11', SEP11d = '2026-09-11';
+  var SEP14 = 'man_mun_dcam_2026_09_14', SEP14d = '2026-09-14';
+  var SEP15 = 'man_mun_dcam_2026_09_15', SEP15d = '2026-09-15';
 
   window.MUNICIONES_MANUALES = [
+    { id: 'man_mun_dcam_2026_09_15', nombre: 'Existencias de municiones DCAM · 15 de septiembre 2026', autoridad: 'DCAM',
+      fecha: '2026-09-15', url: 'inventarios/dcam-municiones-2026-09-15.pdf', fileName: 'dcam-municiones-2026-09-15.pdf', primary: true },
+    { id: 'man_mun_dcam_2026_09_14', nombre: 'Existencias de municiones DCAM · 14 de septiembre 2026', autoridad: 'DCAM',
+      fecha: '2026-09-14', url: 'inventarios/dcam-municiones-2026-09-14.pdf', fileName: 'dcam-municiones-2026-09-14.pdf', primary: false },
     { id: 'man_mun_dcam_2026_09_11', nombre: 'Existencias de municiones DCAM · 11 de septiembre 2026', autoridad: 'DCAM',
-      fecha: '2026-09-11', url: 'inventarios/dcam-municiones-2026-09-11.pdf', fileName: 'dcam-municiones-2026-09-11.pdf', primary: true },
+      fecha: '2026-09-11', url: 'inventarios/dcam-municiones-2026-09-11.pdf', fileName: 'dcam-municiones-2026-09-11.pdf', primary: false },
     { id: 'man_mun_dcam_2026_07_06', nombre: 'Existencias de municiones DCAM · 6 de julio 2026', autoridad: 'DCAM',
       fecha: '2026-07-06', url: 'inventarios/dcam-existencias-2026-07-06.pdf', fileName: 'dcam-existencias-2026-07-06.pdf', primary: false },
     { id: 'man_mun_otca_2026_06_18', nombre: 'Existencias de municiones OTCA · 18 de junio 2026', autoridad: 'OTCA',
@@ -341,6 +356,8 @@
       "Cartucho de escopeta en calibre 12 GA, marca Trust (Perdigón 8, 32 gr). Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 8"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]), priceManualId: SEP11 },
     { ...mun(2092, "Cartucho 7.62x51mm · PMC (Ball M80)", "PMC", "Corea del Sur", "7.62x51mm", "rifle", "FMJ", "147 gr", "seguridad", 28.15, "CARTUCHO CAL7.62X51 mm PMC BALL M80 147G",
       "Cartucho de fusil/rifle en calibre 7.62x51mm, marca PMC (FMJ, 147 gr), eslabonado. Precio de referencia por cartucho del inventario DCAM (11-sep-2026).", ["Armas calibre 7.62x51mm"], [["Calibre", "7.62x51mm"], ["Bala", "FMJ"], ["Peso", "147 gr"], ["Presentación", "Eslabonado"], ["Tipo", "Fusil/Rifle"]]), priceManualId: SEP11 },
+    { ...mun(2093, "Cartucho .380 ACP · Federal", "Federal", "EUA", ".380 ACP", "pistola", "FMJ", "95 gr", "dcam", 11.81, "CARTUCHO CALIBRE .380” AUTO, MARCA FEDE.",
+      "Cartucho de pistola en calibre .380 ACP (.380 Auto), marca Federal (FMJ, 95 gr). Precio de referencia por cartucho del inventario DCAM (14-sep-2026).", ["Armas calibre .380 ACP"], [["Calibre", ".380 ACP"], ["Bala", "FMJ"], ["Peso", "95 gr"], ["Tipo", "Pistola"]]), priceManualId: SEP14 },
   ];
 
   function _mh(price, qty) { return { manualId: OTCA, price: _mFmt(price), date: OTCAd, qty: (qty == null ? null : qty) }; }
@@ -348,6 +365,8 @@
   function _mh18(price, qty) { return { manualId: JUN18M, price: _mFmt(price), date: JUN18Md, qty: (qty == null ? null : qty) }; }
   function _mhl(price, qty) { return { manualId: JUL, price: _mFmt(price), date: JULd, qty: (qty == null ? null : qty) }; }
   function _mhs(price, qty) { return { manualId: SEP11, price: _mFmt(price), date: SEP11d, qty: (qty == null ? null : qty) }; }
+  function _mh14(price, qty) { return { manualId: SEP14, price: _mFmt(price), date: SEP14d, qty: (qty == null ? null : qty) }; }
+  function _mh15(price, qty) { return { manualId: SEP15, price: _mFmt(price), date: SEP15d, qty: (qty == null ? null : qty) }; }
   window.MUNICIONES_PRICE_HISTORY = {
     2001: [_mh(26.08, 1800)],
     2002: [_mh(11.55, 800), _mh18(10.37, 800)],
@@ -367,32 +386,32 @@
     // ── DCAM 16-jun-2026 ──
     2016: [_mhj(15.52, 3550), _mhl(15.54, 5950)],
     2017: [_mhj(10.19, 3250), _mhl(10.21, 1150)],
-    2018: [_mhj(18.18, 4140), _mhl(18.18, 3790), _mhs(18.18, 1240)], // jun/jul: dos renglones del mismo producto (cód. 1E382112) sumados; el 11-sep queda uno
-    2019: [_mhj(8.96, 16650), _mhl(8.96, 15850), _mhs(8.96, 14150)],
+    2018: [_mhj(18.18, 4140), _mhl(18.18, 3790), _mhs(18.18, 1240), _mh14(18.18, 1240), _mh15(18.18, 1240)], // jun/jul: dos renglones del mismo producto (cód. 1E382112) sumados; el 11-sep queda uno
+    2019: [_mhj(8.96, 16650), _mhl(8.96, 15850), _mhs(8.96, 14150), _mh14(8.96, 14150), _mh15(8.96, 13950)],
     2020: [_mhj(21.35, 540)],
-    2021: [_mhj(24.14, 6490), _mhl(24.53, 5450), _mhs(23.82, 1710)],
-    2022: [_mhj(24.14, 4090), _mhl(24.53, 1550), _mhs(23.82, 4650)],
+    2021: [_mhj(24.14, 6490), _mhl(24.53, 5450), _mhs(23.82, 1710), _mh14(23.82, 1710), _mh15(24.04, 1710)],
+    2022: [_mhj(24.14, 4090), _mhl(24.53, 1550), _mhs(23.82, 4650), _mh14(23.82, 4650), _mh15(24.04, 4650)],
     2023: [_mhj(24.14, 1780)],
-    2024: [_mhj(22.15, 2760), _mhl(22.50, 2760), _mhs(21.85, 1660)],
-    2026: [_mhj(47.49, 1942), _mhl(48.25, 1892), _mhs(46.86, 1842)],
+    2024: [_mhj(22.15, 2760), _mhl(22.50, 2760), _mhs(21.85, 1660), _mh14(21.85, 1660), _mh15(22.05, 1660)],
+    2026: [_mhj(47.49, 1942), _mhl(48.25, 1892), _mhs(46.86, 1842), _mh14(46.85, 1842), _mh15(47.29, 1842)],
     2027: [_mhj(11.12, 5000), _mhl(11.13, 5000)],
-    2028: [_mhj(22.15, 920), _mhl(22.50, 920), _mhs(21.85, 20)],
-    2029: [_mhj(24.14, 6210), _mhl(24.53, 4910), _mhs(23.82, 2510)], // dos renglones del mismo cartucho sumados (5,110+1,100 · 3,810+1,100 · 2,010+500); la 2025 se fusionó aquí
-    2030: [_mhj(28.16, 1500), _mhl(28.16, 1300), _mhs(28.16, 1300)],
+    2028: [_mhj(22.15, 920), _mhl(22.50, 920), _mhs(21.85, 20), _mh14(21.85, 20), _mh15(22.05, 20)],
+    2029: [_mhj(24.14, 6210), _mhl(24.53, 4910), _mhs(23.82, 2510), _mh14(23.82, 2510), _mh15(24.04, 2510)], // dos renglones del mismo cartucho sumados (5,110+1,100 · 3,810+1,100 · 2,010+500); la 2025 se fusionó aquí
+    2030: [_mhj(28.16, 1500), _mhl(28.16, 1300), _mhs(28.16, 1300), _mh14(28.16, 1300), _mh15(28.16, 1300)],
     2031: [_mhj(8.93, 2750), _mhl(8.93, 1300)],
     2032: [_mhj(9.18, 2800), _mhl(9.33, 8800)],
-    2033: [_mhj(13.57, 3880), _mhl(13.78, 3600), _mhs(13.39, 5540)],
-    2034: [_mhj(10.38, 8500), _mhl(10.54, 8300), _mhs(10.24, 6600)],
-    2035: [_mhj(12.09, 12100), _mhl(12.09, 11700), _mhs(12.09, 9600)],
-    2036: [_mhj(13.97, 3150), _mhl(14.19, 3150), _mhs(13.78, 3150)],
+    2033: [_mhj(13.57, 3880), _mhl(13.78, 3600), _mhs(13.39, 5540), _mh14(13.39, 5340), _mh15(13.51, 5140)],
+    2034: [_mhj(10.38, 8500), _mhl(10.54, 8300), _mhs(10.24, 6600), _mh14(10.24, 6600), _mh15(10.33, 6600)],
+    2035: [_mhj(12.09, 12100), _mhl(12.09, 11700), _mhs(12.09, 9600), _mh14(12.09, 9600), _mh15(12.09, 9600)],
+    2036: [_mhj(13.97, 3150), _mhl(14.19, 3150), _mhs(13.78, 3150), _mh14(13.78, 3150), _mh15(13.91, 3150)],
     2037: [_mhj(6.78, 250), _mhl(6.89, 250)],
     2038: [_mhj(6.78, 100), _mhl(6.89, 100)],
     2039: [_mhj(34.72, 800), _mhl(35.27, 520)],
     2040: [_mhj(25.74, 5100), _mhl(26.15, 4900)],
     2041: [_mhj(5.99, 1500), _mhl(6.08, 1500)],
-    2042: [_mhj(22.75, 14800), _mhl(23.11, 14800), _mhs(22.44, 14800)],
-    2043: [_mhj(29.73, 10320), _mhl(30.21, 9820), _mhs(29.33, 8920)],
-    2044: [_mhj(10.77, 235), _mhl(10.95, 235), _mhs(10.63, 35)],
+    2042: [_mhj(22.75, 14800), _mhl(23.11, 14800), _mhs(22.44, 14800), _mh14(22.44, 14800), _mh15(22.65, 14800)],
+    2043: [_mhj(29.73, 10320), _mhl(30.21, 9820), _mhs(29.33, 8920), _mh14(29.33, 8920), _mh15(29.6, 8920)],
+    2044: [_mhj(10.77, 235), _mhl(10.95, 235), _mhs(10.63, 35), _mh14(10.63, 35), _mh15(10.73, 35)],
     2045: [_mh18(13.86, 600)],
     2046: [_mh18(406.19, 17700)],
     2047: [_mh18(25.72, 800)],
@@ -409,38 +428,39 @@
     2058: [_mh18(10.18, 10400)],
     2059: [_mhl(9.97, 3500)],
     2060: [_mhl(9.97, 2200)],
-    2061: [_mhl(9.97, 3000), _mhs(9.84, 3500)],
+    2061: [_mhl(9.97, 3000), _mhs(9.84, 3500), _mh14(9.81, 2000), _mh15(9.86, 800)],
     2062: [_mhl(12.53, 250)],
     2063: [_mhl(7.7, 1900)],
     2064: [_mhl(9.74, 1250)],
     2065: [_mhl(10.21, 3000)],
-    2066: [_mhl(10.21, 2250), _mhs(10.07, 3000)],
+    2066: [_mhl(10.21, 2250), _mhs(10.07, 3000), _mh14(10.04, 3000), _mh15(10.09, 3000)],
     2067: [_mhl(10.21, 1500)],
     2068: [_mhl(8.81, 2900)],
     2069: [_mhl(9.05, 2750)],
     2070: [_mhl(10.44, 1100)],
     2071: [_mhl(7.3, 2200)],
-    2072: [_mhs(10.99, 3000)],
-    2073: [_mhs(10.07, 3000)],
-    2074: [_mhs(9.84, 4325)],
-    2075: [_mhs(10.83, 3000)],
-    2076: [_mhs(12.36, 3000)],
-    2077: [_mhs(12.36, 3000)],
+    2072: [_mhs(10.99, 3000), _mh14(10.95, 1600), _mh15(11.01, 1600)],
+    2073: [_mhs(10.07, 3000), _mh14(10.04, 150), _mh15(10.09, 150)],
+    2074: [_mhs(9.84, 4325), _mh14(9.81, 2700), _mh15(9.86, 1200)],
+    2075: [_mhs(10.83, 3000), _mh14(10.83, 1250), _mh15(10.93, 1250)],
+    2076: [_mhs(12.36, 3000), _mh14(12.32, 1750), _mh15(12.38, 1750)],
+    2077: [_mhs(12.36, 3000), _mh14(12.32, 2500), _mh15(12.38, 2500)],
     2078: [_mhs(10.07, 3000)],
-    2079: [_mhs(9.39, 3000)],
-    2080: [_mhs(9.62, 3000)],
-    2081: [_mhs(13.05, 2000)],
+    2079: [_mhs(9.39, 3000), _mh14(9.36, 2250), _mh15(9.4, 2250)],
+    2080: [_mhs(9.62, 3000), _mh14(9.58, 1525), _mh15(9.63, 1525)],
+    2081: [_mhs(13.05, 2000), _mh14(13.01, 1200), _mh15(13.07, 1000)],
     2082: [_mhs(10.07, 3200)],
-    2083: [_mhs(9.84, 3000)],
-    2084: [_mhs(8.93, 3000)],
-    2085: [_mhs(9.62, 1000)],
-    2086: [_mhs(9.62, 3000)],
-    2087: [_mhs(11.45, 4500)],
-    2088: [_mhs(13.28, 3000)],
-    2089: [_mhs(13.28, 3000)],
-    2090: [_mhs(10.30, 550)],
+    2083: [_mhs(9.84, 3000), _mh14(9.81, 3000), _mh15(9.86, 3000)],
+    2084: [_mhs(8.93, 3000), _mh14(8.90, 1000), _mh15(8.94, 1000)],
+    2085: [_mhs(9.62, 1000), _mh14(9.58, 1000), _mh15(9.63, 1000)],
+    2086: [_mhs(9.62, 3000), _mh14(9.58, 2250), _mh15(9.63, 1250)],
+    2087: [_mhs(11.45, 4500), _mh14(11.41, 4000), _mh15(11.46, 4000)],
+    2088: [_mhs(13.28, 3000), _mh14(13.24, 2750), _mh15(13.3, 2750)],
+    2089: [_mhs(13.28, 3000), _mh14(13.24, 3000), _mh15(13.3, 3000)],
+    2090: [_mhs(10.30, 550), _mh14(10.27, 50)],
     2091: [_mhs(10.30, 25)],
-    2092: [_mhs(28.15, 500)],
+    2092: [_mhs(28.15, 500), _mh14(28.15, 500), _mh15(28.41, 500)],
+    2093: [_mh14(11.81, 600), _mh15(11.92, 600)],
   };
 
   window.getMunicionById = function (id) { var n = Number(id); return (window.MUNICIONES || []).find(function (m) { return m.id === n; }) || null; };
