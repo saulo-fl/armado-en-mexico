@@ -922,7 +922,7 @@ function AboutScreen() {
             <span>Armado en México</span><span>Aviso</span>
           </div>
           <h2 id="acerca-aviso" className="amx-acerca-filete">▲ No somos gobierno · Fines informativos</h2>
-          <p className="amx-oficio-texto">Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.</p>
+          <p className="amx-oficio-texto">Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Armado en México no realiza ningún tipo de comercialización, Armas M&amp;S realiza comercialización exclusivamente de productos de outdoors y defensa personal en su propia tienda digital (armasmys.com)</p>
         </div>
       </section>
     </div>);
