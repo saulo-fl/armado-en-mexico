@@ -4307,73 +4307,129 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   EL GAFETE — la credencial de quien responde por un expediente
-   Cartón de copia, foto a la izquierda, campos a la derecha, filete tricolor.
+   EL GAFETE COLGANTE — la credencial de quien responde por un expediente
+   Cordón de marca, gancho, funda de plástico y la tarjeta dentro. Todo
+   dibujado en CSS, como el clip de alambre y la grapa: §5.5 permite la
+   papelería física dibujada, no las texturas ni el envejecido.
    Papel diegético: SOLO tokens de papelería, nunca PALETTE ni CLARO —siguen al
-   tema y dejarían tinta clara sobre cartón claro en oscuro.
+   tema y dejarían tinta clara sobre cartón claro en oscuro. El verde del
+   cordón es `--marca`, que es verde oscuro en los DOS temas.
    ═══════════════════════════════════════════════════════════════════════════ */
 .amx-v2 .amx-gafete {
   position: relative;
-  display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
-  gap: var(--e3);
-  align-items: center;
+  width: min(100%, 224px);
   margin: 0;
-  padding: calc(var(--e3) + 6px) var(--e3) var(--e3);
-  background: var(--copia-carton);
-  border-radius: 3px;
-  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 8px 14px -6px rgba(23, 27, 25, .22);
+  padding-top: 96px;            /* el sitio del cordón, el gancho y el broche */
   color: var(--copia-tinta);
-  transform: rotate(-.6deg);
-  overflow: hidden; /* recorta el filete al radio del cartón */
+  transform: rotate(-1deg);
+}
+/* Las dos cintas del cordón: suben abriéndose desde el gancho. */
+.amx-v2 .amx-gafete-cordon { position: absolute; inset: 0 0 auto; height: 78px; }
+.amx-v2 .amx-gafete-cordon::before,
+.amx-v2 .amx-gafete-cordon::after {
+  content: '';
+  position: absolute;
+  top: -6px; bottom: 0;
+  left: 50%; width: 13px; margin-left: -6.5px;
+  background: linear-gradient(90deg, #1B4A3F 0 22%, var(--marca) 22% 62%, #0E2A23 62%);
+  transform-origin: bottom center;
+}
+.amx-v2 .amx-gafete-cordon::before { transform: rotate(17deg); }
+.amx-v2 .amx-gafete-cordon::after { transform: rotate(-17deg); }
+/* El arco metálico que engancha el broche. */
+.amx-v2 .amx-gafete-gancho {
+  position: absolute;
+  top: 66px; left: 50%; width: 19px; height: 15px; margin-left: -9.5px;
+  border: 2.5px solid #9CA2A6;
+  border-top: 0;
+  border-radius: 0 0 9px 9px;
+  box-shadow: inset 1px -1px 0 rgba(255, 255, 255, .5);
+}
+/* El broche negro que sujeta la funda. */
+.amx-v2 .amx-gafete-broche {
+  position: absolute;
+  top: 74px; left: 50%; width: 15px; height: 28px; margin-left: -7.5px;
+  background: linear-gradient(90deg, #35373A 0 30%, var(--dymo) 30%);
+  border-radius: 3px;
+}
+/* La funda de plástico: translúcida, con la ranura por la que pasa el broche.
+   El blanco va literal —es plástico, no papel— y por eso no sale de un token. */
+.amx-v2 .amx-gafete-funda {
+  position: relative;
+  padding: 20px 6px 7px;
+  background: rgba(255, 255, 255, .5);
+  border: 1px solid var(--copia-filo);
+  border-radius: 9px;
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 9px 16px -7px rgba(23, 27, 25, .26);
+}
+.amx-v2 .amx-gafete-funda::before {   /* la ranura */
+  content: '';
+  position: absolute;
+  top: 8px; left: 50%; width: 46px; height: 6px; margin-left: -23px;
+  border-radius: 3px;
+  background: var(--copia-filo);
+}
+.amx-v2 .amx-gafete-tarjeta {
+  display: grid;
+  justify-items: center;
+  gap: var(--e2);
+  padding: var(--e3) var(--e2) calc(var(--e3) + 2px);
+  background: var(--copia-carton);
+  border-radius: 4px;
+  text-align: center;
+}
+.amx-v2 .amx-gafete-marca {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.amx-v2 .amx-gafete-marca img { width: 22px; height: 22px; border-radius: 4px; display: block; flex-shrink: 0; }
+.amx-v2 .amx-gafete-marca span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.2;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--copia-tinta-2);
+  text-align: left;
 }
 /* Tres franjas duras, sin degradado. No es un emblema: §6b lista las líneas
    tricolor entre lo permitido. Ver el comentario de `Gafete` en ui.jsx. */
 .amx-v2 .amx-gafete-filete {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 6px;
+  width: 100%; height: 4px;
+  border-radius: 2px;
   background: linear-gradient(90deg,
     var(--sello-civil) 0 33.34%,
-    var(--copia-carton) 33.34% 66.67%,
+    var(--copia-placa) 33.34% 66.67%,
     var(--sello-restr) 66.67%);
 }
 .amx-v2 .amx-gafete-foto {
-  aspect-ratio: 3 / 4;
+  width: 116px; height: 116px;
   display: grid;
   place-items: center;
   overflow: hidden;
+  border-radius: 50%;
   background: var(--copia-placa);
-  border: 1px solid var(--copia-filo); /* el canto del cartón, como el pozo de la polaroid */
+  border: 2px solid var(--copia-filo);   /* el canto del retrato, como el pozo de la polaroid */
 }
-.amx-v2 .amx-gafete-foto img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  display: block;
-}
-.amx-v2 .amx-gafete-campos { display: grid; gap: 3px; min-width: 0; }
+.amx-v2 .amx-gafete-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.amx-v2 .amx-gafete-campos { display: grid; gap: 2px; min-width: 0; width: 100%; }
 .amx-v2 .amx-gafete-nombre {
   font-family: var(--sans);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 17px;
   line-height: 1.1;
-  letter-spacing: .04em;
+  letter-spacing: .03em;
   text-transform: uppercase;
   color: var(--copia-tinta);
 }
 .amx-v2 .amx-gafete-cargo {
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: 10.5px;
   line-height: 1.5;
-  letter-spacing: .1em;
+  letter-spacing: .03em;
   color: var(--copia-tinta-2);
-}
-/* El cargo más largo («Co-Fundador de Armas M&S») se sale a 360px con la foto
-   de 84px. Medido en los anchos de México: 360 · 384 · 390 · 393 · 402 · 412. */
-@media (max-width: 400px) {
-  .amx-v2 .amx-gafete { grid-template-columns: 64px minmax(0, 1fr); gap: var(--e2); }
-  .amx-v2 .amx-gafete-nombre { font-size: 16px; }
-  .amx-v2 .amx-gafete-cargo { font-size: 11px; letter-spacing: .04em; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -4401,10 +4457,10 @@
   /* La credencial y la nota, hombro con hombro. */
   .amx-v2 .amx-acerca-gafete {
     display: flex;
-    align-items: flex-start;
-    gap: var(--e5);
+    align-items: center;
+    gap: var(--e6);
   }
-  .amx-v2 .amx-acerca-gafete > .amx-gafete { flex: 0 0 320px; }
+  .amx-v2 .amx-acerca-gafete > .amx-gafete { flex: 0 0 224px; }
   .amx-v2 .amx-acerca-gafete > .amx-acerca-nota { flex: 1; margin-top: 0; }
 }
 .amx-v2 .amx-acerca-cab {
