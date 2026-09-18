@@ -817,180 +817,114 @@ function LegalScreen({ onNav }) {
 window.LegalScreen = LegalScreen;
 
 // ════════════════════════════════════════════════════════════════
-// ABOUT
+// ABOUT — el expediente del propio proyecto
+// Decidido con Saulo sección por sección (17-sep-2026). El folder manila lleva
+// la identidad: cabecera, el gafete de quien responde y la declaración. Fuera
+// del folder, cada sección con su cinta Dymo, como en la ficha de arma.
+// El aviso «no somos gobierno» va AL FINAL: Acerca es la sección personal, y el
+// aviso ya está claro en Inicio y en Legalidad.
+// NADA de folios ni números de expediente: no hay ningún registro real del que
+// salgan. El rótulo de la pestaña es el `eyebrow` del Store, que sí es un dato.
+// Dentro del papel no entra `amxProsa` (inyecta PALETTE.textDim, que sigue al
+// tema) ni PALETTE ni CLARO: el texto va con `.amx-oficio-texto`.
 // ════════════════════════════════════════════════════════════════
 function AboutScreen() {
   const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
+  // Un solo corte, 1024px, el mismo del resto del expediente: `vp.isDesktop`
+  // corta a 900 y dejaría una franja con el CSS de una columna y el espaciado
+  // de escritorio puesto.
+  const ancho = vp.width >= 1024;
+  const padX = ancho ? 28 : 16;
+  const sec = ancho ? 52 : 34;
   const page = window.Store ? window.Store.getPages().about : null;
   const eyebrow = page?.eyebrow || '◆ ACERCA DE';
   const title = page?.title || 'Armado en México';
   const mision = page?.mision || 'Divulgar de forma rigurosa la información técnica, histórica y legal sobre las armas de fuego disponibles para civiles en México.';
   const autor = page?.autor || 'Saulo Flores';
-  const empresa = page?.empresa || 'Armas M&S';
   const bio = page?.bio || 'Catálogo curado y mantenido con base en información oficial de DCAM, SEDENA y publicaciones técnicas de los fabricantes.';
-  const aviso = page?.aviso || 'Las armas de fuego de este catálogo se muestran únicamente con fines informativos y de transparencia. Las únicas que comercializamos son las tres armas traumáticas menos letales.';
+  const foto = page?.foto || null;
   const decl = window.ARMADO_DECLARACION || { titulo: 'Declaración de intenciones', parrafos: [] };
   return (
-    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 800, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{
-        padding: '24px 0',
-        textAlign: 'center',
-        borderBottom: `1px solid ${PALETTE.border}`,
-        marginBottom: 18
-      }}>
-        {/* LOGO Armado en México */}
-        <div style={{
-          width: 132, margin: '0 auto 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 14 }} />
-        </div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', marginBottom: 6
-        }}>{eyebrow}</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif',
-          fontWeight: 700, fontSize: 26,
-          color: PALETTE.text,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em', lineHeight: 1.05
-        }}>{title}</div>
-      </div>
+    <div className="amx-acerca" style={{ padding: `${ancho ? 26 : 14}px ${padX}px 90px`, maxWidth: 800, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
 
-      {/* 1 ▸ DISCLAIMER OFICIAL — NO SOMOS GOBIERNO */}
-      <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-        padding: 14, marginBottom: 18
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.redHi,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          marginBottom: 6, fontWeight: 700
-        }}>▲ NO SOMOS GOBIERNO · FINES INFORMATIVOS</div>
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.
-        </div>
-      </div>
+      {/* ══ EL EXPEDIENTE ══ */}
+      <article className="amx-carpeta" aria-labelledby="acerca-titulo">
+        <span className="amx-carpeta-rotulo">{eyebrow}</span>
 
-      {/* 2 ▸ DECLARACIÓN DE INTENCIONES */}
-      <SectionHeader>{decl.titulo}</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: CLARO.sombra,
-        padding: vp.isDesktop ? '20px 22px' : '16px', marginBottom: 18,
-      }}>
-        {decl.parrafos.map((t, i) => (
-          <p key={i} style={window.amxProsa({
-            margin: i === 0 ? 0 : '14px 0 0',
-            fontSize: 17.5, color: i === 0 ? PALETTE.text : PALETTE.textDim,
-          })}>{t}</p>
-        ))}
-        <div style={{
-          marginTop: 18, paddingTop: 12, borderTop: `1px dashed ${PALETTE.border}`,
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: PALETTE.textMuted, letterSpacing: '0.04em',
-        }}>Armado en México · ¡Protege lo que amas!</div>
-      </div>
+        {/* El DOM va en el orden de lectura del teléfono; en escritorio las
+            áreas lo reparten sin reordenarlo. */}
+        <div className="amx-acerca-grid">
+          <header className="amx-carpeta-cab amx-acerca-cab">
+            <img className="amx-acerca-logo" src="imagenes/logo-armado-mx.webp" alt="" />
+            <h1 id="acerca-titulo" className="t-titulo">{title}</h1>
+          </header>
 
-      {/* 3 ▸ MISIÓN */}
-      <SectionHeader>Misión</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard,
-        border: `1px solid ${PALETTE.border}`,
-        padding: 14, marginBottom: 18,
-        position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={PALETTE.amber} />
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>{mision}</div>
-      </div>
-
-      {/* 4 ▸ DIFERENCIA — ARMADO EN MÉXICO vs ARMAS M&S */}
-      <SectionHeader>Armado en México vs. Armas M&amp;S</SectionHeader>
-      <div style={{
-        display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
-        gap: 12, marginBottom: 18,
-      }}>
-        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
+          <div className="amx-acerca-gafete">
+            <window.Gafete
+              foto={foto}
+              nombre={autor}
+              cargos={['Co-Fundador de Armas M&S', 'Creador de Armado en México']} />
+            <p className="amx-acerca-nota">{bio}</p>
           </div>
-          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
-            Una <span style={{ color: PALETTE.text }}>enciclopedia libre</span> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
+
+          <div className="amx-acerca-papeles">
+            <section className="amx-oficio" aria-labelledby="acerca-declaracion">
+              <div className="amx-oficio-membrete" aria-hidden="true">
+                <span>Armado en México</span><span>{decl.titulo}</span>
+              </div>
+              {/* El membrete ya rotula la hoja: el encabezado va solo para el
+                  lector de pantalla (el membrete es aria-hidden). */}
+              <h2 id="acerca-declaracion" className="amx-sr">{decl.titulo}</h2>
+              {decl.parrafos.map((t, i) => <p key={i} className="amx-oficio-texto">{t}</p>)}
+              <p className="amx-acerca-colofon">Armado en México · ¡Protege lo que amas!</p>
+            </section>
           </div>
         </div>
-        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <img src="imagenes/logo-main.png" alt="Armas M&amp;S" style={{ width: '90%', height: 'auto', display: 'block' }} />
+      </article>
+
+      {/* ══ MISIÓN ══ */}
+      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-mision">
+        <window.CintaDymo id="acerca-mision">Misión</window.CintaDymo>
+        <div className="amx-oficio">
+          <div className="amx-oficio-membrete" aria-hidden="true">
+            <span>Armado en México</span><span>Misión</span>
+          </div>
+          <p className="amx-oficio-texto">{mision}</p>
+        </div>
+      </section>
+
+      {/* ══ LAS DOS ENTIDADES ══ */}
+      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-duo">
+        <window.CintaDymo id="acerca-duo">Armado en México vs. Armas M&amp;S</window.CintaDymo>
+        <div className="amx-acerca-duo">
+          <article className="amx-oficio">
+            <div className="amx-acerca-duo-cab">
+              <img src="imagenes/logo-armado-mx.webp" alt="" />
+              <h3 className="amx-oficio-tit">Armado en México</h3>
             </div>
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
-          </div>
-          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
-            Un <span style={{ color: PALETTE.text }}>proyecto digital de e-commerce</span> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
-          </div>
-        </div>
-      </div>
-
-      {/* AUTOR */}
-      <SectionHeader>Autor</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard,
-        border: `1px solid ${PALETTE.border}`,
-        padding: 14, marginBottom: 18,
-        display: 'flex', gap: 16, alignItems: 'flex-start',
-        flexWrap: 'wrap'
-      }}>
-        {/* FOTO */}
-        <div style={{
-          width: 120, height: 120,
-          background: PALETTE.bgElev,
-          position: 'relative',
-          flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          overflow: 'hidden'
-        }}>
-          {window.Store && window.Store.getPages().about.foto ?
-          <img src={window.Store.getPages().about.foto} alt={autor}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.15) contrast(1.05)' }} /> :
-
-          <div style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 13, color: PALETTE.textMuted,
-            letterSpacing: '0.15em', textAlign: 'center',
-            padding: 8, lineHeight: 1.5
-          }}>
-              <div style={{ fontSize: 38.5, color: PALETTE.amber, marginBottom: 4 }}>◯</div>
-              FOTO<br />PENDIENTE
+            <p className="amx-oficio-texto">Una <b>enciclopedia libre</b> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.</p>
+          </article>
+          <article className="amx-oficio">
+            <div className="amx-acerca-duo-cab">
+              <span className="amx-acerca-duo-placa"><img src="imagenes/logo-main.png" alt="" /></span>
+              <h3 className="amx-oficio-tit">Armas M&amp;S</h3>
             </div>
-          }
+            <p className="amx-oficio-texto">Un <b>proyecto digital de e-commerce</b> con tienda en <b>armasmys.com</b> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.</p>
+          </article>
         </div>
+      </section>
 
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-            fontSize: 23, color: PALETTE.text,
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            lineHeight: 1.1
-          }}>{autor}</div>
-          <div style={window.amxProsa({
-            fontSize: 16, color: PALETTE.amber, marginTop: 6, lineHeight: 1.5
-          })}>Co-Fundador de Armas M&amp;S<br />Creador de Armado en México</div>
-          <div style={window.amxProsa({ fontSize: 16, marginTop: 10, lineHeight: 1.65 })}>{bio}</div>
+      {/* ══ EL AVISO, AL FINAL ══ */}
+      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-aviso">
+        <window.CintaDymo id="acerca-aviso">Aviso</window.CintaDymo>
+        <div className="amx-oficio">
+          <div className="amx-oficio-membrete" aria-hidden="true">
+            <span>Armado en México</span><span>Aviso</span>
+          </div>
+          <h2 id="acerca-aviso" className="amx-acerca-filete">▲ No somos gobierno · Fines informativos</h2>
+          <p className="amx-oficio-texto">Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.</p>
         </div>
-      </div>
-
-      <div style={{
-        textAlign: 'center',
-        padding: '16px',
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.textMuted,
-        letterSpacing: '0.15em'
-      }}>━━━ EDICIÓN 2026 · v1.0 ━━━</div>
+      </section>
     </div>);
 
 }
@@ -1417,4 +1351,4 @@ function MenuScreen({ onNav, onTutorial }) {
     </div>);
 
 }
-window.MenuScreen = MenuScreen;
+window.MenuScreen = MenuScreen;

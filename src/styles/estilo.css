@@ -4305,3 +4305,179 @@
   .amx-v2 .amx-hoja-filtro--entra { animation: none; }
   .amx-v2 .amx-filtros-envoltura::after { transition: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   EL GAFETE — la credencial de quien responde por un expediente
+   Cartón de copia, foto a la izquierda, campos a la derecha, filete tricolor.
+   Papel diegético: SOLO tokens de papelería, nunca PALETTE ni CLARO —siguen al
+   tema y dejarían tinta clara sobre cartón claro en oscuro.
+   ═══════════════════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-gafete {
+  position: relative;
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: var(--e3);
+  align-items: center;
+  margin: 0;
+  padding: calc(var(--e3) + 6px) var(--e3) var(--e3);
+  background: var(--copia-carton);
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 8px 14px -6px rgba(23, 27, 25, .22);
+  color: var(--copia-tinta);
+  transform: rotate(-.6deg);
+  overflow: hidden; /* recorta el filete al radio del cartón */
+}
+/* Tres franjas duras, sin degradado. No es un emblema: §6b lista las líneas
+   tricolor entre lo permitido. Ver el comentario de `Gafete` en ui.jsx. */
+.amx-v2 .amx-gafete-filete {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6px;
+  background: linear-gradient(90deg,
+    var(--sello-civil) 0 33.34%,
+    var(--copia-carton) 33.34% 66.67%,
+    var(--sello-restr) 66.67%);
+}
+.amx-v2 .amx-gafete-foto {
+  aspect-ratio: 3 / 4;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--copia-placa);
+  border: 1px solid var(--copia-filo); /* el canto del cartón, como el pozo de la polaroid */
+}
+.amx-v2 .amx-gafete-foto img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.amx-v2 .amx-gafete-campos { display: grid; gap: 3px; min-width: 0; }
+.amx-v2 .amx-gafete-nombre {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.1;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--copia-tinta);
+}
+.amx-v2 .amx-gafete-cargo {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: .1em;
+  color: var(--copia-tinta-2);
+}
+/* El cargo más largo («Co-Fundador de Armas M&S») se sale a 360px con la foto
+   de 84px. Medido en los anchos de México: 360 · 384 · 390 · 393 · 402 · 412. */
+@media (max-width: 400px) {
+  .amx-v2 .amx-gafete { grid-template-columns: 64px minmax(0, 1fr); gap: var(--e2); }
+  .amx-v2 .amx-gafete-nombre { font-size: 16px; }
+  .amx-v2 .amx-gafete-cargo { font-size: 11px; letter-spacing: .04em; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACERCA — el expediente del propio proyecto
+   La pantalla se comporta como una ficha: el folder manila lleva la identidad
+   (cabecera, gafete, declaración) y lo demás cuelga fuera con cinta Dymo.
+   El aviso «no somos gobierno» va AL FINAL por decisión de Saulo (17-sep-2026):
+   Acerca es la sección personal, y el aviso ya está claro en Inicio y Legalidad.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/* Una sola columna: cabecera, la banda del gafete y la declaración a todo lo
+   ancho. Con dos columnas la declaración estrechaba y el cartón quedaba con
+   medio folder vacío al lado del gafete.
+   Las áreas SE NOMBRAN siempre —aunque haya una sola columna— porque
+   `.amx-carpeta-cab` declara `grid-area: cab` suelta en su media query: sin un
+   área con ese nombre, la línea implícita abriría una fila de más. */
+.amx-v2 .amx-acerca-grid {
+  display: grid;
+  gap: var(--e5);
+  grid-template-areas: "cab" "gafete" "papeles";
+}
+.amx-v2 .amx-acerca-gafete { grid-area: gafete; }
+.amx-v2 .amx-acerca-papeles { grid-area: papeles; }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-acerca-grid { row-gap: 40px; }
+  /* La credencial y la nota, hombro con hombro. */
+  .amx-v2 .amx-acerca-gafete {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--e5);
+  }
+  .amx-v2 .amx-acerca-gafete > .amx-gafete { flex: 0 0 320px; }
+  .amx-v2 .amx-acerca-gafete > .amx-acerca-nota { flex: 1; margin-top: 0; }
+}
+.amx-v2 .amx-acerca-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+}
+.amx-v2 .amx-acerca-logo {
+  width: 56px; height: auto;
+  flex-shrink: 0;
+  border-radius: 8px;
+  display: block;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-acerca-logo { width: 76px; } }
+/* El rótulo de la pestaña mide 104px en móvil y `◆ ACERCA DE` a 12px roza el
+   corte. `eyebrow` además es editable desde el admin: se le baja el cuerpo para
+   que no se recorte en silencio el día que alguien lo alargue. */
+.amx-v2 .amx-acerca .amx-carpeta-rotulo { font-size: 11px; letter-spacing: .1em; }
+/* La bio, mecanografiada sobre el cartón del folder (como .amx-copia-opinion). */
+.amx-v2 .amx-acerca-nota {
+  margin: var(--e3) 0 0;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-acerca-colofon {
+  margin: var(--e4) 0 0;
+  padding-top: var(--e3);
+  border-top: 1px dashed var(--oficio-tinta-2);
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  color: var(--oficio-tinta-2);
+}
+/* El renglón del aviso: rótulo en tinta roja y filete doble. No es una caja con
+   borde rojo ni una banda de canto a canto —no hay clasificación que estampar. */
+.amx-v2 .amx-acerca-filete {
+  margin: 0 0 var(--e3);
+  padding-bottom: 6px;
+  border-bottom: 3px double var(--sello-restr);
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 1.4;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--sello-restr);
+}
+.amx-v2 .amx-acerca-duo { display: grid; gap: var(--e4); }
+@media (min-width: 1024px) {
+  .amx-v2 .amx-acerca-duo { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+/* Dos papeles sobre la mesa, no dos cajas alineadas. */
+.amx-v2 .amx-acerca-duo > *:first-child { transform: rotate(-.4deg); }
+.amx-v2 .amx-acerca-duo > *:last-child { transform: rotate(.35deg); }
+.amx-v2 .amx-acerca-duo-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  margin-bottom: var(--e3);
+}
+.amx-v2 .amx-acerca-duo-cab img { width: 40px; height: 40px; border-radius: 7px; display: block; }
+.amx-v2 .amx-acerca-duo-cab .amx-oficio-tit { margin: 0; }
+/* El logo de Armas M&S es un PNG pensado sobre blanco: su placa se queda
+   blanca, igual que el área de imagen de una copia. */
+.amx-v2 .amx-acerca-duo-placa {
+  width: 40px; height: 40px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 7px;
+  background: var(--copia-placa);
+}
+.amx-v2 .amx-acerca-duo-placa img { width: 90%; height: auto; display: block; }

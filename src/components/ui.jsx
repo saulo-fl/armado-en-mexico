@@ -2574,6 +2574,43 @@ function RepisaArticulo({ foto, silueta, alt, etiqueta, ariaLabel, onClick }) {
 }
 window.RepisaArticulo = RepisaArticulo;
 
+// ──────────────────────────────────────────────────────────────
+// GAFETE — la credencial de quien responde por el expediente
+// Foto a la izquierda, campos a la derecha, filete tricolor arriba.
+//
+// NO lleva folio, número ni vigencia: no hay ningún registro real del que
+// salgan, y un código que no corresponde a nada es decoración que finge ser
+// dato — la misma razón por la que se retiró `AR-####` de la ficha de arma.
+//
+// EL FILETE TRICOLOR: el `.tricolor` que se retiró el 8-sep-2026 (su lápida
+// está en estilo.css) desinformaba porque iba bajo armas checas o italianas.
+// Aquí la nacionalidad que afirma es cierta —el proyecto y la persona son
+// mexicanos— y §6b lista las líneas tricolor entre lo permitido. Son tres
+// franjas de color y nada más: ni escudo, ni águila, ni emblema, ni
+// «inspirado en». No lo retires por reflejo.
+// ──────────────────────────────────────────────────────────────
+function Gafete({ foto, nombre, cargos = [] }) {
+  // Cubre los dos casos, igual que ArmaPolaroid: la foto que nunca existió y
+  // el .webp que está en el dato pero no llega.
+  const [falloCarga, setFalloCarga] = React.useState(false);
+  const sinFoto = falloCarga || !foto;
+  return (
+    <figure className="amx-gafete">
+      <span className="amx-gafete-filete" aria-hidden="true" />
+      <div className="amx-gafete-foto">
+        {sinFoto ?
+        <span className="amx-sello amx-sello--pendiente">Fotografía pendiente</span> :
+        <img src={foto} alt={nombre} decoding="async" onError={() => setFalloCarga(true)} />}
+      </div>
+      <figcaption className="amx-gafete-campos">
+        <span className="amx-gafete-nombre">{nombre}</span>
+        {cargos.map((c, i) => <span key={i} className="amx-gafete-cargo">{c}</span>)}
+      </figcaption>
+    </figure>);
+
+}
+window.Gafete = Gafete;
+
 // ══════════════════════════════════════════════════════════════
 // EL COMPARADOR — dos fichas de fichero lado a lado (14-sep-2026)
 // Decidido con Saulo sección por sección (docs/DESIGN.md §5.6). Qué se compara
