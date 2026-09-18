@@ -4450,13 +4450,15 @@
    corte. `eyebrow` además es editable desde el admin: se le baja el cuerpo para
    que no se recorte en silencio el día que alguien lo alargue. */
 .amx-v2 .amx-acerca .amx-carpeta-rotulo { font-size: 11px; letter-spacing: .1em; }
-/* La bio, mecanografiada sobre el cartón del folder (como .amx-copia-opinion). */
+/* La nota de procedencia, dentro de su hoja: va con la tinta del oficio, no con
+   la del cartón —`--manila-tinta-2` coinciden en claro, pero en penumbra la del
+   manila pasa a tinta plena y aquí no hay penumbra que compensar. */
 .amx-v2 .amx-acerca-nota {
-  margin: var(--e3) 0 0;
+  margin: 0;
   font-family: var(--sans);
   font-size: 14.5px;
   line-height: 1.6;
-  color: var(--manila-tinta-2);
+  color: var(--oficio-tinta-2);
 }
 .amx-v2 .amx-acerca-colofon {
   margin: var(--e4) 0 0;

@@ -867,7 +867,6 @@ function AboutScreen() {
                 foto={foto}
                 nombre={autor}
                 cargos={['Co-Fundador de Armas M&S', 'Creador de Armado en México']} />
-              <p className="amx-acerca-nota">{bio}</p>
             </div>
 
             <section className="amx-oficio" aria-labelledby="acerca-mision">
@@ -924,6 +923,17 @@ function AboutScreen() {
           </div>
           <h2 id="acerca-aviso" className="amx-acerca-filete">▲ No somos gobierno · Fines informativos</h2>
           <p className="amx-oficio-texto">Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Armado en México no realiza ningún tipo de comercialización, Armas M&amp;S realiza comercialización exclusivamente de productos de outdoors y defensa personal en su propia tienda digital (armasmys.com)</p>
+        </div>
+      </section>
+
+      {/* ══ FUENTES ══ */}
+      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-fuente">
+        <div className="amx-oficio">
+          <div className="amx-oficio-membrete" aria-hidden="true">
+            <span>Armado en México</span><span>Fuentes</span>
+          </div>
+          <h2 id="acerca-fuente" className="amx-sr">Fuentes</h2>
+          <p className="amx-acerca-nota">{bio}</p>
         </div>
       </section>
     </div>);
