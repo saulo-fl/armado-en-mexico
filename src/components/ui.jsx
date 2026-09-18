@@ -1887,6 +1887,43 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
   );
 }
 window.Disclosure = Disclosure;
+// ──────────────────────────────────────────────────────────────
+// FOLDER PREGUNTA — el cajón de expedientes de /preguntas
+// Cada pregunta es un folder manila que monta sobre el siguiente, y al abrirlo
+// sale de dentro la hoja de oficio con la respuesta: el cartón pregunta, el
+// papel responde. El tema va rotulado en la pestaña, que es lo que deja leer
+// la pila de un vistazo.
+//
+// Es <details> nativo —el navegador da aria-expanded, teclado y estado— pero
+// NO reusa `Disclosure`: aquel viste con PALETTE y lleva una barrita de
+// acento, y dentro de un papel solo entran los tokens de papelería (§5.5). Sin
+// estado en React: el +/− y el resto los pinta el CSS con [open].
+//
+// OJO: el <span> flex va DENTRO del <summary> y no en el <summary> mismo
+// (display:flex ahí se traga el marcador y rompe el click en Safari viejo).
+// ──────────────────────────────────────────────────────────────
+function FolderPregunta({ pregunta, tema, children }) {
+  return (
+    <details className="amx-faq-folder">
+      <summary>
+        {/* La pestaña rotulada va oculta al lector: clasifica lo que la
+            pregunta de al lado ya dice con todas sus letras. */}
+        {tema && <span className="amx-faq-tema" aria-hidden="true">{tema}</span>}
+        <span className="amx-faq-cab">
+          <span className="amx-faq-q">{pregunta}</span>
+        </span>
+      </summary>
+      <div className="amx-oficio">
+        <div className="amx-oficio-membrete" aria-hidden="true">
+          <span>Armado en México</span><span>{tema || 'Respuesta'}</span>
+        </div>
+        <p className="amx-oficio-texto">{children}</p>
+      </div>
+    </details>
+  );
+}
+window.FolderPregunta = FolderPregunta;
+
 
 // ──────────────────────────────────────────────────────────────
 // PRICE CHART — historial de precios en SVG inline, sin librerías
