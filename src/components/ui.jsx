@@ -2574,6 +2574,59 @@ function RepisaArticulo({ foto, silueta, alt, etiqueta, ariaLabel, onClick }) {
 }
 window.RepisaArticulo = RepisaArticulo;
 
+// ──────────────────────────────────────────────────────────────
+// GAFETE — la credencial de quien responde por el expediente
+// Funda de plástico con su ranura y la tarjeta dentro: logo, filete tricolor,
+// retrato circular, nombre y cargos. El formato lo eligió Saulo con una
+// referencia de gafete de oficina (17-sep-2026).
+//
+// SIN CORDÓN: lo llevaba dibujado en CSS y Saulo lo retiró el mismo día —dos
+// cintas planas no se leen como una cinta de verdad y delataban el dibujo. La
+// funda y su ranura bastan para que se reconozca el gafete. No reintroducir.
+//
+// NO lleva folio, número, vigencia ni firma —los campos que un gafete real
+// tendría ahí—: no hay ningún registro del que salgan, y un código que no
+// corresponde a nada es decoración que finge ser dato. Por eso la tarjeta
+// termina en los cargos y no en una tabla de campos vacíos.
+//
+// EL FILETE TRICOLOR: el `.tricolor` que se retiró el 8-sep-2026 (su lápida
+// está en estilo.css) desinformaba porque iba bajo armas checas o italianas.
+// Aquí la nacionalidad que afirma es cierta —el proyecto y la persona son
+// mexicanos— y §6b lista las líneas tricolor entre lo permitido. Son tres
+// franjas de color y nada más: ni escudo, ni águila, ni emblema. Y el gafete
+// es de un proyecto privado, con su propio logo: no imita una credencial
+// oficial de ninguna dependencia.
+// ──────────────────────────────────────────────────────────────
+function Gafete({ foto, nombre, cargos = [], marca = 'Armado en México', logo = 'imagenes/logo-armado-mx.webp' }) {
+  // Cubre los dos casos, igual que ArmaPolaroid: la foto que nunca existió y
+  // el .webp que está en el dato pero no llega.
+  const [falloCarga, setFalloCarga] = React.useState(false);
+  const sinFoto = falloCarga || !foto;
+  return (
+    <figure className="amx-gafete">
+      <div className="amx-gafete-funda">
+        <div className="amx-gafete-tarjeta">
+          <div className="amx-gafete-marca">
+            <img src={logo} alt="" />
+            <span>{marca}</span>
+          </div>
+          <span className="amx-gafete-filete" aria-hidden="true" />
+          <div className="amx-gafete-foto">
+            {sinFoto ?
+            <span className="amx-sello amx-sello--pendiente">Fotografía pendiente</span> :
+            <img src={foto} alt={nombre} decoding="async" onError={() => setFalloCarga(true)} />}
+          </div>
+          <figcaption className="amx-gafete-campos">
+            <span className="amx-gafete-nombre">{nombre}</span>
+            {cargos.map((c, i) => <span key={i} className="amx-gafete-cargo">{c}</span>)}
+          </figcaption>
+        </div>
+      </div>
+    </figure>);
+
+}
+window.Gafete = Gafete;
+
 // ══════════════════════════════════════════════════════════════
 // EL COMPARADOR — dos fichas de fichero lado a lado (14-sep-2026)
 // Decidido con Saulo sección por sección (docs/DESIGN.md §5.6). Qué se compara
