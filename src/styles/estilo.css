@@ -4606,6 +4606,18 @@
 /* El abierto se queda encima del que lo tapaba. */
 .amx-v2 .amx-faq-folder[open] { z-index: 2; }
 
+/* PENUMBRA, más alta que la de la ficha de arma. `--manila-luz` baja el brillo
+   del cartón al 68 % en oscuro porque allí el folder ocupa la pantalla entera
+   y deslumbraba; aquí son doce pequeños sobre el lienzo oscuro y ese mismo
+   68 % los apagaba —quedaban grises, y la hoja de oficio blanca de dentro lo
+   delataba—. Al 85 % vuelven a ser cartulina sin convertirse en una lámpara
+   (al 93 % la pila entera es un muro de crema, que es lo que el token evita).
+   Los dos bloques de tema, como el resto del archivo. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder { --manila-luz: .85; }
+}
+:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder { --manila-luz: .85; }
+
 .amx-v2 .amx-faq-folder > summary { cursor: pointer; }
 /* Sobre los papeles el anillo va en tinta, y por dentro: el folder tiene la
    pestaña recortada y un anillo exterior dibujaría un rectángulo que no es. */
