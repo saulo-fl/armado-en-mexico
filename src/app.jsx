@@ -489,7 +489,9 @@ function App() {
       <div ref={scrollRef} style={{
         flex: 1, minHeight: 0,
         overflowY: vp.isMobile ? 'auto' : 'visible',
+        overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
+        maxWidth: '100vw',
       }}>
         {content}
         {/* PIE DE OFICIO — global, no solo del Home. Tres razones:

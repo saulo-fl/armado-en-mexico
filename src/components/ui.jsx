@@ -759,17 +759,18 @@ function BottomNav({ current, onNav, compareCount }) {
         const active = current === it.id;
         return (
           <button key={it.id} onClick={() => onNav(it.id)} style={{
-            flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+            flex: 1, minWidth: 0, background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            padding: '8px 4px', gap: 4, minHeight: 48,
-            color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
+            padding: '8px 2px', gap: 4, minHeight: 48,
+            color: active ? '#FAF9F5' : PALETTE.sobreMarcaDim,
             position: 'relative',
           }}>
             {active && (
               <span style={{
                 position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                width: 18, height: 2, background: '#DDD5C4',
-                boxShadow: `0 0 6px ${'#DDD5C4'}`,
+                width: 24, height: 2.5, borderRadius: 1,
+                background: '#FAF9F5',
+                boxShadow: '0 0 8px rgba(250,249,245,.6)',
               }} />
             )}
             <span style={{ lineHeight: 1, position: 'relative' }}>
@@ -787,8 +788,10 @@ function BottomNav({ current, onNav, compareCount }) {
             </span>
             <span style={{
               fontFamily: 'Archivo, sans-serif',
-              fontSize: 12, fontWeight: active ? 600 : 500,
-              letterSpacing: '0.07em',
+              fontSize: 11, fontWeight: active ? 600 : 500,
+              letterSpacing: '0.06em',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              maxWidth: '100%',
             }}>{it.label}</span>
           </button>
         );

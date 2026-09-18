@@ -1103,6 +1103,8 @@
   .amx-v2 .amx-dest-folder {
     grid-template-columns: minmax(0, 1fr) minmax(0, 38%);
     gap: var(--e3);
+    max-width: 100%;
+    overflow: hidden;
   }
   .amx-v2 .amx-dest-specs { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: 13px; }
   .amx-v2 .amx-dest-specs dt { font-size: 11.5px; }
@@ -4715,4 +4717,139 @@
     padding-left: var(--e4); padding-right: var(--e4);
   }
   .amx-v2 .amx-faq-tema { font-size: 11.5px; letter-spacing: .12em; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DEFENSA CONTRA DESBORDE HORIZONTAL en móvil
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 719px) {
+  .amx-v2 { max-width: 100vw; overflow-x: hidden; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MENÚ MÁS — legajo de archivero / índice de fichas
+   Cada entrada es una pestaña que asoma de un folder, con tipografía
+   mecanografiada y la estética de «Documento Oficial Mexicano» (§3 DESIGN.md).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 .amx-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.amx-v2 .amx-menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--e4);
+  padding: 14px 16px;
+  background: var(--ficha);
+  border: none;
+  border-left: 3px solid var(--hair);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+}
+
+.amx-v2 .amx-menu-item:hover {
+  border-left-color: var(--acento);
+}
+
+.amx-v2 .amx-menu-item:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+.amx-v2 .amx-menu-item[disabled] {
+  opacity: .5;
+  cursor: default;
+}
+.amx-v2 .amx-menu-item[disabled]:hover {
+  border-left-color: var(--hair);
+}
+
+.amx-v2 .amx-menu-icono {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--ficha-tinta-2);
+  border: 1.5px solid var(--ficha-tinta-2);
+  border-radius: 0;
+}
+
+.amx-v2 .amx-menu-item--accent {
+  border-left-color: var(--sello-restr);
+}
+.amx-v2 .amx-menu-item--accent .amx-menu-icono {
+  color: var(--sello-restr);
+  border-color: var(--sello-restr);
+}
+
+.amx-v2 .amx-menu-titulo {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta);
+}
+
+.amx-v2 .amx-menu-desc {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--ficha-tinta-2);
+  margin-top: 2px;
+}
+
+.amx-v2 .amx-menu-flecha {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--ficha-tinta-2);
+}
+
+.amx-v2 .amx-menu-sep {
+  height: 0;
+  border: none;
+  border-top: 1px dashed var(--hair);
+  margin: 6px 0;
+}
+
+.amx-v2 .amx-menu-pie {
+  margin-top: 24px;
+  padding: 14px;
+  background: var(--ficha);
+  border: 1px dashed var(--hair);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--ficha-tinta-2);
+  line-height: 1.6;
+}
+.amx-v2 .amx-menu-pie strong {
+  display: block;
+  color: var(--acento);
+  font-weight: 700;
+  letter-spacing: .15em;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+@media (max-width: 399px) {
+  .amx-v2 .amx-menu-item { gap: var(--e3); padding: 12px 12px; }
+  .amx-v2 .amx-menu-icono { width: 30px; height: 30px; font-size: 15px; }
+  .amx-v2 .amx-menu-titulo { font-size: 13px; }
+  .amx-v2 .amx-menu-desc { font-size: 12.5px; }
 }
