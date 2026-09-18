@@ -4904,6 +4904,11 @@
 }
 .amx-v2 .amx-cotiz-pie-tit {
   margin: 0 0 var(--e3);
+}
+/* El segundo epígrafe del pie (el marco legal) va detrás de las condiciones y
+   necesita aire; el primero no, porque el borde del pie ya se lo da. */
+.amx-v2 .amx-cotiz-pie-tit:not(:first-child) {
+  margin-top: var(--e5);
   font-family: var(--mono);
   font-size: 11.5px;
   letter-spacing: .2em;
@@ -5012,7 +5017,10 @@
   text-transform: uppercase;
   color: var(--oficio-tinta-2);
 }
-.amx-v2 .amx-cotiz-municion span {
+/* Solo las fichas de calibre llevan recuadro. El título «Munición» es un span
+   más dentro del mismo contenedor, y sin el :not() salía enmarcado como si
+   fuera un calibre. */
+.amx-v2 .amx-cotiz-municion span:not(.amx-cotiz-municion-tit) {
   padding: 3px 9px;
   border: 1px solid var(--oficio-2);
   font-family: var(--mono);
