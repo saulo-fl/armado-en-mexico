@@ -942,9 +942,6 @@ function AboutScreen() {
 window.AboutScreen = AboutScreen;
 
 // ════════════════════════════════════════════════════════════════
-// FAQ
-// ════════════════════════════════════════════════════════════════
-// ════════════════════════════════════════════════════════════════
 // SOPORTE — normas de la comunidad, denuncias y moderación
 // Existe porque la app acepta texto libre de desconocidos (las reseñas). Las
 // normas están adaptadas de las de Steam, recortadas a lo que aquí hay: no hay
@@ -1186,95 +1183,50 @@ function SoporteScreen({ onNav }) {
 }
 window.SoporteScreen = SoporteScreen;
 
+// ════════════════════════════════════════════════════════════════
+// FAQ — el cajón de expedientes
+// Rediseño del 18-sep-2026. Las 12 preguntas son folders manila apilados que
+// montan uno sobre otro; al abrir uno sale de dentro la hoja de oficio con la
+// respuesta. Arriba, el aviso de transparencia como ficha de fichero con clip.
+//
+// Las preguntas salen de Store —que sirve D1 si lo hay y, si no, el seed de
+// store.js—. Ya NO hay una pregunta de repuesto escrita aquí: era la misma
+// duplicación que AGENTS.md avisa, y con el texto legal desactualizándose por
+// su cuenta.
+// ════════════════════════════════════════════════════════════════
 function FAQScreen() {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
-  const [open, setOpen] = useState2(0);
-  const faqs = window.Store ? window.Store.getPages().faq : [
-  { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México un arma de fuego solo puede adquirirse por los canales oficiales: la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), en el Campo Militar No. 1-D, en Naucalpan, Estado de México (Av. Industria Militar 1111, Col. Lomas de Tecamachalco), y la OTCA, en Monterrey, N.L., que solo atiende al público que radica en Coahuila, Nuevo León, San Luis Potosí y Tamaulipas.' }];
+  const faqs = (window.Store && window.Store.getPages().faq) || [];
 
   return (
-    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      {/* El header móvil ya no pinta el título de pantalla: este bloque es el
-          único encabezado y se centra en móvil para ocupar el sitio que dejó.
-          En escritorio/tablet pasa a la izquierda —TopNav tampoco pinta título—
-          para arrancar al margen de la columna de lectura de abajo. */}
-      <div style={{
-        padding: '20px 0',
-        textAlign: vp.isMobile ? 'center' : 'left',
-        borderBottom: `1px solid ${PALETTE.border}`,
-        marginBottom: 18
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', marginBottom: 6
-        }}>? PREGUNTAS FRECUENTES</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif',
-          fontWeight: 700, fontSize: 23,
-          color: PALETTE.text,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em', lineHeight: 1.1
-        }}>FAQ</div>
-      </div>
+    <div className="amx-faq" style={{
+      padding: `${vp.isDesktop ? 26 : 14}px ${padX}px 90px`,
+      maxWidth: 820, margin: '0 auto', width: '100%', boxSizing: 'border-box'
+    }}>
+      <window.CintaDymo nivel={1} id="faq-titulo">Preguntas frecuentes</window.CintaDymo>
 
-      {/* DISCLAIMER */}
-      <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-        padding: 14, marginBottom: 18
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.redHi,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          marginBottom: 6, fontWeight: 700
-        }}>▲ AVISO DE TRANSPARENCIA</div>
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
-          <br /><br />
-          Armas M&amp;S no presta servicios jurídicos.
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {faqs.map((f, i) =>
-        <div key={i} style={{
-          background: PALETTE.bgCard,
-          border: `1px solid ${open === i ? PALETTE.amber : PALETTE.border}`
-        }}>
-            <button onClick={() => setOpen(open === i ? -1 : i)} style={{
-            width: '100%',
-            background: 'none', border: 'none', cursor: 'pointer',
-            padding: '12px 14px',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            gap: 10, textAlign: 'left'
-          }}>
-              <span style={{
-              fontFamily: 'Archivo, sans-serif',
-              fontWeight: 600, fontSize: 15,
-              color: open === i ? PALETTE.amber : PALETTE.text,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              lineHeight: 1.25,
-              flex: 1
-            }}>{f.q}</span>
-              <span style={{
-              color: PALETTE.amber,
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 19, flexShrink: 0
-            }}>{open === i ? '−' : '+'}</span>
-            </button>
-            {open === i &&
-          <div style={window.amxProsa({
-            padding: '0 14px 14px',
-            fontSize: 16.5,
-            borderTop: `1px dashed ${PALETTE.border}`,
-            paddingTop: 12
-          })}>{f.a}</div>
-          }
+      {/* ══ EL AVISO — la ficha de fichero, lo primero de la página ══ */}
+      {/* La cartulina es la MISMA ficha de fichero de la ficha técnica; el clip
+          va fuera de ella porque lleva la máscara de la perforación y una
+          máscara recorta lo que asome del borde. */}
+      <section className="amx-faq-aviso" aria-labelledby="faq-aviso">
+        <span className="amx-copia-clip" aria-hidden="true" />
+        <div className="amx-fichero-carton">
+          <div className="amx-fichero-cab">
+            <h2 id="faq-aviso" className="amx-faq-aviso-tit">▲ Aviso de transparencia</h2>
           </div>
+          <p className="amx-faq-aviso-texto">
+            Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
+          </p>
+          <p className="amx-faq-aviso-texto">Armas M&amp;S no presta servicios jurídicos.</p>
+        </div>
+      </section>
+
+      {/* ══ EL CAJÓN ══ */}
+      <div className="amx-faq-cajon">
+        {faqs.map((f, i) =>
+          <window.FolderPregunta key={i} pregunta={f.q} tema={f.tema}>{f.a}</window.FolderPregunta>
         )}
       </div>
     </div>);
