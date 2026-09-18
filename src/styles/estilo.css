@@ -4307,50 +4307,22 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   EL GAFETE COLGANTE — la credencial de quien responde por un expediente
-   Cordón de marca, gancho, funda de plástico y la tarjeta dentro. Todo
-   dibujado en CSS, como el clip de alambre y la grapa: §5.5 permite la
-   papelería física dibujada, no las texturas ni el envejecido.
+   EL GAFETE — la credencial de quien responde por un expediente
+   Funda de plástico con su ranura y la tarjeta dentro. Dibujado en CSS, como
+   el clip de alambre y la grapa: §5.5 permite la papelería física dibujada,
+   no las texturas ni el envejecido.
+   El cordón se retiró el 17-sep-2026: dos cintas planas no se leían como una
+   cinta de verdad. No reintroducir.
    Papel diegético: SOLO tokens de papelería, nunca PALETTE ni CLARO —siguen al
-   tema y dejarían tinta clara sobre cartón claro en oscuro. El verde del
-   cordón es `--marca`, que es verde oscuro en los DOS temas.
+   tema y dejarían tinta clara sobre cartón claro en oscuro.
    ═══════════════════════════════════════════════════════════════════════════ */
 .amx-v2 .amx-gafete {
   position: relative;
   width: min(100%, 224px);
-  margin: 0;
-  padding-top: 96px;            /* el sitio del cordón, el gancho y el broche */
+  margin-inline: auto;          /* centrado en su columna y en el teléfono */
+  margin-block: 0;
   color: var(--copia-tinta);
   transform: rotate(-1deg);
-}
-/* Las dos cintas del cordón: suben abriéndose desde el gancho. */
-.amx-v2 .amx-gafete-cordon { position: absolute; inset: 0 0 auto; height: 78px; }
-.amx-v2 .amx-gafete-cordon::before,
-.amx-v2 .amx-gafete-cordon::after {
-  content: '';
-  position: absolute;
-  top: -6px; bottom: 0;
-  left: 50%; width: 13px; margin-left: -6.5px;
-  background: linear-gradient(90deg, #1B4A3F 0 22%, var(--marca) 22% 62%, #0E2A23 62%);
-  transform-origin: bottom center;
-}
-.amx-v2 .amx-gafete-cordon::before { transform: rotate(17deg); }
-.amx-v2 .amx-gafete-cordon::after { transform: rotate(-17deg); }
-/* El arco metálico que engancha el broche. */
-.amx-v2 .amx-gafete-gancho {
-  position: absolute;
-  top: 66px; left: 50%; width: 19px; height: 15px; margin-left: -9.5px;
-  border: 2.5px solid #9CA2A6;
-  border-top: 0;
-  border-radius: 0 0 9px 9px;
-  box-shadow: inset 1px -1px 0 rgba(255, 255, 255, .5);
-}
-/* El broche negro que sujeta la funda. */
-.amx-v2 .amx-gafete-broche {
-  position: absolute;
-  top: 74px; left: 50%; width: 15px; height: 28px; margin-left: -7.5px;
-  background: linear-gradient(90deg, #35373A 0 30%, var(--dymo) 30%);
-  border-radius: 3px;
 }
 /* La funda de plástico: translúcida, con la ranura por la que pasa el broche.
    El blanco va literal —es plástico, no papel— y por eso no sale de un token. */
@@ -4448,20 +4420,19 @@
 .amx-v2 .amx-acerca-grid {
   display: grid;
   gap: var(--e5);
-  grid-template-areas: "cab" "gafete" "papeles";
+  grid-template-areas: "cab" "identidad" "papeles";
 }
-.amx-v2 .amx-acerca-gafete { grid-area: gafete; }
+.amx-v2 .amx-acerca-identidad { grid-area: identidad; display: grid; gap: var(--e5); }
 .amx-v2 .amx-acerca-papeles { grid-area: papeles; }
 @media (min-width: 1024px) {
   .amx-v2 .amx-acerca-grid { row-gap: 40px; }
-  /* La credencial y la nota, hombro con hombro. */
-  .amx-v2 .amx-acerca-gafete {
-    display: flex;
-    align-items: center;
+  /* La credencial a un lado y la misión al otro: la fila queda simétrica y el
+     cartón no se queda con medio folder vacío. En el teléfono se apilan. */
+  .amx-v2 .amx-acerca-identidad {
+    grid-template-columns: 224px minmax(0, 1fr);
     gap: var(--e6);
+    align-items: center;
   }
-  .amx-v2 .amx-acerca-gafete > .amx-gafete { flex: 0 0 224px; }
-  .amx-v2 .amx-acerca-gafete > .amx-acerca-nota { flex: 1; margin-top: 0; }
 }
 .amx-v2 .amx-acerca-cab {
   display: flex;

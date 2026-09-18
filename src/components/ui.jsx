@@ -2575,10 +2575,14 @@ function RepisaArticulo({ foto, silueta, alt, etiqueta, ariaLabel, onClick }) {
 window.RepisaArticulo = RepisaArticulo;
 
 // ──────────────────────────────────────────────────────────────
-// GAFETE — la credencial colgante de quien responde por el expediente
-// Cordón de marca, gancho, funda de plástico y la tarjeta dentro: logo,
-// filete tricolor, retrato circular, nombre y cargos. El formato lo eligió
-// Saulo con una referencia de gafete de oficina (17-sep-2026).
+// GAFETE — la credencial de quien responde por el expediente
+// Funda de plástico con su ranura y la tarjeta dentro: logo, filete tricolor,
+// retrato circular, nombre y cargos. El formato lo eligió Saulo con una
+// referencia de gafete de oficina (17-sep-2026).
+//
+// SIN CORDÓN: lo llevaba dibujado en CSS y Saulo lo retiró el mismo día —dos
+// cintas planas no se leen como una cinta de verdad y delataban el dibujo. La
+// funda y su ranura bastan para que se reconozca el gafete. No reintroducir.
 //
 // NO lleva folio, número, vigencia ni firma —los campos que un gafete real
 // tendría ahí—: no hay ningún registro del que salgan, y un código que no
@@ -2600,9 +2604,6 @@ function Gafete({ foto, nombre, cargos = [], marca = 'Armado en México', logo =
   const sinFoto = falloCarga || !foto;
   return (
     <figure className="amx-gafete">
-      <span className="amx-gafete-cordon" aria-hidden="true" />
-      <span className="amx-gafete-gancho" aria-hidden="true" />
-      <span className="amx-gafete-broche" aria-hidden="true" />
       <div className="amx-gafete-funda">
         <div className="amx-gafete-tarjeta">
           <div className="amx-gafete-marca">

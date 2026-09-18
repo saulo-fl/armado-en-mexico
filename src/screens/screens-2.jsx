@@ -859,12 +859,24 @@ function AboutScreen() {
             <h1 id="acerca-titulo" className="t-titulo">{title}</h1>
           </header>
 
-          <div className="amx-acerca-gafete">
-            <window.Gafete
-              foto={foto}
-              nombre={autor}
-              cargos={['Co-Fundador de Armas M&S', 'Creador de Armado en México']} />
-            <p className="amx-acerca-nota">{bio}</p>
+          {/* La credencial y la misión, hombro con hombro; apiladas en el
+              teléfono. Lo pidió Saulo así para que la fila quede simétrica. */}
+          <div className="amx-acerca-identidad">
+            <div className="amx-acerca-gafete">
+              <window.Gafete
+                foto={foto}
+                nombre={autor}
+                cargos={['Co-Fundador de Armas M&S', 'Creador de Armado en México']} />
+              <p className="amx-acerca-nota">{bio}</p>
+            </div>
+
+            <section className="amx-oficio" aria-labelledby="acerca-mision">
+              <div className="amx-oficio-membrete" aria-hidden="true">
+                <span>Armado en México</span><span>Misión</span>
+              </div>
+              <h2 id="acerca-mision" className="amx-sr">Misión</h2>
+              <p className="amx-oficio-texto">{mision}</p>
+            </section>
           </div>
 
           <div className="amx-acerca-papeles">
@@ -881,17 +893,6 @@ function AboutScreen() {
           </div>
         </div>
       </article>
-
-      {/* ══ MISIÓN ══ */}
-      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-mision">
-        <window.CintaDymo id="acerca-mision">Misión</window.CintaDymo>
-        <div className="amx-oficio">
-          <div className="amx-oficio-membrete" aria-hidden="true">
-            <span>Armado en México</span><span>Misión</span>
-          </div>
-          <p className="amx-oficio-texto">{mision}</p>
-        </div>
-      </section>
 
       {/* ══ LAS DOS ENTIDADES ══ */}
       <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-duo">
