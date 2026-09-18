@@ -4588,6 +4588,7 @@
   filter: brightness(var(--manila-luz))
           drop-shadow(0 1px 2px rgba(23, 27, 25, .18))
           drop-shadow(0 6px 12px rgba(23, 27, 25, .22));
+  transition: filter .18s ease-out;
 }
 
 /* Al pasar el ratón, el folder sale de la pila. Solo donde hay ratón de
@@ -4607,16 +4608,28 @@
 .amx-v2 .amx-faq-folder[open] { z-index: 2; }
 
 /* PENUMBRA, más alta que la de la ficha de arma. `--manila-luz` baja el brillo
-   del cartón al 68 % en oscuro porque allí el folder ocupa la pantalla entera
-   y deslumbraba; aquí son doce pequeños sobre el lienzo oscuro y ese mismo
-   68 % los apagaba —quedaban grises, y la hoja de oficio blanca de dentro lo
-   delataba—. Al 85 % vuelven a ser cartulina sin convertirse en una lámpara
-   (al 93 % la pila entera es un muro de crema, que es lo que el token evita).
-   Los dos bloques de tema, como el resto del archivo. */
+   del cartón al 68 % en oscuro porque allí el folder ocupa la pantalla entera y
+   deslumbraba; aquí son doce pequeños sobre el lienzo oscuro y ese mismo 68 %
+   los apagaba —quedaban grises, y la hoja de oficio blanca de dentro lo
+   delataba—. Al 90 % son cartulina otra vez, y el que está bajo el ratón o
+   abierto sube al 95 %: el de encima de la pila es también el más iluminado.
+   En claro no hay nada que subir, `--manila-luz` ya vale 1, y por eso todo esto
+   vive dentro de los dos bloques de tema oscuro. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder { --manila-luz: .85; }
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder { --manila-luz: .9; }
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
 }
-:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder { --manila-luz: .85; }
+:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder { --manila-luz: .9; }
+:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
+
+/* El hover va aparte y solo donde hay ratón de verdad: en el teléfono se queda
+   pegado tras el toque. Ahí lo cubre `[open]`, que es lo que deja el toque. */
+@media (hover: hover) and (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder:hover { --manila-luz: .95; }
+}
+@media (hover: hover) {
+  :root[data-tema="oscuro"] .amx-v2 .amx-faq-folder:hover { --manila-luz: .95; }
+}
 
 .amx-v2 .amx-faq-folder > summary { cursor: pointer; }
 /* Sobre los papeles el anillo va en tinta, y por dentro: el folder tiene la
