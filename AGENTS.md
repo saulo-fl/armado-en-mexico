@@ -53,6 +53,12 @@ necesita ni resembrar D1 ni verificar armado.mx; `main` es producción y no est�
 hasta que D1 esté resembrado y las sondas den lo que deben. Mezclarlos era la vía por la
 que se daba por publicado algo que ningún visitante veía.
 
+**Agentes que no son Claude Code:** `.github/copilot-instructions.md` es el resumen
+operativo de una página que GitHub Copilot inyecta solo — comandos, invariantes que
+rompen el sitio y las prohibiciones de la §6b. Está pensado para modelos pequeños
+(Qwen y compañía), que no digieren este documento entero. **Si cambian los comandos, el
+stack o las prohibiciones, actualiza los dos.**
+
 **Regla:** cualquier cambio de datos o UI se **verifica con `auditar.js`** y respeta
 `fidelidad-diseno` antes de publicar. Al terminar algo no trivial, aplica
 `mejorar-tooling`.
@@ -99,7 +105,8 @@ configuración**; todo lo demás vive en su carpeta.
 
 ```
 raíz/         solo config: package.json · wrangler.toml · babel.config.json
-              .gitignore · CNAME · .nojekyll · README.md · AGENTS.md · CLAUDE.md
+              .gitignore · CNAME · .nojekyll · README.md · AGENTS.md · CLAUDE.md · LICENSE (AGPL-3.0-or-later)
+              LICENSE-CONTENIDO.md (CC BY-SA 4.0) · LICENSE-TERMINOS-ADICIONALES.md
 functions/    las Functions de Pages. Van en la RAÍZ, fuera de out/: es donde
               Cloudflare las descubre. No las muevas.
 public/       lo que se sirve tal cual → se copia entero a out/
@@ -109,9 +116,10 @@ src/          app.jsx · admin.jsx          (puntos de entrada)
   screens/    los 7 screens-*.jsx
   components/ ui.jsx
   data/       los 6 data-*.js
-  lib/        store.js · dev-viewport.js
+  lib/        store.js · arsenal-hub.js · cotejo.js · dev-viewport.js
   styles/     estilo.css
-scripts/      build-prerender.mjs · copiar-estaticos.mjs · sql/schema.sql
+scripts/      build-prerender.mjs · copiar-estaticos.mjs · actualizar-readme.mjs
+              cotejo|vitrina|arsenal-hub|filtros|faq.test.mjs · dcam/ · sql/schema.sql
 docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md
 out/          TODO lo generado. Gitignoreado. Es lo que publica Pages.
 ```
@@ -127,7 +135,7 @@ siguieran valiendo. Al leer una ruta en este documento, fíjate en si habla del
 1. `build:static` — vacía `out/` y copia `public/` + los archivos que no se
    compilan. Va **primero** porque vacía: si fuera después, borraría lo demás.
 2. `build:js` — Babel compila los `.jsx` a `out/`, planos.
-3. `build:html` — el prerender emite las 321 páginas, `sitemap.xml` y `robots.txt`.
+3. `build:html` — el prerender emite las 398 páginas (394 en el sitemap), `sitemap.xml` y `robots.txt`.
 
 ## Cómo se trabaja aquí
 
@@ -138,9 +146,11 @@ merges se hacen por la API y tu `origin/main` local se queda viejo).
 
 ```bash
 npm install                 # una vez
-npm run build               # estáticos + .jsx -> .js + prerender de las 321 páginas, todo en out/
+npm run build               # estáticos + .jsx -> .js + prerender de las 398 páginas, todo en out/
 npx serve out               # o cualquier servidor HTTP sobre out/: no carga desde file://
 node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
+npm test                     # 5 suites de node:test: cotejo · vitrina · arsenal-hub · filtros · faq
+node --test scripts/faq.test.mjs   # una sola suite
 ```
 
 Antes de publicar, la skill **`verificar-app`**. Al tocar UI, **`fidelidad-diseno`**.
@@ -248,7 +258,7 @@ Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que correspon
 ## Prerender: un .html real por URL (`scripts/build-prerender.mjs`)
 
 `npm run build` son tres pasos (ver «Estructura del repo»): **`build:static`**, **`build:js`**
-(Babel) y **`build:html`** (`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 321 — con su
+(Babel) y **`build:html`** (`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 398 — con su
 `<title>`, `description`, `canonical`, Open Graph, JSON-LD y el contenido **en HTML
 crudo** dentro de `#app-root`.
 
@@ -265,7 +275,7 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
 - El script **falla ruidosamente** si `index.html` cambia de forma (busca el cálculo
   de `APP_BASE`, el `<base>`, el `<title>`, la `description` y `#app-root`). Si tocas
   esas líneas, actualiza las marcas del script — es a propósito: mejor romper el
-  build que publicar 321 páginas mal generadas.
+  build que publicar 398 páginas mal generadas.
 
 **Dos trampas ya resueltas — no las reintroduzcas:**
 
