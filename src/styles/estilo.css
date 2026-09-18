@@ -4945,3 +4945,99 @@
 /* El anillo de foco tiene que verse SOBRE el papel claro en los dos temas:
    --manila-tinta es constante, --acento no. */
 .amx-v2 .amx-cotiz :focus-visible { outline-color: var(--manila-tinta); }
+
+/* ── El cierre de la partida: cifra, nota y salida a la tienda ─────────────
+   Sigue dentro de la hoja de cotización, así que los colores son los
+   constantes en los dos temas. El verde es --sello-civil, el mismo par que ya
+   usa la banda de la hoja de oficio. */
+.amx-v2 .amx-cotiz-precio {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-cotiz-precio small {
+  margin-left: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-nota {
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--oficio-tinta-2);
+}
+/* El botón sale a armasmys.com. 44px de alto mínimo: es objetivo táctil. */
+.amx-v2 .amx-cotiz-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: 44px;
+  padding: 12px 20px;
+  background: var(--sello-civil);
+  color: var(--oficio);
+  border: 1.5px solid var(--sello-civil);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+@media (hover: hover) {
+  .amx-v2 .amx-cotiz-accion:hover { filter: brightness(1.08); }
+}
+/* Agotado: el botón sigue llevando a la tienda, pero sin invitar. Contorno en
+   vez de relleno, y la palabra la pone el JSX. */
+.amx-v2 .amx-cotiz-accion--agotado {
+  background: transparent;
+  color: var(--sello-civil);
+}
+
+/* La munición compatible, en fichas de calibre. */
+.amx-v2 .amx-cotiz-municion {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin-top: var(--e4);
+}
+.amx-v2 .amx-cotiz-municion-tit {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-municion span {
+  padding: 3px 9px;
+  border: 1px solid var(--oficio-2);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .05em;
+}
+
+/* Los destacados del modelo, como renglones marcados de un pliego. */
+.amx-v2 .amx-cotiz-destacados {
+  list-style: none;
+  margin: var(--e4) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.amx-v2 .amx-cotiz-destacados li {
+  display: flex;
+  gap: 9px;
+}
+.amx-v2 .amx-cotiz-destacados li::before {
+  content: "▸";
+  flex-shrink: 0;
+  color: var(--sello-civil);
+}
