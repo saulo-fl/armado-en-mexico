@@ -4558,6 +4558,24 @@
 @media (min-width: 1024px) { .amx-v2 .amx-faq-aviso-texto { font-size: 16px; } }
 
 /* ── EL CAJÓN — cada folder montado sobre el anterior ────────────────────── */
+/* Detrás de la pestaña de un folder no hay aire: hay el folder de atrás. La
+   franja de arriba del cartón es transparente en sus dos tercios derechos —es
+   lo que dibuja la muesca de la pestaña— y sin nada debajo se veía el lienzo
+   por el hueco, con los folders flotando en vez de apilados. El papel va en el
+   CAJÓN y no en cada folder: ahí sería el respaldo que ya se probó y tapa la
+   muesca, dejando un rectángulo liso con una línea encima.
+   El color es el papel del propio folder, medido sobre la foto (el mismo valor
+   que `--manila-medido` en claro), y la penumbra se la pone `--manila-luz` como
+   a la foto: por eso va literal y sin gemelo `--d-`, como el resto de la
+   papelería diegética. */
+.amx-v2 .amx-faq-cajon { position: relative; isolation: isolate; }
+.amx-v2 .amx-faq-cajon::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  background: #EEDFBD;
+  filter: brightness(var(--manila-luz));
+}
+
 .amx-v2 .amx-faq-folder {
   --manila-escala: .32;
   position: relative;
@@ -4616,10 +4634,10 @@
    En claro no hay nada que subir, `--manila-luz` ya vale 1, y por eso todo esto
    vive dentro de los dos bloques de tema oscuro. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder { --manila-luz: .9; }
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-cajon { --manila-luz: .9; }
   :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
 }
-:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder { --manila-luz: .9; }
+:root[data-tema="oscuro"] .amx-v2 .amx-faq-cajon { --manila-luz: .9; }
 :root[data-tema="oscuro"] .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
 
 /* El hover va aparte y solo donde hay ratón de verdad: en el teléfono se queda
