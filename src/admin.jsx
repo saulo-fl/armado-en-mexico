@@ -749,7 +749,7 @@ function LegalEditor() {
 function FAQEditor() {
   const [items, setItems] = useState(window.Store.getPages().faq);
   const set = (i, k, val) => setItems(prev => prev.map((it, idx) => idx === i ? { ...it, [k]: val } : it));
-  const add = () => setItems(prev => [...prev, { q: '', a: '' }]);
+  const add = () => setItems(prev => [...prev, { tema: '', q: '', a: '' }]);
   const del = (i) => { if (confirm('¿Eliminar esta pregunta?')) setItems(prev => prev.filter((_, idx) => idx !== i)); };
   const move = (i, dir) => {
     setItems(prev => {
@@ -784,6 +784,11 @@ function FAQEditor() {
                 <button onClick={() => del(i)} style={Object.assign({}, btnTiny, { color: P.red })}>✕</button>
               </div>
             </div>
+            {/* El tema va rotulado en la pestaña del folder de /preguntas, y
+                ahí solo cabe un tercio del ancho del cartón: una palabra. */}
+            <input value={it.tema || ''} onChange={(e) => set(i, 'tema', e.target.value)} maxLength={12}
+              style={Object.assign({}, inpStyle(), { maxWidth: 180 })} placeholder="Tema (pestaña)" />
+            <div style={{ height: 8 }} />
             <input value={it.q} onChange={(e) => set(i, 'q', e.target.value)} style={inpStyle()} placeholder="Pregunta" />
             <div style={{ height: 8 }} />
             <textarea value={it.a} onChange={(e) => set(i, 'a', e.target.value)} style={taStyle()} rows={3} placeholder="Respuesta" />

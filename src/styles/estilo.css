@@ -4510,3 +4510,165 @@
   background: var(--copia-placa);
 }
 .amx-v2 .amx-acerca-duo-placa img { width: 90%; height: auto; display: block; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PREGUNTAS FRECUENTES — el cajón de expedientes (18-sep-2026)
+   Saulo: «folders APILADOS que al hacer hover se muevan un poco y al hacer
+   click se despliegue la respuesta», con el aviso de transparencia como ficha
+   importante al principio de la página.
+
+   No hay pieza nueva de cero. El aviso es la MISMA cartulina de la ficha
+   técnica (`.amx-fichero-carton`) con el clip de la copia; cada pregunta es el
+   folder manila como 9-slice, la técnica de `.amx-carpeta` — Saulo rechazó dos
+   veces el folder dibujado en CSS, y el `background-size: 100% 100%` de la
+   tarjeta expediente deforma la pestaña cuando el alto es variable, que aquí
+   lo es: el folder crece al abrirse.
+
+   El cartón pregunta y el papel de dentro responde.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── EL AVISO — la cartulina, sujeta con clip ──────────────────────────────
+   El clip va FUERA de la cartulina: `.amx-fichero-carton` lleva la máscara de
+   su perforación, y una máscara recorta lo que asome del borde. */
+.amx-v2 .amx-faq-aviso { position: relative; margin: var(--e4) 0 var(--e5); }
+.amx-v2 .amx-faq-aviso .amx-copia-clip { top: -18px; right: 34px; left: auto; }
+
+/* El rótulo ocupa la cabecera de la ficha, justo encima del renglón rojo —que
+   es el que pone el rojo—. La tinta NO es roja a propósito: sobre esta
+   cartulina el rojo se queda en 4.44:1 y esto es texto que informa. */
+.amx-v2 .amx-faq-aviso-tit {
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta);        /* 11.29:1 */
+}
+/* El texto se apoya en el rayado, un renglón por línea: es lo que hace que se
+   lea como algo escrito EN la ficha y no como un párrafo puesto encima. */
+.amx-v2 .amx-faq-aviso-texto {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: var(--renglon);
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-faq-aviso-texto + .amx-faq-aviso-texto { margin-top: var(--renglon); }
+@media (min-width: 1024px) { .amx-v2 .amx-faq-aviso-texto { font-size: 16px; } }
+
+/* ── EL CAJÓN — cada folder montado sobre el anterior ────────────────────── */
+.amx-v2 .amx-faq-folder {
+  --manila-escala: .32;
+  position: relative;
+  isolation: isolate;
+  padding: calc(120px * var(--manila-escala) + var(--e2)) var(--e3)
+           calc(60px  * var(--manila-escala) + var(--e2));
+  color: var(--manila-tinta);
+  transition: transform .18s ease-out;
+}
+/* El solape, que es lo que hace la pila: cada folder monta sobre el de arriba
+   y le deja asomar el filo de las hojas. No hace falta z-index — en el orden
+   de pintado, el posterior del DOM ya va encima. */
+.amx-v2 .amx-faq-folder + .amx-faq-folder { margin-top: calc(-44px * var(--manila-escala)); }
+
+/* La foto del folder, en un pseudo-elemento: un `filter` en la caja sombrearía
+   también todo lo que lleva encima. Cortes medidos sobre la foto (1000×720):
+   la solapa acaba en y≈120 y la curva de la pestaña en x≈360; las hojas asoman
+   de y≈660 a 710. PENUMBRA: en oscuro `--manila-luz` baja el brillo al 68 %. */
+.amx-v2 .amx-faq-folder::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  border-style: solid; border-width: 0;
+  border-image-source: url(imagenes/folder-manila.webp);
+  border-image-slice: 140 60 70 370 fill;
+  border-image-width:
+    calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+    calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
+  filter: brightness(var(--manila-luz))
+          drop-shadow(0 1px 2px rgba(23, 27, 25, .18))
+          drop-shadow(0 6px 12px rgba(23, 27, 25, .22));
+}
+
+/* Al pasar el ratón, el folder sale de la pila. Solo donde hay ratón de
+   verdad: en el teléfono un :hover se queda pegado tras el toque. */
+@media (hover: hover) {
+  .amx-v2 .amx-faq-folder:hover { z-index: 2; transform: translateY(-6px); }
+  .amx-v2 .amx-faq-folder:hover::before {
+    filter: brightness(var(--manila-luz))
+            drop-shadow(0 2px 3px rgba(23, 27, 25, .20))
+            drop-shadow(0 10px 18px rgba(23, 27, 25, .26));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-faq-folder:hover { transform: none; }
+}
+/* El abierto se queda encima del que lo tapaba. */
+.amx-v2 .amx-faq-folder[open] { z-index: 2; }
+
+.amx-v2 .amx-faq-folder > summary { cursor: pointer; }
+/* Sobre los papeles el anillo va en tinta, y por dentro: el folder tiene la
+   pestaña recortada y un anillo exterior dibujaría un rectángulo que no es. */
+.amx-v2 .amx-faq-folder > summary:focus-visible {
+  outline: 2px solid var(--manila-tinta);
+  outline-offset: -2px;
+}
+
+/* El flex va aquí y no en el <summary>: ponerlo en el summary se traga el
+   marcador y rompe el click en Safari viejo. */
+.amx-v2 .amx-faq-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  min-height: 44px;                  /* el piso de área táctil */
+}
+.amx-v2 .amx-faq-q {
+  flex: 1; min-width: 0;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--manila-tinta);        /* 13.19:1 claro · 6.03:1 en penumbra */
+}
+@media (min-width: 1024px) { .amx-v2 .amx-faq-q { font-size: 17.5px; } }
+
+/* El signo. `.amx-plegable` lo pinta igual, pero allí cuelga de un <summary>
+   que sí es flex; aquí no puede serlo. */
+.amx-v2 .amx-faq-cab::after {
+  content: '+';
+  flex-shrink: 0;
+  width: 16px;
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1;
+  text-align: center;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-faq-folder[open] .amx-faq-cab::after { content: '−'; }
+
+/* El tema, rotulado sobre la pestaña de la foto, en el mismo carril que el
+   tipo de arma en la ficha: la pestaña va de x≈20 a 340 y de y≈0 a 115. */
+.amx-v2 .amx-faq-tema {
+  position: absolute;
+  left: calc(40px * var(--manila-escala)); top: calc(14px * var(--manila-escala));
+  width: calc(290px * var(--manila-escala)); height: calc(100px * var(--manila-escala));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--manila-tinta-2);      /* 5.92:1 sobre el cartón */
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* La respuesta: la hoja de oficio, dentro del folder. */
+.amx-v2 .amx-faq-folder > .amx-oficio { margin-top: var(--e3); }
+
+@media (min-width: 1024px) {
+  .amx-v2 .amx-faq-folder {
+    --manila-escala: .42;
+    padding-left: var(--e4); padding-right: var(--e4);
+  }
+  .amx-v2 .amx-faq-tema { font-size: 11.5px; letter-spacing: .12em; }
+}
