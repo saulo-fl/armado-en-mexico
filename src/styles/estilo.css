@@ -4716,3 +4716,232 @@
   }
   .amx-v2 .amx-faq-tema { font-size: 11.5px; letter-spacing: .12em; }
 }
+
+/* ── LA HOJA DE COTIZACIÓN — Armas Traumáticas ─────────────────────────────
+   La única pantalla del sitio donde SÍ se vende: los tres modelos traumáticos
+   que comercializa Armas M&S. Por eso no es un expediente, es una cotización:
+   partidas numeradas, ficha técnica, precio en su columna y condiciones al pie.
+
+   El papel NO se invierte con el tema —igual que la hoja de oficio y las
+   placas fotográficas—: una cotización impresa sigue siendo papel claro de
+   noche. Por eso usa --oficio / --manila-tinta / --oficio-tinta-2, que son
+   constantes en los dos temas, y NUNCA --tinta ni --papel, que sí cambian y
+   dejarían la letra clara sobre papel claro. */
+.amx-v2 .amx-cotiz {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 18px 16px 24px;
+  background: var(--oficio);
+  color: var(--manila-tinta);
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 8px 14px -6px rgba(23, 27, 25, .22);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-cotiz { padding: 26px 30px 32px; } }
+
+/* El membrete: qué documento es y su folio. El folio es un sello GRÁFICO
+   ficticio (permitido por DESIGN.md §6b); no imita ningún folio de la SEDENA
+   ni lleva iconografía oficial. */
+.amx-v2 .amx-cotiz-membrete {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px var(--e3);
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--oficio-tinta-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-tit {
+  margin: var(--e4) 0 var(--e2);
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 27px;
+  line-height: 1.04;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-cotiz-tit { font-size: 36px; } }
+.amx-v2 .amx-cotiz-entrada {
+  max-width: 62ch;
+  margin-bottom: var(--e4);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oficio-tinta-2);
+}
+
+/* ── Las partidas ──────────────────────────────────────────────────────── */
+.amx-v2 .amx-cotiz-partidas { display: flex; flex-direction: column; gap: var(--e5); }
+/* El número de partida con su regla: el renglón que separa una de otra. */
+.amx-v2 .amx-cotiz-num {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  margin-bottom: var(--e3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-num::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--oficio-2);
+}
+.amx-v2 .amx-cotiz-partida { display: grid; gap: var(--e4); }
+@media (min-width: 720px) {
+  .amx-v2 .amx-cotiz-partida { grid-template-columns: 220px minmax(0, 1fr); }
+}
+/* La placa de la foto: blanca en los dos temas, porque 87 de las 111 fotos
+   son recortes sobre blanco opaco y sobre una placa oscura se leen como un
+   rectángulo pegado. */
+.amx-v2 .amx-cotiz-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  padding: 14px;
+  background: var(--copia-placa);
+  border: 1px solid var(--oficio-2);
+}
+.amx-v2 .amx-cotiz-foto img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.amx-v2 .amx-cotiz-marca {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-modelo {
+  margin: var(--e1) 0 0;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: .01em;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-cotiz-modelo { font-size: 30px; } }
+.amx-v2 .amx-cotiz-nombre {
+  margin-top: 6px;
+  font-family: var(--sans);
+  font-size: 16px;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-resumen {
+  max-width: 60ch;
+  margin-top: var(--e3);
+  font-family: var(--sans);
+  font-size: 16.5px;
+  line-height: 1.6;
+}
+
+/* La ficha técnica de la partida: etiqueta arriba, valor abajo, cifras
+   tabulares para que las columnas se alineen entre partidas. */
+.amx-v2 .amx-cotiz-specs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e3) var(--e4);
+  margin: var(--e4) 0 0;
+  padding-top: var(--e3);
+  border-top: 1px solid var(--oficio-2);
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-cotiz-specs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.amx-v2 .amx-cotiz-specs dt {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-specs dd {
+  margin: 3px 0 0;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* El cierre de la partida: precio, existencia y la salida a la tienda. */
+.amx-v2 .amx-cotiz-cierre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-top: var(--e4);
+  padding-top: var(--e3);
+  border-top: 1px solid var(--oficio-2);
+}
+.amx-v2 .amx-cotiz-estado {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+/* AGOTADO va con el rojo de sello, que es el mismo par ya auditado (6.42:1)
+   que usan los sellos de seguridad. */
+.amx-v2 .amx-cotiz-agotado { color: var(--sello-restr); font-weight: 700; }
+
+/* ── Las condiciones, al pie ────────────────────────────────────────────── */
+.amx-v2 .amx-cotiz-pie {
+  margin-top: var(--e6);
+  padding-top: var(--e4);
+  border-top: 3px double var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-pie-tit {
+  margin: 0 0 var(--e3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-condiciones {
+  display: grid;
+  gap: var(--e3) var(--e5);
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-cotiz-condiciones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.amx-v2 .amx-cotiz-condiciones b { display: block; font-weight: 700; }
+/* El aviso que cierra la hoja. Rojo de sello sobre el papel: 6.42:1. */
+.amx-v2 .amx-cotiz-aviso {
+  margin-top: var(--e4);
+  padding: var(--e3) var(--e4);
+  border: 1px solid var(--sello-restr);
+  background: rgba(163, 52, 31, .06);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-cotiz-aviso-tit {
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sello-restr);
+}
+
+/* El anillo de foco tiene que verse SOBRE el papel claro en los dos temas:
+   --manila-tinta es constante, --acento no. */
+.amx-v2 .amx-cotiz :focus-visible { outline-color: var(--manila-tinta); }
