@@ -866,7 +866,7 @@ function AboutScreen() {
               <window.Gafete
                 foto={foto}
                 nombre={autor}
-                cargos={['Co-Fundador de Armas M&S', 'Creador de Armado en México']} />
+                cargos={['Creador de Armado en México', 'Co-Fundador de Armas M&S']} />
             </div>
 
             <section className="amx-oficio" aria-labelledby="acerca-mision">
