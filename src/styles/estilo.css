@@ -4558,37 +4558,31 @@
 @media (min-width: 1024px) { .amx-v2 .amx-faq-aviso-texto { font-size: 16px; } }
 
 /* ── EL CAJÓN — cada folder montado sobre el anterior ────────────────────── */
-/* Detrás de la pestaña de un folder no hay aire: hay el folder de atrás. La
-   franja de arriba del cartón es transparente en sus dos tercios derechos —es
-   lo que dibuja la muesca de la pestaña— y sin nada debajo se veía el lienzo
-   por el hueco, con los folders flotando en vez de apilados. El papel va en el
-   CAJÓN y no en cada folder: ahí sería el respaldo que ya se probó y tapa la
-   muesca, dejando un rectángulo liso con una línea encima.
-   El color es el papel del propio folder, medido sobre la foto (el mismo valor
-   que `--manila-medido` en claro), y la penumbra se la pone `--manila-luz` como
-   a la foto: por eso va literal y sin gemelo `--d-`, como el resto de la
-   papelería diegética. */
-.amx-v2 .amx-faq-cajon { position: relative; isolation: isolate; }
-.amx-v2 .amx-faq-cajon::before {
-  content: '';
-  position: absolute; inset: 0; z-index: -1;
-  background: #EEDFBD;
-  filter: brightness(var(--manila-luz));
-}
-
 .amx-v2 .amx-faq-folder {
   --manila-escala: .32;
+  /* Un folder de expediente no acaba donde acaba lo escrito: es una cartulina
+     entera, y lo que se ve de él en el cajón es solo su borde de arriba. Este
+     cuerpo de más es lo que se mete POR DEBAJO del folder siguiente, de modo
+     que detrás de su pestaña hay cartón de verdad —con su grano y su sombra—
+     y no un relleno de color, que es lo que delataba el truco. Sale del
+     margen negativo en la misma medida, así que el escalón visible de la pila
+     no cambia: solo se alarga lo que queda escondido.
+     Tiene que pasar de la solapa del siguiente (120px de la foto) con holgura
+     para los 6px que sube el hover; 110px la dan en los dos cortes. */
+  --faq-cuerpo: calc(110px * var(--manila-escala));
   position: relative;
   isolation: isolate;
   padding: calc(120px * var(--manila-escala) + var(--e2)) var(--e3)
-           calc(60px  * var(--manila-escala) + var(--e2));
+           calc(60px  * var(--manila-escala) + var(--e2) + var(--faq-cuerpo));
   color: var(--manila-tinta);
   transition: transform .18s ease-out;
 }
 /* El solape, que es lo que hace la pila: cada folder monta sobre el de arriba
    y le deja asomar el filo de las hojas. No hace falta z-index — en el orden
    de pintado, el posterior del DOM ya va encima. */
-.amx-v2 .amx-faq-folder + .amx-faq-folder { margin-top: calc(-44px * var(--manila-escala)); }
+.amx-v2 .amx-faq-folder + .amx-faq-folder {
+  margin-top: calc(-44px * var(--manila-escala) - var(--faq-cuerpo));
+}
 
 /* La foto del folder, en un pseudo-elemento: un `filter` en la caja sombrearía
    también todo lo que lleva encima. Cortes medidos sobre la foto (1000×720):
@@ -4611,8 +4605,13 @@
 
 /* Al pasar el ratón, el folder sale de la pila. Solo donde hay ratón de
    verdad: en el teléfono un :hover se queda pegado tras el toque. */
+/* Al pasar el ratón el folder ASOMA, no salta al frente: sigue metido entre
+   el de arriba y el de abajo, que es lo que pasa al jalar uno de un expediente.
+   Llevaba un `z-index: 2` que lo sacaba de la pila entera y le tapaba la
+   pestaña al siguiente de golpe; sin él sube sus 6px, se separa del de arriba
+   y conserva su sitio en el montón. */
 @media (hover: hover) {
-  .amx-v2 .amx-faq-folder:hover { z-index: 2; transform: translateY(-6px); }
+  .amx-v2 .amx-faq-folder:hover { transform: translateY(-6px); }
   .amx-v2 .amx-faq-folder:hover::before {
     filter: brightness(var(--manila-luz))
             drop-shadow(0 2px 3px rgba(23, 27, 25, .20))
@@ -4622,9 +4621,6 @@
 @media (prefers-reduced-motion: reduce) {
   .amx-v2 .amx-faq-folder:hover { transform: none; }
 }
-/* El abierto se queda encima del que lo tapaba. */
-.amx-v2 .amx-faq-folder[open] { z-index: 2; }
-
 /* PENUMBRA, más alta que la de la ficha de arma. `--manila-luz` baja el brillo
    del cartón al 68 % en oscuro porque allí el folder ocupa la pantalla entera y
    deslumbraba; aquí son doce pequeños sobre el lienzo oscuro y ese mismo 68 %
@@ -4634,10 +4630,10 @@
    En claro no hay nada que subir, `--manila-luz` ya vale 1, y por eso todo esto
    vive dentro de los dos bloques de tema oscuro. */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-cajon { --manila-luz: .9; }
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder { --manila-luz: .9; }
   :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
 }
-:root[data-tema="oscuro"] .amx-v2 .amx-faq-cajon { --manila-luz: .9; }
+:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder { --manila-luz: .9; }
 :root[data-tema="oscuro"] .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
 
 /* El hover va aparte y solo donde hay ratón de verdad: en el teléfono se queda
