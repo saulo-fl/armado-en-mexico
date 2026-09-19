@@ -64,3 +64,76 @@ test('el envío solo informa éxito ante un 2xx', async () => {
   assert.equal(offline.ok, false);
   assert.equal(offline.status, 0);
 });
+
+test('las reseñas publicadas exponen Denunciar y App transporta contexto', () => {
+  const screen = readFileSync(new URL('../src/screens/screens-2.jsx', import.meta.url), 'utf8');
+  const app = readFileSync(new URL('../src/app.jsx', import.meta.url), 'utf8');
+  const admin = readFileSync(new URL('../src/admin.jsx', import.meta.url), 'utf8');
+  assert.match(screen, /onReportReview/);
+  assert.match(screen, />Denunciar</);
+  assert.match(app, /reportContext/);
+  assert.match(app, /openReviewReport/);
+  assert.match(app, /<window\.SoporteScreen[^>]+reportContext=/);
+  // Admin muestra el contexto factual de la denuncia
+  for (const field of ['entidadNombre', 'entidadId', 'reviewExcerpt']) {
+    assert.match(admin, new RegExp('d\\.' + field));
+  }
+});
+
+test('Soporte usa el dato común y deja todas las normas visibles', () => {
+  const src = readFileSync(new URL('../src/screens/screens-2.jsx', import.meta.url), 'utf8');
+  const ini = src.indexOf('function SoportePortada');
+  const fin = src.indexOf('window.SoporteScreen = SoporteScreen');
+  const soporte = src.slice(ini, fin);
+  assert.match(soporte, /AMX_SOPORTE_CONTENT/);
+  assert.match(soporte, /amx-soporte-reglas/);
+  assert.doesNotMatch(soporte, /<window\.Disclosure/);
+  assert.match(soporte, /aria-live/);
+  assert.match(soporte, /Reintentar/);
+});
+
+test('la piel de Soporte usa papeles físicos y un solo corte estructural', () => {
+  const css = readFileSync(new URL('../src/styles/estilo.css', import.meta.url), 'utf8');
+  for (const cls of ['amx-soporte', 'amx-soporte-portada', 'amx-soporte-aviso',
+    'amx-soporte-reglas', 'amx-soporte-regla', 'amx-soporte-carbon', 'amx-soporte-formato']) {
+    assert.match(css, new RegExp('\\.' + cls + '\\b'));
+  }
+  const block = css.slice(css.indexOf('/* SOPORTE'));
+  assert.match(block, /@media \(min-width: 1024px\)/);
+});
+
+test('ReportarError usa el helper público y advierte que GitHub es público', () => {
+  const ui = readFileSync(new URL('../src/components/ui.jsx', import.meta.url), 'utf8');
+  assert.match(ui, /function ReportarError/);
+  assert.match(ui, /amxCorreccionUrl/);
+  assert.match(ui, /noopener noreferrer/);
+  assert.match(ui, /públic/i);
+  assert.match(ui, /window\.ReportarError = ReportarError/);
+});
+
+test('la acción aparece en seis tipos de detalle y no en listados', () => {
+  const two = readFileSync(new URL('../src/screens/screens-2.jsx', import.meta.url), 'utf8');
+  const acc = readFileSync(new URL('../src/screens/screens-accesorios.jsx', import.meta.url), 'utf8');
+  const mun = readFileSync(new URL('../src/screens/screens-municiones.jsx', import.meta.url), 'utf8');
+  const three = readFileSync(new URL('../src/screens/screens-3.jsx', import.meta.url), 'utf8');
+  assert.match(two, /tipo="arma"/);
+  assert.match(two, /tipo="legalidad"/);
+  assert.match(two, /tipo="faq"/);
+  assert.match(acc, /tipo="accesorio"/);
+  assert.match(mun, /tipo="municion"/);
+  assert.match(three, /tipo="calibre"/);
+});
+
+test('el prerender de Soporte contiene el manual completo sin formulario operativo', async () => {
+  const { renderSoporteHtml } = await import('./prerender-soporte.mjs');
+  const html = renderSoporteHtml(C);
+  assert.match(html, /<h1>Normas de la comunidad<\/h1>/);
+  assert.match(html, /Todos pueden contribuir a mejorar esta enciclopedia/);
+  assert.match(html, /Aquí no se compra ni se vende/);
+  for (const norma of C.normas) assert.match(html, new RegExp(norma.titulo));
+  assert.match(html, /Cómo se moderan las reseñas/);
+  assert.match(html, /Corregir información de la enciclopedia/);
+  assert.match(html, /href="\/legalidad"/);
+  assert.match(html, /href="\/preguntas"/);
+  assert.doesNotMatch(html, /<form|type="email"|reviewId/);
+});

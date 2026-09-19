@@ -3043,6 +3043,68 @@
   color: var(--oficio-tinta-2);
   cursor: not-allowed;
 }
+
+/* Botón "Denunciar" en cada reseña publicada */
+.amx-v2 .amx-opinion-denunciar {
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--oficio-tinta-2);
+  font: 600 12px/1.2 var(--mono);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ── SOPORTE — manual de convivencia + formato de denuncia ────────────────── */
+.amx-soporte {
+  width: min(100% - 32px, 920px);
+  margin: 0 auto;
+  padding: 22px 0 96px;
+}
+.amx-soporte-portada,
+.amx-soporte-regla,
+.amx-soporte-formato {
+  background: var(--oficio);
+  color: var(--oficio-tinta-2);
+}
+.amx-soporte-portada {
+  position: relative;
+  padding: clamp(22px, 5vw, 48px);
+}
+.amx-soporte-dymo {
+  display: inline-block;
+  background: #111;
+  color: #f4efe3;
+  font-family: "JetBrains Mono", monospace;
+}
+.amx-soporte-aviso {
+  background: var(--oficio-2);
+  border-inline-start: 6px solid var(--fichero-rojo);
+}
+.amx-soporte-reglas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.amx-soporte-regla {
+  position: relative;
+  padding: 24px 20px;
+}
+.amx-soporte-carbon {
+  color: var(--oficio-tinta-2);
+  background: color-mix(in srgb, var(--fichero-azul) 13%, var(--oficio));
+}
+.amx-soporte-formato input,
+.amx-soporte-formato select,
+.amx-soporte-formato textarea,
+.amx-soporte-formato button {
+  min-height: 44px;
+}
+@media (min-width: 1024px) {
+  .amx-soporte-regles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .amx-v2 .amx-comentarios-enviado { padding-top: var(--e4); }
 .amx-v2 .amx-comentarios-enviado .amx-sello { color: var(--sello-civil); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; }
 .amx-v2 .amx-comentarios-enviado p { margin: var(--e4) 0 0; font-family: var(--sans); font-size: 15.5px; line-height: 1.6; }

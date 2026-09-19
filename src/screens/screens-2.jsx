@@ -5,7 +5,7 @@
 
 // Armado en México — Pantallas de Producto, Comparador, Legal, FAQ, Acerca
 
-const { useState: useState2, useMemo: useMemo2 } = React;
+const { useState: useState2, useMemo: useMemo2, useEffect: useEffect2, useRef: useRef2 } = React;
 
 // ════════════════════════════════════════════════════════════════
 // PRODUCT — la ficha de un arma: el expediente completo
@@ -248,7 +248,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             a la misma medida (Saulo, 13-sep-2026). */}
         <div className="amx-comentarios-marco">
           <OpinionBlock tipo="arma" entidadId={arma.id} entidadNombre={arma.nombre}
-            nombreTipo="arma" onNav={onNav} />
+            nombreTipo="arma" onNav={onNav} onReportReview={onReportReview} />
         </div>
       </section>
 
@@ -282,6 +282,8 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
           ultimoConocido={ultimoConocido} historial={priceHistory}
           enComparacion={inCmp} onComparar={comparar} />}
+
+      <window.ReportarError tipo="arma" titulo={arma.nombre} ruta={'/pistolas/' + (idx.slugPorA[arma.id] || '')} />
     </div>);
 
 }
@@ -299,7 +301,7 @@ window.ProductScreen = ProductScreen;
 // ════════════════════════════════════════════════════════════════
 const RESENA_MIN = 100, RESENA_MAX = 1200;
 
-function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
+function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav, onReportReview }) {
   const [, force] = useState2(0);
   useEffect(() => window.Store && window.Store.onChange(() => force((x) => x + 1)), []);
 
@@ -422,6 +424,13 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                   </div>
                   <p>{r.texto}</p>
                   <footer>— {r.autor || 'Anónimo'}</footer>
+                  {onReportReview &&
+                    <button type="button" className="amx-opinion-denunciar"
+                      onClick={() => onReportReview(window.amxContextoDenuncia({
+                        review: r, tipo, entidadId, entidadNombre,
+                      }))}>
+                      Denunciar
+                    </button>}
                 </li>
               )}
             </ul>
@@ -811,6 +820,8 @@ function LegalScreen({ onNav }) {
         </a>
       </div>
       )}
+
+      <window.ReportarError tipo="legalidad" titulo="Legalidad" ruta="/legalidad" />
     </div>);
 
 }
@@ -942,244 +953,370 @@ function AboutScreen() {
 window.AboutScreen = AboutScreen;
 
 // ════════════════════════════════════════════════════════════════
-// SOPORTE — normas de la comunidad, denuncias y moderación
-// Existe porque la app acepta texto libre de desconocidos (las reseñas). Las
-// normas están adaptadas de las de Steam, recortadas a lo que aquí hay: no hay
-// Workshop, ni grupos, ni perfiles — hay reseñas y denuncias.
+// SOPORTE — manual de convivencia + formato de denuncia
+// Rediseño del 19-sep-2026: convierte /soporte en un manual de convivencia
+// vintage, con hojas siempre visibles, formulario de denuncia privada con
+// contexto y corrección pública vía GitHub Issues.
 // ════════════════════════════════════════════════════════════════
-function SoporteScreen({ onNav }) {
-  const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
-  const [den, setDen] = useState2({ reviewId: '', motivo: 'ilegal', detalle: '', email: '' });
-  const [denEnviada, setDenEnviada] = useState2(false);
-  const setD = (k, v) => setDen((p) => Object.assign({}, p, { [k]: v }));
-
-  const MOTIVOS = [
-    { value: 'ilegal', label: 'Compraventa u otra actividad ilegal' },
-    { value: 'irrespetuoso', label: 'Insultos, acoso o amenazas' },
-    { value: 'fuera-de-tema', label: 'Fuera de tema o mensaje repetido' },
-    { value: 'comercial', label: 'Publicidad o contenido comercial' },
-    { value: 'manipulacion', label: 'Manipulación de la calificación' },
-    { value: 'datos', label: 'Datos personales de alguien' },
-    { value: 'otro', label: 'Otro' },
-  ];
-  const denListo = den.detalle.trim().length >= 20;
-  const enviarDenuncia = () => {
-    if (!denListo || !window.Store) return;
-    window.Store.addReport(den);
-    setDenEnviada(true);
-  };
-
-  const Regla = ({ children }) => (
-    <div style={window.amxProsa({
-      fontSize: 16, color: PALETTE.text, lineHeight: 1.6, padding: '6px 0',
-      display: 'flex', gap: 9, alignItems: 'flex-start'
-    })}>
-      <span style={{ color: PALETTE.amber, flexShrink: 0 }}>▸</span>
-      <span>{children}</span>
+function SoportePortada({ contenido }) {
+  return (
+    <div className="amx-soporte-portada">
+      <div className="amx-soporte-dymo" style={{
+        display: 'inline-block', background: '#111', color: '#f4efe3',
+        fontFamily: '"JetBrains Mono", monospace', fontSize: 13,
+        letterSpacing: '0.2em', marginBottom: 10, padding: '4px 10px'
+      }}>◈ SOPORTE</div>
+      <h1 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 28,
+        color: '#f4efe3', textTransform: 'uppercase', letterSpacing: '0.04em',
+        lineHeight: 1.1, margin: '8px 0'
+      }}>{contenido.titulo}</h1>
+      <p style={{
+        fontFamily: 'var(--sans)', fontSize: 16, lineHeight: 1.6,
+        color: '#f4efe3', marginTop: 12, maxWidth: 620
+      }}>{contenido.apertura}</p>
+      <p style={{
+        fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.5,
+        color: 'rgba(244,239,227,0.7)', marginTop: 6
+      }}>{contenido.alcance}</p>
     </div>
   );
+}
+
+function SoporteAviso({ aviso }) {
+  return (
+    <div className="amx-soporte-aviso" style={{
+      background: 'var(--oficio-2)', borderInlineStart: '6px solid var(--fichero-rojo)',
+      padding: '16px 20px', marginBottom: 24
+    }}>
+      <div style={{
+        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--fichero-rojo)',
+        letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 700
+      }}>▲ {aviso.titulo}</div>
+      <div style={window.amxProsa({ fontSize: 15.5, color: 'var(--tinta)' })}>
+        {aviso.intro}
+        <ul style={{ margin: '10px 0 0', paddingLeft: 20 }}>
+          {aviso.puntos.map((p, i) => <li key={i}>{p}</li>)}
+        </ul>
+        <p style={{ marginTop: 10, fontSize: 14, color: 'var(--tinta-dim)' }}>{aviso.consecuencia}</p>
+      </div>
+    </div>
+  );
+}
+
+function SoporteHojaNorma({ norma }) {
+  return (
+    <div className="amx-soporte-regla" style={{
+      position: 'relative', padding: '24px 20px',
+      background: 'var(--oficio)', color: 'var(--oficio-tinta-2)',
+      border: '1px solid var(--hair)', borderRadius: 4
+    }}>
+      <h3 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
+        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
+        margin: '0 0 12px'
+      }}>
+        <span style={{
+          display: 'inline-block', background: 'var(--manila-tinta)', color: 'var(--oficio)',
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
+          padding: '2px 8px', borderRadius: 3, marginRight: 10, letterSpacing: '0.1em'
+        }}>NORMA {norma.numero}</span>
+        {norma.titulo}
+      </h3>
+      <ul style={{ margin: 0, paddingLeft: 20 }}>
+        {norma.puntos.map((p, i) => <li key={i} style={{
+          fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
+          marginBottom: 6
+        }}>{p}</li>)}
+      </ul>
+    </div>
+  );
+}
+
+function SoporteModeracion({ contenido }) {
+  return (
+    <div className="amx-soporte-carbon" style={{
+      color: 'var(--oficio-tinta-2)',
+      background: 'color-mix(in srgb, var(--fichero-azul) 13%, var(--oficio))',
+      padding: '20px', marginBottom: 24, borderRadius: 4,
+      border: '1px solid var(--hair)'
+    }}>
+      <h3 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
+        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
+        margin: '0 0 14px'
+      }}>Cómo se moderan las reseñas</h3>
+      <ul style={{ margin: 0, paddingLeft: 20 }}>
+        {contenido.moderacion.map((p, i) => <li key={i} style={{
+          fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
+          marginBottom: 6
+        }}>{p}</li>)}
+      </ul>
+      <h3 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
+        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
+        margin: '20px 0 14px'
+      }}>Acciones reales</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+        {contenido.acciones.map(([n, tit, desc]) => (
+          <div key={n} style={{
+            padding: '10px 12px', background: 'var(--oficio)', borderRadius: 4,
+            border: '1px solid var(--hair)'
+          }}>
+            <div style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--manila-tinta)',
+              marginBottom: 4
+            }}>#{n}</div>
+            <div style={{
+              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
+              color: 'var(--tinta)', marginBottom: 4
+            }}>{tit}</div>
+            <div style={{
+              fontFamily: 'var(--sans)', fontSize: 13, lineHeight: 1.5,
+              color: 'var(--oficio-tinta-2)'
+            }}>{desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SoporteDenuncia({ reportContext }) {
+  const contenido = window.AMX_SOPORTE_CONTENT;
+  const VACIA = { reviewId: '', tipo: 'otro', entidadId: '', entidadNombre: '', reviewExcerpt: '', motivo: 'ilegal', detalle: '', email: '' };
+  const [den, setDen] = useState2(() => Object.assign({}, VACIA, reportContext || {}));
+  const [estado, setEstado] = useState2({ kind: 'idle', error: '' });
+  const titleRef = useRef2(null);
+
+  useEffect2(() => {
+    if (!reportContext) return;
+    setDen(Object.assign({}, VACIA, reportContext));
+    setEstado({ kind: 'idle', error: '' });
+    requestAnimationFrame(() => titleRef.current && titleRef.current.focus());
+  }, [reportContext]);
+
+  const setD = (k, v) => setDen((p) => Object.assign({}, p, { [k]: v }));
+
+  const enviar = async (e) => {
+    e.preventDefault();
+    const detalle = den.detalle.trim();
+    if (detalle.length < 20 || detalle.length > 1200) return;
+    setEstado({ kind: 'submitting', error: '' });
+    const result = await window.Store.addReport(Object.assign({}, den, { detalle }));
+    if (result.ok) {
+      setDen(VACIA);
+      setEstado({ kind: 'success', error: '' });
+    } else {
+      setEstado({ kind: 'error', error: 'No pudimos enviar el reporte. Tus datos siguen en este formulario para que puedas reintentar.' });
+    }
+  };
+
+  const borrarContexto = () => {
+    setDen(Object.assign({}, VACIA, { motivo: den.motivo, detalle: den.detalle, email: den.email }));
+  };
+
+  const motivos = contenido.motivos.map(([v, l]) => ({ value: v, label: l }));
 
   return (
-    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+    <section className="amx-soporte-carbon" style={{
+      padding: '20px', marginBottom: 24, borderRadius: 4,
+      border: '1px solid var(--hair)'
+    }}>
+      <h3 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
+        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
+        margin: '0 0 14px'
+      }}>Denunciar una reseña</h3>
+      <p style={{ fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)', marginBottom: 14 }}>
+        {contenido.denuncia.intro}
+      </p>
+      <p style={{ fontFamily: 'var(--sans)', fontSize: 13.5, lineHeight: 1.5, color: 'var(--oficio-tinta-2)', marginBottom: 16 }}>
+        {contenido.denuncia.privacidad}
+      </p>
 
-      <div style={{ padding: '20px 0', textAlign: 'center', borderBottom: `1px solid ${PALETTE.border}`, marginBottom: 18 }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', marginBottom: 6
-        }}>◈ SOPORTE</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23,
-          color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.1
-        }}>Normas de la comunidad</div>
-        <div style={window.amxProsa({
-          fontSize: 16, lineHeight: 1.6,
-          marginTop: 10, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto'
-        })}>
-          Las reseñas las escriben personas y las lee cualquiera. Estas normas dicen qué
-          se puede publicar aquí, cómo denunciar lo que no cumple y qué pasa cuando se
-          incumplen.
+      {estado.kind === 'success' ? (
+        <div role="status" aria-live="polite" style={{
+          padding: '14px 16px', background: 'var(--oficio)', borderRadius: 4,
+          border: '1px solid var(--sello-civil)', color: 'var(--sello-civil)'
+        }}>
+          <div style={{
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
+            marginBottom: 8
+          }}>✓ {contenido.denuncia.exito}</div>
         </div>
-      </div>
-
-      {/* Lo primero, no enterrado en una lista: el uso que NO se tolera. */}
-      <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-        padding: 14, marginBottom: 22
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.redHi,
-          letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 700
-        }}>▲ Prohibido usar esta app para comprar o vender</div>
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México es un catálogo <b>divulgativo</b>. Aquí no se comercializan
-          armas de fuego, municiones ni accesorios, y no somos intermediarios de ninguna
-          venta.
-          <div style={{ marginTop: 10 }}>
-            Cualquier intento de usar las reseñas —o cualquier otro canal de esta
-            aplicación— para <b>ofrecer, solicitar o intermediar la compraventa de armas,
-            municiones o accesorios fuera de los canales legales</b> (DCAM y OTCA o, para
-            cartuchos, los comercios con permiso general para su compraventa, con la
-            autorización correspondiente de la SEDENA) conllevará el <b>bloqueo inmediato</b> y
-            el <b>reporte a las autoridades competentes</b>, junto con la información
-            asociada al envío.
-          </div>
-          <div style={{ marginTop: 10, color: PALETTE.textDim }}>
-            Lo mismo aplica a pedir o dar instrucciones para modificar un arma de forma
-            ilegal, alterar matrículas, o eludir el trámite ante la SEDENA.
-          </div>
-        </div>
-      </div>
-
-      <SectionHeader>Qué se puede publicar</SectionHeader>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 26 }}>
-
-        <window.Disclosure title="Respeto hacia las demás personas" defaultOpen>
-          <div>
-            <Regla>Nada de insultos, acoso ni burlas hacia otros usuarios, marcas, tiendas o autoridades.</Regla>
-            <Regla>Nada de amenazas ni de incitación a la violencia, ni en broma.</Regla>
-            <Regla>Nada de provocar peleas ni de discriminar por origen, género, religión, orientación o cualquier otra condición.</Regla>
-            <Regla>Nada de acusaciones públicas contra personas concretas.</Regla>
-            <Regla>Nada de publicar datos personales de nadie: nombres completos, domicilios, teléfonos, matrículas ni fotos de terceros.</Regla>
-          </div>
-        </window.Disclosure>
-
-        <window.Disclosure title="La reseña va sobre el producto">
-          <div>
-            <Regla>Escribe sobre el arma, el accesorio, la munición o el lugar que estás reseñando: cómo se comporta, para qué sirve, qué te sorprendió.</Regla>
-            <Regla>No uses las reseñas para hacer preguntas de trámite: para eso están las <b>preguntas frecuentes</b> y la <b>guía legal</b>.</Regla>
-            <Regla>No repitas la misma reseña en varias fichas.</Regla>
-          </div>
-        </window.Disclosure>
-
-        <window.Disclosure title="Nada comercial">
-          <div>
-            <Regla>Sin anuncios, sin promociones y sin enlaces a tiendas, propias o ajenas.</Regla>
-            <Regla>Sin ofertas de compra, venta, permuta o renta de nada.</Regla>
-            <Regla>Sin rifas, sorteos ni captación de clientes.</Regla>
-            <Regla>Si tienes una relación comercial con lo que reseñas —lo vendes, lo distribuyes, te lo regalaron— <b>dilo en la reseña</b>.</Regla>
-          </div>
-        </window.Disclosure>
-
-        <window.Disclosure title="No manipular la calificación">
-          <div>
-            <Regla>Una opinión por persona y por ficha.</Regla>
-            <Regla>Nada de enviar varias reseñas para inflar o hundir una calificación.</Regla>
-            <Regla>Nada de pagar, cobrar ni presionar a nadie por escribir una reseña.</Regla>
-            <Regla>Nada de campañas coordinadas contra un modelo, una marca o una tienda.</Regla>
-          </div>
-        </window.Disclosure>
-
-      </div>
-
-      <SectionHeader>Cómo se revisan las reseñas</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
-        padding: '14px 16px', marginBottom: 26, position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={PALETTE.amber} />
-        <div style={window.amxProsa({ fontSize: 16 })}>
-          <b style={{ color: PALETTE.text }}>Toda reseña se revisa antes de publicarse.</b> Al enviarla
-          entra en una cola y no aparece en la ficha hasta que alguien comprueba que
-          cumple estas normas. Puede tardar; que no se vea al instante no significa que
-          se haya rechazado.
-          <div style={{ marginTop: 10 }}>
-            Pedimos un mínimo de {RESENA_MIN} caracteres a propósito: una opinión sin
-            argumento no ayuda a nadie a decidir, y es lo que da derecho a que tu voto
-            cuente en la calificación.
-          </div>
-          <div style={{ marginTop: 10 }}>
-            Tu <b>correo no se publica nunca</b>: se guarda solo para poder contactarte si
-            hay un problema con tu reseña, y se descarta al aprobarla.
-          </div>
-        </div>
-      </div>
-
-      <SectionHeader>Qué pasa si se incumplen</SectionHeader>
-      <div style={{ marginBottom: 26 }}>
-        {[
-          ['01', 'No se publica', 'Si la reseña no cumple las normas, no llega a la ficha. Si dejaste correo, te avisamos del motivo.'],
-          ['02', 'Se retira lo ya publicado', 'Una reseña publicada puede retirarse después si se detecta —o se denuncia— que incumple.'],
-          ['03', 'Se restringe la participación', 'Quien incumple de forma repetida deja de poder publicar reseñas.'],
-          ['04', 'Bloqueo y reporte', 'En los casos graves —compraventa ilegal, amenazas, explotación de menores— el bloqueo es inmediato y se reporta a las autoridades competentes con la información del envío.'],
-        ].map(([n, tit, desc]) =>
-          <div key={n} style={{ display: 'flex', gap: 13, padding: '11px 0', borderBottom: `1px solid ${PALETTE.border}` }}>
+      ) : (
+        <form onSubmit={enviar} noValidate className="amx-soporte-formato" style={{
+          background: 'var(--oficio)', padding: 16, borderRadius: 4,
+          border: '1px solid var(--hair)'
+        }}>
+          {reportContext && (
             <div style={{
-              width: 32, height: 32, flexShrink: 0,
-              border: `1px solid ${PALETTE.amber}`, color: PALETTE.amber,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700
-            }}>{n}</div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14.5,
-                color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4
-              }}>{tit}</div>
-              <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{desc}</div>
+              marginBottom: 16, padding: '10px 12px', background: 'var(--beige)',
+              borderRadius: 4, border: '1px solid var(--hair)'
+            }}>
+              <div>
+                <strong ref={titleRef} tabIndex="-1" style={{ fontSize: 14, color: 'var(--tinta)' }}>
+                  {reportContext.entidadNombre || 'Entidad no identificada'}
+                </strong>
+                <button type="button" onClick={borrarContexto} style={{
+                  float: 'right', background: 'none', border: 'none',
+                  color: 'var(--fichero-rojo)', cursor: 'pointer',
+                  fontFamily: 'var(--mono)', fontSize: 11
+                }}>Borrar contexto</button>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--tinta-dim)', marginTop: 4 }}>
+                {reportContext.tipo} · {reportContext.reviewId || 'captura manual'} · Autor: {reportContext.autor || 'Anónimo'}
+              </div>
+              {reportContext.reviewExcerpt && (
+                <blockquote style={{
+                  margin: '8px 0 0', padding: '4px 10px',
+                  borderLeft: '2px solid var(--manila-tinta)',
+                  fontSize: 12, color: 'var(--tinta-dim)',
+                  fontStyle: 'italic'
+                }}>"{reportContext.reviewExcerpt}"</blockquote>
+              )}
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="amx-renglon-etq" htmlFor="soporte-reviewId">Reseña denunciada</label>
+              <input id="soporte-reviewId" className="amx-renglon" value={den.reviewId}
+                onChange={(e) => setD('reviewId', e.target.value)}
+                placeholder="Ficha y autor, o el texto que empieza por…" />
+            </div>
+            <div>
+              <label className="amx-renglon-etq" htmlFor="soporte-motivo">Motivo</label>
+              <select id="soporte-motivo" className="amx-renglon" value={den.motivo}
+                onChange={(e) => setD('motivo', e.target.value)}>
+                {motivos.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="amx-renglon-etq" htmlFor="soporte-email">Correo (opcional)</label>
+              <input id="soporte-email" className="amx-renglon" type="email" value={den.email}
+                onChange={(e) => setD('email', e.target.value)} maxLength={160}
+                placeholder="para contarte en qué quedó" />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="amx-renglon-etq" htmlFor="soporte-detalle">
+                ¿Qué pasa con la reseña? <span style={{ color: 'var(--fichero-rojo)' }}>*</span>
+              </label>
+              <textarea id="soporte-detalle" className="amx-renglon" value={den.detalle}
+                onChange={(e) => setD('detalle', e.target.value)}
+                rows={3} minLength={20} maxLength={1200} required
+                placeholder="Explica brevemente por qué incumpe las normas." />
+              <p className="amx-renglon-ayuda" aria-describedby="soporte-detalle-count">
+                {den.detalle.length} / 20 mínimo — {den.detalle.length >= 20 ? '✓ mínimo alcanzado' : 'necesitas más detalle'}
+              </p>
             </div>
           </div>
-        )}
-        <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.65, marginTop: 12 })}>
-          <b style={{ color: PALETTE.text }}>¿Crees que nos equivocamos?</b> Denúncialo con el
-          formulario de abajo indicando qué reseña era y por qué crees que sí cumplía.
-          Moderar es un juicio y a veces sale mal; se revisa de nuevo.
-        </div>
-      </div>
 
-      <SectionHeader>Denunciar contenido</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
-        padding: '15px 16px', position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={denEnviada ? PALETTE.green : PALETTE.amber} />
-        {denEnviada ?
-          <div>
-            <div style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16,
-              color: PALETTE.green, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8
-            }}>✓ Denuncia recibida</div>
-            <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>
-              La revisaremos. Si dejaste correo, te contamos en qué quedó.
-            </div>
-          </div>
-        :
-          <div>
-            <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.65, marginBottom: 14 })}>
-              Si ves una reseña que incumple estas normas, cuéntanoslo. No hace falta que
-              respondas a quien la escribió: eso solo alarga el problema.
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', columnGap: 12 }}>
-              {sfld('Qué reseña', 'reviewId', den, setD, { placeholder: 'Ficha y autor, o el texto que empieza por…', span: 2 })}
-              {sfld('Motivo', 'motivo', den, setD, { select: MOTIVOS })}
-              {sfld('Tu correo (opcional)', 'email', den, setD, { type: 'email', placeholder: 'para contarte en qué quedó' })}
-              {sfld('Qué pasa con ella', 'detalle', den, setD, { ta: true, rows: 3, required: true, span: 2, placeholder: 'Explica brevemente por qué incumple.' })}
-            </div>
-            <button type="button" onClick={enviarDenuncia} disabled={!denListo} style={{
-              width: '100%', marginTop: 4,
-              background: denListo ? PALETTE.amber : 'transparent',
-              color: denListo ? PALETTE.tintaSobreMarca : PALETTE.textMuted,
-              border: `1.5px solid ${denListo ? PALETTE.amber : PALETTE.border}`,
-              padding: '13px', minHeight: 48,
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              cursor: denListo ? 'pointer' : 'not-allowed'
-            }}>Enviar denuncia</button>
-          </div>}
-      </div>
+          <button type="submit" disabled={estado.kind === 'submitting'} style={{
+            width: '100%', marginTop: 12,
+            background: estado.kind === 'submitting' ? 'var(--tinta-dim)' : 'var(--manila-tinta)',
+            color: estado.kind === 'submitting' ? 'var(--oficio-tinta-2)' : 'var(--oficio)',
+            border: '1.5px solid var(--manila-tinta)',
+            padding: '13px', minHeight: 48,
+            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            cursor: estado.kind === 'submitting' ? 'not-allowed' : 'pointer'
+          }}>
+            {estado.kind === 'submitting' ? 'Enviando…' : 'Enviar denuncia'}
+          </button>
 
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
-        {[['legal', '§ Guía legal completa'], ['faq', '? Preguntas frecuentes']].map(([id, txt]) =>
+          {estado.kind === 'error' && (
+            <div role="alert" style={{
+              marginTop: 10, padding: '10px 12px', background: 'rgba(168,58,42,0.1)',
+              borderRadius: 4, border: '1px solid var(--fichero-rojo)',
+              color: 'var(--fichero-rojo)', fontSize: 14
+            }}>{estado.error}</div>
+          )}
+        </form>
+      )}
+    </section>
+  );
+}
+
+function SoporteDirectorio({ contenido, onNav }) {
+  return (
+    <section style={{ marginBottom: 24 }}>
+      <h3 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
+        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
+        margin: '0 0 14px'
+      }}>{contenido.clasificacion.titulo}</h3>
+      <ul style={{ margin: 0, paddingLeft: 20, marginBottom: 24 }}>
+        {contenido.clasificacion.criterios.map((p, i) => <li key={i} style={{
+          fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
+          marginBottom: 6
+        }}>{p}</li>)}
+      </ul>
+
+      <h3 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
+        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
+        margin: '0 0 14px'
+      }}>{contenido.correccion.titulo}</h3>
+      <p style={{ fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)', marginBottom: 12 }}>
+        {contenido.correccion.intro}
+      </p>
+      <ol style={{ margin: 0, paddingLeft: 20, marginBottom: 16 }}>
+        {contenido.correccion.pasos.map((p, i) => <li key={i} style={{
+          fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
+          marginBottom: 6
+        }}>{p}</li>)}
+      </ol>
+
+      <h4 style={{
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
+        color: 'var(--tinta)', margin: '16px 0 10px'
+      }}>Fuentes aceptables</h4>
+      <ul style={{ margin: 0, paddingLeft: 20, marginBottom: 20 }}>
+        {contenido.correccion.fuentes.map((p, i) => <li key={i} style={{
+          fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
+          marginBottom: 4
+        }}>{p}</li>)}
+      </ul>
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        {[['legal', '§ Guía legal completa'], ['faq', '? Preguntas frecuentes']].map(([id, txt]) => (
           <button key={id} type="button" onClick={() => onNav && onNav(id)} style={{
-            flex: '1 1 200px', background: 'transparent', color: PALETTE.amber,
-            border: `1.5px dashed ${PALETTE.border}`, padding: '12px', minHeight: 48,
+            flex: '1 1 200px', background: 'transparent', color: 'var(--manila-tinta)',
+            border: '1.5px dashed var(--hair)', padding: '12px', minHeight: 48,
             fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 13.5,
-            letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
+            letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
+            borderRadius: 4
           }}>{txt} →</button>
-        )}
+        ))}
       </div>
-    </div>);
+    </section>
+  );
+}
 
+function SoporteScreen({ onNav, reportContext }) {
+  const contenido = window.AMX_SOPORTE_CONTENT;
+  return (
+    <main className="amx-soporte">
+      <SoportePortada contenido={contenido} />
+      <SoporteAviso aviso={contenido.venta} />
+      <section aria-labelledby="soporte-normas-titulo">
+        <h2 id="soporte-normas-titulo" className="amx-soporte-seccion-titulo" style={{
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22,
+          color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
+          margin: '0 0 16px', padding: '12px 0',
+          borderBottom: '2px solid var(--manila-tinta)'
+        }}>Normas</h2>
+        <div className="amx-soporte-reglas">
+          {contenido.normas.map((norma) => <SoporteHojaNorma key={norma.numero} norma={norma} />)}
+        </div>
+      </section>
+      <SoporteModeracion contenido={contenido} />
+      <SoporteDenuncia reportContext={reportContext} />
+      <SoporteDirectorio contenido={contenido} onNav={onNav} />
+    </main>
+  );
 }
 window.SoporteScreen = SoporteScreen;
 
@@ -1229,6 +1366,8 @@ function FAQScreen() {
           <window.FolderPregunta key={i} pregunta={f.q} tema={f.tema}>{f.a}</window.FolderPregunta>
         )}
       </div>
+
+      <window.ReportarError tipo="faq" titulo="Preguntas frecuentes" ruta="/preguntas" />
     </div>);
 
 }

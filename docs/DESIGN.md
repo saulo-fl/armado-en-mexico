@@ -579,16 +579,28 @@ MUNICIONES RELACIONADAS
 ```
 ---
 22. SOPORTE Y NORMAS
-Sección documental.
-Debe contener:
-Normas de uso de la plataforma.
-Política de contenido.
-Fuentes de información.
-Criterios de clasificación.
-Correcciones.
-Reportar información incorrecta.
-Contacto.
-Puede utilizar un diseño parecido a documentación técnica.
+Rediseño del 19-sep-2026: manual de convivencia vintage + formato de denuncia privada.
+
+Concepto: archivo físico del sitio (papel oficio, carpetas manila, hojas siempre visibles).
+Ancho aproximado: 920 px centrado. Papel fijo en tema oscuro. Breakpoint estructural: 1024 px (2 × 2 grid).
+Clases CSS: `.amx-soporte-*` (portada, aviso, reglas, regla, carbon, formato).
+
+Estructura:
+- Portada: h1 Dymo, apertura y alcance.
+- Aviso: prohibido comprar/vender (antes de las normas).
+- Normas: cuatro hojas siempre visibles (no acordeones), 1 columna < 1024 px, 2 × 2 desde 1024 px.
+- Moderación: copia al carbón + acciones reales.
+- Denuncia: formulario privado con contexto de reseña (no persiste en localStorage, no va a URL).
+- Directorio: clasificación, corrección pública vía GitHub Issues, fuentes aceptables, FAQ y Legalidad.
+
+Diferencia entre denuncia privada y corrección pública:
+- Denuncia: formulario en /soporte, solo backend escribe en D1, contexto en memoria React.
+- Corrección: Issue Form público en GitHub, PR opcional posterior a revisión editorial.
+
+ReportarError: primitiva reutilizable que aparece al final de arma, accesorio, munición, calibre, Legalidad y FAQ. NO en Inicio, Arsenal, Comparador, Más, Acerca, Tutorial ni Soporte.
+
+Textos prohibidos (no afirmar): bloqueo inmediato, reporte a autoridades, 24/48 horas, te contamos en qué quedó.
+Textos vigentes: opiniones negativas fundadas protegidas, fabricantes pueden corregir declarando relación.
 ---
 23. PREGUNTAS FRECUENTES
 FAQ con acordeones.

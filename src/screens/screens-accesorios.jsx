@@ -142,7 +142,7 @@ function HojaCompatibilidad({ compat, onOpenArma }) {
   );
 }
 
-function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds }) {
+function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportReview }) {
   const vp = window.useViewport();
   // Las opiniones llegan con la hidratación de /api/state, DESPUÉS del primer
   // render: sin esta suscripción «Opiniones: …» se quedaba vacío.
@@ -289,7 +289,7 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds }) {
         <window.CintaDymo id="ficha-opiniones">Opiniones</window.CintaDymo>
         <div className="amx-comentarios-marco">
           <window.OpinionBlock tipo="accesorio" entidadId={acc.id} entidadNombre={acc.nombre}
-            nombreTipo="accesorio" onNav={onNav} />
+            nombreTipo="accesorio" onNav={onNav} onReportReview={onReportReview} />
         </div>
       </section>
      </div>
@@ -300,7 +300,7 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds }) {
         <window.TalonComprobante fijo
           precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
           ultimoConocido={inv.ultimoConocido} historial={priceHistory} />}
-    </div>
+      <window.ReportarError tipo="accesorio" titulo={acc.nombre} ruta={idx.slugPorC[acc.id] || ''} />    </div>
   );
 }
 window.AccesorioFicha = AccesorioFicha;

@@ -149,7 +149,7 @@ npm install                 # una vez
 npm run build               # estáticos + .jsx -> .js + prerender de las 398 páginas, todo en out/
 npx serve out               # o cualquier servidor HTTP sobre out/: no carga desde file://
 node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
-npm test                     # 5 suites de node:test: cotejo · vitrina · arsenal-hub · filtros · faq
+npm test                     # 6 suites de node:test: cotejo · vitrina · arsenal-hub · filtros · faq · soporte
 node --test scripts/faq.test.mjs   # una sola suite
 ```
 
