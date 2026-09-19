@@ -699,7 +699,7 @@ window.AppHeader = AppHeader;
 // ──────────────────────────────────────────────────────────────
 // BOTTOM NAV — navegación inferior
 // ──────────────────────────────────────────────────────────────
-function BottomNav({ current, onNav, compareCount }) {
+function BottomNav({ current, onNav, compareCount, visible = true }) {
   const navRef = React.useRef(null);
 
   // La barra fija de la ficha y CompareFloat se apoyan JUSTO encima de este nav.
@@ -748,12 +748,14 @@ function BottomNav({ current, onNav, compareCount }) {
   ];
   return (
     <div ref={navRef} style={{
-      position: 'sticky', bottom: 0, zIndex: 50,
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
       background: PALETTE.marca,
       borderTop: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex',
       padding: '6px 4px 10px',
       paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+      transform: visible ? 'translateY(0)' : 'translateY(100%)',
+      transition: 'transform .28s ease',
     }}>
       {items.map(it => {
         const active = current === it.id;

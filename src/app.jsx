@@ -289,10 +289,37 @@ function App() {
 
   const scrollRef = useRefApp(null);
 
+  // Auto-hide BottomNav: visible por defecto, se oculta al bajar, reaparece al subir
+  const [navVisible, setNavVisible] = useStateApp(true);
+  const lastScrollY = useRefApp(0);
+
   useEffectApp(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     window.scrollTo(0, 0);
+    setNavVisible(true);
+    lastScrollY.current = 0;
   }, [screen, productId]);
+
+  // Dirección de scroll → ocultar/mostrar BottomNav en móvil
+  useEffectApp(() => {
+    const el = scrollRef.current;
+    if (!el || !vp.isMobile) return;
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = el.scrollTop;
+        const delta = y - lastScrollY.current;
+        lastScrollY.current = y;
+        if (delta > 10) setNavVisible(false);
+        else if (delta < -5) setNavVisible(true);
+        ticking = false;
+      });
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [vp.isMobile]);
 
   const navigate = (target, filter) => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
@@ -535,7 +562,8 @@ function App() {
         <window.BottomNav
           current={currentNavId}
           onNav={navTab}
-          compareCount={compareIds.length} />
+          compareCount={compareIds.length}
+          visible={navVisible} />
       )}
 
       {/* ─── TUTORIAL DE BIENVENIDA (overlay) ─── */}
