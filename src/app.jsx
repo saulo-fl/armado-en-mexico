@@ -300,25 +300,38 @@ function App() {
     lastScrollY.current = 0;
   }, [screen, productId]);
 
-  // Dirección de scroll → ocultar/mostrar BottomNav en móvil
+  // Dirección de scroll → ocultar/mostrar BottomNav en móvil.
+  // Escuchamos en el scroll-body Y en window: según la geometría del
+  // contenido el scroll puede ocurrir en cualquiera de los dos.
   useEffectApp(() => {
+    if (!vp.isMobile) return;
     const el = scrollRef.current;
-    if (!el || !vp.isMobile) return;
     let ticking = false;
+    const getY = () => {
+      const ey = el ? el.scrollTop : 0;
+      const wy = window.scrollY || window.pageYOffset || 0;
+      return Math.max(ey, wy);
+    };
+    lastScrollY.current = getY();
     const onScroll = () => {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        const y = el.scrollTop;
+        const y = getY();
         const delta = y - lastScrollY.current;
         lastScrollY.current = y;
-        if (delta > 10) setNavVisible(false);
-        else if (delta < -5) setNavVisible(true);
+        if (delta > 8) setNavVisible(false);
+        else if (delta < -4) setNavVisible(true);
         ticking = false;
       });
     };
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
+    const opts = { passive: true };
+    if (el) el.addEventListener('scroll', onScroll, opts);
+    window.addEventListener('scroll', onScroll, opts);
+    return () => {
+      if (el) el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll);
+    };
   }, [vp.isMobile]);
 
   const navigate = (target, filter) => {
