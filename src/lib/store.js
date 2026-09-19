@@ -218,25 +218,6 @@
       body: JSON.stringify(item), credentials: 'include',
     }).catch(() => {});
   }
-  // La interfaz puede ser sustituida por soporte.js; mientras carga, este
-  // transporte mínimo conserva el contrato de resultado HTTP para denuncias.
-  async function sendReport(url, item) {
-    if (typeof window.amxEnviarReporte === 'function') {
-      return window.amxEnviarReporte(url, item, fetch);
-    }
-    try {
-      const res = await fetch(url, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item), credentials: 'include',
-      });
-      let data = {};
-      try { data = await res.json(); } catch (e) {}
-      if (res.ok) return { ok: true, status: res.status };
-      return { ok: false, status: res.status, error: data.error || 'sin_backend' };
-    } catch (e) {
-      return { ok: false, status: 0, error: 'sin_backend' };
-    }
-  }
   // Hidratación: trae el snapshot compartido y refresca el cache local.
   async function hydrate() {
     if (!REMOTE.enabled) return false;
@@ -457,8 +438,10 @@
         detalle: String(rep.detalle || '').trim(),
         email: String(rep.email || '').trim(),
       };
-      if (!REMOTE.enabled) return { ok: false, status: 0, error: 'sin_backend' };
-      const result = await sendReport(REMOTE.base + '/append/reports', item);
+      if (!REMOTE.enabled || typeof window.amxEnviarReporte !== 'function') {
+        return { ok: false, status: 0, error: 'sin_backend' };
+      }
+      const result = await window.amxEnviarReporte(REMOTE.base + '/append/reports', item, fetch);
       if (result.ok) REMOTE.ok = true;
       return result;
     },

@@ -53,6 +53,14 @@ for (const [nombre, cambio] of [
 }
 ok('denuncias inválidas no modifican el dominio');
 
+{
+  const current = [{ id: 'd_existente', status: 'pending' }];
+  const out = mergeAppend('reports', current, { ...REPORTE_VALIDO, motivo: 'inventado' });
+  assert.deepEqual(out, current, 'un reporte inválido conserva la cola existente');
+  assert.notEqual(out, current, 'la defensa no expone el array original');
+  ok('denuncia inválida conserva la cola existente');
+}
+
 // ── Los envíos de «Proponer arma» y «Sugerir cambios» ya no se aceptan ─────
 // Salieron el 13-sep-2026. Si alguien vuelve a añadirlos a APPEND_DOMAINS, la
 // API pública volvería a guardar lo que ninguna pantalla revisa.
