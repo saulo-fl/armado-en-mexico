@@ -42,7 +42,7 @@ mkdirSync(OUT, { recursive: true });
 const win = {};
 const ctx = createContext({ window: win, console });
 ctx.window = win;
-for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js',
+for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
                  'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
   runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
