@@ -289,10 +289,50 @@ function App() {
 
   const scrollRef = useRefApp(null);
 
+  // Auto-hide BottomNav: visible por defecto, se oculta al bajar, reaparece al subir
+  const [navVisible, setNavVisible] = useStateApp(true);
+  const lastScrollY = useRefApp(0);
+
   useEffectApp(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     window.scrollTo(0, 0);
+    setNavVisible(true);
+    lastScrollY.current = 0;
   }, [screen, productId]);
+
+  // Dirección de scroll → ocultar/mostrar BottomNav en móvil.
+  // Escuchamos en el scroll-body Y en window: según la geometría del
+  // contenido el scroll puede ocurrir en cualquiera de los dos.
+  useEffectApp(() => {
+    if (!vp.isMobile) return;
+    const el = scrollRef.current;
+    let ticking = false;
+    const getY = () => {
+      const ey = el ? el.scrollTop : 0;
+      const wy = window.scrollY || window.pageYOffset || 0;
+      return Math.max(ey, wy);
+    };
+    lastScrollY.current = getY();
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = getY();
+        const delta = y - lastScrollY.current;
+        lastScrollY.current = y;
+        if (delta > 8) setNavVisible(false);
+        else if (delta < -4) setNavVisible(true);
+        ticking = false;
+      });
+    };
+    const opts = { passive: true };
+    if (el) el.addEventListener('scroll', onScroll, opts);
+    window.addEventListener('scroll', onScroll, opts);
+    return () => {
+      if (el) el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [vp.isMobile]);
 
   const navigate = (target, filter) => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
@@ -489,7 +529,9 @@ function App() {
       <div ref={scrollRef} style={{
         flex: 1, minHeight: 0,
         overflowY: vp.isMobile ? 'auto' : 'visible',
+        overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
+        maxWidth: '100vw',
       }}>
         {content}
         {/* PIE DE OFICIO — global, no solo del Home. Tres razones:
@@ -533,7 +575,8 @@ function App() {
         <window.BottomNav
           current={currentNavId}
           onNav={navTab}
-          compareCount={compareIds.length} />
+          compareCount={compareIds.length}
+          visible={navVisible} />
       )}
 
       {/* ─── TUTORIAL DE BIENVENIDA (overlay) ─── */}

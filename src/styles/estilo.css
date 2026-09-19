@@ -1103,6 +1103,8 @@
   .amx-v2 .amx-dest-folder {
     grid-template-columns: minmax(0, 1fr) minmax(0, 38%);
     gap: var(--e3);
+    max-width: 100%;
+    overflow: hidden;
   }
   .amx-v2 .amx-dest-specs { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: 13px; }
   .amx-v2 .amx-dest-specs dt { font-size: 11.5px; }
@@ -4716,3 +4718,181 @@
   }
   .amx-v2 .amx-faq-tema { font-size: 11.5px; letter-spacing: .12em; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DEFENSA CONTRA DESBORDE HORIZONTAL en móvil
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 719px) {
+  .amx-v2 { max-width: 100vw; overflow-x: hidden; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MENÚ MÁS — cada entrada es un mini-folder manila
+   Misma técnica que el FAQ: border-image sobre folder-manila.webp, escalado
+   con --manila-escala. Los ítems se apilan con margen negativo, así que la
+   pestaña de cada folder asoma detrás del anterior.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 .amx-menu-folders {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* ── Cada folder del menú ────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder {
+  --manila-escala: .18;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: var(--e4);
+  /* Padding: arriba deja sitio para la pestaña de la foto del folder,
+     abajo un cuerpo extra que se mete bajo el siguiente. */
+  padding: calc(100px * var(--manila-escala) + 10px) 16px
+           calc(40px  * var(--manila-escala) + 10px);
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  color: var(--manila-tinta);
+}
+
+/* El folder como pseudo, igual que en FAQ */
+.amx-v2 .amx-menu-folder::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  border-style: solid; border-width: 0;
+  border-image-source: url(imagenes/folder-manila.webp);
+  border-image-slice: 140 60 70 370 fill;
+  border-image-width:
+    calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+    calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
+  filter: brightness(var(--manila-luz))
+          drop-shadow(0 1px 2px rgba(23, 27, 25, .12))
+          drop-shadow(0 3px 6px rgba(23, 27, 25, .10));
+}
+
+/* Apilar: cada folder monta sobre el de arriba */
+.amx-v2 .amx-menu-folder + .amx-menu-folder {
+  margin-top: calc(-20px * var(--manila-escala));
+}
+
+/* Hover: sube ligeramente */
+@media (hover: hover) {
+  .amx-v2 .amx-menu-folder:not([disabled]):hover::before {
+    filter: brightness(var(--manila-luz))
+            drop-shadow(0 2px 3px rgba(23, 27, 25, .16))
+            drop-shadow(0 6px 12px rgba(23, 27, 25, .18));
+  }
+}
+
+.amx-v2 .amx-menu-folder:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+/* Deshabilitado */
+.amx-v2 .amx-menu-folder[disabled] {
+  opacity: .5;
+  cursor: default;
+}
+
+/* Acento: borde izquierdo rojo */
+.amx-v2 .amx-menu-folder--accent {
+  border-left: 3px solid var(--sello-restr);
+}
+
+/* ── Icono: la silueta o el glifo ──────────────────────────────────── */
+.amx-v2 .amx-menu-folder-icono {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.amx-v2 .amx-menu-folder-glyph {
+  font-family: var(--mono);
+  font-size: 22px;
+  color: var(--manila-tinta-2);
+  line-height: 1;
+}
+
+/* ── Texto ────────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder-titulo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+}
+
+.amx-v2 .amx-menu-folder-desc {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--manila-tinta-2);
+  margin-top: 2px;
+}
+
+/* ── Flecha ───────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder-flecha {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--manila-tinta-2);
+}
+
+/* ── Separador entre grupos ──────────────────────────────────────── */
+.amx-v2 .amx-menu-sep {
+  height: 0;
+  border: none;
+  border-top: 1px dashed var(--hair);
+  margin: 8px 0;
+}
+
+/* ── Pie ─────────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-pie {
+  margin-top: 24px;
+  padding: 14px;
+  background: var(--ficha);
+  border: 1px dashed var(--hair);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--ficha-tinta-2);
+  line-height: 1.6;
+}
+.amx-v2 .amx-menu-pie strong {
+  display: block;
+  color: var(--acento);
+  font-weight: 700;
+  letter-spacing: .15em;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+/* Responsive: estrecho */
+@media (max-width: 399px) {
+  .amx-v2 .amx-menu-folder { gap: var(--e3); }
+  .amx-v2 .amx-menu-folder-icono { width: 32px; height: 32px; }
+  .amx-v2 .amx-menu-folder-icono img { width: 32px !important; height: 32px !important; }
+  .amx-v2 .amx-menu-folder-glyph { font-size: 18px; }
+  .amx-v2 .amx-menu-folder-titulo { font-size: 12px; }
+  .amx-v2 .amx-menu-folder-desc { font-size: 12px; }
+}
+
+/* Penumbra: en tema oscuro los folders del menú suben su brillo */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-v2 .amx-menu-folder { --manila-luz: .88; }
+}
+:root[data-tema="oscuro"] .amx-v2 .amx-menu-folder { --manila-luz: .88; }
