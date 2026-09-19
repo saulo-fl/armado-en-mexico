@@ -454,13 +454,16 @@ const FIJAS = [
     desc: 'Índice de secciones de Armado en México.' },
 ];
 for (const p of FIJAS) {
+  // Si la entrada ya tiene `cuerpo` (ej. soporte con renderSoporteHtml),
+  // úsalo tal cual; de lo contrario, genera el HTML genérico.
+  const cuerpo = p.cuerpo || `<article>
+<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(p.titulo)}</nav>
+<h1>${esc(p.titulo)}</h1><p>${esc(p.desc)}</p></article>`;
   emitir(p.ruta, {
     titulo: `${p.titulo} | Armado en México`, desc: p.desc, noindex: p.noindex,
     jsonld: { '@context': 'https://schema.org',
       '@graph': [migas([{ nombre: 'Inicio', ruta: '' }, { nombre: p.titulo }])] },
-    cuerpo: `<article>
-<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(p.titulo)}</nav>
-<h1>${esc(p.titulo)}</h1><p>${esc(p.desc)}</p></article>`,
+    cuerpo,
   });
   paginas.push({ ruta: p.ruta, enSitemap: p.enSitemap });
 }
