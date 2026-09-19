@@ -1356,6 +1356,26 @@
   .amx-v2 .amx-loteria-mesa { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e2); }
 }
 
+/* Cartas de lotería con ilustración completa (carta-*.webp). Reemplazan la
+   estructura de lámina + silueta + número + nombre por una sola imagen que
+   contiene todo: fondo de color, ilustración estilo Lotería mexicana, número
+   en la esquina y nombre abajo. */
+.amx-v2 .amx-loteria-carta-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border: none;
+  border-radius: 0;
+}
+.amx-v2 .amx-loteria:has(.amx-loteria-carta-img) {
+  border: 2px solid var(--loteria-filo);
+  box-shadow: var(--sombra);
+  padding: 0;
+  overflow: hidden;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    EL PUESTO DE MUNICIÓN — la caja en la mesa, con su letrero (tablero 8-sep-2026)
    ══════════════════════════════════════════════════════════════════════════

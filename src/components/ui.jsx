@@ -1208,6 +1208,11 @@ window.ArmaPolaroid = ArmaPolaroid;
 // igual que en la copia y en los accesorios sin foto: el .webp aporta solo el
 // contorno y el color lo pone el CSS.
 //
+// `ilustracion` es la URL de la ilustración completa estilo Lotería mexicana
+// (carta-pistolas.webp, carta-revolveres.webp, etc.). Cuando se proporciona,
+// la carta se muestra como imagen completa y se ocultan el número y el nombre
+// que el componente renderiza por defecto.
+//
 // El número lo lee el lector de pantalla por el `aria-label` del botón, no
 // suelto: «31» a secas no dice de qué.
 // ──────────────────────────────────────────────────────────────
@@ -1217,18 +1222,22 @@ window.ArmaPolaroid = ArmaPolaroid;
 // petición y un repintado por carta para saber algo que ya sabemos aquí.
 const SILUETAS_LARGAS = /-(rifle|escopeta|carabina|optica|cargador|municion)\.webp/;
 
-function CartaLoteria({ nombre, cuenta, unidad = 'piezas', forma, onClick }) {
+function CartaLoteria({ nombre, cuenta, unidad = 'piezas', forma, ilustracion, onClick }) {
+  const esCartaCompleta = !!ilustracion;
   return (
     <button type="button" className="amx-loteria" onClick={onClick}
       aria-label={`${nombre} — ${cuenta} ${cuenta === 1 ? unidad.replace(/s$/, '') : unidad}`}>
-      <span className="amx-loteria-lam">
-        <span className="amx-loteria-num" aria-hidden="true">{cuenta}</span>
-        {forma &&
-          <span aria-hidden="true"
-            className={'amx-loteria-fig' + (SILUETAS_LARGAS.test(forma) ? ' amx-loteria-fig--largo' : '')}
-            style={{ '--silueta-forma': `url(${forma})` }} />}
-      </span>
-      <span className="amx-loteria-pie">{nombre}</span>
+      {esCartaCompleta
+        ? <img src={ilustracion} alt="" className="amx-loteria-carta-img" />
+        : <span className="amx-loteria-lam">
+            <span className="amx-loteria-num" aria-hidden="true">{cuenta}</span>
+            {forma &&
+              <span aria-hidden="true"
+                className={'amx-loteria-fig' + (SILUETAS_LARGAS.test(forma) ? ' amx-loteria-fig--largo' : '')}
+                style={{ '--silueta-forma': `url(${forma})` }} />}
+          </span>
+      }
+      {!esCartaCompleta && <span className="amx-loteria-pie">{nombre}</span>}
     </button>
   );
 }
