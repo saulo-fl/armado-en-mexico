@@ -324,3 +324,16 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   - **Ningún renglón de oct-2025 ni del OTCA 26-sep encadena con estas altas.** Se comprobó
     dividiendo el precio del 16-jun entre ×0.89960 (general) y ×0.89447 (grupo Beretta), con
     ×1.00105 para OTCA: sus historiales empiezan en 2026.
+
+## Cuando te invoca el conciliador headless
+
+`infra/conciliar.sh` te llama con `openclaw agent`, sin humano delante. Contrato duro:
+
+- Trabaja sobre `origin/main` fresco, en la rama `auto/inventario-<FECHA>`.
+- `auditar.js` es puerta dura: si no da «✔✔ AUDITORÍA SIN HALLAZGOS», **no abras PR**.
+- Abre los **dos** Draft-PR con `gh pr create --draft`, uno `--base main` y otro `--base develop`.
+- Tu **última línea** de salida debe ser SOLO este JSON:
+  `{"ok":true,"prs":["url1","url2"]}` o `{"ok":false,"motivo":"..."}`.
+
+Si cambias cualquiera de esos cuatro puntos, `conciliar.sh` lo lee como fallo: avisa por Telegram
+y manda la señal a `.fallida` aunque los PR estén abiertos.

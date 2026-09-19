@@ -317,12 +317,14 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
     exist_nuevas = [u for u in cambios["nuevos"] + cambios["cambiados"]
                     if actuales[u]["tipo"] == "existencias" and u in archivos]
     if exist_nuevas:
-        senal = Path(os.environ.get("DCAM_DIR", ".")) / "pendiente-conciliar.json"
+        senal = dir_base / "pendiente-conciliar.json"
         senal.write_text(json.dumps({
             "fecha": fecha(ahora),
             "pdfs": [str(archivos[u]) for u in exist_nuevas],
             "shas": {actuales[u]["etiqueta"]: actuales[u]["sha256"] for u in exist_nuevas},
-        }, ensure_ascii=False, indent=2))
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    msgs[-1]["texto"] += " · señal escrita" if exist_nuevas else " · sin señal"
 
     guardar_estado(ruta_estado, nuevo_estado)
     return 0, msgs
