@@ -1241,21 +1241,23 @@ function MenuScreen({ onNav, onTutorial }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
 
+  // Cada ítem lleva su imagen (silueta webp existente o glifo para los que no tienen asset).
+  // Las siluetas se pintan con mask-image sobre el fondo del folder, al estilo del resto del sitio.
   const items = [
-    { id: 'traumaticas', icon: '◎', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
-    { id: 'accesorios', icon: '▫', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
-    { id: 'municiones', icon: '◉', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
-    { id: 'calibres', icon: '◉', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
+    { id: 'traumaticas', img: 'imagenes/silueta-pistola.webp', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
+    { id: 'accesorios', img: 'imagenes/silueta-cargador.webp', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
+    { id: 'municiones', img: 'imagenes/silueta-municion.webp', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
+    { id: 'calibres', img: 'imagenes/silueta-municion.webp', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
     { sep: true },
-    { id: 'campos', icon: '◎', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados', proximamente: true },
-    { id: 'experiencias', icon: '✦', title: 'Experiencias', desc: 'Formación y actividades de tiro', proximamente: true },
+    { id: 'campos', img: 'imagenes/silueta-rifle.webp', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados', proximamente: true },
+    { id: 'experiencias', img: 'imagenes/silueta-escopeta.webp', title: 'Experiencias', desc: 'Formación y actividades de tiro', proximamente: true },
     { sep: true },
-    { id: 'legal', icon: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
-    { id: 'soporte', icon: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
-    { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
-    { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
+    { id: 'legal', glyph: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
+    { id: 'soporte', glyph: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
+    { id: 'faq', glyph: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
+    { id: 'about', img: 'imagenes/isotipo-armado.webp', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
     { sep: true },
-    { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
+    { id: 'tutorial', action: 'tutorial', glyph: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
   ];
 
   return (
@@ -1268,7 +1270,7 @@ function MenuScreen({ onNav, onTutorial }) {
         textAlign: vp.isMobile ? 'center' : 'left'
       }}>☰ ÍNDICE · MÁS</div>
 
-      <div className="amx-menu">
+      <div className="amx-menu-folders">
         {items.map((it, i) => {
           if (it.sep) return <hr key={`sep-${i}`} className="amx-menu-sep" />;
           const proximamente = it.proximamente;
@@ -1276,16 +1278,21 @@ function MenuScreen({ onNav, onTutorial }) {
           return (
             <button
               key={it.id}
-              className={`amx-menu-item${it.accent ? ' amx-menu-item--accent' : ''}`}
+              className={`amx-menu-folder${it.accent ? ' amx-menu-folder--accent' : ''}`}
               disabled={proximamente}
               onClick={proximamente ? undefined : () => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)}
             >
-              <span className="amx-menu-icono">{it.icon}</span>
+              <span className="amx-menu-folder-icono">
+                {it.img
+                  ? <img src={it.img} alt="" width="36" height="36" loading="lazy"
+                      style={{ width: 36, height: 36, objectFit: 'contain', opacity: .7 }} />
+                  : <span className="amx-menu-folder-glyph">{it.glyph}</span>}
+              </span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="amx-menu-titulo">{label}</div>
-                <div className="amx-menu-desc">{it.desc}</div>
+                <div className="amx-menu-folder-titulo">{label}</div>
+                <div className="amx-menu-folder-desc">{it.desc}</div>
               </div>
-              <span className="amx-menu-flecha">›</span>
+              <span className="amx-menu-folder-flecha">›</span>
             </button>
           );
         })}

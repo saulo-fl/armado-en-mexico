@@ -4727,106 +4727,140 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   MENÚ MÁS — legajo de archivero / índice de fichas
-   Cada entrada es una pestaña que asoma de un folder, con tipografía
-   mecanografiada y la estética de «Documento Oficial Mexicano» (§3 DESIGN.md).
+   MENÚ MÁS — cada entrada es un mini-folder manila
+   Misma técnica que el FAQ: border-image sobre folder-manila.webp, escalado
+   con --manila-escala. Los ítems se apilan con margen negativo, así que la
+   pestaña de cada folder asoma detrás del anterior.
    ══════════════════════════════════════════════════════════════════════════ */
 
-.amx-v2 .amx-menu {
+.amx-v2 .amx-menu-folders {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
-.amx-v2 .amx-menu-item {
+/* ── Cada folder del menú ────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder {
+  --manila-escala: .18;
   position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: var(--e4);
-  padding: 14px 16px;
-  background: var(--ficha);
+  /* Padding: arriba deja sitio para la pestaña de la foto del folder,
+     abajo un cuerpo extra que se mete bajo el siguiente. */
+  padding: calc(100px * var(--manila-escala) + 10px) 16px
+           calc(40px  * var(--manila-escala) + 10px);
   border: none;
-  border-left: 3px solid var(--hair);
+  background: none;
   cursor: pointer;
   text-align: left;
   width: 100%;
   font-family: inherit;
+  color: var(--manila-tinta);
 }
 
-.amx-v2 .amx-menu-item:hover {
-  border-left-color: var(--acento);
+/* El folder como pseudo, igual que en FAQ */
+.amx-v2 .amx-menu-folder::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  border-style: solid; border-width: 0;
+  border-image-source: url(imagenes/folder-manila.webp);
+  border-image-slice: 140 60 70 370 fill;
+  border-image-width:
+    calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+    calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
+  filter: brightness(var(--manila-luz))
+          drop-shadow(0 1px 2px rgba(23, 27, 25, .12))
+          drop-shadow(0 3px 6px rgba(23, 27, 25, .10));
 }
 
-.amx-v2 .amx-menu-item:focus-visible {
+/* Apilar: cada folder monta sobre el de arriba */
+.amx-v2 .amx-menu-folder + .amx-menu-folder {
+  margin-top: calc(-20px * var(--manila-escala));
+}
+
+/* Hover: sube ligeramente */
+@media (hover: hover) {
+  .amx-v2 .amx-menu-folder:not([disabled]):hover::before {
+    filter: brightness(var(--manila-luz))
+            drop-shadow(0 2px 3px rgba(23, 27, 25, .16))
+            drop-shadow(0 6px 12px rgba(23, 27, 25, .18));
+  }
+}
+
+.amx-v2 .amx-menu-folder:focus-visible {
   outline: 2px solid var(--acento);
   outline-offset: -2px;
 }
 
-.amx-v2 .amx-menu-item[disabled] {
+/* Deshabilitado */
+.amx-v2 .amx-menu-folder[disabled] {
   opacity: .5;
   cursor: default;
 }
-.amx-v2 .amx-menu-item[disabled]:hover {
-  border-left-color: var(--hair);
+
+/* Acento: borde izquierdo rojo */
+.amx-v2 .amx-menu-folder--accent {
+  border-left: 3px solid var(--sello-restr);
 }
 
-.amx-v2 .amx-menu-icono {
+/* ── Icono: la silueta o el glifo ──────────────────────────────────── */
+.amx-v2 .amx-menu-folder-icono {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--mono);
-  font-size: 18px;
-  color: var(--ficha-tinta-2);
-  border: 1.5px solid var(--ficha-tinta-2);
-  border-radius: 0;
 }
 
-.amx-v2 .amx-menu-item--accent {
-  border-left-color: var(--sello-restr);
-}
-.amx-v2 .amx-menu-item--accent .amx-menu-icono {
-  color: var(--sello-restr);
-  border-color: var(--sello-restr);
+.amx-v2 .amx-menu-folder-glyph {
+  font-family: var(--mono);
+  font-size: 22px;
+  color: var(--manila-tinta-2);
+  line-height: 1;
 }
 
-.amx-v2 .amx-menu-titulo {
+/* ── Texto ────────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder-titulo {
   font-family: var(--mono);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: .12em;
+  letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--ficha-tinta);
+  color: var(--manila-tinta);
 }
 
-.amx-v2 .amx-menu-desc {
+.amx-v2 .amx-menu-folder-desc {
   font-family: var(--sans);
-  font-size: 13.5px;
+  font-size: 13px;
   line-height: 1.4;
-  color: var(--ficha-tinta-2);
+  color: var(--manila-tinta-2);
   margin-top: 2px;
 }
 
-.amx-v2 .amx-menu-flecha {
+/* ── Flecha ───────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder-flecha {
   flex-shrink: 0;
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 16px;
-  color: var(--ficha-tinta-2);
+  font-size: 18px;
+  color: var(--manila-tinta-2);
 }
 
+/* ── Separador entre grupos ──────────────────────────────────────── */
 .amx-v2 .amx-menu-sep {
   height: 0;
   border: none;
   border-top: 1px dashed var(--hair);
-  margin: 6px 0;
+  margin: 8px 0;
 }
 
+/* ── Pie ─────────────────────────────────────────────────────────── */
 .amx-v2 .amx-menu-pie {
   margin-top: 24px;
   padding: 14px;
@@ -4847,9 +4881,18 @@
   font-size: 13px;
 }
 
+/* Responsive: estrecho */
 @media (max-width: 399px) {
-  .amx-v2 .amx-menu-item { gap: var(--e3); padding: 12px 12px; }
-  .amx-v2 .amx-menu-icono { width: 30px; height: 30px; font-size: 15px; }
-  .amx-v2 .amx-menu-titulo { font-size: 13px; }
-  .amx-v2 .amx-menu-desc { font-size: 12.5px; }
+  .amx-v2 .amx-menu-folder { gap: var(--e3); }
+  .amx-v2 .amx-menu-folder-icono { width: 32px; height: 32px; }
+  .amx-v2 .amx-menu-folder-icono img { width: 32px !important; height: 32px !important; }
+  .amx-v2 .amx-menu-folder-glyph { font-size: 18px; }
+  .amx-v2 .amx-menu-folder-titulo { font-size: 12px; }
+  .amx-v2 .amx-menu-folder-desc { font-size: 12px; }
 }
+
+/* Penumbra: en tema oscuro los folders del menú suben su brillo */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-v2 .amx-menu-folder { --manila-luz: .88; }
+}
+:root[data-tema="oscuro"] .amx-v2 .amx-menu-folder { --manila-luz: .88; }
