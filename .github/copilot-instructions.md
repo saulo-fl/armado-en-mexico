@@ -58,36 +58,27 @@ Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.
 
 ## Git y conflictos
 
-Lecciones del 18-sep-2026, cuando el conflicto de un PR costó 40 minutos y quedó mal resuelto.
+Las reglas generales (merge y nunca rebase sobre una rama publicada, resolver cortando por
+número de línea, qué comprobar al cerrar) están en las instrucciones globales de Saulo
+—`~/dotfiles/instrucciones/AGENTS.md`, sección «Git — ramas y conflictos»—. GitHub Copilot
+no las hereda, así que el resumen es: **merge hacia tu rama, nunca rebase; corta por línea
+en vez de reescribir el bloque; y conserva los dos lados cuando ambos añadieron al final.**
 
-1. **Para actualizar una rama publicada: `merge`, nunca `rebase`.** Rebasar reescribe la
-   rama y obliga a `push --force`, que está prohibido. Además multiplica el trabajo: aquel
-   conflicto era **uno** por merge y **cuatro** por rebase, uno por commit de la rama.
-2. **En un rebase, `ours` y `theirs` se invierten**: `HEAD` pasa a ser la rama base, no la
-   tuya. Leerlo al revés fue lo que llevó a «restaurar» 43 líneas de CSS que ya estaban.
-3. **Resuelve cortando por número de línea, no reproduciendo el bloque.** Reescribir
-   literalmente cientos de líneas no sale bien: localiza los marcadores
-   (`grep -n '^<<<<<<<\|^=======\|^>>>>>>>'`), corta las partes con `sed -n` o `awk` y
-   reensambla. Cuando ambos lados añaden al final del archivo, casi siempre la resolución
-   correcta es conservar los dos bloques, uno tras otro.
-4. **Un conflicto de CSS entre dos secciones nuevas casi nunca es semántico**: es de
-   vecindad. Comprueba si los selectores se pisan de verdad antes de decidir nada.
+Lo propio de este repo: un conflicto en `estilo.css` entre dos secciones nuevas casi nunca
+es semántico, es de vecindad. Ambas suelen añadir al final del archivo sin pisarse ninguna
+regla; comprueba los selectores antes de descartar nada.
 
 ## Antes de decir que está hecho
 
 `npm test` **no** detecta marcadores de conflicto ni CSS duplicado: las 5 suites son de
-datos (catálogo, filtros, FAQ) y pasan con el archivo roto. La verificación real es:
+datos (catálogo, filtros, FAQ) y pasan con el archivo roto. Aquí la verificación real es:
 
 ```bash
-grep -rn '^<<<<<<<\|^=======\|^>>>>>>>' src/   # cero resultados
-npm run build && npm test                        # 398 páginas · 47 pruebas
-git diff origin/main --stat                      # que el cambio sea el esperado
-npx serve out                                    # y abrir la pantalla tocada
+git grep -nE '^(<<<<<<<|>>>>>>>) '             # cero resultados
+npm run build && npm test                      # 398 páginas · 47 pruebas
+git diff --stat origin/main...HEAD             # que el cambio sea el esperado
+npx serve out                                  # y abrir la pantalla tocada
 ```
-
-Nunca anuncies que algo quedó resuelto sin haber visto la salida de esos comandos. Si una
-tarea no cupo en el presupuesto de tokens, dilo: media resolución silenciosa cuesta más
-que un «no pude terminar».
 
 ## Prohibido
 
