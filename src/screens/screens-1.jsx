@@ -205,21 +205,23 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <button onClick={() => onNav('catalog')} style={window.estiloAccion(false)}>Ver Todas →</button>
         }>Categorías</SectionHeader>
 
-        {/* Cinco cartas de arma y detrás las de accesorio: el número de la carta es cuántas armas hay en la
-            categoría y el nombre va abajo, como en la baraja. Los ids de
-            `CATEGORIES.tipo` son exactamente los cinco de `SILUETA_TIPOS`, así
-            que la figura sale del asset que ya existe.
-            Las fotos de escena (`CATEGORY_HEROS`) no se pierden: siguen siendo
-            la portada de cada categoría en el hub del arsenal. */}
+        {/* Cinco cartas de arma con ilustración completa estilo Lotería mexicana
+            (carta-*.png) y detrás las de accesorio. Las ilustraciones reemplazan
+            la estructura de lámina + silueta + número + nombre por una sola imagen
+            que contiene todo el diseño. */}
         <div className="amx-loteria-mesa" style={{ marginBottom: 22 }}>
-          {window.CATEGORIES.tipo.map((c) => (
-            <window.CartaLoteria key={c.id}
-              nombre={c.label}
-              cuenta={window.DB.filter((a) => a.tipo === c.id).length}
-              unidad="armas"
-              forma={`imagenes/silueta-${c.id}.webp`}
-              onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
-          ))}
+          {window.CATEGORIES.tipo.map((c) => {
+            const cuenta = window.DB.filter((a) => a.tipo === c.id).length;
+            const ilustracion = `imagenes/carta-${c.id}.webp`;
+            return (
+              <window.CartaLoteria key={c.id}
+                nombre={c.label}
+                cuenta={cuenta}
+                unidad="armas"
+                ilustracion={ilustracion}
+                onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+            );
+          })}
           {/* 8.5 ▸ Las categorías de accesorio, en la misma mesa */}
           {window.HomeAccesoriosSection &&
             <window.HomeAccesoriosSection onNav={onNav} />
@@ -737,15 +739,18 @@ function ArsenalHubScreen({ onNav = () => {} }) {
           onAbrir={(id) => onNav('category', { mode: 'avail', value: id })} />
       </section>
 
-      {/* ── TIPO DE ARMA: lotería (reusa HOME) + accesorios ─────────── */}
+      {/* ── TIPO DE ARMA: lotería con ilustración completa + accesorios ──── */}
       <section className="amx-hub-seccion">
         <window.CintaDymo>Tipo de arma</window.CintaDymo>
         <div className="amx-arsenal-loteria-mesa">
-          {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
-            ? <window.CartaLoteria key={c.id} nombre={c.label} cuenta={tipoCount(c.id)} unidad="armas"
-                forma={`imagenes/silueta-${c.id}.webp`}
-                onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
-            : null)}
+          {window.CATEGORIES.tipo.map((c) => {
+            const cuenta = tipoCount(c.id);
+            return cuenta
+              ? <window.CartaLoteria key={c.id} nombre={c.label} cuenta={cuenta} unidad="armas"
+                  ilustracion={`imagenes/carta-${c.id}.webp`}
+                  onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+              : null;
+          })}
           {/* Accesorios en la misma mesa */}
           {window.HomeAccesoriosSection &&
             <window.HomeAccesoriosSection onNav={onNav} />
