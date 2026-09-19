@@ -1,0 +1,115 @@
+{
+  "_nota": "Los 11 calibres que no estan hoy en window.CALIBRES. Textos redactados por Claude el 19-sep-2026 para revision de Saulo. Las cifras (mm, velocidadMs, energiaJ) NO van aqui: entran verificadas desde cifras-11.json. cartucho: null = se dibuja con silueta-vertical.webp hasta que haya foto.",
+  "calibres": [
+    {
+      "id": ".223 Rem",
+      "clase": "Rifle",
+      "sistema": "Percusión central",
+      "uso": "Tiro deportivo, varmint y práctica",
+      "alias": ["5.56×45 en versión civil"],
+      "enCatalogo": true,
+      "cartucho": null,
+      "desc": "Versión civil del 5.56×45 de la OTAN. Comparten medidas pero no presión ni recámara: un rifle marcado .223 no debe disparar munición militar 5.56, aunque el cartucho entre. Retroceso suave y trayectoria muy tensa."
+    },
+    {
+      "id": ".22-250 Rem",
+      "clase": "Rifle",
+      "sistema": "Percusión central",
+      "uso": "Varmint y tiro a distancia",
+      "alias": [],
+      "enCatalogo": true,
+      "cartucho": null,
+      "desc": "De los cartuchos más veloces del catálogo: una bala muy ligera empujada por una carga grande. Diseñado para alimañas a larga distancia, con retroceso moderado para el alcance que da."
+    },
+    {
+      "id": "6.5 Creedmoor",
+      "clase": "Rifle",
+      "sistema": "Percusión central",
+      "uso": "Precisión a larga distancia y caza",
+      "alias": ["6.5 CM"],
+      "enCatalogo": true,
+      "cartucho": null,
+      "desc": "El cartucho que popularizó el tiro de precisión moderno. Usa balas largas y esbeltas que conservan la energía y aguantan mejor el viento, con bastante menos retroceso que un magnum de alcance parecido."
+    },
+    {
+      "id": "16 GA",
+      "clase": "Escopeta",
+      "sistema": "Percusión central",
+      "uso": "Caza de ave y tiro",
+      "alias": ["Calibre 16"],
+      "enCatalogo": true,
+      "cartucho": null,
+      "desc": "El calibre intermedio de las escopetas, entre el 12 y el 20. Tuvo su época dorada en la cacería de ave; hoy es minoritario y su cartucho cuesta más de encontrar que el de 12 o 20."
+    },
+    {
+      "id": ".45 ACP",
+      "clase": "Pistola",
+      "sistema": "Percusión central",
+      "uso": "Defensa y tiro deportivo",
+      "alias": ["11.43×23", ".45 Auto"],
+      "enCatalogo": false,
+      "cartucho": null,
+      "desc": "El cartucho de la Colt 1911: bala pesada y lenta, que se siente como un empujón más que como un latigazo. Muy querido en el tiro deportivo, pero queda por encima del tope de calibre que la ley mexicana admite a un particular."
+    },
+    {
+      "id": ".357 Magnum",
+      "clase": "Revólver",
+      "sistema": "Percusión central",
+      "uso": "Defensa y caza menor",
+      "alias": [".357 Mag"],
+      "enCatalogo": false,
+      "cartucho": null,
+      "desc": "Un .38 Especial alargado y mucho más potente. Por eso un revólver .357 dispara los dos, pero uno de .38 Especial nunca debe disparar .357: no aguanta la presión. Retroceso y estruendo notables."
+    },
+    {
+      "id": "5.7x28mm",
+      "clase": "Pistola",
+      "sistema": "Percusión central",
+      "uso": "Táctico y deportivo",
+      "alias": ["5.7×28 FN"],
+      "enCatalogo": false,
+      "cartucho": null,
+      "desc": "Cartucho pequeño y rapidísimo que FN creó para la P90 y la Five-seveN. Se comporta más como un cartucho de rifle en miniatura que como uno de pistola: muy poco retroceso y trayectoria plana."
+    },
+    {
+      "id": ".22 WMR",
+      "clase": "Rimfire",
+      "sistema": "Rimfire",
+      "uso": "Caza menor y plagas a más distancia",
+      "alias": [".22 Magnum", ".22 Win Mag"],
+      "enCatalogo": false,
+      "cartucho": null,
+      "desc": "El fuego anular llevado más lejos: casi el doble de velocidad que el .22 LR conservando un retroceso mínimo. No son intercambiables: la recámara es distinta y el .22 LR no debe dispararse en un .22 Magnum."
+    },
+    {
+      "id": ".30-30 Win",
+      "clase": "Rifle",
+      "sistema": "Percusión central",
+      "uso": "Caza media en monte cerrado",
+      "alias": [".30-30", ".30 WCF"],
+      "enCatalogo": false,
+      "cartucho": null,
+      "desc": "El cartucho del rifle de palanca, con más de un siglo encima y todavía de los más vistos en el campo mexicano. Alcance corto frente a los modernos, pero de sobra para el monte cerrado."
+    },
+    {
+      "id": ".32 ACP",
+      "clase": "Pistola",
+      "sistema": "Percusión central",
+      "uso": "Defensa de bolsillo",
+      "alias": ["7.65×17 Browning", "7.65 mm"],
+      "enCatalogo": false,
+      "cartucho": null,
+      "desc": "Cartucho pequeño de las pistolas compactas de otra época, todavía frecuente en armas heredadas. Poca energía, retroceso mínimo y munición cada vez más difícil de conseguir."
+    },
+    {
+      "id": ".38 S&W",
+      "clase": "Revólver",
+      "sistema": "Percusión central",
+      "uso": "Tiro recreativo",
+      "alias": [".38 Smith & Wesson", ".380 Revolver"],
+      "enCatalogo": false,
+      "cartucho": null,
+      "desc": "No confundir con el .38 Especial: es más corto, más débil y no son intercambiables. Vive en revólveres antiguos y su munición hoy es rara en México."
+    }
+  ]
+}

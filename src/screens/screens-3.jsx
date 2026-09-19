@@ -93,143 +93,171 @@ window.MiniBadge = MiniBadge;
 // ═══════════════════════════════════════════════════════════════════════
 // CALIBRES — guía enciclopédica
 // ═══════════════════════════════════════════════════════════════════════
-function CalibresScreen({ onOpenArma, onNav }) {
+function CalibresScreen({ onNav, onAbrirCalibre }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
-  const calibres = window.CALIBRES || [];
-  const clases = useMemo3(() => ['Todos', ...Array.from(new Set(calibres.map((c) => c.sistema)))], [calibres]);
-  const [clase, setClase] = useState3('Todos');
-  const list = clase === 'Todos' ? calibres : calibres.filter((c) => c.sistema === clase);
+  const guia = useMemo3(() => window.amxGuiaCalibres(window.CALIBRES || [], window.DB || []), []);
+  const [soloCiviles, setSoloCiviles] = useState3(false);
+  const [clase, setClase] = useState3('');
+  const clases = useMemo3(() => Array.from(new Set(guia.map((c) => c.clase))), [guia]);
+  const lista = window.amxFiltrarCalibres(guia, { avail: soloCiviles ? 'dcam' : '', clase: clase });
+  const abrir = (id) => onAbrirCalibre && onAbrirCalibre(id);
+
+  // La mesa se dibuja con la misma primitiva del hub del Arsenal. Sin foto, la
+  // silueta de pie: 11 de los 30 calibres todavía no tienen la suya.
+  const mesa = lista.map((c) => ({
+    id: c.id, label: c.id, armas: c.armas, escala: c.escala,
+    foto: c.cartucho || 'imagenes/cartuchos/silueta-vertical.webp',
+  }));
+
+  const chip = (activo, texto, alClic) => (
+    <button key={texto} type="button" onClick={alClic} aria-pressed={activo}
+      className={'amx-calchip' + (activo ? ' amx-calchip--on' : '')}>{texto}</button>
+  );
 
   return (
-    <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
-      {/* encabezado */}
-      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 34 : 26, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05, marginBottom: 8 }}>Guía de calibres</div>
-      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 640, marginBottom: 18 }}>
-        Conoce los calibres presentes en el catálogo: su uso típico, balística aproximada y las armas que los emplean. Cifras divulgativas, varían según marca y munición.
+    <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <h1 className="amx-cal-titulo">Guía de calibres</h1>
+      <p className="amx-cal-entrada" style={window.amxProsa({ maxWidth: 640 })}>
+        Treinta cartuchos: qué son, qué tan fuerte pega cada uno y cuáles puede comprar
+        un civil en México. Las cifras son de una carga comercial corriente y cada ficha
+        dice de dónde salen.
+      </p>
+
+      <div className="amx-calchips" role="group" aria-label="Filtros de la guía">
+        {chip(!soloCiviles && !clase, 'Todos', () => { setSoloCiviles(false); setClase(''); })}
+        {chip(soloCiviles, 'Solo civiles', () => setSoloCiviles(!soloCiviles))}
+        {clases.map((cl) => chip(clase === cl, cl, () => setClase(clase === cl ? '' : cl)))}
       </div>
 
-      {/* filtro por clase */}
-      <div className="amx-hscroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 6, marginBottom: 18 }}>
-        {clases.map((cl) => {
-          const active = clase === cl;
-          return (
-            <button key={cl} onClick={() => setClase(cl)} style={{
-              flexShrink: 0,
-              background: active ? PALETTE.amber : 'transparent',
-              color: active ? PALETTE.tintaSobreMarca : PALETTE.textDim,
-              border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
-              padding: '7px 14px', cursor: 'pointer',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
-              letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 700,
-            }}>{cl}</button>
-          );
-        })}
+      <window.CintaDymo chica>De menor a mayor</window.CintaDymo>
+      <p className="amx-cal-pie-mesa">Cada cartucho, a su tamaño real comparado con los demás.</p>
+      {mesa.length > 0
+        ? <window.MostradorCalibres calibres={mesa} onAbrir={abrir} />
+        : <p className="amx-cal-vacio">Ningún calibre cumple ese filtro.</p>}
+
+      <window.CintaDymo chica>Las fichas</window.CintaDymo>
+      <div className="amx-cal-rejilla">
+        {lista.map((c) => <CaliberMiniCard key={c.id} cal={c} onClick={() => abrir(c.id)} />)}
       </div>
 
-      {/* lista de fichas */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {list.map((c) => <CaliberFicha key={c.id} cal={c} onOpenArma={onOpenArma} vp={vp} />)}
+      <window.CintaDymo chica>Para empezar</window.CintaDymo>
+      <div className="amx-cal-lecciones">
+        {(window.LECCIONES_CALIBRE || []).map((l) => (
+          <window.FolderPregunta key={l.titulo} pregunta={l.titulo} tema={l.tema}>
+            {l.cuerpo.map((p, i) => <p key={i} style={window.amxProsa({ marginTop: i ? 10 : 0 })}>{p}</p>)}
+          </window.FolderPregunta>
+        ))}
       </div>
     </div>
   );
 }
 window.CalibresScreen = CalibresScreen;
 
-// Escala real de cartuchos — la altura del PNG es proporcional a la longitud
-// total real del cartucho (mm). Misma escala en todas las fichas → comparables.
+// Escala real de cartuchos — la altura de la imagen es proporcional a la longitud
+// total real del cartucho (mm), la misma en toda la app. La usa la tarjeta de la
+// portada; la guía y el hub del Arsenal calculan la suya con amxEscalaCartucho.
 const CARTUCHO_MAX_MM = 84.8;          // .30-06 / .270 / 7mm Rem / .300 WM
-const CARTUCHO_FICHA_MAXH = { desktop: 212, mobile: 168 };
 const CARTUCHO_HOME_MAXH = 120;
 
-// ── CARTUCHO SLOT — rectángulo vertical para el PNG del cartucho del calibre.
-// La imagen se dibuja anclada al piso con altura = longitud real escalada.
-function CartuchoSlot({ cal, vp }) {
-  const w = vp.isDesktop ? 104 : 72;
-  const maxH = vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop : CARTUCHO_FICHA_MAXH.mobile;
-  const h = Math.round(((cal.mm || 40) / CARTUCHO_MAX_MM) * maxH);
-  return (
-    <div style={{
-      flexShrink: 0, width: w, alignSelf: 'stretch', position: 'relative', overflow: 'hidden',
-      borderLeft: `1px solid ${PALETTE.border}`,
-      background: cal.cartucho ? PALETTE.bgElev
-        : `repeating-linear-gradient(135deg, ${PALETTE.bgElev} 0 9px, ${PALETTE.bgCard} 9px 18px)`,
-      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-    }}>
-      {/* corner ticks */}
-      <span style={{ position: 'absolute', top: 7, left: 7, width: 9, height: 9, borderTop: `1.5px solid ${PALETTE.amber}`, borderLeft: `1.5px solid ${PALETTE.amber}`, opacity: 0.7 }} />
-      <span style={{ position: 'absolute', bottom: 7, right: 7, width: 9, height: 9, borderBottom: `1.5px solid ${PALETTE.amber}`, borderRight: `1.5px solid ${PALETTE.amber}`, opacity: 0.7 }} />
-      {cal.cartucho
-        ? <img src={cal.cartucho} alt={`Cartucho ${cal.id}`} loading="lazy"
-            style={{ height: h, width: 'auto', maxWidth: 'calc(100% - 14px)', objectFit: 'contain', objectPosition: 'bottom', display: 'block', marginBottom: 12 }} />
-        : <span style={{
-            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%) rotate(180deg)',
-            writingMode: 'vertical-rl',
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.textMuted,
-            letterSpacing: '0.2em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-          }}>▢ Cartucho · {cal.id}</span>}
-    </div>
-  );
-}
+// ═══════════════════════════════════════════════════════════════════════
+// FICHA DE UN CALIBRE — /calibres/<slug>
+// El expediente de un cartucho: su tamaño real sobre la regla, sus cifras
+// situadas entre las de los otros 29, lo que la ley mexicana dice de él y las
+// armas del catálogo que lo usan.
+// ═══════════════════════════════════════════════════════════════════════
+function CalibreScreen({ calibreId, onOpenArma, onNav }) {
+  const vp = window.useViewport();
+  const padX = vp.isDesktop ? 28 : 16;
+  const guia = useMemo3(() => window.amxGuiaCalibres(window.CALIBRES || [], window.DB || []), []);
+  const cal = guia.find((c) => c.id === calibreId);
+  const rango = useMemo3(() => window.amxRangoCalibres(guia), [guia]);
+  const mmMax = useMemo3(() => guia.reduce((m, c) => Math.max(m, c.mm || 0), 0), [guia]);
 
-function CaliberFicha({ cal, onOpenArma, vp }) {
+  if (!cal) {
+    return (
+      <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 720, margin: '0 auto' }}>
+        <p style={window.amxProsa({})}>Ese calibre no está en la guía.</p>
+        <button type="button" className="amx-calchip" onClick={() => onNav && onNav('calibres')}>Ver los 30 calibres</button>
+      </div>
+    );
+  }
+
   const armas = armasPorCalibre(cal.id);
-  const stat = (k, v) => (
-    <div style={{ flex: 1, minWidth: 90 }}>
-      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
-      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16, color: PALETTE.text }}>{v}</div>
-    </div>
-  );
+  const visibles = armas.slice(0, 6);
+  const sello = (window.SELLOS_LEGALES || {})[cal.avail];
+
   return (
-    <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, display: 'flex', alignItems: 'stretch', minHeight: vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop + 28 : CARTUCHO_FICHA_MAXH.mobile + 24 }}>
-      <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '18px 20px' : '14px' }}>
-        {/* título + sistema */}
-        <div>
-          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase', marginBottom: 5 }}>{cal.sistema}</div>
-          <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 25 : 21, color: PALETTE.text, letterSpacing: '0.01em' }}>{cal.id}</span>
+    <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+      <div className="amx-calficha">
+        <div className="amx-calficha-cabeza">
+          <div>
+            <div className="amx-calficha-clase">{cal.clase} · {cal.sistema}</div>
+            <h1 className="amx-calficha-id">{cal.id}</h1>
+            <div className="amx-calficha-uso">{cal.uso}</div>
+            {cal.alias && cal.alias.length > 0
+              ? <div className="amx-calficha-alias">También se le llama {cal.alias.join(', ')}</div>
+              : null}
+          </div>
+          {sello
+            ? <window.SelloLegal avail={cal.avail} etiqueta={cal.legalArt} grande />
+            : <span className="amx-calficha-sinsello">Clasificación pendiente</span>}
         </div>
-        {/* uso */}
-        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: PALETTE.amber, letterSpacing: '0.06em', marginTop: 6 }}>▸ {cal.uso}</div>
-        {/* desc */}
-        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 8 }}>{cal.desc}</div>
-        {/* balística */}
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 14, paddingTop: 12, borderTop: `1px solid ${PALETTE.border}` }}>
-          {stat('Velocidad', cal.velocidad)}
-          {stat('Energía', cal.energia)}
-          {stat('Retroceso', cal.retroceso)}
-          {stat('En catálogo', `${armas.length} arma${armas.length === 1 ? '' : 's'}`)}
+
+        <p style={window.amxProsa({ marginTop: 14 })}>{cal.desc}</p>
+
+        <window.ReglaCartucho calibre={cal} escala={cal.escala} mmMax={mmMax} />
+
+        <div className="amx-calficha-specs">
+          <window.SpecRow label="Velocidad" value={cal.velocidad} />
+          <window.SpecRow label="Energía" value={cal.energia} />
+          <window.SpecRow label="Retroceso" value={cal.retroceso} />
+          <window.SpecRow label="En el catálogo" value={armas.length === 0 ? 'No se vende en DCAM' : armas.length + (armas.length === 1 ? ' arma' : ' armas')} />
         </div>
-        {/* armas que lo usan */}
-        {armas.length > 0 && (
-          <div style={{ marginTop: 14 }}>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 8 }}>Armas que lo usan</div>
-            <DragScroll style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-              {armas.map((a) => (
-                <button key={a.id} onClick={() => onOpenArma(a.id)} style={{
-                  flexShrink: 0, width: 118, background: PALETTE.bgElev, border: `1px solid ${PALETTE.border}`,
-                  cursor: 'pointer', padding: 0, textAlign: 'left',
-                }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = PALETTE.amber}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = PALETTE.border}>
-                  <div style={{ width: '100%', aspectRatio: '16 / 9', background: '#fff', overflow: 'hidden' }}>
-                    {a.img
-                      ? <img src={a.img} alt={a.nombre} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }} />
-                      : <div style={{ width: '100%', height: '100%', background: `repeating-linear-gradient(135deg, ${PALETTE.bgElev} 0 8px, ${PALETTE.bgCard} 8px 16px)` }} />}
-                  </div>
-                  <div style={{ padding: '6px 7px' }}>
-                    <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.textMuted, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{a.marca}</div>
-                    <div style={{ fontFamily: 'Archivo, sans-serif', fontSize: 13, fontWeight: 600, color: PALETTE.text, lineHeight: 1.15, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.nombre}</div>
-                  </div>
+
+        {typeof cal.energiaJ === 'number' && rango.energia.max > 0
+          ? <window.ReglaComparativa titulo="Energía frente a los otros 29"
+              valor={cal.energiaJ} min={rango.energia.min} max={rango.energia.max}
+              unidad="J" fuente={cal.fuente} />
+          : <p className="amx-calficha-nota" style={window.amxProsa({})}>
+              La energía de una escopeta no se compara con la de una bala única: depende
+              de la carga de perdigón y va repartida en cientos de municiones.
+            </p>}
+
+        <div className="amx-calficha-legal">
+          <div className="amx-calficha-legal-tit">Qué dice la ley mexicana</div>
+          <p style={window.amxProsa({})}>{cal.legalNota}</p>
+          <div className="amx-calficha-legal-art">{cal.legalArt}</div>
+          <button type="button" className="amx-calchip" onClick={() => onNav && onNav('legal')}>
+            Ver la pantalla de Legalidad
+          </button>
+        </div>
+
+        {visibles.length > 0 ? (
+          <div className="amx-calficha-armas">
+            <window.CintaDymo chica>Armas que lo usan</window.CintaDymo>
+            <DragScroll style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+              {/* ArmaPolaroid no recibe onClick: el clic va en el botón que la envuelve. */}
+              {visibles.map((a) => (
+                <button key={a.id} type="button" className="amx-calficha-arma"
+                  onClick={() => onOpenArma && onOpenArma(a.id)} aria-label={a.nombre}>
+                  <window.ArmaPolaroid arma={a} />
                 </button>
               ))}
             </DragScroll>
+            {armas.length > visibles.length ? (
+              <button type="button" className="amx-calchip"
+                onClick={() => onNav && onNav('category', { mode: 'calibre', value: cal.id })}>
+                Ver las {armas.length} en el Arsenal
+              </button>
+            ) : null}
           </div>
-        )}
+        ) : null}
       </div>
-      <CartuchoSlot cal={cal} vp={vp} />
     </div>
   );
 }
+window.CalibreScreen = CalibreScreen;
 
 // ═══════════════════════════════════════════════════════════════════════
 // CAMPOS DE TIRO — listado de clubes/polígonos (placeholder)
@@ -381,7 +409,7 @@ function CaliberMiniCard({ cal, onClick }) {
         <div className="amx-calibre-n">{n} arma{n === 1 ? '' : 's'} →</div>
       </div>
       <div className="amx-calibre-marco">
-        <img src={cal.cartucho} alt={`Cartucho ${cal.id}`} loading="lazy"
+        <img src={cal.cartucho || 'imagenes/cartuchos/silueta-vertical.webp'} alt={`Cartucho ${cal.id}`} loading="lazy"
           style={{ height: alto }} />
       </div>
     </div>

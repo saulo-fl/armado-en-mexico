@@ -343,6 +343,35 @@ ${notaErrata(histMun(m.id))}
   paginas.push({ ruta, enSitemap: true, fuente: 'mun', lastmod: fechaMun(m) });
 }
 
+// Ficha de cada calibre: /calibres/<slug>. Van SIN lastmod a propósito: no salen
+// de un inventario con fecha, como las armas, sino de una guía.
+for (const c of (win.CALIBRES || [])) {
+  const ruta = `calibres/${slug(c.id)}`;
+  const armas = ARMAS.filter((a) => a.calibre === c.id);
+  const resumen = `${c.id}: cartucho de ${String(c.clase).toLowerCase()} para ${String(c.uso).toLowerCase()}. ${c.desc || ''}`;
+  emitir(ruta, {
+    titulo: `${c.id} — calibre, balística y situación legal en México | Armado en México`,
+    desc: recorta(resumen, 155),
+    jsonld: { '@context': 'https://schema.org', '@graph': [
+      { '@type': 'Article', headline: `${c.id} — ficha del calibre`, description: recorta(resumen, 250), inLanguage: 'es-MX',
+        isPartOf: { '@type': 'WebSite', name: 'Armado en México', url: SITIO } },
+      migas([{ nombre: 'Inicio', ruta: '' }, { nombre: 'Calibres', ruta: 'calibres' }, { nombre: c.id }]),
+    ] },
+    cuerpo: `<article>
+<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/calibres">Calibres</a> › ${esc(c.id)}</nav>
+<h1>${esc(c.id)}</h1>
+<p>${esc(recorta(resumen, 400))}</p>
+${dl([['Clase', c.clase], ['Sistema', c.sistema], ['Uso típico', c.uso],
+      ['Largo del cartucho', c.mm ? `${c.mm} mm` : ''],
+      ['Velocidad', c.velocidad], ['Energía', c.energia], ['Retroceso', c.retroceso],
+      ['Situación legal', c.legalNota], ['Fundamento', c.legalArt],
+      ['Fuente de las cifras', c.fuente ? `${c.fuente.nombre} (${c.fuente.fecha})` : '']])}
+${armas.length ? `<h2>Armas del catálogo en ${esc(c.id)}</h2><ul>${armas.map((a) => `<li><a href="/${rutaArma.get(a.id)}">${esc(a.nombre)}</a></li>`).join('')}</ul>` : ''}
+</article>`,
+  });
+  paginas.push({ ruta, enSitemap: true, fuente: 'calibres' });
+}
+
 // 5d. Listados por rama (armas y accesorios) + municiones
 const listados = [
   ...Object.entries(TIPO_TO_PATH).map(([tipo, ruta]) => ({
@@ -416,7 +445,7 @@ const FIJAS = [
   { ruta: 'arsenal', titulo: 'Arsenal — armas legales en México', enSitemap: true,
     desc: 'La sección Arsenal: los tipos de armas, las armerías DCAM y OTCA, y el catálogo completo con filtros por tipo, calibre, uso, precio y disponibilidad.' },
   { ruta: 'calibres', titulo: 'Guía de calibres', enSitemap: true,
-    desc: 'Guía divulgativa de los calibres presentes en el catálogo DCAM: uso típico, velocidad, energía y retroceso.' },
+    desc: 'Los 30 calibres de la guía, de menor a mayor: qué son, qué tan fuerte pega cada uno, su balística y cuáles puede adquirir un civil en México.' },
   { ruta: 'legalidad', titulo: 'Tenencia legal de armas en México — requisitos y trámite SEDENA', enSitemap: true,
     desc: 'Requisitos y pasos para la posesión legal de un arma de fuego en México conforme a la Ley Federal de Armas de Fuego y Explosivos.' },
   { ruta: 'traumaticas', titulo: 'Armas traumáticas — defensa menos letal sin permiso SEDENA', enSitemap: true,

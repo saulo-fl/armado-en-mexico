@@ -809,3 +809,52 @@ window.CURSOS = [
   { id: 'mantenimiento',  titulo: 'Mantenimiento y Limpieza',       nivel: 'Básico',      duracion: '4 h',          modalidad: 'Presencial', precio: 'Desde $—',
     desc: 'Desarme básico, limpieza, lubricación y diagnóstico de fallas comunes para conservar tu arma en óptimas condiciones.' },
 ];
+
+// ═══════════════════════════════════════════════════════════════════════
+// LECCIONES — los fundamentos, al pie de la guía de calibres
+// Van en folders plegables: quien busca un calibre no los tropieza, y quien
+// baja los encuentra. Redactadas el 19-sep-2026; la cuarta no afirma nada que
+// no esté ya en el texto legal del FAQ (src/lib/store.js, tema «Calibres»).
+// ═══════════════════════════════════════════════════════════════════════
+window.LECCIONES_CALIBRE = [
+  {
+    tema: 'Fundamentos',
+    titulo: '¿Cómo se lee el nombre de un calibre?',
+    cuerpo: [
+      'No hay un solo sistema, hay tres conviviendo, y por eso los nombres parecen arbitrarios. En el sistema de pulgadas, «.380» significa que la bala mide 0.380 pulgadas de diámetro, unos 9.6 mm. Lo que va después suele ser quién lo creó o para qué: ACP es Automatic Colt Pistol, S&W es Smith & Wesson, Rem es Remington.',
+      'En el sistema métrico se dan dos medidas: «9×19» es una bala de 9 mm en una vaina de 19 mm de largo. Por eso el 9×19 y el 9×21 no son el mismo cartucho aunque la bala sea idéntica: la vaina cambia, y con ella la recámara que lo acepta.',
+      'Las escopetas no miden diámetro: miden cuántas bolas del tamaño del cañón salen de una libra de plomo. De ahí que el calibre 12 sea MÁS grande que el 20, al revés que en todo lo demás. El .410 es la excepción: ese sí es una medida en pulgadas.',
+      'Consecuencia práctica: dos cartuchos con nombres casi iguales pueden no ser intercambiables. El .38 Especial y el .38 S&W no lo son. El .380 ACP tampoco es un «.38 pequeño».',
+    ],
+  },
+  {
+    tema: 'Fundamentos',
+    titulo: '¿Qué es fuego anular y qué es percusión central?',
+    cuerpo: [
+      'Es dónde está el fulminante, la chispa que enciende la pólvora. En el fuego anular está repartido dentro del borde del culote: el percutor golpea la orilla y por eso la vaina no puede ser gruesa. Eso limita la presión y, con ella, la potencia.',
+      'En la percusión central el fulminante es una cápsula en el centro de la base. Aguanta mucha más presión, y además se puede sustituir: una vaina de percusión central se recarga, una de fuego anular no.',
+      'De los 30 calibres de esta guía solo dos son de fuego anular: el .22 LR y el .22 WMR. Todos los demás son de percusión central. Esa es también la razón de que el .22 sea tan barato y de que casi todo el mundo aprenda a tirar con él.',
+    ],
+  },
+  {
+    tema: 'Cifras',
+    titulo: '¿Qué significan la velocidad, la energía y el retroceso?',
+    cuerpo: [
+      'La velocidad es a qué rapidez sale la bala del cañón. La energía combina esa velocidad con el peso de la bala, y es la cifra que mejor responde a «qué tan fuerte pega»: un .22 LR ronda los 150 julios y un .300 Win Mag pasa de 4,800. Treinta veces más.',
+      'El retroceso es el empujón hacia atrás, y no se puede leer de la energía: el .45 ACP tiene menos energía que un .357 Magnum pero se siente como un empujón lento en vez de un latigazo, porque mueve una bala pesada despacio. Por eso aquí va en palabras y no en números.',
+      'Un aviso sobre las cifras: cada fabricante mide la velocidad en el cañón que le conviene —24 pulgadas de rifle, 4 de revólver—, así que las velocidades de dos calibres distintos no son estrictamente comparables. Sirven como orden de magnitud. Cada ficha dice de qué carga y de qué fuente salió su número.',
+      'Y en las escopetas la energía va como «Variable» a propósito: sería la de toda la columna de perdigón junta, repartida luego en cientos de municiones. Compararla con la bala única de un rifle no significaría nada.',
+    ],
+  },
+  {
+    tema: 'Ley',
+    titulo: '¿Qué calibres puede tener un civil en México?',
+    cuerpo: [
+      'Para la protección del domicilio, el instructivo del permiso DEFENSA-02-040 fija un techo por tipo de arma: en pistola, calibre .380 como máximo —quedan fuera las .38 Súper, las .38 Comando y las de 9 mm—; en revólver, .38 Especial como máximo, sin el .357 Magnum.',
+      'Quien practica tiro o cacería inscrito en un club acreditado ante la Secretaría de la Defensa Nacional puede acceder además a escopetas de hasta calibre 12 con cañón de 635 mm o más, y a rifles de repetición o semiautomáticos no convertibles en automáticos, con las excepciones de calibre que fija la Ley (art. 10). Los ejidatarios, comuneros y jornaleros del campo pueden poseer un rifle .22 o una escopeta (art. 9o).',
+      'La Ley reserva las pistolas 9 mm Parabellum al uso exclusivo de la Fuerza Armada Permanente (art. 11). Ese es el motivo de que el calibre de pistola más común del mundo no esté al alcance de un particular aquí.',
+      'Ojo con una trampa: el estatus no lo fija solo el cartucho, también la configuración del arma. El .380 ACP es de adquisición civil, pero las pistolas de cañón largo en ese calibre están restringidas a corporaciones de seguridad. Y el 7.62×51 tiene las mismas medidas que el .308 Winchester de caza y sin embargo es de uso militar.',
+      'Esta guía resume; no sustituye a la Ley ni a la DCAM. Cada ficha cita el artículo en el que se apoya.',
+    ],
+  },
+];
