@@ -70,7 +70,7 @@ test('las reseñas publicadas exponen Denunciar y App transporta contexto', () =
   const app = readFileSync(new URL('../src/app.jsx', import.meta.url), 'utf8');
   const admin = readFileSync(new URL('../src/admin.jsx', import.meta.url), 'utf8');
   assert.match(screen, /onReportReview/);
-  assert.match(screen, />Denunciar</);
+  assert.match(screen, /className="amx-opinion-denunciar"[\s\S]{0,240}>\s*Denunciar\s*</);
   assert.match(app, /reportContext/);
   assert.match(app, /openReviewReport/);
   assert.match(app, /<window\.SoporteScreen[^>]+reportContext=/);
@@ -98,8 +98,8 @@ test('la piel de Soporte usa papeles físicos y un solo corte estructural', () =
     'amx-soporte-reglas', 'amx-soporte-regla', 'amx-soporte-carbon', 'amx-soporte-formato']) {
     assert.match(css, new RegExp('\\.' + cls + '\\b'));
   }
-  const block = css.slice(css.indexOf('/* SOPORTE'));
-  assert.match(block, /@media \(min-width: 1024px\)/);
+  assert.match(css, /@media \(min-width: 1024px\)\s*\{[^}]*\.amx-soporte-reglas\b/);
+  assert.doesNotMatch(css, /amx-soporte-regles/);
 });
 
 test('ReportarError usa el helper público y advierte que GitHub es público', () => {

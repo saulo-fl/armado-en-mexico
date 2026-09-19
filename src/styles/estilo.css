@@ -3103,7 +3103,7 @@
   min-height: 44px;
 }
 @media (min-width: 1024px) {
-  .amx-soporte-regles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .amx-soporte-reglas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .amx-v2 .amx-comentarios-enviado { padding-top: var(--e4); }
 .amx-v2 .amx-comentarios-enviado .amx-sello { color: var(--sello-civil); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; }

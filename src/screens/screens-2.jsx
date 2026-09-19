@@ -968,16 +968,16 @@ function SoportePortada({ contenido }) {
       }}>◈ SOPORTE</div>
       <h1 style={{
         fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 28,
-        color: '#f4efe3', textTransform: 'uppercase', letterSpacing: '0.04em',
+        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
         lineHeight: 1.1, margin: '8px 0'
       }}>{contenido.titulo}</h1>
       <p style={{
         fontFamily: 'var(--sans)', fontSize: 16, lineHeight: 1.6,
-        color: '#f4efe3', marginTop: 12, maxWidth: 620
+        color: 'var(--oficio-tinta-2)', marginTop: 12, maxWidth: 620
       }}>{contenido.apertura}</p>
       <p style={{
         fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.5,
-        color: 'rgba(244,239,227,0.7)', marginTop: 6
+        color: 'var(--tinta-dim)', marginTop: 6
       }}>{contenido.alcance}</p>
     </div>
   );
@@ -1223,7 +1223,7 @@ function SoporteDenuncia({ reportContext }) {
             letterSpacing: '0.14em', textTransform: 'uppercase',
             cursor: estado.kind === 'submitting' ? 'not-allowed' : 'pointer'
           }}>
-            {estado.kind === 'submitting' ? 'Enviando…' : 'Enviar denuncia'}
+            {estado.kind === 'submitting' ? 'Enviando…' : estado.kind === 'error' ? 'Reintentar' : 'Enviar denuncia'}
           </button>
 
           {estado.kind === 'error' && (
