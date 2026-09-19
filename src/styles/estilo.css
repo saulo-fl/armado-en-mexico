@@ -4749,6 +4749,81 @@
   outline-offset: -2px;
 }
 
+/* ── SOPORTE — modo oscuro: sobrescribir --oficio y --oficio-tinta-2 ──────────
+   Las variables de soporte usan papeles de oficio (claros) que no se adaptan
+   al tema oscuro. Aquí se reemplazan con fondos oscuros y tinta clara para
+   mantener contraste ≥ 4.5:1 en todo el bloque. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-soporte-portada,
+  :root:not([data-tema="claro"]) .amx-soporte-regla,
+  :root:not([data-tema="claro"]) .amx-soporte-formato {
+    background: #1A1E1B;
+    color: #D4DAD4;
+  }
+  :root:not([data-tema="claro"]) .amx-soporte-portada h1 {
+    color: #EAEEE8;
+  }
+  :root:not([data-tema="claro"]) .amx-soporte-portada p {
+    color: #C6CDC7;
+  }
+  :root:not([data-tema="claro"]) .amx-soporte-aviso {
+    background: #1E2420;
+    border-inline-start-color: #D46A5A;
+  }
+  :root:not([data-tema="claro"]) .amx-soporte-regla {
+    background: #1A1E1B;
+  }
+  :root:not([data-tema="claro"]) .amx-soporte-carbon {
+    background: #242A25;
+    color: #D4DAD4;
+  }
+  :root:not([data-tema="claro"]) .amx-soporte-formato input,
+  :root:not([data-tema="claro"]) .amx-soporte-formato select,
+  :root:not([data-tema="claro"]) .amx-soporte-formato textarea {
+    background: #242A25;
+    color: #D4DAD4;
+    border-color: #3E443D;
+  }
+  :root:not([data-tema="claro"]) .amx-soporte-formato button {
+    background: #3E443D;
+    color: #EAEEE8;
+  }
+}
+:root[data-tema="oscuro"] .amx-soporte-portada,
+:root[data-tema="oscuro"] .amx-soporte-regla,
+:root[data-tema="oscuro"] .amx-soporte-formato {
+  background: #1A1E1B;
+  color: #D4DAD4;
+}
+:root[data-tema="oscuro"] .amx-soporte-portada h1 {
+  color: #EAEEE8;
+}
+:root[data-tema="oscuro"] .amx-soporte-portada p {
+  color: #C6CDC7;
+}
+:root[data-tema="oscuro"] .amx-soporte-aviso {
+  background: #1E2420;
+  border-inline-start-color: #D46A5A;
+}
+:root[data-tema="oscuro"] .amx-soporte-regla {
+  background: #1A1E1B;
+}
+:root[data-tema="oscuro"] .amx-soporte-carbon {
+  background: #242A25;
+  color: #D4DAD4;
+}
+:root[data-tema="oscuro"] .amx-soporte-formato input,
+:root[data-tema="oscuro"] .amx-soporte-formato select,
+:root[data-tema="oscuro"] .amx-soporte-formato textarea {
+  background: #242A25;
+  color: #D4DAD4;
+  border-color: #3E443D;
+}
+:root[data-tema="oscuro"] .amx-soporte-formato button {
+  background: #3E443D;
+  color: #EAEEE8;
+}
+
 /* El flex va aquí y no en el <summary>: ponerlo en el summary se traga el
    marcador y rompe el click en Safari viejo. */
 .amx-v2 .amx-faq-cab {
