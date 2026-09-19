@@ -22,20 +22,32 @@ function HomeAccesoriosSection({ onNav }) {
   const counts = {};
   (window.ACCESORIOS || []).forEach(a => { counts[a.categoria] = (counts[a.categoria] || 0) + 1; });
 
-  // El número es cuántos accesorios hay en la categoría y el nombre va abajo.
-  // La figura sale de `accesorioPlaceholder`, que ya sabe mapear las diez
-  // categorías a las siluetas que existen —solo lee `.categoria`, por eso se le
-  // pasa un objeto de un campo.
+  // Mapeo de categorías de accesorio a sus ilustraciones de lotería.
+  // Las categorías con ilustración propia se usan directamente; las demás
+  // mantienen la silueta como respaldo.
+  const CARTAS_ACCESORIO = {
+    cargadores: 'carta-cargadores.webp',
+    opticas: 'carta-opticas.webp',
+    empunaduras: 'carta-empuñaduras.webp',
+    refacciones: 'carta-refacciones.webp',
+  };
+
   return (
     <React.Fragment>
-      {cats.filter(c => counts[c.id]).map(c => (
-        <window.CartaLoteria key={c.id}
-          nombre={c.label}
-          cuenta={counts[c.id]}
-          unidad="accesorios"
-          forma={window.accesorioPlaceholder({ categoria: c.id })}
-          onClick={() => onNav && onNav('accesorios', { categoria: c.id })} />
-      ))}
+      {cats.filter(c => counts[c.id]).map(c => {
+        const ilustracion = CARTAS_ACCESORIO[c.id]
+          ? `imagenes/carta-${c.id}.webp`
+          : null;
+        return (
+          <window.CartaLoteria key={c.id}
+            nombre={c.label}
+            cuenta={counts[c.id]}
+            unidad="accesorios"
+            forma={ilustracion ? null : window.accesorioPlaceholder({ categoria: c.id })}
+            ilustracion={ilustracion}
+            onClick={() => onNav && onNav('accesorios', { categoria: c.id })} />
+        );
+      })}
     </React.Fragment>
   );
 }
