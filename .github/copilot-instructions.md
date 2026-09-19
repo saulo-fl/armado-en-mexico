@@ -56,6 +56,30 @@ Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.
    `:focus-visible` siempre visible · `prefers-reduced-motion` desactiva todo movimiento.
 4. Móvil manda. Medir en 360px antes de dar nada por bueno.
 
+<!-- Copia literal de ~/dotfiles/instrucciones/AGENTS.md § «Git — ramas y conflictos».
+     github.com no ve ese disco, por eso está duplicada. La captura horaria de HEFESTO
+     compara las dos; si editas una, edita la otra. -->
+
+## Git — ramas y conflictos
+
+- Para traer `main`/`develop` a **tu** rama ya publicada: `merge` hacia tu rama, nunca `rebase`. Rebasar la reescribe y obliga a `push --force`, prohibido arriba; además multiplica el conflicto: uno por merge, uno por cada commit de la rama en rebase. El merge en sentido contrario, hacia `main`, sigue necesitando el OK de Saulo. Cuidado con `git pull`: si el repo tiene `pull.rebase=true` rebasa solo — usa `git fetch` y luego `git merge origin/<rama>`.
+- En un conflicto, `HEAD` es donde estás parado, no lo que traes. En `rebase`, `cherry-pick`, `revert` y `stash pop` eso invierte `ours` y `theirs` respecto a lo que esperas. Confirma de quién es cada lado antes de borrar nada.
+- Resuelve **cortando por número de línea**, no reescribiendo el bloque de memoria: localiza los marcadores, corta los trozos (`sed -n` en APOLO, `Get-Content | Select-Object -Skip -First` en HEFESTO) y reensambla. Reproducir cientos de líneas a mano sale mal y se queda a medias.
+- Si los dos lados añadieron al final del mismo archivo, casi siempre lo correcto es conservar **los dos bloques**, uno tras otro. Comprueba si de verdad se pisan antes de descartar uno.
+- Cierra así: `git grep -nE '^(<<<<<<<|>>>>>>>) '` en cero y `git ls-files -u` vacío —hacen falta los dos: si alguien hizo `git add` del archivo con los marcadores dentro, `ls-files -u` sale vacío igual—, la comprobación que tenga el proyecto (build, test o linter; si no tiene, dilo) y `git diff --stat origin/<rama-base>...HEAD` para ver qué archivos cambiaron. Si aparece con cientos de líneas uno que no tocaste, lo rompiste tú: finales de línea.
+
+## Antes de decir que está hecho
+
+`npm test` **no** detecta marcadores de conflicto ni CSS duplicado: las 5 suites son de
+datos (catálogo, filtros, FAQ) y pasan con el archivo roto. Aquí la verificación real es:
+
+```bash
+git grep -nE '^(<<<<<<<|>>>>>>>) '             # cero resultados
+npm run build && npm test                      # 398 páginas · 47 pruebas
+git diff --stat origin/main...HEAD             # que el cambio sea el esperado
+npx serve out                                  # y abrir la pantalla tocada
+```
+
 ## Prohibido
 
 - **Inventar leyes, artículos o reformas.** Sin fuente, no se escribe. Todo contenido
