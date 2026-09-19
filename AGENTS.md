@@ -531,3 +531,10 @@ sí pasan, que son los que importan para GEO). Ver `docs/SEO.md`. Y cambiar la c
 por defecto del admin (`armado2026`, en claro en `store.js`, que armado.mx sirve público
 aunque el repo sea privado):
 ya no es la única barrera —Access va delante— pero sigue ahí.
+
+## Convenciones de contribución
+
+- **Estilo:** conserva la sangría existente de dos espacios, punto y coma, comillas simples, `camelCase` para funciones y variables, y `UPPER_SNAKE_CASE` para constantes. Los comentarios y textos visibles van en español.
+- **Pruebas:** usa `node:test` y `node:assert/strict`; nombra los archivos `*.test.mjs`. Las pruebas del navegador viven en `scripts/` y las de Functions junto a sus helpers privados. Antes de abrir un PR corre `npm run build`, `npm test`, `node --test functions/api/_lib.test.mjs` y la auditoría indicada arriba.
+- **Commits:** usa asuntos breves en español y enfocados en un solo cambio. El historial admite el formato convencional cuando ayuda, por ejemplo `fix: corregir menú móvil` o `feat(traumaticas): rediseñar cotización`.
+- **Pull requests:** explica el cambio visible, enumera la verificación ejecutada, enlaza el issue si existe y adjunta capturas antes/después para cambios de UI. Trabaja en una rama de tarea; nunca hagas push directo a `main` o `develop`. Los merges, despliegues de producción y escrituras remotas en D1 requieren aprobación explícita.
