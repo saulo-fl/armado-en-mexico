@@ -567,6 +567,14 @@
   padding: 14px;
   box-shadow: var(--sombra);
 }
+/* Las fotos de las traumáticas no tienen faldón de texto — solo el pozo con
+   la imagen — así que el padding de 14px se ve excesivo y estira la copia.
+   Reducimos a 6px para que la foto ocupe más y se vea como una foto real,
+   no como una tarjeta extendida. */
+.amx-v2 .amx-cotiz-partida .amx-polaroid {
+  padding: 6px;
+  align-self: start;                       /* no estirar la polaroid en el grid */
+}
 @media (min-width: 1024px) {
   /* Giro ESTÁTICO y mínimo, con `transform` (§6 prohíbe animar otra cosa) —
      no hay transición ni animación que desactivar. La caja rotada crece unos
@@ -605,6 +613,20 @@
   width: 92%;
   height: 92%;
   object-fit: contain;
+}
+/* Las traumáticas no tienen faldón de texto, así que la foto puede llenar
+   casi todo el pozo — 96 % en vez de 92 % — y se ve más grande sin
+   perder el marco blanco de la Polaroid. */
+.amx-v2 .amx-cotiz-partida .amx-polaroid-pozo img {
+  width: 96%;
+  height: 96%;
+}
+/* El pozo cuadrado (1:1) deja mucho espacio blanco con fotos apaisadas.
+   Cambiamos a 4:3 para las traumáticas, que es la proporción real de las
+   fotos de producto — se ven como una Polaroid rectangular de verdad, no
+   como un cuadrado con aire a los lados. */
+.amx-v2 .amx-cotiz-partida .amx-polaroid-pozo {
+  aspect-ratio: 4 / 3;
 }
 /* El faldón. Crece si el nombre es largo en vez de recortarlo, así que ninguna
    ficha se queda con el rótulo cortado. */
@@ -803,6 +825,11 @@
 .amx-v2 .amx-sello--civil { color: var(--sello-civil); }
 .amx-v2 .amx-sello--restr { color: var(--sello-restr); }
 .amx-v2 .amx-sello--grande { font-size: 15px; padding: 5px 13px 6px; border-width: 3px; }
+/* El sello de aviso en la cotización traumáticas necesita aire vertical
+   para no aplastarse entre las hojas de arriba y abajo. */
+.amx-v2 .amx-cotiz-pie .amx-sello--grande {
+  margin: var(--e4) 0 var(--e3);
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    LA TARJETA EXPEDIENTE — el formato único de Home y Arsenal
@@ -1103,6 +1130,8 @@
   .amx-v2 .amx-dest-folder {
     grid-template-columns: minmax(0, 1fr) minmax(0, 38%);
     gap: var(--e3);
+    max-width: 100%;
+    overflow: hidden;
   }
   .amx-v2 .amx-dest-specs { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: 13px; }
   .amx-v2 .amx-dest-specs dt { font-size: 11.5px; }
@@ -4515,3 +4544,763 @@
   background: var(--copia-placa);
 }
 .amx-v2 .amx-acerca-duo-placa img { width: 90%; height: auto; display: block; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PREGUNTAS FRECUENTES — el cajón de expedientes (18-sep-2026)
+   Saulo: «folders APILADOS que al hacer hover se muevan un poco y al hacer
+   click se despliegue la respuesta», con el aviso de transparencia como ficha
+   importante al principio de la página.
+
+   No hay pieza nueva de cero. El aviso es la MISMA cartulina de la ficha
+   técnica (`.amx-fichero-carton`) con el clip de la copia; cada pregunta es el
+   folder manila como 9-slice, la técnica de `.amx-carpeta` — Saulo rechazó dos
+   veces el folder dibujado en CSS, y el `background-size: 100% 100%` de la
+   tarjeta expediente deforma la pestaña cuando el alto es variable, que aquí
+   lo es: el folder crece al abrirse.
+
+   El cartón pregunta y el papel de dentro responde.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── EL AVISO — la cartulina, sujeta con clip ──────────────────────────────
+   El clip va FUERA de la cartulina: `.amx-fichero-carton` lleva la máscara de
+   su perforación, y una máscara recorta lo que asome del borde. */
+.amx-v2 .amx-faq-aviso { position: relative; margin: var(--e4) 0 var(--e5); }
+.amx-v2 .amx-faq-aviso .amx-copia-clip { top: -18px; right: 34px; left: auto; }
+
+/* El rótulo ocupa la cabecera de la ficha, justo encima del renglón rojo —que
+   es el que pone el rojo—. La tinta NO es roja a propósito: sobre esta
+   cartulina el rojo se queda en 4.44:1 y esto es texto que informa. */
+.amx-v2 .amx-faq-aviso-tit {
+  margin: 0;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta);        /* 11.29:1 */
+}
+/* El texto se apoya en el rayado, un renglón por línea: es lo que hace que se
+   lea como algo escrito EN la ficha y no como un párrafo puesto encima. */
+.amx-v2 .amx-faq-aviso-texto {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: var(--renglon);
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-faq-aviso-texto + .amx-faq-aviso-texto { margin-top: var(--renglon); }
+@media (min-width: 1024px) { .amx-v2 .amx-faq-aviso-texto { font-size: 16px; } }
+
+/* ── EL CAJÓN — cada folder montado sobre el anterior ────────────────────── */
+.amx-v2 .amx-faq-folder {
+  --manila-escala: .32;
+  /* Un folder de expediente no acaba donde acaba lo escrito: es una cartulina
+     entera, y lo que se ve de él en el cajón es solo su borde de arriba. Este
+     cuerpo de más es lo que se mete POR DEBAJO del folder siguiente, de modo
+     que detrás de su pestaña hay cartón de verdad —con su grano y su sombra—
+     y no un relleno de color, que es lo que delataba el truco. Sale del
+     margen negativo en la misma medida, así que el escalón visible de la pila
+     no cambia: solo se alarga lo que queda escondido.
+     Tiene que pasar de la solapa del siguiente (120px de la foto) con holgura
+     para los 6px que sube el hover; 110px la dan en los dos cortes. */
+  --faq-cuerpo: calc(110px * var(--manila-escala));
+  position: relative;
+  isolation: isolate;
+  padding: calc(120px * var(--manila-escala) + var(--e2)) var(--e3)
+           calc(60px  * var(--manila-escala) + var(--e2) + var(--faq-cuerpo));
+  color: var(--manila-tinta);
+  transition: transform .18s ease-out;
+}
+/* El solape, que es lo que hace la pila: cada folder monta sobre el de arriba
+   y le deja asomar el filo de las hojas. No hace falta z-index — en el orden
+   de pintado, el posterior del DOM ya va encima. */
+.amx-v2 .amx-faq-folder + .amx-faq-folder {
+  margin-top: calc(-44px * var(--manila-escala) - var(--faq-cuerpo));
+}
+
+/* La foto del folder, en un pseudo-elemento: un `filter` en la caja sombrearía
+   también todo lo que lleva encima. Cortes medidos sobre la foto (1000×720):
+   la solapa acaba en y≈120 y la curva de la pestaña en x≈360; las hojas asoman
+   de y≈660 a 710. PENUMBRA: en oscuro `--manila-luz` baja el brillo al 68 %. */
+.amx-v2 .amx-faq-folder::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  border-style: solid; border-width: 0;
+  border-image-source: url(imagenes/folder-manila.webp);
+  border-image-slice: 140 60 70 370 fill;
+  border-image-width:
+    calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+    calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
+  filter: brightness(var(--manila-luz))
+          drop-shadow(0 1px 2px rgba(23, 27, 25, .18))
+          drop-shadow(0 6px 12px rgba(23, 27, 25, .22));
+  transition: filter .18s ease-out;
+}
+
+/* Al pasar el ratón, el folder sale de la pila. Solo donde hay ratón de
+   verdad: en el teléfono un :hover se queda pegado tras el toque. */
+/* Al pasar el ratón el folder ASOMA, no salta al frente: sigue metido entre
+   el de arriba y el de abajo, que es lo que pasa al jalar uno de un expediente.
+   Llevaba un `z-index: 2` que lo sacaba de la pila entera y le tapaba la
+   pestaña al siguiente de golpe; sin él sube sus 6px, se separa del de arriba
+   y conserva su sitio en el montón. */
+@media (hover: hover) {
+  .amx-v2 .amx-faq-folder:hover { transform: translateY(-6px); }
+  .amx-v2 .amx-faq-folder:hover::before {
+    filter: brightness(var(--manila-luz))
+            drop-shadow(0 2px 3px rgba(23, 27, 25, .20))
+            drop-shadow(0 10px 18px rgba(23, 27, 25, .26));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-faq-folder:hover { transform: none; }
+}
+/* PENUMBRA, más alta que la de la ficha de arma. `--manila-luz` baja el brillo
+   del cartón al 68 % en oscuro porque allí el folder ocupa la pantalla entera y
+   deslumbraba; aquí son doce pequeños sobre el lienzo oscuro y ese mismo 68 %
+   los apagaba —quedaban grises, y la hoja de oficio blanca de dentro lo
+   delataba—. Al 90 % son cartulina otra vez, y el que está bajo el ratón o
+   abierto sube al 95 %: el de encima de la pila es también el más iluminado.
+   En claro no hay nada que subir, `--manila-luz` ya vale 1, y por eso todo esto
+   vive dentro de los dos bloques de tema oscuro. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder { --manila-luz: .9; }
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
+}
+:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder { --manila-luz: .9; }
+:root[data-tema="oscuro"] .amx-v2 .amx-faq-folder[open] { --manila-luz: .95; }
+
+/* El hover va aparte y solo donde hay ratón de verdad: en el teléfono se queda
+   pegado tras el toque. Ahí lo cubre `[open]`, que es lo que deja el toque. */
+@media (hover: hover) and (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-v2 .amx-faq-folder:hover { --manila-luz: .95; }
+}
+@media (hover: hover) {
+  :root[data-tema="oscuro"] .amx-v2 .amx-faq-folder:hover { --manila-luz: .95; }
+}
+
+.amx-v2 .amx-faq-folder > summary { cursor: pointer; }
+/* Sobre los papeles el anillo va en tinta, y por dentro: el folder tiene la
+   pestaña recortada y un anillo exterior dibujaría un rectángulo que no es. */
+.amx-v2 .amx-faq-folder > summary:focus-visible {
+  outline: 2px solid var(--manila-tinta);
+  outline-offset: -2px;
+}
+
+/* El flex va aquí y no en el <summary>: ponerlo en el summary se traga el
+   marcador y rompe el click en Safari viejo. */
+.amx-v2 .amx-faq-cab {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  min-height: 44px;                  /* el piso de área táctil */
+}
+.amx-v2 .amx-faq-q {
+  flex: 1; min-width: 0;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--manila-tinta);        /* 13.19:1 claro · 6.03:1 en penumbra */
+}
+@media (min-width: 1024px) { .amx-v2 .amx-faq-q { font-size: 17.5px; } }
+
+/* El signo. `.amx-plegable` lo pinta igual, pero allí cuelga de un <summary>
+   que sí es flex; aquí no puede serlo. */
+.amx-v2 .amx-faq-cab::after {
+  content: '+';
+  flex-shrink: 0;
+  width: 16px;
+  font-family: var(--mono);
+  font-size: 20px;
+  line-height: 1;
+  text-align: center;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-faq-folder[open] .amx-faq-cab::after { content: '−'; }
+
+/* El tema, rotulado sobre la pestaña de la foto, en el mismo carril que el
+   tipo de arma en la ficha: la pestaña va de x≈20 a 340 y de y≈0 a 115. */
+.amx-v2 .amx-faq-tema {
+  position: absolute;
+  left: calc(40px * var(--manila-escala)); top: calc(14px * var(--manila-escala));
+  width: calc(290px * var(--manila-escala)); height: calc(100px * var(--manila-escala));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--manila-tinta-2);      /* 5.92:1 sobre el cartón */
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* La respuesta: la hoja de oficio, dentro del folder. */
+.amx-v2 .amx-faq-folder > .amx-oficio { margin-top: var(--e3); }
+
+@media (min-width: 1024px) {
+  .amx-v2 .amx-faq-folder {
+    --manila-escala: .42;
+    padding-left: var(--e4); padding-right: var(--e4);
+  }
+  .amx-v2 .amx-faq-tema { font-size: 11.5px; letter-spacing: .12em; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DEFENSA CONTRA DESBORDE HORIZONTAL en móvil
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 719px) {
+  .amx-v2 { max-width: 100vw; overflow-x: hidden; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MENÚ MÁS — cada entrada es un mini-folder manila
+   Misma técnica que el FAQ: border-image sobre folder-manila.webp, escalado
+   con --manila-escala. Los ítems se apilan con margen negativo, así que la
+   pestaña de cada folder asoma detrás del anterior.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 .amx-menu-folders {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* ── Cada folder del menú ────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder {
+  --manila-escala: .18;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: var(--e4);
+  /* Padding: arriba deja sitio para la pestaña de la foto del folder,
+     abajo un cuerpo extra que se mete bajo el siguiente. */
+  padding: calc(100px * var(--manila-escala) + 10px) 16px
+           calc(40px  * var(--manila-escala) + 10px);
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  font-family: inherit;
+  color: var(--manila-tinta);
+}
+
+/* El folder como pseudo, igual que en FAQ */
+.amx-v2 .amx-menu-folder::before {
+  content: '';
+  position: absolute; inset: 0; z-index: -1;
+  border-style: solid; border-width: 0;
+  border-image-source: url(imagenes/folder-manila.webp);
+  border-image-slice: 140 60 70 370 fill;
+  border-image-width:
+    calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+    calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
+  filter: brightness(var(--manila-luz))
+          drop-shadow(0 1px 2px rgba(23, 27, 25, .12))
+          drop-shadow(0 3px 6px rgba(23, 27, 25, .10));
+}
+
+/* Apilar: cada folder monta sobre el de arriba */
+.amx-v2 .amx-menu-folder + .amx-menu-folder {
+  margin-top: calc(-20px * var(--manila-escala));
+}
+
+/* Hover: sube ligeramente */
+@media (hover: hover) {
+  .amx-v2 .amx-menu-folder:not([disabled]):hover::before {
+    filter: brightness(var(--manila-luz))
+            drop-shadow(0 2px 3px rgba(23, 27, 25, .16))
+            drop-shadow(0 6px 12px rgba(23, 27, 25, .18));
+  }
+}
+
+.amx-v2 .amx-menu-folder:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: -2px;
+}
+
+/* Deshabilitado */
+.amx-v2 .amx-menu-folder[disabled] {
+  opacity: .5;
+  cursor: default;
+}
+
+/* Acento: borde izquierdo rojo */
+.amx-v2 .amx-menu-folder--accent {
+  border-left: 3px solid var(--sello-restr);
+}
+
+/* ── Icono: la silueta o el glifo ──────────────────────────────────── */
+.amx-v2 .amx-menu-folder-icono {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.amx-v2 .amx-menu-folder-glyph {
+  font-family: var(--mono);
+  font-size: 22px;
+  color: var(--manila-tinta-2);
+  line-height: 1;
+}
+
+/* ── Texto ────────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder-titulo {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+}
+
+.amx-v2 .amx-menu-folder-desc {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--manila-tinta-2);
+  margin-top: 2px;
+}
+
+/* ── Flecha ───────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-folder-flecha {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--manila-tinta-2);
+}
+
+/* ── Separador entre grupos ──────────────────────────────────────── */
+.amx-v2 .amx-menu-sep {
+  height: 0;
+  border: none;
+  border-top: 1px dashed var(--hair);
+  margin: 8px 0;
+}
+
+/* ── Pie ─────────────────────────────────────────────────────────── */
+.amx-v2 .amx-menu-pie {
+  margin-top: 24px;
+  padding: 14px;
+  background: var(--ficha);
+  border: 1px dashed var(--hair);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .1em;
+  color: var(--ficha-tinta-2);
+  line-height: 1.6;
+}
+.amx-v2 .amx-menu-pie strong {
+  display: block;
+  color: var(--acento);
+  font-weight: 700;
+  letter-spacing: .15em;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+/* Responsive: estrecho */
+@media (max-width: 399px) {
+  .amx-v2 .amx-menu-folder { gap: var(--e3); }
+  .amx-v2 .amx-menu-folder-icono { width: 32px; height: 32px; }
+  .amx-v2 .amx-menu-folder-icono img { width: 32px !important; height: 32px !important; }
+  .amx-v2 .amx-menu-folder-glyph { font-size: 18px; }
+  .amx-v2 .amx-menu-folder-titulo { font-size: 12px; }
+  .amx-v2 .amx-menu-folder-desc { font-size: 12px; }
+}
+
+/* Penumbra: en tema oscuro los folders del menú suben su brillo */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .amx-v2 .amx-menu-folder { --manila-luz: .88; }
+}
+:root[data-tema="oscuro"] .amx-v2 .amx-menu-folder { --manila-luz: .88; }
+
+/* ── LA HOJA DE COTIZACIÓN — Armas Traumáticas ─────────────────────────────
+   La única pantalla del sitio donde SÍ se vende: los tres modelos traumáticos
+   que comercializa Armas M&S. Por eso no es un expediente, es una cotización:
+   partidas numeradas, ficha técnica, precio en su columna y condiciones al pie.
+
+   El papel NO se invierte con el tema —igual que la hoja de oficio y las
+   placas fotográficas—: una cotización impresa sigue siendo papel claro de
+   noche. Por eso usa --oficio / --manila-tinta / --oficio-tinta-2, que son
+   constantes en los dos temas, y NUNCA --tinta ni --papel, que sí cambian y
+   dejarían la letra clara sobre papel claro. */
+.amx-v2 .amx-cotiz {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 18px 16px 24px;
+  background: var(--oficio);
+  color: var(--manila-tinta);
+  box-shadow: 0 1px 2px rgba(23, 27, 25, .14), 0 8px 14px -6px rgba(23, 27, 25, .22);
+}
+@media (min-width: 1024px) { .amx-v2 .amx-cotiz { padding: 26px 30px 32px; } }
+
+/* El membrete: qué documento es y su folio. El folio es un sello GRÁFICO
+   ficticio (permitido por DESIGN.md §6b); no imita ningún folio de la SEDENA
+   ni lleva iconografía oficial. */
+.amx-v2 .amx-cotiz-membrete {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2px var(--e3);
+  padding-bottom: 8px;
+  border-bottom: 3px double var(--oficio-tinta-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-tit {
+  margin: var(--e4) 0 var(--e2);
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 27px;
+  line-height: 1.04;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-cotiz-tit { font-size: 36px; } }
+.amx-v2 .amx-cotiz-entrada {
+  max-width: 62ch;
+  margin-bottom: var(--e4);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--oficio-tinta-2);
+}
+
+/* ── Las partidas ──────────────────────────────────────────────────────── */
+.amx-v2 .amx-cotiz-partidas { display: flex; flex-direction: column; gap: var(--e5); }
+/* El número de partida con su regla: el renglón que separa una de otra. */
+.amx-v2 .amx-cotiz-num {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  margin-bottom: var(--e3);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-num::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--oficio-2);
+}
+.amx-v2 .amx-cotiz-partida { display: grid; gap: var(--e4); }
+@media (min-width: 720px) {
+  .amx-v2 .amx-cotiz-partida { grid-template-columns: 220px minmax(0, 1fr); }
+}
+/* La placa de la foto: blanca en los dos temas, porque 87 de las 111 fotos
+   son recortes sobre blanco opaco y sobre una placa oscura se leen como un
+   rectángulo pegado. */
+.amx-v2 .amx-cotiz-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  padding: 14px;
+  background: var(--copia-placa);
+  border: 1px solid var(--oficio-2);
+}
+.amx-v2 .amx-cotiz-foto img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.amx-v2 .amx-cotiz-marca {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-modelo {
+  margin: var(--e1) 0 0;
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 25px;
+  line-height: 1;
+  letter-spacing: .01em;
+}
+@media (min-width: 1024px) { .amx-v2 .amx-cotiz-modelo { font-size: 30px; } }
+.amx-v2 .amx-cotiz-nombre {
+  margin-top: 6px;
+  font-family: var(--sans);
+  font-size: 16px;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-resumen {
+  max-width: 60ch;
+  margin-top: var(--e3);
+  font-family: var(--sans);
+  font-size: 16.5px;
+  line-height: 1.6;
+}
+
+/* La ficha técnica de la partida: etiqueta arriba, valor abajo, cifras
+   tabulares para que las columnas se alineen entre partidas. */
+.amx-v2 .amx-cotiz-specs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e3) var(--e4);
+  margin: var(--e4) 0 0;
+  padding-top: var(--e3);
+  border-top: 1px solid var(--oficio-2);
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-cotiz-specs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.amx-v2 .amx-cotiz-specs dt {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-specs dd {
+  margin: 3px 0 0;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Specs DENTRO de la polaroid de las traumáticas: fondo semitransparente
+   oscuro, texto claro, compacto — se ven como una placa técnica pegada a
+   la foto, no como una ficha separada. Grid de 2 columnas que cabe en el
+   ancho de la polaroid. */
+.amx-v2 .amx-cotiz-specs--polaroid {
+  background: rgba(0,0,0,.72);
+  color: #fff;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+  margin: 8px 0 0;
+  padding: 8px;
+  border-top: none;
+  border-radius: 2px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+.amx-v2 .amx-cotiz-specs--polaroid dt {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  font-weight: 400;
+}
+.amx-v2 .amx-cotiz-specs--polaroid dd {
+  margin: 0;
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+/* La polaroid de las traumáticas es columna flex: foto arriba, specs abajo */
+.amx-v2 .amx-cotiz-partida .amx-polaroid {
+  display: flex;
+  flex-direction: column;
+}
+
+/* El cierre de la partida: precio, existencia y la salida a la tienda. */
+.amx-v2 .amx-cotiz-cierre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-top: var(--e4);
+  padding-top: var(--e3);
+  border-top: 1px solid var(--oficio-2);
+}
+.amx-v2 .amx-cotiz-estado {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+/* AGOTADO va con el rojo de sello, que es el mismo par ya auditado (6.42:1)
+   que usan los sellos de seguridad. */
+.amx-v2 .amx-cotiz-agotado { color: var(--sello-restr); font-weight: 700; }
+
+/* ── Las condiciones, al pie ────────────────────────────────────────────── */
+.amx-v2 .amx-cotiz-pie {
+  margin-top: var(--e6);
+  padding-top: var(--e4);
+  border-top: 3px double var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-pie-tit {
+  margin: 0 0 var(--e3);
+}
+/* El segundo epígrafe del pie (el marco legal) va detrás de las condiciones y
+   necesita aire; el primero no, porque el borde del pie ya se lo da. */
+.amx-v2 .amx-cotiz-pie-tit:not(:first-child) {
+  margin-top: var(--e5);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e4);
+}
+@media (min-width: 768px) {
+  .amx-v2 .amx-cotiz-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.amx-v2 .amx-cotiz-condiciones {
+  display: grid;
+  gap: var(--e3) var(--e5);
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.55;
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-cotiz-condiciones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.amx-v2 .amx-cotiz-condiciones b { display: block; font-weight: 700; }
+/* El aviso que cierra la hoja. Rojo de sello sobre el papel: 6.42:1. */
+.amx-v2 .amx-cotiz-aviso {
+  margin-top: var(--e4);
+  padding: var(--e3) var(--e4);
+  border: 1px solid var(--sello-restr);
+  background: rgba(163, 52, 31, .06);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-cotiz-aviso-tit {
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sello-restr);
+}
+
+/* El anillo de foco tiene que verse SOBRE el papel claro en los dos temas:
+   --manila-tinta es constante, --acento no. */
+.amx-v2 .amx-cotiz :focus-visible { outline-color: var(--manila-tinta); }
+
+/* ── El cierre de la partida: cifra, nota y salida a la tienda ─────────────
+   Sigue dentro de la hoja de cotización, así que los colores son los
+   constantes en los dos temas. El verde es --sello-civil, el mismo par que ya
+   usa la banda de la hoja de oficio. */
+.amx-v2 .amx-cotiz-precio {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-cotiz-precio small {
+  margin-left: 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-nota {
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--oficio-tinta-2);
+}
+/* El botón sale a armasmys.com. 44px de alto mínimo: es objetivo táctil. */
+.amx-v2 .amx-cotiz-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  min-height: 44px;
+  padding: 12px 20px;
+  background: var(--sello-civil);
+  color: var(--oficio);
+  border: 1.5px solid var(--sello-civil);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+@media (hover: hover) {
+  .amx-v2 .amx-cotiz-accion:hover { filter: brightness(1.08); }
+}
+/* Agotado: el botón sigue llevando a la tienda, pero sin invitar. Contorno en
+   vez de relleno, y la palabra la pone el JSX. */
+.amx-v2 .amx-cotiz-accion--agotado {
+  background: transparent;
+  color: var(--sello-civil);
+}
+
+/* La munición compatible, en fichas de calibre. */
+.amx-v2 .amx-cotiz-municion {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--e2);
+  margin-top: var(--e4);
+}
+.amx-v2 .amx-cotiz-municion-tit {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+/* Solo las fichas de calibre llevan recuadro. El título «Munición» es un span
+   más dentro del mismo contenedor, y sin el :not() salía enmarcado como si
+   fuera un calibre. */
+.amx-v2 .amx-cotiz-municion span:not(.amx-cotiz-municion-tit) {
+  padding: 3px 9px;
+  border: 1px solid var(--oficio-2);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .05em;
+}
+
+/* Los destacados del modelo, como renglones marcados de un pliego. */
+.amx-v2 .amx-cotiz-destacados {
+  list-style: none;
+  margin: var(--e4) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.5;
+}
+.amx-v2 .amx-cotiz-destacados li {
+  display: flex;
+  gap: 9px;
+}
+.amx-v2 .amx-cotiz-destacados li::before {
+  content: "▸";
+  flex-shrink: 0;
+  color: var(--sello-civil);
+}

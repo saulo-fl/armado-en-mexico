@@ -699,7 +699,7 @@ window.AppHeader = AppHeader;
 // ──────────────────────────────────────────────────────────────
 // BOTTOM NAV — navegación inferior
 // ──────────────────────────────────────────────────────────────
-function BottomNav({ current, onNav, compareCount }) {
+function BottomNav({ current, onNav, compareCount, visible = true }) {
   const navRef = React.useRef(null);
 
   // La barra fija de la ficha y CompareFloat se apoyan JUSTO encima de este nav.
@@ -748,28 +748,31 @@ function BottomNav({ current, onNav, compareCount }) {
   ];
   return (
     <div ref={navRef} style={{
-      position: 'sticky', bottom: 0, zIndex: 50,
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
       background: PALETTE.marca,
       borderTop: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex',
       padding: '6px 4px 10px',
       paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+      transform: visible ? 'translateY(0)' : 'translateY(100%)',
+      transition: 'transform .28s ease',
     }}>
       {items.map(it => {
         const active = current === it.id;
         return (
           <button key={it.id} onClick={() => onNav(it.id)} style={{
-            flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+            flex: 1, minWidth: 0, background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            padding: '8px 4px', gap: 4, minHeight: 48,
-            color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
+            padding: '8px 2px', gap: 4, minHeight: 48,
+            color: active ? '#FAF9F5' : PALETTE.sobreMarcaDim,
             position: 'relative',
           }}>
             {active && (
               <span style={{
                 position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                width: 18, height: 2, background: '#DDD5C4',
-                boxShadow: `0 0 6px ${'#DDD5C4'}`,
+                width: 24, height: 2.5, borderRadius: 1,
+                background: '#FAF9F5',
+                boxShadow: '0 0 8px rgba(250,249,245,.6)',
               }} />
             )}
             <span style={{ lineHeight: 1, position: 'relative' }}>
@@ -787,8 +790,10 @@ function BottomNav({ current, onNav, compareCount }) {
             </span>
             <span style={{
               fontFamily: 'Archivo, sans-serif',
-              fontSize: 12, fontWeight: active ? 600 : 500,
-              letterSpacing: '0.07em',
+              fontSize: 11, fontWeight: active ? 600 : 500,
+              letterSpacing: '0.06em',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              maxWidth: '100%',
             }}>{it.label}</span>
           </button>
         );
@@ -1887,6 +1892,43 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
   );
 }
 window.Disclosure = Disclosure;
+// ──────────────────────────────────────────────────────────────
+// FOLDER PREGUNTA — el cajón de expedientes de /preguntas
+// Cada pregunta es un folder manila que monta sobre el siguiente, y al abrirlo
+// sale de dentro la hoja de oficio con la respuesta: el cartón pregunta, el
+// papel responde. El tema va rotulado en la pestaña, que es lo que deja leer
+// la pila de un vistazo.
+//
+// Es <details> nativo —el navegador da aria-expanded, teclado y estado— pero
+// NO reusa `Disclosure`: aquel viste con PALETTE y lleva una barrita de
+// acento, y dentro de un papel solo entran los tokens de papelería (§5.5). Sin
+// estado en React: el +/− y el resto los pinta el CSS con [open].
+//
+// OJO: el <span> flex va DENTRO del <summary> y no en el <summary> mismo
+// (display:flex ahí se traga el marcador y rompe el click en Safari viejo).
+// ──────────────────────────────────────────────────────────────
+function FolderPregunta({ pregunta, tema, children }) {
+  return (
+    <details className="amx-faq-folder">
+      <summary>
+        {/* La pestaña rotulada va oculta al lector: clasifica lo que la
+            pregunta de al lado ya dice con todas sus letras. */}
+        {tema && <span className="amx-faq-tema" aria-hidden="true">{tema}</span>}
+        <span className="amx-faq-cab">
+          <span className="amx-faq-q">{pregunta}</span>
+        </span>
+      </summary>
+      <div className="amx-oficio">
+        <div className="amx-oficio-membrete" aria-hidden="true">
+          <span>Armado en México</span><span>{tema || 'Respuesta'}</span>
+        </div>
+        <p className="amx-oficio-texto">{children}</p>
+      </div>
+    </details>
+  );
+}
+window.FolderPregunta = FolderPregunta;
+
 
 // ──────────────────────────────────────────────────────────────
 // PRICE CHART — historial de precios en SVG inline, sin librerías
