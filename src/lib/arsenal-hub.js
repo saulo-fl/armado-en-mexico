@@ -74,7 +74,7 @@
     // dibuja como el más CORTO de la mesa. A escala 1 mentiría: diría que es el
     // cartucho más largo de todos.
     const menor = Math.min(...filas.map((fila) => fila.mm).filter(Boolean), mayor);
-    return filas.map((fila) => Object.assign(fila, { escala: mayor ? (fila.mm || menor) / mayor : 1 }));
+    return filas.map((fila) => Object.assign(fila, { escala: window.amxEscalaCartucho(fila.mm || menor, mayor) }));
   }
 
   window.amxTieneExistencia = amxTieneExistencia;

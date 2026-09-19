@@ -97,12 +97,13 @@ function amxSlugIndex() {
 }
 window.amxSlugIndex = amxSlugIndex;
 
-function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter, compareIds) {
+function amxBuildPath(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds) {
   const idx = amxSlugIndex();
   if (screen === 'compare') return window.amxRutaComparar(compareIds, idx.slugNPorA);
   if (screen === 'product') return idx.slugPorA[productId] || 'arsenal';
   if (screen === 'accesorio') return idx.slugPorC[accesorioId] || 'accesorios';
   if (screen === 'municion') return 'municiones/' + (idx.slugPorM[municionId] || '');
+  if (screen === 'calibre') return 'calibres/' + amxSlug(calibreId || '');
   // Listados por rama: /pistolas, /cargadores…
   if (screen === 'catalog' && catalogFilter && catalogFilter.mode === 'tipo' && TIPO_TO_PATH[catalogFilter.value]) {
     return TIPO_TO_PATH[catalogFilter.value];
@@ -123,11 +124,11 @@ function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter,
   }
   return SCREEN_TO_PATH[screen] || '';
 }
-function amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter, compareIds) {
-  return APP_BASE + amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter, compareIds);
+function amxBuildUrl(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds) {
+  return APP_BASE + amxBuildPath(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds);
 }
 
-const VACIO = { screen: 'home', productId: null, accesorioId: null, municionId: null, catalogFilter: null, compareIds: [] };
+const VACIO = { screen: 'home', productId: null, accesorioId: null, municionId: null, calibreId: null, catalogFilter: null, compareIds: [] };
 function amxParsePath(pathname) {
   let rel = pathname || '';
   if (APP_BASE !== '/' && rel.indexOf(APP_BASE) === 0) rel = rel.slice(APP_BASE.length);
@@ -161,6 +162,15 @@ function amxParsePath(pathname) {
   // Pantallas con nombre propio (/arsenal, /calibres…) y el listado de municiones
   if (seg.length === 1 && PATH_TO_SCREEN[seg[0]]) {
     return Object.assign({}, VACIO, { screen: PATH_TO_SCREEN[seg[0]] });
+  }
+  // Ficha de un calibre: /calibres/<slug>. El id lleva puntos y espacios
+  // («.30-06 Sprg»), así que la dirección guarda su slug y aquí se busca de
+  // vuelta. Un slug que no existe cae en la guía, no en la portada.
+  if (seg[0] === SCREEN_TO_PATH.calibres && seg[1]) {
+    const cal = (window.CALIBRES || []).find((c) => amxSlug(c.id) === seg[1]);
+    return cal
+      ? Object.assign({}, VACIO, { screen: 'calibre', calibreId: cal.id })
+      : Object.assign({}, VACIO, { screen: 'calibres' });
   }
   // Ficha de munición: /municiones/<slug>
   if (seg[0] === SCREEN_TO_PATH.municiones && seg[1]) {
@@ -207,6 +217,7 @@ function App() {
   const [productId, setProductId] = useStateApp(_init.productId);
   const [accesorioId, setAccesorioId] = useStateApp(_init.accesorioId);
   const [municionId, setMunicionId] = useStateApp(_init.municionId);
+  const [calibreId, setCalibreId] = useStateApp(_init.calibreId);
   const [catalogFilter, setCatalogFilter] = useStateApp(_init.catalogFilter);
   const [compareIds, setCompareIds] = useStateApp(_init.compareIds);
   // El lado del comparador que se está eligiendo en la búsqueda ('a', 'b' o null).
@@ -240,12 +251,12 @@ function App() {
     if (skipPush.current) { skipPush.current = false; return; }
     // Basta comparar la dirección que toca con la que hay. Al depender también
     // del filtro, /arsenal y /pistolas son direcciones distintas.
-    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter, compareIds);
+    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter, compareIds, calibreId);
     if (window.location.pathname === url) return;
     try {
-      window.history[reemplazar ? 'replaceState' : 'pushState']({ screen, productId, accesorioId, municionId }, '', url);
+      window.history[reemplazar ? 'replaceState' : 'pushState']({ screen, productId, accesorioId, municionId, calibreId }, '', url);
     } catch (e) {}
-  }, [screen, productId, accesorioId, municionId, catalogFilter, compareIds]);
+  }, [screen, productId, accesorioId, municionId, catalogFilter, compareIds, calibreId]);
 
   // Botón atrás/adelante del navegador → aplica la pantalla de la URL
   const idsVivos = useRefApp(compareIds);   // para onPop, que se registra una sola vez
@@ -259,6 +270,7 @@ function App() {
       setProductId(s.productId);
       setAccesorioId(s.accesorioId);
       setMunicionId(s.municionId);
+      setCalibreId(s.calibreId);
       setCatalogFilter(s.catalogFilter);
       setReportContext(null);
       // En el comparador manda la selección EN MEMORIA, no la de la dirección:
@@ -377,6 +389,12 @@ function App() {
     setScreen('municion');
   };
 
+  const openCalibre = (id) => {
+    setHistory(h => [...h, { screen, productId, catalogFilter }]);
+    setCalibreId(id);
+    setScreen('calibre');
+  };
+
   const goBack = () => {
     setHistory(h => {
       if (!h.length) { setScreen('home'); return []; }
@@ -436,15 +454,15 @@ function App() {
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
-    calibres: 'Calibres', campos: 'Campos de tiro', experiencias: 'Experiencias',
+    calibres: 'Calibres', calibre: 'Calibre', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
     legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
-    calibres: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
+    calibres: 'menu', calibre: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
     soporte: 'menu',
     municiones: 'menu', municion: 'menu',
     accesorios: 'accesorios', accesorio: 'accesorios',
@@ -490,7 +508,9 @@ function App() {
   } else if (screen === 'menu') {
     content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
   } else if (screen === 'calibres') {
-    content = <window.CalibresScreen onOpenArma={openArma} onNav={navigate} />;
+    content = <window.CalibresScreen onOpenArma={openArma} onNav={navigate} onAbrirCalibre={openCalibre} />;
+  } else if (screen === 'calibre') {
+    content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onNav={navigate} />;
   // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son
   // de relleno (ver data-extra.js). CamposScreen y CursosScreen siguen escritas
   // en screens-3.jsx — para reactivarlas basta con volver a montarlas aqui.

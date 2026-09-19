@@ -1,0 +1,193 @@
+{
+  "_nota": "Estatus legal por calibre. Fuente unica: el texto ya aprobado del FAQ (src/lib/store.js, tema 'Calibres') y los textos de _legalFor (src/data/data.js:102-121). NO se inventan articulos. revisar:true = Saulo decide antes de publicar.",
+  "_instrumento": "Instructivo del permiso DEFENSA-02-040 (proteccion del domicilio): maximo .380 en pistola -sin .38 Super, .38 Comando ni 9 mm- y .38 Especial en revolver -sin .357 Magnum-. Art. 10 LFAFE: escopetas hasta calibre 12 con canon de 635 mm o mas, y rifles de repeticion o semiautomaticos no convertibles en automaticos, para socios de club acreditado. Art. 9o: ejidatarios, comuneros y jornaleros, un rifle .22 o una escopeta. Art. 11: reserva las pistolas 9 mm Parabellum a la Fuerza Armada Permanente.",
+  "calibres": [
+    {
+      "id": ".22 LR",
+      "avail": "dcam",
+      "legalArt": "arts. 9o y 10 LFAFE",
+      "legalNota": "De libre adquisición civil. El art. 9o permite a ejidatarios, comuneros y jornaleros del campo poseer un rifle .22, y el art. 10 incluye las pistolas y rifles de calibre .22 entre las autorizadas a socios de un club de tiro o cacería acreditado. En la DCAM el cartucho de fuego anular tiene cuota propia: hasta 500 por persona."
+    },
+    {
+      "id": ".32 ACP",
+      "avail": "dcam",
+      "legalArt": "art. 9o fr. I LFAFE",
+      "legalNota": "Queda por debajo del tope de .380 que el instructivo del permiso DEFENSA-02-040 fija para pistola en protección del domicilio, y no figura entre los calibres exceptuados."
+    },
+    {
+      "id": ".380 ACP",
+      "avail": "dcam",
+      "legalArt": "art. 9o fr. I LFAFE",
+      "legalNota": "Es el calibre máximo que el instructivo del permiso DEFENSA-02-040 admite en pistola para la protección del domicilio. Ojo: las pistolas de cañón largo en .380 sí están restringidas a corporaciones de seguridad."
+    },
+    {
+      "id": ".38 S&W",
+      "avail": "dcam",
+      "legalArt": "art. 9o fr. II LFAFE",
+      "revisar": true,
+      "legalNota": "Cartucho de revólver por debajo del .38 Especial, que es el tope del instructivo DEFENSA-02-040, y no figura entre los exceptuados. No está en el catálogo DCAM: es un calibre antiguo, frecuente en revólveres heredados."
+    },
+    {
+      "id": ".38 Special",
+      "avail": "dcam",
+      "legalArt": "art. 9o fr. II LFAFE",
+      "legalNota": "Es el calibre máximo que el instructivo del permiso DEFENSA-02-040 admite en revólver para la protección del domicilio. El .357 Magnum, que usa la misma recámara, queda expresamente fuera."
+    },
+    {
+      "id": ".22 WMR",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "revisar": true,
+      "legalNota": "Fuego anular, pero no es el .22 LR: la DCAM lo excluye de la cuota de 500 cartuchos de los .22 (salvo Magnum, Hornet o TCM) y el texto del art. 9o lo menciona entre los calibres exceptuados en pistola. REVISAR: la guía no debería afirmar que se adquiere como un .22 corriente."
+    },
+    {
+      "id": ".38 Super",
+      "avail": "ejercito",
+      "legalArt": "art. 9o fr. I LFAFE",
+      "revisar": true,
+      "legalNota": "El instructivo del permiso DEFENSA-02-040 lo excluye por su nombre del permiso de protección al domicilio (sin las .38 Súper y .38 Comando). En el catálogo figura como uso exclusivo. REVISAR: es el calibre de competencia más arraigado en México y el art. 10 sí admite pistolas .38 con fines de tiro olímpico o de competencia para socios de club."
+    },
+    {
+      "id": "9mm Parabellum",
+      "avail": "ejercito",
+      "legalArt": "art. 11 LFAFE",
+      "legalNota": "La Ley Federal de Armas de Fuego y Explosivos reserva las pistolas 9 mm Parabellum al uso exclusivo de la Fuerza Armada Permanente. El instructivo del permiso de domicilio también las excluye por su nombre. Es el calibre más usado del mundo y el que más se pregunta aquí: en México, un particular no puede adquirirlo."
+    },
+    {
+      "id": ".357 Magnum",
+      "avail": null,
+      "legalArt": "art. 9o fr. II LFAFE",
+      "revisar": true,
+      "legalNota": "HUECO MARCADO, no rellenar sin decisión de Saulo. Lo único respaldado: el instructivo del permiso DEFENSA-02-040 lo excluye expresamente del revólver de protección al domicilio (sin el .357 Magnum). No hay en el repo texto que diga a quién SÍ corresponde, y no hay armas en .357 en el catálogo, así que no se puede derivar. Sin decisión, esta ficha no lleva sello."
+    },
+    {
+      "id": ".40 S&W",
+      "avail": "ejercito",
+      "legalArt": "art. 9o fr. I LFAFE",
+      "legalNota": "Supera el tope de .380 que el instructivo DEFENSA-02-040 fija en pistola para particulares. En el catálogo figura como uso exclusivo de las Fuerzas Armadas. CORRIGE el texto publicado hoy, que lo daba como restringido a seguridad pública o privada."
+    },
+    {
+      "id": ".45 ACP",
+      "avail": null,
+      "legalArt": "art. 9o fr. I LFAFE",
+      "revisar": true,
+      "legalNota": "HUECO MARCADO. Respaldado: supera el tope de .380 del instructivo DEFENSA-02-040, así que no procede para la protección del domicilio. No hay armas .45 en el catálogo ni texto en el repo que fije su clasificación, y no se inventa. Saulo decide el sello."
+    },
+    {
+      "id": "5.7x28mm",
+      "avail": null,
+      "legalArt": "art. 9o fr. I LFAFE",
+      "revisar": true,
+      "legalNota": "HUECO MARCADO. Respaldado: supera el tope de .380 del instructivo DEFENSA-02-040. Cartucho moderno de la FN Five-seveN y el P90, asociado a cuerpos armados; sin texto en el repo que lo clasifique, no se afirma más."
+    },
+    {
+      "id": "5.56x45mm",
+      "avail": "ejercito",
+      "legalArt": "art. 11 LFAFE",
+      "legalNota": "Cartucho de fusil estándar OTAN. Los fusiles automáticos y los calibres militares de alto poder son de uso exclusivo de las Fuerzas Armadas; en el catálogo todas las armas en este calibre figuran así."
+    },
+    {
+      "id": "7.62x39mm",
+      "avail": "ejercito",
+      "legalArt": "art. 11 LFAFE",
+      "legalNota": "Cartucho intermedio de fusil; uso exclusivo de las Fuerzas Armadas, como el resto de los calibres militares de alto poder."
+    },
+    {
+      "id": "7.62x51mm",
+      "avail": "ejercito",
+      "legalArt": "art. 11 LFAFE",
+      "legalNota": "Equivalente militar del .308 Winchester. Mismas dimensiones de recámara, distinta clasificación legal: como cartucho de fusil de batalla es de uso exclusivo de las Fuerzas Armadas. Es el mejor ejemplo de que el estatus no lo fija el tamaño del cartucho."
+    },
+    {
+      "id": ".223 Rem",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Versión civil del 5.56×45: la DCAM lo lista entre los cartuchos de alto poder y fuego central que un particular puede adquirir con permiso extraordinario vigente. La diferencia con el militar está en la presión y en el arma que lo dispara, no en el nombre."
+    },
+    {
+      "id": ".22-250 Rem",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Rifle de caza menor y alimañas, autorizado a quienes practican tiro y cacería inscritos en un club o asociación acreditado ante la Secretaría de la Defensa Nacional."
+    },
+    {
+      "id": ".243 Winchester",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Rifle de caza autorizado a socios de un club de tiro o cacería acreditado, con permiso extraordinario de adquisición vigente."
+    },
+    {
+      "id": ".270 Winchester",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Rifle de caza mayor autorizado a socios de un club de tiro o cacería acreditado, con permiso extraordinario de adquisición vigente."
+    },
+    {
+      "id": ".30-30 Win",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "revisar": true,
+      "legalNota": "Rifle de palanca clásico de la sierra mexicana, autorizado a socios de club acreditado. No está en el catálogo DCAM, pero es de los más presentes en el campo."
+    },
+    {
+      "id": ".308 Winchester",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "La DCAM lo lista entre los cartuchos de alto poder y fuego central que un particular puede adquirir con permiso extraordinario vigente. Su gemelo militar, el 7.62×51, no."
+    },
+    {
+      "id": ".30-06 Sprg",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "La DCAM lo lista entre los cartuchos de alto poder y fuego central autorizados a particulares con permiso extraordinario vigente."
+    },
+    {
+      "id": "6.5 Creedmoor",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Rifle de precisión y caza autorizado a socios de un club de tiro o cacería acreditado, con permiso extraordinario de adquisición vigente."
+    },
+    {
+      "id": "6.5 PRC",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Rifle de precisión y caza de montaña autorizado a socios de un club de tiro o cacería acreditado, con permiso extraordinario vigente."
+    },
+    {
+      "id": "7mm Rem Mag",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Rifle magnum de caza a larga distancia, autorizado a socios de un club de tiro o cacería acreditado."
+    },
+    {
+      "id": ".300 Win Mag",
+      "avail": "dcam",
+      "legalArt": "art. 10 LFAFE",
+      "legalNota": "Rifle magnum de caza mayor, autorizado a socios de un club de tiro o cacería acreditado."
+    },
+    {
+      "id": "12 GA",
+      "avail": "dcam",
+      "legalArt": "arts. 9o y 10 LFAFE",
+      "legalNota": "El art. 10 autoriza escopetas hasta calibre 12 con cañón de 635 mm o más; el 12 es justo el tope. El art. 9o permite además una escopeta a ejidatarios, comuneros y jornaleros del campo. En la DCAM el cartucho de escopeta tiene su propia cuota: hasta 1,000 por persona."
+    },
+    {
+      "id": "16 GA",
+      "avail": "dcam",
+      "legalArt": "arts. 9o y 10 LFAFE",
+      "legalNota": "Escopeta por debajo del calibre 12, que es el tope del art. 10. La DCAM lista su cartucho junto al de 12 y 20 para protección de domicilio o parcela."
+    },
+    {
+      "id": "20 GA",
+      "avail": "dcam",
+      "legalArt": "arts. 9o y 10 LFAFE",
+      "legalNota": "Escopeta por debajo del calibre 12, que es el tope del art. 10. Su cartucho figura en la tabla de requisitos de la DCAM para personal civil."
+    },
+    {
+      "id": ".410 Bore",
+      "avail": "dcam",
+      "legalArt": "arts. 9o y 10 LFAFE",
+      "legalNota": "La escopeta más pequeña, muy por debajo del tope de calibre 12 del art. 10. Su cartucho figura en la tabla de requisitos de la DCAM para personal civil."
+    }
+  ]
+}

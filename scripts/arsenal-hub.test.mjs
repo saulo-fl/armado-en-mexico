@@ -14,6 +14,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 globalThis.window = globalThis;
+const libCalibres = fileURLToPath(new URL('../src/lib/calibres.js', import.meta.url));
+vm.runInThisContext(readFileSync(libCalibres, 'utf8'), { filename: libCalibres });
 const archivo = fileURLToPath(new URL('../src/lib/arsenal-hub.js', import.meta.url));
 vm.runInThisContext(readFileSync(archivo, 'utf8'), { filename: archivo });
 

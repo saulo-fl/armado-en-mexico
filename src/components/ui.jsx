@@ -3354,6 +3354,47 @@ function TiraFiltros({ uid, orden, mas = [], filtros, valores, onCambiar, precio
 }
 window.TiraFiltros = TiraFiltros;
 
+// ──────────────────────────────────────────────────────────────
+// REGLA COMPARATIVA — regla graduada que enseña dónde cae un
+// calibre dentro del rango de todos los demás
+// ──────────────────────────────────────────────────────────────
+function ReglaComparativa({ titulo, valor, min, max, unidad, fuente }) {
+  const pos = window.amxPosicionEnRango(valor, min, max);
+  const etiqueta = `${valor} ${unidad}. En esta guía el mínimo es ${min} y el máximo ${max}.`;
+  return (
+    <div className="amx-regla" style={{ '--pos': pos }}>
+      <div className="amx-regla-titulo">{titulo}</div>
+      <div className="amx-regla-pista" role="img" aria-label={etiqueta}>
+        <span className="amx-regla-cursor" />
+      </div>
+      <div className="amx-regla-pies">
+        <span>{min} {unidad}</span>
+        <b>{valor} {unidad}</b>
+        <span>{max} {unidad}</span>
+      </div>
+      {fuente ? <div className="amx-regla-fuente">{fuente.nombre} · {fuente.fecha}</div> : null}
+    </div>
+  );
+}
+window.ReglaComparativa = ReglaComparativa;
+
+// ──────────────────────────────────────────────────────────────
+// REGLA CARTUCHO — cartucho de pie sobre regla graduada en mm
+// ──────────────────────────────────────────────────────────────
+function ReglaCartucho({ calibre, escala, mmMax }) {
+  const foto = calibre.cartucho || 'imagenes/cartuchos/silueta-vertical.webp';
+  const paso = (10 / (mmMax || 84.8)) * 100;
+  return (
+    <div className="amx-reglacart" style={{ '--escala': escala, '--paso': paso + '%' }}>
+      <div className="amx-reglacart-pozo">
+        <img className="amx-reglacart-foto" src={foto} alt="" loading="lazy" />
+        <span className="amx-reglacart-regla" aria-hidden="true" />
+      </div>
+      <div className="amx-reglacart-pie">{calibre.mm} mm de largo</div>
+    </div>
+  );
+}
+window.ReglaCartucho = ReglaCartucho;
 // ══════════════════════════════════════════════════════════════
 // REPORTAR ERROR — enlace público a GitHub para correcciones factuales
 // Aparece al final de las fichas de arma, accesorio, munición, calibre,
