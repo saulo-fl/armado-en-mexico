@@ -218,6 +218,25 @@
       body: JSON.stringify(item), credentials: 'include',
     }).catch(() => {});
   }
+  // La interfaz puede ser sustituida por soporte.js; mientras carga, este
+  // transporte mínimo conserva el contrato de resultado HTTP para denuncias.
+  async function sendReport(url, item) {
+    if (typeof window.amxEnviarReporte === 'function') {
+      return window.amxEnviarReporte(url, item, fetch);
+    }
+    try {
+      const res = await fetch(url, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item), credentials: 'include',
+      });
+      let data = {};
+      try { data = await res.json(); } catch (e) {}
+      if (res.ok) return { ok: true, status: res.status };
+      return { ok: false, status: res.status, error: data.error || 'sin_backend' };
+    } catch (e) {
+      return { ok: false, status: 0, error: 'sin_backend' };
+    }
+  }
   // Hidratación: trae el snapshot compartido y refresca el cache local.
   async function hydrate() {
     if (!REMOTE.enabled) return false;
@@ -427,21 +446,21 @@
     },
 
     // ─── DENUNCIAS DE CONTENIDO ────────────────────────────
-    addReport(rep) {
+    async addReport(rep) {
       const item = {
         reviewId: String(rep.reviewId || ''),
+        tipo: String(rep.tipo || 'otro'),
+        entidadId: String(rep.entidadId == null ? '' : rep.entidadId),
+        entidadNombre: String(rep.entidadNombre || ''),
+        reviewExcerpt: String(rep.reviewExcerpt || ''),
         motivo: String(rep.motivo || ''),
-        detalle: String(rep.detalle || '').slice(0, 1200),
+        detalle: String(rep.detalle || '').trim(),
         email: String(rep.email || '').trim(),
       };
-      const arr = read(K.reports, []);
-      arr.unshift(Object.assign({
-        id: 'd_' + Date.now(), submittedAt: new Date().toISOString(), status: 'pending',
-      }, item));
-      write(K.reports, arr.slice(0, 500));
-      Store._notify();
-      publicAppend('reports', item);
-      return true;
+      if (!REMOTE.enabled) return { ok: false, status: 0, error: 'sin_backend' };
+      const result = await sendReport(REMOTE.base + '/append/reports', item);
+      if (result.ok) REMOTE.ok = true;
+      return result;
     },
     getReports() { return read(K.reports, []); },
     resolveReport(id) {
