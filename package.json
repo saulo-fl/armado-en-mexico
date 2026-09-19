@@ -11,7 +11,7 @@
     "build:html": "node scripts/build-prerender.mjs",
     "watch": "npm run build:js -- --watch",
     "cifras": "node scripts/actualizar-readme.mjs",
-    "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs scripts/filtros.test.mjs scripts/faq.test.mjs"
+    "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs scripts/filtros.test.mjs scripts/faq.test.mjs scripts/soporte.test.mjs scripts/store-report.test.mjs scripts/github-contribution.test.mjs"
   },
   "devDependencies": {
     "@babel/cli": "^8.0.4",

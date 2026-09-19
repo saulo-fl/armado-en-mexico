@@ -427,21 +427,23 @@
     },
 
     // ─── DENUNCIAS DE CONTENIDO ────────────────────────────
-    addReport(rep) {
+    async addReport(rep) {
       const item = {
         reviewId: String(rep.reviewId || ''),
+        tipo: String(rep.tipo || 'otro'),
+        entidadId: String(rep.entidadId == null ? '' : rep.entidadId),
+        entidadNombre: String(rep.entidadNombre || ''),
+        reviewExcerpt: String(rep.reviewExcerpt || ''),
         motivo: String(rep.motivo || ''),
-        detalle: String(rep.detalle || '').slice(0, 1200),
+        detalle: String(rep.detalle || '').trim(),
         email: String(rep.email || '').trim(),
       };
-      const arr = read(K.reports, []);
-      arr.unshift(Object.assign({
-        id: 'd_' + Date.now(), submittedAt: new Date().toISOString(), status: 'pending',
-      }, item));
-      write(K.reports, arr.slice(0, 500));
-      Store._notify();
-      publicAppend('reports', item);
-      return true;
+      if (!REMOTE.enabled || typeof window.amxEnviarReporte !== 'function') {
+        return { ok: false, status: 0, error: 'sin_backend' };
+      }
+      const result = await window.amxEnviarReporte(REMOTE.base + '/append/reports', item, fetch);
+      if (result.ok) REMOTE.ok = true;
+      return result;
     },
     getReports() { return read(K.reports, []); },
     resolveReport(id) {

@@ -1,0 +1,92 @@
+name: Corregir información de la enciclopedia
+description: Señala un dato factual y aporta fuentes para revisarlo.
+title: "[Corrección]: "
+labels: [documentation]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Este issue será público. No incluyas datos personales ni denuncias sobre reseñas. El equipo revisará las fuentes antes de modificar la web.
+  - type: input
+    id: pagina
+    attributes:
+      label: Página exacta
+      description: URL o ruta donde aparece el dato.
+      placeholder: https://armado.mx/pistolas/ejemplo
+    validations:
+      required: true
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: Tipo de contenido
+      options:
+        - Arma
+        - Accesorio
+        - Munición
+        - Calibre
+        - Legalidad
+        - Preguntas frecuentes
+        - Otro
+    validations:
+      required: true
+  - type: input
+    id: nombre
+    attributes:
+      label: Ficha o sección
+      placeholder: Nombre del producto o apartado
+    validations:
+      required: true
+  - type: textarea
+    id: dato_actual
+    attributes:
+      label: Dato actual
+      description: Copia o describe con precisión lo que parece incorrecto.
+    validations:
+      required: true
+  - type: textarea
+    id: correccion
+    attributes:
+      label: Corrección propuesta
+      description: Indica cuál debería ser el dato y por qué.
+    validations:
+      required: true
+  - type: textarea
+    id: fuentes
+    attributes:
+      label: Fuentes
+      description: Enlaza DOF, Cámara de Diputados, DEFENSA, inventarios DCAM/OTCA, fabricante, manual oficial o fuentes editoriales identificables.
+      placeholder: Una fuente por línea, con título y URL.
+    validations:
+      required: true
+  - type: dropdown
+    id: relacion
+    attributes:
+      label: Relación comercial o institucional
+      description: Declara cualquier relación con la información corregida.
+      options:
+        - Ninguna
+        - Fabricante o marca
+        - Distribuidor o tienda
+        - Club o campo de tiro
+        - Autor o representante de la fuente
+        - Otra relación
+    validations:
+      required: true
+  - type: dropdown
+    id: pull_request
+    attributes:
+      label: ¿Te interesaría aportar la solución mediante un pull request?
+      description: Es opcional y solo procede después de que el equipo confirme el cambio.
+      options:
+        - Sí
+        - Tal vez, necesito orientación
+        - No
+    validations:
+      required: true
+  - type: checkboxes
+    id: derechos
+    attributes:
+      label: Derechos y licencia
+      options:
+        - label: Confirmo que puedo aportar este contenido bajo la licencia correspondiente y que no incluyo material de terceros sin permiso compatible.
+          required: true
