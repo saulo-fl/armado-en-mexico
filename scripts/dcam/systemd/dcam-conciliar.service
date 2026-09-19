@@ -1,0 +1,17 @@
+[Unit]
+Description=Conciliador DCAM — mapea inventario nuevo y abre Draft-PR (main+develop)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=saulo
+Group=saulo
+WorkingDirectory=/home/saulo/apps/dcam-bot/repo
+Environment=DCAM_DIR=/home/saulo/apps/dcam-bot
+Environment=DCAM_TG_ENV=/home/saulo/apps/dcam-bot/telegram.env
+# Ruta ESTABLE fuera del árbol que el propio script resetea con git reset --hard.
+# repo/scripts/dcam/conciliar.sh es la fuente de verdad; esta copia es la que corre.
+ExecStart=/usr/bin/env bash /home/saulo/apps/dcam-bot/infra/conciliar.sh
+Nice=10
+TimeoutStartSec=90min

@@ -276,6 +276,8 @@ def test_documento_cambiado_manda_inventario_cambiado():
         cambiado = [m for m in msgs if m["texto"].startswith("📦 Inventario cambiado DCAM:")]
         assert len(cambiado) == 1 and "archivo" in cambiado[0], msgs
         assert "cambiados: 1" in msgs[-1]["texto"], msgs[-1]["texto"]
+        assert (base / "pendiente-conciliar.json").exists(), "el vigia no dejo la senal"
+        assert "escrita" in msgs[-1]["texto"], msgs[-1]["texto"]
 
 
 if __name__ == "__main__":
