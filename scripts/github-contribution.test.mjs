@@ -6,8 +6,12 @@ const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
 test('el Issue Form pide contexto, fuentes, relación y derechos', () => {
   const yml = read('../.github/ISSUE_TEMPLATE/correccion.yml');
-  for (const id of ['pagina', 'tipo', 'nombre', 'dato_actual', 'correccion', 'fuentes', 'relacion', 'pull_request', 'derechos']) {
+  const requiredIds = ['pagina', 'tipo', 'nombre', 'dato_actual', 'correccion', 'fuentes', 'relacion', 'pull_request', 'derechos'];
+  for (const id of requiredIds) {
     assert.match(yml, new RegExp(`id: ${id}\\b`));
+    const block = yml.split(/\n  - type: /).find((candidate) => new RegExp(`\\bid: ${id}\\b`).test(candidate));
+    assert.ok(block, `no se encontró el bloque del campo ${id}`);
+    assert.match(block, /(?:validations|options):\s*[\s\S]*?required:\s*true/, `el campo ${id} debe ser obligatorio`);
   }
   assert.match(yml, /labels:\s*\[documentation\]/);
   assert.match(yml, /required:\s*true/);

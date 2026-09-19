@@ -2,7 +2,7 @@
 
 ## Correcciones de la enciclopedia
 
-1. Abre primero el formulario público **Corregir información de la enciclopedia** (`correccion.yml`) con la página exacta, el dato actual, la propuesta y sus fuentes.
+1. Abre primero el formulario público **Corregir información de la enciclopedia** (`correccion.yml`) con la página exacta, el dato actual, la propuesta y sus fuentes. Revisa personalmente todos los campos y pulsa **Submit new issue** para enviarlo.
 2. Espera la revisión editorial. Abrir el issue no garantiza que el cambio sea aceptado.
 3. Crea un pull request solo si el cambio fue confirmado o si el issue lo solicita. El PR es opcional.
 
