@@ -1240,75 +1240,66 @@ window.FAQScreen = FAQScreen;
 function MenuScreen({ onNav, onTutorial }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
+
+  // Cada ítem lleva su imagen (silueta webp existente o glifo para los que no tienen asset).
+  // Las siluetas se pintan con mask-image sobre el fondo del folder, al estilo del resto del sitio.
   const items = [
-  { id: 'traumaticas', icon: '◎', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
-  { id: 'accesorios', icon: '▫', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
-  { id: 'municiones', icon: '◉', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
-  { id: 'calibres', icon: '◉', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
-  // Congeladas hasta el lanzamiento: visibles pero sin navegar. Ver PLACEHOLDERS.md.
-  { id: 'campos', icon: '◎', title: 'Campos de tiro (Próximamente)', desc: 'Clubes y polígonos aliados', proximamente: true },
-  { id: 'experiencias', icon: '✦', title: 'Experiencias (Próximamente)', desc: 'Formación y actividades de tiro', proximamente: true },
-  { id: 'legal', icon: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
-  { id: 'soporte', icon: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
-  { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
-  { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
-  { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' }];
+    { id: 'traumaticas', img: 'imagenes/silueta-pistola.webp', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
+    { id: 'accesorios', img: 'imagenes/silueta-cargador.webp', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
+    { id: 'municiones', img: 'imagenes/silueta-municion.webp', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
+    { id: 'calibres', img: 'imagenes/silueta-municion.webp', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
+    { sep: true },
+    { id: 'campos', img: 'imagenes/silueta-rifle.webp', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados', proximamente: true },
+    { id: 'experiencias', img: 'imagenes/silueta-escopeta.webp', title: 'Experiencias', desc: 'Formación y actividades de tiro', proximamente: true },
+    { sep: true },
+    { id: 'legal', glyph: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
+    { id: 'soporte', glyph: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
+    { id: 'faq', glyph: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
+    { id: 'about', img: 'imagenes/isotipo-armado.webp', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
+    { sep: true },
+    { id: 'tutorial', action: 'tutorial', glyph: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
+  ];
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      {/* Único encabezado de la pantalla desde que el header móvil dejó de
-          pintar título: centrado en móvil, al margen en escritorio/tablet. */}
       <div style={{
         fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.amber,
+        fontSize: 12, color: PALETTE.amber,
         letterSpacing: '0.2em', marginBottom: 14,
+        textTransform: 'uppercase',
         textAlign: vp.isMobile ? 'center' : 'left'
-      }}>☰ MÁS</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {items.map((it) =>
-        <button key={it.id} disabled={it.proximamente}
-          onClick={it.proximamente ? undefined : () => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)} style={{
-          background: it.accent ? `linear-gradient(135deg, ${PALETTE.bgCard} 0%, ${PALETTE.bgElev} 100%)` : PALETTE.bgCard,
-          border: `1px solid ${it.accent ? PALETTE.amber : PALETTE.border}`,
-          padding: '14px',
-          cursor: it.proximamente ? 'default' : 'pointer',
-          opacity: it.proximamente ? 0.55 : 1,
-          textAlign: 'left',
-          display: 'flex', alignItems: 'center', gap: 14
-        }}>
-            <span style={{
-            fontSize: 27.5, color: PALETTE.amber,
-            width: 30, textAlign: 'center',
-            fontFamily: 'JetBrains Mono, monospace'
-          }}>{it.icon}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{
-              fontFamily: 'Archivo, sans-serif',
-              fontWeight: 600, fontSize: 16,
-              color: PALETTE.text,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em'
-            }}>{it.title}</div>
-              <div style={window.amxProsa({
-                fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.45, marginTop: 2
-              })}>{it.desc}</div>
-            </div>
-            <span style={{ color: PALETTE.amber, fontSize: 20.5}}>›</span>
-          </button>
-        )}
+      }}>☰ ÍNDICE · MÁS</div>
+
+      <div className="amx-menu-folders">
+        {items.map((it, i) => {
+          if (it.sep) return <hr key={`sep-${i}`} className="amx-menu-sep" />;
+          const proximamente = it.proximamente;
+          const label = proximamente ? `${it.title} (Próximamente)` : it.title;
+          return (
+            <button
+              key={it.id}
+              className={`amx-menu-folder${it.accent ? ' amx-menu-folder--accent' : ''}`}
+              disabled={proximamente}
+              onClick={proximamente ? undefined : () => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)}
+            >
+              <span className="amx-menu-folder-icono">
+                {it.img
+                  ? <img src={it.img} alt="" width="36" height="36" loading="lazy"
+                      style={{ width: 36, height: 36, objectFit: 'contain', opacity: .7 }} />
+                  : <span className="amx-menu-folder-glyph">{it.glyph}</span>}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="amx-menu-folder-titulo">{label}</div>
+                <div className="amx-menu-folder-desc">{it.desc}</div>
+              </div>
+              <span className="amx-menu-folder-flecha">›</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div style={window.amxProsa({
-        marginTop: 30,
-        padding: '14px',
-        background: PALETTE.bgElev,
-        border: `1px dashed ${PALETTE.border}`,
-        fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6
-      })}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', color: PALETTE.amber, fontWeight: 700,
-          letterSpacing: '0.15em', marginBottom: 4, fontSize: 13
-        }}>◆ ARMADO·MX</div>
+      <div className="amx-menu-pie">
+        <strong>◆ ARMADO·MX</strong>
         Catálogo divulgativo. Edición 2026. Contenido editado por Saulo Flores · Armas M&amp;S.
       </div>
     </div>);
