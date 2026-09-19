@@ -567,6 +567,14 @@
   padding: 14px;
   box-shadow: var(--sombra);
 }
+/* Las fotos de las traumáticas no tienen faldón de texto — solo el pozo con
+   la imagen — así que el padding de 14px se ve excesivo y estira la copia.
+   Reducimos a 6px para que la foto ocupe más y se vea como una foto real,
+   no como una tarjeta extendida. */
+.amx-v2 .amx-cotiz-partida .amx-polaroid {
+  padding: 6px;
+  align-self: start;                       /* no estirar la polaroid en el grid */
+}
 @media (min-width: 1024px) {
   /* Giro ESTÁTICO y mínimo, con `transform` (§6 prohíbe animar otra cosa) —
      no hay transición ni animación que desactivar. La caja rotada crece unos
@@ -605,6 +613,20 @@
   width: 92%;
   height: 92%;
   object-fit: contain;
+}
+/* Las traumáticas no tienen faldón de texto, así que la foto puede llenar
+   casi todo el pozo — 96 % en vez de 92 % — y se ve más grande sin
+   perder el marco blanco de la Polaroid. */
+.amx-v2 .amx-cotiz-partida .amx-polaroid-pozo img {
+  width: 96%;
+  height: 96%;
+}
+/* El pozo cuadrado (1:1) deja mucho espacio blanco con fotos apaisadas.
+   Cambiamos a 4:3 para las traumáticas, que es la proporción real de las
+   fotos de producto — se ven como una Polaroid rectangular de verdad, no
+   como un cuadrado con aire a los lados. */
+.amx-v2 .amx-cotiz-partida .amx-polaroid-pozo {
+  aspect-ratio: 4 / 3;
 }
 /* El faldón. Crece si el nombre es largo en vez de recortarlo, así que ninguna
    ficha se queda con el rótulo cortado. */
@@ -803,6 +825,11 @@
 .amx-v2 .amx-sello--civil { color: var(--sello-civil); }
 .amx-v2 .amx-sello--restr { color: var(--sello-restr); }
 .amx-v2 .amx-sello--grande { font-size: 15px; padding: 5px 13px 6px; border-width: 3px; }
+/* El sello de aviso en la cotización traumáticas necesita aire vertical
+   para no aplastarse entre las hojas de arriba y abajo. */
+.amx-v2 .amx-cotiz-pie .amx-sello--grande {
+  margin: var(--e4) 0 var(--e3);
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    LA TARJETA EXPEDIENTE — el formato único de Home y Arsenal
@@ -4872,6 +4899,44 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Specs DENTRO de la polaroid de las traumáticas: fondo semitransparente
+   oscuro, texto claro, compacto — se ven como una placa técnica pegada a
+   la foto, no como una ficha separada. Grid de 2 columnas que cabe en el
+   ancho de la polaroid. */
+.amx-v2 .amx-cotiz-specs--polaroid {
+  background: rgba(0,0,0,.72);
+  color: #fff;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+  margin: 8px 0 0;
+  padding: 8px;
+  border-top: none;
+  border-radius: 2px;
+  font-size: 11px;
+  line-height: 1.3;
+}
+.amx-v2 .amx-cotiz-specs--polaroid dt {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.6);
+  font-weight: 400;
+}
+.amx-v2 .amx-cotiz-specs--polaroid dd {
+  margin: 0;
+  font-weight: 700;
+  font-size: 12px;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+/* La polaroid de las traumáticas es columna flex: foto arriba, specs abajo */
+.amx-v2 .amx-cotiz-partida .amx-polaroid {
+  display: flex;
+  flex-direction: column;
+}
+
 /* El cierre de la partida: precio, existencia y la salida a la tienda. */
 .amx-v2 .amx-cotiz-cierre {
   display: flex;
@@ -4914,6 +4979,16 @@
   letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-cotiz-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--e4);
+}
+@media (min-width: 768px) {
+  .amx-v2 .amx-cotiz-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 .amx-v2 .amx-cotiz-condiciones {
   display: grid;

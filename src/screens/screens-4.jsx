@@ -17,19 +17,13 @@ function TraumaFicha({ p, indice = 1 }) {
 
   return (
     <div>
-      <div className="amx-cotiz-num">Partida {indice}</div>
+      <div className="amx-cotiz-num" aria-hidden="true"></div>
       <div className="amx-cotiz-partida">
-        <div className="amx-cotiz-foto">
-          <img src={p.img} alt={p.nombre} loading="lazy" />
-        </div>
-
-        <div>
-          <div className="amx-cotiz-marca">{p.marca} · {p.tipo}</div>
-          <h3 className="amx-cotiz-modelo">{p.modelo}</h3>
-          <div className="amx-cotiz-nombre">{p.nombre}</div>
-          <p className="amx-cotiz-resumen">{p.resumen}</p>
-
-          <dl className="amx-cotiz-specs">
+        <figure className="amx-polaroid">
+          <span className="amx-polaroid-pozo">
+            <img src={p.img} alt={p.nombre} loading="lazy" />
+          </span>
+          <dl className="amx-cotiz-specs amx-cotiz-specs--polaroid">
             {p.specs.map(([k, v]) => (
               <React.Fragment key={k}>
                 <div>
@@ -39,6 +33,13 @@ function TraumaFicha({ p, indice = 1 }) {
               </React.Fragment>
             ))}
           </dl>
+        </figure>
+
+        <div>
+          <div className="amx-cotiz-marca">{p.marca} · {p.tipo}</div>
+          <h3 className="amx-cotiz-modelo">{p.modelo}</h3>
+          <div className="amx-cotiz-nombre">{p.nombre}</div>
+          <p className="amx-cotiz-resumen">{p.resumen}</p>
 
           <div className="amx-cotiz-municion">
             <span className="amx-cotiz-municion-tit">Munición</span>
@@ -79,23 +80,31 @@ function TraumaLegal() {
 
   return (
     <React.Fragment>
-      <div className="amx-cotiz-pie-tit">§ Marco legal · México — por qué no requieren permiso</div>
+      <div className="amx-cotiz-pie-tit">Marco legal · México — por qué no requieren permiso</div>
 
       <p className="amx-cotiz-resumen">{L.resumen}</p>
 
-      <div className="amx-cotiz-condiciones">
+      <div className="amx-cotiz-grid">
         {L.puntos.map((pt) => (
-          <div key={pt.tit}>
-            <b>{pt.tit}</b>
-            {pt.desc}
+          <div key={pt.tit} className="amx-oficio">
+            <div className="amx-oficio-membrete" aria-hidden="true">
+              <span>Armado en México</span><span>Marco legal</span>
+            </div>
+            <h3 className="amx-oficio-tit">{pt.tit}</h3>
+            <p className="amx-oficio-texto">{pt.desc}</p>
           </div>
         ))}
       </div>
 
-      <div className="amx-cotiz-aviso">
-        <div className="amx-cotiz-aviso-tit">▲ Aviso</div>
-        {L.disclaimer}
-      </div>
+      <section aria-labelledby="cotiz-aviso">
+        <span id="cotiz-aviso" className="amx-sello amx-sello--restr amx-sello--grande">AVISO</span>
+        <div className="amx-oficio">
+          <div className="amx-oficio-membrete" aria-hidden="true">
+            <span>Armado en México</span><span>Aviso</span>
+          </div>
+          <p className="amx-oficio-texto">{L.disclaimer}</p>
+        </div>
+      </section>
     </React.Fragment>
   );
 }
@@ -116,7 +125,6 @@ function TraumaticasScreen({ onNav }) {
             imitan ningún folio de la SEDENA ni llevan iconografía oficial. */}
         <div className="amx-cotiz-membrete">
           <span>Cotización · Armas M&amp;S</span>
-          <span>Folio AT-003 · {productos.length} partidas</span>
         </div>
 
         <h2 className="amx-cotiz-tit">Armas traumáticas</h2>
