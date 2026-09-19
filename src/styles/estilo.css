@@ -5587,3 +5587,288 @@
   flex-shrink: 0;
   color: var(--sello-civil);
 }
+
+/* ── Regla comparativa — regla graduada que enseña dónde cae un calibre ── */
+
+.amx-v2 .amx-regla {
+  font-variant-numeric: tabular-nums;
+}
+.amx-v2 .amx-regla-titulo {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  color: var(--carton-tinta-2);
+  margin-bottom: 6px;
+}
+.amx-v2 .amx-regla-pista {
+  height: 22px;
+  position: relative;
+  background: repeating-linear-gradient(90deg,
+    transparent,
+    transparent 24%,
+    var(--hair) 24%,
+    var(--hair) 25%
+  );
+  border: 0;
+}
+.amx-v2 .amx-regla-cursor {
+  position: absolute;
+  top: 0;
+  left: calc(var(--pos) * 100%);
+  width: 2px;
+  height: 22px;
+  background: var(--acento);
+}
+.amx-v2 .amx-regla-pies {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--carton-tinta-2);
+  margin-top: 4px;
+}
+.amx-v2 .amx-regla-pies b {
+  color: var(--tinta);
+}
+.amx-v2 .amx-regla-fuente {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  color: var(--carton-tinta-2);
+  margin-top: 4px;
+}
+
+/* ── Regla cartucho — cartucho de pie sobre regla graduada en mm ───────── */
+.amx-v2 .amx-reglacart {
+  --alto-cart: 240px;
+}
+@media (max-width: 1023px) {
+  .amx-v2 .amx-reglacart {
+    --alto-cart: 180px;
+  }
+}
+.amx-v2 .amx-reglacart-pozo {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: var(--alto-cart);
+}
+.amx-v2 .amx-reglacart-foto {
+  height: calc(var(--alto-cart) * var(--escala));
+  width: auto;
+  display: block;
+}
+.amx-v2 .amx-reglacart-regla {
+  width: 30px;
+  height: 100%;
+  background: repeating-linear-gradient(to top, var(--hair) 0 1px, transparent 1px var(--paso));
+}
+.amx-v2 .amx-reglacart-pie {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--carton-tinta-2);
+  margin-top: 6px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   GUÍA DE CALIBRES — pantalla /calibres
+
+   Las clases ya tienen className en el JSX; aquí solo viven los estilos.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 .amx-cal-titulo h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  line-height: 1.05;
+  color: var(--tinta);
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-cal-titulo h1 { font-size: 34px; }
+}
+
+.amx-v2 .amx-cal-entrada {
+  margin: 0 0 18px;
+}
+
+.amx-v2 .amx-calchips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+
+.amx-v2 .amx-calchip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--tinta-dim);
+  background: var(--papel);
+  border: none;
+  border-radius: 2px;
+  box-shadow: var(--sombra);
+  cursor: pointer;
+}
+
+.amx-v2 .amx-calchip--on {
+  background: var(--acento);
+  color: var(--tinta-sobre-marca);
+}
+
+.amx-v2 .amx-calchip:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.amx-v2 .amx-cal-pie-mesa {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--tinta-2);
+  margin: 0 0 10px;
+}
+
+.amx-v2 .amx-cal-vacio {
+  padding: 20px 0;
+  color: var(--tinta-2);
+}
+
+.amx-v2 .amx-cal-rejilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+  margin-top: 18px;
+}
+
+.amx-v2 .amx-cal-lecciones {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   FICHA DE CALIBRE — pantalla /calibres/<slug>
+
+   La ficha es una hoja de papel con sombra, no una caja con borde: en este
+   sistema las cosas se separan por superficie y sombra, nunca por una línea
+   de 1px.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.amx-v2 .amx-calficha {
+  background: var(--papel);
+  box-shadow: var(--sombra);
+  padding: 20px;
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-calficha { padding: 28px; }
+}
+
+.amx-v2 .amx-calficha-cabeza {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.amx-v2 .amx-calficha-clase {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--tinta-2);
+}
+
+.amx-v2 .amx-calficha-id {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--tinta);
+  margin: 2px 0 4px;
+  line-height: 1.05;
+}
+@media (min-width: 1024px) {
+  .amx-v2 .amx-calficha-id { font-size: 38px; }
+}
+
+.amx-v2 .amx-calficha-uso {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--acento);
+}
+
+.amx-v2 .amx-calficha-alias {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--tinta-2);
+  margin-top: 6px;
+}
+
+.amx-v2 .amx-calficha-sinsello {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--tinta-2);
+}
+
+.amx-v2 .amx-calficha-specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 4px 16px;
+  margin: 18px 0;
+}
+
+.amx-v2 .amx-calficha-nota {
+  margin-top: 14px;
+}
+
+.amx-v2 .amx-calficha-legal {
+  background: var(--lienzo);
+  padding: 16px;
+  margin-top: 20px;
+}
+
+.amx-v2 .amx-calficha-legal-tit {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .14em;
+  color: var(--tinta-2);
+  margin-bottom: 8px;
+}
+
+.amx-v2 .amx-calficha-legal-art {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--tinta-2);
+  margin: 10px 0 12px;
+}
+
+.amx-v2 .amx-calficha-armas {
+  margin-top: 24px;
+}
+
+.amx-v2 .amx-calficha-arma {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.amx-v2 .amx-calficha-arma:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}

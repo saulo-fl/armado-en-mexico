@@ -1,0 +1,77 @@
+{
+  "_nota": "Cifras verificadas de los 11 calibres nuevos (19-sep-2026). Los largos son la dimension L6 (cartridge maxi) de la ficha TDCC de la C.I.P., leida de cada PDF y contrastada con SAAMI en pulgadas: coinciden al centesimo de mm. Velocidad y energia salen de la ficha del fabricante de una carga comercial corriente, convertidas con 1 ft/s = 0.3048 m/s y 1 ft-lb = 1.3558 J.",
+  "_avisos": [
+    "16 GA: ni SAAMI ni CIP norman el largo del CARTUCHO CARGADO de escopeta; 70 mm es el casco nominal de 2 3/4 in. Se usa 70 por coherencia con 12 GA y 20 GA, que ya arrastran ese mismo criterio en el repo. El cartucho cerrado real mide del orden de 60-65 mm.",
+    "16 GA: su energia va como 'Variable' porque la unica cifra posible seria la de toda la columna de perdigon junta (unos 1,787 J con carga de caza de plomo), que no se compara con la bala unica de un rifle. Ademas varia 1.5x entre cargas del mismo catalogo. Es el mismo criterio que ya usan 12 GA y 20 GA.",
+    "Las velocidades NO son comparables entre calibres: cada fabricante mide en el canon que le conviene (24 in de rifle en el .22-250 y el 6.5 CM, 4 in ventilado en el .357, 4.8 in en el 5.7x28). Sirven como orden de magnitud, no como medicion homogenea. Por eso la regla comparativa de la ficha va sobre energia y no sobre velocidad.",
+    ".357 Magnum y .32 ACP: dentro del mismo calibre hay hasta el doble de energia segun el peso de bala. La cifra es de la carga de referencia citada, no un maximo."
+  ],
+  "calibres": [
+    {
+      "id": ".223 Rem", "mm": 57.40,
+      "velocidad": "~990 m/s", "velocidadMs": 988,
+      "energia": "~1,740 J", "energiaJ": 1738, "retroceso": "Bajo",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Federal AE223 55 gr", "fecha": "2026-09" }
+    },
+    {
+      "id": ".22-250 Rem", "mm": 59.69,
+      "velocidad": "~1,120 m/s", "velocidadMs": 1122,
+      "energia": "~2,240 J", "energiaJ": 2242, "retroceso": "Bajo-Medio",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Hornady V-MAX 55 gr", "fecha": "2026-09" }
+    },
+    {
+      "id": "6.5 Creedmoor", "mm": 71.76,
+      "velocidad": "~825 m/s", "velocidadMs": 823,
+      "energia": "~3,140 J", "energiaJ": 3139, "retroceso": "Medio",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Hornady ELD-X 143 gr", "fecha": "2026-09" }
+    },
+    {
+      "id": "16 GA", "mm": 70,
+      "velocidad": "~355 m/s", "velocidadMs": 355,
+      "energia": "Variable", "energiaJ": null, "retroceso": "Medio-Alto",
+      "fuente": { "nombre": "C.I.P. TAB VII (casco 2¾ in) · Federal Game-Shok 1 oz", "fecha": "2026-09" }
+    },
+    {
+      "id": ".45 ACP", "mm": 32.39,
+      "velocidad": "~255 m/s", "velocidadMs": 255,
+      "energia": "~485 J", "energiaJ": 483, "retroceso": "Medio",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Winchester USA 230 gr FMJ", "fecha": "2026-09" }
+    },
+    {
+      "id": ".357 Magnum", "mm": 40.39,
+      "velocidad": "~380 m/s", "velocidadMs": 378,
+      "energia": "~730 J", "energiaJ": 731, "retroceso": "Alto",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Federal Hydra-Shok 158 gr, cañón 4\"", "fecha": "2026-09" }
+    },
+    {
+      "id": "5.7x28mm", "mm": 40.50,
+      "velocidad": "~530 m/s", "velocidadMs": 530,
+      "energia": "~365 J", "energiaJ": 363, "retroceso": "Bajo",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · FN SS197SR 40 gr, pistola Five-seveN", "fecha": "2026-09" }
+    },
+    {
+      "id": ".22 WMR", "mm": 34.29,
+      "velocidad": "~570 m/s", "velocidadMs": 572,
+      "energia": "~425 J", "energiaJ": 423, "retroceso": "Bajo",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · CCI Maxi-Mag 40 gr, en rifle", "fecha": "2026-09" }
+    },
+    {
+      "id": ".30-30 Win", "mm": 64.77,
+      "velocidad": "~730 m/s", "velocidadMs": 729,
+      "energia": "~2,580 J", "energiaJ": 2579, "retroceso": "Medio",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Federal Power-Shok 150 gr", "fecha": "2026-09" }
+    },
+    {
+      "id": ".32 ACP", "mm": 25.00,
+      "velocidad": "~320 m/s", "velocidadMs": 318,
+      "energia": "~240 J", "energiaJ": 239, "retroceso": "Bajo",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Sellier & Bellot 73 gr FMJ", "fecha": "2026-09" }
+    },
+    {
+      "id": ".38 S&W", "mm": 31.50,
+      "velocidad": "~210 m/s", "velocidadMs": 209,
+      "energia": "~205 J", "energiaJ": 206, "retroceso": "Bajo",
+      "fuente": { "nombre": "C.I.P. TDCC (L6) · Remington WheelGun 146 gr", "fecha": "2026-09" }
+    }
+  ]
+}
