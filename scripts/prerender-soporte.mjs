@@ -17,19 +17,18 @@ export function renderSoporteHtml(c) {
   return `<article class="amx-soporte amx-v2">
 <nav aria-label="Ruta"><a href="/">Inicio</a> › Soporte</nav>
 <header class="amx-soporte-portada">
-<p class="amx-soporte-dymo">SOPORTE</p>
-<h1>${esc(c.titulo)}</h1>
-<p>${esc(c.apertura)}</p>
-<p>${esc(c.alcance)}</p></header>
+<h1 class="amx-dymo">${esc(c.titulo)}</h1>
+<p class="amx-soporte-apertura">${esc(c.apertura)}</p>
+<p class="amx-soporte-alcance">${esc(c.alcance)}</p></header>
 ${hoja('limite-compraventa', c.venta.titulo,
-  `<p>${esc(c.venta.intro)}</p>${lista(c.venta.puntos)}<p>${esc(c.venta.consecuencia)}</p>`,
+  `<p>${esc(c.venta.intro)}</p>${lista(c.venta.puntos)}<p class="amx-soporte-alcance">${esc(c.venta.consecuencia)}</p>`,
   ' amx-soporte-aviso')}
 <section aria-labelledby="normas-comunidad"><h2 id="normas-comunidad">Normas</h2>
 <div class="amx-soporte-reglas">${c.normas.map((n) =>
-  `<section class="amx-soporte-regla"><h3>${esc(n.titulo)}</h3>${lista(n.puntos)}</section>`).join('')}</div></section>
+  `<section class="amx-soporte-regla"><h3><span class="amx-soporte-num">NORMA ${esc(n.numero)}</span>${esc(n.titulo)}</h3>${lista(n.puntos)}</section>`).join('')}</div></section>
 ${hoja('moderacion', 'Cómo se moderan las reseñas', lista(c.moderacion), ' amx-soporte-carbon')}
 ${hoja('denuncia', 'Denunciar una reseña',
-  `<p>${esc(c.denuncia.intro)}</p><p>${esc(c.denuncia.privacidad)}</p>`)}
+  `<p>${esc(c.denuncia.intro)}</p><p class="amx-soporte-alcance">${esc(c.denuncia.privacidad)}</p>`)}
 ${hoja('clasificacion', c.clasificacion.titulo, lista(c.clasificacion.criterios))}
 ${hoja('correccion', c.correccion.titulo,
   `<p>${esc(c.correccion.intro)}</p>${lista(c.correccion.pasos)}` +

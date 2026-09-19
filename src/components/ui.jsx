@@ -3205,53 +3205,6 @@ function TiraFiltros({ uid, orden, mas = [], filtros, valores, onCambiar, precio
     hoja.style.setProperty('--muesca', Math.max(18, Math.min(c.left + c.width / 2 - (h.left + margen + x), ancho - 18)) + 'px');
   }, [abierto]);
 
-// ══════════════════════════════════════════════════════════════
-// REPORTAR ERROR — enlace público a GitHub para correcciones factuales
-// Aparece al final de las fichas de arma, accesorio, munición, calibre,
-// Legalidad y FAQ. NO en Inicio, Arsenal, Comparador, Más, Acerca,
-// Tutorial ni Soporte.
-// ══════════════════════════════════════════════════════════════
-function ReportarError({ tipo, titulo, ruta }) {
-  const href = window.amxCorreccionUrl({ tipo, titulo, ruta });
-  return (
-    <aside className="amx-reportar-error" aria-label="Corregir información" style={{
-      marginTop: 24, padding: '16px 18px',
-      background: 'var(--oficio)', border: '1px solid var(--hair)',
-      borderRadius: 4, color: 'var(--oficio-tinta-2)'
-    }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <strong style={{
-          fontFamily: 'Archivo, sans-serif', fontSize: 15,
-          color: 'var(--tinta)', fontWeight: 700
-        }}>¿Encontraste un dato incorrecto?</strong>
-        <span style={{
-          fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.55
-        }}>
-          La aportación se revisará con sus fuentes antes de modificar la enciclopedia.
-        </span>
-        <small style={{
-          fontFamily: 'var(--sans)', fontSize: 12.5, lineHeight: 1.5,
-          color: 'var(--tinta-dim)'
-        }}>
-          El formulario y lo que escribas serán públicos en GitHub. No incluyas datos personales.
-        </small>
-      </div>
-      <a href={href} target="_blank" rel="noopener noreferrer" style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        marginTop: 10, padding: '10px 14px', minHeight: 44,
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-        letterSpacing: '0.08em', textTransform: 'uppercase',
-        color: 'var(--manila-tinta)', textDecoration: 'underline',
-        textUnderlineOffset: '3px', cursor: 'pointer',
-        border: '1.5px solid var(--manila-tinta)', borderRadius: 3,
-        background: 'transparent', whiteSpace: 'nowrap'
-      }}>
-        Repórtalo <span aria-hidden="true" style={{ fontSize: 16 }}>↗</span>
-      </a>
-    </aside>
-  );
-}
-window.ReportarError = ReportarError;
 
   React.useLayoutEffect(() => {
     const tira = tiraRef.current;
@@ -3391,3 +3344,51 @@ window.ReportarError = ReportarError;
   );
 }
 window.TiraFiltros = TiraFiltros;
+
+// ══════════════════════════════════════════════════════════════
+// REPORTAR ERROR — enlace público a GitHub para correcciones factuales
+// Aparece al final de las fichas de arma, accesorio, munición, calibre,
+// Legalidad y FAQ. NO en Inicio, Arsenal, Comparador, Más, Acerca,
+// Tutorial ni Soporte.
+// ══════════════════════════════════════════════════════════════
+function ReportarError({ tipo, titulo, ruta }) {
+  const href = window.amxCorreccionUrl({ tipo, titulo, ruta });
+  return (
+    <aside className="amx-reportar-error" aria-label="Corregir información" style={{
+      marginTop: 24, padding: '16px 18px',
+      background: 'var(--oficio)', border: '1px solid var(--hair)',
+      borderRadius: 4, color: 'var(--oficio-tinta-2)'
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <strong style={{
+          fontFamily: 'Archivo, sans-serif', fontSize: 15,
+          color: 'var(--tinta)', fontWeight: 700
+        }}>¿Encontraste un dato incorrecto?</strong>
+        <span style={{
+          fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.55
+        }}>
+          La aportación se revisará con sus fuentes antes de modificar la enciclopedia.
+        </span>
+        <small style={{
+          fontFamily: 'var(--sans)', fontSize: 12.5, lineHeight: 1.5,
+          color: 'var(--tinta-dim)'
+        }}>
+          El formulario y lo que escribas serán públicos en GitHub. No incluyas datos personales.
+        </small>
+      </div>
+      <a href={href} target="_blank" rel="noopener noreferrer" style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        marginTop: 10, padding: '10px 14px', minHeight: 44,
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+        color: 'var(--manila-tinta)', textDecoration: 'underline',
+        textUnderlineOffset: '3px', cursor: 'pointer',
+        border: '1.5px solid var(--manila-tinta)', borderRadius: 3,
+        background: 'transparent', whiteSpace: 'nowrap'
+      }}>
+        Repórtalo <span aria-hidden="true" style={{ fontSize: 16 }}>↗</span>
+      </a>
+    </aside>
+  );
+}
+window.ReportarError = ReportarError;

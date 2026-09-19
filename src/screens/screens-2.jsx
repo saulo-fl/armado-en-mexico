@@ -960,125 +960,49 @@ window.AboutScreen = AboutScreen;
 // ════════════════════════════════════════════════════════════════
 function SoportePortada({ contenido }) {
   return (
-    <div className="amx-soporte-portada">
-      <div className="amx-soporte-dymo" style={{
-        display: 'inline-block', background: '#111', color: '#f4efe3',
-        fontFamily: '"JetBrains Mono", monospace', fontSize: 13,
-        letterSpacing: '0.2em', marginBottom: 10, padding: '4px 10px'
-      }}>◈ SOPORTE</div>
-      <h1 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 28,
-        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        lineHeight: 1.1, margin: '8px 0'
-      }}>{contenido.titulo}</h1>
-      <p style={{
-        fontFamily: 'var(--sans)', fontSize: 16, lineHeight: 1.6,
-        color: 'var(--oficio-tinta-2)', marginTop: 12, maxWidth: 620
-      }}>{contenido.apertura}</p>
-      <p style={{
-        fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.5,
-        color: 'var(--tinta-dim)', marginTop: 6
-      }}>{contenido.alcance}</p>
-    </div>
+    <header className="amx-soporte-portada">
+      <window.CintaDymo nivel={1}>{contenido.titulo}</window.CintaDymo>
+      <p className="amx-soporte-apertura">{contenido.apertura}</p>
+      <p className="amx-soporte-alcance">{contenido.alcance}</p>
+    </header>
   );
 }
 
 function SoporteAviso({ aviso }) {
   return (
-    <div className="amx-soporte-aviso" style={{
-      background: 'var(--oficio-2)', borderInlineStart: '6px solid var(--fichero-rojo)',
-      padding: '16px 20px', marginBottom: 24
-    }}>
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--fichero-rojo)',
-        letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 700
-      }}>▲ {aviso.titulo}</div>
-      <div style={window.amxProsa({ fontSize: 15.5, color: 'var(--tinta)' })}>
-        {aviso.intro}
-        <ul style={{ margin: '10px 0 0', paddingLeft: 20 }}>
-          {aviso.puntos.map((p, i) => <li key={i}>{p}</li>)}
-        </ul>
-        <p style={{ marginTop: 10, fontSize: 14, color: 'var(--tinta-dim)' }}>{aviso.consecuencia}</p>
-      </div>
-    </div>
+    <section className="amx-soporte-aviso" aria-labelledby="soporte-limite">
+      <p className="amx-soporte-aviso-tit" id="soporte-limite">▲ {aviso.titulo}</p>
+      <p>{aviso.intro}</p>
+      <ul>{aviso.puntos.map((p, i) => <li key={i}>{p}</li>)}</ul>
+      <p className="amx-soporte-alcance">{aviso.consecuencia}</p>
+    </section>
   );
 }
 
 function SoporteHojaNorma({ norma }) {
   return (
-    <div className="amx-soporte-regla" style={{
-      position: 'relative', padding: '24px 20px',
-      background: 'var(--oficio)', color: 'var(--oficio-tinta-2)',
-      border: '1px solid var(--hair)', borderRadius: 4
-    }}>
-      <h3 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
-        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        margin: '0 0 12px'
-      }}>
-        <span style={{
-          display: 'inline-block', background: 'var(--manila-tinta)', color: 'var(--oficio)',
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 11,
-          padding: '2px 8px', borderRadius: 3, marginRight: 10, letterSpacing: '0.1em'
-        }}>NORMA {norma.numero}</span>
-        {norma.titulo}
-      </h3>
-      <ul style={{ margin: 0, paddingLeft: 20 }}>
-        {norma.puntos.map((p, i) => <li key={i} style={{
-          fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
-          marginBottom: 6
-        }}>{p}</li>)}
-      </ul>
-    </div>
+    <section className="amx-soporte-regla">
+      <h3><span className="amx-soporte-num">NORMA {norma.numero}</span>{norma.titulo}</h3>
+      <ul>{norma.puntos.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    </section>
   );
 }
 
 function SoporteModeracion({ contenido }) {
   return (
-    <div className="amx-soporte-carbon" style={{
-      color: 'var(--oficio-tinta-2)',
-      background: 'color-mix(in srgb, var(--fichero-azul) 13%, var(--oficio))',
-      padding: '20px', marginBottom: 24, borderRadius: 4,
-      border: '1px solid var(--hair)'
-    }}>
-      <h3 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
-        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        margin: '0 0 14px'
-      }}>Cómo se moderan las reseñas</h3>
-      <ul style={{ margin: 0, paddingLeft: 20 }}>
-        {contenido.moderacion.map((p, i) => <li key={i} style={{
-          fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
-          marginBottom: 6
-        }}>{p}</li>)}
-      </ul>
-      <h3 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
-        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        margin: '20px 0 14px'
-      }}>Acciones reales</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+    <section className="amx-soporte-carbon" aria-labelledby="soporte-moderacion">
+      <h3 id="soporte-moderacion">Cómo se moderan las reseñas</h3>
+      <ul>{contenido.moderacion.map((p, i) => <li key={i}>{p}</li>)}</ul>
+      <h3>Acciones reales</h3>
+      <dl className="amx-soporte-acciones">
         {contenido.acciones.map(([n, tit, desc]) => (
-          <div key={n} style={{
-            padding: '10px 12px', background: 'var(--oficio)', borderRadius: 4,
-            border: '1px solid var(--hair)'
-          }}>
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: 'var(--manila-tinta)',
-              marginBottom: 4
-            }}>#{n}</div>
-            <div style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-              color: 'var(--tinta)', marginBottom: 4
-            }}>{tit}</div>
-            <div style={{
-              fontFamily: 'var(--sans)', fontSize: 13, lineHeight: 1.5,
-              color: 'var(--oficio-tinta-2)'
-            }}>{desc}</div>
+          <div key={n} className="amx-soporte-accion">
+            <dt><span className="amx-soporte-num">{n}</span>{tit}</dt>
+            <dd>{desc}</dd>
           </div>
         ))}
-      </div>
-    </div>
+      </dl>
+    </section>
   );
 }
 
@@ -1119,68 +1043,36 @@ function SoporteDenuncia({ reportContext }) {
   const motivos = contenido.motivos.map(([v, l]) => ({ value: v, label: l }));
 
   return (
-    <section className="amx-soporte-carbon" style={{
-      padding: '20px', marginBottom: 24, borderRadius: 4,
-      border: '1px solid var(--hair)'
-    }}>
-      <h3 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
-        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        margin: '0 0 14px'
-      }}>Denunciar una reseña</h3>
-      <p style={{ fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)', marginBottom: 14 }}>
-        {contenido.denuncia.intro}
-      </p>
-      <p style={{ fontFamily: 'var(--sans)', fontSize: 13.5, lineHeight: 1.5, color: 'var(--oficio-tinta-2)', marginBottom: 16 }}>
-        {contenido.denuncia.privacidad}
-      </p>
+    <section className="amx-soporte-carbon" aria-labelledby="soporte-denuncia">
+      <h3 id="soporte-denuncia">Denunciar una reseña</h3>
+      <p>{contenido.denuncia.intro}</p>
+      <p className="amx-soporte-alcance">{contenido.denuncia.privacidad}</p>
 
       {estado.kind === 'success' ? (
-        <div role="status" aria-live="polite" style={{
-          padding: '14px 16px', background: 'var(--oficio)', borderRadius: 4,
-          border: '1px solid var(--sello-civil)', color: 'var(--sello-civil)'
-        }}>
-          <div style={{
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-            marginBottom: 8
-          }}>✓ {contenido.denuncia.exito}</div>
+        <div role="status" aria-live="polite" className="amx-soporte-exito">
+          <p className="amx-soporte-exito-tit">✓ {contenido.denuncia.exito}</p>
         </div>
       ) : (
-        <form onSubmit={enviar} noValidate className="amx-soporte-formato" style={{
-          background: 'var(--oficio)', padding: 16, borderRadius: 4,
-          border: '1px solid var(--hair)'
-        }}>
+        <form onSubmit={enviar} noValidate className="amx-soporte-formato">
           {reportContext && (
-            <div style={{
-              marginBottom: 16, padding: '10px 12px', background: 'var(--beige)',
-              borderRadius: 4, border: '1px solid var(--hair)'
-            }}>
+            <div className="amx-soporte-contexto">
               <div>
-                <strong ref={titleRef} tabIndex="-1" style={{ fontSize: 14, color: 'var(--tinta)' }}>
+                <strong ref={titleRef} tabIndex="-1">
                   {reportContext.entidadNombre || 'Entidad no identificada'}
                 </strong>
-                <button type="button" onClick={borrarContexto} style={{
-                  float: 'right', background: 'none', border: 'none',
-                  color: 'var(--fichero-rojo)', cursor: 'pointer',
-                  fontFamily: 'var(--mono)', fontSize: 11
-                }}>Borrar contexto</button>
+                <button type="button" onClick={borrarContexto} className="amx-soporte-borrar">Borrar contexto</button>
               </div>
-              <div style={{ fontSize: 12, color: 'var(--tinta-dim)', marginTop: 4 }}>
+              <p className="amx-soporte-alcance">
                 {reportContext.tipo} · {reportContext.reviewId || 'captura manual'} · Autor: {reportContext.autor || 'Anónimo'}
-              </div>
+              </p>
               {reportContext.reviewExcerpt && (
-                <blockquote style={{
-                  margin: '8px 0 0', padding: '4px 10px',
-                  borderLeft: '2px solid var(--manila-tinta)',
-                  fontSize: 12, color: 'var(--tinta-dim)',
-                  fontStyle: 'italic'
-                }}>"{reportContext.reviewExcerpt}"</blockquote>
+                <blockquote>"{reportContext.reviewExcerpt}"</blockquote>
               )}
             </div>
           )}
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
-            <div style={{ gridColumn: '1 / -1' }}>
+          <div className="amx-soporte-campos">
+            <div className="amx-soporte-ancho">
               <label className="amx-renglon-etq" htmlFor="soporte-reviewId">Reseña denunciada</label>
               <input id="soporte-reviewId" className="amx-renglon" value={den.reviewId}
                 onChange={(e) => setD('reviewId', e.target.value)}
@@ -1199,39 +1091,26 @@ function SoporteDenuncia({ reportContext }) {
                 onChange={(e) => setD('email', e.target.value)} maxLength={160}
                 placeholder="para contarte en qué quedó" />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div className="amx-soporte-ancho">
               <label className="amx-renglon-etq" htmlFor="soporte-detalle">
-                ¿Qué pasa con la reseña? <span style={{ color: 'var(--fichero-rojo)' }}>*</span>
+                ¿Qué pasa con la reseña? <span className="amx-soporte-req">*</span>
               </label>
               <textarea id="soporte-detalle" className="amx-renglon" value={den.detalle}
                 onChange={(e) => setD('detalle', e.target.value)}
                 rows={3} minLength={20} maxLength={1200} required
-                placeholder="Explica brevemente por qué incumpe las normas." />
+                placeholder="Explica brevemente por qué incumple las normas." />
               <p className="amx-renglon-ayuda" aria-describedby="soporte-detalle-count">
                 {den.detalle.length} / 20 mínimo — {den.detalle.length >= 20 ? '✓ mínimo alcanzado' : 'necesitas más detalle'}
               </p>
             </div>
           </div>
 
-          <button type="submit" disabled={estado.kind === 'submitting'} style={{
-            width: '100%', marginTop: 12,
-            background: estado.kind === 'submitting' ? 'var(--tinta-dim)' : 'var(--manila-tinta)',
-            color: estado.kind === 'submitting' ? 'var(--oficio-tinta-2)' : 'var(--oficio)',
-            border: '1.5px solid var(--manila-tinta)',
-            padding: '13px', minHeight: 48,
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-            letterSpacing: '0.14em', textTransform: 'uppercase',
-            cursor: estado.kind === 'submitting' ? 'not-allowed' : 'pointer'
-          }}>
+          <button type="submit" disabled={estado.kind === 'submitting'} className="amx-soporte-enviar">
             {estado.kind === 'submitting' ? 'Enviando…' : estado.kind === 'error' ? 'Reintentar' : 'Enviar denuncia'}
           </button>
 
           {estado.kind === 'error' && (
-            <div role="alert" style={{
-              marginTop: 10, padding: '10px 12px', background: 'rgba(168,58,42,0.1)',
-              borderRadius: 4, border: '1px solid var(--fichero-rojo)',
-              color: 'var(--fichero-rojo)', fontSize: 14
-            }}>{estado.error}</div>
+            <div role="alert" className="amx-soporte-error">{estado.error}</div>
           )}
         </form>
       )}
@@ -1241,54 +1120,20 @@ function SoporteDenuncia({ reportContext }) {
 
 function SoporteDirectorio({ contenido, onNav }) {
   return (
-    <section style={{ marginBottom: 24 }}>
-      <h3 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
-        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        margin: '0 0 14px'
-      }}>{contenido.clasificacion.titulo}</h3>
-      <ul style={{ margin: 0, paddingLeft: 20, marginBottom: 24 }}>
-        {contenido.clasificacion.criterios.map((p, i) => <li key={i} style={{
-          fontFamily: 'var(--sans)', fontSize: 15, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
-          marginBottom: 6
-        }}>{p}</li>)}
-      </ul>
+    <section className="amx-soporte-cierre">
+      <h3>{contenido.clasificacion.titulo}</h3>
+      <ul>{contenido.clasificacion.criterios.map((p, i) => <li key={i}>{p}</li>)}</ul>
 
-      <h3 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 17,
-        color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-        margin: '0 0 14px'
-      }}>{contenido.correccion.titulo}</h3>
-      <p style={{ fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)', marginBottom: 12 }}>
-        {contenido.correccion.intro}
-      </p>
-      <ol style={{ margin: 0, paddingLeft: 20, marginBottom: 16 }}>
-        {contenido.correccion.pasos.map((p, i) => <li key={i} style={{
-          fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
-          marginBottom: 6
-        }}>{p}</li>)}
-      </ol>
+      <h3>{contenido.correccion.titulo}</h3>
+      <p>{contenido.correccion.intro}</p>
+      <ol>{contenido.correccion.pasos.map((p, i) => <li key={i}>{p}</li>)}</ol>
 
-      <h4 style={{
-        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-        color: 'var(--tinta)', margin: '16px 0 10px'
-      }}>Fuentes aceptables</h4>
-      <ul style={{ margin: 0, paddingLeft: 20, marginBottom: 20 }}>
-        {contenido.correccion.fuentes.map((p, i) => <li key={i} style={{
-          fontFamily: 'var(--sans)', fontSize: 14.5, lineHeight: 1.6, color: 'var(--oficio-tinta-2)',
-          marginBottom: 4
-        }}>{p}</li>)}
-      </ul>
+      <h4>Fuentes aceptables</h4>
+      <ul>{contenido.correccion.fuentes.map((p, i) => <li key={i}>{p}</li>)}</ul>
 
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+      <div className="amx-soporte-directorio">
         {[['legal', '§ Guía legal completa'], ['faq', '? Preguntas frecuentes']].map(([id, txt]) => (
-          <button key={id} type="button" onClick={() => onNav && onNav(id)} style={{
-            flex: '1 1 200px', background: 'transparent', color: 'var(--manila-tinta)',
-            border: '1.5px dashed var(--hair)', padding: '12px', minHeight: 48,
-            fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 13.5,
-            letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer',
-            borderRadius: 4
-          }}>{txt} →</button>
+          <button key={id} type="button" onClick={() => onNav && onNav(id)}>{txt} →</button>
         ))}
       </div>
     </section>
@@ -1302,12 +1147,7 @@ function SoporteScreen({ onNav, reportContext }) {
       <SoportePortada contenido={contenido} />
       <SoporteAviso aviso={contenido.venta} />
       <section aria-labelledby="soporte-normas-titulo">
-        <h2 id="soporte-normas-titulo" className="amx-soporte-seccion-titulo" style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22,
-          color: 'var(--tinta)', textTransform: 'uppercase', letterSpacing: '0.04em',
-          margin: '0 0 16px', padding: '12px 0',
-          borderBottom: '2px solid var(--manila-tinta)'
-        }}>Normas</h2>
+        <h2 id="soporte-normas-titulo">Normas</h2>
         <div className="amx-soporte-reglas">
           {contenido.normas.map((norma) => <SoporteHojaNorma key={norma.numero} norma={norma} />)}
         </div>

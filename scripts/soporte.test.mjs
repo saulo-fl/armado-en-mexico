@@ -127,7 +127,7 @@ test('la acción aparece en seis tipos de detalle y no en listados', () => {
 test('el prerender de Soporte contiene el manual completo sin formulario operativo', async () => {
   const { renderSoporteHtml } = await import('./prerender-soporte.mjs');
   const html = renderSoporteHtml(C);
-  assert.match(html, /<h1>Normas de la comunidad<\/h1>/);
+  assert.match(html, /<h1[^>]*>Normas de la comunidad<\/h1>/);
   assert.match(html, /Todos pueden contribuir a mejorar esta enciclopedia/);
   assert.match(html, /Aquí no se compra ni se vende/);
   for (const norma of C.normas) assert.match(html, new RegExp(norma.titulo));
@@ -136,4 +136,28 @@ test('el prerender de Soporte contiene el manual completo sin formulario operati
   assert.match(html, /href="\/legalidad"/);
   assert.match(html, /href="\/preguntas"/);
   assert.doesNotMatch(html, /<form|type="email"|reviewId/);
+  assert.equal((html.match(/<h1/g) || []).length, 1);
+});
+
+// Un `window.X = X` puede estar escrito sin indentar y aun asi vivir DENTRO de otra
+// funcion: asi entro ReportarError en medio de TiraFiltros, y su export solo corria
+// si antes se renderizaba la tira de filtros. Hasta entonces window.ReportarError
+// era undefined y cada pantalla que lo usa (FAQ, Legalidad, las tres fichas)
+// reventaba con React #130 y se quedaba en blanco. Mirar el texto no basta: hay que
+// mirar el ARBOL.
+test('las primitivas de ui.jsx se exportan a nivel de modulo, no dentro de otra funcion', async () => {
+  const { parse } = await import('@babel/parser');
+  const src = readFileSync(new URL('../src/components/ui.jsx', import.meta.url), 'utf8');
+  const ast = parse(src, { sourceType: 'script', plugins: ['jsx'] });
+  const nivelSuperior = new Set();
+  for (const n of ast.program.body) {
+    if (n.type === 'ExpressionStatement' && n.expression.type === 'AssignmentExpression') {
+      const l = n.expression.left;
+      if (l.type === 'MemberExpression' && l.object.name === 'window') nivelSuperior.add(l.property.name);
+    }
+  }
+  for (const nombre of ['ReportarError', 'CintaDymo', 'TiraFiltros', 'FolderPregunta']) {
+    assert.ok(nivelSuperior.has(nombre),
+      `window.${nombre} no se asigna a nivel de modulo: quedaria undefined hasta que se renderice quien lo envuelve`);
+  }
 });
