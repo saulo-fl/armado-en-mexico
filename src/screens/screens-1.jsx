@@ -206,7 +206,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         }>Categorías</SectionHeader>
 
         {/* Cinco cartas de arma con ilustración completa estilo Lotería mexicana
-            (carta-*.webp) y detrás las de accesorio. Las ilustraciones reemplazan
+            (carta-*.png) y detrás las de accesorio. Las ilustraciones reemplazan
             la estructura de lámina + silueta + número + nombre por una sola imagen
             que contiene todo el diseño. */}
         <div className="amx-loteria-mesa" style={{ marginBottom: 22 }}>

@@ -1209,7 +1209,7 @@ window.ArmaPolaroid = ArmaPolaroid;
 // contorno y el color lo pone el CSS.
 //
 // `ilustracion` es la URL de la ilustración completa estilo Lotería mexicana
-// (carta-pistolas.webp, carta-revolveres.webp, etc.). Cuando se proporciona,
+// (carta-pistola.webp, carta-revolver.webp, etc.). Cuando se proporciona,
 // la carta se muestra como imagen completa y se ocultan el número y el nombre
 // que el componente renderiza por defecto.
 //
