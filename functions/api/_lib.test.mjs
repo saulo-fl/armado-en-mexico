@@ -12,52 +12,46 @@
 // entero en cada carga de página. Sin esta prueba, subir un tope o tocar
 // sanitizeItem rompe la protección en silencio.
 import assert from 'node:assert/strict';
-import { mergeAppend, APPEND_DOMAINS, RESENA_MIN, RESENA_MAX } from './_lib.js';
+import {
+  mergeAppend, APPEND_DOMAINS, RESENA_MIN, RESENA_MAX,
+  normalizeReport, REPORT_MIN, REPORT_MAX,
+} from './_lib.js';
 
 const pesa = (v) => JSON.stringify(v).length;
 let n = 0;
 const ok = (msg) => { n++; console.log('  ok', msg); };
 
-// ── Un objeto anidado descomunal no entra ───────────────────────────────────
+// ── Denuncias: contrato cerrado que no acepta campos arbitrarios ────────────
+const REPORTE_VALIDO = {
+  reviewId: 'r_47', tipo: 'arma', entidadId: 47, entidadNombre: 'Ruger LCP',
+  reviewExcerpt: 'Una reseña pública breve', motivo: 'datos',
+  detalle: 'La reseña contiene el teléfono de una tercera persona.',
+  email: 'ana@example.com', extra: 'no debe persistir',
+};
+
 {
-  const specs = {};
-  for (let i = 0; i < 2500; i++) specs['k' + i] = 'x'.repeat(100);   // ~276 KB
-  const out = mergeAppend('reports', [], { nombre: 'Prueba', specs });
-  assert.equal(out.length, 1, 'el item debe guardarse');
-  assert.equal(out[0].specs, undefined, 'specs de 276 KB debe descartarse');
-  assert.equal(out[0].nombre, 'Prueba', 'los campos normales sobreviven');
-  ok('objeto anidado de 276 KB descartado, el resto del item intacto');
+  const out = normalizeReport(REPORTE_VALIDO);
+  assert.equal(out.ok, true);
+  assert.equal(out.value.extra, undefined);
+  assert.deepEqual(Object.keys(out.value), [
+    'reviewId', 'tipo', 'entidadId', 'entidadNombre', 'reviewExcerpt', 'motivo', 'detalle', 'email',
+  ]);
+  ok('denuncia válida normalizada por lista cerrada');
 }
 
-// ── Un objeto anidado razonable SÍ entra (no romper el caso legítimo) ────────
-{
-  const out = mergeAppend('reports', [], {
-    motivo: 'spam', detalle: { entidad: 'arma', entidadId: 40, resenaId: 'r_1' },
-  });
-  assert.equal(out[0].detalle.entidadId, 40, 'un objeto anidado normal debe conservarse');
-  ok('objeto anidado legítimo conservado');
+for (const [nombre, cambio] of [
+  ['tipo desconocido', { tipo: 'inventado' }],
+  ['motivo desconocido', { motivo: 'spam' }],
+  ['detalle corto', { detalle: 'demasiado corto' }],
+  ['detalle largo', { detalle: 'x'.repeat(REPORT_MAX + 1) }],
+  ['correo inválido', { email: 'no-es-correo' }],
+  ['nombre sobredimensionado', { entidadNombre: 'x'.repeat(121) }],
+]) {
+  const out = normalizeReport({ ...REPORTE_VALIDO, ...cambio });
+  assert.equal(out.ok, false, nombre);
+  assert.deepEqual(mergeAppend('reports', [], { ...REPORTE_VALIDO, ...cambio }), [], nombre);
 }
-
-// ── Un array de objetos gordos tampoco pasa por el hueco del slice(0,100) ───
-{
-  const fotos = Array.from({ length: 100 }, () => ({ b64: 'x'.repeat(1000) }));  // ~100 KB
-  const out = mergeAppend('reports', [], { nombre: 'A', fotos });
-  assert.equal(out[0].fotos, undefined, 'array de 100 KB debe descartarse');
-  ok('array grande descartado (slice por elementos no bastaba)');
-}
-
-// ── La lista acumulada del dominio tiene techo en bytes ─────────────────────
-{
-  let lista = [];
-  for (let i = 0; i < 300; i++) {
-    lista = mergeAppend('reports', lista, { nombre: 'n' + i, texto: 'y'.repeat(5000) });
-  }
-  const bytes = pesa(lista);
-  assert.ok(bytes <= 512 * 1024, `el dominio debe quedar bajo 512 KB, mide ${bytes}`);
-  assert.ok(lista.length > 20, `debe conservar items utiles, conserva ${lista.length}`);
-  assert.equal(lista[0].nombre, 'n299', 'el mas reciente va primero');
-  ok(`dominio acotado a ${bytes} bytes con ${lista.length} items, el mas nuevo primero`);
-}
+ok('denuncias inválidas no modifican el dominio');
 
 // ── Los envíos de «Proponer arma» y «Sugerir cambios» ya no se aceptan ─────
 // Salieron el 13-sep-2026. Si alguien vuelve a añadirlos a APPEND_DOMAINS, la
