@@ -33,13 +33,22 @@
 // ── Inventarios (PDFs oficiales gob.mx) ──────────────────────────────────────
 window.ACCESORIOS_MANUALES = [
   {
+    id: 'man_acc_2026_09_18',
+    nombre: 'Existencias de accesorios DCAM · 18 de septiembre 2026',
+    autoridad: 'DCAM',
+    fecha: '2026-09-18',
+    url: 'inventarios/dcam-accesorios-2026-09-18.pdf',
+    fileName: 'dcam-accesorios-2026-09-18.pdf',
+    primary: true,
+  },
+  {
     id: 'man_acc_2026_09_15',
     nombre: 'Existencias de accesorios DCAM · 15 de septiembre 2026',
     autoridad: 'DCAM',
     fecha: '2026-09-15',
     url: 'inventarios/dcam-accesorios-2026-09-15.pdf',
     fileName: 'dcam-accesorios-2026-09-15.pdf',
-    primary: true,
+    primary: false,
   },
   {
     id: 'man_acc_2026_09_14',
@@ -372,6 +381,10 @@ window.ACCESORIOS = [
   { ...amx(134, "Cargador .380 ACP · CZ P-07 (15 cart.)", "Česká Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 666.10,
     "CARGADOR PARA PISTOLA CAL. 0.380\" MARCA CESKA ZBROJOVKA MOD. CZ P-07, CAP. 15 CARTS.", [], [["Calibre", ".380 ACP"], ["Capacidad", "15 cartuchos"], ["Plataforma", "CZ P-07"]],
     "Cargador de 15 cartuchos para pistola Česká Zbrojovka CZ P-07 en .380 ACP. Existencia y precio del inventario OTCA 26-sep-2025 (Monterrey)."), priceManualId: 'man_acc_2025_09_26' },
+  // ── ALTA del inventario DCAM 18-sep-2026 ──
+  { ...amx(135, "Cargador .22 LR · CZ P-07 Kadet (10 cart.)", "Česká Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 535.91,
+    "CARGADOR CALIBRE .22 LR, MARCA CESKA ZBROJOVKA PARA PISTOLA MODELO CZ P-07 KADET, CON CAPACIDAD DE 10 CARTUCHOS.", [], [["Calibre", ".22 LR"], ["Capacidad", "10 cartuchos"], ["Plataforma", "CZ P-07 Kadet"]],
+    "Cargador de 10 cartuchos para el kit de conversión .22 LR de la pistola Česká Zbrojovka CZ P-07 Kadet. Existencia y precio del inventario DCAM (18-sep-2026)."), priceManualId: 'man_acc_2026_09_18' },
 ];
 
 // ── COMPATIBILIDAD ACCESORIO ↔ ARMA (14-sep-2026) ────────────────────────────
@@ -422,6 +435,7 @@ const ACC_COMPAT = {
   132: { armas: [] },                  // Tanfoglio FT-9-FS: no hay ficha
   133: { armas: [] },                  // Galil ACE 21/22: la ACE 21N del catálogo usa STANAG
   134: { armas: [8] },                 // CZ P-07 .380
+  135: { armas: [217] },               // CZ P-07 Kadet .22 LR
   201: { tipos: ['carabina','rifle','escopeta'], riel: true }, // MEPRO MOR: óptica de riel Picatinny, solo armas con `riel` (data.js)
   202: { armas: [] },                  // MEPRO GLS: mira de lanzagranadas 40 mm; no hay ficha
   301: { armas: [100, 223] },          // Culata TSK para DT11/DT10
@@ -452,7 +466,7 @@ const ACC_CORTO = {
   125: 'Browning 1911-22',     126: 'OPT VM G2 12 GA',     127: 'OPT VM G2 20 GA',
   128: 'Beretta PX4',          129: 'Taurus PT58',         130: 'Browning Buck Mark',
   131: 'CZ 457',               132: 'Tanfoglio FT-9',      133: 'IWI Galil ACE',
-  134: 'CZ P-07',
+  134: 'CZ P-07',              135: 'CZ P-07 Kadet',
   201: 'Mepro MOR',            202: 'Mepro GLS',
   301: 'Culata DT11',
   401: 'Mossberg 500',         402: 'Clips Rhino .38',
@@ -484,6 +498,7 @@ const ACC_TRAMO = {
   128: ['pistola', '9mm'],       129: ['pistola', '.380 ACP'],  130: ['pistola', '.22 LR'],
   131: ['rifle', '.22 LR'],      132: ['pistola', '.380 ACP'],  133: ['rifle', '5.56'],
   134: ['pistola', '.380 ACP'],
+  135: ['pistola', '.22 LR'],
 };
 window.ACCESORIOS.forEach((a) => {
   const t = ACC_TRAMO[a.id];
@@ -600,51 +615,53 @@ const JUL = 'man_acc_2026_07_06', JULd = '2026-07-06';
 const S11 = 'man_acc_2026_09_11', S11d = '2026-09-11';
 const S14 = 'man_acc_2026_09_14', S14d = '2026-09-14';
 const S15 = 'man_acc_2026_09_15', S15d = '2026-09-15';
+const S18 = 'man_acc_2026_09_18', S18d = '2026-09-18';
 
 window.ACCESORIOS_PRICE_HISTORY = {
-  101: [_h(OCT, 665.4, OCTd, 18), _h(JUL, 608.16, JULd, 8), _h(S11, 590.63, S11d, 4), _h(S14, 590.58, S14d, 4), _h(S15, 596.04, S15d, 4)],
-  102: [_h(OCT, 332.7, OCTd, 46), _h(JUL, 304.08, JULd, 44), _h(S11, 295.32, S11d, 44), _h(S14, 295.29, S14d, 44), _h(S15, 298.02, S15d, 44)],
-  103: [_h(OCT, 138.62, OCTd, 20), _h(JUL, 126.70, JULd, 20), _h(S11, 123.05, S11d, 20), _h(S14, 123.04, S14d, 20), _h(S15, 124.18, S15d, 20)],
-  104: [_h(OCT, 841.81, OCTd, 39), _h(JUN, 1303.22, JUNd, 20), _h(JUN18, 761.73, JUN18d, 8), _h(JUL, 1304.78, JULd, 20)],
-  105: [_h(OCT, 362.63, OCTd, 8), _h(JUL, 324.75, JULd, 6), _h(S11, 320.50, S11d, 6), _h(S14, 319.48, S14d, 6), _h(S15, 321.02, S15d, 6)],
-  106: [_h(SEP, 555.08, SEPd, 18), _h(OCT, 554.5, OCTd, 5), _h(JUN18, 498.49, JUN18d, 10), _h(JUL, 506.80, JULd, 9), _h(S11, 492.19, S11d, 5), _h(S14, 492.15, S14d, 5), _h(S15, 496.7, S15d, 5)],
-  107: [_h(SEP, 555.08, SEPd, 17), _h(OCT, 554.5, OCTd, 51), _h(JUN18, 498.49, JUN18d, 13), _h(JUL, 506.80, JULd, 22), _h(S11, 492.19, S11d, 20), _h(S14, 492.15, S14d, 20), _h(S15, 496.7, S15d, 20)],
-  108: [_h(OCT, 554.5, OCTd, 37), _h(JUL, 506.80, JULd, 65), _h(S11, 492.19, S11d, 60), _h(S14, 492.15, S14d, 60), _h(S15, 496.7, S15d, 60)],
+  101: [_h(OCT, 665.4, OCTd, 18), _h(JUL, 608.16, JULd, 8), _h(S11, 590.63, S11d, 4), _h(S14, 590.58, S14d, 4), _h(S15, 596.04, S15d, 4), _h(S18, 598.11, S18d, 4)],
+  102: [_h(OCT, 332.7, OCTd, 46), _h(JUL, 304.08, JULd, 44), _h(S11, 295.32, S11d, 44), _h(S14, 295.29, S14d, 44), _h(S15, 298.02, S15d, 44), _h(S18, 299.06, S18d, 44)],
+  103: [_h(OCT, 138.62, OCTd, 20), _h(JUL, 126.70, JULd, 20), _h(S11, 123.05, S11d, 20), _h(S14, 123.04, S14d, 20), _h(S15, 124.18, S15d, 20), _h(S18, 124.61, S18d, 20)],
+  104: [_h(OCT, 841.81, OCTd, 39), _h(JUN, 1303.22, JUNd, 20), _h(JUN18, 761.73, JUN18d, 8), _h(JUL, 1304.78, JULd, 20), _h(S18, 743.69, S18d, 30)],
+  105: [_h(OCT, 362.63, OCTd, 8), _h(JUL, 324.75, JULd, 6), _h(S11, 320.50, S11d, 6), _h(S14, 319.48, S14d, 6), _h(S15, 321.02, S15d, 6), _h(S18, 320.36, S18d, 6)],
+  106: [_h(SEP, 555.08, SEPd, 18), _h(OCT, 554.5, OCTd, 5), _h(JUN18, 498.49, JUN18d, 10), _h(JUL, 506.80, JULd, 9), _h(S11, 492.19, S11d, 5), _h(S14, 492.15, S14d, 5), _h(S15, 496.7, S15d, 5), _h(S18, 498.43, S18d, 3)],
+  107: [_h(SEP, 555.08, SEPd, 17), _h(OCT, 554.5, OCTd, 51), _h(JUN18, 498.49, JUN18d, 13), _h(JUL, 506.80, JULd, 22), _h(S11, 492.19, S11d, 20), _h(S14, 492.15, S14d, 20), _h(S15, 496.7, S15d, 20), _h(S18, 498.43, S18d, 20)],
+  108: [_h(OCT, 554.5, OCTd, 37), _h(JUL, 506.80, JULd, 65), _h(S11, 492.19, S11d, 60), _h(S14, 492.15, S14d, 60), _h(S15, 496.7, S15d, 60), _h(S18, 498.43, S18d, 60)],
   109: [_h(OCT, 723.95, OCTd, 8), _h(JUL, 661.68, JULd, 1)],
   110: [_h(OCT, 621.04, OCTd, 5), _h(JUN18, 558.31, JUN18d, 6)],
-  111: [_h(SEP, 1054.65, SEPd, 8), _h(OCT, 1053.55, OCTd, 40), _h(JUN18, 947.12, JUN18d, 4), _h(S11, 935.17, S11d, 26), _h(S14, 935.09, S14d, 26), _h(S15, 943.74, S15d, 26)],
-  112: [_h(SEP, 701.44, SEPd, 5), _h(OCT, 693.12, OCTd, 42), _h(S11, 615.24, S11d, 19), _h(S14, 615.19, S14d, 19), _h(S15, 620.88, S15d, 19)],
+  111: [_h(SEP, 1054.65, SEPd, 8), _h(OCT, 1053.55, OCTd, 40), _h(JUN18, 947.12, JUN18d, 4), _h(S11, 935.17, S11d, 26), _h(S14, 935.09, S14d, 26), _h(S15, 943.74, S15d, 26), _h(S18, 947.01, S18d, 26)],
+  112: [_h(SEP, 701.44, SEPd, 5), _h(OCT, 693.12, OCTd, 42), _h(S11, 615.24, S11d, 19), _h(S14, 615.19, S14d, 19), _h(S15, 620.88, S15d, 19), _h(S18, 623.04, S18d, 19)],
   113: [_h(OCT, 543.41, OCTd, 70), _h(JUN, 488.85, JUNd, 1)],
-  114: [_h(OCT, 368.86, OCTd, 36), _h(JUN, 368.86, JUNd, 36), _h(JUL, 368.86, JULd, 36), _h(S11, 368.86, S11d, 36), _h(S14, 368.86, S14d, 36), _h(S15, 368.86, S15d, 36)],
-  115: [_h(OCT, 546.2, OCTd, 18), _h(JUN, 546.2, JUNd, 18), _h(JUL, 546.20, JULd, 18), _h(S11, 546.20, S11d, 18), _h(S14, 546.20, S14d, 18), _h(S15, 546.2, S15d, 18)],
-  116: [_h(OCT, 9426.46, OCTd, 5), _h(JUN, 8479.99, JUNd, 5), _h(JUL, 8615.57, JULd, 5), _h(S11, 8367.29, S11d, 5), _h(S14, 8366.56, S14d, 5), _h(S15, 8443.96, S15d, 5)],
-  117: [_h(OCT, 6931.22, OCTd, 2), _h(JUN, 6235.29, JUNd, 1), _h(JUL, 6334.98, JULd, 1), _h(S11, 6152.42, S11d, 1), _h(S14, 6151.88, S14d, 1), _h(S15, 6208.79, S15d, 1)],
-  201: [_h(OCT, 29111.11, OCTd, 11), _h(JUL, 26606.91, JULd, 11), _h(S11, 25840.17, S11d, 10), _h(S14, 25837.89, S14d, 10), _h(S15, 26076.92, S15d, 10)],
-  202: [_h(OCT, 24675.13, OCTd, 5), _h(JUL, 22552.52, JULd, 5), _h(S11, 21902.62, S11d, 5), _h(S14, 21900.69, S14d, 5), _h(S15, 22103.3, S15d, 5)],
-  301: [_h(OCT, 6475.47, OCTd, 1), _h(JUN, 5792.08, JUNd, 1), _h(JUL, 5799.04, JULd, 1), _h(S11, 5723.24, S11d, 1), _h(S14, 5705.00, S14d, 1), _h(S15, 5732.46, S15d, 1)],
-  401: [_h(OCT, 5045.93, OCTd, 10), _h(JUN, 4539.29, JUNd, 10), _h(JUL, 4611.86, JULd, 10), _h(S11, 4478.96, S11d, 10), _h(S14, 4478.57, S14d, 10), _h(S15, 4520.0, S15d, 10)],
-  402: [_h(OCT, 809.43, OCTd, 5), _h(JUN, 724.01, JUNd, 5), _h(JUL, 724.88, JULd, 5), _h(S11, 715.40, S11d, 5), _h(S14, 713.12, S14d, 5), _h(S15, 716.56, S15d, 5)],
+  114: [_h(OCT, 368.86, OCTd, 36), _h(JUN, 368.86, JUNd, 36), _h(JUL, 368.86, JULd, 36), _h(S11, 368.86, S11d, 36), _h(S14, 368.86, S14d, 36), _h(S15, 368.86, S15d, 36), _h(S18, 368.86, S18d, 36)],
+  115: [_h(OCT, 546.2, OCTd, 18), _h(JUN, 546.2, JUNd, 18), _h(JUL, 546.20, JULd, 18), _h(S11, 546.20, S11d, 18), _h(S14, 546.20, S14d, 18), _h(S15, 546.2, S15d, 18), _h(S18, 546.20, S18d, 18)],
+  116: [_h(OCT, 9426.46, OCTd, 5), _h(JUN, 8479.99, JUNd, 5), _h(JUL, 8615.57, JULd, 5), _h(S11, 8367.29, S11d, 5), _h(S14, 8366.56, S14d, 5), _h(S15, 8443.96, S15d, 5), _h(S18, 8473.29, S18d, 5)],
+  117: [_h(OCT, 6931.22, OCTd, 2), _h(JUN, 6235.29, JUNd, 1), _h(JUL, 6334.98, JULd, 1), _h(S11, 6152.42, S11d, 1), _h(S14, 6151.88, S14d, 1), _h(S15, 6208.79, S15d, 1), _h(S18, 6230.36, S18d, 1)],
+  201: [_h(OCT, 29111.11, OCTd, 11), _h(JUL, 26606.91, JULd, 11), _h(S11, 25840.17, S11d, 10), _h(S14, 25837.89, S14d, 10), _h(S15, 26076.92, S15d, 10), _h(S18, 26167.51, S18d, 10)],
+  202: [_h(OCT, 24675.13, OCTd, 5), _h(JUL, 22552.52, JULd, 5), _h(S11, 21902.62, S11d, 5), _h(S14, 21900.69, S14d, 5), _h(S15, 22103.3, S15d, 5), _h(S18, 22180.08, S18d, 5)],
+  301: [_h(OCT, 6475.47, OCTd, 1), _h(JUN, 5792.08, JUNd, 1), _h(JUL, 5799.04, JULd, 1), _h(S11, 5723.24, S11d, 1), _h(S14, 5705.00, S14d, 1), _h(S15, 5732.46, S15d, 1), _h(S18, 5720.71, S18d, 1)],
+  401: [_h(OCT, 5045.93, OCTd, 10), _h(JUN, 4539.29, JUNd, 10), _h(JUL, 4611.86, JULd, 10), _h(S11, 4478.96, S11d, 10), _h(S14, 4478.57, S14d, 10), _h(S15, 4520.0, S15d, 10), _h(S18, 4535.70, S18d, 10)],
+  402: [_h(OCT, 809.43, OCTd, 5), _h(JUN, 724.01, JUNd, 5), _h(JUL, 724.88, JULd, 5), _h(S11, 715.40, S11d, 5), _h(S14, 713.12, S14d, 5), _h(S15, 716.56, S15d, 5), _h(S18, 715.09, S18d, 5)],
   // Datos reales del inventario DCAM 3-oct-2025 (EXIST_ACCESORIOS). OTCA 26-sep pendiente de conciliar.
   118: [_h(SEP, 580.17, SEPd, 9), _h(JUN18, 521.02, JUN18d, 3)],
-  119: [_h(SEP, 233.13, SEPd, 10), _h(JUN, 209.51, JUNd, 23), _h(JUN18, 209.36, JUN18d, 13), _h(JUL, 212.86, JULd, 23), _h(S11, 206.72, S11d, 19), _h(S14, 206.70, S14d, 19), _h(S15, 208.62, S15d, 19)],
+  119: [_h(SEP, 233.13, SEPd, 10), _h(JUN, 209.51, JUNd, 23), _h(JUN18, 209.36, JUN18d, 13), _h(JUL, 212.86, JULd, 23), _h(S11, 206.72, S11d, 19), _h(S14, 206.70, S14d, 19), _h(S15, 208.62, S15d, 19), _h(S18, 209.34, S18d, 17)],
   // ── Nuevos accesorios DCAM 16-jun-2026 ──
-  120: [_h(JUN, 467.70, JUNd, 18), _h(JUL, 475.17, JULd, 14), _h(S11, 461.48, S11d, 2), _h(S14, 461.44, S14d, 2), _h(S15, 465.71, S15d, 2)],
-  121: [_h(JUN, 467.70, JUNd, 31), _h(JUL, 475.17, JULd, 29), _h(S11, 461.48, S11d, 20), _h(S14, 461.44, S14d, 20), _h(S15, 465.71, S15d, 20)],
-  122: [_h(JUN, 467.70, JUNd, 44), _h(JUL, 475.17, JULd, 42), _h(S11, 461.48, S11d, 40), _h(S14, 461.44, S14d, 40), _h(S15, 465.71, S15d, 40)],
-  123: [_h(JUN, 577.82, JUNd, 30), _h(JUL, 578.51, JULd, 30), _h(S11, 570.95, S11d, 30), _h(S14, 569.13, S14d, 30), _h(S15, 571.87, S15d, 30)],
+  120: [_h(JUN, 467.70, JUNd, 18), _h(JUL, 475.17, JULd, 14), _h(S11, 461.48, S11d, 2), _h(S14, 461.44, S14d, 2), _h(S15, 465.71, S15d, 2), _h(S18, 467.33, S18d, 32)],
+  121: [_h(JUN, 467.70, JUNd, 31), _h(JUL, 475.17, JULd, 29), _h(S11, 461.48, S11d, 20), _h(S14, 461.44, S14d, 20), _h(S15, 465.71, S15d, 20), _h(S18, 467.33, S18d, 48)],
+  122: [_h(JUN, 467.70, JUNd, 44), _h(JUL, 475.17, JULd, 42), _h(S11, 461.48, S11d, 40), _h(S14, 461.44, S14d, 40), _h(S15, 465.71, S15d, 40), _h(S18, 467.33, S18d, 40)],
+  123: [_h(JUN, 577.82, JUNd, 30), _h(JUL, 578.51, JULd, 30), _h(S11, 570.95, S11d, 30), _h(S14, 569.13, S14d, 30), _h(S15, 571.87, S15d, 30), _h(S18, 570.70, S18d, 30)],
   124: [_h(JUN, 530.09, JUNd, 2), _h(JUN18, 529.07, JUN18d, 10), _h(JUL, 530.73, JULd, 2)],
-  125: [_h(JUN, 623.53, JUNd, 29), _h(JUN18, 618.96, JUN18d, 1), _h(JUL, 633.50, JULd, 27), _h(S11, 615.24, S11d, 27), _h(S14, 615.19, S14d, 27), _h(S15, 620.88, S15d, 27)],
-  126: [_h(JUN, 977.69, JUNd, 20), _h(JUL, 993.32, JULd, 20), _h(S11, 964.70, S11d, 20), _h(S14, 964.61, S14d, 20), _h(S15, 973.54, S15d, 20)],
-  127: [_h(JUN, 977.69, JUNd, 6), _h(JUL, 993.32, JULd, 6), _h(S11, 964.70, S11d, 6), _h(S14, 964.61, S14d, 6), _h(S15, 973.54, S15d, 6)],
+  125: [_h(JUN, 623.53, JUNd, 29), _h(JUN18, 618.96, JUN18d, 1), _h(JUL, 633.50, JULd, 27), _h(S11, 615.24, S11d, 27), _h(S14, 615.19, S14d, 27), _h(S15, 620.88, S15d, 27), _h(S18, 623.04, S18d, 27)],
+  126: [_h(JUN, 977.69, JUNd, 20), _h(JUL, 993.32, JULd, 20), _h(S11, 964.70, S11d, 20), _h(S14, 964.61, S14d, 20), _h(S15, 973.54, S15d, 20), _h(S18, 976.92, S18d, 20)],
+  127: [_h(JUN, 977.69, JUNd, 6), _h(JUL, 993.32, JULd, 6), _h(S11, 964.70, S11d, 6), _h(S14, 964.61, S14d, 6), _h(S15, 973.54, S15d, 6), _h(S18, 976.92, S18d, 6)],
   128: [_h(JUN18, 619.95, JUN18d, 16)],
-  129: [_h(JUN18, 521.02, JUN18d, 12)],
-  130: [_h(JUN18, 623.11, JUN18d, 13), _h(JUL, 633.50, JULd, 29), _h(S11, 615.24, S11d, 19), _h(S14, 615.19, S14d, 19), _h(S15, 620.88, S15d, 19)],
-  131: [_h(JUN18, 1121.59, JUN18d, 16), _h(JUL, 1140.30, JULd, 37), _h(S11, 1107.44, S11d, 11), _h(S14, 1107.34, S14d, 11), _h(S15, 1117.58, S15d, 11)],
+  129: [_h(JUN18, 521.02, JUN18d, 12), _h(S18, 520.96, S18d, 30)],
+  130: [_h(JUN18, 623.11, JUN18d, 13), _h(JUL, 633.50, JULd, 29), _h(S11, 615.24, S11d, 19), _h(S14, 615.19, S14d, 19), _h(S15, 620.88, S15d, 19), _h(S18, 623.04, S18d, 19)],
+  131: [_h(JUN18, 1121.59, JUN18d, 16), _h(JUL, 1140.30, JULd, 37), _h(S11, 1107.44, S11d, 11), _h(S14, 1107.34, S14d, 11), _h(S15, 1117.58, S15d, 11), _h(S18, 1121.46, S18d, 20)],
   // ── Nuevos accesorios DCAM 11-sep-2026 ──
-  132: [_h(S11, 2.56, S11d, 3, 2.56), _h(S14, 2.56, S14d, 3, 2.56), _h(S15, 2.58, S15d, 3, 2.58)], // errata DCAM continua ($2.58); sin precio anterior se publica el del PDF
-  133: [_h(S11, 664.46, S11d, 15), _h(S14, 664.40, S14d, 15), _h(S15, 670.55, S15d, 15)],
+  132: [_h(S11, 2.56, S11d, 3, 2.56), _h(S14, 2.56, S14d, 3, 2.56), _h(S15, 2.58, S15d, 3, 2.58), _h(S18, 2.59, S18d, 3, 2.59)], // errata DCAM continua ($2.58); sin precio anterior se publica el del PDF
+  133: [_h(S11, 664.46, S11d, 15), _h(S14, 664.40, S14d, 15), _h(S15, 670.55, S15d, 15), _h(S18, 672.88, S18d, 15)],
   // ── Separado en la revisión del 13-sep-2026 (antes, registro OTCA de la 113) ──
   134: [_h(SEP, 666.1, SEPd, 35)],
+  135: [_h(S18, 535.91, S18d, 20)],
 };
 
 // ── Helpers (auto-contenidos; no tocan el store de armas) ────────────────────
