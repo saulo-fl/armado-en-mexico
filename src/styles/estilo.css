@@ -5324,3 +5324,90 @@
   flex-shrink: 0;
   color: var(--sello-civil);
 }
+
+/* ── Regla comparativa — regla graduada que enseña dónde cae un calibre ── */
+
+.amx-v2 .amx-regla {
+  font-variant-numeric: tabular-nums;
+}
+.amx-v2 .amx-regla-titulo {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  color: var(--carton-tinta-2);
+  margin-bottom: 6px;
+}
+.amx-v2 .amx-regla-pista {
+  height: 22px;
+  position: relative;
+  background: repeating-linear-gradient(90deg,
+    transparent,
+    transparent 24%,
+    var(--hair) 24%,
+    var(--hair) 25%
+  );
+  border: 0;
+}
+.amx-v2 .amx-regla-cursor {
+  position: absolute;
+  top: 0;
+  left: calc(var(--pos) * 100%);
+  width: 2px;
+  height: 22px;
+  background: var(--acento);
+}
+.amx-v2 .amx-regla-pies {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--carton-tinta-2);
+  margin-top: 4px;
+}
+.amx-v2 .amx-regla-pies b {
+  color: var(--tinta);
+}
+.amx-v2 .amx-regla-fuente {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  color: var(--carton-tinta-2);
+  margin-top: 4px;
+}
+
+/* ── Regla cartucho — cartucho de pie sobre regla graduada en mm ───────── */
+.amx-v2 .amx-reglacart {
+  --alto-cart: 240px;
+}
+@media (max-width: 1023px) {
+  .amx-v2 .amx-reglacart {
+    --alto-cart: 180px;
+  }
+}
+.amx-v2 .amx-reglacart-pozo {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: var(--alto-cart);
+}
+.amx-v2 .amx-reglacart-foto {
+  height: calc(var(--alto-cart) * var(--escala));
+  width: auto;
+  display: block;
+}
+.amx-v2 .amx-reglacart-regla {
+  width: 30px;
+  height: 100%;
+  background: repeating-linear-gradient(to top, var(--hair) 0 1px, transparent 1px var(--paso));
+}
+.amx-v2 .amx-reglacart-pie {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--carton-tinta-2);
+  margin-top: 6px;
+}

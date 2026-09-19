@@ -46,6 +46,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /arsenal-hub.js
   Cache-Control: public, max-age=0, must-revalidate
+/calibres.js
+  Cache-Control: public, max-age=0, must-revalidate
 /filtros.js
   Cache-Control: public, max-age=0, must-revalidate
 /ui.js
