@@ -56,17 +56,17 @@ Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.
    `:focus-visible` siempre visible · `prefers-reduced-motion` desactiva todo movimiento.
 4. Móvil manda. Medir en 360px antes de dar nada por bueno.
 
-## Git y conflictos
+<!-- Copia literal de ~/dotfiles/instrucciones/AGENTS.md § «Git — ramas y conflictos».
+     github.com no ve ese disco, por eso está duplicada. La captura horaria de HEFESTO
+     compara las dos; si editas una, edita la otra. -->
 
-Las reglas generales (merge y nunca rebase sobre una rama publicada, resolver cortando por
-número de línea, qué comprobar al cerrar) están en las instrucciones globales de Saulo
-—`~/dotfiles/instrucciones/AGENTS.md`, sección «Git — ramas y conflictos»—. GitHub Copilot
-no las hereda, así que el resumen es: **merge hacia tu rama, nunca rebase; corta por línea
-en vez de reescribir el bloque; y conserva los dos lados cuando ambos añadieron al final.**
+## Git — ramas y conflictos
 
-Lo propio de este repo: un conflicto en `estilo.css` entre dos secciones nuevas casi nunca
-es semántico, es de vecindad. Ambas suelen añadir al final del archivo sin pisarse ninguna
-regla; comprueba los selectores antes de descartar nada.
+- Para traer `main`/`develop` a **tu** rama ya publicada: `merge` hacia tu rama, nunca `rebase`. Rebasar la reescribe y obliga a `push --force`, prohibido arriba; además multiplica el conflicto: uno por merge, uno por cada commit de la rama en rebase. El merge en sentido contrario, hacia `main`, sigue necesitando el OK de Saulo. Cuidado con `git pull`: si el repo tiene `pull.rebase=true` rebasa solo — usa `git fetch` y luego `git merge origin/<rama>`.
+- En un conflicto, `HEAD` es donde estás parado, no lo que traes. En `rebase`, `cherry-pick`, `revert` y `stash pop` eso invierte `ours` y `theirs` respecto a lo que esperas. Confirma de quién es cada lado antes de borrar nada.
+- Resuelve **cortando por número de línea**, no reescribiendo el bloque de memoria: localiza los marcadores, corta los trozos (`sed -n` en APOLO, `Get-Content | Select-Object -Skip -First` en HEFESTO) y reensambla. Reproducir cientos de líneas a mano sale mal y se queda a medias.
+- Si los dos lados añadieron al final del mismo archivo, casi siempre lo correcto es conservar **los dos bloques**, uno tras otro. Comprueba si de verdad se pisan antes de descartar uno.
+- Cierra así: `git grep -nE '^(<<<<<<<|>>>>>>>) '` en cero y `git ls-files -u` vacío —hacen falta los dos: si alguien hizo `git add` del archivo con los marcadores dentro, `ls-files -u` sale vacío igual—, la comprobación que tenga el proyecto (build, test o linter; si no tiene, dilo) y `git diff --stat origin/<rama-base>...HEAD` para ver qué archivos cambiaron. Si aparece con cientos de líneas uno que no tocaste, lo rompiste tú: finales de línea.
 
 ## Antes de decir que está hecho
 
