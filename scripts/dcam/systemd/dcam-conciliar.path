@@ -1,0 +1,10 @@
+[Unit]
+Description=Observa la señal del vigía DCAM y dispara la conciliación
+
+[Path]
+# El vigía escribe pendiente-conciliar.json cuando baja existencias nuevas.
+PathModified=/home/saulo/apps/dcam-bot/pendiente-conciliar.json
+Unit=dcam-conciliar.service
+
+[Install]
+WantedBy=multi-user.target
