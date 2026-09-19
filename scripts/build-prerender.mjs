@@ -25,6 +25,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
+import { renderSoporteHtml } from './prerender-soporte.mjs';
 
 const SITIO = 'https://armado.mx';
 const RAIZ = process.cwd();
@@ -42,12 +43,18 @@ mkdirSync(OUT, { recursive: true });
 const win = {};
 const ctx = createContext({ window: win, console });
 ctx.window = win;
-for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js',
+for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
                  'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
   runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
 const ARMAS = win.DB || [], ACCESORIOS = win.ACCESORIOS || [], MUNICIONES = win.MUNICIONES || [];
 if (!ARMAS.length) throw new Error('No se cargaron las armas: revisa data.js');
+
+// Verificar contenido de Soporte
+const SOPORTE = win.AMX_SOPORTE_CONTENT;
+if (!SOPORTE || !SOPORTE.normas || SOPORTE.normas.length !== 4) {
+  throw new Error('No se cargó el contenido completo de Soporte');
+}
 
 // ─── 1b. Fecha real de cada artículo, para el lastmod del sitemap ───────────
 // NO sale de git. Cloudflare Pages clona en superficial, así que
@@ -451,7 +458,8 @@ const FIJAS = [
   { ruta: 'traumaticas', titulo: 'Armas traumáticas — defensa menos letal sin permiso SEDENA', enSitemap: true,
     desc: 'Dispositivos de defensa menos letal accionados por CO₂: no son armas de fuego y no requieren permiso ante la SEDENA.' },
   { ruta: 'soporte', titulo: 'Soporte y normas de la comunidad', enSitemap: true,
-    desc: 'Qué se puede publicar en las reseñas, cómo denunciar contenido y cómo se modera. Catálogo divulgativo: aquí no se compran ni se venden armas.' },
+    desc: 'Qué se puede publicar en las reseñas, cómo denunciar contenido y cómo se modera. Catálogo divulgativo: aquí no se compran ni se venden armas.',
+    cuerpo: renderSoporteHtml(SOPORTE) },
   { ruta: 'preguntas', titulo: 'Preguntas frecuentes sobre armas legales en México', enSitemap: true,
     desc: 'Dudas habituales sobre licencias, calibres permitidos, portación y trámite ante la SEDENA.' },
   // CONGELADAS hasta el lanzamiento: la app sirve una pantalla «Próximamente».
@@ -475,13 +483,16 @@ const FIJAS = [
     desc: 'Índice de secciones de Armado en México.' },
 ];
 for (const p of FIJAS) {
+  // Si la entrada ya tiene `cuerpo` (ej. soporte con renderSoporteHtml),
+  // úsalo tal cual; de lo contrario, genera el HTML genérico.
+  const cuerpo = p.cuerpo || `<article>
+<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(p.titulo)}</nav>
+<h1>${esc(p.titulo)}</h1><p>${esc(p.desc)}</p></article>`;
   emitir(p.ruta, {
     titulo: `${p.titulo} | Armado en México`, desc: p.desc, noindex: p.noindex,
     jsonld: { '@context': 'https://schema.org',
       '@graph': [migas([{ nombre: 'Inicio', ruta: '' }, { nombre: p.titulo }])] },
-    cuerpo: `<article>
-<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(p.titulo)}</nav>
-<h1>${esc(p.titulo)}</h1><p>${esc(p.desc)}</p></article>`,
+    cuerpo,
   });
   paginas.push({ ruta: p.ruta, enSitemap: p.enSitemap });
 }

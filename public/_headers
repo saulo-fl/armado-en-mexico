@@ -42,6 +42,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /store.js
   Cache-Control: public, max-age=0, must-revalidate
+/soporte.js
+  Cache-Control: public, max-age=0, must-revalidate
 /cotejo.js
   Cache-Control: public, max-age=0, must-revalidate
 /arsenal-hub.js
@@ -71,6 +73,8 @@
 /screens-tutorial.js
   Cache-Control: public, max-age=0, must-revalidate
 /data.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-soporte.js
   Cache-Control: public, max-age=0, must-revalidate
 /data-extra.js
   Cache-Control: public, max-age=0, must-revalidate

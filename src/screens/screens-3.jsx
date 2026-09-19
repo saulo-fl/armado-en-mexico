@@ -149,6 +149,8 @@ function CalibresScreen({ onNav, onAbrirCalibre }) {
           </window.FolderPregunta>
         ))}
       </div>
+
+      <window.ReportarError tipo="calibres" titulo="Guía de calibres" ruta="/calibres" />
     </div>
   );
 }
@@ -254,6 +256,11 @@ function CalibreScreen({ calibreId, onOpenArma, onNav }) {
           </div>
         ) : null}
       </div>
+
+      {/* Viene del rediseño de soporte (#242): ahora que cada calibre tiene su
+          propia dirección, la corrección apunta a la ficha y no a un ancla. */}
+      <window.ReportarError tipo="calibre" titulo={cal.id}
+        ruta={'/calibres/' + window.amxSlug(cal.id)} />
     </div>
   );
 }

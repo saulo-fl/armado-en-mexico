@@ -225,6 +225,19 @@ function App() {
   const [history, setHistory] = useStateApp([]);
   const skipPush = useRefApp(false);
 
+  // Contexto de denuncia: solo en memoria, se borra al salir de /soporte
+  const [reportContext, setReportContext] = useStateApp(null);
+
+  const openReviewReport = (context) => {
+    setHistory((h) => [...h, { screen, productId, accesorioId, municionId, catalogFilter }]);
+    setReportContext(context);
+    setScreen('soporte');
+  };
+
+  useEffectApp(() => {
+    if (screen !== 'soporte') setReportContext(null);
+  }, [screen]);
+
   // URL ↔ pantalla: empuja una nueva dirección al cambiar de pantalla. Dentro del
   // comparador, cambiar o quitar un arma REEMPLAZA la dirección en vez de apilar
   // una por toque; y al llegar por un enlace con un slug que no existe, la
@@ -259,6 +272,7 @@ function App() {
       setMunicionId(s.municionId);
       setCalibreId(s.calibreId);
       setCatalogFilter(s.catalogFilter);
+      setReportContext(null);
       // En el comparador manda la selección EN MEMORIA, no la de la dirección:
       // la entrada del historial guarda las armas de cuando se escribió, y al
       // volver con «atrás» pisaba lo marcado después en otra ficha (se veía el
@@ -472,6 +486,7 @@ function App() {
       onOpenAccesorio={openAccesorio}
       onOpenMunicion={openMunicion}
       onNav={navigate}
+      onReportReview={openReviewReport}
       compareIds={compareIds}
       toggleCompare={toggleCompare} />;
   } else if (screen === 'compare') {
@@ -489,7 +504,7 @@ function App() {
   } else if (screen === 'faq') {
     content = <window.FAQScreen />;
   } else if (screen === 'soporte') {
-    content = <window.SoporteScreen onNav={navTab} />;
+    content = <window.SoporteScreen onNav={navTab} reportContext={reportContext} />;
   } else if (screen === 'menu') {
     content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
   } else if (screen === 'calibres') {
@@ -511,7 +526,7 @@ function App() {
     content = <window.AccesoriosScreen initialFilter={catalogFilter} onOpenAccesorio={openAccesorio}
       onCategoria={(id) => setCatalogFilter(id === 'all' ? null : { categoria: id })} />;
   } else if (screen === 'accesorio') {
-    content = <window.AccesorioFicha accesorioId={accesorioId} onOpenArma={openArma} onNav={navigate} compareIds={compareIds} />;
+    content = <window.AccesorioFicha accesorioId={accesorioId} onOpenArma={openArma} onNav={navigate} onReportReview={openReviewReport} compareIds={compareIds} />;
   } else if (screen === 'municiones') {
     content = <window.MunicionesScreen initialFilter={catalogFilter} onOpenMunicion={openMunicion} onNav={navigate} />;
   } else if (screen === 'municion') {
