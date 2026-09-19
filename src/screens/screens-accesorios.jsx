@@ -28,7 +28,7 @@ function HomeAccesoriosSection({ onNav }) {
   const CARTAS_ACCESORIO = {
     cargadores: 'carta-cargadores.webp',
     opticas: 'carta-opticas.webp',
-    empunaduras: 'carta-empuñaduras.webp',
+    empunaduras: 'carta-empunaduras.webp',
     refacciones: 'carta-refacciones.webp',
   };
 
