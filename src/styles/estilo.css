@@ -3063,6 +3063,269 @@
   color: var(--oficio-tinta-2);
   cursor: not-allowed;
 }
+
+/* Botón "Denunciar" en cada reseña publicada */
+.amx-v2 .amx-opinion-denunciar {
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--oficio-tinta-2);
+  font: 600 12px/1.2 var(--mono);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* ── SOPORTE — manual de convivencia + formato de denuncia ────────────────── */
+/* El manual es una SUPERFICIE FÍSICA, como la polaroid y el folder manila: su
+   papel no cambia con el tema (spec: «las superficies físicas conservarán sus
+   colores de papel en tema oscuro»). Por eso aquí NO entra ningún token que gire
+   —ni --tinta, ni --tinta-dim, ni --papel—: sobre un papel constante, en tema
+   oscuro se volverían tinta clara sobre papel claro. La tinta de este bloque es
+   --manila-tinta (16.65:1) para los títulos y --oficio-tinta-2 (7.47:1) para el
+   cuerpo, medidas sobre --oficio y válidas en los dos temas.
+
+   Hubo un parche que redefinía --oficio dentro de .amx-soporte para el modo
+   oscuro: arreglaba los fondos y dejaba invisibles 18 textos que usaban --oficio
+   como TINTA sobre sello negro. No volver a esa vía. */
+.amx-soporte {
+  width: min(100% - 32px, 920px);
+  margin: 0 auto;
+  padding: 22px 0 96px;
+  color: var(--oficio-tinta-2);
+}
+.amx-soporte-portada,
+.amx-soporte-regla,
+.amx-soporte-formato {
+  background: var(--oficio);
+  color: var(--oficio-tinta-2);
+}
+.amx-soporte-portada { position: relative; padding: clamp(22px, 5vw, 48px); }
+
+/* Tipografía por ELEMENTO, no por clase: el prerender emite el mismo HTML
+   semántico sin clases sueltas, así que hereda esta piel sin duplicar nada. */
+.amx-soporte h1 { margin: 8px 0; }
+.amx-soporte h2,
+.amx-soporte h3,
+.amx-soporte h4 {
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--manila-tinta);
+}
+.amx-soporte h2 {
+  font-size: 22px;
+  margin: 0 0 16px;
+  padding: 12px 0;
+  border-bottom: 2px solid var(--manila-tinta);
+}
+/* El h2 de seccion es el unico titulo que flota sobre el LIENZO de la app y no
+   sobre papel: su tinta tiene que girar con el tema, al reves que todo lo demas
+   de este bloque. Los h2 que el prerender emite dentro de una hoja no entran
+   aqui porque llevan .amx-soporte-regla encima. */
+.amx-soporte > section > h2 {
+  color: var(--tinta);
+  border-bottom-color: var(--tinta);
+}
+.amx-soporte h3 { font-size: 17px; margin: 0 0 12px; }
+.amx-soporte h4 { font-size: 15px; margin: 16px 0 10px; text-transform: none; }
+.amx-soporte p,
+.amx-soporte li {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--oficio-tinta-2);
+}
+.amx-soporte p { margin: 0 0 12px; }
+.amx-soporte ul,
+.amx-soporte ol { margin: 0 0 16px; padding-inline-start: 20px; }
+.amx-soporte li + li { margin-top: 6px; }
+.amx-soporte a { color: var(--manila-tinta); }
+
+/* El aviso principal. El rojo es el de SELLO (--sello-restr, 6.42:1 sobre el
+   oficio), no --fichero-rojo: ese es un rojo pálido para fondos oscuros y aquí
+   se quedaba en 2:1. */
+.amx-soporte-aviso {
+  background: var(--oficio-2);
+  border-inline-start: 6px solid var(--sello-restr);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.amx-soporte-aviso-tit {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--sello-restr);
+  margin-bottom: 8px;
+}
+
+/* Las cuatro hojas de normas. */
+.amx-soporte-reglas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.amx-soporte-regla {
+  position: relative;
+  padding: 24px 20px;
+  border: 1px solid var(--hair);
+  border-radius: 4px;
+}
+.amx-soporte-num {
+  display: inline-block;
+  margin-inline-end: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--manila-tinta);
+  color: var(--oficio);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+}
+/* La hoja de copia al carbón: moderación y formato de denuncia. */
+.amx-soporte-carbon {
+  padding: 20px;
+  margin-bottom: 24px;
+  border: 1px solid var(--hair);
+  border-radius: 4px;
+  color: var(--oficio-tinta-2);
+  background: color-mix(in srgb, var(--fichero-azul) 13%, var(--oficio));
+}
+.amx-soporte-acciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.amx-soporte-accion {
+  padding: 10px 12px;
+  background: var(--oficio);
+  border: 1px solid var(--hair);
+  border-radius: 4px;
+}
+.amx-soporte-accion dt {
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--manila-tinta);
+  margin-bottom: 4px;
+}
+.amx-soporte-accion dd {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--oficio-tinta-2);
+}
+
+/* El formato desprendible. */
+.amx-soporte-formato { padding: 16px; border: 1px solid var(--hair); border-radius: 4px; }
+.amx-soporte-campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.amx-soporte-campos .amx-soporte-ancho { grid-column: 1 / -1; }
+.amx-soporte-formato input,
+.amx-soporte-formato select,
+.amx-soporte-formato textarea,
+.amx-soporte-formato button { min-height: 44px; }
+.amx-soporte-formato label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--oficio-tinta-2);
+}
+.amx-soporte-req { color: var(--sello-restr); }
+.amx-soporte-enviar {
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px;
+  background: var(--manila-tinta);
+  color: var(--oficio);
+  border: 1.5px solid var(--manila-tinta);
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.amx-soporte-enviar[disabled] {
+  background: var(--oficio-tinta-2);
+  border-color: var(--oficio-tinta-2);
+  cursor: not-allowed;
+}
+.amx-soporte-error {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--sello-restr);
+  border-radius: 4px;
+  color: var(--sello-restr);
+}
+.amx-soporte-exito {
+  padding: 14px 16px;
+  background: var(--oficio);
+  border: 1px solid var(--sello-civil);
+  border-radius: 4px;
+  color: var(--sello-civil);
+}
+.amx-soporte-contexto {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: var(--beige);
+  border: 1px solid var(--hair);
+  border-radius: 4px;
+}
+.amx-soporte-contexto blockquote {
+  margin: 8px 0 0;
+  padding: 4px 10px;
+  border-inline-start: 2px solid var(--manila-tinta);
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Jerarquia menor: la linea de alcance, la privacidad y el pie del contexto. */
+.amx-soporte-apertura { font-size: 16px; max-width: 62ch; }
+.amx-soporte-alcance { font-size: 13.5px; line-height: 1.5; }
+.amx-soporte-exito-tit { font-family: Archivo, sans-serif; font-weight: 700; font-size: 15px; margin: 0; color: var(--sello-civil); }
+.amx-soporte-borrar { float: right; min-height: 0; padding: 0; background: none; border: 0; cursor: pointer; font-family: var(--mono); font-size: 11px; color: var(--sello-restr); }
+.amx-soporte-cierre {
+  margin-bottom: 24px;
+  padding: 24px 20px;
+  background: var(--oficio);
+  color: var(--oficio-tinta-2);
+  border: 1px solid var(--hair);
+  border-radius: 4px;
+}
+
+/* El directorio del cierre. */
+.amx-soporte-directorio { display: flex; gap: 10px; flex-wrap: wrap; }
+.amx-soporte-directorio button {
+  flex: 1 1 200px;
+  min-height: 48px;
+  padding: 12px;
+  background: transparent;
+  color: var(--manila-tinta);
+  border: 1.5px dashed var(--hair);
+  border-radius: 4px;
+  font-family: Archivo, sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* El único corte estructural, a 1024px: las cuatro hojas pasan a 2 × 2. */
+@media (min-width: 1024px) {
+  .amx-soporte-reglas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .amx-v2 .amx-comentarios-enviado { padding-top: var(--e4); }
 .amx-v2 .amx-comentarios-enviado .amx-sello { color: var(--sello-civil); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; }
 .amx-v2 .amx-comentarios-enviado p { margin: var(--e4) 0 0; font-family: var(--sans); font-size: 15.5px; line-height: 1.6; }

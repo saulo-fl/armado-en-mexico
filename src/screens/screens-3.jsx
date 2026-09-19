@@ -181,6 +181,7 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
     </div>
   );
   return (
+    <React.Fragment>
     <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, display: 'flex', alignItems: 'stretch', minHeight: vp.isDesktop ? CARTUCHO_FICHA_MAXH.desktop + 28 : CARTUCHO_FICHA_MAXH.mobile + 24 }}>
       <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '18px 20px' : '14px' }}>
         {/* título + sistema */}
@@ -228,6 +229,12 @@ function CaliberFicha({ cal, onOpenArma, vp }) {
       </div>
       <CartuchoSlot cal={cal} vp={vp} />
     </div>
+
+    <article id={'calibre-' + window.amxSlug(cal.id)} className="amx-calibre-ficha" style={{ marginTop: 12 }}>
+      <window.ReportarError tipo="calibre" titulo={cal.id}
+        ruta={'/calibres#calibre-' + window.amxSlug(cal.id)} />
+    </article>
+    </React.Fragment>
   );
 }
 

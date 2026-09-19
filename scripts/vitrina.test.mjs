@@ -111,11 +111,11 @@ test('un cargador sin tramo válido deja la sección sin tramos y no se pierde',
   }
 });
 
-test('el catálogo real: 34 cargadores en 9 tramos; Jericho en 9mm y MR1 en .223 Rem', () => {
+test('el catálogo real: 35 cargadores en 9 tramos; Jericho en 9mm y MR1 en .223 Rem', () => {
   const s = window.accesoriosVitrina('cargadores')[0];
-  assert.equal(s.piezas.length, 34);
+  assert.equal(s.piezas.length, 35);
   assert.deepEqual(s.tramos.map((t) => [t.label, t.piezas.length]), [
-    ['Pistolas · .22 LR', 4], ['Pistolas · .380 ACP', 7], ['Pistolas · 9mm', 10], ['Pistolas · .40 S&W', 1],
+    ['Pistolas · .22 LR', 5], ['Pistolas · .380 ACP', 7], ['Pistolas · 9mm', 10], ['Pistolas · .40 S&W', 1],
     ['Rifles · .22 LR', 4], ['Rifles · .223 Rem', 1], ['Rifles · 5.56', 5],
     ['Escopetas · 12 GA', 1], ['Escopetas · 20 GA', 1],
   ]);

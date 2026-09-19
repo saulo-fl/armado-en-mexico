@@ -1286,6 +1286,13 @@ function ReportsTab() {
                 <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.textDim, marginBottom: 6 }}>
                   Señala: {d.reviewId}
                 </div>}
+              <div style={{ marginBottom: 8, padding: '8px 10px', background: P.bg, border: `1px solid ${P.border}`, fontSize: 12 }}>
+                <div style={{ marginBottom: 4 }}>{d.entidadNombre || 'Entidad no identificada'}</div>
+                <div style={{ color: P.textDim, fontFamily: 'JetBrains Mono, monospace', fontSize: 10 }}>
+                  {String(d.tipo || 'otro')} · {d.entidadId || 'sin id'} · {d.reviewId || 'captura manual'}
+                </div>
+                {d.reviewExcerpt && <blockquote style={{ margin: '6px 0 0', padding: '4px 10px', borderLeft: `2px solid ${P.amber}`, color: P.textDim, fontSize: 11 }}>{d.reviewExcerpt}</blockquote>}
+              </div>
               <div style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.text,
                 lineHeight: 1.65, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', marginBottom: 9
