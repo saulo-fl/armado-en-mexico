@@ -4124,6 +4124,8 @@
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--por-fila), minmax(0, 1fr));
+  --mesa-superficie: var(--mesa-madera);
+  --mesa-canto-sombra: 0 4px 6px -3px rgba(23, 27, 25, .4);
 }
 .amx-v2 .amx-mesa-fila::after {
   content: '';
@@ -4131,7 +4133,8 @@
   left: 0; right: 0; bottom: 0;
   z-index: 0;
   height: 24%;
-  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
+  background: var(--mesa-superficie) 0 0 / auto 100% repeat-x;
+  box-shadow: var(--mesa-canto-sombra);
 }
 .amx-v2 .amx-mesa-fila .amx-puesto { z-index: 1; }            /* el puesto entero, sobre la tabla */
 .amx-v2 .amx-mesa-fila .amx-puesto::after { content: none; }  /* sin la tabla propia del Home */
@@ -4299,7 +4302,12 @@
 /* CALIBRE — la repisa de la vitrina convertida en mostrador: una sola tabla que
    se desliza también en escritorio (en la vitrina, desde 1024 px, se parte en
    filas) y sin el marco de la vitrina. El cartucho mide lo que su largo real. */
-.amx-v2 .amx-mostrador { --alto-foto: 150px; margin: 0; padding: 0 0 8px; }
+.amx-v2 .amx-mostrador {
+  --alto-foto: 150px;
+  --mesa-superficie: var(--mesa-madera);
+  margin: 0;
+  padding: 0 0 8px;
+}
 /* En móvil la mesa llega al borde derecho de la pantalla: asoma el siguiente
    calibre y se lee que la mesa sigue (a 390 px cabían tres justos y nada invitaba
    a deslizar). */
@@ -4314,7 +4322,7 @@
    fotos, y la madera trae la cubierta en su 80 % de arriba (de ahí el `/ .8`). */
 .amx-v2 .amx-mostrador .amx-repisa-carril::before { content: none; }
 .amx-v2 .amx-mostrador .amx-repisa-carril {
-  background: var(--mesa-madera)
+  background: var(--mesa-superficie)
     0 calc(10px + var(--alto-foto) - var(--fondo-repisa)) / auto calc((var(--fondo-repisa) + 8px) / .8) repeat-x;
 }
 /* El ancho de la celda sale del de la pantalla para que en cualquier teléfono se
