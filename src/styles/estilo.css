@@ -3101,12 +3101,63 @@
   background: var(--oficio);
   color: var(--oficio-tinta-2);
 }
+.amx-soporte-cabecera {
+  --manila-escala: .38;
+  --manila-luz: 1;
+  position: relative;
+  isolation: isolate;
+  margin-bottom: clamp(42px, 7vw, 68px);
+  padding:
+    calc(120px * var(--manila-escala) + 22px)
+    clamp(18px, 4vw, 38px)
+    calc(60px * var(--manila-escala) + 30px);
+  color: var(--manila-tinta);
+}
+.amx-soporte-cabecera::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-style: solid;
+  border-width: 0;
+  border-image-source: url(imagenes/folder-manila.webp);
+  border-image-slice: 140 60 70 370 fill;
+  border-image-width:
+    calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+    calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
+  filter: brightness(var(--manila-luz))
+          drop-shadow(0 1px 2px rgba(23, 27, 25, .16))
+          drop-shadow(0 8px 16px rgba(23, 27, 25, .20));
+}
+.amx-soporte-cabecera-rotulo {
+  position: absolute;
+  top: calc(18px * var(--manila-escala));
+  left: calc(40px * var(--manila-escala));
+  width: calc(290px * var(--manila-escala));
+  height: calc(86px * var(--manila-escala));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--carton-tinta-2);
+}
 .amx-soporte-portada {
   position: relative;
-  padding: clamp(28px, 6vw, 56px) clamp(22px, 6vw, 58px);
-  border-top: 8px solid var(--marca);
-  border-inline-start: clamp(12px, 2.5vw, 22px) solid var(--marca);
-  box-shadow: 0 1px 0 rgba(23, 27, 25, .18), 0 10px 22px -20px rgba(23, 27, 25, .8);
+  z-index: 1;
+  min-height: clamp(248px, 34vw, 310px);
+  padding: clamp(30px, 5vw, 48px) clamp(24px, 6vw, 58px) clamp(36px, 6vw, 58px);
+  background-color: var(--fichero);
+  background-image: url(imagenes/ficha-biblioteca.webp);
+  background-position: 50% 50%;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 2px 3px rgba(23, 27, 25, .22));
+  transform: rotate(-.25deg);
 }
 .amx-soporte-portada .amx-dymo { margin-bottom: clamp(20px, 4vw, 34px); }
 
@@ -3158,11 +3209,14 @@
    oficio), no --fichero-rojo: ese es un rojo pálido para fondos oscuros y aquí
    se quedaba en 2:1. */
 .amx-soporte-aviso {
+  position: relative;
+  z-index: 2;
   background: var(--oficio-2);
   border-inline-start: 8px solid var(--sello-restr);
   padding: clamp(20px, 4vw, 30px) clamp(20px, 5vw, 42px);
-  margin: -1px clamp(0px, 2.5vw, 22px) clamp(36px, 6vw, 58px);
-  box-shadow: 0 8px 16px -16px rgba(23, 27, 25, .75);
+  margin: clamp(-28px, -3vw, -18px) clamp(10px, 4vw, 34px) 0;
+  box-shadow: 0 2px 3px rgba(23, 27, 25, .16), 0 8px 16px -12px rgba(23, 27, 25, .42);
+  transform: rotate(.18deg);
 }
 .amx-soporte-aviso-tit {
   display: inline-block;
@@ -3336,7 +3390,7 @@
 .amx-soporte-portada .amx-soporte-alcance {
   margin: 0;
   padding-top: 16px;
-  border-top: 1px dashed var(--hair);
+  border-top: 1px solid var(--fichero-azul);
 }
 .amx-soporte-exito-tit { font-family: Archivo, sans-serif; font-weight: 700; font-size: 15px; margin: 0; color: var(--sello-civil); }
 .amx-soporte-borrar { float: right; min-height: 0; padding: 0; background: none; border: 0; cursor: pointer; font-family: var(--mono); font-size: 11px; color: var(--sello-restr); }
@@ -3371,12 +3425,22 @@
 /* El único corte estructural, a 1024px: las cuatro hojas pasan a 2 × 2. */
 @media (min-width: 1024px) {
   .amx-soporte-reglas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .amx-soporte-cabecera { --manila-escala: .5; }
   .amx-soporte-acciones { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 480px) {
   .amx-soporte { width: calc(100% - 16px); }
-  .amx-soporte-portada { padding-inline: 18px; }
-  .amx-soporte-aviso { margin-inline: 0; }
+  .amx-soporte-cabecera {
+    --manila-escala: .32;
+    padding-inline: 12px;
+  }
+  .amx-soporte-cabecera-rotulo { font-size: 9px; }
+  .amx-soporte-portada {
+    min-height: 0;
+    padding: 28px 20px 38px;
+    background-size: auto 100%;
+  }
+  .amx-soporte-aviso { margin-inline: 6px; }
   .amx-soporte-regla { padding: 20px 16px; }
   .amx-soporte-carbon { padding: 20px 14px; box-shadow: 4px 4px 0 color-mix(in srgb, var(--fichero-azul) 38%, var(--oficio)); }
   .amx-soporte-formato { padding: 18px 14px; }

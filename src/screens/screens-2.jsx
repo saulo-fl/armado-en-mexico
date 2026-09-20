@@ -1144,8 +1144,11 @@ function SoporteScreen({ onNav, reportContext }) {
   const contenido = window.AMX_SOPORTE_CONTENT;
   return (
     <main className="amx-soporte">
-      <SoportePortada contenido={contenido} />
-      <SoporteAviso aviso={contenido.venta} />
+      <div className="amx-soporte-cabecera">
+        <span className="amx-soporte-cabecera-rotulo" aria-hidden="true">Comunidad</span>
+        <SoportePortada contenido={contenido} />
+        <SoporteAviso aviso={contenido.venta} />
+      </div>
       <section className="amx-soporte-seccion-normas" aria-labelledby="soporte-normas-titulo">
         <h2 id="soporte-normas-titulo">Normas</h2>
         <div className="amx-soporte-reglas">
