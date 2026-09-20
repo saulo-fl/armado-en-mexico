@@ -26,7 +26,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
 import { renderSoporteHtml } from './prerender-soporte.mjs';
-import { renderLegalHtml } from './prerender-legal.mjs';
+import { renderLegalHtml, renderEntrevistaHtml } from './prerender-legal.mjs';
 
 const SITIO = 'https://armado.mx';
 const RAIZ = process.cwd();
@@ -45,12 +45,14 @@ const win = {};
 const ctx = createContext({ window: win, console });
 ctx.window = win;
 for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
-                 'data-legal.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
+                 'data-legal.js', 'data-entrevista.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
   runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
 runInContext(readFileSync(join(SRC, 'lib', 'legal.js'), 'utf8'), ctx, { filename: 'legal.js' });
 const LEGAL = win.AMX_LEGAL;
 if (!LEGAL || !LEGAL.requisitos || LEGAL.requisitos.length === 0) throw new Error('data-legal.js no cargó');
+const ENTREVISTA = win.AMX_ENTREVISTA;
+if (!ENTREVISTA || !ENTREVISTA.preguntas || !ENTREVISTA.preguntas.length) throw new Error('data-entrevista.js no cargó');
 const ARMAS = win.DB || [], ACCESORIOS = win.ACCESORIOS || [], MUNICIONES = win.MUNICIONES || [];
 if (!ARMAS.length) throw new Error('No se cargaron las armas: revisa data.js');
 
@@ -463,6 +465,18 @@ const FIJAS = [
   { ruta: 'legalidad/requisitos', titulo: 'Requisitos para comprar un arma en México — permiso y compra', enSitemap: true,
     desc: 'Los papeles que pide el permiso extraordinario ante el Registro Federal y los que pide la compra en la DCAM. Son dos trámites distintos.',
     cuerpo: renderLegalHtml(LEGAL, 'requisitos', win) },
+  { ruta: 'legalidad/federal', titulo: 'Marco federal de armas en México — la escalera de normas', enSitemap: true,
+    desc: 'Constitución, Ley Federal de Armas de Fuego y Explosivos y su reglamento: qué norma manda sobre qué, con el artículo y la fuente de cada afirmación.',
+    cuerpo: renderLegalHtml(LEGAL, 'federal', win) },
+  { ruta: 'legalidad/estatal', titulo: 'Lo que cambia por estado — antecedentes penales y ventanilla', enSitemap: true,
+    desc: 'Las armas de fuego son competencia federal. Lo que sí cambia por estado: dónde sacas la constancia de antecedentes penales, si puedes enviar por correo y qué ventanilla te toca.',
+    cuerpo: renderLegalHtml(LEGAL, 'estatal', win) },
+  { ruta: 'legalidad/permisos', titulo: 'Permisos y licencias de armas en México — posesión no es portación', enSitemap: true,
+    desc: 'Ficha de cada trámite ante la Secretaría de la Defensa Nacional: qué habilita, qué no habilita, cuánto cuesta y con qué homoclave.',
+    cuerpo: renderLegalHtml(LEGAL, 'permisos', win) },
+  { ruta: 'legalidad/puedo-comprar', titulo: '¿Puedo comprar un arma? — entrevista sobre los requisitos', enSitemap: true,
+    desc: 'Quince preguntas sobre tu situación, ninguna con datos personales, para saber qué papeles te pide el formato DEFENSA-02-040 y cuál te falta.',
+    cuerpo: renderEntrevistaHtml(ENTREVISTA, LEGAL, win) },
   { ruta: 'traumaticas', titulo: 'Armas traumáticas — defensa menos letal sin permiso SEDENA', enSitemap: true,
     desc: 'Dispositivos de defensa menos letal accionados por CO₂: no son armas de fuego y no requieren permiso ante la SEDENA.' },
   { ruta: 'soporte', titulo: 'Soporte y normas de la comunidad', enSitemap: true,

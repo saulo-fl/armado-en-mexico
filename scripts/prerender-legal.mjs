@@ -159,5 +159,155 @@ export function renderLegalHtml(corpus, seccion, h) {
       '</article>';
   }
 
+  if (seccion === 'federal') {
+    var normas = (corpus.normas || []).slice().sort(function(a, b) { return a.orden - b.orden; });
+    var peldanos = normas.map(function(n) {
+      var arts = (n.articulos || []).map(function(artId) {
+        var art = (corpus.articulos || []).find(function(a) { return a.id === artId; });
+        if (!art || art.revisar) return '';
+        return '<div><strong>' + esc(art.rotulo) + '</strong>' +
+          (art.titulo ? '<p>' + esc(art.titulo) + '</p>' : '') +
+          (art.resumen ? '<p>' + esc(art.resumen) + '</p>' : '') +
+          fuenteCita(corpus.fuentes ? corpus.fuentes[art.fuente] : null) +
+          '</div>';
+      }).join('');
+
+      return '<li class="amx-leg-peldano">' +
+        '<h2>' + esc(n.rotulo) + '</h2>' +
+        (n.titulo ? '<p class="amx-leg-peldano-tit">' + esc(n.titulo) + '</p>' : '') +
+        (!n.revisar && n.resumen ? '<p class="amx-leg-habilita">' + esc(n.resumen) + '</p>' : '') +
+        (n.notaVigencia ? '<p class="amx-leg-vigencia">' + esc(n.notaVigencia) + '</p>' : '') +
+        (n.revisar ? '<p class="amx-leg-hueco">Pendiente de verificar: ' + esc(n.nota) + '</p>' : '') +
+        (!n.revisar && n.fuente ? fuenteCita(corpus.fuentes ? corpus.fuentes[n.fuente] : null) : '') +
+        (arts ? '<details class="amx-leg-arts"><summary>Artículos</summary><div>' + arts + '</div></details>' : '') +
+        '</li>';
+    }).join('');
+
+    return '<article class="amx-leg amx-v2">' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Marco federal</nav>' +
+      '<h1>Marco federal</h1>' +
+      '<p class="amx-leg-intro">Las armas de fuego en México son competencia exclusiva del ' +
+      'Congreso de la Unión. Ningún estado ni municipio puede crear permisos, licencias ni ' +
+      'registros de armas de fuego. Esta es la escalera de normas que se aplica, del escalón ' +
+      'más alto al más específico.</p>' +
+      '<ol class="amx-leg-escalera">' + peldanos + '</ol>' +
+      '</article>';
+  }
+
+  // El prerender de Estatal NO lleva el `<select>` de la pantalla: sin JavaScript un
+  // selector no selecciona nada, y lo que el buscador —y quien llegue sin JS— necesita
+  // ver son las 32 fichas escritas. La pantalla filtra; esta página las enseña todas.
+  if (seccion === 'estatal') {
+    var fichas = (corpus.entidades || []).map(function(e) {
+      var ant = e.antecedentes || {};
+      var antHtml = ant.revisar
+        ? 'Todavía no hemos verificado el portal de este estado. ' + esc(ant.nota || '')
+        : esc(ant.dependencia || '') +
+          (ant.domicilio ? '<p>' + esc(ant.domicilio) + '</p>' : '') +
+          (ant.url ? ' <a href="' + esc(ant.url) + '" target="_blank" rel="noopener noreferrer"' +
+            ' aria-label="Ir al trámite de antecedentes penales de ' + esc(e.nombre) +
+            ' (se abre en una pestaña nueva)">Ir al trámite</a>' : '');
+
+      return '<section class="amx-leg-estado-ficha">' +
+        '<h2>' + esc(e.nombre) + '</h2>' +
+        '<dl class="amx-leg-estado">' +
+        '<dt>Constancia de antecedentes penales</dt><dd>' + antHtml + '</dd>' +
+        '<dt>Dónde compras</dt><dd>' +
+        (e.ventanilla === 'otca' ? 'OTCA, en Monterrey' : 'DCAM, en Naucalpan') +
+        ', ' + esc(e.ventanillaFundamento) + '</dd>' +
+        '<dt>Envío por correo certificado</dt><dd>' +
+        (e.envioPorCorreo ? 'Sí se puede' : 'No se puede desde aquí') +
+        ', ' + esc(e.envioFundamento) +
+        (e.envioNota ? '<p>' + esc(e.envioNota) + '</p>' : '') + '</dd>' +
+        '<dt>Traslado de traumáticas</dt><dd>' +
+        (e.traumaticas
+          ? esc(e.traumaticas.texto) + ' — ' + esc(e.traumaticas.fundamento)
+          : 'No hemos verificado la regla local de este estado.') +
+        '</dd>' +
+        '</dl></section>';
+    }).join('');
+
+    return '<article class="amx-leg amx-v2">' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Lo que cambia por estado</nav>' +
+      '<h1>Lo que cambia por estado</h1>' +
+      '<p class="amx-leg-advertencia">' + esc(corpus.noHayEstatal) + '</p>' +
+      fichas +
+      '</article>';
+  }
+
+  if (seccion === 'permisos') {
+    var fichasTramite = (corpus.tramites || []).map(function(t) {
+      var filas = '';
+      if (t.dependencia) filas += '<dt>Dependencia</dt><dd>' + esc(t.dependencia) + '</dd>';
+      if (t.sede) filas += '<dt>Sede</dt><dd>' + esc(t.sede) + '</dd>';
+      if (t.habilita) filas += '<dt>Qué habilita</dt><dd>' + esc(t.habilita) + '</dd>';
+      if (t.noHabilita) filas += '<dt>Qué NO habilita</dt><dd>' + esc(t.noHabilita) + '</dd>';
+      if (t.costo) {
+        filas += '<dt>Costo</dt><dd>$' + esc(t.costo.monto) + ' ' + esc(t.costo.moneda) +
+          ' (cuota de ' + esc(t.costo.anio) + ')</dd>';
+      }
+
+      return '<article class="amx-leg-ficha">' +
+        '<h2>' + esc(t.nombre) + '</h2>' +
+        (t.homoclave ? '<p class="amx-leg-homoclave">' + esc(t.homoclave) + '</p>' : '') +
+        (t.notaHomoclave ? '<p class="amx-leg-vigencia">' + esc(t.notaHomoclave) + '</p>' : '') +
+        '<dl>' + filas + '</dl>' +
+        (t.revisar ? '<p class="amx-leg-hueco">Pendiente de verificar: ' + esc(t.nota) + '</p>' : '') +
+        (!t.revisar && t.fuente ? fuenteCita(corpus.fuentes ? corpus.fuentes[t.fuente] : null) : '') +
+        '</article>';
+    }).join('');
+
+    return '<article class="amx-leg amx-v2">' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Permisos y licencias</nav>' +
+      '<h1>Permisos y licencias</h1>' +
+      '<section class="amx-leg-contraste">' +
+      '<h2>Posesión no es portación</h2>' +
+      '<p>Tener un permiso de adquisición te autoriza a comprar el arma y a tenerla en el ' +
+      'domicilio que declaraste ante la Secretaría de la Defensa Nacional. Pero sacar esa arma ' +
+      'de tu casa para llevarla en la vía pública es otra cosa completamente distinta: eso se ' +
+      'llama portación, y requiere una licencia individual de portación (DEFENSA-02-025), que ' +
+      'es un trámite separado, más costoso, y cuya concesión no está garantizada aunque cumplas ' +
+      'todos los requisitos. Esta es la confusión más frecuente entre las personas que tramitan ' +
+      'su primer permiso.</p>' +
+      '</section>' +
+      fichasTramite +
+      '</article>';
+  }
+
   return '';
+}
+
+/**
+ * La entrevista no se puede jugar sin JavaScript, así que su página estática no finge un
+ * formulario: enseña de qué preguntas se compone, qué documentos entran siempre y de dónde
+ * sale el criterio. Es lo que un bot puede indexar y lo que alguien sin JS puede leer.
+ */
+export function renderEntrevistaHtml(arbol, corpus, h) {
+  helpers = h;
+
+  var etapasHtml = (arbol.etapas || []).map(function(et) {
+    var preguntas = (arbol.preguntas || [])
+      .filter(function(p) { return p.etapa === et.id; })
+      .map(function(p) { return '<li>' + esc(p.texto) + '</li>'; })
+      .join('');
+    return '<section><h2>' + esc(et.nombre) + '</h2><ol>' + preguntas + '</ol></section>';
+  }).join('');
+
+  var siempreHtml = (arbol.siempre || []).map(function(id) {
+    var req = (corpus.requisitos || []).find(function(r) { return r.id === id; });
+    return '<li>' + esc(req ? req.nombre : id) + '</li>';
+  }).join('');
+
+  return '<article class="amx-ent amx-v2">' +
+    '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › ¿Puedo comprar un arma?</nav>' +
+    '<h1>' + esc(arbol.titulo) + '</h1>' +
+    '<p class="amx-leg-advertencia">' + esc(arbol.advertencia) + '</p>' +
+    '<p>Son ' + (arbol.preguntas || []).length + ' preguntas sobre tu situación —ninguna pide ' +
+    'un dato personal— y al final dice qué papeles te tocan según el formato DEFENSA-02-040, ' +
+    'cuál te falta y cómo se consigue. Estas son las preguntas:</p>' +
+    etapasHtml +
+    '<section><h2>Lo que entra en el expediente pase lo que pase</h2><ul>' + siempreHtml + '</ul></section>' +
+    '<nav aria-label="Más"><a href="/legalidad/requisitos">Todos los requisitos, sin entrevista</a> · ' +
+    '<a href="/legalidad">Legalidad</a></nav>' +
+    '</article>';
 }
