@@ -135,7 +135,8 @@ siguieran valiendo. Al leer una ruta en este documento, fíjate en si habla del
 1. `build:static` — vacía `out/` y copia `public/` + los archivos que no se
    compilan. Va **primero** porque vacía: si fuera después, borraría lo demás.
 2. `build:js` — Babel compila los `.jsx` a `out/`, planos.
-3. `build:html` — el prerender emite las 398 páginas (394 en el sitemap), `sitemap.xml` y `robots.txt`.
+3. `build:html` — el prerender emite un `.html` por URL, `sitemap.xml` y `robots.txt`.
+   Las cifras del día las imprime el propio build; no se copian aquí porque se pudren.
 
 ## Cómo se trabaja aquí
 
@@ -146,10 +147,11 @@ merges se hacen por la API y tu `origin/main` local se queda viejo).
 
 ```bash
 npm install                 # una vez
-npm run build               # estáticos + .jsx -> .js + prerender de las 398 páginas, todo en out/
+npm run build               # estáticos + .jsx -> .js + prerender, todo en out/
 npx serve out               # o cualquier servidor HTTP sobre out/: no carga desde file://
 node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
-npm test                     # 6 suites de node:test: cotejo · vitrina · arsenal-hub · filtros · faq · soporte
+npm test                     # las suites de node:test (scripts/*.test.mjs)
+npm run smoke                # abre out/ en un Chrome real: una página por forma de ruta
 node --test scripts/faq.test.mjs   # una sola suite
 ```
 
@@ -275,7 +277,7 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
 - El script **falla ruidosamente** si `index.html` cambia de forma (busca el cálculo
   de `APP_BASE`, el `<base>`, el `<title>`, la `description` y `#app-root`). Si tocas
   esas líneas, actualiza las marcas del script — es a propósito: mejor romper el
-  build que publicar 398 páginas mal generadas.
+  build que publicar todas las páginas mal generadas.
 
 **Dos trampas ya resueltas — no las reintroduzcas:**
 
@@ -535,6 +537,6 @@ ya no es la única barrera —Access va delante— pero sigue ahí.
 ## Convenciones de contribución
 
 - **Estilo:** conserva la sangría existente de dos espacios, punto y coma, comillas simples, `camelCase` para funciones y variables, y `UPPER_SNAKE_CASE` para constantes. Los comentarios y textos visibles van en español.
-- **Pruebas:** usa `node:test` y `node:assert/strict`; nombra los archivos `*.test.mjs`. Las pruebas del navegador viven en `scripts/` y las de Functions junto a sus helpers privados. Antes de abrir un PR corre `npm run build`, `npm test`, `node --test functions/api/_lib.test.mjs` y la auditoría indicada arriba.
+- **Pruebas:** usa `node:test` y `node:assert/strict`; nombra los archivos `*.test.mjs`. Las pruebas del navegador viven en `scripts/` y las de Functions junto a sus helpers privados. Antes de abrir un PR corre `npm run build`, `npm test`, `npm run smoke`, `node --test functions/api/_lib.test.mjs` y la auditoría indicada arriba. El smoke no es opcional si tocaste un `.jsx`: ni las pruebas ni el build ejecutan los componentes, y es ahí donde se esconden los fallos que dejan la pantalla en blanco.
 - **Commits:** usa asuntos breves en español y enfocados en un solo cambio. El historial admite el formato convencional cuando ayuda, por ejemplo `fix: corregir menú móvil` o `feat(traumaticas): rediseñar cotización`.
 - **Pull requests:** explica el cambio visible, enumera la verificación ejecutada, enlaza el issue si existe y adjunta capturas antes/después para cambios de UI. Trabaja en una rama de tarea; nunca hagas push directo a `main` o `develop`. Los merges, despliegues de producción y escrituras remotas en D1 requieren aprobación explícita.
