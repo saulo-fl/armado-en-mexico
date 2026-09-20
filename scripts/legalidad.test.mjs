@@ -205,3 +205,35 @@ test('amxLegalHuecos tambien encuentra los huecos anidados', function () {
   var variante = h.find(function (x) { return x.tabla === 'requisitos/variantes'; });
   assert.equal(variante.id, 'r1/extranjero', 'la variante se identifica por requisito y escenario');
 });
+
+// MODO CATÁLOGO. La pantalla de Requisitos enseña el trámite entero, sin persona a la que
+// adaptarlo. Si `amxRequisitosDe` descartara ahí los requisitos con variantes, esa pantalla
+// se quedaría sin la carta de trabajo, sin la constancia del contador y sin el certificado
+// del comisariado ejidal: justo los tres que más cuesta encontrar en el formato.
+test('sin escenarios devuelve el requisito entero, con todas sus variantes', function () {
+  var corpus = {
+    requisitos: [
+      { id: 'ingresos', tramite: 't1', orden: 1, nombre: 'Comprobante de ingresos', variantes: [
+        { escenario: 'asalariado', documento: 'Carta de trabajo' },
+        { escenario: 'ejidatario', documento: 'Certificado del Comisariado, Registro Agrario Nacional' },
+      ] },
+      { id: 'curp', tramite: 't1', orden: 2, nombre: 'CURP', escenarios: ['*'] },
+    ],
+  };
+  var todos = amxRequisitosDe(corpus, 't1', {});
+  assert.equal(todos.length, 2, 'con {} tienen que salir los dos');
+  var ing = todos.find(function (r) { return r.id === 'ingresos'; });
+  assert.equal(ing.variantes.length, 2, 'en modo catálogo van TODAS las variantes');
+  assert.equal(ing.variante, undefined, 'y ninguna colapsada');
+
+  // Con escenario, en cambio, colapsa a la que toca y quita la lista.
+  var uno = amxRequisitosDe(corpus, 't1', { ingresos: 'ejidatario' });
+  var ing2 = uno.find(function (r) { return r.id === 'ingresos'; });
+  assert.match(ing2.variante.documento, /Registro Agrario Nacional/);
+  assert.equal(ing2.variantes, undefined, 'la lista completa se quita al personalizar');
+
+  // Y un escenario que no casa con ninguna variante sigue descartando el requisito.
+  var ninguno = amxRequisitosDe(corpus, 't1', { ingresos: 'astronauta' });
+  assert.equal(ninguno.length, 1, 'solo debería quedar el de escenarios ["*"]');
+  assert.equal(ninguno[0].id, 'curp');
+});

@@ -99,20 +99,30 @@
       }
       // c) si tiene variantes, busca una que case con los escenarios
       else if (Array.isArray(req.variantes)) {
-        // `escenarios` viene por eje: { ingresos: 'ejidatario' }. Una variante casa
-        // cuando su escenario es uno de los VALORES, no una de las claves.
+        // `escenarios` viene por eje —{ ingresos: 'ejidatario' }— o como lista de ids.
+        // Una variante casa cuando su escenario es uno de los VALORES, no una clave.
         var elegidos = [];
         for (var eje in escenarios) {
           if (Object.prototype.hasOwnProperty.call(escenarios, eje) && escenarios[eje]) {
             elegidos.push(escenarios[eje]);
           }
         }
-        for (var k = 0; k < req.variantes.length; k++) {
-          var v = req.variantes[k];
-          if (v.escenario && elegidos.indexOf(v.escenario) !== -1) {
-            incluir = true;
-            variante = v;
-            break;
+        if (!elegidos.length) {
+          // MODO CATÁLOGO. Sin escenarios no hay a quién adaptar el documento, y las dos
+          // lecturas posibles no son simétricas: descartar el requisito dejaría la
+          // pantalla de Requisitos sin la carta de trabajo, sin la constancia del contador
+          // y sin el certificado del comisariado ejidal —justo lo que más cuesta
+          // encontrar en el formato—. Así que se devuelve entero, con TODAS sus variantes,
+          // que es lo que esa pantalla necesita enseñar.
+          incluir = true;
+        } else {
+          for (var k = 0; k < req.variantes.length; k++) {
+            var v = req.variantes[k];
+            if (v.escenario && elegidos.indexOf(v.escenario) !== -1) {
+              incluir = true;
+              variante = v;
+              break;
+            }
           }
         }
       }

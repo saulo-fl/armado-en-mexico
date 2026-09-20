@@ -27,16 +27,18 @@
     version: 1,
     actualizado: '2026-09-19',
     advertencia: 'La información mostrada es de carácter informativo. Consulta siempre la normativa y fuente oficial vigente.',
-    // El aviso de transparencia, en UN solo sitio. Estaba escrito dos veces con
-    // redacciones distintas —una en la FAQ y otra en Legalidad— y esa es exactamente la
-    // duplicación por la que se corrigió «DCAM Monterrey» en un sitio de doce. Se toma la
-    // redacción de la FAQ, que es la más reciente y la ya aprobada. La primitiva
-    // AvisoTransparencia lo lee de aquí y las dos pantallas la usan.
+    // El aviso de transparencia, en UN solo sitio. Estaba escrito TRES veces con
+    // redacciones distintas —FAQ, Legalidad y Acerca— y esa es exactamente la duplicación
+    // por la que se corrigió «DCAM Monterrey» en un sitio de doce. Esta es la redacción
+    // que Saulo fijó como correcta el 19-sep-2026, y corrige a las otras en un punto de
+    // fondo: las demás decían que lo único que se comercializa son las tres armas
+    // traumáticas, cuando Armas M&S vende productos de outdoors y defensa personal en su
+    // tienda. La primitiva AvisoTransparencia lo lee de aquí; ninguna pantalla lo reescribe.
     avisoTransparencia: {
       titulo: '▲ Aviso de transparencia',
       parrafos: [
-        'Armado en México y Armas M&S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.',
-        'Armas M&S no presta servicios jurídicos.',
+        'Armado en México y Armas M&S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos.',
+        'Armado en México no realiza ningún tipo de comercialización. Armas M&S realiza comercialización exclusivamente de productos de outdoors y defensa personal en su propia tienda digital (armasmys.com).',
       ],
     },
     noHayEstatal: 'No existe normativa estatal de armas de fuego. El artículo 10 de la Constitución reserva a la ley federal los casos, condiciones, requisitos y lugares en que se puede autorizar la portación, y la Ley Federal de Armas de Fuego y Explosivos deja su aplicación en manos de la Presidencia, de la Secretaría de la Defensa Nacional y de las demás autoridades federales: a los estados, municipios y alcaldías solo les corresponde la intervención que esa misma ley y su reglamento les señalan. Por eso ningún congreso local puede crear permisos, licencias ni registros de armas de fuego, y cuando lo intenta la norma se invalida: en marzo de 2025 el Pleno de la Suprema Corte, por unanimidad, tumbó el artículo 46 de la Ley del Sistema Estatal de Seguridad Ciudadana de Baja California por extender los efectos de una licencia oficial colectiva fuera de la función de seguridad. Lo que sí cambia de un estado a otro son los documentos locales que el trámite federal te pide: la constancia de antecedentes penales, que debe expedirla la autoridad de la entidad donde resides y cuyo portal, costo y tiempo de entrega varían en cada estado; la constancia domiciliaria o de posesión de la primera autoridad administrativa municipal; el certificado de ejidatario o comunero del Comisariado Ejidal; y el certificado de modo honesto de vivir que pide el Reglamento para la licencia de portación. Además, cada estado define en su código penal qué objetos que no son armas de fuego cuentan como armas prohibidas, y regula a las empresas de seguridad privada que operan solo dentro de su territorio; el arma, en cambio, sigue siendo siempre federal.',
