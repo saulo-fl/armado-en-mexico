@@ -312,7 +312,7 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportRe
         <window.TalonComprobante fijo
           precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
           ultimoConocido={inv.ultimoConocido} historial={priceHistory} />}
-      <window.ReportarError tipo="accesorio" titulo={acc.nombre} ruta={idx.slugPorC[acc.id] || ''} />    </div>
+      <window.ReportarError tipo="accesorio" titulo={acc.nombre} ruta={'/' + (window.amxSlugIndex().slugPorC[acc.id] || 'accesorios')} />    </div>
   );
 }
 window.AccesorioFicha = AccesorioFicha;

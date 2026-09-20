@@ -15,7 +15,7 @@ const { useState: useState2, useMemo: useMemo2, useEffect: useEffect2, useRef: u
 // docs/DESIGN.md §4.3. Aquí solo vive lo que depende del dato.
 // ════════════════════════════════════════════════════════════════
 
-function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
+function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, onReportReview, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   // Las opiniones llegan en la hidratacion desde /api/state, DESPUES del primer
   // render. Sin esta suscripcion la etiqueta de la copia se quedaba vacia hasta
@@ -283,7 +283,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           ultimoConocido={ultimoConocido} historial={priceHistory}
           enComparacion={inCmp} onComparar={comparar} />}
 
-      <window.ReportarError tipo="arma" titulo={arma.nombre} ruta={'/pistolas/' + (idx.slugPorA[arma.id] || '')} />
+      <window.ReportarError tipo="arma" titulo={arma.nombre} ruta={'/' + (window.amxSlugIndex().slugPorA[arma.id] || 'arsenal')} />
     </div>);
 
 }
