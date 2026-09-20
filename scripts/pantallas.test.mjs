@@ -202,3 +202,33 @@ test('el prerender no publica ningún hueco como afirmación', () => {
   assert.ok(html.includes(huecos[0].nota.slice(0, 40).replace(/&/g, '&amp;')),
     'la nota del primer hueco no llega al HTML');
 });
+
+// Toda carpeta del hub tiene que llevar a una pantalla que EXISTE y estar dada de alta en
+// el router. Una carpeta que navega a una clave inventada no da error: no hace nada, y eso
+// no se nota hasta que alguien la pulsa. Pasó con 'legal-requisitos', que el router llama
+// 'legal-req'.
+test('las carpetas del hub llevan a pantallas que existen y están ruteadas', () => {
+  const app = readFileSync(raiz('src/app.jsx'), 'utf8');
+  const src = readFileSync(raiz('src/screens/screens-legalidad.jsx'), 'utf8');
+  const claves = [...src.matchAll(/clave:\s*'([^']+)'/g)].map((m) => m[1]);
+  assert.ok(claves.length >= 4, 'se esperaban al menos cuatro carpetas, hay ' + claves.length);
+  for (const c of claves) {
+    assert.match(app, new RegExp("screen === '" + c + "'"),
+      'la carpeta «' + c + '» navega a una pantalla que el router no monta: el botón no haría nada');
+    assert.ok(app.includes("'" + c + "':") || new RegExp("\b" + c.replace(/-/g, '\-') + "\s*:").test(app),
+      'la carpeta «' + c + '» no tiene ruta en SCREEN_TO_PATH');
+  }
+});
+
+// La descripción de «Estatal» decía «normativa estatal aplicable a la posesión y uso de
+// armas». Es falso: las armas son competencia federal y el propio corpus lo dice en
+// `noHayEstatal`. Un texto de relleno plausible que contradice al corpus es exactamente
+// lo que §6b prohíbe, y en una sección legal es lo más caro que puede pasar.
+test('ninguna carpeta afirma que existe normativa estatal de armas', () => {
+  const src = readFileSync(raiz('src/screens/screens-legalidad.jsx'), 'utf8');
+  const descs = [...src.matchAll(/desc:\s*'([^']+)'/g)].map((m) => m[1]).join(' ');
+  assert.doesNotMatch(descs, /normativa estatal/i,
+    'una carpeta afirma que hay normativa estatal de armas; el corpus dice lo contrario');
+  assert.ok(win.AMX_LEGAL.noHayEstatal && win.AMX_LEGAL.noHayEstatal.length > 80,
+    'el corpus tiene que explicar por qué no hay normativa estatal');
+});

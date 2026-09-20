@@ -116,8 +116,11 @@ test('la acción aparece en seis tipos de detalle y no en listados', () => {
   const acc = readFileSync(new URL('../src/screens/screens-accesorios.jsx', import.meta.url), 'utf8');
   const mun = readFileSync(new URL('../src/screens/screens-municiones.jsx', import.meta.url), 'utf8');
   const three = readFileSync(new URL('../src/screens/screens-3.jsx', import.meta.url), 'utf8');
+  // Legalidad se mudó a su propio archivo con el rediseño del 19-sep-2026: la vieja
+  // LegalScreen de screens-2.jsx se borró entera.
+  const leg = readFileSync(new URL('../src/screens/screens-legalidad.jsx', import.meta.url), 'utf8');
   assert.match(two, /tipo="arma"/);
-  assert.match(two, /tipo="legalidad"/);
+  assert.match(leg, /tipo="legalidad"/);
   assert.match(two, /tipo="faq"/);
   assert.match(acc, /tipo="accesorio"/);
   assert.match(mun, /tipo="municion"/);
