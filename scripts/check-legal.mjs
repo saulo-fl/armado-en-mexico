@@ -234,30 +234,123 @@ function refUrl(err, donde, url) {
   }
 }
 
+// El guion NO puede prometer un resultado: la autorización la decide la autoridad.
+const PROMESAS = /\b(autorizado|aprobado|te garantizamos|garantizado|podr[áa]s comprar|s[íi] puedes comprar|tu tr[áa]mite proceder[áa])\b/i;
+const JERGA = /\b(dossier|curadur[íi]a)\b/i;
+const CLAVE_OK = /^[a-z0-9]{1,6}$/;
+
 /**
- * Comprueba que el guion de la entrevista no cría su propia tabla de documentos:
- * todo id que cita tiene que resolver contra los requisitos del corpus.
+ * Juzga el guion de la entrevista. Dos familias de comprobación:
+ *
+ *   1. Que no críe su propia tabla de documentos. Todo id que cita tiene que resolver
+ *      contra los requisitos del corpus, o volveríamos a tener el mismo documento
+ *      descrito en dos sitios, que es el incidente «DCAM Monterrey» otra vez.
+ *   2. Que el árbol sea recorrible y honesto: claves estables, guardas que miran hacia
+ *      atrás, todo camino con salida, y —lo que más importa— que un impedimento
+ *      definitivo no insinúe una salida que no existe, y que nada prometa un permiso.
  */
 export function revisarEntrevista(corpus, arbol) {
   const errores = [];
   const avisos = [];
-  if (!arbol) return { errores: ['(entrevista) — window.AMX_ENTREVISTA no existe'], avisos };
+  if (!arbol) return { errores: ['(entrevista) — el guion no existe'], avisos };
+  const err = (donde, m) => errores.push(`${donde} — ${m}`);
+
   const ids = new Set((corpus.requisitos || []).map((r) => r.id));
-  const usados = new Set();
   const cita = (lista, donde) => {
     for (const id of lista || []) {
-      usados.add(id);
-      if (!ids.has(id)) errores.push(`${donde} — cita el documento "${id}", que no existe en los requisitos del corpus`);
+      if (!ids.has(id)) err(donde, `cita el documento "${id}", que no existe en los requisitos del corpus`);
     }
   };
   cita(arbol.siempre, 'entrevista:siempre');
-  for (const p of arbol.preguntas || []) {
-    for (const o of p.opciones || []) cita(o.documentos, `entrevista:${p.id} · ${o.id}`);
-  }
-  for (const id of usados) {
-    // Nada que hacer: el bucle de arriba ya reportó los que no resuelven.
-    void id;
-  }
+
+  const preguntas = arbol.preguntas || [];
+  if (!preguntas.length) err('(entrevista)', 'no tiene preguntas');
+
+  const vistas = new Map();   // id de pregunta -> índice, para que las guardas miren atrás
+  const claves = new Map();
+  const etapas = new Set((arbol.etapas || []).map((e) => e.id));
+
+  preguntas.forEach((p, i) => {
+    const d = `entrevista:${p.id || '(sin id)'}`;
+    if (!p.id) err(d, 'sin `id`');
+    if (!p.texto) err(d, 'sin `texto`');
+    if (p.etapa && etapas.size && !etapas.has(p.etapa)) err(d, `\`etapa\` "${p.etapa}" no existe`);
+
+    // La clave viaja en el enlace compartible: es para siempre y no se puede reusar.
+    if (!CLAVE_OK.test(p.clave || '')) err(d, `\`clave\` "${p.clave}" debe casar ${CLAVE_OK}`);
+    else if (claves.has(p.clave)) err(d, `\`clave\` "${p.clave}" ya la usa ${claves.get(p.clave)}`);
+    else claves.set(p.clave, p.id);
+
+    // Una guarda hacia adelante no se cumple nunca: es el equivalente al nodo huérfano.
+    for (const regla of p.si || []) {
+      const ref = regla.pregunta;
+      if (!vistas.has(ref)) {
+        err(d, `su guarda mira a "${ref}", que no es una pregunta ANTERIOR: nunca se cumpliría`);
+        continue;
+      }
+      const previa = preguntas[vistas.get(ref)];
+      const valores = [].concat(regla.es || [], regla.noEs || []);
+      if (!valores.length) err(d, `su guarda sobre "${ref}" no trae ni \`es\` ni \`noEs\``);
+      for (const v of valores) {
+        if (!(previa.opciones || []).some((o) => o.id === v)) {
+          err(d, `su guarda espera la respuesta "${v}", que no es una opción de "${ref}"`);
+        }
+      }
+    }
+
+    const ops = p.opciones || [];
+    if (!ops.length) err(d, 'sin opciones: la entrevista se quedaría sin salida aquí');
+    const clavesOp = new Set();
+    for (const o of ops) {
+      const dd = `${d} · ${o.id || '(sin id)'}`;
+      if (!o.id) err(dd, 'opción sin `id`');
+      if (!o.texto) err(dd, 'opción sin `texto`');
+      if (!CLAVE_OK.test(o.clave || '')) err(dd, `\`clave\` de opción "${o.clave}" debe casar ${CLAVE_OK}`);
+      else if (clavesOp.has(o.clave)) err(dd, `\`clave\` de opción "${o.clave}" repetida dentro de la pregunta`);
+      else clavesOp.add(o.clave);
+      cita(o.documentos, dd);
+
+      const imp = o.impedimento;
+      if (imp) {
+        if (!['definitivo', 'subsanable'].includes(imp.tipo)) {
+          err(dd, `\`impedimento.tipo\` "${imp.tipo}" no es definitivo ni subsanable`);
+        }
+        if (!imp.motivo) err(dd, 'impedimento sin `motivo`');
+        if (imp.tipo === 'definitivo') {
+          // Insinuar una salida donde la ley no la da es peor que no decir nada.
+          if (imp.remedio !== null && imp.remedio !== undefined) {
+            err(dd, 'un impedimento definitivo debe llevar `remedio: null`: no hay salida que ofrecer');
+          }
+          if (!imp.nota) err(dd, 'un impedimento definitivo necesita `nota` que explique por qué no la hay');
+        }
+        if (imp.tipo === 'subsanable') {
+          if (!imp.remedio) err(dd, 'un impedimento subsanable necesita `remedio`: decir qué falta sin decir cómo se consigue no sirve de nada');
+          else if (imp.remedio.trim() === (imp.motivo || '').trim()) err(dd, 'el `remedio` repite el `motivo`');
+        }
+        if (!imp.fundamento) err(dd, 'impedimento sin `fundamento`: es una afirmación normativa');
+      }
+      if (o.aviso) {
+        if (!o.aviso.texto) err(dd, 'aviso sin `texto`');
+        // Un aviso es para lo que nadie exige. Si dice que no puedes comprar, es un
+        // impedimento disfrazado, y encima uno sin respaldo.
+        if (/no puedes? (comprar|adquirir)/i.test(o.aviso.texto || '')) {
+          err(dd, 'un `aviso` no puede decir que no puedes comprar: o es impedimento con su fundamento, o no se dice');
+        }
+      }
+      if (!o.impedimento && !o.aviso && !o.documentos && !o.id) err(dd, 'la opción no hace nada');
+    }
+    vistas.set(p.id, i);
+  });
+
+  const texto = JSON.stringify(arbol);
+  const promesa = texto.match(PROMESAS);
+  if (promesa) err('(entrevista)', `promete un resultado ("${promesa[0]}"): la autorización la decide la autoridad, no el cuestionario`);
+  const jerga = texto.match(JERGA);
+  if (jerga) err('(entrevista)', `usa vocabulario prohibido ("${jerga[0]}")`);
+
+  const sinUsar = [...ids].filter((id) => !texto.includes('"' + id + '"'));
+  if (sinUsar.length) avisos.push(`(entrevista) — requisitos del corpus que el guion nunca cita: ${sinUsar.join(', ')}`);
+
   return { errores, avisos };
 }
 

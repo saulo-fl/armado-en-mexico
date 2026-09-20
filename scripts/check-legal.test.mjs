@@ -156,18 +156,110 @@ test('la cuota de un año pasado sale como aviso, no como error', () => {
   assert.match(r.avisos.join('\n'), /es del 2025 y estamos en 2026/);
 });
 
-test('la entrevista no puede citar un documento que el corpus no tiene', () => {
-  const c = sano();
-  const arbol = {
-    siempre: ['ingresos'],
-    preguntas: [{ id: 'modo', opciones: [{ id: 'a', documentos: ['carta-que-no-existe'] }] }],
-  };
-  const r = revisarEntrevista(c, arbol);
-  assert.equal(r.errores.length, 1);
-  assert.match(r.errores[0], /cita el documento "carta-que-no-existe", que no existe en los requisitos del corpus/);
+// Las dos pruebas que había aquí usaban un árbol de juguete sin claves ni textos. Al
+// endurecer el juez dejaron de pasar, con razón: ese árbol no es publicable. Su cometido
+// —que un documento citado resuelva contra el corpus— lo cubre ahora la batería de abajo,
+// que trabaja sobre un guion completo y válido.
+
+// ── El juez del GUION de la entrevista ──────────────────────────────────────
+// Mismo principio: se le siembran defectos para comprobar que los caza. Los dos que
+// mas importan son el impedimento definitivo que insinua una salida inexistente y el
+// aviso que dice «no puedes comprar» sin respaldo: los dos le mentirian a alguien
+// sobre si puede ejercer un derecho.
+const arbolSano = () => ({
+  version: '2026-09-19',
+  etapas: [{ id: 'quien', nombre: 'Quién eres' }, { id: 'modo', nombre: 'Modo de vivir' }],
+  siempre: ['ingresos'],
+  preguntas: [
+    {
+      clave: 'ed', id: 'edad', etapa: 'quien', texto: '¿Eres mayor de edad?',
+      opciones: [
+        { clave: 's', id: 'si', texto: 'Sí' },
+        { clave: 'n', id: 'no', texto: 'No',
+          impedimento: { tipo: 'definitivo', motivo: 'El permiso solo se expide a personas mayores de edad.',
+            remedio: null, nota: 'Este impedimento desaparece al cumplir la mayoría de edad.',
+            fundamento: 'Código Civil Federal art. 646' } },
+      ],
+    },
+    {
+      clave: 'mv', id: 'modo-vivir', etapa: 'modo', texto: '¿Cómo acreditas tu modo de vivir?',
+      si: [{ pregunta: 'edad', es: ['si'] }],
+      opciones: [
+        { clave: 'a', id: 'asalariado', texto: 'Asalariado', documentos: ['ingresos'] },
+        { clave: 'i', id: 'independiente', texto: 'Independiente' },
+      ],
+    },
+    {
+      clave: 'sat', id: 'declaracion', etapa: 'modo', texto: '¿Presentaste tu declaración anual?',
+      si: [{ pregunta: 'modo-vivir', es: ['independiente'] }],
+      opciones: [
+        { clave: 's', id: 'si', texto: 'Sí' },
+        { clave: 'n', id: 'no', texto: 'No',
+          aviso: { texto: 'No es un requisito de SEDENA, pero el contador suele pedirla para sustentar la constancia.',
+            remedio: 'Presenta tu declaración anual.', fundamento: 'El formato no la menciona.' } },
+      ],
+    },
+  ],
 });
 
-test('la entrevista que cita bien no se queja', () => {
-  const arbol = { siempre: ['ingresos'], preguntas: [{ id: 'modo', opciones: [{ id: 'a', documentos: ['ingresos'] }] }] };
-  assert.equal(revisarEntrevista(sano(), arbol).errores.length, 0);
+const corpusMin = () => ({ requisitos: [{ id: 'ingresos' }] });
+const errE = (a) => revisarEntrevista(corpusMin(), a).errores.join('\n');
+
+test('guion sano: el juez no se queja', () => {
+  const r = revisarEntrevista(corpusMin(), arbolSano());
+  assert.equal(r.errores.length, 0, 'errores inesperados:\n' + r.errores.join('\n'));
+});
+
+test('guion · un impedimento definitivo no puede ofrecer remedio', () => {
+  const a = arbolSano();
+  a.preguntas[0].opciones[1].impedimento.remedio = 'Espera a cumplir 18.';
+  assert.match(errE(a), /debe llevar `remedio: null`/);
+});
+
+test('guion · un impedimento subsanable sin remedio no sirve', () => {
+  const a = arbolSano();
+  a.preguntas[0].opciones[1].impedimento = { tipo: 'subsanable', motivo: 'Falta algo.', fundamento: 'x' };
+  assert.match(errE(a), /necesita `remedio`/);
+});
+
+test('guion · un aviso no puede decir que no puedes comprar', () => {
+  const a = arbolSano();
+  a.preguntas[2].opciones[1].aviso.texto = 'No puedes comprar un arma sin tu declaración anual.';
+  assert.match(errE(a), /un `aviso` no puede decir que no puedes comprar/);
+});
+
+test('guion · una guarda no puede mirar hacia adelante', () => {
+  const a = arbolSano();
+  a.preguntas[0].si = [{ pregunta: 'declaracion', es: ['si'] }];
+  assert.match(errE(a), /no es una pregunta ANTERIOR/);
+});
+
+test('guion · una guarda no puede esperar una respuesta inexistente', () => {
+  const a = arbolSano();
+  a.preguntas[1].si = [{ pregunta: 'edad', es: ['quiza'] }];
+  assert.match(errE(a), /espera la respuesta "quiza", que no es una opción/);
+});
+
+test('guion · las claves no se repiten', () => {
+  const a = arbolSano();
+  a.preguntas[1].clave = 'ed';
+  assert.match(errE(a), /`clave` "ed" ya la usa/);
+});
+
+test('guion · no puede citar un documento que el corpus no tiene', () => {
+  const a = arbolSano();
+  a.preguntas[1].opciones[0].documentos = ['carta-inventada'];
+  assert.match(errE(a), /cita el documento "carta-inventada"/);
+});
+
+test('guion · no promete que el permiso se vaya a otorgar', () => {
+  const a = arbolSano();
+  a.preguntas[0].opciones[0].texto = 'Sí, y entonces sí puedes comprar tu arma';
+  assert.match(errE(a), /promete un resultado/);
+});
+
+test('guion · una pregunta sin opciones deja la entrevista sin salida', () => {
+  const a = arbolSano();
+  a.preguntas[2].opciones = [];
+  assert.match(errE(a), /sin opciones/);
 });
