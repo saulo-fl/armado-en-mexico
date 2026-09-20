@@ -695,7 +695,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
         </div>
       }
 
-      <window.ReportarError tipo="municion" titulo={mun.nombre} ruta={'/municiones/' + (idx.slugPorM[mun.id] || '')} />
+      <window.ReportarError tipo="municion" titulo={mun.nombre} ruta={'/municiones/' + (window.amxSlugIndex().slugPorM[mun.id] || '')} />
     </div>
   );
 }
