@@ -1,0 +1,43 @@
+# La red que faltaba. El 19-sep-2026 el PR #242 se mergeó con las fichas de
+# arma, accesorio y munición en blanco: pasó la revisión y pasó Cloudflare
+# Pages —que solo compila—, y la suite que lo habría cazado no la corrió nadie,
+# porque hasta hoy `npm test` solo vivía como casilla en la plantilla de PR.
+name: Pruebas
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Empujar dos veces seguidas a la misma rama no deja dos tandas corriendo.
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Babel hace falta de verdad aquí: el build:js compila los .jsx y es la
+      # mitad de la comprobación (el otro build, el del prerender, es Node puro).
+      - run: npm ci
+
+      - name: Pruebas
+        run: npm test
+
+      # Que compile y que el prerender saque sus páginas. Si el build se cae,
+      # lo que se publica es la versión anterior y nadie se entera.
+      - name: Build
+        run: npm run build

@@ -3442,3 +3442,99 @@ function ReportarError({ tipo, titulo, ruta }) {
   );
 }
 window.ReportarError = ReportarError;
+
+// ── PANTALLA ROTA — el cortafuegos ────────────────────────────────────────
+//
+// React no perdona: un error dentro de CUALQUIER componente durante el render
+// desmonta el árbol ENTERO y deja la página en blanco. Así se publicó el
+// 19-sep-2026 un `idx` mal puesto en la ficha de munición que tumbaba TODO el
+// sitio, no solo esa ficha.
+//
+// Esto no evita el fallo —para eso están las pruebas—, le pone un suelo: la
+// cabecera, la navegación y el pie siguen vivos y el visitante conserva salida.
+//
+// La `llave` es la mitad del asunto. Sin ella el boundary se queda pegado al
+// error para siempre y navegar a otra pantalla no lo suelta, que es tanto como
+// no tener red. Va cableado a la pantalla actual: cambiar de pantalla lo limpia.
+class PantallaRota extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+    this.reintentar = () => this.setState({ error: null });
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, info) {
+    // La consola es el único sitio donde esto queda: no hay telemetría y no se
+    // va a montar por una pantalla rota. Si alguna vez la hay, el gancho es este.
+    console.error('[amx] pantalla rota:', error, info && info.componentStack);
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.llave !== this.props.llave && this.state.error) this.setState({ error: null });
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+    // Sin hooks (es una clase) y sin reaccionar al resize: una pantalla de
+    // error no necesita seguir al viewport, solo nacer con la medida correcta.
+    const vp = amxMedirViewport(typeof window !== 'undefined' ? window.innerWidth : 1024);
+    const ancho = vp.isDesktop;
+    const padX = ancho ? 28 : 16;
+    const alinea = vp.isMobile ? 'center' : 'left';
+    return (
+      <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}
+        role="alert">
+        <div style={{
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: ancho ? 34 : 26,
+          color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05,
+          textAlign: alinea,
+        }}>Esta sección no abrió</div>
+        <div style={{
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 15, color: PALETTE.amber,
+          letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: 8,
+          textAlign: alinea,
+        }}>Falla de consulta</div>
+
+        <div style={{
+          marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+          boxShadow: window.CLARO && window.CLARO.sombra,
+          padding: ancho ? '34px 30px' : '26px 18px', textAlign: 'center',
+        }}>
+          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.6, lineHeight: 1 }}
+            aria-hidden="true">!</div>
+          <div style={{
+            fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim,
+            lineHeight: 1.55, maxWidth: 560, margin: '16px auto 0',
+          }}>
+            El fallo es nuestro, no tuyo: el resto del sitio sigue funcionando.
+            Vuelve a intentarlo o entra por otra sección.
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginTop: 20 }}>
+            <button type="button" className="amx-calchip" onClick={this.reintentar}>Reintentar</button>
+            {this.props.onNav &&
+              <button type="button" className="amx-calchip" onClick={() => this.props.onNav('home')}>Ir al inicio</button>}
+          </div>
+
+          {/* El mensaje técnico, plegado: no le sirve al visitante, pero es lo
+              primero que se pide cuando alguien reporta que «no carga». */}
+          <details style={{ marginTop: 18, textAlign: 'left', maxWidth: 560, margin: '18px auto 0' }}>
+            <summary style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted,
+              letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', textAlign: 'center',
+            }}>Detalle técnico</summary>
+            <pre style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.textDim,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '10px 0 0',
+            }}>{String(this.state.error && (this.state.error.stack || this.state.error.message || this.state.error))}</pre>
+          </details>
+        </div>
+      </div>
+    );
+  }
+}
+window.PantallaRota = PantallaRota;
