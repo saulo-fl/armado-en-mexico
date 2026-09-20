@@ -48,13 +48,14 @@
     if (!arbol) {
       return {
         estado: 'incompleta', dictamen: null, pendiente: null,
-        recorrido: [], documentos: [], avisos: [], fundamentos: [],
+        recorrido: [], documentos: [], avisos: [], fundamentos: [], escenarios: [],
         progreso: { hechas: 0, total: 0 },
       };
     }
     if (!respuestas) respuestas = {};
 
     var recorrido = [];
+    var escenarios = [];
     var documentos = [];
     var avisos = [];
     var fundamentos = [];
@@ -91,6 +92,13 @@
 
       hechas++;
       recorrido.push({ pregunta: p, opcion: opcion });
+
+      // El mapa de escenarios, por eje. Una opcion lo declara EXPLICITAMENTE con
+      // `escenario`; no se adivina por coincidencia de id, porque el guion puede partir
+      // un escenario del corpus en dos opciones (hombre con cartilla liberada y sin
+      // ella) y entonces ninguna coincidiria. Con este mapa, amxRequisitosDe resuelve
+      // la variante que le toca a esta persona.
+      if (opcion.escenario && escenarios.indexOf(opcion.escenario) === -1) escenarios.push(opcion.escenario);
 
       if (opcion.documentos) {
         for (var k = 0; k < opcion.documentos.length; k++) {
@@ -138,6 +146,7 @@
       documentos: documentos,
       avisos: avisos,
       fundamentos: fundamentos,
+      escenarios: escenarios,
       progreso: { hechas: hechas, total: total },
     };
   }

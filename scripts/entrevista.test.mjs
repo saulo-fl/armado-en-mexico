@@ -175,3 +175,29 @@ test('todo camino del árbol termina en un dictamen, y ninguno lanza', () => {
     assert.deepEqual(vuelta.respuestas, respuestas, 'el enlace pierde respuestas: ' + etiqueta);
   }
 });
+
+// El puente entre el guion y el corpus: la opcion declara su `escenario` y el evaluador
+// lo acumula, para que amxRequisitosDe pueda elegir la variante del documento que le toca
+// a esta persona. Sin esto, el guion puede partir un escenario en dos opciones (hombre con
+// cartilla liberada y sin ella) y la variante se cae del expediente en silencio.
+test('el evaluador acumula los escenarios que declaran las opciones', () => {
+  const arbol = {
+    version: '2026-09-19', siempre: [],
+    preguntas: [
+      { clave: 'pe', id: 'persona', texto: '¿Quién eres?', opciones: [
+        { clave: 'h', id: 'hombre-con-cartilla', texto: 'Hombre con cartilla', escenario: 'hombre' },
+        { clave: 'm', id: 'mujer', texto: 'Mujer', escenario: 'mujer' } ] },
+      { clave: 'mv', id: 'modo', texto: '¿De qué vives?', opciones: [
+        { clave: 'a', id: 'asalariado', texto: 'Asalariado', escenario: 'asalariado' },
+        { clave: 'x', id: 'ninguno', texto: 'De nada por ahora' } ] },
+    ],
+  };
+  // El id de la opción y el del escenario NO son el mismo: por eso hace falta declararlo.
+  const d = amxEvaluarEntrevista(arbol, { persona: 'hombre-con-cartilla', modo: 'asalariado' });
+  assert.deepEqual(d.escenarios, ['hombre', 'asalariado']);
+  // Una opción sin `escenario` no aporta ninguno, y no rompe nada.
+  const d2 = amxEvaluarEntrevista(arbol, { persona: 'mujer', modo: 'ninguno' });
+  assert.deepEqual(d2.escenarios, ['mujer']);
+  // Sin respuestas, la lista viene vacía y no undefined: la forma no cambia.
+  assert.deepEqual(amxEvaluarEntrevista(arbol, {}).escenarios, []);
+});

@@ -263,3 +263,16 @@ test('guion · una pregunta sin opciones deja la entrevista sin salida', () => {
   a.preguntas[2].opciones = [];
   assert.match(errE(a), /sin opciones/);
 });
+
+test('guion · un escenario inventado dejaría caer su documento del expediente', () => {
+  const a = arbolSano();
+  a.preguntas[1].opciones[0].escenario = 'astronauta';
+  assert.match(errE(a), /`escenario` "astronauta" no existe en el corpus/);
+});
+
+test('guion · el escenario declarado que sí existe no se queja', () => {
+  const a = arbolSano();
+  a.preguntas[1].opciones[0].escenario = 'asalariado';
+  const c = { requisitos: [{ id: 'ingresos' }], escenarios: [{ id: 'asalariado', eje: 'ingresos' }] };
+  assert.equal(revisarEntrevista(c, a).errores.length, 0);
+});

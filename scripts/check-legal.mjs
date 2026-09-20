@@ -235,7 +235,21 @@ function refUrl(err, donde, url) {
 }
 
 // El guion NO puede prometer un resultado: la autorización la decide la autoridad.
-const PROMESAS = /\b(autorizado|aprobado|te garantizamos|garantizado|podr[áa]s comprar|s[íi] puedes comprar|tu tr[áa]mite proceder[áa])\b/i;
+//
+// Lo que se persigue es la promesa EN SEGUNDA PERSONA sobre el desenlace del trámite,
+// no la palabra suelta. «Autorizado» aparece legítimamente en citas del propio formato
+// —«nadie está autorizado para recibir dinero en efectivo», que es una advertencia
+// contra la corrupción y tiene que poder decirse— y en «el material autorizado en el
+// último permiso». Un patrón por palabra suelta las tacharía todas.
+const PROMESAS = new RegExp([
+  'te (garantizamos|aseguramos)',
+  '(est[áa]s|quedas|ser[áa]s|has sido) autorizad',
+  'tu (permiso|solicitud|tr[áa]mite) (ser[áa]|est[áa]|queda) (autorizad|aprobad|concedid)',
+  's[íi],? (s[íi] )?puedes (comprar|adquirir)',
+  'podr[áa]s (comprar|adquirir)',
+  'tu tr[áa]mite proceder[áa]',
+  'tienes garantizad',
+].join('|'), 'i');
 const JERGA = /\b(dossier|curadur[íi]a)\b/i;
 const CLAVE_OK = /^[a-z0-9]{1,6}$/;
 
@@ -256,6 +270,7 @@ export function revisarEntrevista(corpus, arbol) {
   const err = (donde, m) => errores.push(`${donde} — ${m}`);
 
   const ids = new Set((corpus.requisitos || []).map((r) => r.id));
+  const escenarios = new Set((corpus.escenarios || []).map((e) => e.id));
   const cita = (lista, donde) => {
     for (const id of lista || []) {
       if (!ids.has(id)) err(donde, `cita el documento "${id}", que no existe en los requisitos del corpus`);
@@ -309,6 +324,14 @@ export function revisarEntrevista(corpus, arbol) {
       else if (clavesOp.has(o.clave)) err(dd, `\`clave\` de opción "${o.clave}" repetida dentro de la pregunta`);
       else clavesOp.add(o.clave);
       cita(o.documentos, dd);
+
+      // El escenario declarado es lo que permite a amxRequisitosDe elegir la variante
+      // que le toca a esta persona. Un id que no exista en el corpus no falla a gritos:
+      // simplemente deja caer del expediente el documento de esa variante, en silencio.
+      // Así se perdió la cartilla del Servicio Militar la primera vez.
+      if (o.escenario && !escenarios.has(o.escenario)) {
+        err(dd, `\`escenario\` "${o.escenario}" no existe en el corpus: su variante se caería del expediente sin avisar`);
+      }
 
       const imp = o.impedimento;
       if (imp) {
