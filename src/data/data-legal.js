@@ -237,7 +237,7 @@
         titulo: 'Acuerdo por el que se eliminan y se establecen acciones de simplificación y mejora administrativa de trámites que se realizan ante la Secretaría de la Defensa Nacional (2026)',
         emisor: 'Secretaría de la Defensa Nacional',
         revisar: true,
-        nota: 'HUECO CRÍTICO — Nota SIDOF 5789879 (posible nota relacionada 5784083 del 06-04-2026), sin fecha exacta ni texto confirmado. Podría eliminar requisitos del DEFENSA-02-040 y del DEFENSA-02-062 (CURP impresa, acta de nacimiento, escritos libres). Verificarlo en el DOF antes de publicar la lista de requisitos.',
+        nota: 'HUECO SIN FUENTE, BÚSQUEDA CERRADA. Nota SIDOF 5789879, y la relacionada 5784083 del 06-04-2026. Los enlaces del SIDOF están rotos: no cargan y tampoco están en Wayback Machine (comprobado por Saulo el 19-sep-2026; el DOF además rechaza la conexión automatizada). No se persigue más hasta que SEDENA o el DOF lo republiquen. Si reaparece hay que revisarlo: podría eliminar requisitos del DEFENSA-02-040 y del DEFENSA-02-062.',
       },
       'dcam-preguntas-frecuentes': {
         titulo: 'Preguntas frecuentes de la Direccion de Comercializacion de Armamento y Municiones',
@@ -451,7 +451,7 @@
         resumen: 'Acuerdo anunciado en 2026 que eliminaría requisitos en más de treinta trámites de armas y pirotecnia. Si alcanza al DEFENSA-02-040, cambia la lista de documentos de esta sección.',
         articulos: [],
         revisar: true,
-        nota: 'HUECO CRÍTICO — Sin fecha de publicación confirmada ni texto (nota SIDOF 5789879). La ficha oficial del DEFENSA-02-040 consultada el 19-09-2026 todavía pide CURP y acta de nacimiento, es decir, aún no refleja la simplificación. Verificar en el DOF antes de publicar.',
+        nota: 'HUECO SIN FUENTE, BÚSQUEDA CERRADA. Los enlaces del SIDOF a la nota 5789879 están rotos y no hay copia en Wayback Machine (comprobado el 19-sep-2026). Mientras tanto vale lo que sí está publicado: la ficha oficial del DEFENSA-02-040, consultada el 19-09-2026, todavía pide CURP y acta de nacimiento, así que la simplificación no se refleja aún en los requisitos vigentes.',
         fuente: 'acuerdo-simplificacion-2026',
       },
     ],
