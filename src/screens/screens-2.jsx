@@ -971,7 +971,7 @@ function SoportePortada({ contenido }) {
 function SoporteAviso({ aviso }) {
   return (
     <section className="amx-soporte-aviso" aria-labelledby="soporte-limite">
-      <p className="amx-soporte-aviso-tit" id="soporte-limite">▲ {aviso.titulo}</p>
+      <p className="amx-soporte-aviso-tit" id="soporte-limite">{aviso.titulo}</p>
       <p>{aviso.intro}</p>
       <ul>{aviso.puntos.map((p, i) => <li key={i}>{p}</li>)}</ul>
       <p className="amx-soporte-alcance">{aviso.consecuencia}</p>
@@ -990,7 +990,7 @@ function SoporteHojaNorma({ norma }) {
 
 function SoporteModeracion({ contenido }) {
   return (
-    <section className="amx-soporte-carbon" aria-labelledby="soporte-moderacion">
+    <section className="amx-soporte-carbon amx-soporte-moderacion" aria-labelledby="soporte-moderacion">
       <h3 id="soporte-moderacion">Cómo se moderan las reseñas</h3>
       <ul>{contenido.moderacion.map((p, i) => <li key={i}>{p}</li>)}</ul>
       <h3>Acciones reales</h3>
@@ -1043,7 +1043,7 @@ function SoporteDenuncia({ reportContext }) {
   const motivos = contenido.motivos.map(([v, l]) => ({ value: v, label: l }));
 
   return (
-    <section className="amx-soporte-carbon" aria-labelledby="soporte-denuncia">
+    <section className="amx-soporte-carbon amx-soporte-denuncia" aria-labelledby="soporte-denuncia">
       <h3 id="soporte-denuncia">Denunciar una reseña</h3>
       <p>{contenido.denuncia.intro}</p>
       <p className="amx-soporte-alcance">{contenido.denuncia.privacidad}</p>
@@ -1146,7 +1146,7 @@ function SoporteScreen({ onNav, reportContext }) {
     <main className="amx-soporte">
       <SoportePortada contenido={contenido} />
       <SoporteAviso aviso={contenido.venta} />
-      <section aria-labelledby="soporte-normas-titulo">
+      <section className="amx-soporte-seccion-normas" aria-labelledby="soporte-normas-titulo">
         <h2 id="soporte-normas-titulo">Normas</h2>
         <div className="amx-soporte-reglas">
           {contenido.normas.map((norma) => <SoporteHojaNorma key={norma.numero} norma={norma} />)}
