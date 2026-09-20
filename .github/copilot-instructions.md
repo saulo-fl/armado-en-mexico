@@ -10,11 +10,12 @@ visual es [`docs/DESIGN.md`](../docs/DESIGN.md). Esto es el resumen operativo.
 
 ```bash
 npm install                        # una vez
-npm run build                      # estáticos + Babel + prerender de 398 páginas -> out/
+npm run build                      # estáticos + Babel + prerender -> out/
 npm run watch                      # recompila los .jsx mientras editas
 npx serve out                      # la app NO carga desde file://
-npm test                           # 5 suites de node:test
+npm test                           # las suites de node:test (scripts/*.test.mjs)
 node --test scripts/faq.test.mjs   # una sola suite
+npm run smoke                      # abre out/ en un Chrome real, una página por ruta
 ```
 
 Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.
@@ -70,12 +71,20 @@ Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.
 
 ## Antes de decir que está hecho
 
-`npm test` **no** detecta marcadores de conflicto ni CSS duplicado: las 5 suites son de
-datos (catálogo, filtros, FAQ) y pasan con el archivo roto. Aquí la verificación real es:
+`npm test` **no** detecta marcadores de conflicto ni CSS duplicado: casi todas las
+suites son de datos (catálogo, filtros, FAQ) y pasan con el archivo roto. La excepción
+es `referencias.test.mjs`, que sí lee el código: resuelve cada identificador de los
+`.jsx` contra lo que declaran entre todos, porque son scripts de navegador y comparten
+el scope global.
+
+Y ni las pruebas ni el build EJECUTAN los componentes — Babel compila feliz y el
+prerender escribe el HTML sin montarlos. El 19-sep-2026 eso dejó tres fichas en blanco
+en producción con la suite verde. Por eso la verificación real termina en un navegador:
 
 ```bash
 git grep -nE '^(<<<<<<<|>>>>>>>) '             # cero resultados
-npm run build && npm test                      # 398 páginas · 47 pruebas
+npm run build && npm test                      # que compile y que las suites pasen
+npm run smoke                                  # un Chrome de verdad, una página por ruta
 git diff --stat origin/main...HEAD             # que el cambio sea el esperado
 npx serve out                                  # y abrir la pantalla tocada
 ```

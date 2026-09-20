@@ -508,7 +508,7 @@ function App() {
   } else if (screen === 'menu') {
     content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
   } else if (screen === 'calibres') {
-    content = <window.CalibresScreen onOpenArma={openArma} onNav={navigate} onAbrirCalibre={openCalibre} />;
+    content = <window.CalibresScreen onNav={navigate} onAbrirCalibre={openCalibre} />;
   } else if (screen === 'calibre') {
     content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onNav={navigate} />;
   // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son
@@ -568,7 +568,12 @@ function App() {
         WebkitOverflowScrolling: 'touch',
         maxWidth: '100vw',
       }}>
-        {content}
+        {/* El cortafuegos: si la pantalla revienta, se lleva solo este hueco.
+            Cabecera, navegación y pie siguen en pie. La llave es la pantalla
+            actual, para que al navegar el aviso se suelte. */}
+        <window.PantallaRota llave={screen} onNav={navTab}>
+          {content}
+        </window.PantallaRota>
         {/* PIE DE OFICIO — global, no solo del Home. Tres razones:
             (1) lo que lleva dentro son avisos de SITIO —divulgativo, no somos
                 gobierno, marcas de terceros—, no de pantalla;

@@ -1043,7 +1043,7 @@ Dos condiciones, las dos aprendidas a golpes:
 - **En la tinta del sitio `rgba(23,27,25,…)`, nunca teñida con el verde.** Una sombra de color es
   un halo cromático: otro tic de interfaz generada. El detector lo marca como `dark-glow`.
 - **Máximo 18px de blur** (24px en hover, y solo ahí). El coste de una sombra escala con el
-  cuadrado del radio, y son 321 páginas con muchas tarjetas.
+  cuadrado del radio, y el sitio son cientos de páginas con muchas tarjetas cada una.
 
 ### 5.2 Escala de espaciado — 6 valores, no 36
 
@@ -1321,7 +1321,7 @@ Es un sitio publicado, divulgativo y con contenido de referencia legal.
 
 ## 8. Cómo se trabaja
 
-1. **Nunca sobre las 321 páginas.** Se itera en una página de galería con todos los primitivos.
+1. **Nunca sobre el sitio entero.** Se itera en una página de galería con todos los primitivos.
 2. **Las primitivas antes que las pantallas.** Las ~15 de `ui.jsx` (`ArmaCard`, `TiraFiltros`,
    `AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`…) propagan solas a todo el sitio.
    Las pantallas solo las componen.

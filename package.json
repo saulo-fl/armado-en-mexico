@@ -11,12 +11,14 @@
     "build:html": "node scripts/build-prerender.mjs",
     "watch": "npm run build:js -- --watch",
     "cifras": "node scripts/actualizar-readme.mjs",
+    "smoke": "node scripts/smoke.mjs",
     "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs scripts/filtros.test.mjs scripts/faq.test.mjs scripts/soporte.test.mjs scripts/store-report.test.mjs scripts/github-contribution.test.mjs scripts/calibres.test.mjs scripts/referencias.test.mjs scripts/mesa-style.test.mjs"
   },
   "devDependencies": {
     "@babel/cli": "^8.0.4",
     "@babel/core": "^8.0.1",
     "@babel/preset-react": "^8.0.1",
-    "@babel/standalone": "^7.29.0"
+    "@babel/standalone": "^7.29.0",
+    "puppeteer-core": "^25.11.0"
   }
 }

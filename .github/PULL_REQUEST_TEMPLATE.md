@@ -18,5 +18,6 @@
 
 - [ ] `npm test`
 - [ ] `npm run build`
+- [ ] `npm run smoke` (obligatorio si tocaste un `.jsx`: ni las pruebas ni el build ejecutan los componentes)
 - [ ] Revisé el resultado visible si cambié la interfaz
 - [ ] Tengo derecho a aportar el contenido bajo la licencia correspondiente
