@@ -5992,3 +5992,90 @@
   outline: 2px solid var(--acento);
   outline-offset: 2px;
 }
+
+/* ── CITA DE FUENTE Y AVISO DE TRANSPARENCIA ─── */
+
+.amx-v2 .amx-cita {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.amx-v2 .amx-cita a {
+  color: var(--ficha-tinta);
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-cita a:hover {
+  text-decoration: none;
+}
+.amx-v2 .amx-cita a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-aviso {
+  position: relative;
+  margin: 18px 0;
+}
+.amx-v2 .amx-aviso-tit {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-aviso-texto {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin-top: 8px;
+}
+
+/* ── CITA DE FUENTE Y AVISO DE TRANSPARENCIA ─────────────────────────────────
+   Las dos viven SOBRE PAPEL, asi que aqui no entra ninguna variable de tema
+   (--bg, --text, --border y sus gemelas --d-*): en modo oscuro dejarian tinta
+   clara sobre papel claro. Solo tokens de papeleria. Es la regla §5.5.
+
+   La cita es el mecanismo por el que §14 —«fuente + fecha de actualizacion
+   visibles»— deja de depender de la disciplina de quien escribe: se usa unas
+   60 veces y es la unica forma de rotular una afirmacion normativa.
+   ────────────────────────────────────────────────────────────────────────── */
+.amx-v2 .amx-cita {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
+  margin: 10px 0 0;
+}
+.amx-v2 .amx-cita a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-cita a:hover { text-decoration: none; }
+.amx-v2 .amx-cita a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+
+.amx-v2 .amx-aviso {
+  position: relative;
+  margin: 18px 0;
+}
+.amx-v2 .amx-aviso-tit {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-aviso-texto {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 8px 0 0;
+}
