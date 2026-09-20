@@ -36,6 +36,10 @@ function LegalidadHub({ onNav }) {
       <p className="amx-leg-advertencia">{C.advertencia}</p>
       <p className="amx-leg-fecha">Actualizado el {window.amxLegalFecha(C.actualizado)}</p>
 
+      {/* El mapa va aquí y solo aquí: en la portada sería ruido antes de que la
+          persona sepa qué pregunta tiene (decisión de Saulo, 19-sep-2026). */}
+      {window.MapaTramite && <window.MapaTramite />}
+
       <nav className="amx-leg-carpetas" aria-label="Secciones de Legalidad">
         {carpetas.map((c) => (
           <button

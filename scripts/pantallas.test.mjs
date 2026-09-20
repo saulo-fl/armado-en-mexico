@@ -232,3 +232,22 @@ test('ninguna carpeta afirma que existe normativa estatal de armas', () => {
   assert.ok(win.AMX_LEGAL.noHayEstatal && win.AMX_LEGAL.noHayEstatal.length > 80,
     'el corpus tiene que explicar por qué no hay normativa estatal');
 });
+
+// Dos fallos que solo se ven mirando la pantalla, no leyendo el codigo:
+//   1. `AMX_LEGAL.requisitos` es un ARRAY. Indexarlo con una cadena da undefined, y la
+//      carpeta enseniaba los ids crudos —«pa-curp»— en vez de los nombres. Compilaba.
+//   2. El titulo se sacaba del dictamen, que no lo tiene, asi que la cinta Dymo decia
+//      «Entrevista» en vez de la pregunta que da nombre a la pantalla.
+test('la entrevista enseña NOMBRES de documento, no ids, y su título de verdad', (t) => {
+  if (!win.EntrevistaScreen) return t.skip('pantalla aún no escrita');
+  const t2 = texto(win.EntrevistaScreen({ onNav: () => {} }));
+  assert.ok(t2.includes(win.AMX_ENTREVISTA.titulo), 'la cinta no lleva el título del guion');
+  // Los documentos que le tocan a todo el mundo salen desde la primera pregunta.
+  const C = win.AMX_LEGAL;
+  for (const id of win.AMX_ENTREVISTA.siempre) {
+    const req = C.requisitos.find((r) => r.id === id);
+    assert.ok(req, 'el guion cita un documento que el corpus no tiene: ' + id);
+    assert.ok(t2.includes(req.nombre), 'la carpeta no muestra el nombre de «' + id + '»');
+    assert.ok(!t2.includes(id), 'la carpeta enseña el id crudo «' + id + '» en vez del nombre');
+  }
+});

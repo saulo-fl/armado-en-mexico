@@ -6093,18 +6093,18 @@
   font-size: 13px;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: var(--ficha-tinta-2);
+  color: var(--tinta-2);
 }
 .amx-v2 .amx-leg-intro {
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.6;
-  color: var(--ficha-tinta);
+  color: var(--tinta);
 }
 .amx-v2 .amx-leg-advertencia {
   font-family: var(--mono);
   font-size: 13.5px;
-  color: var(--oficio-tinta-2);
+  color: var(--tinta-dim);
   border-left: 3px solid var(--sello-restr);
   padding-left: 12px;
   margin: 16px 0;
@@ -6112,7 +6112,7 @@
 .amx-v2 .amx-leg-fecha {
   font-family: var(--mono);
   font-size: 13px;
-  color: var(--ficha-tinta-2);
+  color: var(--tinta-2);
 }
 .amx-v2 .amx-leg-carpetas {
   display: grid;
@@ -6121,12 +6121,13 @@
   margin: 20px 0;
 }
 .amx-v2 .amx-leg-carpeta {
-  background: var(--carton);
+  background: var(--carton-alto);
   border: 1px solid var(--carton-filo);
   text-align: left;
   padding: 14px;
   min-height: 44px;
   cursor: pointer;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-carpeta:hover {
   background: var(--ficha);
@@ -6155,6 +6156,14 @@
   background: var(--oficio-2);
   padding: 14px;
   margin: 22px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-huecos p {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 8px 0 0;
 }
 .amx-v2 .amx-leg-huecos h2 {
   font-family: var(--mono);
@@ -6179,6 +6188,7 @@
   background: var(--oficio);
   padding: 16px;
   margin: 18px 0;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-hoja h2 {
   font-family: var(--sans);
@@ -6294,6 +6304,7 @@
 .amx-v2 .amx-ent-folder {
   background: var(--oficio);
   padding: 16px;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-ent-recorrido {
   display: flex;
@@ -6310,6 +6321,10 @@
   color: var(--ficha-tinta);
   padding: 0 10px;
   cursor: pointer;
+  min-width: 44px;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
 }
 .amx-v2 .amx-ent-paso:focus-visible {
   outline: 2px solid var(--ficha-tinta);
@@ -6356,7 +6371,7 @@
   min-height: 44px;
   margin-top: 14px;
   padding: 0 18px;
-  background: var(--carton);
+  background: var(--carton-alto);
   border: 1px solid var(--carton-filo);
   font-family: var(--sans);
   font-size: 15px;
@@ -6382,6 +6397,7 @@
   background: var(--ficha);
   padding: 14px;
   align-self: start;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-ent-carpeta h2 {
   font-family: var(--mono);
@@ -6415,6 +6431,7 @@
   padding: 18px;
   position: relative;
   text-align: center;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-ent-sello {
   font-family: var(--mono);
@@ -6483,6 +6500,7 @@
   max-width: 900px;
   min-height: 260px;
   box-sizing: border-box;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-hent-tit {
   font-family: var(--sans);
@@ -6502,6 +6520,7 @@
   background: var(--ficha);
   padding: 14px;
   margin-top: 12px;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-hent-num {
   font-family: var(--mono);
@@ -6526,7 +6545,7 @@
 .amx-v2 .amx-hent-boton {
   min-height: 44px;
   padding: 0 20px;
-  background: var(--carton);
+  background: var(--carton-alto);
   border: 1px solid var(--carton-filo);
   font-family: var(--sans);
   font-size: 15px;
@@ -6566,6 +6585,7 @@
   padding: 14px 16px;
   margin-bottom: 10px;
   border-left: 3px solid var(--carton-filo);
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-peldano h2 {
   font-family: var(--sans);
@@ -6641,6 +6661,7 @@
   background: var(--oficio);
   padding: 16px;
   margin: 16px 0;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-estado dt {
   font-family: var(--mono);
@@ -6674,6 +6695,7 @@
   padding: 16px;
   margin: 18px 0;
   border-left: 3px solid var(--sello-civil);
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-contraste h2 {
   font-family: var(--sans);
@@ -6693,6 +6715,7 @@
   background: var(--oficio);
   padding: 16px;
   margin: 14px 0;
+  color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-ficha h2 {
   font-family: var(--sans);
@@ -6731,4 +6754,101 @@
   border-left: 3px solid var(--sello-restr);
   padding-left: 10px;
   margin-top: 6px;
+}
+
+/* ── MAPA DEL TRÁMITE ─────────────────────────────────────────────────────────
+   El SVG que genera Archify llega sin un solo color ni fuente literal: todo va
+   por estas 34 clases. Eso es lo que permite vestirlo con la papelería del
+   sitio y que siga al tema, en vez de traer su propia paleta.
+
+   Como todo lo que vive sobre papel (§5.5), aquí NO entra ninguna variable de
+   tema: solo tokens de papelería.
+   ────────────────────────────────────────────────────────────────────────── */
+.amx-v2 .amx-mapa {
+  margin: 22px 0;
+  padding: 0;
+  overflow-x: auto;          /* el diagrama es ancho; el resto de la página no scrollea */
+}
+.amx-v2 .amx-mapa-svg {
+  display: block;
+  width: 100%;
+  min-width: 720px;          /* por debajo de esto los rótulos dejan de leerse */
+  height: auto;
+}
+.amx-v2 .amx-mapa-pie {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--tinta-2);
+  margin-top: 10px;
+}
+
+/* Superficies: el lienzo es papel, los carriles el papel alterno, las cajas
+   fichas de fichero. La máscara tapa la línea que pasa bajo una etiqueta, así
+   que tiene que ser del mismo color que el papel. */
+.amx-v2 .amx-mapa .c-grid           { fill: none; stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .c-lane           { fill: var(--oficio-2); }
+.amx-v2 .amx-mapa .c-mask           { fill: var(--oficio); }
+.amx-v2 .amx-mapa .c-frontend,
+.amx-v2 .amx-mapa .c-cloud          { fill: var(--ficha); }
+.amx-v2 .amx-mapa .c-backend,
+.amx-v2 .amx-mapa .c-messagebus     { fill: var(--oficio-2); }
+.amx-v2 .amx-mapa .c-database       { fill: var(--carton-alto); }
+.amx-v2 .amx-mapa .c-security,
+.amx-v2 .amx-mapa .c-security-group { fill: var(--ficha); }
+
+/* Trazos: el filo del cartón para todo, y el sello rojo donde la norma cierra
+   una puerta —los antecedentes penales y lo que no autoriza el permiso—. */
+.amx-v2 .amx-mapa .s-frontend,
+.amx-v2 .amx-mapa .s-backend,
+.amx-v2 .amx-mapa .s-cloud,
+.amx-v2 .amx-mapa .s-database,
+.amx-v2 .amx-mapa .s-messagebus     { stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .s-security       { stroke: var(--sello-restr); }
+
+/* Tinta. */
+.amx-v2 .amx-mapa .t-primary,
+.amx-v2 .amx-mapa .t-frontend,
+.amx-v2 .amx-mapa .t-backend,
+.amx-v2 .amx-mapa .t-database,
+.amx-v2 .amx-mapa .t-messagebus     { fill: var(--ficha-tinta); }
+.amx-v2 .amx-mapa .t-dim,
+.amx-v2 .amx-mapa .t-muted          { fill: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .t-security       { fill: var(--sello-restr); }
+
+/* Aristas: el camino principal en verde de sello, lo que corta en rojo, y lo
+   que es «otro trámite» punteado y en tinta secundaria. */
+/* Las aristas son <path> y <line>. El `fill: none` NO es decorativo: sin el, el
+   navegador rellena la curva de la arista con negro y se come el diagrama. */
+.amx-v2 .amx-mapa .a-default,
+.amx-v2 .amx-mapa .a-emphasis,
+.amx-v2 .amx-mapa .a-security,
+.amx-v2 .amx-mapa .a-dashed,
+.amx-v2 .amx-mapa .semantic-sigil   { fill: none; }
+.amx-v2 .amx-mapa .a-default        { stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .a-emphasis       { stroke: var(--sello-civil); }
+.amx-v2 .amx-mapa .a-security       { stroke: var(--sello-restr); }
+.amx-v2 .amx-mapa .a-dashed         { stroke: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .m-default        { fill: var(--carton-filo); }
+.amx-v2 .amx-mapa .m-emphasis       { fill: var(--sello-civil); }
+.amx-v2 .amx-mapa .m-security       { fill: var(--sello-restr); }
+.amx-v2 .amx-mapa .m-dashed         { fill: var(--ficha-tinta-2); }
+
+.amx-v2 .amx-mapa .semantic-sigil   { stroke: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .sigil-fill       { fill: var(--ficha-tinta-2); }
+
+.amx-v2 .amx-ent-reiniciar {
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 18px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--carton-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-ent-reiniciar:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
 }

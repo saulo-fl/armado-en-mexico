@@ -34,7 +34,7 @@ function EntrevistaScreen({ onNav }) {
 
     return (
       <div className="amx-ent">
-        <window.CintaDymo nivel={1}>{d.titulo || 'Entrevista'}</window.CintaDymo>
+        <window.CintaDymo nivel={1}>{arbol.titulo || 'Entrevista'}</window.CintaDymo>
 
         <div className="amx-ent-mesa">
 
@@ -50,7 +50,7 @@ function EntrevistaScreen({ onNav }) {
                       ': respondiste ' + r.opcion.texto + '. Cambiar.'}
                     onClick={function () { borrarYRestar(i); }}
                   >
-                    {i + 1}. {r.pregunta.texto}
+                    <span aria-hidden="true">{i + 1}</span>
                   </button>
                 );
               })}
@@ -89,7 +89,7 @@ function EntrevistaScreen({ onNav }) {
                   })}
                 </ul>
               )}
-              <button type="button" onClick={function () { setResp({}); setSel(null); }}>
+              <button type="button" className="amx-ent-reiniciar" onClick={function () { setResp({}); setSel(null); }}>
                 Empezar de nuevo
               </button>
             </section>
@@ -99,7 +99,7 @@ function EntrevistaScreen({ onNav }) {
             <h2>En tu carpeta</h2>
             <ul>
               {d.documentos.map(function (docId, i) {
-                var req = window.AMX_LEGAL.requisitos[docId];
+                var req = (window.AMX_LEGAL.requisitos || []).find(function (r) { return r.id === docId; });
                 var nombre = req ? req.nombre : docId;
                 return <li key={i}>{nombre}</li>;
               })}
@@ -113,7 +113,7 @@ function EntrevistaScreen({ onNav }) {
 
   return (
     <div className="amx-ent">
-      <window.CintaDymo nivel={1}>{d.titulo || 'Entrevista'}</window.CintaDymo>
+      <window.CintaDymo nivel={1}>{arbol.titulo || 'Entrevista'}</window.CintaDymo>
 
       <div className="amx-ent-mesa">
 
@@ -129,7 +129,7 @@ function EntrevistaScreen({ onNav }) {
                     ': respondiste ' + r.opcion.texto + '. Cambiar.'}
                   onClick={function () { borrarYRestar(i); }}
                 >
-                  {i + 1}. {r.pregunta.texto}
+                  <span aria-hidden="true">{i + 1}</span>
                 </button>
               );
             })}
@@ -172,7 +172,7 @@ function EntrevistaScreen({ onNav }) {
           <h2>En tu carpeta</h2>
           <ul>
             {d.documentos.map(function (docId, i) {
-              var req = window.AMX_LEGAL.requisitos[docId];
+              var req = (window.AMX_LEGAL.requisitos || []).find(function (r) { return r.id === docId; });
               var nombre = req ? req.nombre : docId;
               return <li key={i}>{nombre}</li>;
             })}

@@ -98,6 +98,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /screens-entrevista.js
   Cache-Control: public, max-age=0, must-revalidate
+/mapa-tramite.js
+  Cache-Control: public, max-age=0, must-revalidate
 
 # ── Assets inmutables bajo su nombre: caché larga ────────────────────────────
 /imagenes/*
