@@ -26,6 +26,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
 import { renderSoporteHtml } from './prerender-soporte.mjs';
+import { renderLegalHtml } from './prerender-legal.mjs';
 
 const SITIO = 'https://armado.mx';
 const RAIZ = process.cwd();
@@ -44,9 +45,12 @@ const win = {};
 const ctx = createContext({ window: win, console });
 ctx.window = win;
 for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
-                 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
+                 'data-legal.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
   runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
+runInContext(readFileSync(join(SRC, 'lib', 'legal.js'), 'utf8'), ctx, { filename: 'legal.js' });
+const LEGAL = win.AMX_LEGAL;
+if (!LEGAL || !LEGAL.requisitos || LEGAL.requisitos.length === 0) throw new Error('data-legal.js no cargó');
 const ARMAS = win.DB || [], ACCESORIOS = win.ACCESORIOS || [], MUNICIONES = win.MUNICIONES || [];
 if (!ARMAS.length) throw new Error('No se cargaron las armas: revisa data.js');
 
@@ -454,7 +458,11 @@ const FIJAS = [
   { ruta: 'calibres', titulo: 'Guía de calibres', enSitemap: true,
     desc: 'Los 30 calibres de la guía, de menor a mayor: qué son, qué tan fuerte pega cada uno, su balística y cuáles puede adquirir un civil en México.' },
   { ruta: 'legalidad', titulo: 'Tenencia legal de armas en México — requisitos y trámite SEDENA', enSitemap: true,
-    desc: 'Requisitos y pasos para la posesión legal de un arma de fuego en México conforme a la Ley Federal de Armas de Fuego y Explosivos.' },
+    desc: 'Los permisos, los papeles y la ley detrás de tener un arma legalmente en México, con la fuente y la fecha de cada afirmación.',
+    cuerpo: renderLegalHtml(LEGAL, 'hub', win) },
+  { ruta: 'legalidad/requisitos', titulo: 'Requisitos para comprar un arma en México — permiso y compra', enSitemap: true,
+    desc: 'Los papeles que pide el permiso extraordinario ante el Registro Federal y los que pide la compra en la DCAM. Son dos trámites distintos.',
+    cuerpo: renderLegalHtml(LEGAL, 'requisitos', win) },
   { ruta: 'traumaticas', titulo: 'Armas traumáticas — defensa menos letal sin permiso SEDENA', enSitemap: true,
     desc: 'Dispositivos de defensa menos letal accionados por CO₂: no son armas de fuego y no requieren permiso ante la SEDENA.' },
   { ruta: 'soporte', titulo: 'Soporte y normas de la comunidad', enSitemap: true,

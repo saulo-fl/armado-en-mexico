@@ -60,7 +60,12 @@ function requisitoHtml(r, corpus, helpers) {
       var v = r.variantes[i];
       if (v.revisar) continue;
       html += '<dt>' + esc(v.escenario) + '</dt>';
-      html += '<dd>' + esc(v.documento) + '</dd>';
+      // Quién lo expide es la mitad útil del dato: sin esto, el ejidatario sabe que
+      // necesita un certificado pero no que se lo da el Comisariado Ejidal inscrito en
+      // el Registro Agrario Nacional.
+      html += '<dd>' + esc(v.documento) +
+        (v.autoridadLocal ? ' <span class="amx-leg-autoridad">Lo expide: ' + esc(v.autoridadLocal) + '</span>' : '') +
+        '</dd>';
     }
     html += '</dl>';
   }
@@ -104,8 +109,12 @@ function requisitosSection(corpus, tramite) {
     '</section>';
 }
 
+// El modulo de la cita necesita el formateador de fecha, y esta escrito como funcion
+// suelta. Se guarda el juego de helpers en una variable del modulo, DECLARADA: un ESM va
+// en modo estricto y una asignacion a variable no declarada revienta el build entero.
+let helpers = null;
+
 export function renderLegalHtml(corpus, seccion, h) {
-  // Guardar helpers en cierre para que fuenteCita los vea.
   helpers = h;
 
   if (seccion === 'hub') {

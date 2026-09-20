@@ -152,3 +152,53 @@ test('cada variante muestra su escenario y quién expide el documento', (t) => {
   assert.match(t2, /Comisariado Ejidal/, 'no dice quién expide el certificado del campo');
   assert.match(t2, /contador público/i, 'no sale la variante del trabajador independiente');
 });
+
+// ── El prerender: lo que ven los buscadores y quien no ejecuta JavaScript ───
+// Antes de esto, /legalidad se servía como dos líneas de HTML: un bot no veía ni un
+// requisito. Estas pruebas no miran el archivo construido —eso obligaría a correr el
+// build— sino el renderizador, que es donde está la lógica.
+import { renderLegalHtml } from './prerender-legal.mjs';
+
+const helpers = {
+  amxLegalFuente: win.amxLegalFuente, amxLegalHuecos: win.amxLegalHuecos,
+  amxRequisitosDe: win.amxRequisitosDe, amxLegalFecha: win.amxLegalFecha,
+};
+
+test('el prerender sirve contenido de verdad, no un esqueleto', () => {
+  for (const seccion of ['hub', 'requisitos']) {
+    const html = renderLegalHtml(win.AMX_LEGAL, seccion, helpers);
+    assert.ok(html.length > 4000, seccion + ': solo ' + html.length + ' caracteres, es un esqueleto');
+    assert.equal((html.match(/<h1/g) || []).length, 1, seccion + ': debe haber exactamente un <h1>');
+    // Es HTML para bots y para quien no tiene JavaScript: nada operativo.
+    for (const tag of ['<form', '<input', '<select', '<button']) {
+      assert.ok(!html.includes(tag), seccion + ': no puede llevar ' + tag);
+    }
+  }
+});
+
+test('el prerender de Requisitos separa los dos trámites y cita sus fuentes', () => {
+  const html = renderLegalHtml(win.AMX_LEGAL, 'requisitos', helpers);
+  const C = win.AMX_LEGAL;
+  for (const id of ['permiso-adquisicion', 'compra-dcam']) {
+    const t = C.tramites.find((x) => x.id === id);
+    assert.ok(html.includes(t.nombre.slice(0, 40)), 'falta el trámite ' + id);
+  }
+  assert.match(html, /Registro Agrario Nacional/, 'falta la variante del ejidatario');
+  assert.match(html, /rel="noopener noreferrer"/, 'los enlaces externos van con rel noopener');
+  assert.match(html, /se abre en una pestaña nueva/, 'los enlaces externos lo dicen al lector de pantalla');
+});
+
+test('el prerender no publica ningún hueco como afirmación', () => {
+  const html = renderLegalHtml(win.AMX_LEGAL, 'hub', helpers);
+  const C = win.AMX_LEGAL;
+  // Un trámite marcado `revisar` no puede salir como si estuviera verificado…
+  for (const t of C.tramites.filter((x) => x.revisar)) {
+    assert.ok(!html.includes(t.nombre), 'el trámite "' + t.id + '" está marcado como hueco y sale afirmado');
+  }
+  // …pero su nota SÍ tiene que salir, en el bloque de lo que falta por verificar.
+  const huecos = win.amxLegalHuecos(C);
+  assert.ok(huecos.length > 20);
+  assert.match(html, /falta por verificar/i, 'no sale el bloque de huecos');
+  assert.ok(html.includes(huecos[0].nota.slice(0, 40).replace(/&/g, '&amp;')),
+    'la nota del primer hueco no llega al HTML');
+});
