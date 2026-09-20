@@ -120,3 +120,50 @@ test('la restauración del comparador pasa las armas en el parámetro de las arm
       `El comparador se reescribiría sin sus armas.`);
   }
 });
+
+// Las rutas de Legalidad son de DOS segmentos. La búsqueda de PATH_TO_SCREEN exige
+// `seg.length === 1`, así que sin una rama propia una recarga directa sobre
+// /legalidad/requisitos se caía al fallback de accesorios y de ahí a la portada: la URL
+// se escribía bien y al recargar aparecía otra pantalla. Esta prueba fija las dos ramas
+// y que una desconocida aterrice en el hub de Legalidad, nunca en la portada.
+test('las ramas de Legalidad se parsean, y una desconocida cae en el hub', () => {
+  // No se puede cazar el bloque con un no-codicioso hasta el primer `}`: el primero que
+  // aparece es el de `Object.assign({}`. Se miran las dos líneas siguientes al `if`,
+  // que es donde vive la lógica.
+  const iSalto = src.indexOf('seg[0] === SCREEN_TO_PATH.legal && seg[1]');
+  const m = iSalto < 0 ? null : [src.slice(iSalto).split('\n').slice(0, 3).join('\n')];
+  assert.ok(m, 'no hay rama de parseo para las subrutas de Legalidad: /legalidad/requisitos se caería al recargar');
+  assert.match(m[0], /PATH_TO_SCREEN\[seg\[0\] \+ '\/' \+ seg\[1\]\]/, 'la rama no compone la ruta de dos segmentos');
+  assert.match(m[0], /\|\| 'legal'/, 'una rama desconocida debe caer en el hub de Legalidad, no en la portada');
+
+  // Y la rama tiene que ir ANTES de la búsqueda de un solo segmento y del fallback.
+  const iRama = src.indexOf("seg[0] === SCREEN_TO_PATH.legal && seg[1]");
+  const iUno = src.indexOf('seg.length === 1 && PATH_TO_SCREEN[seg[0]]');
+  assert.ok(iRama > 0 && iUno > 0 && iRama < iUno, 'la rama de Legalidad debe ir antes de la búsqueda de un segmento');
+});
+
+// Las dos pantallas nuevas son puntos de alta en cinco sitios distintos. Si falta uno, el
+// botón de la barra queda muerto o el título sale vacío, y no lo nota nadie hasta el
+// navegador. Aquí se cuentan los cinco de una vez.
+test('cada pantalla nueva está dada de alta en los cinco sitios', () => {
+  for (const [pantalla, ruta, titulo] of [
+    ['legal-req', 'legalidad/requisitos', 'Requisitos'],
+    ['entrevista', 'legalidad/puedo-comprar', '¿Puedo comprar un arma?'],
+  ]) {
+    assert.ok(src.includes("'" + ruta + "'"), pantalla + ': falta su ruta en SCREEN_TO_PATH');
+    assert.ok(src.includes("'" + titulo + "'"), pantalla + ': falta su título');
+    // La clave puede ir entrecomillada o no —`'legal-req': 'legal'` frente a
+    // `entrevista: 'legal'`—, así que se admiten las dos formas.
+    const navId = new RegExp("'?" + pantalla + "'?\\s*:\\s*'legal'");
+    assert.match(src, navId,
+      pantalla + ': no cuelga de Legalidad en currentNavId, su botón de la barra quedaría muerto');
+    // Nada de regex por distancia: la línea de isInternal es larga y crece cada vez que
+    // se añade una pantalla. Se busca la línea y se mira dentro.
+    const lineaInternal = src.split('\n').find((l) => l.includes('const isInternal'));
+    assert.ok(lineaInternal, 'no se encontró la línea de isInternal');
+    assert.ok(lineaInternal.includes("'" + pantalla + "'"),
+      pantalla + ': no está en isInternal, se quedaría sin botón de volver');
+    assert.match(src, new RegExp("screen === '" + pantalla + "'"),
+      pantalla + ': no se monta en el switch de contenido');
+  }
+});
