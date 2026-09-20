@@ -251,7 +251,7 @@ function App() {
     if (skipPush.current) { skipPush.current = false; return; }
     // Basta comparar la dirección que toca con la que hay. Al depender también
     // del filtro, /arsenal y /pistolas son direcciones distintas.
-    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter, compareIds, calibreId);
+    const url = amxBuildUrl(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds);
     if (window.location.pathname === url) return;
     try {
       window.history[reemplazar ? 'replaceState' : 'pushState']({ screen, productId, accesorioId, municionId, calibreId }, '', url);
@@ -282,7 +282,7 @@ function App() {
       // eso mismo skipPush vuelve a false, o se tragaría el siguiente pushState.
       if (s.screen === 'compare') {
         skipPush.current = false;
-        const url = amxBuildUrl('compare', null, null, null, null, idsVivos.current);
+        const url = amxBuildUrl('compare', null, null, null, null, null, idsVivos.current);
         if (window.location.pathname !== url) {
           try { window.history.replaceState(window.history.state, '', url); } catch (e) {}
         }

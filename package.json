@@ -12,7 +12,7 @@
     "watch": "npm run build:js -- --watch",
     "cifras": "node scripts/actualizar-readme.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs scripts/filtros.test.mjs scripts/faq.test.mjs scripts/soporte.test.mjs scripts/store-report.test.mjs scripts/github-contribution.test.mjs scripts/calibres.test.mjs scripts/referencias.test.mjs"
+    "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs scripts/filtros.test.mjs scripts/faq.test.mjs scripts/soporte.test.mjs scripts/store-report.test.mjs scripts/github-contribution.test.mjs scripts/calibres.test.mjs scripts/rutas.test.mjs scripts/referencias.test.mjs"
   },
   "devDependencies": {
     "@babel/cli": "^8.0.4",
