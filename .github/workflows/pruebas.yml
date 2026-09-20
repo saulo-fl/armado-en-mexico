@@ -41,3 +41,9 @@ jobs:
       # lo que se publica es la versión anterior y nadie se entera.
       - name: Build
         run: npm run build
+
+      # La capa que de verdad habría parado el 19-sep: abre una página de cada
+      # forma de ruta en el Chrome del runner y falla si alguna tira un error.
+      # Lo que las pruebas no ven porque no ejecutan los componentes, aquí se ve.
+      - name: Smoke en el navegador
+        run: npm run smoke
