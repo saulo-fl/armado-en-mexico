@@ -6553,3 +6553,182 @@
     animation: none;
   }
 }
+
+/* ── FEDERAL, ESTATAL Y PERMISOS ────────────────────────────────────── */
+
+.amx-v2 .amx-leg-escalera {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0;
+}
+.amx-v2 .amx-leg-peldano {
+  background: var(--oficio);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-peldano h2 {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-peldano-tit {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-hueco {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--oficio-tinta-2);
+  background: var(--oficio-2);
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-left: 3px solid var(--sello-restr);
+}
+.amx-v2 .amx-leg-arts {
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-arts summary {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.amx-v2 .amx-leg-arts summary:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-selector {
+  display: block;
+  margin: 18px 0;
+}
+.amx-v2 .amx-leg-selector span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin-bottom: 6px;
+}
+.amx-v2 .amx-leg-selector select {
+  display: block;
+  min-height: 44px;
+  width: 100%;
+  max-width: 420px;
+  padding: 0 10px;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  background: var(--ficha);
+  color: var(--ficha-tinta);
+  border: 1px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-selector select:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-estado {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 16px 0;
+}
+.amx-v2 .amx-leg-estado dt {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  margin-top: 12px;
+}
+.amx-v2 .amx-leg-estado dd {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 4px 0 0;
+}
+.amx-v2 .amx-leg-estado a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.amx-v2 .amx-leg-estado a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-contraste {
+  background: var(--ficha);
+  padding: 16px;
+  margin: 18px 0;
+  border-left: 3px solid var(--sello-civil);
+}
+.amx-v2 .amx-leg-contraste h2 {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0 0 8px;
+}
+.amx-v2 .amx-leg-contraste p {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-ficha {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 14px 0;
+}
+.amx-v2 .amx-leg-ficha h2 {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-ficha dt {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-ficha dd {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 4px 0 0;
+}
+.amx-v2 .amx-leg-homoclave {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .06em;
+  color: var(--ficha-tinta-2);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-no-habilita {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--oficio-tinta-2);
+  border-left: 3px solid var(--sello-restr);
+  padding-left: 10px;
+  margin-top: 6px;
+}
