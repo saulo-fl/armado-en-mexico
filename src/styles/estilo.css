@@ -6000,3 +6000,863 @@
   outline: 2px solid var(--acento);
   outline-offset: 2px;
 }
+
+/* ── CITA DE FUENTE Y AVISO DE TRANSPARENCIA ─── */
+
+.amx-v2 .amx-cita {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.amx-v2 .amx-cita a {
+  color: var(--ficha-tinta);
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-cita a:hover {
+  text-decoration: none;
+}
+.amx-v2 .amx-cita a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-aviso {
+  position: relative;
+  margin: 18px 0;
+}
+.amx-v2 .amx-aviso-tit {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-aviso-texto {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin-top: 8px;
+}
+
+/* ── CITA DE FUENTE Y AVISO DE TRANSPARENCIA ─────────────────────────────────
+   Las dos viven SOBRE PAPEL, asi que aqui no entra ninguna variable de tema
+   (--bg, --text, --border y sus gemelas --d-*): en modo oscuro dejarian tinta
+   clara sobre papel claro. Solo tokens de papeleria. Es la regla §5.5.
+
+   La cita es el mecanismo por el que §14 —«fuente + fecha de actualizacion
+   visibles»— deja de depender de la disciplina de quien escribe: se usa unas
+   60 veces y es la unica forma de rotular una afirmacion normativa.
+   ────────────────────────────────────────────────────────────────────────── */
+.amx-v2 .amx-cita {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
+  margin: 10px 0 0;
+}
+.amx-v2 .amx-cita a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-cita a:hover { text-decoration: none; }
+.amx-v2 .amx-cita a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+
+.amx-v2 .amx-aviso {
+  position: relative;
+  margin: 18px 0;
+}
+.amx-v2 .amx-aviso-tit {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-aviso-texto {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 8px 0 0;
+}
+
+/* ── LEGALIDAD, REQUISITOS Y LA ENTREVISTA ──────────────────────────── */
+
+/* Pantallas de Legalidad */
+.amx-v2 .amx-leg {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 0 16px 90px;
+}
+.amx-v2 .amx-leg-eyebrow {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-leg-intro {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--tinta);
+}
+.amx-v2 .amx-leg-advertencia {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  color: var(--tinta-dim);
+  border-left: 3px solid var(--sello-restr);
+  padding-left: 12px;
+  margin: 16px 0;
+}
+.amx-v2 .amx-leg-fecha {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-leg-carpetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.amx-v2 .amx-leg-carpeta {
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  text-align: left;
+  padding: 14px;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-carpeta:hover {
+  background: var(--ficha);
+}
+.amx-v2 .amx-leg-carpeta:focus-visible {
+  outline: 2px solid var(--carton-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-carpeta-tit {
+  display: block;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--carton-tinta);
+}
+.amx-v2 .amx-leg-carpeta-desc {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--carton-tinta);
+  margin-top: 4px;
+}
+.amx-v2 .amx-leg-huecos {
+  background: var(--oficio-2);
+  padding: 14px;
+  margin: 22px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-huecos p {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 8px 0 0;
+}
+.amx-v2 .amx-leg-huecos h2 {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-huecos ul {
+  padding-left: 18px;
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-huecos li {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--oficio-tinta-2);
+  margin-bottom: 8px;
+}
+.amx-v2 .amx-leg-hoja {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 18px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-hoja h2 {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin-top: 0;
+}
+.amx-v2 .amx-leg-dependencia {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-leg-habilita {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-checklist {
+  list-style: none;
+  padding: 0;
+}
+.amx-v2 .amx-leg-checklist li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-casilla {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--ficha-tinta-2);
+  margin-right: 8px;
+}
+.amx-v2 .amx-leg-req-nombre {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-sello {
+  display: inline;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--sello-restr);
+  border: 1px solid var(--sello-restr);
+  padding: 1px 5px;
+  margin-left: 8px;
+}
+.amx-v2 .amx-leg-copia {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ficha-tinta-2);
+  margin-left: 8px;
+}
+.amx-v2 .amx-leg-detalle {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  margin-top: 6px;
+}
+.amx-v2 .amx-leg-vigencia {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  margin-top: 6px;
+}
+.amx-v2 .amx-leg-variantes {
+  margin-top: 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-variantes dt {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-leg-variantes dd {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-autoridad {
+  display: block;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ficha-tinta-2);
+  margin-top: 3px;
+}
+
+/* La entrevista */
+.amx-v2 .amx-ent {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 0 16px 90px;
+}
+.amx-v2 .amx-ent-mesa {
+  display: grid;
+  gap: 16px;
+}
+@media (min-width: 900px) {
+  .amx-v2 .amx-ent-mesa {
+    grid-template-columns: 1fr 260px;
+  }
+}
+.amx-v2 .amx-ent-folder {
+  background: var(--oficio);
+  padding: 16px;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-recorrido {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.amx-v2 .amx-ent-paso {
+  min-height: 44px;
+  background: var(--ficha);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ficha-tinta);
+  padding: 0 10px;
+  cursor: pointer;
+  min-width: 44px;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+}
+.amx-v2 .amx-ent-paso:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-pregunta {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.amx-v2 .amx-ent-pregunta legend {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-ayuda {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  margin: 8px 0 12px;
+}
+.amx-v2 .amx-ent-opcion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 6px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-opcion:hover {
+  background: var(--oficio-2);
+}
+.amx-v2 .amx-ent-opcion input:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-continuar {
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 0 18px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--carton-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-ent-continuar:focus-visible {
+  outline: 2px solid var(--carton-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-pregunta:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-continuar[disabled] {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.amx-v2 .amx-ent-carpeta {
+  background: var(--ficha);
+  padding: 14px;
+  align-self: start;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-carpeta h2 {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-ent-carpeta ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+}
+.amx-v2 .amx-ent-carpeta li {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ficha-tinta);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--carton-filo);
+}
+.amx-v2 .amx-ent-cuenta {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ficha-tinta-2);
+  margin-top: 10px;
+}
+.amx-v2 .amx-ent-dictamen {
+  background: var(--oficio);
+  padding: 18px;
+  position: relative;
+  text-align: center;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-sello {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  padding: 6px 10px;
+  display: inline-block;
+  transform: rotate(-4deg);
+}
+.amx-v2 .amx-ent-dictamen[data-tipo="reune-requisitos"] .amx-ent-sello {
+  color: var(--sello-civil);
+  border: 2px solid var(--sello-civil);
+}
+.amx-v2 .amx-ent-dictamen[data-tipo="falta-requisito"] .amx-ent-sello,
+.amx-v2 .amx-ent-dictamen[data-tipo="no-procede"] .amx-ent-sello {
+  color: var(--sello-restr);
+  border: 2px solid var(--sello-restr);
+}
+.amx-v2 .amx-ent-dictamen h2 {
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-motivo {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  text-align: left;
+}
+.amx-v2 .amx-ent-remedio {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  text-align: left;
+  background: var(--oficio-2);
+  padding: 12px;
+}
+.amx-v2 .amx-ent-nota {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  text-align: left;
+}
+.amx-v2 .amx-ent-avisos {
+  text-align: left;
+  padding-left: 18px;
+}
+.amx-v2 .amx-ent-avisos li {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta);
+  margin-bottom: 6px;
+}
+
+/* Bloque de portada */
+.amx-v2 .amx-hent {
+  background: var(--oficio);
+  padding: 18px;
+  margin: 16px auto;
+  max-width: 900px;
+  min-height: 260px;
+  box-sizing: border-box;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-hent-tit {
+  font-family: var(--sans);
+  font-size: 21px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-hent-promesa {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-hent-caja {
+  background: var(--ficha);
+  padding: 14px;
+  margin-top: 12px;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-hent-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-hent-preg {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ficha-tinta);
+  margin: 6px 0 12px;
+}
+.amx-v2 .amx-hent-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.amx-v2 .amx-hent-boton {
+  min-height: 44px;
+  padding: 0 20px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--carton-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-hent-boton:focus-visible {
+  outline: 2px solid var(--carton-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-hent-pie {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
+  margin-top: 12px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-leg-carpeta,
+  .amx-v2 .amx-ent-opcion {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ── FEDERAL, ESTATAL Y PERMISOS ────────────────────────────────────── */
+
+.amx-v2 .amx-leg-escalera {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0;
+}
+.amx-v2 .amx-leg-peldano {
+  background: var(--oficio);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--carton-filo);
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-peldano h2 {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-peldano-tit {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-hueco {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--oficio-tinta-2);
+  background: var(--oficio-2);
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-left: 3px solid var(--sello-restr);
+}
+.amx-v2 .amx-leg-arts {
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-arts summary {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.amx-v2 .amx-leg-arts summary:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-selector {
+  display: block;
+  margin: 18px 0;
+}
+.amx-v2 .amx-leg-selector span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin-bottom: 6px;
+}
+.amx-v2 .amx-leg-selector select {
+  display: block;
+  min-height: 44px;
+  width: 100%;
+  max-width: 420px;
+  padding: 0 10px;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  background: var(--ficha);
+  color: var(--ficha-tinta);
+  border: 1px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-selector select:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-estado {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 16px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-estado dt {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  margin-top: 12px;
+}
+.amx-v2 .amx-leg-estado dd {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 4px 0 0;
+}
+.amx-v2 .amx-leg-estado a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.amx-v2 .amx-leg-estado a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-contraste {
+  background: var(--ficha);
+  padding: 16px;
+  margin: 18px 0;
+  border-left: 3px solid var(--sello-civil);
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-contraste h2 {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0 0 8px;
+}
+.amx-v2 .amx-leg-contraste p {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-ficha {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 14px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-ficha h2 {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-ficha dt {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-ficha dd {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 4px 0 0;
+}
+.amx-v2 .amx-leg-homoclave {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .06em;
+  color: var(--ficha-tinta-2);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-no-habilita {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--oficio-tinta-2);
+  border-left: 3px solid var(--sello-restr);
+  padding-left: 10px;
+  margin-top: 6px;
+}
+
+/* ── MAPA DEL TRÁMITE ─────────────────────────────────────────────────────────
+   El SVG que genera Archify llega sin un solo color ni fuente literal: todo va
+   por estas 34 clases. Eso es lo que permite vestirlo con la papelería del
+   sitio y que siga al tema, en vez de traer su propia paleta.
+
+   Como todo lo que vive sobre papel (§5.5), aquí NO entra ninguna variable de
+   tema: solo tokens de papelería.
+   ────────────────────────────────────────────────────────────────────────── */
+.amx-v2 .amx-mapa {
+  margin: 22px 0;
+  padding: 0;
+  overflow-x: auto;          /* el diagrama es ancho; el resto de la página no scrollea */
+}
+.amx-v2 .amx-mapa-svg {
+  display: block;
+  width: 100%;
+  min-width: 720px;          /* por debajo de esto los rótulos dejan de leerse */
+  height: auto;
+}
+.amx-v2 .amx-mapa-pie {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--tinta-2);
+  margin-top: 10px;
+}
+
+/* Superficies: el lienzo es papel, los carriles el papel alterno, las cajas
+   fichas de fichero. La máscara tapa la línea que pasa bajo una etiqueta, así
+   que tiene que ser del mismo color que el papel. */
+.amx-v2 .amx-mapa .c-grid           { fill: none; stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .c-lane           { fill: var(--oficio-2); }
+.amx-v2 .amx-mapa .c-mask           { fill: var(--oficio); }
+.amx-v2 .amx-mapa .c-frontend,
+.amx-v2 .amx-mapa .c-cloud          { fill: var(--ficha); }
+.amx-v2 .amx-mapa .c-backend,
+.amx-v2 .amx-mapa .c-messagebus     { fill: var(--oficio-2); }
+.amx-v2 .amx-mapa .c-database       { fill: var(--carton-alto); }
+.amx-v2 .amx-mapa .c-security,
+.amx-v2 .amx-mapa .c-security-group { fill: var(--ficha); }
+
+/* Trazos: el filo del cartón para todo, y el sello rojo donde la norma cierra
+   una puerta —los antecedentes penales y lo que no autoriza el permiso—. */
+.amx-v2 .amx-mapa .s-frontend,
+.amx-v2 .amx-mapa .s-backend,
+.amx-v2 .amx-mapa .s-cloud,
+.amx-v2 .amx-mapa .s-database,
+.amx-v2 .amx-mapa .s-messagebus     { stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .s-security       { stroke: var(--sello-restr); }
+
+/* Tinta. */
+.amx-v2 .amx-mapa .t-primary,
+.amx-v2 .amx-mapa .t-frontend,
+.amx-v2 .amx-mapa .t-backend,
+.amx-v2 .amx-mapa .t-database,
+.amx-v2 .amx-mapa .t-messagebus     { fill: var(--ficha-tinta); }
+.amx-v2 .amx-mapa .t-dim,
+.amx-v2 .amx-mapa .t-muted          { fill: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .t-security       { fill: var(--sello-restr); }
+
+/* Aristas: el camino principal en verde de sello, lo que corta en rojo, y lo
+   que es «otro trámite» punteado y en tinta secundaria. */
+/* Las aristas son <path> y <line>. El `fill: none` NO es decorativo: sin el, el
+   navegador rellena la curva de la arista con negro y se come el diagrama. */
+.amx-v2 .amx-mapa .a-default,
+.amx-v2 .amx-mapa .a-emphasis,
+.amx-v2 .amx-mapa .a-security,
+.amx-v2 .amx-mapa .a-dashed,
+.amx-v2 .amx-mapa .semantic-sigil   { fill: none; }
+.amx-v2 .amx-mapa .a-default        { stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .a-emphasis       { stroke: var(--sello-civil); }
+.amx-v2 .amx-mapa .a-security       { stroke: var(--sello-restr); }
+.amx-v2 .amx-mapa .a-dashed         { stroke: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .m-default        { fill: var(--carton-filo); }
+.amx-v2 .amx-mapa .m-emphasis       { fill: var(--sello-civil); }
+.amx-v2 .amx-mapa .m-security       { fill: var(--sello-restr); }
+.amx-v2 .amx-mapa .m-dashed         { fill: var(--ficha-tinta-2); }
+
+.amx-v2 .amx-mapa .semantic-sigil   { stroke: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .sigil-fill       { fill: var(--ficha-tinta-2); }
+
+.amx-v2 .amx-ent-reiniciar {
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 18px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--carton-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-ent-reiniciar:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}

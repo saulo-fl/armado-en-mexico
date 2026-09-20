@@ -3538,3 +3538,55 @@ class PantallaRota extends React.Component {
   }
 }
 window.PantallaRota = PantallaRota;
+
+// ──────────────────────────────────────────────────────────────
+// CITA DE FUENTE — pie de cita normativa
+// ──────────────────────────────────────────────────────────────
+function CitaFuente({ fuente }) {
+  if (!fuente || !fuente.url) {
+    return fuente && fuente.titulo ? <p className="amx-cita">{fuente.titulo}</p> : null;
+  }
+  const titulo = fuente.titulo || '';
+  const fechaTexto = window.amxLegalFecha ? window.amxLegalFecha(fuente.fechaConsulta) : '';
+  const hayFecha = fechaTexto !== '';
+  const esPdf = fuente.pdf === true;
+
+  return (
+    <p className="amx-cita">
+      Fuente:{' '}
+      <a
+        href={fuente.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={esPdf
+          ? titulo + ' (PDF, se abre en una pestaña nueva)'
+          : titulo + ' (se abre en una pestaña nueva)'}
+      >
+        {titulo}
+        {esPdf && <span aria-hidden="true"> ↗</span>}
+      </a>
+      {fuente.emisor && <> ({fuente.emisor})</>}
+      {hayFecha && <> · Consultado el {fechaTexto}</>}
+    </p>
+  );
+}
+window.CitaFuente = CitaFuente;
+
+// ──────────────────────────────────────────────────────────────
+// AVISO DE TRANSPARENCIA — bloque informativo
+// ──────────────────────────────────────────────────────────────
+function AvisoTransparencia({ aviso, id = 'aviso-transparencia' }) {
+  if (!aviso) return null;
+  return (
+    <section className="amx-aviso" aria-labelledby={id}>
+      <span className="amx-copia-clip" aria-hidden="true" />
+      <div className="amx-fichero-carton">
+        <div className="amx-fichero-cab">
+          <h2 id={id} className="amx-aviso-tit">{aviso.titulo}</h2>
+        </div>
+        {aviso.parrafos.map((t, i) => <p key={i} className="amx-aviso-texto">{t}</p>)}
+      </div>
+    </section>
+  );
+}
+window.AvisoTransparencia = AvisoTransparencia;
