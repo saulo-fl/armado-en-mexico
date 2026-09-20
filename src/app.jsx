@@ -508,7 +508,7 @@ function App() {
   } else if (screen === 'menu') {
     content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
   } else if (screen === 'calibres') {
-    content = <window.CalibresScreen onOpenArma={openArma} onNav={navigate} onAbrirCalibre={openCalibre} />;
+    content = <window.CalibresScreen onNav={navigate} onAbrirCalibre={openCalibre} />;
   } else if (screen === 'calibre') {
     content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onNav={navigate} />;
   // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son
