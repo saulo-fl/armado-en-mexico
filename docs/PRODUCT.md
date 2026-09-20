@@ -12,8 +12,8 @@
 
 ## Plataforma
 
-`web` **[evidencia]**. Sitio estático publicado en Cloudflare Pages, con prerender de 321 páginas
-y una capa de datos en D1. No hay app nativa ni envoltorio; el móvil es web móvil.
+`web` **[evidencia]**. Sitio estático publicado en Cloudflare Pages, con una página
+prerenderizada por URL y una capa de datos en D1. No hay app nativa ni envoltorio; el móvil es web móvil.
 
 ---
 
@@ -58,7 +58,9 @@ fecha; cada afirmación legal, a su texto de ley. El sitio vale lo que vale su p
 
 ## Capacidades
 
-**[evidencia]** — 192 armas en catálogo, 325 páginas `.html` (321 generadas).
+**[evidencia]** — el catálogo de armas al completo, con un `.html` por URL. Las cifras
+del día las imprime `npm run build` y las repinta el README solo; aquí no se copian,
+porque copiadas se quedan viejas (llegaron a decir 192 armas y 321 páginas).
 
 - Catálogo por tipo (pistola · revólver · rifle · escopeta · carabina), calibre, uso y disponibilidad.
 - Ficha por arma: especificaciones, clase legal, precio actual e histórico, existencias por sucursal,
@@ -111,7 +113,7 @@ falla el build si no se cumple.
 **[evidencia]** — decidido y en producción; no es una elección abierta.
 
 - React vía UMD, sin bundler. Los `.jsx` son la fuente.
-- `npm run build` = Babel CLI (`.jsx` → `.js`) + `build-prerender.mjs` (prerender de las 321 páginas).
+- `npm run build` = Babel CLI (`.jsx` → `.js`) + `build-prerender.mjs` (un `.html` por URL).
 - **Los `.js` y los `.html` generados no se versionan.** Se edita el `.jsx`.
 - Cloudflare Pages + D1. `admin.html` protegido por Cloudflare Access.
 
@@ -130,5 +132,6 @@ de que ninguna decisión de producto dependa de ello.
 - **[abierto]** Método de emparejamiento arma ↔ accesorio por nombre de modelo (hoy solo por
   calibre). Referencia a estudiar: `github.com/midudev/canirun.ai` (§4.1 de `DESIGN.md`).
   Es trabajo de datos, no de diseño.
-- **[evidencia]** 62 de las 192 armas (32%) no tienen fotografía propia y caen en
-  `window.armaPlaceholder`.
+- **[evidencia]** Cubierto: hoy todas las armas del catálogo tienen fotografía propia y su
+  archivo en `public/`, así que ninguna cae en `window.armaPlaceholder`, que queda de red
+  para las altas nuevas. Llegó a ser el 32% (62 de 192) cuando se levantó este documento.
