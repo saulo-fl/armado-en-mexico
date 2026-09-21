@@ -16,6 +16,14 @@ vm.runInThisContext(
     'utf8',
   ),
 );
+vm.runInThisContext(
+  readFileSync(
+    fileURLToPath(new URL('../src/data/data-entrevista.js', import.meta.url)),
+    'utf8',
+  ),
+);
+
+const ENTREVISTA_ACTUAL = globalThis.AMX_ENTREVISTA;
 
 var ARBOL = {
   version: '2026-09-19',
@@ -50,6 +58,39 @@ var ARBOL = {
         { clave: 't', id: 'tiro', texto: 'Tiro deportivo', documentos: ['pa-club'] } ] },
   ],
 };
+
+test('el guion nuevo no concede documentos antes de responder', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, {});
+  assert.deepEqual(r.documentos, []);
+});
+
+test('una mujer nacida en México nunca recibe la pregunta de cartilla', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, {
+    nacimiento: 'mx',
+    sexo: 'mujer',
+    edad: 'si',
+    'modo-vivir': 'asalariado',
+    'carta-trabajo': 'si',
+    antecedentes: 'no',
+    uso: 'domicilio',
+    domicilio: 'a-mi-nombre',
+    medico: 'si',
+    nombres: 'si',
+  });
+  assert.equal(r.estado, 'completa');
+  assert.equal(r.recorrido.some(function (x) { return x.pregunta.id === 'cartilla'; }), false);
+});
+
+test('una persona extranjera recibe residencia y no acta de nacimiento', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, { nacimiento: 'extranjero' });
+  assert.equal(r.documentos.includes('pa-acta-nacimiento'), false);
+  assert.equal(r.documentos.includes('pa-residencia'), true);
+});
+
+test('ser mayor de edad añade la identificación al expediente', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, { edad: 'si' });
+  assert.equal(r.documentos.includes('pa-identificacion'), true);
+});
 
 test('{} → incompleta, pendiente = edad', function () {
   var r = amxEvaluarEntrevista(ARBOL, {});

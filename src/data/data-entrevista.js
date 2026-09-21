@@ -31,7 +31,7 @@
 
 (function () {
   window.AMX_ENTREVISTA = {
-    version: '2026-09-19',
+    version: '2026-09-20',
     titulo: '¿Puedo comprar un arma?',
     advertencia: 'Esta entrevista es informativa y está escrita sobre el formato DEFENSA-02-040 y la ley vigente al 19 de septiembre de 2026. Reunir todos los documentos no obliga a la autoridad a otorgar el permiso: la autorización la decide la Secretaría de la Defensa Nacional.',
     etapas: [
@@ -44,8 +44,8 @@
         nombre: 'De qué vives',
       },
       {
-        id: 'donde',
-        nombre: 'Dónde vives y qué dice tu historial',
+        id: 'historial',
+        nombre: 'Tu historial',
       },
       {
         id: 'uso',
@@ -56,8 +56,53 @@
         nombre: 'Los papeles del expediente',
       },
     ],
-    siempre: ['pa-acta-nacimiento', 'pa-curp', 'pa-identificacion'],
+    siempre: [],
     preguntas: [
+      {
+        clave: 'nac',
+        id: 'nacimiento',
+        etapa: 'quien',
+        texto: '¿Naciste en México?',
+        opciones: [
+          {
+            clave: 'mx',
+            id: 'mx',
+            texto: 'Sí',
+            documentos: ['pa-acta-nacimiento', 'pa-curp'],
+          },
+          {
+            clave: 'ex',
+            id: 'extranjero',
+            texto: 'No, nací en el extranjero',
+            documentos: ['pa-residencia'],
+            aviso: {
+              texto: 'El formato todavía pide la «forma migratoria FM2», que ya no existe: la Ley de Migración de 2011 sustituyó aquellas formas por las condiciones de estancia de residente temporal y residente permanente. Lo que hoy tienes es tu tarjeta de residente vigente o tu carta de naturalización.',
+              remedio: 'Antes de juntar los papeles, pregunta en la DGRFAFyCE qué condición de estancia te aceptan para ADQUIRIR: el artículo 27 de la LFAFE exige residente permanente, pero ese artículo regula la portación, no la compra. El pliego de la DCAM tampoco dice qué identificación admite de una persona extranjera residente; eso también se pregunta antes de ir.',
+              fundamento: 'Ley de Migración, arts. 3o y 52 (condiciones de estancia), que sustituyeron las formas migratorias anteriores; el formato DEFENSA-02-040 Civiles 2026, requisito 1, conserva la redacción anterior. Los dos puntos quedan marcados como pendientes de confirmar en el corpus de armado.mx.',
+            },
+            escenario: 'extranjero',
+          },
+        ],
+      },
+      {
+        clave: 'sex',
+        id: 'sexo',
+        etapa: 'quien',
+        texto: '¿Eres hombre o mujer?',
+        opciones: [
+          {
+            clave: 'h',
+            id: 'hombre',
+            texto: 'Hombre',
+          },
+          {
+            clave: 'm',
+            id: 'mujer',
+            texto: 'Mujer',
+            escenario: 'mujer',
+          },
+        ],
+      },
       {
         clave: 'ed',
         id: 'edad',
@@ -69,6 +114,7 @@
             clave: 's',
             id: 'si',
             texto: 'Sí',
+            documentos: ['pa-identificacion'],
           },
           {
             clave: 'n',
@@ -84,23 +130,32 @@
         ],
       },
       {
-        clave: 'per',
-        id: 'persona',
+        clave: 'car',
+        id: 'cartilla',
         etapa: 'quien',
-        texto: '¿Cuál de estos casos es el tuyo?',
-        ayuda: 'El requisito 1 del formato cambia según quién lo presenta. Si eres mujer se cubre con el acta de nacimiento, que de todos modos ya va en el expediente.',
+        texto: '¿Cuentas con la cartilla del Servicio Militar Nacional liberada?',
+        si: [
+          {
+            pregunta: 'nacimiento',
+            es: ['mx'],
+          },
+          {
+            pregunta: 'sexo',
+            es: ['hombre'],
+          },
+        ],
         opciones: [
           {
-            clave: 'h',
-            id: 'hombre-cartilla',
-            texto: 'Soy hombre y ya tengo liberada mi cartilla del Servicio Militar Nacional',
+            clave: 's',
+            id: 'si',
+            texto: 'Sí',
             documentos: ['pa-smn'],
             escenario: 'hombre',
           },
           {
-            clave: 'hs',
-            id: 'hombre-sin-cartilla',
-            texto: 'Soy hombre y no tengo la cartilla liberada',
+            clave: 'n',
+            id: 'no',
+            texto: 'No',
             impedimento: {
               tipo: 'subsanable',
               motivo: 'El requisito 1 del formato pide fotocopia legible de la cartilla del Servicio Militar Nacional liberada. Sin ella el expediente queda incompleto desde el primer renglón.',
@@ -110,24 +165,7 @@
             escenario: 'hombre',
           },
           {
-            clave: 'm',
-            id: 'mujer',
-            texto: 'Soy mujer',
-            escenario: 'mujer',
-          },
-          {
-            clave: 'e',
-            id: 'extranjero',
-            texto: 'Soy una persona extranjera',
-            aviso: {
-              texto: 'El formato todavía pide la «forma migratoria FM2», que ya no existe: la Ley de Migración de 2011 sustituyó aquellas formas por las condiciones de estancia de residente temporal y residente permanente. Lo que hoy tienes es tu tarjeta de residente vigente o tu carta de naturalización.',
-              remedio: 'Antes de juntar los papeles, pregunta en la DGRFAFyCE qué condición de estancia te aceptan para ADQUIRIR: el artículo 27 de la LFAFE exige residente permanente, pero ese artículo regula la portación, no la compra. El pliego de la DCAM tampoco dice qué identificación admite de una persona extranjera residente; eso también se pregunta antes de ir.',
-              fundamento: 'Ley de Migración, arts. 3o y 52 (condiciones de estancia), que sustituyeron las formas migratorias anteriores; el formato DEFENSA-02-040 Civiles 2026, requisito 1, conserva la redacción anterior. Los dos puntos quedan marcados como pendientes de confirmar en el corpus de armado.mx.',
-            },
-            escenario: 'extranjero',
-          },
-          {
-            clave: 'mi',
+            clave: 'mil',
             id: 'militar',
             texto: 'Soy personal militar',
             aviso: {
@@ -320,7 +358,7 @@
       {
         clave: 'ap',
         id: 'antecedentes',
-        etapa: 'donde',
+        etapa: 'historial',
         texto: '¿Tienes antecedentes penales?',
         ayuda: 'La constancia la expide la autoridad de la entidad donde RESIDES, no donde naciste ni donde te juzgaron. Va en original, con firma autógrafa y sello, y con fecha de expedición no mayor a seis meses.',
         opciones: [
@@ -341,275 +379,6 @@
               fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
               nota: 'Si crees que ese registro es un error, que ya fue cancelado o que no debería aparecer, eso se aclara con la autoridad que expide la constancia en tu estado, que es la única que puede corregir lo que ella misma certifica. Este sitio solo lee la norma: no ve tu expediente, no lo consulta y no puede cambiarlo.',
             },
-          },
-          {
-            clave: 'ns',
-            id: 'no-se',
-            texto: 'No estoy seguro',
-            aviso: {
-              texto: 'Saca la constancia antes de gastar en lo demás. Es el filtro que decide todo el trámite y es el único documento que te va a decir, en blanco y negro, qué dice tu registro en el estado donde vives.',
-              remedio: 'Pídela a la autoridad de la entidad donde resides. En la Ciudad de México la expide la Dirección del Archivo Nacional de Sentenciados y Estadística Penitenciaria de la SSPC, en Av. Melchor Ocampo 171, Col. Tlaxpana, C.P. 11370, Alcaldía Miguel Hidalgo. Cuida la fecha: no puede tener más de seis meses cuando entregues.',
-              fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-        ],
-      },
-      {
-        clave: 'edo',
-        id: 'entidad',
-        etapa: 'donde',
-        texto: '¿En qué estado vives?',
-        ayuda: 'El estado de la constancia de antecedentes penales tiene que ser el mismo del comprobante de domicilio. El propio instructivo pone como ejemplo de rechazo presentar comprobante de la Ciudad de México con constancia del Estado de México.',
-        opciones: [
-          {
-            clave: 'agu',
-            id: 'mx-agu',
-            texto: 'Aguascalientes',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Aguascalientes no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el catálogo de la Fiscalía General no la lista y los portales de trámites del estado no respondieron.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Aguascalientes (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'bcn',
-            id: 'mx-bcn',
-            texto: 'Baja California',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Baja California no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el portal estatal se la atribuye a la Secretaría de Seguridad Ciudadana, pero su enlace lleva a la portada y no a la ficha del trámite.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Baja California (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'bcs',
-            id: 'mx-bcs',
-            texto: 'Baja California Sur',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Baja California Sur no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque la ficha del catálogo estatal carga vacía y vive en un servidor temporal.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Baja California Sur (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'cam',
-            id: 'mx-cam',
-            texto: 'Campeche',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Campeche no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el portal del estado rechaza la conexión y el sitio de la Fiscalía General ni siquiera abre.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Campeche (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'coa',
-            id: 'mx-coa',
-            texto: 'Coahuila de Zaragoza',
-          },
-          {
-            clave: 'col',
-            id: 'mx-col',
-            texto: 'Colima',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Colima no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el catálogo de trámites solo abre esa categoría desde dentro del navegador, sin una dirección que se pueda guardar, y la Fiscalía General no tiene sitio propio activo.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Colima (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'chp',
-            id: 'mx-chp',
-            texto: 'Chiapas',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Chiapas no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque ni el portal del estado ni la Fiscalía General publican el trámite de forma localizable, y el sitio de la Secretaría de Seguridad y Protección Ciudadana rechaza la conexión.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Chiapas (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'chh',
-            id: 'mx-chh',
-            texto: 'Chihuahua',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Chihuahua no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el portal estatal se lo atribuye a la Fiscalía General del Estado, pero su página no abre por un problema de certificado de seguridad.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Chihuahua (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'cmx',
-            id: 'mx-cmx',
-            texto: 'Ciudad de México',
-            aviso: {
-              texto: 'El instructivo del formato excluye a Ciudad de México del envío por correo certificado: tu expediente se entrega en persona en la Dirección General del Registro Federal de Armas de Fuego y Control de Explosivos, en Av. Industria Militar 1111, Naucalpan, Estado de México. No hay ventanilla digital. La constancia de antecedentes penales la expide la Dirección del Archivo Nacional de Sentenciados y Estadística Penitenciaria, en Av. Melchor Ocampo 171, Col. Tlaxpana, C.P. 11370, Alcaldía Miguel Hidalgo, y también es presencial; la constancia federal del OADPRS es otra cosa y no la sustituye.',
-              remedio: 'Cuenta con el viaje y con la espera: el trámite es presencial y la resolución tarda de 45 a 60 días hábiles. El pago por e5cinco se hace hasta después de que te notifican la autorización, nunca al entregar, y nadie está autorizado para recibir dinero en efectivo.',
-              fundamento: 'Instructivo del Formato DEFENSA-02-040 Civiles 2026, requisito 3 y regla de envío por correo certificado; ficha oficial del trámite DEFENSA-02-040 y notas ** y *** del anverso del formato.',
-            },
-          },
-          {
-            clave: 'dur',
-            id: 'mx-dur',
-            texto: 'Durango',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Durango no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque no se identificó la dependencia ni la ficha del trámite, y los portales del estado y de la Fiscalía tienen los certificados de seguridad vencidos o mal instalados.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Durango (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'gua',
-            id: 'mx-gua',
-            texto: 'Guanajuato',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Guanajuato no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el catálogo estatal no deja guardar la dirección de la ficha, y no se identificó quién expide la carta, ni el costo, ni la vigencia.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Guanajuato (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'gro',
-            id: 'mx-gro',
-            texto: 'Guerrero',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Guerrero no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque la Fiscalía General publica el agendado de cita, pero esa página no abre, y no hay ficha oficial con costo ni vigencia.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Guerrero (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'hid',
-            id: 'mx-hid',
-            texto: 'Hidalgo',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Hidalgo no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el registro de trámites del estado lo lista, pero el botón de «Iniciar en línea» no lleva a ninguna dirección y faltan la dependencia exacta, el costo y la vigencia. Y hay otra: el instructivo del formato excluye a Hidalgo del envío por correo certificado, así que el expediente se entrega en persona en la Dirección General del Registro Federal de Armas de Fuego y Control de Explosivos, en Av. Industria Militar 1111, Naucalpan, Estado de México.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Hidalgo (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'jal',
-            id: 'mx-jal',
-            texto: 'Jalisco',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Jalisco no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque los tres portales oficiales que deberían tenerlo (Fiscalía, catálogo de trámites y ventanilla digital) no entregan contenido.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Jalisco (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'mex',
-            id: 'mx-mex',
-            texto: 'Estado de México',
-            aviso: {
-              texto: 'El instructivo del formato excluye a Estado de México del envío por correo certificado: tu expediente se entrega en persona en la Dirección General del Registro Federal de Armas de Fuego y Control de Explosivos, en Av. Industria Militar 1111, Naucalpan, Estado de México. No hay ventanilla digital.',
-              remedio: 'Cuenta con el viaje y con la espera: el trámite es presencial y la resolución tarda de 45 a 60 días hábiles. El pago por e5cinco se hace hasta después de que te notifican la autorización, nunca al entregar, y nadie está autorizado para recibir dinero en efectivo.',
-              fundamento: 'Instructivo del Formato DEFENSA-02-040 Civiles 2026, requisito 3 y regla de envío por correo certificado; ficha oficial del trámite DEFENSA-02-040 y notas ** y *** del anverso del formato.',
-            },
-          },
-          {
-            clave: 'mic',
-            id: 'mx-mic',
-            texto: 'Michoacán de Ocampo',
-          },
-          {
-            clave: 'mor',
-            id: 'mx-mor',
-            texto: 'Morelos',
-            aviso: {
-              texto: 'Cuidado con el domicilio exacto: el instructivo excluye del envío por correo certificado a Cuernavaca, no al estado entero. Si vives en Cuernavaca, entregas el expediente en persona en la Dirección General del Registro Federal de Armas de Fuego y Control de Explosivos, en Av. Industria Militar 1111, Naucalpan, Estado de México.',
-              remedio: 'Si tu domicilio es de Cuernavaca, planea la entrega presencial; si es de cualquier otro municipio de Morelos, el envío por correo certificado sigue abierto.',
-              fundamento: 'Instructivo del Formato DEFENSA-02-040 Civiles 2026: excluye del envío por correo certificado a los habitantes de la Ciudad de México, el Estado de México, Querétaro, Hidalgo y Cuernavaca.',
-            },
-          },
-          {
-            clave: 'nay',
-            id: 'mx-nay',
-            texto: 'Nayarit',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Nayarit no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el Catálogo Estatal de Trámites no incluye la constancia y el sitio de la Fiscalía General rechaza toda conexión; la «constancia de no reclusión» que sí aparece ahí no la sustituye.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Nayarit (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'nle',
-            id: 'mx-nle',
-            texto: 'Nuevo León',
-            aviso: {
-              texto: 'Nadie te lo exige, pero te vas a topar con ello: en Nuevo León no pudimos confirmar con una fuente oficial quién expide la constancia de antecedentes penales, cuánto cuesta ni cuánto tarda, porque el buscador del portal estatal no devuelve resultados y el catálogo de servicios de la Fiscalía General no lista el trámite.',
-              remedio: 'Pregunta directamente en la Fiscalía General de tu estado o en la secretaría de seguridad estatal antes de armar el expediente. La constancia tiene que ser del estado donde vives, con firma autógrafa y sello, y no puede tener más de seis meses de expedida.',
-              fundamento: 'Hueco anotado en el corpus normativo de armado.mx para Nuevo León (consulta del 19-09-2026). El requisito, en el Formato DEFENSA-02-040 Civiles 2026, requisito 3 del anverso e instructivo punto 14.',
-            },
-          },
-          {
-            clave: 'oax',
-            id: 'mx-oax',
-            texto: 'Oaxaca',
-          },
-          {
-            clave: 'pue',
-            id: 'mx-pue',
-            texto: 'Puebla',
-          },
-          {
-            clave: 'que',
-            id: 'mx-que',
-            texto: 'Querétaro',
-            aviso: {
-              texto: 'El instructivo del formato excluye a Querétaro del envío por correo certificado: tu expediente se entrega en persona en la Dirección General del Registro Federal de Armas de Fuego y Control de Explosivos, en Av. Industria Militar 1111, Naucalpan, Estado de México. No hay ventanilla digital.',
-              remedio: 'Cuenta con el viaje y con la espera: el trámite es presencial y la resolución tarda de 45 a 60 días hábiles. El pago por e5cinco se hace hasta después de que te notifican la autorización, nunca al entregar, y nadie está autorizado para recibir dinero en efectivo.',
-              fundamento: 'Instructivo del Formato DEFENSA-02-040 Civiles 2026, requisito 3 y regla de envío por correo certificado; ficha oficial del trámite DEFENSA-02-040 y notas ** y *** del anverso del formato.',
-            },
-          },
-          {
-            clave: 'roo',
-            id: 'mx-roo',
-            texto: 'Quintana Roo',
-          },
-          {
-            clave: 'slp',
-            id: 'mx-slp',
-            texto: 'San Luis Potosí',
-          },
-          {
-            clave: 'sin',
-            id: 'mx-sin',
-            texto: 'Sinaloa',
-          },
-          {
-            clave: 'son',
-            id: 'mx-son',
-            texto: 'Sonora',
-          },
-          {
-            clave: 'tab',
-            id: 'mx-tab',
-            texto: 'Tabasco',
-          },
-          {
-            clave: 'tam',
-            id: 'mx-tam',
-            texto: 'Tamaulipas',
-          },
-          {
-            clave: 'tla',
-            id: 'mx-tla',
-            texto: 'Tlaxcala',
-          },
-          {
-            clave: 'ver',
-            id: 'mx-ver',
-            texto: 'Veracruz de Ignacio de la Llave',
-          },
-          {
-            clave: 'yuc',
-            id: 'mx-yuc',
-            texto: 'Yucatán',
-          },
-          {
-            clave: 'zac',
-            id: 'mx-zac',
-            texto: 'Zacatecas',
           },
         ],
       },
