@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { transformSync } from '@babel/core';
 
 globalThis.window = globalThis;
 vm.runInThisContext(
@@ -241,4 +242,28 @@ test('el evaluador acumula los escenarios que declaran las opciones', () => {
   assert.deepEqual(d2.escenarios, ['mujer']);
   // Sin respuestas, la lista viene vacía y no undefined: la forma no cambia.
   assert.deepEqual(amxEvaluarEntrevista(arbol, {}).escenarios, []);
+});
+
+test('la hoja PNG ajusta texto por palabras y parte una palabra que no cabe', () => {
+  const fuente = readFileSync(
+    fileURLToPath(new URL('../src/screens/screens-entrevista.jsx', import.meta.url)),
+    'utf8',
+  );
+  const compilado = transformSync(fuente, {
+    babelrc: false,
+    configFile: false,
+    presets: [['@babel/preset-react', { runtime: 'classic' }]],
+  }).code;
+  const contexto = { window: {}, React: {}, console };
+  vm.runInNewContext(compilado, contexto);
+  const ajustar = contexto.window.amxEntrevistaAjustarTexto;
+  const ctx = { measureText: (texto) => ({ width: Array.from(texto).length * 10 }) };
+
+  const lineas = Array.from(ajustar(ctx, 'motivo legal con varias palabras', 100));
+  assert.equal(lineas.join(' '), 'motivo legal con varias palabras');
+  assert.ok(lineas.every((linea) => ctx.measureText(linea).width <= 100));
+
+  const palabraLarga = Array.from(ajustar(ctx, 'documentoextraordinariamentelargo', 70));
+  assert.equal(palabraLarga.join(''), 'documentoextraordinariamentelargo');
+  assert.ok(palabraLarga.every((linea) => ctx.measureText(linea).width <= 70));
 });
