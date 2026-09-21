@@ -6343,13 +6343,39 @@
   padding: 0;
   margin: 0;
 }
+/* El enunciado tiene ALTURA RESERVADA, no altura propia. Las preguntas del guion
+   van de 18 a 109 caracteres, y sin reserva las respuestas empezaban 25 px más
+   abajo en las largas que en las cortas: al avanzar, las cajas saltaban de sitio
+   y era lo que más se notaba de «robótico» (Saulo, 20-sep-2026).
+   La reserva son tres renglones a 18 px; los enunciados que no caben encogen la
+   letra —`data-largo` lo decide en el JSX— en vez de recortarse con puntos
+   suspensivos: es una pregunta legal y tiene que leerse entera. */
 .amx-v2 .amx-ent-pregunta legend {
+  display: block;
+  width: 100%;
+  min-height: calc(18px * 1.35 * 3);
   font-family: var(--sans);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.35;
   color: var(--ficha-tinta);
 }
+/* En la portada, la pregunta y sus dos botones comparten fila. El `legend` no
+   entra en el flujo flex del `fieldset` por sí solo —el navegador lo saca—, así
+   que se le devuelve con `float: left`, que sí respeta. Cabe porque el «No»
+   usa ahí su texto corto: con «No, nací en el extranjero» (192 px) no cabía. */
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta { overflow: hidden; }
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta-enunciado {
+  float: left;
+  width: auto;
+  max-width: 64%;
+  margin-inline-end: 12px;
+  line-height: 44px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones--compacta { overflow: hidden; }
+
+.amx-v2 .amx-ent-pregunta legend[data-largo="medio"] { font-size: 17px; }
+.amx-v2 .amx-ent-pregunta legend[data-largo="mucho"] { font-size: 15.5px; }
 .amx-v2 .amx-ent-ayuda {
   font-family: var(--mono);
   font-size: 13px;
@@ -6573,11 +6599,292 @@
   margin-top: 12px;
 }
 
+/* Entrevista: mesa fija, pregunta y escritorio de documentos */
+.amx-v2 .amx-solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.amx-v2 .amx-ent-cuerpo {
+  margin-top: 14px;
+}
+.amx-v2 .amx-ent-folder {
+  overflow: hidden;
+}
+.amx-v2 .amx-ent-pregunta {
+  background: var(--ficha);
+  padding: 18px;
+}
+.amx-v2 .amx-ent-num {
+  margin: 0 0 7px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-ent-pregunta legend {
+  margin: 0 0 14px;
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.35;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-opciones {
+  display: grid;
+  gap: 8px;
+}
+/* Modo portada (HOME, sin respuestas aún): preguntas en línea horizontal,
+   botones cortos a la derecha. No apilados, no a todo el ancho. */
+.amx-v2 .amx-ent-opciones--compacta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.amx-v2 .amx-ent-opciones--compacta .amx-ent-opcion {
+  width: auto;
+  flex: 0 0 auto;
+}
+.amx-v2 button.amx-ent-opcion {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--carton-filo);
+  background: var(--oficio);
+  color: var(--ficha-tinta);
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+.amx-v2 button.amx-ent-opcion:hover {
+  background: var(--oficio-2);
+}
+.amx-v2 button.amx-ent-opcion:focus-visible,
+.amx-v2 .amx-ent-regresar:focus-visible,
+.amx-v2 .amx-ent-guardar:focus-visible,
+.amx-v2 .amx-ent-dictamen:focus-visible {
+  outline: 3px solid var(--manila-tinta);
+  outline-offset: 3px;
+}
+.amx-v2 .amx-ent-pregunta--entra {
+  animation: amx-ent-pregunta-entra 220ms ease-out both;
+}
+.amx-v2 .amx-ent-pregunta--sale {
+  animation: amx-ent-pregunta-sale 180ms ease-in both;
+}
+@keyframes amx-ent-pregunta-entra {
+  from { opacity: 0; transform: translateX(42px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes amx-ent-pregunta-sale {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-42px); }
+}
+/* La mesa de verdad: la misma madera del puesto de munición y la vitrina.
+   `--mesa-madera` ya trae la tabla arriba y la tira del canto abajo (el rect
+   del canto vive en el SVG), igual que en `.amx-repisa-carril::before`. Es un
+   objeto de la escena, no una superficie del tema: no lleva variante `--d-`
+   y no cambia en oscuro. La sombra interior arriba es lo que deja ver que los
+   papeles están apoyados, no flotando. */
+.amx-v2 .amx-ent-escritorio {
+  position: relative;
+  margin-top: 14px;
+  padding: 12px 12px 34px;
+  overflow: hidden;
+  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
+  border: 1px solid var(--carton-filo);
+  box-shadow: inset 0 8px 12px -8px rgba(23, 27, 25, .5);
+}
+/* La superficie de la mesa a escala, 358 × 280. Los papeles (78 × 100) se
+   colocan en % del ancho y la altura se sostiene con la misma relación de
+   aspecto, así que cada plaza cae donde está en el boceto a cualquier tamaño.
+   Que se solapen es la intención: es una mesa con papeles, no una cuadrícula. */
+/* La mesa NO tiene alto fijo: lo pone `--amx-mesa-alto` según cuántos documentos
+   hay encima, para que nunca se vea medio vacía. Con cuatro papeles pequeños
+   sobre una mesa de 280 px quedaba media madera desnuda (Saulo, 20-sep-2026). */
+.amx-v2 .amx-ent-pila {
+  position: relative;
+  aspect-ratio: 358 / var(--amx-mesa-rel, 280);
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+  transition: aspect-ratio 420ms cubic-bezier(.2,.75,.25,1);
+}
+/* Un papel de 78 × 100 sobre la mesa de 358 × 280. La plaza le viene por
+   variables desde ui.jsx: `--amx-plaza-x` es `x / 78 · 100 %` del propio ancho
+   del papel (21.7877 % de la mesa) y `--amx-plaza-y` es `y %` de su propia
+   altura — ambos exactos a cualquier tamaño. El cambio de plaza anima solo la
+   transición de `transform`, sin tocar el layout. */
+.amx-v2 .amx-ent-papel {
+  position: absolute;
+  /* La plaza va en `left`/`top` —% de la MESA— y no en `translate`, que sería %
+     del propio papel: al crecer el papel, las plazas habrían crecido con él y
+     las de los bordes se habrían salido. El `min()` sujeta el papel contra el
+     borde cuando es grande, en lugar de dejarlo asomar fuera de la madera. */
+  left: min(var(--amx-plaza-x), calc(100% - var(--amx-ancho-papel, 21.7877%)));
+  top: min(var(--amx-plaza-y), calc(100% - var(--amx-alto-papel, 36%)));
+  z-index: calc(var(--amx-papel-i) + 1);
+  width: var(--amx-ancho-papel, 21.7877%);
+  aspect-ratio: 78 / 100;
+  transform: rotate(var(--amx-plaza-r));
+  transform-origin: 50% 85%;
+  animation: amx-ent-papel-entra 420ms cubic-bezier(.2,.75,.25,1) backwards;
+  animation-delay: calc(var(--amx-papel-i) * 24ms);
+  transition: transform 420ms cubic-bezier(.2,.75,.25,1);
+  filter: drop-shadow(0 5px 5px rgba(23, 27, 25, .2));
+}
+.amx-v2 .amx-ent-papel img,
+.amx-v2 .amx-ent-papel-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.amx-v2 .amx-ent-papel-fallback {
+  box-sizing: border-box;
+  padding: 22px;
+  background: var(--oficio);
+  border: 1px solid var(--carton-filo);
+  color: var(--ficha-tinta);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+.amx-v2 .amx-ent-papel-fallback::before {
+  content: '';
+  display: block;
+  width: 48%;
+  margin: 0 auto 20px;
+  border-top: 2px solid var(--ficha-tinta-2);
+  box-shadow: 0 8px 0 var(--carton-filo), 0 16px 0 var(--carton-filo);
+}
+/* La entrada: cae desde abajo a su plaza. Solo `from`: el `to` es el valor
+   base (la plaza, con su giro). `backwards` y no `both`: durante el delay el
+   papel ya está en el punto de partida, y al terminar la animación deja de
+   ocupar el transform y manda el valor base, que es el que recorre el cambio
+   de plaza con `transition`. Con `forwards` la animación terminada clavaría
+   el transform y el traslado no se vería. */
+@keyframes amx-ent-papel-entra {
+  from { opacity: 0; transform: translate(var(--amx-plaza-x), calc(var(--amx-plaza-y) + 130%)) rotate(0); }
+}
+.amx-v2 .amx-ent-escritorio-cuenta {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--carton-tinta);
+}
+.amx-v2 .amx-ent-acciones {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+.amx-v2 .amx-ent-regresar,
+.amx-v2 .amx-ent-guardar {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--carton-filo);
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.amx-v2 .amx-ent-regresar {
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-ent-guardar {
+  color: var(--carton-tinta);
+  background: var(--carton-alto);
+}
+.amx-v2 .amx-ent-regresar:disabled,
+.amx-v2 .amx-ent-guardar:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.amx-v2 .amx-ent-carpeta {
+  display: none;
+}
+.amx-v2 .amx-ent-documentos-finales {
+  padding-left: 20px;
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-pie-dictamen {
+  margin: 18px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-mesa {
+  display: block;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-folder {
+  padding: 0;
+  background: transparent;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-acciones {
+  display: none;
+}
+/* En modo compacto: pregunta y botones en la misma fila, sin reserva de altura. */
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px 14px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta legend {
+  min-height: 0;
+  flex: 0 1 auto;
+  margin: 0;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones {
+  flex: 0 0 auto;
+  gap: 8px;
+}
+@media (min-width: 900px) {
+  .amx-v2 .amx-ent-carpeta {
+    display: block;
+  }
+  .amx-v2 .amx-ent-papel {
+    animation-name: amx-ent-papel-entra-escritorio;
+  }
+  /* La versión de escritorio parte de más lejos, desde el pie de la carpeta. */
+  @keyframes amx-ent-papel-entra-escritorio {
+    from { opacity: 0; transform: translate(var(--amx-plaza-x), calc(var(--amx-plaza-y) + 210%)) rotate(0); }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .amx-v2 .amx-leg-carpeta,
-  .amx-v2 .amx-ent-opcion {
+  .amx-v2 .amx-ent-opcion,
+  .amx-v2 .amx-ent-pregunta,
+  .amx-v2 .amx-ent-papel {
     transition: none;
     animation: none;
+  }
+  /* Ya colocados en su plaza, sin viaje ni giro: solo el traslado, sin el
+     ángulo, para que la pila se lea de plano. */
+  .amx-v2 .amx-ent-papel {
+    transform: translate(var(--amx-plaza-x), var(--amx-plaza-y));
   }
 }
 

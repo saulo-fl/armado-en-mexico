@@ -8,6 +8,7 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { transformSync } from '@babel/core';
 
 globalThis.window = globalThis;
 vm.runInThisContext(
@@ -16,6 +17,14 @@ vm.runInThisContext(
     'utf8',
   ),
 );
+vm.runInThisContext(
+  readFileSync(
+    fileURLToPath(new URL('../src/data/data-entrevista.js', import.meta.url)),
+    'utf8',
+  ),
+);
+
+const ENTREVISTA_ACTUAL = globalThis.AMX_ENTREVISTA;
 
 var ARBOL = {
   version: '2026-09-19',
@@ -50,6 +59,39 @@ var ARBOL = {
         { clave: 't', id: 'tiro', texto: 'Tiro deportivo', documentos: ['pa-club'] } ] },
   ],
 };
+
+test('el guion nuevo no concede documentos antes de responder', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, {});
+  assert.deepEqual(r.documentos, []);
+});
+
+test('una mujer nacida en México nunca recibe la pregunta de cartilla', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, {
+    nacimiento: 'mx',
+    sexo: 'mujer',
+    edad: 'si',
+    'modo-vivir': 'asalariado',
+    'carta-trabajo': 'si',
+    antecedentes: 'no',
+    uso: 'domicilio',
+    domicilio: 'a-mi-nombre',
+    medico: 'si',
+    nombres: 'si',
+  });
+  assert.equal(r.estado, 'completa');
+  assert.equal(r.recorrido.some(function (x) { return x.pregunta.id === 'cartilla'; }), false);
+});
+
+test('una persona extranjera recibe residencia y no acta de nacimiento', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, { nacimiento: 'extranjero' });
+  assert.equal(r.documentos.includes('pa-acta-nacimiento'), false);
+  assert.equal(r.documentos.includes('pa-residencia'), true);
+});
+
+test('ser mayor de edad añade la identificación al expediente', function () {
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, { edad: 'si' });
+  assert.equal(r.documentos.includes('pa-identificacion'), true);
+});
 
 test('{} → incompleta, pendiente = edad', function () {
   var r = amxEvaluarEntrevista(ARBOL, {});
@@ -200,4 +242,28 @@ test('el evaluador acumula los escenarios que declaran las opciones', () => {
   assert.deepEqual(d2.escenarios, ['mujer']);
   // Sin respuestas, la lista viene vacía y no undefined: la forma no cambia.
   assert.deepEqual(amxEvaluarEntrevista(arbol, {}).escenarios, []);
+});
+
+test('la hoja PNG ajusta texto por palabras y parte una palabra que no cabe', () => {
+  const fuente = readFileSync(
+    fileURLToPath(new URL('../src/screens/screens-entrevista.jsx', import.meta.url)),
+    'utf8',
+  );
+  const compilado = transformSync(fuente, {
+    babelrc: false,
+    configFile: false,
+    presets: [['@babel/preset-react', { runtime: 'classic' }]],
+  }).code;
+  const contexto = { window: {}, React: {}, console };
+  vm.runInNewContext(compilado, contexto);
+  const ajustar = contexto.window.amxEntrevistaAjustarTexto;
+  const ctx = { measureText: (texto) => ({ width: Array.from(texto).length * 10 }) };
+
+  const lineas = Array.from(ajustar(ctx, 'motivo legal con varias palabras', 100));
+  assert.equal(lineas.join(' '), 'motivo legal con varias palabras');
+  assert.ok(lineas.every((linea) => ctx.measureText(linea).width <= 100));
+
+  const palabraLarga = Array.from(ajustar(ctx, 'documentoextraordinariamentelargo', 70));
+  assert.equal(palabraLarga.join(''), 'documentoextraordinariamentelargo');
+  assert.ok(palabraLarga.every((linea) => ctx.measureText(linea).width <= 70));
 });

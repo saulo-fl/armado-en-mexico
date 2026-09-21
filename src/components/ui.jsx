@@ -2174,6 +2174,155 @@ function CintaDymo({ children, nivel = 2, id, chica = false }) {
 window.CintaDymo = CintaDymo;
 
 // ──────────────────────────────────────────────────────────────
+// ESCRITORIO DE PAPELES — documentos ganados en la entrevista
+// ──────────────────────────────────────────────────────────────
+const AMX_ENTREVISTA_ARTES = {
+  'pa-identificacion': 'ine.webp',
+  'pa-acta-nacimiento': 'acta-nacimiento.webp',
+  'pa-curp': 'curp.webp',
+  'pa-smn': 'cartilla-militar.webp',
+  'pa-ingresos': 'constancia-ingresos.webp',
+  'pa-antecedentes': 'antecedentes-no-penales.webp',
+  'pa-domicilio': 'comprobante-domicilio.webp',
+  'pa-medico': 'certificados-medicos.webp',
+  'pa-club': 'licencia-club-tiro.webp',
+  'pa-socio-activo': 'constancia-club-cinegetico.webp',
+  'pa-permiso-coleccion': 'permiso-coleccionista.webp',
+  'pa-residencia': 'tarjeta-residente.webp',
+};
+
+// LAS PLAZAS (20-sep-2026): el recorrido más largo entrega diez documentos,
+// así que diez plazas sobre la mesa de 358 × 280; el papel mide 78 × 100.
+// `x`/`y` son la esquina superior izquierda en coordenadas de la mesa y `r`
+// el giro en grados. El giro es FIJO por plaza: cada papel siempre cae igual,
+// nunca aleatorio. estilo.css las convierte a % del tamaño propio del papel
+// (x/78 del ancho, y del alto) con la misma relación de aspecto de la mesa.
+const AMX_ENTREVISTA_PLAZAS = [
+  { x: 140, y: 90, r: -2 },   // 1 — el centro
+  { x: 18, y: 22, r: -7 },    // 2
+  { x: 240, y: 16, r: 5 },    // 3
+  { x: 14, y: 150, r: 4 },    // 4
+  { x: 258, y: 152, r: -5 },  // 5
+  { x: 136, y: 172, r: 3 },   // 6
+  { x: 66, y: 86, r: 7 },     // 7
+  { x: 214, y: 88, r: -4 },   // 8
+  { x: 96, y: 14, r: -3 },    // 9
+  { x: 180, y: 168, r: 6 },   // 10
+];
+
+// El último en llegar toma la plaza 1 (el centro) y el que estaba ahí se mueve
+// a la primera plaza libre. Se simulan los arribos en orden sobre la lista, así
+// el resultado es una función pura de los documentos: responder tres seguidas
+// o recargar con los diez ya ganados da la misma mesa. Nunca hay más de diez
+// papeles que plazas (diez, justo), así el desplazado siempre encuentra sitio.
+function amxPlazasDocumentos(documentos) {
+  const ocupada = {};
+  for (let i = 0; i < documentos.length; i++) {
+    const saliente = ocupada[0];
+    ocupada[0] = documentos[i];
+    if (saliente !== undefined) {
+      let libre = 1;
+      while (libre < AMX_ENTREVISTA_PLAZAS.length && ocupada[libre] !== undefined) libre++;
+      ocupada[libre] = saliente;
+    }
+  }
+  const porDocumento = {};
+  for (let p = 0; p < AMX_ENTREVISTA_PLAZAS.length; p++) {
+    if (ocupada[p] !== undefined) porDocumento[ocupada[p]] = p;
+  }
+  return porDocumento;
+}
+
+// La mesa se ajusta a lo que hay encima, para que nunca se vea medio vacía:
+// pocos documentos, papeles grandes y mesa baja; muchos, papeles chicos y mesa
+// alta. Interpola entre anclajes en vez de saltar por rangos, así al entrar un
+// documento la mesa se reorganiza de un tirón con la transición que ya existe.
+//
+// El techo no es estético, es geométrico: las plazas llegan hasta x = 258 de
+// 358 (el 72 % de la mesa), así que un papel mucho más ancho se saldría por la
+// derecha. `min()` en el CSS lo contiene contra el borde, y los anclajes se
+// quedan por debajo para no tener que apoyarse en ese tope.
+// `rel` es el alto de la mesa en las unidades de las plazas (que se trazaron
+// sobre 358 × 280), no en píxeles: así la mesa es proporcional y funciona igual
+// en un teléfono que en un monitor. `papel` es su ancho en % de la mesa.
+const AMX_MESA_ANCLAJES = [
+  { n: 1, rel: 200, papel: 30 },
+  { n: 2, rel: 215, papel: 28 },
+  { n: 4, rel: 240, papel: 26 },
+  { n: 7, rel: 270, papel: 24 },
+  { n: 10, rel: 300, papel: 22 },
+];
+
+function amxMedidaMesa(n) {
+  const A = AMX_MESA_ANCLAJES;
+  const interpola = function (a, b, t) {
+    return { rel: a.rel + (b.rel - a.rel) * t, papel: a.papel + (b.papel - a.papel) * t };
+  };
+  let m = { rel: A[A.length - 1].rel, papel: A[A.length - 1].papel };
+  if (n <= A[0].n) m = { rel: A[0].rel, papel: A[0].papel };
+  else {
+    for (let i = 1; i < A.length; i++) {
+      if (n <= A[i].n) { m = interpola(A[i - 1], A[i], (n - A[i - 1].n) / (A[i].n - A[i - 1].n)); break; }
+    }
+  }
+  // El alto del papel en % de la mesa. El papel guarda la proporción 78 × 100,
+  // así que su alto sale de su ancho por 100/78, y se pasa a % del alto de la
+  // mesa multiplicando por 358/rel. Es lo que el CSS necesita para que `min()`
+  // pueda sujetarlo contra el borde de abajo en vez de dejarlo salirse.
+  m.altoPapel = m.papel * (100 / 78) * (358 / m.rel);
+  return m;
+}
+window.amxMedidaMesa = amxMedidaMesa;
+
+function PapelEntrevista({ id, indice, plaza }) {
+  const [fallo, setFallo] = React.useState(false);
+  const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
+  const requisito = requisitos.find(function (r) { return r.id === id; });
+  const nombre = requisito ? requisito.nombre : id;
+  const archivo = AMX_ENTREVISTA_ARTES[id];
+  const p = AMX_ENTREVISTA_PLAZAS[plaza] || AMX_ENTREVISTA_PLAZAS[0];
+  return (
+    <div className="amx-ent-papel" style={{
+      // En % de LA MESA, no del papel: si fueran del papel, al agrandarlo las
+      // plazas se separarían con él y las de los bordes se saldrían.
+      '--amx-plaza-x': (p.x / 358 * 100) + '%',
+      '--amx-plaza-y': (p.y / 280 * 100) + '%',
+      '--amx-plaza-r': p.r + 'deg',
+      '--amx-papel-i': indice,
+    }}>
+      {!fallo && archivo ? (
+        <img src={'imagenes/entrevista/' + archivo} alt="" onError={function () { setFallo(true); }} />
+      ) : (
+        <div className="amx-ent-papel-fallback"><span>{nombre}</span></div>
+      )}
+    </div>
+  );
+}
+
+function EscritorioPapeles({ documentos = [] }) {
+  // Sin documentos NO HAY MESA. Antes de contestar la primera pregunta no hay
+  // nada que apoyar encima, y una mesa vacía solo ocupa alto (Saulo, 20-sep-2026).
+  if (!documentos.length) return null;
+  const plazas = amxPlazasDocumentos(documentos);
+  const medida = amxMedidaMesa(documentos.length);
+  return (
+    <div className="amx-ent-escritorio" aria-hidden="true">
+      <div className="amx-ent-pila" style={{
+        '--amx-mesa-rel': medida.rel.toFixed(1),
+        '--amx-ancho-papel': medida.papel.toFixed(2) + '%',
+        '--amx-alto-papel': medida.altoPapel.toFixed(2) + '%',
+      }}>
+        {documentos.map(function (id, indice) {
+          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || 0} />;
+        })}
+      </div>
+      <p className="amx-ent-escritorio-cuenta">{documentos.length} documentos</p>
+    </div>
+  );
+}
+window.EscritorioPapeles = EscritorioPapeles;
+
+// ──────────────────────────────────────────────────────────────
 // NOTA DE ERRATA — el precio que la DCAM publicó mal
 // Saulo, 13-sep-2026: «Cuando pase eso hay que colocar el último precio
 // conocido y una nota indicando que probablemente sea un error de la

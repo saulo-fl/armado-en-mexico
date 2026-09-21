@@ -320,6 +320,16 @@
         label: 'Tiro deportivo',
       },
       {
+        // Agrupacion de la ENTREVISTA, no una modalidad distinta de la ley: el
+        // formato distingue tiro de caza, pero no les pide documentos distintos
+        // —ningun requisito del corpus varia entre uno y otro— y preguntarlo por
+        // separado solo anadia una caja mas a la pantalla. `tiro` y `caza` se
+        // conservan arriba porque la ley si los nombra por separado.
+        id: 'tiro-caza',
+        eje: 'modalidad',
+        label: 'Tiro deportivo o cacería',
+      },
+      {
         id: 'caza',
         eje: 'modalidad',
         label: 'Caza y actividades cinegéticas',
@@ -849,6 +859,7 @@
           'pa-permiso-coleccion',
           'pa-acta-nacimiento',
           'pa-curp',
+          'pa-residencia',
         ],
         limites: [
           {
@@ -1422,6 +1433,19 @@
         vigencia: 'Impresión reciente, formato nuevo',
         escenarios: ['*'],
         fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 10 del anverso; la ficha oficial del trámite consultada el 19-09-2026 sigue pidiéndola',
+        fuente: 'formato-02-040',
+      },
+      {
+        id: 'pa-residencia',
+        tramite: 'permiso-adquisicion',
+        orden: 12,
+        nombre: 'Tarjeta de residente vigente o carta de naturalización',
+        original: false,
+        copia: 'Fotocopia legible',
+        detalle: 'El formato todavía solicita la «forma migratoria FM2», denominación que dejó de existir con la Ley de Migración de 2011. Hoy ese supuesto equivale a la tarjeta de residente temporal o permanente vigente, o a la carta de naturalización.',
+        vigencia: 'Vigente',
+        escenarios: ['extranjero'],
+        fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito de identificación del anverso — el formato aún pide la «forma migratoria FM2», sustituida por las condiciones de estancia de la Ley de Migración de 2011',
         fuente: 'formato-02-040',
       },
       {
