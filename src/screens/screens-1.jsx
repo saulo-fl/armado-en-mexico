@@ -801,18 +801,9 @@ window.ArsenalHubScreen = ArsenalHubScreen;
 // ════════════════════════════════════════════════════════════════
 // HOME — Bloque de entrevista en la portada
 // ════════════════════════════════════════════════════════════════
-function HomeEntrevistaBloque({ onNav }) {
+function HomeEntrevistaBloque() {
   const A = window.AMX_ENTREVISTA;
   if (!A || !A.preguntas || !A.preguntas.length) return null;
-  const p = A.preguntas[0];
-
-  function responder(idOpcion) {
-    try {
-      window.localStorage.setItem('amx_entrevista_v1',
-        JSON.stringify({ version: A.version, respuestas: { [p.id]: idOpcion } }));
-    } catch (e) {}
-    onNav('entrevista');
-  }
 
   return (
     <section className="amx-hent" aria-labelledby="hent-tit">
@@ -821,16 +812,7 @@ function HomeEntrevistaBloque({ onNav }) {
         Contesta unas preguntas y sal con la lista de documentos que a ti te tocan,
         con el enlace oficial de cada uno. No guardamos nada.
       </p>
-      <div className="amx-hent-caja">
-        <p className="amx-hent-num">Pregunta 1 de {A.preguntas.length}</p>
-        <p className="amx-hent-preg">{p.texto}</p>
-        <div className="amx-hent-opciones">
-          {p.opciones.map((o) => (
-            <button key={o.id} type="button" className="amx-hent-boton"
-              onClick={() => responder(o.id)}>{o.texto}</button>
-          ))}
-        </div>
-      </div>
+      <window.EntrevistaCuerpo modoPortada />
       <p className="amx-hent-pie">
         Basado en el formato DEFENSA-02-040. No es una resolución oficial ni asesoría
         jurídica.

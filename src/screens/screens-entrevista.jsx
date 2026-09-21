@@ -4,182 +4,186 @@
 // (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 
-function EntrevistaScreen({ onNav }) {
-  const [resp, setResp] = React.useState({});
-  const [sel, setSel] = React.useState(null);
+const AMX_ENTREVISTA_STORAGE = 'amx_entrevista_v1';
+const AMX_ENTREVISTA_PIE = 'Autodiagnóstico hecho en armado.mx, esto no constituye ningún permiso ni trámite oficial';
 
+function amxEntrevistaNombreDocumento(docId) {
+  const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
+  const req = requisitos.find(function (r) { return r.id === docId; });
+  return req ? req.nombre : docId;
+}
+
+function amxLeerEntrevista(arbol) {
+  try {
+    const guardado = JSON.parse(window.localStorage.getItem(AMX_ENTREVISTA_STORAGE) || 'null');
+    if (!guardado || guardado.version !== arbol.version) {
+      window.localStorage.removeItem(AMX_ENTREVISTA_STORAGE);
+      return {};
+    }
+    return guardado.respuestas && typeof guardado.respuestas === 'object'
+      ? guardado.respuestas : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function EntrevistaCarpeta({ documentos }) {
+  return (
+    <aside className="amx-ent-carpeta" aria-label="Documentos que llevas">
+      <h2>En tu carpeta</h2>
+      <ul>
+        {documentos.map(function (docId) {
+          return <li key={docId}>{amxEntrevistaNombreDocumento(docId)}</li>;
+        })}
+      </ul>
+      <p className="amx-ent-cuenta">{documentos.length} documentos</p>
+    </aside>
+  );
+}
+
+function EntrevistaCuerpo({ modoPortada = false }) {
   const arbol = window.AMX_ENTREVISTA;
+  const [resp, setResp] = React.useState(function () { return amxLeerEntrevista(arbol); });
+  const [saliendo, setSaliendo] = React.useState(false);
+  const [anuncio, setAnuncio] = React.useState('');
+  const dictamenRef = React.useRef(null);
   const d = window.amxEvaluarEntrevista(arbol, resp);
   const p = d.pendiente;
+  const final = d.estado !== 'incompleta' && d.pendiente === null;
+  const compacta = modoPortada && d.recorrido.length === 0;
+
+  React.useEffect(function () {
+    try {
+      window.localStorage.setItem(AMX_ENTREVISTA_STORAGE,
+        JSON.stringify({ version: arbol.version, respuestas: resp }));
+    } catch (e) {}
+  }, [arbol.version, resp]);
+
+  React.useEffect(function () {
+    if (final && dictamenRef.current) dictamenRef.current.focus();
+  }, [final]);
+
+  function guardarRespuestas(nuevas) {
+    setResp(nuevas);
+    setSaliendo(false);
+  }
+
+  function responder(opcionId) {
+    if (!p || saliendo) return;
+    const nuevas = Object.assign({}, resp, { [p.id]: opcionId });
+    const siguiente = window.amxEvaluarEntrevista(arbol, nuevas);
+    const agregados = siguiente.documentos.filter(function (id) {
+      return d.documentos.indexOf(id) === -1;
+    });
+    const proxima = siguiente.pendiente;
+    const numero = proxima ? arbol.preguntas.indexOf(proxima) + 1 : arbol.preguntas.length;
+    const partes = [proxima ? 'Pregunta ' + numero + ' de ' + arbol.preguntas.length : 'Entrevista terminada'];
+    agregados.forEach(function (id) {
+      partes.push('Agregado: ' + amxEntrevistaNombreDocumento(id));
+    });
+    setAnuncio(partes.join('. '));
+    const reducir = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducir) {
+      guardarRespuestas(nuevas);
+      return;
+    }
+    setSaliendo(true);
+    window.setTimeout(function () { guardarRespuestas(nuevas); }, 180);
+  }
 
   function borrarYRestar(i) {
     const claves = d.recorrido.slice(0, i).map(function (r) { return r.pregunta.id; });
-    var acc = {};
+    const acc = {};
     claves.forEach(function (k) { if (resp[k] !== undefined) acc[k] = resp[k]; });
     setResp(acc);
-    setSel(null);
+    setSaliendo(false);
+    const anterior = arbol.preguntas.findIndex(function (pregunta) {
+      return pregunta.id === (d.recorrido[i] && d.recorrido[i].pregunta.id);
+    });
+    setAnuncio('Pregunta ' + (anterior + 1) + ' de ' + arbol.preguntas.length);
   }
 
-  if (d.estado !== 'incompleta' && d.pendiente === null) {
-    var tituloDictamen;
-    if (d.dictamen === 'reune-requisitos') {
-      tituloDictamen = 'Reúnes los requisitos del formato';
-    } else if (d.dictamen === 'falta-requisito') {
-      tituloDictamen = 'Falta un requisito';
-    } else if (d.dictamen === 'no-procede') {
-      tituloDictamen = 'El formato no procede';
-    } else {
-      tituloDictamen = 'Dictamen';
-    }
+  function regresar() {
+    if (!d.recorrido.length) return;
+    borrarYRestar(d.recorrido.length - 1);
+  }
 
-    return (
-      <div className="amx-ent">
-        <window.CintaDymo nivel={1}>{arbol.titulo || 'Entrevista'}</window.CintaDymo>
-
-        <div className="amx-ent-mesa">
-
-          <div className="amx-ent-folder">
-            <nav className="amx-ent-recorrido" aria-label="Respuestas dadas">
-              {d.recorrido.map(function (r, i) {
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    className="amx-ent-paso"
-                    aria-label={'Pregunta ' + (i + 1) + ', ' + r.pregunta.texto +
-                      ': respondiste ' + r.opcion.texto + '. Cambiar.'}
-                    onClick={function () { borrarYRestar(i); }}
-                  >
-                    <span aria-hidden="true">{i + 1}</span>
-                  </button>
-                );
-              })}
-            </nav>
-
-            <section className="amx-ent-dictamen" data-tipo={d.dictamen}>
-              <p className="amx-ent-sello" aria-hidden="true">REVISIÓN PROPIA · ARMADO EN MÉXICO</p>
-              <h2>{tituloDictamen}</h2>
-              {d.dictamen === 'reune-requisitos' && (
-                <p>Con lo que contestaste, reúnes los requisitos que el formato
-                  DEFENSA-02-040 pide para iniciar el trámite. La autorización la decide la
-                  autoridad, no este cuestionario.</p>
-              )}
-              {d.dictamen === 'falta-requisito' && (
-                <p>Con lo que contestaste, todavía te falta un requisito.</p>
-              )}
-              {d.dictamen === 'no-procede' && (
-                <p>Con lo que contestaste, el formato no permite expedir la
-                  autorización.</p>
-              )}
-              {d.impedimento && (
-                <>
-                  <p className="amx-ent-motivo">{d.impedimento.motivo}</p>
-                  {d.impedimento.remedio && (
-                    <p className="amx-ent-remedio">{d.impedimento.remedio}</p>
-                  )}
-                  {d.impedimento.nota && (
-                    <p className="amx-ent-nota">{d.impedimento.nota}</p>
-                  )}
-                </>
-              )}
-              {d.avisos && d.avisos.length > 0 && (
-                <ul className="amx-ent-avisos">
-                  {d.avisos.map(function (a, i) {
-                    return <li key={i}>{a.texto}</li>;
-                  })}
-                </ul>
-              )}
-              <button type="button" className="amx-ent-reiniciar" onClick={function () { setResp({}); setSel(null); }}>
-                Empezar de nuevo
-              </button>
-            </section>
-          </div>
-
-          <aside className="amx-ent-carpeta" aria-label="Documentos que llevas">
-            <h2>En tu carpeta</h2>
-            <ul>
-              {d.documentos.map(function (docId, i) {
-                var req = (window.AMX_LEGAL.requisitos || []).find(function (r) { return r.id === docId; });
-                var nombre = req ? req.nombre : docId;
-                return <li key={i}>{nombre}</li>;
-              })}
-            </ul>
-            <p className="amx-ent-cuenta">{d.documentos.length} documentos</p>
-          </aside>
-        </div>
+  const pregunta = !final && p ? (
+    <fieldset
+      key={p.id}
+      className={'amx-ent-pregunta amx-ent-pregunta--entra' + (saliendo ? ' amx-ent-pregunta--sale' : '')}
+    >
+      <p className="amx-ent-num">Pregunta {arbol.preguntas.indexOf(p) + 1} de {arbol.preguntas.length}</p>
+      <legend id={'amx-ent-p-' + p.id}>{p.texto}</legend>
+      <div className="amx-ent-opciones">
+        {p.opciones.map(function (o) {
+          return (
+            <button key={o.id} type="button" className="amx-ent-opcion"
+              disabled={saliendo} onClick={function () { responder(o.id); }}>
+              {o.texto}
+            </button>
+          );
+        })}
       </div>
-    );
-  }
+    </fieldset>
+  ) : null;
 
+  const dictamen = final ? (
+    <section className="amx-ent-dictamen" data-tipo={d.dictamen} tabIndex="-1" ref={dictamenRef}>
+      <p className="amx-ent-sello" aria-label={d.dictamen === 'reune-requisitos'
+        ? 'Apto para iniciar el trámite' : 'No apto para el trámite'}>
+        {d.dictamen === 'reune-requisitos' ? 'Apto para iniciar el trámite' : 'No apto para el trámite'}
+      </p>
+      {d.impedimento && <p className="amx-ent-motivo">{d.impedimento.motivo}</p>}
+      {d.impedimento && d.impedimento.remedio && (
+        <p className="amx-ent-remedio">{d.impedimento.remedio}</p>
+      )}
+      {d.impedimento && d.impedimento.nota && <p className="amx-ent-nota">{d.impedimento.nota}</p>}
+      {d.avisos && d.avisos.length > 0 && (
+        <ul className="amx-ent-avisos">
+          {d.avisos.map(function (a, i) { return <li key={i}>{a.texto}</li>; })}
+        </ul>
+      )}
+      <h2>Documentos que te corresponden</h2>
+      <ul className="amx-ent-documentos-finales">
+        {d.documentos.map(function (docId) {
+          return <li key={docId}>{amxEntrevistaNombreDocumento(docId)}</li>;
+        })}
+      </ul>
+      <p className="amx-ent-pie-dictamen">{AMX_ENTREVISTA_PIE}</p>
+    </section>
+  ) : null;
+
+  return (
+    <div className={'amx-ent-cuerpo' + (compacta ? ' amx-ent-cuerpo--compacto' : '')}>
+      <div className="amx-ent-vivo amx-solo-lector" aria-live="polite" aria-atomic="true">{anuncio}</div>
+      <div className="amx-ent-mesa">
+        <div className="amx-ent-folder">
+          {pregunta}
+          {dictamen}
+          {!compacta && <window.EscritorioPapeles documentos={d.documentos} />}
+          <div className="amx-ent-acciones">
+            <button type="button" className="amx-ent-regresar" disabled={!d.recorrido.length}
+              onClick={regresar}>Regresar</button>
+            {final && (
+              <button type="button" className="amx-ent-guardar" disabled
+                title="Guardar Test llegará en la siguiente entrega">Guardar Test</button>
+            )}
+          </div>
+        </div>
+        {!compacta && <EntrevistaCarpeta documentos={d.documentos} />}
+      </div>
+    </div>
+  );
+}
+window.EntrevistaCuerpo = EntrevistaCuerpo;
+
+function EntrevistaScreen() {
+  const arbol = window.AMX_ENTREVISTA;
   return (
     <div className="amx-ent">
       <window.CintaDymo nivel={1}>{arbol.titulo || 'Entrevista'}</window.CintaDymo>
-
-      <div className="amx-ent-mesa">
-
-        <div className="amx-ent-folder">
-          <nav className="amx-ent-recorrido" aria-label="Respuestas dadas">
-            {d.recorrido.map(function (r, i) {
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  className="amx-ent-paso"
-                  aria-label={'Pregunta ' + (i + 1) + ', ' + r.pregunta.texto +
-                    ': respondiste ' + r.opcion.texto + '. Cambiar.'}
-                  onClick={function () { borrarYRestar(i); }}
-                >
-                  <span aria-hidden="true">{i + 1}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          {d.estado === 'incompleta' && d.pendiente && (
-            <fieldset className="amx-ent-pregunta">
-              <legend>{p.texto}</legend>
-              {p.ayuda && <p className="amx-ent-ayuda">{p.ayuda}</p>}
-              {p.opciones.map(function (o) {
-                return (
-                  <label key={o.id} className="amx-ent-opcion">
-                    <input
-                      type="radio"
-                      name={'p-' + p.id}
-                      value={o.id}
-                      checked={sel === o.id}
-                      onChange={function () { setSel(o.id); }}
-                    />
-                    <span>{o.texto}</span>
-                  </label>
-                );
-              })}
-              <button
-                type="button"
-                className="amx-ent-continuar"
-                disabled={!sel}
-                onClick={function () {
-                  setResp(Object.assign({}, resp, { [p.id]: sel }));
-                  setSel(null);
-                }}
-              >
-                Continuar
-              </button>
-            </fieldset>
-          )}
-        </div>
-
-        <aside className="amx-ent-carpeta" aria-label="Documentos que llevas">
-          <h2>En tu carpeta</h2>
-          <ul>
-            {d.documentos.map(function (docId, i) {
-              var req = (window.AMX_LEGAL.requisitos || []).find(function (r) { return r.id === docId; });
-              var nombre = req ? req.nombre : docId;
-              return <li key={i}>{nombre}</li>;
-            })}
-          </ul>
-          <p className="amx-ent-cuenta">{d.documentos.length} documentos</p>
-        </aside>
-      </div>
+      <EntrevistaCuerpo />
     </div>
   );
 }

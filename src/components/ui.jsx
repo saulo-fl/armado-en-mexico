@@ -2174,6 +2174,65 @@ function CintaDymo({ children, nivel = 2, id, chica = false }) {
 window.CintaDymo = CintaDymo;
 
 // ──────────────────────────────────────────────────────────────
+// ESCRITORIO DE PAPELES — documentos ganados en la entrevista
+// ──────────────────────────────────────────────────────────────
+const AMX_ENTREVISTA_ARTES = {
+  'pa-identificacion': 'ine.webp',
+  'pa-acta-nacimiento': 'acta-nacimiento.webp',
+  'pa-curp': 'curp.webp',
+  'pa-smn': 'cartilla-militar.webp',
+  'pa-ingresos': 'constancia-ingresos.webp',
+  'pa-antecedentes': 'antecedentes-no-penales.webp',
+  'pa-domicilio': 'comprobante-domicilio.webp',
+  'pa-medico': 'certificados-medicos.webp',
+  'pa-club': 'licencia-club-tiro.webp',
+  'pa-socio-activo': 'constancia-club-cinegetico.webp',
+  'pa-permiso-coleccion': 'permiso-coleccionista.webp',
+  'pa-residencia': 'tarjeta-residente.webp',
+};
+
+function amxRotacionPapel(id) {
+  return String(id || '').split('').reduce(function (suma, caracter) {
+    return suma + caracter.charCodeAt(0);
+  }, 0) % 9 - 4;
+}
+
+function PapelEntrevista({ id, indice }) {
+  const [fallo, setFallo] = React.useState(false);
+  const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
+  const requisito = requisitos.find(function (r) { return r.id === id; });
+  const nombre = requisito ? requisito.nombre : id;
+  const archivo = AMX_ENTREVISTA_ARTES[id];
+  const rotacion = amxRotacionPapel(id);
+  return (
+    <div className="amx-ent-papel" style={{
+      '--amx-papel-giro': rotacion + 'deg',
+      '--amx-papel-i': indice,
+    }}>
+      {!fallo && archivo ? (
+        <img src={'imagenes/entrevista/' + archivo} alt="" onError={function () { setFallo(true); }} />
+      ) : (
+        <div className="amx-ent-papel-fallback"><span>{nombre}</span></div>
+      )}
+    </div>
+  );
+}
+
+function EscritorioPapeles({ documentos = [] }) {
+  return (
+    <div className="amx-ent-escritorio" aria-hidden="true">
+      <div className="amx-ent-pila">
+        {documentos.map(function (id, indice) {
+          return <PapelEntrevista key={id} id={id} indice={indice} />;
+        })}
+      </div>
+      <p className="amx-ent-escritorio-cuenta">{documentos.length} documentos</p>
+    </div>
+  );
+}
+window.EscritorioPapeles = EscritorioPapeles;
+
+// ──────────────────────────────────────────────────────────────
 // NOTA DE ERRATA — el precio que la DCAM publicó mal
 // Saulo, 13-sep-2026: «Cuando pase eso hay que colocar el último precio
 // conocido y una nota indicando que probablemente sea un error de la
