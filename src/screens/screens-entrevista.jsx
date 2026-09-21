@@ -47,6 +47,7 @@ function EntrevistaCuerpo({ modoPortada = false }) {
   const [saliendo, setSaliendo] = React.useState(false);
   const [anuncio, setAnuncio] = React.useState('');
   const dictamenRef = React.useRef(null);
+  const enunciadoRef = React.useRef(null);
   const d = window.amxEvaluarEntrevista(arbol, resp);
   const p = d.pendiente;
   const final = d.estado !== 'incompleta' && d.pendiente === null;
@@ -76,8 +77,7 @@ function EntrevistaCuerpo({ modoPortada = false }) {
       return d.documentos.indexOf(id) === -1;
     });
     const proxima = siguiente.pendiente;
-    const numero = proxima ? arbol.preguntas.indexOf(proxima) + 1 : arbol.preguntas.length;
-    const partes = [proxima ? 'Pregunta ' + numero + ' de ' + arbol.preguntas.length : 'Entrevista terminada'];
+    const partes = [proxima ? proxima.texto : 'Entrevista terminada'];
     agregados.forEach(function (id) {
       partes.push('Agregado: ' + amxEntrevistaNombreDocumento(id));
     });
@@ -97,10 +97,8 @@ function EntrevistaCuerpo({ modoPortada = false }) {
     claves.forEach(function (k) { if (resp[k] !== undefined) acc[k] = resp[k]; });
     setResp(acc);
     setSaliendo(false);
-    const anterior = arbol.preguntas.findIndex(function (pregunta) {
-      return pregunta.id === (d.recorrido[i] && d.recorrido[i].pregunta.id);
-    });
-    setAnuncio('Pregunta ' + (anterior + 1) + ' de ' + arbol.preguntas.length);
+    const anterior = d.recorrido[i] && d.recorrido[i].pregunta;
+    setAnuncio(anterior ? anterior.texto : '');
   }
 
   function regresar() {
@@ -113,13 +111,14 @@ function EntrevistaCuerpo({ modoPortada = false }) {
       key={p.id}
       className={'amx-ent-pregunta amx-ent-pregunta--entra' + (saliendo ? ' amx-ent-pregunta--sale' : '')}
     >
-      <p className="amx-ent-num">Pregunta {arbol.preguntas.indexOf(p) + 1} de {arbol.preguntas.length}</p>
-      <legend id={'amx-ent-p-' + p.id}>{p.texto}</legend>
-      <div className="amx-ent-opciones">
+      <legend id={'amx-ent-p-' + p.id} ref={enunciadoRef} className="amx-ent-pregunta-enunciado">{p.texto}</legend>
+      <div className="amx-ent-opciones" role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
         {p.opciones.map(function (o) {
           return (
-            <button key={o.id} type="button" className="amx-ent-opcion"
+            <button key={o.id} type="button" role="radio" aria-checked={resp[p.id] === o.id}
+              className="amx-casilla amx-ent-opcion"
               disabled={saliendo} onClick={function () { responder(o.id); }}>
+              <span className="amx-casilla-caja" aria-hidden="true" />
               {o.texto}
             </button>
           );
