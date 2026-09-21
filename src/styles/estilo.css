@@ -6500,9 +6500,8 @@
   font-family: var(--sans);
   font-size: 21px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .04em;
   color: var(--ficha-tinta);
+  line-height: 1.3;
 }
 .amx-v2 .amx-hent-promesa {
   font-family: var(--sans);
