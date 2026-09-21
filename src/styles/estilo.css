@@ -6683,12 +6683,16 @@
    colocan en % del ancho y la altura se sostiene con la misma relación de
    aspecto, así que cada plaza cae donde está en el boceto a cualquier tamaño.
    Que se solapen es la intención: es una mesa con papeles, no una cuadrícula. */
+/* La mesa NO tiene alto fijo: lo pone `--amx-mesa-alto` según cuántos documentos
+   hay encima, para que nunca se vea medio vacía. Con cuatro papeles pequeños
+   sobre una mesa de 280 px quedaba media madera desnuda (Saulo, 20-sep-2026). */
 .amx-v2 .amx-ent-pila {
   position: relative;
-  aspect-ratio: 358 / 280;
+  aspect-ratio: 358 / var(--amx-mesa-rel, 280);
   width: 100%;
   max-width: 420px;
   margin-inline: auto;
+  transition: aspect-ratio 420ms cubic-bezier(.2,.75,.25,1);
 }
 /* Un papel de 78 × 100 sobre la mesa de 358 × 280. La plaza le viene por
    variables desde ui.jsx: `--amx-plaza-x` es `x / 78 · 100 %` del propio ancho
@@ -6697,12 +6701,16 @@
    transición de `transform`, sin tocar el layout. */
 .amx-v2 .amx-ent-papel {
   position: absolute;
-  left: 0;
-  top: 0;
+  /* La plaza va en `left`/`top` —% de la MESA— y no en `translate`, que sería %
+     del propio papel: al crecer el papel, las plazas habrían crecido con él y
+     las de los bordes se habrían salido. El `min()` sujeta el papel contra el
+     borde cuando es grande, en lugar de dejarlo asomar fuera de la madera. */
+  left: min(var(--amx-plaza-x), calc(100% - var(--amx-ancho-papel, 21.7877%)));
+  top: min(var(--amx-plaza-y), calc(100% - var(--amx-alto-papel, 36%)));
   z-index: calc(var(--amx-papel-i) + 1);
-  width: 21.7877%;            /* 78 / 358 del ancho de la mesa */
+  width: var(--amx-ancho-papel, 21.7877%);
   aspect-ratio: 78 / 100;
-  transform: translate(var(--amx-plaza-x), var(--amx-plaza-y)) rotate(var(--amx-plaza-r));
+  transform: rotate(var(--amx-plaza-r));
   transform-origin: 50% 85%;
   animation: amx-ent-papel-entra 420ms cubic-bezier(.2,.75,.25,1) backwards;
   animation-delay: calc(var(--amx-papel-i) * 24ms);

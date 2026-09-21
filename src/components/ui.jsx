@@ -2233,6 +2233,50 @@ function amxPlazasDocumentos(documentos) {
   return porDocumento;
 }
 
+// La mesa se ajusta a lo que hay encima, para que nunca se vea medio vacía:
+// pocos documentos, papeles grandes y mesa baja; muchos, papeles chicos y mesa
+// alta. Interpola entre anclajes en vez de saltar por rangos, así al entrar un
+// documento la mesa se reorganiza de un tirón con la transición que ya existe.
+//
+// El techo no es estético, es geométrico: las plazas llegan hasta x = 258 de
+// 358 (el 72 % de la mesa), así que un papel mucho más ancho se saldría por la
+// derecha. `min()` en el CSS lo contiene contra el borde, y los anclajes se
+// quedan por debajo para no tener que apoyarse en ese tope.
+// `rel` es el alto de la mesa en las unidades de las plazas (que se trazaron
+// sobre 358 × 280), no en píxeles: así la mesa es proporcional y funciona igual
+// en un teléfono que en un monitor. `papel` es su ancho en % de la mesa.
+const AMX_MESA_ANCLAJES = [
+  // Sin documentos la mesa es solo una franja esperando: un bloque alto de
+  // madera desnuda antes de contestar nada se veía peor que no tener mesa.
+  { n: 0, rel: 105, papel: 30 },
+  { n: 1, rel: 200, papel: 30 },
+  { n: 2, rel: 215, papel: 28 },
+  { n: 4, rel: 240, papel: 26 },
+  { n: 7, rel: 270, papel: 24 },
+  { n: 10, rel: 300, papel: 22 },
+];
+
+function amxMedidaMesa(n) {
+  const A = AMX_MESA_ANCLAJES;
+  const interpola = function (a, b, t) {
+    return { rel: a.rel + (b.rel - a.rel) * t, papel: a.papel + (b.papel - a.papel) * t };
+  };
+  let m = { rel: A[A.length - 1].rel, papel: A[A.length - 1].papel };
+  if (n <= A[0].n) m = { rel: A[0].rel, papel: A[0].papel };
+  else {
+    for (let i = 1; i < A.length; i++) {
+      if (n <= A[i].n) { m = interpola(A[i - 1], A[i], (n - A[i - 1].n) / (A[i].n - A[i - 1].n)); break; }
+    }
+  }
+  // El alto del papel en % de la mesa. El papel guarda la proporción 78 × 100,
+  // así que su alto sale de su ancho por 100/78, y se pasa a % del alto de la
+  // mesa multiplicando por 358/rel. Es lo que el CSS necesita para que `min()`
+  // pueda sujetarlo contra el borde de abajo en vez de dejarlo salirse.
+  m.altoPapel = m.papel * (100 / 78) * (358 / m.rel);
+  return m;
+}
+window.amxMedidaMesa = amxMedidaMesa;
+
 function PapelEntrevista({ id, indice, plaza }) {
   const [fallo, setFallo] = React.useState(false);
   const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
@@ -2242,8 +2286,10 @@ function PapelEntrevista({ id, indice, plaza }) {
   const p = AMX_ENTREVISTA_PLAZAS[plaza] || AMX_ENTREVISTA_PLAZAS[0];
   return (
     <div className="amx-ent-papel" style={{
-      '--amx-plaza-x': (p.x / 78 * 100) + '%',
-      '--amx-plaza-y': p.y + '%',
+      // En % de LA MESA, no del papel: si fueran del papel, al agrandarlo las
+      // plazas se separarían con él y las de los bordes se saldrían.
+      '--amx-plaza-x': (p.x / 358 * 100) + '%',
+      '--amx-plaza-y': (p.y / 280 * 100) + '%',
       '--amx-plaza-r': p.r + 'deg',
       '--amx-papel-i': indice,
     }}>
@@ -2258,9 +2304,14 @@ function PapelEntrevista({ id, indice, plaza }) {
 
 function EscritorioPapeles({ documentos = [] }) {
   const plazas = amxPlazasDocumentos(documentos);
+  const medida = amxMedidaMesa(documentos.length);
   return (
     <div className="amx-ent-escritorio" aria-hidden="true">
-      <div className="amx-ent-pila">
+      <div className="amx-ent-pila" style={{
+        '--amx-mesa-rel': medida.rel.toFixed(1),
+        '--amx-ancho-papel': medida.papel.toFixed(2) + '%',
+        '--amx-alto-papel': medida.altoPapel.toFixed(2) + '%',
+      }}>
         {documentos.map(function (id, indice) {
           return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || 0} />;
         })}
