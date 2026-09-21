@@ -6652,31 +6652,49 @@
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(-42px); }
 }
+/* La mesa de verdad: la misma madera del puesto de munición y la vitrina.
+   `--mesa-madera` ya trae la tabla arriba y la tira del canto abajo (el rect
+   del canto vive en el SVG), igual que en `.amx-repisa-carril::before`. Es un
+   objeto de la escena, no una superficie del tema: no lleva variante `--d-`
+   y no cambia en oscuro. La sombra interior arriba es lo que deja ver que los
+   papeles están apoyados, no flotando. */
 .amx-v2 .amx-ent-escritorio {
   position: relative;
-  min-height: 224px;
   margin-top: 14px;
   padding: 12px 12px 34px;
   overflow: hidden;
-  background: var(--carton);
+  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
   border: 1px solid var(--carton-filo);
+  box-shadow: inset 0 8px 12px -8px rgba(23, 27, 25, .5);
 }
+/* La superficie de la mesa a escala, 358 × 280. Los papeles (78 × 100) se
+   colocan en % del ancho y la altura se sostiene con la misma relación de
+   aspecto, así que cada plaza cae donde está en el boceto a cualquier tamaño.
+   Que se solapen es la intención: es una mesa con papeles, no una cuadrícula. */
 .amx-v2 .amx-ent-pila {
   position: relative;
-  min-height: 176px;
+  aspect-ratio: 358 / 280;
+  width: 100%;
   max-width: 420px;
   margin-inline: auto;
 }
+/* Un papel de 78 × 100 sobre la mesa de 358 × 280. La plaza le viene por
+   variables desde ui.jsx: `--amx-plaza-x` es `x / 78 · 100 %` del propio ancho
+   del papel (21.7877 % de la mesa) y `--amx-plaza-y` es `y %` de su propia
+   altura — ambos exactos a cualquier tamaño. El cambio de plaza anima solo la
+   transición de `transform`, sin tocar el layout. */
 .amx-v2 .amx-ent-papel {
   position: absolute;
-  inset: 8px auto auto 50%;
+  left: 0;
+  top: 0;
   z-index: calc(var(--amx-papel-i) + 1);
-  width: min(72%, 260px);
-  aspect-ratio: 4 / 3;
-  transform: translateX(-50%) rotate(var(--amx-papel-giro));
+  width: 21.7877%;            /* 78 / 358 del ancho de la mesa */
+  aspect-ratio: 78 / 100;
+  transform: translate(var(--amx-plaza-x), var(--amx-plaza-y)) rotate(var(--amx-plaza-r));
   transform-origin: 50% 85%;
-  animation: amx-ent-papel-entra 420ms cubic-bezier(.2,.75,.25,1) both;
+  animation: amx-ent-papel-entra 420ms cubic-bezier(.2,.75,.25,1) backwards;
   animation-delay: calc(var(--amx-papel-i) * 24ms);
+  transition: transform 420ms cubic-bezier(.2,.75,.25,1);
   filter: drop-shadow(0 5px 5px rgba(23, 27, 25, .2));
 }
 .amx-v2 .amx-ent-papel img,
@@ -6705,9 +6723,14 @@
   border-top: 2px solid var(--ficha-tinta-2);
   box-shadow: 0 8px 0 var(--carton-filo), 0 16px 0 var(--carton-filo);
 }
+/* La entrada: cae desde abajo a su plaza. Solo `from`: el `to` es el valor
+   base (la plaza, con su giro). `backwards` y no `both`: durante el delay el
+   papel ya está en el punto de partida, y al terminar la animación deja de
+   ocupar el transform y manda el valor base, que es el que recorre el cambio
+   de plaza con `transition`. Con `forwards` la animación terminada clavaría
+   el transform y el traslado no se vería. */
 @keyframes amx-ent-papel-entra {
-  from { opacity: 0; transform: translate(-50%, 120%) rotate(0); }
-  to { opacity: 1; transform: translateX(-50%) rotate(var(--amx-papel-giro)); }
+  from { opacity: 0; transform: translate(var(--amx-plaza-x), calc(var(--amx-plaza-y) + 130%)) rotate(0); }
 }
 .amx-v2 .amx-ent-escritorio-cuenta {
   position: absolute;
@@ -6782,9 +6805,9 @@
   .amx-v2 .amx-ent-papel {
     animation-name: amx-ent-papel-entra-escritorio;
   }
+  /* La versión de escritorio parte de más lejos, desde el pie de la carpeta. */
   @keyframes amx-ent-papel-entra-escritorio {
-    from { opacity: 0; transform: translate(-50%, 150%) rotate(0); }
-    to { opacity: 1; transform: translateX(-50%) rotate(var(--amx-papel-giro)); }
+    from { opacity: 0; transform: translate(var(--amx-plaza-x), calc(var(--amx-plaza-y) + 210%)) rotate(0); }
   }
 }
 
@@ -6796,8 +6819,10 @@
     transition: none;
     animation: none;
   }
+  /* Ya colocados en su plaza, sin viaje ni giro: solo el traslado, sin el
+     ángulo, para que la pila se lea de plano. */
   .amx-v2 .amx-ent-papel {
-    transform: translateX(-50%);
+    transform: translate(var(--amx-plaza-x), var(--amx-plaza-y));
   }
 }
 

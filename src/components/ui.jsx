@@ -2191,22 +2191,60 @@ const AMX_ENTREVISTA_ARTES = {
   'pa-residencia': 'tarjeta-residente.webp',
 };
 
-function amxRotacionPapel(id) {
-  return String(id || '').split('').reduce(function (suma, caracter) {
-    return suma + caracter.charCodeAt(0);
-  }, 0) % 9 - 4;
+// LAS PLAZAS (20-sep-2026): el recorrido más largo entrega diez documentos,
+// así que diez plazas sobre la mesa de 358 × 280; el papel mide 78 × 100.
+// `x`/`y` son la esquina superior izquierda en coordenadas de la mesa y `r`
+// el giro en grados. El giro es FIJO por plaza: cada papel siempre cae igual,
+// nunca aleatorio. estilo.css las convierte a % del tamaño propio del papel
+// (x/78 del ancho, y del alto) con la misma relación de aspecto de la mesa.
+const AMX_ENTREVISTA_PLAZAS = [
+  { x: 140, y: 90, r: -2 },   // 1 — el centro
+  { x: 18, y: 22, r: -7 },    // 2
+  { x: 240, y: 16, r: 5 },    // 3
+  { x: 14, y: 150, r: 4 },    // 4
+  { x: 258, y: 152, r: -5 },  // 5
+  { x: 136, y: 172, r: 3 },   // 6
+  { x: 66, y: 86, r: 7 },     // 7
+  { x: 214, y: 88, r: -4 },   // 8
+  { x: 96, y: 14, r: -3 },    // 9
+  { x: 180, y: 168, r: 6 },   // 10
+];
+
+// El último en llegar toma la plaza 1 (el centro) y el que estaba ahí se mueve
+// a la primera plaza libre. Se simulan los arribos en orden sobre la lista, así
+// el resultado es una función pura de los documentos: responder tres seguidas
+// o recargar con los diez ya ganados da la misma mesa. Nunca hay más de diez
+// papeles que plazas (diez, justo), así el desplazado siempre encuentra sitio.
+function amxPlazasDocumentos(documentos) {
+  const ocupada = {};
+  for (let i = 0; i < documentos.length; i++) {
+    const saliente = ocupada[0];
+    ocupada[0] = documentos[i];
+    if (saliente !== undefined) {
+      let libre = 1;
+      while (libre < AMX_ENTREVISTA_PLAZAS.length && ocupada[libre] !== undefined) libre++;
+      ocupada[libre] = saliente;
+    }
+  }
+  const porDocumento = {};
+  for (let p = 0; p < AMX_ENTREVISTA_PLAZAS.length; p++) {
+    if (ocupada[p] !== undefined) porDocumento[ocupada[p]] = p;
+  }
+  return porDocumento;
 }
 
-function PapelEntrevista({ id, indice }) {
+function PapelEntrevista({ id, indice, plaza }) {
   const [fallo, setFallo] = React.useState(false);
   const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
   const requisito = requisitos.find(function (r) { return r.id === id; });
   const nombre = requisito ? requisito.nombre : id;
   const archivo = AMX_ENTREVISTA_ARTES[id];
-  const rotacion = amxRotacionPapel(id);
+  const p = AMX_ENTREVISTA_PLAZAS[plaza] || AMX_ENTREVISTA_PLAZAS[0];
   return (
     <div className="amx-ent-papel" style={{
-      '--amx-papel-giro': rotacion + 'deg',
+      '--amx-plaza-x': (p.x / 78 * 100) + '%',
+      '--amx-plaza-y': p.y + '%',
+      '--amx-plaza-r': p.r + 'deg',
       '--amx-papel-i': indice,
     }}>
       {!fallo && archivo ? (
@@ -2219,11 +2257,12 @@ function PapelEntrevista({ id, indice }) {
 }
 
 function EscritorioPapeles({ documentos = [] }) {
+  const plazas = amxPlazasDocumentos(documentos);
   return (
     <div className="amx-ent-escritorio" aria-hidden="true">
       <div className="amx-ent-pila">
         {documentos.map(function (id, indice) {
-          return <PapelEntrevista key={id} id={id} indice={indice} />;
+          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || 0} />;
         })}
       </div>
       <p className="amx-ent-escritorio-cuenta">{documentos.length} documentos</p>
