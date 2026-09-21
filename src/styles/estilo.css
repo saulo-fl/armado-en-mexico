@@ -6830,6 +6830,22 @@
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-acciones {
   display: none;
 }
+/* En modo compacto: pregunta y botones en la misma fila, sin reserva de altura. */
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px 14px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta legend {
+  min-height: 0;
+  flex: 0 1 auto;
+  margin: 0;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones {
+  flex: 0 0 auto;
+  gap: 8px;
+}
 @media (min-width: 900px) {
   .amx-v2 .amx-ent-carpeta {
     display: block;
