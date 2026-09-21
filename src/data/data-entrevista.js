@@ -74,6 +74,11 @@
             clave: 'ex',
             id: 'extranjero',
             texto: 'No, nací en el extranjero',
+            // `corto` solo lo usa el bloque compacto de la portada, donde la
+            // pregunta y sus dos botones comparten fila: con el texto completo
+            // (192 px) no cabían y los botones bajaban a una segunda línea.
+            // En la entrevista a pantalla completa se lee el texto entero.
+            corto: 'No',
             documentos: ['pa-residencia'],
             aviso: {
               texto: 'El formato todavía pide la «forma migratoria FM2», que ya no existe: la Ley de Migración de 2011 sustituyó aquellas formas por las condiciones de estancia de residente temporal y residente permanente. Lo que hoy tienes es tu tarjeta de residente vigente o tu carta de naturalización.',

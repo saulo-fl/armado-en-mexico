@@ -6360,6 +6360,20 @@
   line-height: 1.35;
   color: var(--ficha-tinta);
 }
+/* En la portada, la pregunta y sus dos botones comparten fila. El `legend` no
+   entra en el flujo flex del `fieldset` por sí solo —el navegador lo saca—, así
+   que se le devuelve con `float: left`, que sí respeta. Cabe porque el «No»
+   usa ahí su texto corto: con «No, nací en el extranjero» (192 px) no cabía. */
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta { overflow: hidden; }
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta-enunciado {
+  float: left;
+  width: auto;
+  max-width: 64%;
+  margin-inline-end: 12px;
+  line-height: 44px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones--compacta { overflow: hidden; }
+
 .amx-v2 .amx-ent-pregunta legend[data-largo="medio"] { font-size: 17px; }
 .amx-v2 .amx-ent-pregunta legend[data-largo="mucho"] { font-size: 15.5px; }
 .amx-v2 .amx-ent-ayuda {

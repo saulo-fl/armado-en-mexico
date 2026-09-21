@@ -125,7 +125,12 @@ function EntrevistaCuerpo({ modoPortada = false }) {
               className="amx-casilla amx-ent-opcion"
               disabled={saliendo} onClick={function () { responder(o.id); }}>
               <span className="amx-casilla-caja" aria-hidden="true" />
-              {o.texto}
+              {/* En la portada cabe la versión corta; el lector de pantalla
+                  sigue oyendo la respuesta entera por el aria-label. */}
+              <span aria-hidden={compacta && o.corto ? 'true' : undefined}>
+                {compacta && o.corto ? o.corto : o.texto}
+              </span>
+              {compacta && o.corto && <span className="amx-solo-lector">{o.texto}</span>}
             </button>
           );
         })}
