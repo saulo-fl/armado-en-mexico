@@ -401,38 +401,10 @@
             escenario: 'domicilio',
           },
           {
-            clave: 'pa',
-            id: 'parcela',
-            texto: 'Protección a la parcela',
-            aviso: {
-              texto: 'Desde la reforma de 2025, los ejidatarios, comuneros y jornaleros pueden tener ADEMÁS en su domicilio un arma corta de las permitidas. Es una posibilidad nueva que el formato de 2021 todavía no refleja.',
-              remedio: 'Si te interesa, pregúntalo expresamente en ventanilla: el formato en papel no trae casilla para eso y la ley es más reciente que el formato. Los cartuchos en esta modalidad se vuelven a solicitar una vez al año.',
-              fundamento: 'LFAFE art. 9o, párrafos adicionados DOF 29-05-2025; instructivo del formato DEFENSA-02-040 Civiles 2026, punto 5.',
-            },
-            escenario: 'parcela',
-          },
-          {
             clave: 'ti',
-            id: 'tiro',
-            texto: 'Tiro deportivo',
-            escenario: 'tiro',
-          },
-          {
-            clave: 'ca',
-            id: 'caza',
-            texto: 'Caza y actividades cinegéticas',
-            escenario: 'caza',
-          },
-          {
-            clave: 'ch',
-            id: 'charreria',
-            texto: 'Charrería',
-            aviso: {
-              texto: 'Al charro se le pueden autorizar revólveres de mayor calibre, pero solo como complemento del atuendo charro y descargados. Y hay una zona gris que no conviene resolver a ojo: el último párrafo del artículo 10 permite ese mayor calibre mientras el artículo 11 reserva el .357 Magnum a la Fuerza Armada Permanente, y no hay criterio oficial publicado que concilie los dos.',
-              remedio: 'Pregunta en la DGRFAFyCE qué calibre te van a autorizar antes de llenar el formato con un modelo concreto, y guarda por escrito lo que te contesten.',
-              fundamento: 'LFAFE art. 10, último párrafo, y art. 11; nota de vigencia del corpus de armado.mx: no hay criterio oficial publicado que concilie ambos.',
-            },
-            escenario: 'charreria',
+            id: 'tiro-caza',
+            texto: 'Tiro deportivo o cacería',
+            escenario: 'tiro-caza',
           },
           {
             clave: 'co',
@@ -451,7 +423,7 @@
         si: [
           {
             pregunta: 'uso',
-            es: ['tiro', 'caza'],
+            es: ['tiro-caza'],
           },
         ],
         opciones: [

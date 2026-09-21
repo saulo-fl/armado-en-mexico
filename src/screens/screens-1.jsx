@@ -809,8 +809,7 @@ function HomeEntrevistaBloque() {
     <section className="amx-hent" aria-labelledby="hent-tit">
       <h2 id="hent-tit" className="amx-hent-tit">{A.titulo}</h2>
       <p className="amx-hent-promesa">
-        Contesta unas preguntas y sal con la lista de documentos que a ti te tocan,
-        con el enlace oficial de cada uno. No guardamos nada.
+        Contesta unas preguntas y conoce si cumples los requisitos
       </p>
       <window.EntrevistaCuerpo modoPortada />
       <p className="amx-hent-pie">

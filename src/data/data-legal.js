@@ -320,6 +320,16 @@
         label: 'Tiro deportivo',
       },
       {
+        // Agrupacion de la ENTREVISTA, no una modalidad distinta de la ley: el
+        // formato distingue tiro de caza, pero no les pide documentos distintos
+        // —ningun requisito del corpus varia entre uno y otro— y preguntarlo por
+        // separado solo anadia una caja mas a la pantalla. `tiro` y `caza` se
+        // conservan arriba porque la ley si los nombra por separado.
+        id: 'tiro-caza',
+        eje: 'modalidad',
+        label: 'Tiro deportivo o cacería',
+      },
+      {
         id: 'caza',
         eje: 'modalidad',
         label: 'Caza y actividades cinegéticas',
