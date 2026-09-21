@@ -117,7 +117,8 @@ function EntrevistaCuerpo({ modoPortada = false }) {
           México?», y las cajas saltaban de sitio al cambiar de pregunta. */}
       <legend id={'amx-ent-p-' + p.id} ref={enunciadoRef} className="amx-ent-pregunta-enunciado"
         data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}>{p.texto}</legend>
-      <div className="amx-ent-opciones" role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
+      <div className={'amx-ent-opciones' + (compacta ? ' amx-ent-opciones--compacta' : '')}
+        role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
         {p.opciones.map(function (o) {
           return (
             <button key={o.id} type="button" role="radio" aria-checked={resp[p.id] === o.id}

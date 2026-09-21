@@ -6626,6 +6626,18 @@
   display: grid;
   gap: 8px;
 }
+/* Modo portada (HOME, sin respuestas aún): preguntas en línea horizontal,
+   botones cortos a la derecha. No apilados, no a todo el ancho. */
+.amx-v2 .amx-ent-opciones--compacta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.amx-v2 .amx-ent-opciones--compacta .amx-ent-opcion {
+  width: auto;
+  flex: 0 0 auto;
+}
 .amx-v2 button.amx-ent-opcion {
   display: block;
   width: 100%;
