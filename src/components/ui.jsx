@@ -2246,9 +2246,6 @@ function amxPlazasDocumentos(documentos) {
 // sobre 358 × 280), no en píxeles: así la mesa es proporcional y funciona igual
 // en un teléfono que en un monitor. `papel` es su ancho en % de la mesa.
 const AMX_MESA_ANCLAJES = [
-  // Sin documentos la mesa es solo una franja esperando: un bloque alto de
-  // madera desnuda antes de contestar nada se veía peor que no tener mesa.
-  { n: 0, rel: 105, papel: 30 },
   { n: 1, rel: 200, papel: 30 },
   { n: 2, rel: 215, papel: 28 },
   { n: 4, rel: 240, papel: 26 },
@@ -2303,6 +2300,9 @@ function PapelEntrevista({ id, indice, plaza }) {
 }
 
 function EscritorioPapeles({ documentos = [] }) {
+  // Sin documentos NO HAY MESA. Antes de contestar la primera pregunta no hay
+  // nada que apoyar encima, y una mesa vacía solo ocupa alto (Saulo, 20-sep-2026).
+  if (!documentos.length) return null;
   const plazas = amxPlazasDocumentos(documentos);
   const medida = amxMedidaMesa(documentos.length);
   return (
