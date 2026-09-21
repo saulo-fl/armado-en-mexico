@@ -2246,10 +2246,10 @@ function amxPlazasDocumentos(documentos) {
 // sobre 358 × 280), no en píxeles: así la mesa es proporcional y funciona igual
 // en un teléfono que en un monitor. `papel` es su ancho en % de la mesa.
 const AMX_MESA_ANCLAJES = [
-  { n: 1, rel: 200, papel: 30 },
-  { n: 2, rel: 215, papel: 28 },
-  { n: 4, rel: 240, papel: 26 },
-  { n: 7, rel: 270, papel: 24 },
+  { n: 1, rel: 150, papel: 32 },
+  { n: 2, rel: 170, papel: 30 },
+  { n: 4, rel: 220, papel: 28 },
+  { n: 7, rel: 260, papel: 24 },
   { n: 10, rel: 300, papel: 22 },
 ];
 
@@ -2316,7 +2316,6 @@ function EscritorioPapeles({ documentos = [] }) {
           return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || 0} />;
         })}
       </div>
-      <p className="amx-ent-escritorio-cuenta">{documentos.length} documentos</p>
     </div>
   );
 }

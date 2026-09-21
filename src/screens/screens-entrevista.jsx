@@ -230,20 +230,6 @@ function amxLeerEntrevista(arbol) {
   }
 }
 
-function EntrevistaCarpeta({ documentos }) {
-  return (
-    <aside className="amx-ent-carpeta" aria-label="Documentos que llevas">
-      <h2>En tu carpeta</h2>
-      <ul>
-        {documentos.map(function (docId) {
-          return <li key={docId}>{amxEntrevistaNombreDocumento(docId)}</li>;
-        })}
-      </ul>
-      <p className="amx-ent-cuenta">{documentos.length} documentos</p>
-    </aside>
-  );
-}
-
 function EntrevistaCuerpo({ modoPortada = false }) {
   const arbol = window.AMX_ENTREVISTA;
   const [resp, setResp] = React.useState(function () { return amxLeerEntrevista(arbol); });
@@ -332,20 +318,17 @@ function EntrevistaCuerpo({ modoPortada = false }) {
       key={p.id}
       className={'amx-ent-pregunta amx-ent-pregunta--entra' + (saliendo ? ' amx-ent-pregunta--sale' : '')}
     >
-      {/* `data-largo` encoge la letra en los enunciados largos para que quepan en la
-          altura reservada. Sin él, «¿Tu patrón puede darte una carta de trabajo…»
-          (109 caracteres) empujaba las respuestas 25 px más abajo que «¿Naciste en
-          México?», y las cajas saltaban de sitio al cambiar de pregunta. */}
+      {/* La altura estable evita que salten las respuestas; el texto se apoya
+          abajo para que la pregunta corta no deje un hueco encima de ellas. */}
       <legend id={'amx-ent-p-' + p.id} ref={enunciadoRef} className="amx-ent-pregunta-enunciado"
-        data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}>{p.texto}</legend>
+        data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}><span>{p.texto}</span></legend>
       <div className={'amx-ent-opciones' + (compacta ? ' amx-ent-opciones--compacta' : '')}
         role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
         {p.opciones.map(function (o) {
           return (
             <button key={o.id} type="button" role="radio" aria-checked={resp[p.id] === o.id}
-              className="amx-casilla amx-ent-opcion"
+              className="amx-ent-opcion"
               disabled={saliendo} onClick={function () { responder(o.id); }}>
-              <span className="amx-casilla-caja" aria-hidden="true" />
               {/* En la portada cabe la versión corta; el lector de pantalla
                   sigue oyendo la respuesta entera por el aria-label. */}
               <span aria-hidden={compacta && o.corto ? 'true' : undefined}>
@@ -392,7 +375,6 @@ function EntrevistaCuerpo({ modoPortada = false }) {
         <div className="amx-ent-folder">
           {pregunta}
           {dictamen}
-          {!compacta && <window.EscritorioPapeles documentos={d.documentos} />}
           <div className="amx-ent-acciones">
             <button type="button" className="amx-ent-regresar" disabled={!d.recorrido.length}
               onClick={regresar}>Regresar</button>
@@ -401,8 +383,8 @@ function EntrevistaCuerpo({ modoPortada = false }) {
                 onClick={guardarTest}>{guardando ? 'Preparando…' : 'Guardar Test'}</button>
             )}
           </div>
+          {!compacta && !final && <window.EscritorioPapeles documentos={d.documentos} />}
         </div>
-        {!compacta && <EntrevistaCarpeta documentos={d.documentos} />}
       </div>
     </div>
   );
