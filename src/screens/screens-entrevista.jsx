@@ -111,7 +111,12 @@ function EntrevistaCuerpo({ modoPortada = false }) {
       key={p.id}
       className={'amx-ent-pregunta amx-ent-pregunta--entra' + (saliendo ? ' amx-ent-pregunta--sale' : '')}
     >
-      <legend id={'amx-ent-p-' + p.id} ref={enunciadoRef} className="amx-ent-pregunta-enunciado">{p.texto}</legend>
+      {/* `data-largo` encoge la letra en los enunciados largos para que quepan en la
+          altura reservada. Sin él, «¿Tu patrón puede darte una carta de trabajo…»
+          (109 caracteres) empujaba las respuestas 25 px más abajo que «¿Naciste en
+          México?», y las cajas saltaban de sitio al cambiar de pregunta. */}
+      <legend id={'amx-ent-p-' + p.id} ref={enunciadoRef} className="amx-ent-pregunta-enunciado"
+        data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}>{p.texto}</legend>
       <div className="amx-ent-opciones" role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
         {p.opciones.map(function (o) {
           return (

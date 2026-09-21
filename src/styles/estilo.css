@@ -6343,13 +6343,25 @@
   padding: 0;
   margin: 0;
 }
+/* El enunciado tiene ALTURA RESERVADA, no altura propia. Las preguntas del guion
+   van de 18 a 109 caracteres, y sin reserva las respuestas empezaban 25 px más
+   abajo en las largas que en las cortas: al avanzar, las cajas saltaban de sitio
+   y era lo que más se notaba de «robótico» (Saulo, 20-sep-2026).
+   La reserva son tres renglones a 18 px; los enunciados que no caben encogen la
+   letra —`data-largo` lo decide en el JSX— en vez de recortarse con puntos
+   suspensivos: es una pregunta legal y tiene que leerse entera. */
 .amx-v2 .amx-ent-pregunta legend {
+  display: block;
+  width: 100%;
+  min-height: calc(18px * 1.35 * 3);
   font-family: var(--sans);
   font-size: 18px;
   font-weight: 700;
   line-height: 1.35;
   color: var(--ficha-tinta);
 }
+.amx-v2 .amx-ent-pregunta legend[data-largo="medio"] { font-size: 17px; }
+.amx-v2 .amx-ent-pregunta legend[data-largo="mucho"] { font-size: 15.5px; }
 .amx-v2 .amx-ent-ayuda {
   font-family: var(--mono);
   font-size: 13px;
