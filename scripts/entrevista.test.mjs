@@ -300,3 +300,74 @@ test('la hoja PNG ajusta texto por palabras y parte una palabra que no cabe', ()
   assert.equal(palabraLarga.join(''), 'documentoextraordinariamentelargo');
   assert.ok(palabraLarga.every((linea) => ctx.measureText(linea).width <= 70));
 });
+
+// ── EL ACOMODO DE LA MESA ────────────────────────────────────────────
+// ui.jsx no es un módulo: se compila y se corre en un contexto con React
+// fingido, que es todo lo que necesita `amxPlazasDocumentos` para calcular.
+function cargarUI() {
+  const fuente = readFileSync(
+    fileURLToPath(new URL('../src/components/ui.jsx', import.meta.url)),
+    'utf8',
+  );
+  const compilado = transformSync(fuente, {
+    babelrc: false,
+    configFile: false,
+    presets: [['@babel/preset-react', { runtime: 'classic' }]],
+  }).code;
+  const React = {
+    Component: class {}, memo: (f) => f, useState: (v) => [v, () => {}],
+    useRef: () => ({ current: null }), useEffect: () => {}, useMemo: (f) => f(),
+    useCallback: (f) => f, createElement: () => null, Fragment: 'f',
+  };
+  const contexto = {
+    window: {}, React, console,
+    document: { querySelector: () => null, createElement: () => ({}) }, navigator: {},
+  };
+  vm.runInNewContext(compilado, contexto);
+  return contexto.window;
+}
+
+test('los documentos se acomodan en orden de lectura y caben en la mesa', () => {
+  const ui = cargarUI();
+  const docs = ['a', 'b', 'c', 'd', 'e', 'f'];
+  const plazas = ui.amxPlazasDocumentos(docs);
+  const puestos = docs.map((d) => plazas[d]);
+  assert.equal(puestos.filter(Boolean).length, docs.length, 'algún documento se quedó sin sitio');
+
+  // Orden de lectura: dentro de un renglón la x crece; al bajar de renglón, la y.
+  for (let i = 1; i < puestos.length; i++) {
+    const a = puestos[i - 1], b = puestos[i];
+    const mismoRenglon = Math.abs(a.y - b.y) < 0.01;
+    assert.ok(mismoRenglon ? b.x > a.x : b.y > a.y,
+      `el documento ${i} rompe el orden de lectura: ${JSON.stringify(a)} → ${JSON.stringify(b)}`);
+  }
+
+  // Y ninguno se sale de la mesa, con cualquier número de documentos.
+  for (let n = 1; n <= 10; n++) {
+    const lista = Array.from({ length: n }, (_, i) => 'doc' + i);
+    const medida = ui.amxMedidaMesa(n);
+    const alto = medida.papel * (100 / 78) * (358 / 300);
+    for (const p of Object.values(ui.amxPlazasDocumentos(lista))) {
+      assert.ok(p.x >= 0 && p.x + medida.papel <= 100.01, `con ${n} documentos uno se sale por el lado`);
+      assert.ok(p.y >= 0 && p.y + alto <= 100.01, `con ${n} documentos uno se sale por abajo`);
+    }
+  }
+});
+
+test('un documento recién ganado se anima; no basta con que exista la regla', () => {
+  const ui = readFileSync(
+    fileURLToPath(new URL('../src/components/ui.jsx', import.meta.url)), 'utf8');
+  const css = readFileSync(
+    fileURLToPath(new URL('../src/styles/estilo.css', import.meta.url)), 'utf8');
+  // El escritorio se monta al contestar la primera pregunta, así que sus
+  // documentos nacen visibles: partiendo de `visible` no había paso de oculto a
+  // visible y los primeros documentos nunca se animaban.
+  assert.match(ui, /const \[prevVisible, setPrevVisible\] = React\.useState\(false\)/,
+    'el papel debe partir de «no visible» para detectar su propia aparición');
+  // Y la animación no puede venir con nombre desde la regla base: se dispararía
+  // al montar la página y no quedaría nada que reproducir al revelarse.
+  assert.doesNotMatch(css, /\.amx-v2 \.amx-ent-papel \{[^}]*animation:\s*amx-ent-papel-entra/,
+    'la regla base no debe nombrar la animación');
+  assert.match(css, /\.amx-ent-papel\.amx-ent-papel-revelado \{\s*animation-name: amx-ent-papel-entra;/,
+    'la clase de revelado es la que enciende la animación');
+});

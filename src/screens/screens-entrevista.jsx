@@ -243,6 +243,7 @@ function EntrevistaCuerpo({ modoPortada = false }) {
   const [guardando, setGuardando] = React.useState(false);
   const dictamenRef = React.useRef(null);
   const enunciadoRef = React.useRef(null);
+  const cuerpoRef = React.useRef(null);
   const d = window.amxEvaluarEntrevista(arbol, resp);
   const p = d.pendiente;
   const final = d.estado !== 'incompleta' && d.pendiente === null;
@@ -258,6 +259,20 @@ function EntrevistaCuerpo({ modoPortada = false }) {
   React.useEffect(function () {
     if (final && dictamenRef.current) dictamenRef.current.focus();
   }, [final]);
+
+  // Al contestar la PRIMERA pregunta aparece la mesa, que va encima y empuja la
+  // pregunta hacia abajo: quien acaba de tocar un botón se queda mirando un
+  // sitio donde ya no hay nada. Este es el único empujón de la entrevista; en
+  // las siguientes la mesa ya está puesta y nada se mueve de sitio.
+  const contestadas = d.recorrido.length;
+  const contestadasAntes = React.useRef(contestadas);
+  React.useEffect(function () {
+    const antes = contestadasAntes.current;
+    contestadasAntes.current = contestadas;
+    if (!modoPortada || antes !== 0 || contestadas !== 1 || !cuerpoRef.current) return;
+    const reducir = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    cuerpoRef.current.scrollIntoView({ block: 'start', behavior: reducir ? 'auto' : 'smooth' });
+  }, [modoPortada, contestadas]);
 
   function guardarRespuestas(nuevas) {
     setResp(nuevas);
@@ -374,7 +389,7 @@ function EntrevistaCuerpo({ modoPortada = false }) {
   ) : null;
 
   return (
-    <div className={'amx-ent-cuerpo' + (compacta ? ' amx-ent-cuerpo--compacto' : '')}>
+    <div ref={cuerpoRef} className={'amx-ent-cuerpo' + (compacta ? ' amx-ent-cuerpo--compacto' : '')}>
       <div className="amx-ent-vivo amx-solo-lector" aria-live="polite" aria-atomic="true">{anuncio}</div>
       {/* El escritorio va ARRIBA de las preguntas: así no lo empuja hacia abajo
           una pregunta con cuatro respuestas largas, y se queda quieto mientras
