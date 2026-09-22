@@ -3,6 +3,14 @@
 // Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
 // (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
+// Legalidad v2 (22-sep-2026): las ocho decisiones de Saulo, tomadas en los hilos
+// de Penpot, están en docs/superpowers/specs/2026-09-22-legalidad-v2-design.md
+// (llega con el PR #278, rama fable/penpot).
+// En corto: la entrevista arriba del hub; los huecos del corpus NO se publican
+// (son de desarrollo: `amxLegalHuecos` los sigue contando para check-legal.mjs);
+// lo federal se ordena por pregunta ciudadana; Requisitos y Permisos se funden
+// en Trámites; y la vigencia de cada cuota va junto al importe.
+
 /* ----------------------------------------------------------------__ */
 /*  LegalidadHub                                                      */
 /* ----------------------------------------------------------------__ */
@@ -10,23 +18,16 @@
 function LegalidadHub({ onNav }) {
   const C = window.AMX_LEGAL;
 
-  // OJO con la descripción de «Estatal»: decía «normativa estatal aplicable a la posesión
-  // y uso de armas», y eso es FALSO. Las armas de fuego son competencia federal: no hay
-  // normativa estatal que consultar. Lo que sí cambia de un estado a otro es dónde se
-  // hacen algunos papeles, y eso es lo que esa pantalla enseña. El corpus lo dice con
-  // todas sus letras en `noHayEstatal`; la carpeta no puede contradecirlo.
-  //
-  // Y la clave de Requisitos es 'legal-req', que es la que conoce el router. Con
-  // 'legal-requisitos' la única carpeta que debería funcionar tampoco lo hacía.
+  // OJO con la descripción de «Por estado»: no hay normativa estatal de armas, son
+  // competencia federal. Lo que cambia de un estado a otro es dónde se hacen algunos
+  // papeles, y eso es lo que esa pantalla enseña. El corpus lo dice con todas sus
+  // letras en `noHayEstatal`; la carpeta no puede contradecirlo.
   const carpetas = [
-    { clave: 'legal-federal', tit: 'Federal', desc: 'La escalera de normas que aplica, de la Constitución al formato de solicitud.' },
-    { clave: 'legal-estatal', tit: 'Estatal', desc: 'Dónde se saca cada papel según el estado donde vives.' },
-    { clave: 'legal-req', tit: 'Requisitos', desc: 'Los papeles del permiso y los de la compra, que son dos listas distintas.' },
-    { clave: 'legal-permisos', tit: 'Permisos', desc: 'Qué autoriza cada permiso y qué no. Posesión no es portación.' },
+    { clave: 'legal-federal', tit: 'Lo federal', desc: 'Qué arma puedes tener, qué papel llenas y cuánto cuesta: la Constitución, la ley reformada en 2025, el reglamento, los formatos y las cuotas.' },
+    { clave: 'legal-estatal', tit: 'Por estado', desc: 'Dónde sacas la constancia de antecedentes penales, en qué armería compras y si puedes mandar la solicitud por correo.' },
+    { clave: 'legal-tramites', tit: 'Trámites', desc: 'Seis trámites ante la Defensa: qué habilita cada uno, su checklist y su cuota vigente.' },
     { clave: 'legal-documentos', tit: 'Documentos', desc: 'Textos oficiales y PDF de consulta alojados en Armado en México.' },
   ];
-
-  const huecos = window.amxLegalHuecos(C);
 
   return (
     <div className="amx-leg">
@@ -37,8 +38,20 @@ function LegalidadHub({ onNav }) {
       <p className="amx-leg-advertencia">{C.advertencia}</p>
       <p className="amx-leg-fecha">Actualizado el {window.amxLegalFecha(C.actualizado)}</p>
 
-      {/* El mapa va aquí y solo aquí: en la portada sería ruido antes de que la
-          persona sepa qué pregunta tiene (decisión de Saulo, 19-sep-2026). */}
+      {/* La entrevista va ARRIBA (hilo 1): es lo que resuelve la duda en tres minutos.
+          El mapa queda debajo como contexto y se rediseña en un PR aparte: hoy no se
+          lee en el teléfono. */}
+      <section className="amx-leg-cta" aria-labelledby="leg-cta">
+        <h2 id="leg-cta">¿Puedo comprar un arma?</h2>
+        <p>
+          Contesta unas preguntas sobre tu situación —ninguna pide un dato personal— y
+          llévate el dictamen con los documentos que te corresponden.
+        </p>
+        <button type="button" className="amx-boton-tinta" onClick={() => onNav('entrevista')}>
+          Empezar la entrevista
+        </button>
+      </section>
+
       {window.MapaTramite && <window.MapaTramite />}
 
       <nav className="amx-leg-carpetas" aria-label="Secciones de Legalidad">
@@ -54,21 +67,6 @@ function LegalidadHub({ onNav }) {
           </button>
         ))}
       </nav>
-
-      <section className="amx-leg-huecos" aria-labelledby="leg-huecos">
-        <h2 id="leg-huecos">Qué falta por verificar</h2>
-        <p>
-          Estos puntos no se afirman en esta página porque todavía no se ha
-          encontrado la fuente oficial que los respalde.
-        </p>
-        <ul>
-          {huecos.map((h) => (
-            <li key={h.tabla + h.id}>
-              <code>{h.tabla}</code> — {h.nota}
-            </li>
-          ))}
-        </ul>
-      </section>
 
       <window.ReportarError tipo="legalidad" titulo="Legalidad" ruta="/legalidad" />
     </div>
@@ -111,134 +109,77 @@ function LegalidadDocumentos() {
 window.LegalidadDocumentos = LegalidadDocumentos;
 
 /* ----------------------------------------------------------------__ */
-/*  LegalidadRequisitos                                               */
+/*  LegalidadFederal — por pregunta ciudadana (hilo 3)                */
 /* ----------------------------------------------------------------__ */
 
-function LegalidadRequisitos({ onNav }) {
-  const C = window.AMX_LEGAL;
-
-  const orden = ['permiso-adquisicion', 'compra-dcam'];
-
+// Un peldaño de la escalera. Va fuera de la pantalla a propósito: un componente
+// definido dentro de otro remonta su subárbol en cada render (fidelidad-diseno).
+// Los artículos van como resumen llano + cita (hilo 4); el literal se abre desde
+// la cita. Una norma con `revisar` enseña su título y su fuente, que son hechos, y
+// una línea neutra; ni su resumen ni su nota de vigencia, que son afirmaciones sin
+// verificar, ni la nota interna del hueco (hilo 2).
+function LegalidadPeldano({ n, norma, C }) {
+  const arts = (norma.articulos || [])
+    .map((id) => C.articulos.find((a) => a.id === id))
+    .filter((a) => a && !a.revisar);
   return (
-    <div className="amx-leg">
-      <window.CintaDymo nivel={1}>Requisitos</window.CintaDymo>
-      <p className="amx-leg-advertencia">{C.advertencia}</p>
-
-      {orden.map((id) => {
-        const tramite = C.tramites.find((t) => t.id === id);
-        if (!tramite) return null;
-
-        const requisitos = window.amxRequisitosDe(C, tramite.id, {});
-
-        return (
-          <section key={tramite.id} className="amx-leg-hoja">
-            <h2>{tramite.nombre}</h2>
-            <p className="amx-leg-dependencia">{tramite.dependencia}</p>
-            <p className="amx-leg-habilita">{tramite.habilita}</p>
-            {tramite.noHabilita && (
-              <p className="amx-leg-no-habilita">{tramite.noHabilita}</p>
-            )}
-
-            <ol className="amx-leg-checklist">
-              {requisitos.map((r) => (
-                <li key={r.id}>
-                  <span className="amx-leg-casilla" aria-hidden="true">☐</span>
-                  <span className="amx-leg-req-nombre">{r.nombre}</span>
-                  {r.original && <span className="amx-leg-sello">ORIGINAL</span>}
-                  {r.copia && <span className="amx-leg-copia">{r.copia}</span>}
-                  {r.detalle && <p className="amx-leg-detalle">{r.detalle}</p>}
-                  {r.vigencia && <p className="amx-leg-vigencia">{r.vigencia}</p>}
-                  {r.variantes && r.variantes.length > 0 && (
-                    <dl className="amx-leg-variantes">
-                      {r.variantes.map((v, i) => (
-                        <div key={i}>
-                          <dt>{v.escenario}</dt>
-                          <dd>
-                            {v.documento}
-                            {/* Quién lo expide es la mitad útil del dato: sin esto, el
-                                ejidatario sabe que necesita un certificado pero no que
-                                se lo da el Comisariado Ejidal inscrito en el RAN. */}
-                            {v.autoridadLocal && (
-                              <span className="amx-leg-autoridad"> Lo expide: {v.autoridadLocal}</span>
-                            )}
-                          </dd>
-                        </div>
-                      ))}
-                    </dl>
-                  )}
-                  <window.CitaFuente fuente={window.amxLegalFuente(C, r.fuente)} />
-                </li>
-              ))}
-            </ol>
-
-            <window.CitaFuente fuente={window.amxLegalFuente(C, tramite.fuente)} />
-          </section>
-        );
-      })}
-
-      <window.ReportarError tipo="legalidad" titulo="Requisitos" ruta="/legalidad/requisitos" />
-    </div>
+    <li className="amx-leg-peldano">
+      <p className="amx-leg-peldano-num">{String(n).padStart(2, '0')} · {norma.rotulo}</p>
+      <h3>{norma.titulo || norma.rotulo}</h3>
+      {!norma.revisar && norma.resumen && <p className="amx-leg-habilita">{norma.resumen}</p>}
+      {!norma.revisar && norma.notaVigencia && <p className="amx-leg-vigencia">{norma.notaVigencia}</p>}
+      {norma.revisar && (
+        <p className="amx-leg-vigencia">En verificación: su contenido se publica cuando se confirme contra la fuente oficial.</p>
+      )}
+      {norma.fuente && <window.CitaFuente fuente={window.amxLegalFuente(C, norma.fuente)} />}
+      {arts.length > 0 && (
+        <details className="amx-leg-arts">
+          <summary>{(arts.length === 1 ? '1 artículo' : arts.length + ' artículos') + ' · resumen y cita'}</summary>
+          <div>
+            {arts.map((art) => (
+              <div key={art.id}>
+                <strong>{art.rotulo}</strong>
+                {art.titulo && <p>{art.titulo}</p>}
+                {art.resumen && <p>{art.resumen}</p>}
+                <window.CitaFuente fuente={window.amxLegalFuente(C, art.fuente)} />
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+    </li>
   );
 }
 
-/* ----------------------------------------------------------------__ */
-/*  LegalidadFederal                                                  */
-/* ----------------------------------------------------------------__ */
-
 function LegalidadFederal({ onNav }) {
   const C = window.AMX_LEGAL;
-
-  const normasOrdenadas = [...C.normas].sort((a, b) => a.orden - b.orden);
+  const grupos = window.amxNormasPorPregunta(C);
+  let n = 0;
 
   return (
     <div className="amx-leg">
-      <window.CintaDymo nivel={1}>Marco federal</window.CintaDymo>
+      <window.CintaDymo nivel={1}>Lo federal</window.CintaDymo>
       <p className="amx-leg-intro">
-        Las armas de fuego en México son competencia exclusiva del Congreso de la Unión.
-        Ningún estado ni municipio puede crear permisos, licencias ni registros de armas
-        de fuego. Esta es la escalera de normas que se aplica, del escalón más alto al más
-        específico.
+        Las armas de fuego en México son competencia exclusiva del Congreso de la Unión:
+        ningún estado ni municipio puede crear permisos, licencias ni registros de armas
+        de fuego. Las normas van ordenadas por la pregunta que traes; la jerarquía —de la
+        Constitución al formato de ventanilla— se ve dentro de cada grupo.
       </p>
-      <ol className="amx-leg-escalera">
-        {normasOrdenadas.map((n) => (
-          <li key={n.id} className="amx-leg-peldano">
-            <h2>{n.rotulo}</h2>
-            {n.titulo && <p className="amx-leg-peldano-tit">{n.titulo}</p>}
-            {!n.revisar && n.resumen && <p className="amx-leg-habilita">{n.resumen}</p>}
-            {n.notaVigencia && <p className="amx-leg-vigencia">{n.notaVigencia}</p>}
-            {n.revisar && (
-              <p className="amx-leg-hueco">
-                Pendiente de verificar: {n.nota}
-              </p>
-            )}
-            {!n.revisar && n.fuente && (
-              <window.CitaFuente fuente={window.amxLegalFuente(C, n.fuente)} />
-            )}
-            {n.articulos && n.articulos.length > 0 && (
-              <details className="amx-leg-arts">
-                <summary>Artículos</summary>
-                <div>
-                  {n.articulos.map((artId) => {
-                    const art = C.articulos.find((a) => a.id === artId);
-                    if (!art || art.revisar) return null;
-                    return (
-                      <div key={art.id}>
-                        <strong>{art.rotulo}</strong>
-                        {art.titulo && <p>{art.titulo}</p>}
-                        {art.resumen && <p>{art.resumen}</p>}
-                        <window.CitaFuente fuente={window.amxLegalFuente(C, art.fuente)} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </details>
-            )}
-          </li>
-        ))}
-      </ol>
+      {grupos.map((g) => (
+        <section key={g.id} className="amx-leg-grupo" aria-labelledby={'leg-grupo-' + g.id}>
+          <window.CintaDymo nivel={2} chica id={'leg-grupo-' + g.id}>{g.corto}</window.CintaDymo>
+          <p className="amx-leg-pregunta">{g.pregunta}</p>
+          <ol className="amx-leg-escalera">
+            {g.normas.map((norma) => {
+              n += 1;
+              return <LegalidadPeldano key={norma.id} n={n} norma={norma} C={C} />;
+            })}
+          </ol>
+        </section>
+      ))}
       <window.ReportarError
         tipo="legalidad"
-        titulo="Marco federal"
+        titulo="Lo federal"
         ruta="/legalidad/federal"
       />
     </div>
@@ -254,6 +195,7 @@ function LegalidadEstatal({ onNav }) {
   const [sel, setSel] = React.useState('');
 
   const ent = C.entidades.find((e) => e.id === sel);
+  const sinPortal = (e) => !!(e.antecedentes && e.antecedentes.revisar);
 
   return (
     <div className="amx-leg">
@@ -261,11 +203,14 @@ function LegalidadEstatal({ onNav }) {
       <p className="amx-leg-advertencia">{C.noHayEstatal}</p>
       <label className="amx-leg-selector">
         <span>Elige tu estado</span>
+        {/* Las entidades sin portal verificado se quedan en el selector, en gris y con
+            su aviso (hilo 5): es transparencia, y cada URL que se verifique las saca de
+            ahí sin tocar código. */}
         <select value={sel} onChange={(e) => setSel(e.target.value)}>
           <option value="">Selecciona…</option>
           {C.entidades.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.nombre}
+            <option key={e.id} value={e.id} className={sinPortal(e) ? 'amx-leg-opcion--sin-portal' : undefined}>
+              {e.nombre + (sinPortal(e) ? ' · portal sin verificar' : '')}
             </option>
           ))}
         </select>
@@ -275,10 +220,10 @@ function LegalidadEstatal({ onNav }) {
           <dt>Constancia de antecedentes penales</dt>
           <dd>
             {ent.antecedentes.revisar ? (
-              <>
-                Todavía no hemos verificado el portal de este estado.{' '}
-                {ent.antecedentes.nota}
-              </>
+              <span className="amx-leg-sin-portal">
+                Portal sin verificar: todavía no hemos comprobado la dependencia ni el
+                enlace de este estado.
+              </span>
             ) : (
               <>
                 {ent.antecedentes.dependencia}
@@ -327,15 +272,123 @@ function LegalidadEstatal({ onNav }) {
 }
 
 /* ----------------------------------------------------------------__ */
-/*  LegalidadPermisos                                                 */
+/*  LegalidadTramites — Requisitos y Permisos, fundidos (hilo 6)      */
 /* ----------------------------------------------------------------__ */
 
-function LegalidadPermisos({ onNav }) {
+function LegalidadRequisito({ r, C }) {
+  return (
+    <li>
+      <span className="amx-leg-casilla" aria-hidden="true">☐</span>
+      <span className="amx-leg-req-nombre">{r.nombre}</span>
+      {window.amxRotuloEscenarios(C, r.escenarios) && (
+        <span className="amx-leg-solo-si">{window.amxRotuloEscenarios(C, r.escenarios)}</span>
+      )}
+      {r.original && <span className="amx-leg-sello">ORIGINAL</span>}
+      {r.copia && <span className="amx-leg-copia">{r.copia}</span>}
+      {r.detalle && <p className="amx-leg-detalle">{r.detalle}</p>}
+      {r.vigencia && <p className="amx-leg-vigencia">{r.vigencia}</p>}
+      {r.variantes && r.variantes.some((v) => !v.revisar) && (
+        <dl className="amx-leg-variantes">
+          {r.variantes.filter((v) => !v.revisar).map((v, i) => (
+            <div key={i}>
+              <dt>{v.escenario}</dt>
+              <dd>
+                {v.documento}
+                {/* Quién lo expide es la mitad útil del dato: sin esto, el ejidatario
+                    sabe que necesita un certificado pero no que se lo da el Comisariado
+                    Ejidal inscrito en el RAN. */}
+                {v.autoridadLocal && (
+                  <span className="amx-leg-autoridad"> Lo expide: {v.autoridadLocal}</span>
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+      <window.CitaFuente fuente={window.amxLegalFuente(C, r.fuente)} />
+    </li>
+  );
+}
+
+// Una tarjeta por trámite: qué es, qué habilita, cuánto cuesta y de qué año es la
+// cuota (hilo 7), y su checklist plegada; la del primero viene abierta. Los seis van
+// en el orden del corpus, que no es una cronología: la compra en la DCAM ya deja el
+// arma registrada, y portación, colección y transporte son trámites aparte.
+function LegalidadTramite({ t, C, abierto }) {
+  // Un requisito o una variante en revisión es un hueco interno (hilo 2): no se pinta.
+  const requisitos = window.amxRequisitosDe(C, t.id, {}).filter((r) => !r.revisar);
+  const vigencia = window.amxVigenciaCuota(t.costo);
+  return (
+    <article className="amx-leg-ficha">
+      <p className="amx-leg-paso">
+        <span className="amx-leg-homoclave">{t.homoclave || 'Compra en la DCAM'}</span>
+      </p>
+      <h2>{t.nombre}</h2>
+      {t.notaHomoclave && <p className="amx-leg-vigencia">{t.notaHomoclave}</p>}
+      <dl>
+        {t.dependencia && (
+          <>
+            <dt>Dependencia</dt>
+            <dd>{t.dependencia}</dd>
+          </>
+        )}
+        {t.sede && (
+          <>
+            <dt>Sede</dt>
+            <dd>{t.sede}</dd>
+          </>
+        )}
+        {t.habilita && (
+          <>
+            <dt>Qué habilita</dt>
+            <dd>{t.habilita}</dd>
+          </>
+        )}
+        {t.noHabilita && (
+          <>
+            <dt>Qué NO habilita</dt>
+            <dd className="amx-leg-no-habilita">{t.noHabilita}</dd>
+          </>
+        )}
+      </dl>
+      {t.costo && (
+        <p className="amx-leg-costo">
+          <span className="amx-leg-importe">{window.amxImporte(t.costo.monto) + ' ' + t.costo.moneda}</span>
+          {t.costo.concepto && <span className="amx-leg-concepto">{t.costo.concepto}</span>}
+          {vigencia && <span className="amx-leg-vigencia-cuota">{vigencia}</span>}
+        </p>
+      )}
+      {requisitos.length > 0 && (
+        <details className="amx-leg-plegable" open={abierto}>
+          <summary>{requisitos.length + ' requisitos · checklist'}</summary>
+          <ol className="amx-leg-checklist">
+            {requisitos.map((r) => <LegalidadRequisito key={r.id} r={r} C={C} />)}
+          </ol>
+        </details>
+      )}
+      {!t.revisar && t.fuente && (
+        <window.CitaFuente fuente={window.amxLegalFuente(C, t.fuente)} />
+      )}
+    </article>
+  );
+}
+
+function LegalidadTramites({ onNav }) {
   const C = window.AMX_LEGAL;
+  const tramites = C.tramites;
 
   return (
     <div className="amx-leg">
-      <window.CintaDymo nivel={1}>Permisos y licencias</window.CintaDymo>
+      <window.CintaDymo nivel={1}>Trámites</window.CintaDymo>
+      <p className="amx-leg-intro">
+        Seis trámites ante la Secretaría de la Defensa Nacional: el permiso extraordinario
+        de adquisición, la compra en la DCAM y el registro del arma; y aparte la licencia
+        de portación, el permiso de colección y el de transporte. Cada uno con lo que
+        habilita, su checklist de requisitos y su cuota vigente. El permiso y la compra
+        son dos trámites distintos: creer que son el mismo papeleo es lo que hace que
+        alguien llegue al mostrador sin expediente.
+      </p>
+      <p className="amx-leg-advertencia">{C.advertencia}</p>
       <section className="amx-leg-contraste">
         <h2>Posesión no es portación</h2>
         <p>
@@ -349,61 +402,10 @@ function LegalidadPermisos({ onNav }) {
           tramitan su primer permiso.
         </p>
       </section>
-      {C.tramites.map((t) => (
-        <article key={t.id} className="amx-leg-ficha">
-          <h2>{t.nombre}</h2>
-          {t.homoclave && <p className="amx-leg-homoclave">{t.homoclave}</p>}
-          {t.notaHomoclave && <p className="amx-leg-vigencia">{t.notaHomoclave}</p>}
-          <dl>
-            {t.dependencia && (
-              <>
-                <dt>Dependencia</dt>
-                <dd>{t.dependencia}</dd>
-              </>
-            )}
-            {t.sede && (
-              <>
-                <dt>Sede</dt>
-                <dd>{t.sede}</dd>
-              </>
-            )}
-            {t.habilita && (
-              <>
-                <dt>Qué habilita</dt>
-                <dd>{t.habilita}</dd>
-              </>
-            )}
-            {t.noHabilita && (
-              <>
-                <dt>Qué NO habilita</dt>
-                <dd>{t.noHabilita}</dd>
-              </>
-            )}
-            {t.costo && (
-              <>
-                <dt>Costo</dt>
-                <dd>
-                  ${t.costo.monto}{' '}
-                  {t.costo.moneda} (cuota de {t.costo.anio})
-                </dd>
-              </>
-            )}
-          </dl>
-          {t.revisar && (
-            <p className="amx-leg-hueco">
-              Pendiente de verificar: {t.nota}
-            </p>
-          )}
-          {!t.revisar && t.fuente && (
-            <window.CitaFuente fuente={window.amxLegalFuente(C, t.fuente)} />
-          )}
-        </article>
+      {tramites.map((t, i) => (
+        <LegalidadTramite key={t.id} t={t} C={C} abierto={i === 0} />
       ))}
-      <window.ReportarError
-        tipo="legalidad"
-        titulo="Permisos"
-        ruta="/legalidad/permisos"
-      />
+      <window.ReportarError tipo="legalidad" titulo="Trámites" ruta="/legalidad/tramites" />
     </div>
   );
 }
@@ -413,7 +415,6 @@ function LegalidadPermisos({ onNav }) {
 /* ----------------------------------------------------------------__ */
 
 window.LegalidadHub = LegalidadHub;
-window.LegalidadRequisitos = LegalidadRequisitos;
 window.LegalidadFederal = LegalidadFederal;
 window.LegalidadEstatal = LegalidadEstatal;
-window.LegalidadPermisos = LegalidadPermisos;
+window.LegalidadTramites = LegalidadTramites;

@@ -424,9 +424,20 @@ function EntrevistaCuerpo({ modoPortada = false }) {
         <p className="amx-ent-remedio">{d.impedimento.remedio}</p>
       )}
       {d.impedimento && d.impedimento.nota && <p className="amx-ent-nota">{d.impedimento.nota}</p>}
+      {/* Los avisos son erratas del formato frente a la ley (o frente a la práctica de
+          ventanilla) y se marcan como tales, con el signo de la nota de errata del sitio
+          y no con un sello (decisión de Saulo, 22-sep-2026, hilo 8). */}
       {d.avisos && d.avisos.length > 0 && (
         <ul className="amx-ent-avisos">
-          {d.avisos.map(function (a, i) { return <li key={i} dangerouslySetInnerHTML={{__html: a.texto}}></li>; })}
+          {d.avisos.map(function (a, i) {
+            return (
+              <li key={i} className="amx-errata amx-ent-errata">
+                {/* U+FE0E: el signo en texto, no como emoji (iOS lo pinta a color). */}
+                <span className="amx-errata-signo" aria-hidden="true">{'⚠︎'}</span>
+                <span dangerouslySetInnerHTML={{ __html: a.texto }}></span>
+              </li>
+            );
+          })}
         </ul>
       )}
       <h2>Documentos que te corresponden</h2>

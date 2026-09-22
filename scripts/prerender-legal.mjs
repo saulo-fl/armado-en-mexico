@@ -49,6 +49,8 @@ function fuenteCita(fuente) {
  */
 function requisitoHtml(r, corpus, helpers) {
   var html = '<span class="amx-leg-req-nombre">' + esc(r.nombre) + '</span>';
+  var soloSi = helpers && helpers.amxRotuloEscenarios ? helpers.amxRotuloEscenarios(corpus, r.escenarios) : '';
+  if (soloSi) html += ' <span class="amx-leg-solo-si">' + esc(soloSi) + '</span>';
   if (r.original) html += ' <span class="amx-leg-sello">ORIGINAL</span>';
   if (r.copia) html += ' <span class="amx-leg-copia">' + esc(r.copia) + '</span>';
   if (r.detalle) html += '<p>' + esc(r.detalle) + '</p>';
@@ -77,37 +79,22 @@ function requisitoHtml(r, corpus, helpers) {
 }
 
 /**
- * Genera el HTML de la sección de requisitos de un trámite.
- * Ordena por orden ascendente y filtra revisar === true.
+ * La checklist de un trámite: sus requisitos ordenados y sin los que están en
+ * revisión. Devuelve { n, html } o null si no hay ninguno.
  */
-function requisitosSection(corpus, tramite) {
-  if (tramite.revisar) return '';
+function requisitosLista(corpus, tramite) {
+  if (tramite.revisar) return null;
 
-  var reqs = corpus.requisitos || [];
-  var filtrados = [];
-  for (var i = 0; i < reqs.length; i++) {
-    if (reqs[i].tramite === tramite.id && reqs[i].revisar !== true) {
-      filtrados.push(reqs[i]);
-    }
-  }
-  filtrados.sort(function(a, b) { return a.orden - b.orden; });
+  // La MISMA lista que pinta la pantalla (amxRequisitosDe en modo catálogo), sin los
+  // requisitos en revisión: bots y personas ven el mismo checklist, con el mismo conteo.
+  var filtrados = (helpers && helpers.amxRequisitosDe ? helpers.amxRequisitosDe(corpus, tramite.id, {}) : [])
+    .filter(function(r) { return r.revisar !== true; });
 
+  if (!filtrados.length) return null;
   var itemsHtml = filtrados.map(function(r) {
     return '<li>' + requisitoHtml(r, corpus, helpers) + '</li>';
   }).join('');
-
-  var tramiteCita = fuenteCita(tramite.fuente && corpus.fuentes ? corpus.fuentes[tramite.fuente] : null);
-
-  return '<section class="amx-leg-hoja">' +
-    '<h2>' + esc(tramite.nombre) + '</h2>' +
-    '<p class="amx-leg-dependencia">' + esc(tramite.dependencia) + '</p>' +
-    '<p class="amx-leg-habilita">' + esc(tramite.habilita) + '</p>' +
-    (tramite.noHabilita ? '<p class="amx-leg-no-habilita">' + esc(tramite.noHabilita) + '</p>' : '') +
-    '<ol class="amx-leg-checklist">' +
-    itemsHtml +
-    '</ol>' +
-    (tramiteCita ? tramiteCita : '') +
-    '</section>';
+  return { n: filtrados.length, html: '<ol class="amx-leg-checklist">' + itemsHtml + '</ol>' };
 }
 
 // El modulo de la cita necesita el formateador de fecha, y esta escrito como funcion
@@ -118,12 +105,9 @@ let helpers = null;
 export function renderLegalHtml(corpus, seccion, h) {
   helpers = h;
 
+  // Legalidad v2 (22-sep-2026): la entrevista va primero, los huecos del corpus no se
+  // publican (son de desarrollo) y Requisitos y Permisos se fundieron en Trámites.
   if (seccion === 'hub') {
-    var huecos = h.amxLegalHuecos(corpus);
-    var huecosHtml = huecos.map(function(hc) {
-      return '<li><code>' + esc(hc.tabla) + '</code> — ' + esc(hc.nota) + '</li>';
-    }).join('');
-
     return '<article class="amx-leg amx-v2">' +
       '<nav aria-label="Ruta"><a href="/">Inicio</a> › Legalidad</nav>' +
       '<h1>' + esc(corpus.portada.title) + '</h1>' +
@@ -133,15 +117,15 @@ export function renderLegalHtml(corpus, seccion, h) {
       '</section>' +
       '<p>' + esc(corpus.advertencia) + '</p>' +
       '<p>Actualizado el <time datetime="' + esc(corpus.actualizado) + '">' + h.amxLegalFecha(corpus.actualizado) + '</time></p>' +
+      '<section aria-labelledby="entrevista"><h2 id="entrevista">¿Puedo comprar un arma?</h2>' +
+      '<p>Contesta unas preguntas sobre tu situación —ninguna pide un dato personal— y llévate el dictamen con los documentos que te corresponden. ' +
+      '<a href="/legalidad/puedo-comprar">Empezar la entrevista</a></p></section>' +
       '<nav aria-label="Secciones"><ul>' +
-      '<li><a href="/legalidad/requisitos">Requisitos</a></li>' +
-      '<li><a href="/legalidad/federal">Federal</a></li>' +
-      '<li><a href="/legalidad/estatal">Estatal</a></li>' +
-      '<li><a href="/legalidad/permisos">Permisos</a></li>' +
-      '<li><a href="/legalidad/documentos">Documentos legales</a></li>' +
+      '<li><a href="/legalidad/federal">Lo federal</a>: qué arma puedes tener, qué papel llenas y cuánto cuesta; la Constitución, la ley reformada en 2025, el reglamento, los formatos y las cuotas.</li>' +
+      '<li><a href="/legalidad/estatal">Lo que cambia por estado</a>: dónde sacas la constancia de antecedentes penales, en qué armería compras y si puedes mandar la solicitud por correo.</li>' +
+      '<li><a href="/legalidad/tramites">Trámites</a>: seis trámites ante la Defensa, con lo que habilita cada uno, su checklist y su cuota vigente.</li>' +
+      '<li><a href="/legalidad/documentos">Documentos legales</a>: textos oficiales y PDF de consulta alojados en Armado en México.</li>' +
       '</ul></nav>' +
-      '<section aria-labelledby="huecos"><h2 id="huecos">Qué falta por verificar</h2>' +
-      '<ul>' + huecosHtml + '</ul></section>' +
       '<nav aria-label="Más"><a href="/preguntas">Preguntas frecuentes</a> · <a href="/soporte">Soporte</a></nav>' +
       '</article>';
   }
@@ -174,53 +158,48 @@ export function renderLegalHtml(corpus, seccion, h) {
       '</article>';
   }
 
-  if (seccion === 'requisitos') {
-    var orden = ['permiso-adquisicion', 'compra-dcam'];
-    var secciones = orden.map(function(id) {
-      var items = corpus.tramites.filter(function(t) { return t.id === id; });
-      return items.length > 0 ? requisitosSection(corpus, items[0]) : '';
-    }).filter(Boolean).join('');
-
-    return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Requisitos</nav>' +
-      '<h1>Requisitos</h1>' +
-      '<p class="amx-leg-advertencia">' + esc(corpus.advertencia) + '</p>' +
-      secciones +
-      '</article>';
-  }
-
   if (seccion === 'federal') {
-    var normas = (corpus.normas || []).slice().sort(function(a, b) { return a.orden - b.orden; });
-    var peldanos = normas.map(function(n) {
-      var arts = (n.articulos || []).map(function(artId) {
-        var art = (corpus.articulos || []).find(function(a) { return a.id === artId; });
-        if (!art || art.revisar) return '';
-        return '<div><strong>' + esc(art.rotulo) + '</strong>' +
-          (art.titulo ? '<p>' + esc(art.titulo) + '</p>' : '') +
-          (art.resumen ? '<p>' + esc(art.resumen) + '</p>' : '') +
-          fuenteCita(corpus.fuentes ? corpus.fuentes[art.fuente] : null) +
-          '</div>';
+    // Por pregunta ciudadana (hilo 3): la tabla vive en lib/legal.js, junto a la pantalla.
+    // Los artículos van como resumen + cita (hilo 4); el hueco de una norma en revisión
+    // no se publica (hilo 2): solo su título y su nota de vigencia.
+    var grupos = h.amxNormasPorPregunta(corpus);
+    var num = 0;
+    var gruposHtml = grupos.map(function(g) {
+      var peldanos = g.normas.map(function(n) {
+        num += 1;
+        var arts = (n.articulos || []).map(function(artId) {
+          var art = (corpus.articulos || []).find(function(a) { return a.id === artId; });
+          if (!art || art.revisar) return '';
+          return '<div><strong>' + esc(art.rotulo) + '</strong>' +
+            (art.titulo ? '<p>' + esc(art.titulo) + '</p>' : '') +
+            (art.resumen ? '<p>' + esc(art.resumen) + '</p>' : '') +
+            fuenteCita(corpus.fuentes ? corpus.fuentes[art.fuente] : null) +
+            '</div>';
+        }).filter(Boolean);
+        return '<li class="amx-leg-peldano">' +
+          '<p class="amx-leg-peldano-num">' + String(num).padStart(2, '0') + ' · ' + esc(n.rotulo) + '</p>' +
+          '<h3>' + esc(n.titulo || n.rotulo) + '</h3>' +
+          (!n.revisar && n.resumen ? '<p class="amx-leg-habilita">' + esc(n.resumen) + '</p>' : '') +
+          (!n.revisar && n.notaVigencia ? '<p class="amx-leg-vigencia">' + esc(n.notaVigencia) + '</p>' : '') +
+          (n.revisar ? '<p class="amx-leg-vigencia">En verificación: su contenido se publica cuando se confirme contra la fuente oficial.</p>' : '') +
+          (n.fuente ? fuenteCita(corpus.fuentes ? corpus.fuentes[n.fuente] : null) : '') +
+          (arts.length ? '<details class="amx-leg-arts"><summary>' + (arts.length === 1 ? '1 artículo' : arts.length + ' artículos') + ' · resumen y cita</summary><div>' + arts.join('') + '</div></details>' : '') +
+          '</li>';
       }).join('');
-
-      return '<li class="amx-leg-peldano">' +
-        '<h2>' + esc(n.rotulo) + '</h2>' +
-        (n.titulo ? '<p class="amx-leg-peldano-tit">' + esc(n.titulo) + '</p>' : '') +
-        (!n.revisar && n.resumen ? '<p class="amx-leg-habilita">' + esc(n.resumen) + '</p>' : '') +
-        (n.notaVigencia ? '<p class="amx-leg-vigencia">' + esc(n.notaVigencia) + '</p>' : '') +
-        (n.revisar ? '<p class="amx-leg-hueco">Pendiente de verificar: ' + esc(n.nota) + '</p>' : '') +
-        (!n.revisar && n.fuente ? fuenteCita(corpus.fuentes ? corpus.fuentes[n.fuente] : null) : '') +
-        (arts ? '<details class="amx-leg-arts"><summary>Artículos</summary><div>' + arts + '</div></details>' : '') +
-        '</li>';
+      return '<section class="amx-leg-grupo" aria-labelledby="leg-grupo-' + esc(g.id) + '">' +
+        '<h2 id="leg-grupo-' + esc(g.id) + '">' + esc(g.corto) + '</h2>' +
+        '<p class="amx-leg-pregunta">' + esc(g.pregunta) + '</p>' +
+        '<ol class="amx-leg-escalera">' + peldanos + '</ol></section>';
     }).join('');
 
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Marco federal</nav>' +
-      '<h1>Marco federal</h1>' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Lo federal</nav>' +
+      '<h1>Lo federal</h1>' +
       '<p class="amx-leg-intro">Las armas de fuego en México son competencia exclusiva del ' +
-      'Congreso de la Unión. Ningún estado ni municipio puede crear permisos, licencias ni ' +
-      'registros de armas de fuego. Esta es la escalera de normas que se aplica, del escalón ' +
-      'más alto al más específico.</p>' +
-      '<ol class="amx-leg-escalera">' + peldanos + '</ol>' +
+      'Congreso de la Unión: ningún estado ni municipio puede crear permisos, licencias ni ' +
+      'registros de armas de fuego. Las normas van ordenadas por la pregunta que traes; la ' +
+      'jerarquía —de la Constitución al formato de ventanilla— se ve dentro de cada grupo.</p>' +
+      gruposHtml +
       '</article>';
   }
 
@@ -231,7 +210,7 @@ export function renderLegalHtml(corpus, seccion, h) {
     var fichas = (corpus.entidades || []).map(function(e) {
       var ant = e.antecedentes || {};
       var antHtml = ant.revisar
-        ? 'Todavía no hemos verificado el portal de este estado. ' + esc(ant.nota || '')
+        ? '<span class="amx-leg-sin-portal">Portal sin verificar: todavía no hemos comprobado la dependencia ni el enlace de este estado.</span>'
         : esc(ant.dependencia || '') +
           (ant.domicilio ? '<p>' + esc(ant.domicilio) + '</p>' : '') +
           (ant.url ? ' <a href="' + esc(ant.url) + '" target="_blank" rel="noopener noreferrer"' +
@@ -239,7 +218,7 @@ export function renderLegalHtml(corpus, seccion, h) {
             ' (se abre en una pestaña nueva)">Ir al trámite</a>' : '');
 
       return '<section class="amx-leg-estado-ficha">' +
-        '<h2>' + esc(e.nombre) + '</h2>' +
+        '<h2>' + esc(e.nombre) + (ant.revisar ? ' <small class="amx-leg-sin-portal">· portal sin verificar</small>' : '') + '</h2>' +
         '<dl class="amx-leg-estado">' +
         '<dt>Constancia de antecedentes penales</dt><dd>' + antHtml + '</dd>' +
         '<dt>Dónde compras</dt><dd>' +
@@ -265,31 +244,46 @@ export function renderLegalHtml(corpus, seccion, h) {
       '</article>';
   }
 
-  if (seccion === 'permisos') {
-    var fichasTramite = (corpus.tramites || []).map(function(t) {
+  if (seccion === 'tramites') {
+    var tramites = corpus.tramites || [];
+    var fichasTramite = tramites.map(function(t, i) {
       var filas = '';
       if (t.dependencia) filas += '<dt>Dependencia</dt><dd>' + esc(t.dependencia) + '</dd>';
       if (t.sede) filas += '<dt>Sede</dt><dd>' + esc(t.sede) + '</dd>';
       if (t.habilita) filas += '<dt>Qué habilita</dt><dd>' + esc(t.habilita) + '</dd>';
-      if (t.noHabilita) filas += '<dt>Qué NO habilita</dt><dd>' + esc(t.noHabilita) + '</dd>';
+      if (t.noHabilita) filas += '<dt>Qué NO habilita</dt><dd class="amx-leg-no-habilita">' + esc(t.noHabilita) + '</dd>';
+      var costo = '';
       if (t.costo) {
-        filas += '<dt>Costo</dt><dd>$' + esc(t.costo.monto) + ' ' + esc(t.costo.moneda) +
-          ' (cuota de ' + esc(t.costo.anio) + ')</dd>';
+        var vigencia = helpers && helpers.amxVigenciaCuota ? helpers.amxVigenciaCuota(t.costo) : '';
+        var importe = helpers && helpers.amxImporte ? helpers.amxImporte(t.costo.monto) : '$' + t.costo.monto;
+        costo = '<p class="amx-leg-costo"><span class="amx-leg-importe">' + esc(importe) + ' ' + esc(t.costo.moneda) + '</span>' +
+          (t.costo.concepto ? ' <span class="amx-leg-concepto">' + esc(t.costo.concepto) + '</span>' : '') +
+          (vigencia ? ' <span class="amx-leg-vigencia-cuota">' + esc(vigencia) + '</span>' : '') + '</p>';
       }
-
+      // La checklist va plegada en un <details>, la del primer paso abierta: es lo
+      // mismo que hace la pantalla, y un bot lee el contenido esté abierto o no.
+      var reqs = requisitosLista(corpus, t);
+      var checklist = reqs
+        ? '<details class="amx-leg-plegable"' + (i === 0 ? ' open' : '') + '><summary>' + reqs.n + ' requisitos · checklist</summary>' + reqs.html + '</details>'
+        : '';
       return '<article class="amx-leg-ficha">' +
+        '<p class="amx-leg-paso"><span class="amx-leg-homoclave">' + esc(t.homoclave || 'Compra en la DCAM') + '</span></p>' +
         '<h2>' + esc(t.nombre) + '</h2>' +
-        (t.homoclave ? '<p class="amx-leg-homoclave">' + esc(t.homoclave) + '</p>' : '') +
         (t.notaHomoclave ? '<p class="amx-leg-vigencia">' + esc(t.notaHomoclave) + '</p>' : '') +
-        '<dl>' + filas + '</dl>' +
-        (t.revisar ? '<p class="amx-leg-hueco">Pendiente de verificar: ' + esc(t.nota) + '</p>' : '') +
+        '<dl>' + filas + '</dl>' + costo + checklist +
         (!t.revisar && t.fuente ? fuenteCita(corpus.fuentes ? corpus.fuentes[t.fuente] : null) : '') +
         '</article>';
     }).join('');
 
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Permisos y licencias</nav>' +
-      '<h1>Permisos y licencias</h1>' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Trámites</nav>' +
+      '<h1>Trámites</h1>' +
+      '<p class="amx-leg-intro">Seis trámites ante la Secretaría de la Defensa Nacional: el permiso extraordinario ' +
+      'de adquisición, la compra en la DCAM y el registro del arma; y aparte la licencia de portación, el permiso ' +
+      'de colección y el de transporte. Cada uno con lo que habilita, su checklist de requisitos y su cuota vigente. ' +
+      'El permiso y la compra son dos trámites distintos: creer que son el mismo papeleo es lo que hace que ' +
+      'alguien llegue al mostrador sin expediente.</p>' +
+      '<p class="amx-leg-advertencia">' + esc(corpus.advertencia) + '</p>' +
       '<section class="amx-leg-contraste">' +
       '<h2>Posesión no es portación</h2>' +
       '<p>Tener un permiso de adquisición te autoriza a comprar el arma y a tenerla en el ' +
@@ -337,7 +331,7 @@ export function renderEntrevistaHtml(arbol, corpus, h) {
     'cuál te falta y cómo se consigue. Estas son las preguntas:</p>' +
     etapasHtml +
     '<section><h2>Lo que entra en el expediente pase lo que pase</h2><ul>' + siempreHtml + '</ul></section>' +
-    '<nav aria-label="Más"><a href="/legalidad/requisitos">Todos los requisitos, sin entrevista</a> · ' +
+    '<nav aria-label="Más"><a href="/legalidad/tramites">Todos los trámites y sus requisitos, sin entrevista</a> · ' +
     '<a href="/legalidad">Legalidad</a></nav>' +
     '</article>';
 }

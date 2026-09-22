@@ -1,0 +1,5 @@
+# Requisitos y Permisos se fundieron en Trámites el 22-sep-2026. Las dos
+# direcciones viejas estaban en el sitemap y en enlaces: 301, no 404.
+# Solo reglas literales: un comodín /* se comería sitemap.xml y app.js (AGENTS.md).
+/legalidad/requisitos  /legalidad/tramites  301
+/legalidad/permisos    /legalidad/tramites  301
