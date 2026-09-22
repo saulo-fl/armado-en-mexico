@@ -162,7 +162,7 @@ function LegalidadEstatalCuerpo({ C }) {
           </dd>
           <dt>Traslado de traumáticas</dt>
           <dd>
-            {ent.traumaticas
+            {ent.traumaticas && !ent.traumaticas.revisar
               ? `${ent.traumaticas.texto} — ${ent.traumaticas.fundamento}`
               : 'No hemos verificado la regla local de este estado.'}
           </dd>
@@ -323,7 +323,7 @@ function LegalidadDocumentosCuerpo({ C }) {
   function grupo(titulo, items) {
     if (!items.length) return null;
     return <details className="amx-leg-plegable" key={titulo}>
-      <summary><span className="amx-leg-plegable-corto">{titulo}</span><span className="amx-leg-plegable-pregunta">{items.length + (items.length === 1 ? ' documento' : ' documentos')}</span></summary>
+      <summary><span className="amx-leg-plegable-corto">{titulo + ' · ' + items.length}</span></summary>
       <ul className="amx-leg-documentos">
         {items.map((f) => <li key={f.archivoLocal || f.url || f.titulo}>
           <strong>{f.titulo}</strong>
@@ -366,13 +366,21 @@ function LegalidadHub({ onNav, seccion }) {
   const C = window.AMX_LEGAL;
   const abiertoRef = React.useRef(null);
 
-  // Una ruta profunda (/legalidad/tramites) aterriza con su folder abierto y a la vista.
+  // Una ruta profunda (/legalidad/tramites) aterriza con su folder abierto, a la vista y
+  // con el foco. App pone el scroll a 0 en su propio efecto, que corre DESPUÉS de este
+  // (React ejecuta los efectos de hijo a padre), así que el desplazamiento se difiere un
+  // frame para caer detrás; `seccion` no cambia mientras el hub está montado.
   React.useEffect(() => {
-    if (seccion && abiertoRef.current) {
-      abiertoRef.current.open = true;
-      const suave = !window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      abiertoRef.current.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'start' });
-    }
+    if (!seccion || !abiertoRef.current) return undefined;
+    const folder = abiertoRef.current;
+    folder.open = true;
+    const suave = !window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const id = requestAnimationFrame(() => {
+      folder.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'start' });
+      folder.tabIndex = -1;
+      folder.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(id);
   }, [seccion]);
 
   return (
@@ -381,6 +389,7 @@ function LegalidadHub({ onNav, seccion }) {
       <p className="amx-leg-eyebrow">{C.portada.eyebrow} · actualizado el {window.amxLegalFecha(C.actualizado)}</p>
       <p className="amx-leg-intro">{C.portada.intro}</p>
       <p className="amx-leg-advertencia">{C.advertencia}</p>
+      <window.AvisoTransparencia aviso={C.avisoTransparencia} />
 
       {/* La entrevista va ARRIBA (hilo 1): es lo que resuelve la duda en tres minutos.
           El mapa queda debajo como contexto y se rediseña en un PR aparte: hoy no se
@@ -428,7 +437,6 @@ function LegalidadHub({ onNav, seccion }) {
         ))}
       </div>
 
-      <window.AvisoTransparencia aviso={C.avisoTransparencia} />
       <window.ReportarError tipo="legalidad" titulo="Legalidad" ruta="/legalidad" />
     </div>
   );

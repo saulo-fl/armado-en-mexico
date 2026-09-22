@@ -229,7 +229,7 @@ export function renderLegalHtml(corpus, seccion, h) {
         ', ' + esc(e.envioFundamento) +
         (e.envioNota ? '<p>' + esc(e.envioNota) + '</p>' : '') + '</dd>' +
         '<dt>Traslado de traumáticas</dt><dd>' +
-        (e.traumaticas
+        (e.traumaticas && !e.traumaticas.revisar
           ? esc(e.traumaticas.texto) + ' — ' + esc(e.traumaticas.fundamento)
           : 'No hemos verificado la regla local de este estado.') +
         '</dd>' +

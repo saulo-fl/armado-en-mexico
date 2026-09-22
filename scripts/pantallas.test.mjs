@@ -108,8 +108,20 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
   assert.match(t2, /Elige tu estado/, 'lo estatal no está en el hub');
   assert.match(t2, /Posesión no es portación/, 'los trámites no están en el hub');
   assert.match(t2, /Documentos oficiales/, 'los documentos no están en el hub');
-  assert.ok(contar(arbol, 'details') >= 4 + 3 + 6, 'faltan desplegables: cuatro folders, tres preguntas y seis trámites');
-  assert.ok(contar(arbol, 'button') <= 3, 'el hub no debe llevar botones de navegación a otras pantallas');
+  // Cuatro folders exactos y trece plegables dentro (3 preguntas + 1 «por qué no hay ley
+  // estatal» + 6 trámites + 3 grupos de documentos); un solo botón, el de la entrevista
+  // (el arnés no carga ui.jsx, así que ReportarError no cuenta).
+  const conClase = (nodo, clase, n = { v: 0 }) => {
+    if (!nodo || typeof nodo !== 'object') return n.v;
+    if (Array.isArray(nodo)) { nodo.forEach((x) => conClase(x, clase, n)); return n.v; }
+    if (nodo.props && typeof nodo.props.className === 'string' && nodo.props.className.split(' ').includes(clase)) n.v++;
+    if (typeof nodo.tipo === 'function') conClase(nodo.tipo(nodo.props), clase, n);
+    (nodo.hijos || []).forEach((x) => conClase(x, clase, n));
+    return n.v;
+  };
+  assert.equal(conClase(arbol, 'amx-leg-folder'), 4, 'el cajón lleva exactamente cuatro folders');
+  assert.equal(conClase(arbol, 'amx-leg-plegable'), 13, 'dentro de los folders van trece plegables');
+  assert.equal(contar(arbol, 'button'), 1, 'el único botón del hub es el de la entrevista');
 });
 
 test('LegalidadTramites separa PERMISO de COMPRA, que es el error que corrige', (t) => {
@@ -350,6 +362,10 @@ test('el prerender no publica ningún hueco: ni como afirmación ni como lista',
     // …y su nota interna tampoco: desde el 22-sep-2026 los huecos son de desarrollo
     // (check-legal.mjs y docs/fuentes/legalidad.md), no del público (hilo 2).
     assert.doesNotMatch(html, /falta por verificar/i, seccion + ': volvió el bloque de huecos');
+    // La regla de traumáticas de un estado en revisión tampoco se afirma (CDMX, Morelos).
+    for (const e of C.entidades.filter((x) => x.traumaticas && x.traumaticas.revisar)) {
+      assert.ok(!html.includes(e.traumaticas.texto.slice(0, 40).replace(/&/g, '&amp;')), seccion + ': traumáticas de ' + e.id + ' está en revisión y sale afirmado');
+    }
     for (const h of huecos) {
       if (h.nota) assert.ok(!html.includes(h.nota.slice(0, 40).replace(/&/g, '&amp;')),
         seccion + ': la nota interna del hueco ' + h.tabla + '/' + h.id + ' llega al HTML');

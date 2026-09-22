@@ -6228,9 +6228,13 @@
   line-height: 1.45;
   color: var(--manila-tinta-2);
 }
-/* Dentro del folder, el cuerpo de la sección no hereda el ancho de párrafo del oficio. */
-.amx-v2 .amx-leg-folder .amx-oficio-texto { max-width: none; }
+/* Dentro del folder, el cuerpo de la sección no hereda el ancho ni el margen de párrafo
+   del oficio, y la intro y la advertencia —que fuera van sobre el lienzo con tinta de
+   tema— aquí van sobre papel: tinta de papelería, igual en los dos temas. */
+.amx-v2 .amx-leg-folder .amx-oficio-texto { max-width: none; margin-bottom: 0; }
 .amx-v2 .amx-leg-cuerpo > .amx-leg-intro { margin-top: 0; }
+.amx-v2 .amx-leg-folder .amx-leg-intro { color: var(--ficha-tinta); }          /* 16.65:1 sobre el oficio */
+.amx-v2 .amx-leg-folder .amx-leg-advertencia { color: var(--oficio-tinta-2); } /* 7.47:1 */
 /* Los papeles que antes iban sobre el lienzo ahora van sobre el oficio: un punto más
    gastados para que se vean como hojas encima, no como el mismo papel. */
 .amx-v2 .amx-leg-folder .amx-leg-ficha,
@@ -6239,7 +6243,6 @@
 /* Lo federal, por pregunta ciudadana: cada pregunta es un desplegable; el rótulo
    corto y la pregunta entera van en el <summary>, uno sobre otro. */
 .amx-v2 .amx-leg-grupo { margin-top: 26px; }
-.amx-v2 .amx-leg-plegable summary { flex-wrap: wrap; row-gap: 2px; }
 .amx-v2 .amx-leg-plegable-corto { flex: 1; min-width: 0; }
 .amx-v2 .amx-leg-plegable-pregunta {
   order: 3;
@@ -6252,7 +6255,7 @@
   text-transform: none;
   color: var(--ficha-tinta);
 }
-.amx-v2 .amx-leg-plegable summary::after { order: 2; }
+.amx-v2 .amx-leg-plegable > summary::after { order: 2; }
 .amx-v2 .amx-leg-plegable > .amx-leg-escalera,
 .amx-v2 .amx-leg-plegable > .amx-leg-ficha,
 .amx-v2 .amx-leg-plegable > .amx-leg-documentos,
@@ -6331,22 +6334,27 @@
   text-transform: uppercase;
   color: var(--kardex-imp);
 }
-/* Los plegables de Legalidad (checklist y artículos) pintan su signo como .amx-plegable:
-   con display:flex el navegador quita el triángulo nativo y no se sabría que se abren. */
+/* Los plegables de Legalidad (preguntas, trámites, documentos y artículos) pintan su
+   signo como .amx-plegable: con display:flex el navegador quita el triángulo nativo y
+   no se sabría que se abren. Siempre con `>`: un plegable lleva otros dentro (los
+   artículos de cada norma), y con el combinador descendiente el `[open]` del padre
+   les pondría «−» a los hijos cerrados. */
 .amx-v2 .amx-leg-plegable { margin-top: 12px; }
-.amx-v2 .amx-leg-plegable summary,
-.amx-v2 .amx-leg-arts summary {
+.amx-v2 .amx-leg-plegable > summary,
+.amx-v2 .amx-leg-arts > summary {
   list-style: none;
   justify-content: space-between;
-  gap: 12px;
+  column-gap: 12px;
+  row-gap: 2px;
+  flex-wrap: wrap;
 }
-.amx-v2 .amx-leg-plegable summary::-webkit-details-marker,
-.amx-v2 .amx-leg-arts summary::-webkit-details-marker { display: none; }
-.amx-v2 .amx-leg-plegable summary::after,
-.amx-v2 .amx-leg-arts summary::after { content: '+'; font-size: 18px; line-height: 1; }
-.amx-v2 .amx-leg-plegable[open] summary::after,
-.amx-v2 .amx-leg-arts[open] summary::after { content: '−'; }
-.amx-v2 .amx-leg-plegable summary {
+.amx-v2 .amx-leg-plegable > summary::-webkit-details-marker,
+.amx-v2 .amx-leg-arts > summary::-webkit-details-marker { display: none; }
+.amx-v2 .amx-leg-plegable > summary::after,
+.amx-v2 .amx-leg-arts > summary::after { content: '+'; font-size: 18px; line-height: 1; }
+.amx-v2 .amx-leg-plegable[open] > summary::after,
+.amx-v2 .amx-leg-arts[open] > summary::after { content: '−'; }
+.amx-v2 .amx-leg-plegable > summary {
   font-family: var(--mono);
   font-size: 13px;
   text-transform: uppercase;
@@ -6357,7 +6365,7 @@
   display: flex;
   align-items: center;
 }
-.amx-v2 .amx-leg-plegable summary:focus-visible {
+.amx-v2 .amx-leg-plegable > summary:focus-visible {
   outline: 2px solid var(--ficha-tinta);
   outline-offset: 2px;
 }
