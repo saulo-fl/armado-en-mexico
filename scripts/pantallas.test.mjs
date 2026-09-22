@@ -123,6 +123,26 @@ test('la entrevista arranca por la primera pregunta y no por otra', (t) => {
   assert.ok(contar(arbol, 'legend') >= 1, 'el <fieldset> no lleva <legend>');
 });
 
+test('en el teléfono la entrevista de la portada cabe en pantalla', () => {
+  const portada = readFileSync(raiz('src/screens/screens-1.jsx'), 'utf8');
+  const estilos = readFileSync(raiz('src/styles/estilo.css'), 'utf8');
+  assert.doesNotMatch(portada, /Basado en el formato DEFENSA-02-040/i,
+    'la portada no debe repetir el aviso del formato: ya está en Legalidad');
+  // El título se retira SOLO con la entrevista empezada. En la primera pregunta
+  // es el único contexto que tiene quien llega; a partir de la segunda estorba y
+  // empuja la mesa con los documentos fuera de la pantalla.
+  assert.match(estilos,
+    /\.amx-hent:has\(\.amx-ent-cuerpo:not\(\.amx-ent-cuerpo--compacto\)\) \.amx-hent-tit \{[^}]*clip:/,
+    'falta la regla que retira el título una vez empezada la entrevista');
+  assert.doesNotMatch(estilos,
+    /\.amx-hent:has\(\.amx-ent-cuerpo--compacto\) \.amx-hent-tit \{[^}]*clip:/,
+    'el título no debe esconderse en la primera pregunta: ahí es el único contexto');
+  // En 390 px los tres renglones reservados del enunciado dejaban 70 px de hueco
+  // sobre cada pregunta corta. En tableta y escritorio la reserva se queda.
+  assert.match(estilos, /\.amx-v2 \.amx-ent-pregunta legend \{\s*min-height: 0;/,
+    'en móvil el enunciado no debe reservar los tres renglones');
+});
+
 test('ninguna pantalla promete que el permiso se vaya a otorgar', (t) => {
   const fuentes = ['src/screens/screens-legalidad.jsx', 'src/screens/screens-entrevista.jsx'];
   let miradas = 0;

@@ -808,9 +808,6 @@ function HomeEntrevistaBloque() {
   return (
     <section className="amx-hent" aria-labelledby="hent-tit">
       <h2 id="hent-tit" className="amx-hent-tit">Contesta unas preguntas y conoce si cumples los requisitos</h2>
-      <p className="amx-hent-pie">
-        Basado en el formato DEFENSA-02-040. No es una resolución oficial ni asesoría jurídica.
-      </p>
       <window.EntrevistaCuerpo modoPortada />
     </section>
   );

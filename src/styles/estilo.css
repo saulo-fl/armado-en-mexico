@@ -6833,6 +6833,57 @@
   flex: 0 0 auto;
   gap: 8px;
 }
+@media (max-width: 600px) {
+  /* La portada sin respuestas todavía no es una mesa: es una sola línea, así
+     que no reserva alto ni márgenes laterales de sección. */
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) {
+    min-height: 0;
+    padding: 12px 0;
+  }
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) .amx-hent-tit {
+    padding-inline: 8px;
+  }
+  /* Contestada la primera pregunta el título se retira: la pregunta sube y la
+     mesa con los documentos entra en pantalla, que es lo que hay que ver a
+     partir de ahí. Vuelve si se regresa al principio de la entrevista.
+     Sigue estando para los lectores de pantalla: la sección se nombra por él. */
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo:not(.amx-ent-cuerpo--compacto)) .amx-hent-tit {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo:not(.amx-ent-cuerpo--compacto)) .amx-ent-cuerpo {
+    margin-top: 0;
+  }
+  /* En el teléfono no se reservan los tres renglones del enunciado: dejaban
+     70 px de hueco sobre cada pregunta corta —media tarjeta vacía— a cambio de
+     que las respuestas no saltaran. En una pantalla de 390 px pesa mas el
+     hueco. En tableta y escritorio la reserva se queda. */
+  .amx-v2 .amx-ent-pregunta legend {
+    min-height: 0;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
+    gap: 10px;
+    padding: 0 8px 8px;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta legend {
+    font-size: 16px;
+    line-height: 40px;
+  }
+  .amx-v2 .amx-ent-opciones--compacta {
+    gap: 6px;
+  }
+  .amx-v2 .amx-ent-opciones--compacta .amx-ent-opcion {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+}
 @media (min-width: 900px) {
   .amx-v2 .amx-ent-papel {
     animation-name: amx-ent-papel-entra-escritorio;
