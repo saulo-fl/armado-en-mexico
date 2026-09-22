@@ -6599,8 +6599,8 @@
 }
 .amx-v2 .amx-ent-opciones {
   display: grid;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 0;
+  margin-top: 6px;
 }
 /* Modo portada (HOME, sin respuestas aún): preguntas en línea horizontal,
    botones cortos a la derecha. No apilados, no a todo el ancho. */
@@ -6614,36 +6614,53 @@
   width: auto;
   flex: 0 0 auto;
 }
+/* CADA RESPUESTA ES UN RENGLÓN QUE SE MARCA (21-sep-2026). Eran botones con
+   fondo, sombra y flecha: piezas de aplicación en medio de una hoja de papel.
+   Ahora la entrevista entera se lee como el formato que es —casilla, etiqueta
+   y su raya—, igual que la primera pregunta de la portada. El área pulsable
+   sigue siendo el renglón completo, con sus 46 px de alto. */
 .amx-v2 button.amx-ent-opcion {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 12px;
   width: 100%;
-  min-height: 44px;
-  padding: 11px 16px;
+  min-height: 46px;
+  padding: 10px 6px;
   border: 0;
-  background: var(--ficha);
+  border-bottom: 1px solid color-mix(in srgb, var(--manila-tinta) 20%, transparent);
+  background: transparent;
   color: var(--ficha-tinta);
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.35;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(23, 27, 25, .15);
-  border-radius: 0 8px 0 0;
+  box-shadow: none;
+  border-radius: 0;
 }
-.amx-v2 button.amx-ent-opcion::after {
+.amx-v2 .amx-ent-opciones .amx-ent-opcion:last-child {
+  border-bottom: 0;
+}
+/* La casilla del formato. Se rellena al marcarla, como una X de bolígrafo. */
+.amx-v2 button.amx-ent-opcion::before {
   content: '';
   flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  transform: rotate(45deg);
+  width: 19px;
+  height: 19px;
+  border: 1.5px solid var(--ficha-tinta-2);
+  border-radius: 1px;
+}
+.amx-v2 button.amx-ent-opcion::after {
+  content: none;
 }
 .amx-v2 button.amx-ent-opcion:hover {
-  background: var(--oficio-2);
+  background: color-mix(in srgb, var(--manila-tinta) 6%, transparent);
+}
+.amx-v2 button.amx-ent-opcion:hover::before,
+.amx-v2 button.amx-ent-opcion:focus-visible::before {
+  border-color: var(--ficha-tinta);
+  background: color-mix(in srgb, var(--ficha-tinta) 8%, transparent);
 }
 .amx-v2 button.amx-ent-opcion:focus-visible,
 .amx-v2 .amx-ent-regresar:focus-visible,
@@ -6852,7 +6869,10 @@
 .amx-v2 .amx-ent-folio {
   display: inline-block;
   flex: 0 0 auto;
-  align-self: center;
+  /* Arriba, a la altura del primer renglón: en una pregunta de cuatro líneas,
+     centrado se quedaba flotando en mitad del párrafo. */
+  align-self: flex-start;
+  margin-top: 3px;
   margin-inline-end: 10px;
   padding: 1px 7px;
   border: 1px solid color-mix(in srgb, var(--ficha-tinta-2) 60%, transparent);
@@ -6875,33 +6895,14 @@
 /* Las respuestas se marcan, no se pulsan: cuadro vacío y etiqueta en tinta
    normal. Nada de fondo ni de flecha, que es lo que las hacía parecer botones
    de aplicación en medio de una hoja de papel. */
+/* En la portada el renglón va en línea con la pregunta, así que no lleva su
+   raya: la separación la da el espacio, no una línea que cortaría la frase. */
 .amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion {
   width: auto;
   gap: 9px;
   min-height: 44px;
   padding: 0 12px 0 6px;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  font-family: var(--sans);
-  font-size: 16px;
-  color: var(--ficha-tinta);
-}
-.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion::after {
-  content: none;
-}
-.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion::before {
-  content: '';
-  flex: 0 0 auto;
-  width: 19px;
-  height: 19px;
-  border: 1.5px solid var(--ficha-tinta-2);
-  border-radius: 1px;
-}
-.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion:hover::before,
-.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion:focus-visible::before {
-  border-color: var(--ficha-tinta);
-  background: color-mix(in srgb, var(--ficha-tinta) 8%, transparent);
+  border-bottom: 0;
 }
 @media (max-width: 600px) {
   /* La portada sin respuestas todavía no es una mesa: es una sola línea, así

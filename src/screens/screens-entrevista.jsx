@@ -391,7 +391,7 @@ function EntrevistaCuerpo({ modoPortada = false }) {
         data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}>
         {/* El folio del renglón, como en un formato impreso. Va oculto al
             lector de pantalla: numera, no dice nada que la pregunta no diga. */}
-        {compacta && <span className="amx-ent-folio" aria-hidden="true">{d.recorrido.length + 1}</span>}
+        <span className="amx-ent-folio" aria-hidden="true">{d.recorrido.length + 1}</span>
         <span>{p.texto}</span></legend>
       <div className={'amx-ent-opciones' + (compacta ? ' amx-ent-opciones--compacta' : '')}
         role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
@@ -450,11 +450,11 @@ function EntrevistaCuerpo({ modoPortada = false }) {
         <window.EscritorioPapeles documentos={d.documentos} />
       )}
       <div className="amx-ent-mesa">
-        {/* En la portada la pregunta se sirve sobre la misma hoja de oficio que
-            usan la FAQ y la clasificación, con su membrete: es un renglón del
-            formato, no una tarjeta de aplicación. */}
-        <div className={'amx-ent-folder' + (compacta ? ' amx-oficio' : '')}>
-          {compacta && (
+        {/* Toda la entrevista se sirve sobre la misma hoja de oficio que usan la
+            FAQ y la clasificación, con su membrete: cada pregunta es un renglón
+            del formato, no una tarjeta de aplicación. */}
+        <div className="amx-ent-folder amx-oficio">
+          {!final && (
             <div className="amx-oficio-membrete" aria-hidden="true">
               {/* En el teléfono el membrete se queda solo con lo que aporta: la
                   marca ya está en la cabecera del sitio y partida en dos
