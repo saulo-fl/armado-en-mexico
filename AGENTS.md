@@ -120,9 +120,17 @@ src/          app.jsx · admin.jsx          (puntos de entrada)
   styles/     estilo.css
 scripts/      build-prerender.mjs · copiar-estaticos.mjs · actualizar-readme.mjs
               cotejo|vitrina|arsenal-hub|filtros|faq.test.mjs · dcam/ · sql/schema.sql
-docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md
+              tokens-dtcg.mjs (+ tokens.test.mjs) · capturas-movil.mjs   ← Penpot
+docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md · PENPOT.md
+              penpot/tokens.json (generado desde estilo.css) · capturas/movil/ (360 px)
 out/          TODO lo generado. Gitignoreado. Es lo que publica Pages.
 ```
+
+**Penpot es espejo, no fuente (22-sep-2026).** El diseño vive en `estilo.css` / `ui.jsx` /
+`DESIGN.md`; el archivo «Wire Frame» de Penpot los consume por `docs/penpot/tokens.json`
+(`npm run tokens`, vigilado por `scripts/tokens.test.mjs`) y sirve para proponer lo nuevo,
+trabajar igual con cualquier agente y enseñar el sistema. Cómo conectar el MCP, el mapa
+del archivo, el ritual por sesión y las trampas de la Plugin API: `docs/PENPOT.md`.
 
 **Fuente estructurada, salida plana.** El build aplana: `src/styles/estilo.css`
 acaba en `out/estilo.css` y se sirve como `/estilo.css`. Se hizo así a propósito
