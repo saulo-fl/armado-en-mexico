@@ -417,7 +417,7 @@
             id: 'domicilio',
             texto: 'Protección al domicilio',
             aviso: {
-              texto: 'En esta modalidad el instructivo del formato solo autoriza un arma corta. Eso es criterio administrativo de la dependencia, no un tope de la ley: el artículo 15 reformado en 2025 ya no fija un número máximo de armas en el domicilio, y el artículo 83 Bis de la LFAFE castiga como acopio tener más de cinco armas de las permitidas sin el permiso correspondiente.',
+              texto: 'En esta modalidad el instructivo del formato solo autoriza un arma corta. Eso es criterio administrativo de la dependencia, no un tope de la ley: el artículo 15 reformado en 2025 ya no fija un número máximo de armas en el domicilio, y el artículo 83 Bis de la LFAFE establece que «<a href="https://www.diputados.gob.mx/LeyesBiblio/pdf/LFAFE.pdf" target="_blank" rel="noopener noreferrer">en el caso de las armas permitidas, la posesión de más de cinco de las comprendidas en los artículos 9o. y 10 de esta Ley sin el permiso correspondiente, se sancionará</a>».',
               remedio: 'Si quieres más de un arma en casa, pregunta en ventanilla cómo están aplicando ese criterio antes de llenar el formato. Los calibres sí los fija la ley: pistola hasta .380 y sus equivalentes, revólver hasta .38 Especial.',
               fundamento: 'Instructivo del formato DEFENSA-02-040 Civiles 2026, puntos 3 y 5, contrastado con la LFAFE arts. 15, 9o fracciones I y II (reformados DOF 29-05-2025) y 83 Bis. Donde no coinciden, manda la ley.',
             },

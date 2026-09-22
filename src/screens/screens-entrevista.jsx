@@ -426,7 +426,7 @@ function EntrevistaCuerpo({ modoPortada = false }) {
       {d.impedimento && d.impedimento.nota && <p className="amx-ent-nota">{d.impedimento.nota}</p>}
       {d.avisos && d.avisos.length > 0 && (
         <ul className="amx-ent-avisos">
-          {d.avisos.map(function (a, i) { return <li key={i}>{a.texto}</li>; })}
+          {d.avisos.map(function (a, i) { return <li key={i} dangerouslySetInnerHTML={{__html: a.texto}}></li>; })}
         </ul>
       )}
       <h2>Documentos que te corresponden</h2>
