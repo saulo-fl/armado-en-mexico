@@ -7,11 +7,21 @@ import { fileURLToPath } from 'node:url';
 const cssPath = fileURLToPath(new URL('../src/styles/estilo.css', import.meta.url));
 const css = readFileSync(cssPath, 'utf8');
 
-test('Accesorios y Calibres declaran la misma superficie de mesa', () => {
+test('las baldas de Accesorios conservan su superficie de mesa', () => {
   assert.match(css, /\.amx-mesa-fila\s*\{[\s\S]*?--mesa-superficie:\s*var\(--mesa-madera\)/);
-  assert.match(css, /\.amx-mostrador\s*\{[\s\S]*?--mesa-superficie:\s*var\(--mesa-madera\)/);
   assert.match(css, /\.amx-mesa-fila::after\s*\{[\s\S]*?background:\s*var\(--mesa-superficie\)/);
-  assert.match(css, /\.amx-mostrador \.amx-repisa-carril\s*\{[\s\S]*?background:\s*var\(--mesa-superficie\)/);
+});
+
+test('el mostrador de calibres NO lleva tabla: solo pared, cartuchos y etiquetas', () => {
+  // Se desliza mucho, y la madera corriendo por delante de los cartuchos
+  // mareaba. El anaquel ya pone la pared detrás, que es todo el suelo que
+  // necesitan. La mesa se queda donde sí sostiene algo: las baldas.
+  const mostrador = css.match(/\.amx-v2 \.amx-mostrador \{[^}]*\}/);
+  assert.ok(mostrador, 'no encuentro la regla del mostrador');
+  assert.doesNotMatch(mostrador[0], /--mesa-superficie/,
+    'el mostrador no debe declarar superficie de mesa');
+  assert.doesNotMatch(css, /\.amx-mostrador \.amx-repisa-carril\s*\{[^}]*background:\s*var\(--mesa-superficie\)/,
+    'el carril del mostrador no debe pintar la tabla');
 });
 
 test('ninguna repisa se queda sin su pared', () => {
