@@ -257,11 +257,20 @@ test('las carpetas del hub llevan a pantallas que existen y están ruteadas', ()
   const src = readFileSync(raiz('src/screens/screens-legalidad.jsx'), 'utf8');
   const claves = [...src.matchAll(/clave:\s*'([^']+)'/g)].map((m) => m[1]);
   assert.ok(claves.length >= 4, 'se esperaban al menos cuatro carpetas, hay ' + claves.length);
+  const bloque = app.match(/const SCREEN_TO_PATH = \{[\s\S]*?\n\};/);
+  assert.ok(bloque, 'no encuentro SCREEN_TO_PATH en app.jsx');
+  const mapa = bloque[0];
   for (const c of claves) {
     assert.match(app, new RegExp("screen === '" + c + "'"),
       'la carpeta «' + c + '» navega a una pantalla que el router no monta: el botón no haría nada');
-    assert.ok(app.includes("'" + c + "':") || new RegExp("\b" + c.replace(/-/g, '\-') + "\s*:").test(app),
-      'la carpeta «' + c + '» no tiene ruta en SCREEN_TO_PATH');
+    // Se busca DENTRO de SCREEN_TO_PATH, no en todo app.jsx: la misma clave
+    // aparece en los mapas de rótulos y de pestaña, así que buscarla en el
+    // archivo entero daba por buena una ruta que no existía (comprobado
+    // borrándola: el test seguía pasando). La clave va entrecomillada o
+    // desnuda, y los escapes van dobles al construir la expresión desde
+    // cadena: `"\b"` es el carácter de retroceso, no el límite de palabra.
+    const enMapa = new RegExp("[{,]\\s*'?" + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'?\\s*:");
+    assert.ok(enMapa.test(mapa), 'la carpeta «' + c + '» no tiene ruta en SCREEN_TO_PATH');
   }
 });
 
