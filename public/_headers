@@ -86,6 +86,20 @@
   Cache-Control: public, max-age=0, must-revalidate
 /data-municiones.js
   Cache-Control: public, max-age=0, must-revalidate
+/data-legal.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-entrevista.js
+  Cache-Control: public, max-age=0, must-revalidate
+/legal.js
+  Cache-Control: public, max-age=0, must-revalidate
+/entrevista.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-legalidad.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-entrevista.js
+  Cache-Control: public, max-age=0, must-revalidate
+/mapa-tramite.js
+  Cache-Control: public, max-age=0, must-revalidate
 
 # ── Assets inmutables bajo su nombre: caché larga ────────────────────────────
 /imagenes/*

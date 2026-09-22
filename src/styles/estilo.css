@@ -6000,3 +6000,1196 @@
   outline: 2px solid var(--acento);
   outline-offset: 2px;
 }
+
+/* ── CITA DE FUENTE Y AVISO DE TRANSPARENCIA ─── */
+
+.amx-v2 .amx-cita {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.amx-v2 .amx-cita a {
+  color: var(--ficha-tinta);
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-cita a:hover {
+  text-decoration: none;
+}
+.amx-v2 .amx-cita a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-aviso {
+  position: relative;
+  margin: 18px 0;
+}
+.amx-v2 .amx-aviso-tit {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-aviso-texto {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin-top: 8px;
+}
+
+/* ── CITA DE FUENTE Y AVISO DE TRANSPARENCIA ─────────────────────────────────
+   Las dos viven SOBRE PAPEL, asi que aqui no entra ninguna variable de tema
+   (--bg, --text, --border y sus gemelas --d-*): en modo oscuro dejarian tinta
+   clara sobre papel claro. Solo tokens de papeleria. Es la regla §5.5.
+
+   La cita es el mecanismo por el que §14 —«fuente + fecha de actualizacion
+   visibles»— deja de depender de la disciplina de quien escribe: se usa unas
+   60 veces y es la unica forma de rotular una afirmacion normativa.
+   ────────────────────────────────────────────────────────────────────────── */
+.amx-v2 .amx-cita {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
+  margin: 10px 0 0;
+}
+.amx-v2 .amx-cita a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-cita a:hover { text-decoration: none; }
+.amx-v2 .amx-cita a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+
+.amx-v2 .amx-aviso {
+  position: relative;
+  margin: 18px 0;
+}
+.amx-v2 .amx-aviso-tit {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-aviso-texto {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 8px 0 0;
+}
+
+/* ── LEGALIDAD, REQUISITOS Y LA ENTREVISTA ──────────────────────────── */
+
+/* Pantallas de Legalidad */
+.amx-v2 .amx-leg {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 0 16px 90px;
+}
+.amx-v2 .amx-leg-eyebrow {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-leg-intro {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--tinta);
+}
+.amx-v2 .amx-leg-advertencia {
+  font-family: var(--mono);
+  font-size: 13.5px;
+  color: var(--tinta-dim);
+  border-left: 3px solid var(--sello-restr);
+  padding-left: 12px;
+  margin: 16px 0;
+}
+.amx-v2 .amx-leg-fecha {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--tinta-2);
+}
+.amx-v2 .amx-leg-carpetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+.amx-v2 .amx-leg-carpeta {
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  text-align: left;
+  padding: 14px;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-carpeta:hover {
+  background: var(--ficha);
+}
+.amx-v2 .amx-leg-carpeta:focus-visible {
+  outline: 2px solid var(--carton-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-carpeta-tit {
+  display: block;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--carton-tinta);
+}
+.amx-v2 .amx-leg-carpeta-desc {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--carton-tinta);
+  margin-top: 4px;
+}
+.amx-v2 .amx-leg-huecos {
+  background: var(--oficio-2);
+  padding: 14px;
+  margin: 22px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-huecos p {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 8px 0 0;
+}
+.amx-v2 .amx-leg-huecos h2 {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-huecos ul {
+  padding-left: 18px;
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-huecos li {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--oficio-tinta-2);
+  margin-bottom: 8px;
+}
+.amx-v2 .amx-leg-hoja {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 18px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-hoja h2 {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin-top: 0;
+}
+.amx-v2 .amx-leg-dependencia {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-leg-habilita {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-checklist {
+  list-style: none;
+  padding: 0;
+}
+.amx-v2 .amx-leg-checklist li {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-casilla {
+  font-family: var(--mono);
+  font-size: 16px;
+  color: var(--ficha-tinta-2);
+  margin-right: 8px;
+}
+.amx-v2 .amx-leg-req-nombre {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-sello {
+  display: inline;
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--sello-restr);
+  border: 1px solid var(--sello-restr);
+  padding: 1px 5px;
+  margin-left: 8px;
+}
+.amx-v2 .amx-leg-copia {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ficha-tinta-2);
+  margin-left: 8px;
+}
+.amx-v2 .amx-leg-detalle {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  margin-top: 6px;
+}
+.amx-v2 .amx-leg-vigencia {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  margin-top: 6px;
+}
+.amx-v2 .amx-leg-variantes {
+  margin-top: 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-variantes dt {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-leg-variantes dd {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-autoridad {
+  display: block;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ficha-tinta-2);
+  margin-top: 3px;
+}
+
+/* La entrevista */
+.amx-v2 .amx-ent {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 0 16px calc(var(--amx-nav-h, 0px) + 32px);
+}
+.amx-v2 .amx-ent-mesa {
+  display: block;
+}
+.amx-v2 .amx-ent-folder {
+  background: var(--oficio);
+  padding: 16px;
+  color: var(--ficha-tinta);
+  box-shadow: var(--sombra);
+  max-width: 624px;
+  margin-inline: auto;
+}
+.amx-v2 .amx-ent-recorrido {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.amx-v2 .amx-ent-paso {
+  min-height: 44px;
+  background: var(--ficha);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--ficha-tinta);
+  padding: 0 10px;
+  cursor: pointer;
+  min-width: 44px;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+}
+.amx-v2 .amx-ent-paso:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-pregunta {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+/* El enunciado conserva tres renglones de alto, pero apoya el texto abajo.
+   Así la primera respuesta no salta entre preguntas ni queda separada de una
+   pregunta corta por el espacio reservado. */
+.amx-v2 .amx-ent-pregunta legend {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  min-height: calc(18px * 1.35 * 3);
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ficha-tinta);
+}
+/* En la portada, la pregunta y sus dos botones comparten fila. El `legend` no
+   entra en el flujo flex del `fieldset` por sí solo —el navegador lo saca—, así
+   que se le devuelve con `float: left`, que sí respeta. Cabe porque el «No»
+   usa ahí su texto corto: con «No, nací en el extranjero» (192 px) no cabía. */
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta { overflow: hidden; }
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta-enunciado {
+  float: left;
+  width: auto;
+  max-width: 64%;
+  margin-inline-end: 12px;
+  line-height: 44px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones--compacta { overflow: hidden; }
+
+.amx-v2 .amx-ent-pregunta legend[data-largo="medio"] { font-size: 17px; }
+.amx-v2 .amx-ent-pregunta legend[data-largo="mucho"] { font-size: 15.5px; }
+.amx-v2 .amx-ent-ayuda {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  margin: 8px 0 12px;
+}
+.amx-v2 .amx-ent-opcion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 6px;
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-opcion:hover {
+  background: var(--oficio-2);
+}
+.amx-v2 .amx-ent-opcion input:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-continuar {
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 0 18px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--carton-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-ent-continuar:focus-visible {
+  outline: 2px solid var(--carton-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-pregunta:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-ent-continuar[disabled] {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.amx-v2 .amx-ent-dictamen {
+  padding: 0 0 18px;
+  position: relative;
+  text-align: center;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-sello {
+  font-family: var(--mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .18em;
+  padding: 6px 10px;
+  display: inline-block;
+  transform: rotate(-4deg);
+}
+.amx-v2 .amx-ent-dictamen[data-tipo="reune-requisitos"] .amx-ent-sello {
+  color: var(--sello-civil);
+  border: 2px solid var(--sello-civil);
+}
+.amx-v2 .amx-ent-dictamen[data-tipo="falta-requisito"] .amx-ent-sello,
+.amx-v2 .amx-ent-dictamen[data-tipo="no-procede"] .amx-ent-sello {
+  color: var(--sello-restr);
+  border: 2px solid var(--sello-restr);
+}
+.amx-v2 .amx-ent-dictamen h2 {
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-motivo {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  text-align: left;
+}
+.amx-v2 .amx-ent-remedio {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  text-align: left;
+  background: var(--oficio-2);
+  padding: 12px;
+}
+.amx-v2 .amx-ent-nota {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ficha-tinta-2);
+  text-align: left;
+}
+.amx-v2 .amx-ent-avisos {
+  text-align: left;
+  padding-left: 18px;
+}
+.amx-v2 .amx-ent-avisos li {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ficha-tinta);
+  margin-bottom: 6px;
+}
+
+/* Bloque de portada */
+.amx-v2 .amx-hent {
+  background: var(--oficio);
+  padding: 18px;
+  margin: 16px auto;
+  max-width: 900px;
+  min-height: 260px;
+  box-sizing: border-box;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-hent-tit {
+  font-family: var(--sans);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  line-height: 1.3;
+}
+.amx-v2 .amx-hent-promesa {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-hent-caja {
+  background: var(--ficha);
+  padding: 14px;
+  margin-top: 12px;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-hent-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-hent-preg {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ficha-tinta);
+  margin: 6px 0 12px;
+}
+.amx-v2 .amx-hent-opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.amx-v2 .amx-hent-boton {
+  min-height: 44px;
+  padding: 0 20px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--carton-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-hent-boton:focus-visible {
+  outline: 2px solid var(--carton-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-hent-pie {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
+  margin-top: 12px;
+}
+
+/* Entrevista: mesa fija, pregunta y escritorio de documentos */
+.amx-v2 .amx-solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.amx-v2 .amx-ent-cuerpo {
+  margin-top: 14px;
+  /* Un respiro cuando la primera respuesta trae aquí el scroll. */
+  scroll-margin-top: 10px;
+}
+.amx-v2 .amx-ent-folder {
+  overflow: hidden;
+}
+.amx-v2 .amx-ent-pregunta {
+  background: transparent;
+  padding: 0;
+}
+.amx-v2 .amx-ent-num {
+  margin: 0 0 7px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-ent-pregunta legend {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 18px;
+  line-height: 1.35;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-opciones {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+}
+/* Modo portada (HOME, sin respuestas aún): preguntas en línea horizontal,
+   botones cortos a la derecha. No apilados, no a todo el ancho. */
+.amx-v2 .amx-ent-opciones--compacta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.amx-v2 .amx-ent-opciones--compacta .amx-ent-opcion {
+  width: auto;
+  flex: 0 0 auto;
+}
+.amx-v2 button.amx-ent-opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 16px;
+  border: 0;
+  background: var(--ficha);
+  color: var(--ficha-tinta);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(23, 27, 25, .15);
+  border-radius: 0 8px 0 0;
+}
+.amx-v2 button.amx-ent-opcion::after {
+  content: '';
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+}
+.amx-v2 button.amx-ent-opcion:hover {
+  background: var(--oficio-2);
+}
+.amx-v2 button.amx-ent-opcion:focus-visible,
+.amx-v2 .amx-ent-regresar:focus-visible,
+.amx-v2 .amx-ent-guardar:focus-visible,
+.amx-v2 .amx-ent-dictamen:focus-visible {
+  outline: 3px solid var(--manila-tinta);
+  outline-offset: -3px;
+}
+.amx-v2 .amx-ent-pregunta--entra {
+  animation: amx-ent-pregunta-entra 220ms ease-out both;
+}
+.amx-v2 .amx-ent-pregunta--sale {
+  animation: amx-ent-pregunta-sale 180ms ease-in both;
+}
+@keyframes amx-ent-pregunta-entra {
+  from { opacity: 0; transform: translateX(42px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes amx-ent-pregunta-sale {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(-42px); }
+}
+/* La mesa de verdad: la misma madera del puesto de munición y la vitrina.
+   `--mesa-madera` ya trae la tabla arriba y la tira del canto abajo (el rect
+   del canto vive en el SVG), igual que en `.amx-repisa-carril::before`. Es un
+   objeto de la escena, no una superficie del tema: no lleva variante `--d-`
+   y no cambia en oscuro. La sombra interior arriba es lo que deja ver que los
+   papeles están apoyados, no flotando. */
+.amx-v2 .amx-ent-escritorio {
+  position: relative;
+  /* La madera sangra a los lados, pero NO contra la pregunta: va encima de
+     ella y el texto pegado al borde oscuro se lee mal. */
+  margin: 0 -16px 22px;
+  padding: 12px 16px 16px;
+  overflow: hidden;
+  background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
+  border-top: 6px solid var(--oficio-2);
+  box-shadow: inset 0 8px 12px -8px rgba(23, 27, 25, .5);
+}
+/* La superficie de la mesa a escala, 358 × 280. Los papeles (78 × 100) se
+   colocan en % del ancho y la altura se sostiene con la misma relación de
+   aspecto, así que cada plaza cae donde está en el boceto a cualquier tamaño.
+   Que se solapen es la intención: es una mesa con papeles, no una cuadrícula. */
+/* La mesa NO tiene alto fijo: lo pone `--amx-mesa-alto` según cuántos documentos
+   hay encima, para que nunca se vea medio vacía. Con cuatro papeles pequeños
+   sobre una mesa de 280 px quedaba media madera desnuda (Saulo, 20-sep-2026). */
+.amx-v2 .amx-ent-pila {
+  position: relative;
+  /* Altura fija: la mesa no cambia de tamaño al agregar/quitar documentos.
+     Los papeles escalan proporcionalmente dentro del mismo contenedor.
+     `--amx-mesa-rel` se ignora aquí; la mesa siempre mide lo mismo. */
+  aspect-ratio: 358 / 300;
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+}
+/* Un papel de 78 × 100 sobre la mesa de 358 × 280. La plaza le viene por
+   variables desde ui.jsx: `--amx-plaza-x` es `x / 78 · 100 %` del propio ancho
+   del papel (21.7877 % de la mesa) y `--amx-plaza-y` es `y %` de su propia
+   altura — ambos exactos a cualquier tamaño. El cambio de plaza anima solo la
+   transición de `transform`, sin tocar el layout. */
+.amx-v2 .amx-ent-papel {
+  position: absolute;
+  /* La plaza va en `left`/`top` —% de la MESA— y no en `translate`, que sería %
+     del propio papel: al crecer el papel, las plazas habrían crecido con él y
+     las de los bordes se habrían salido. El `min()` sujeta el papel contra el
+     borde cuando es grande, en lugar de dejarlo asomar fuera de la madera. */
+  left: min(var(--amx-plaza-x), calc(100% - var(--amx-ancho-papel, 21.7877%)));
+  top: min(var(--amx-plaza-y), calc(100% - var(--amx-alto-papel, 36%)));
+  z-index: calc(var(--amx-papel-i) + 1);
+  width: var(--amx-ancho-papel, 21.7877%);
+  aspect-ratio: 78 / 100;
+  transform: rotate(var(--amx-plaza-r));
+  transform-origin: 50% 85%;
+  /* Sin nombre a proposito: la enciende `.amx-ent-papel-revelado` cuando el
+     documento se gana. Declararla aqui con nombre la disparaba al MONTAR la
+     pagina, con el papel todavia invisible; para cuando se revelaba ya habia
+     terminado, y como la clase repite el mismo `animation-name`, el navegador
+     no la reinicia. Se veia solo la transicion de opacidad: el documento
+     apareciendo en su sitio en vez de subir desde abajo. */
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(.2,.75,.25,1);
+  animation-fill-mode: backwards;
+  animation-delay: calc(var(--amx-papel-i) * 24ms);
+  transition: transform 420ms cubic-bezier(.2,.75,.25,1),
+              left 420ms cubic-bezier(.2,.75,.25,1),
+              top 420ms cubic-bezier(.2,.75,.25,1),
+              opacity 420ms cubic-bezier(.2,.75,.25,1);
+  filter: drop-shadow(0 5px 5px rgba(23, 27, 25, .2));
+}
+.amx-v2 .amx-ent-papel img,
+.amx-v2 .amx-ent-papel-fallback {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.amx-v2 .amx-ent-papel-fallback {
+  box-sizing: border-box;
+  padding: 22px;
+  background: var(--oficio);
+  border: 1px solid var(--carton-filo);
+  color: var(--ficha-tinta);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
+.amx-v2 .amx-ent-papel-fallback::before {
+  content: '';
+  display: block;
+  width: 48%;
+  margin: 0 auto 20px;
+  border-top: 2px solid var(--ficha-tinta-2);
+  box-shadow: 0 8px 0 var(--carton-filo), 0 16px 0 var(--carton-filo);
+}
+/* La entrada: el papel sube desde abajo hasta su plaza. Viene de abajo porque
+   la mesa quedó ARRIBA de las preguntas: así el documento parece salir de la
+   respuesta que se acaba de tocar. Solo `from`: el `to` es el valor
+   base (la plaza, con su giro). `backwards` y no `both`: durante el delay el
+   papel ya está en el punto de partida, y al terminar la animación deja de
+   ocupar el transform y manda el valor base, que es el que recorre el cambio
+   de plaza con `transition`. Con `forwards` la animación terminada clavaría
+   el transform y el traslado no se vería. */
+@keyframes amx-ent-papel-entra {
+  from { opacity: 0; transform: translate(var(--amx-plaza-x), calc(var(--amx-plaza-y) + 210%)) rotate(0); }
+}
+/* Solo anima la primera vez que se revela; después solo usa la transición CSS */
+.amx-v2 .amx-ent-papel.amx-ent-papel-revelado {
+  animation-name: amx-ent-papel-entra;
+}
+.amx-v2 .amx-ent-acciones {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+.amx-v2 .amx-ent-regresar,
+.amx-v2 .amx-ent-guardar {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--carton-filo);
+  background: transparent;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.amx-v2 .amx-ent-regresar {
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-ent-guardar {
+  color: var(--carton-tinta);
+  background: var(--carton-alto);
+}
+.amx-v2 .amx-ent-regresar:disabled,
+.amx-v2 .amx-ent-guardar:disabled {
+  opacity: 1;
+  color: var(--oficio-tinta-2);
+  background: var(--oficio-2);
+  cursor: not-allowed;
+}
+.amx-v2 .amx-ent-documentos-finales {
+  padding-left: 20px;
+  text-align: left;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-pie-dictamen {
+  margin: 18px 0 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-mesa {
+  display: block;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-folder {
+  padding: 0;
+  background: transparent;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-acciones {
+  display: none;
+}
+/* En modo compacto: pregunta y botones en la misma fila, sin reserva de altura. */
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px 14px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta legend {
+  min-height: 0;
+  flex: 0 1 auto;
+  margin: 0;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones {
+  flex: 0 0 auto;
+  gap: 8px;
+}
+@media (max-width: 600px) {
+  /* La portada sin respuestas todavía no es una mesa: es una sola línea, así
+     que no reserva alto ni márgenes laterales de sección. */
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) {
+    min-height: 0;
+    padding: 12px 0;
+  }
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) .amx-hent-tit {
+    padding-inline: 8px;
+  }
+  /* Contestada la primera pregunta el título se retira: la pregunta sube y la
+     mesa con los documentos entra en pantalla, que es lo que hay que ver a
+     partir de ahí. Vuelve si se regresa al principio de la entrevista.
+     Sigue estando para los lectores de pantalla: la sección se nombra por él. */
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo:not(.amx-ent-cuerpo--compacto)) .amx-hent-tit {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .amx-v2 .amx-hent:has(.amx-ent-cuerpo:not(.amx-ent-cuerpo--compacto)) .amx-ent-cuerpo {
+    margin-top: 0;
+  }
+  /* En el teléfono no se reservan los tres renglones del enunciado: dejaban
+     70 px de hueco sobre cada pregunta corta —media tarjeta vacía— a cambio de
+     que las respuestas no saltaran. En una pantalla de 390 px pesa mas el
+     hueco. En tableta y escritorio la reserva se queda. */
+  .amx-v2 .amx-ent-pregunta legend {
+    min-height: 0;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
+    gap: 10px;
+    padding: 0 8px 8px;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta legend {
+    font-size: 16px;
+    line-height: 40px;
+  }
+  .amx-v2 .amx-ent-opciones--compacta {
+    gap: 6px;
+  }
+  .amx-v2 .amx-ent-opciones--compacta .amx-ent-opcion {
+    min-height: 40px;
+    padding: 8px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-leg-carpeta,
+  .amx-v2 .amx-ent-opcion,
+  .amx-v2 .amx-ent-pregunta,
+  .amx-v2 .amx-ent-pila,
+  .amx-v2 .amx-ent-papel {
+    transition: none;
+    animation: none;
+  }
+  /* La plaza ya viene de left/top; no se traslada una segunda vez. */
+  .amx-v2 .amx-ent-papel {
+    transform: none;
+  }
+}
+
+/* ── FEDERAL, ESTATAL Y PERMISOS ────────────────────────────────────── */
+
+.amx-v2 .amx-leg-escalera {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0;
+}
+.amx-v2 .amx-leg-peldano {
+  background: var(--oficio);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  border-left: 3px solid var(--carton-filo);
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-peldano h2 {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-peldano-tit {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-hueco {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--oficio-tinta-2);
+  background: var(--oficio-2);
+  padding: 10px 12px;
+  margin-top: 8px;
+  border-left: 3px solid var(--sello-restr);
+}
+.amx-v2 .amx-leg-arts {
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-arts summary {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.amx-v2 .amx-leg-arts summary:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-selector {
+  display: block;
+  margin: 18px 0;
+}
+.amx-v2 .amx-leg-selector span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--manila-tinta);
+  margin-bottom: 6px;
+}
+.amx-v2 .amx-leg-selector select {
+  display: block;
+  min-height: 44px;
+  width: 100%;
+  max-width: 420px;
+  padding: 0 10px;
+  font-family: var(--sans);
+  font-size: 15.5px;
+  background: var(--ficha);
+  color: var(--ficha-tinta);
+  border: 1px solid var(--carton-filo);
+}
+.amx-v2 .amx-leg-selector select:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-estado {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 16px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-estado dt {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  margin-top: 12px;
+}
+.amx-v2 .amx-leg-estado dd {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 4px 0 0;
+}
+.amx-v2 .amx-leg-estado a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.amx-v2 .amx-leg-estado a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+.amx-v2 .amx-leg-contraste {
+  background: var(--ficha);
+  padding: 16px;
+  margin: 18px 0;
+  border-left: 3px solid var(--sello-civil);
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-contraste h2 {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0 0 8px;
+}
+.amx-v2 .amx-leg-contraste p {
+  font-family: var(--sans);
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-ficha {
+  background: var(--oficio);
+  padding: 16px;
+  margin: 14px 0;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-ficha h2 {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ficha-tinta);
+  margin: 0;
+}
+.amx-v2 .amx-leg-ficha dt {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  margin-top: 10px;
+}
+.amx-v2 .amx-leg-ficha dd {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 4px 0 0;
+}
+.amx-v2 .amx-leg-homoclave {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .06em;
+  color: var(--ficha-tinta-2);
+  margin: 2px 0 8px;
+}
+.amx-v2 .amx-leg-no-habilita {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--oficio-tinta-2);
+  border-left: 3px solid var(--sello-restr);
+  padding-left: 10px;
+  margin-top: 6px;
+}
+
+/* ── MAPA DEL TRÁMITE ─────────────────────────────────────────────────────────
+   El SVG que genera Archify llega sin un solo color ni fuente literal: todo va
+   por estas 34 clases. Eso es lo que permite vestirlo con la papelería del
+   sitio y que siga al tema, en vez de traer su propia paleta.
+
+   Como todo lo que vive sobre papel (§5.5), aquí NO entra ninguna variable de
+   tema: solo tokens de papelería.
+   ────────────────────────────────────────────────────────────────────────── */
+.amx-v2 .amx-mapa {
+  margin: 22px 0;
+  padding: 0;
+  overflow-x: auto;          /* el diagrama es ancho; el resto de la página no scrollea */
+}
+.amx-v2 .amx-mapa-svg {
+  display: block;
+  width: 100%;
+  min-width: 720px;          /* por debajo de esto los rótulos dejan de leerse */
+  height: auto;
+}
+.amx-v2 .amx-mapa-pie {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--tinta-2);
+  margin-top: 10px;
+}
+
+/* Superficies: el lienzo es papel, los carriles el papel alterno, las cajas
+   fichas de fichero. La máscara tapa la línea que pasa bajo una etiqueta, así
+   que tiene que ser del mismo color que el papel. */
+.amx-v2 .amx-mapa .c-grid           { fill: none; stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .c-lane           { fill: var(--oficio-2); }
+.amx-v2 .amx-mapa .c-mask           { fill: var(--oficio); }
+.amx-v2 .amx-mapa .c-frontend,
+.amx-v2 .amx-mapa .c-cloud          { fill: var(--ficha); }
+.amx-v2 .amx-mapa .c-backend,
+.amx-v2 .amx-mapa .c-messagebus     { fill: var(--oficio-2); }
+.amx-v2 .amx-mapa .c-database       { fill: var(--carton-alto); }
+.amx-v2 .amx-mapa .c-security,
+.amx-v2 .amx-mapa .c-security-group { fill: var(--ficha); }
+
+/* Trazos: el filo del cartón para todo, y el sello rojo donde la norma cierra
+   una puerta —los antecedentes penales y lo que no autoriza el permiso—. */
+.amx-v2 .amx-mapa .s-frontend,
+.amx-v2 .amx-mapa .s-backend,
+.amx-v2 .amx-mapa .s-cloud,
+.amx-v2 .amx-mapa .s-database,
+.amx-v2 .amx-mapa .s-messagebus     { stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .s-security       { stroke: var(--sello-restr); }
+
+/* Tinta. */
+.amx-v2 .amx-mapa .t-primary,
+.amx-v2 .amx-mapa .t-frontend,
+.amx-v2 .amx-mapa .t-backend,
+.amx-v2 .amx-mapa .t-database,
+.amx-v2 .amx-mapa .t-messagebus     { fill: var(--ficha-tinta); }
+.amx-v2 .amx-mapa .t-dim,
+.amx-v2 .amx-mapa .t-muted          { fill: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .t-security       { fill: var(--sello-restr); }
+
+/* Aristas: el camino principal en verde de sello, lo que corta en rojo, y lo
+   que es «otro trámite» punteado y en tinta secundaria. */
+/* Las aristas son <path> y <line>. El `fill: none` NO es decorativo: sin el, el
+   navegador rellena la curva de la arista con negro y se come el diagrama. */
+.amx-v2 .amx-mapa .a-default,
+.amx-v2 .amx-mapa .a-emphasis,
+.amx-v2 .amx-mapa .a-security,
+.amx-v2 .amx-mapa .a-dashed,
+.amx-v2 .amx-mapa .semantic-sigil   { fill: none; }
+.amx-v2 .amx-mapa .a-default        { stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa .a-emphasis       { stroke: var(--sello-civil); }
+.amx-v2 .amx-mapa .a-security       { stroke: var(--sello-restr); }
+.amx-v2 .amx-mapa .a-dashed         { stroke: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .m-default        { fill: var(--carton-filo); }
+.amx-v2 .amx-mapa .m-emphasis       { fill: var(--sello-civil); }
+.amx-v2 .amx-mapa .m-security       { fill: var(--sello-restr); }
+.amx-v2 .amx-mapa .m-dashed         { fill: var(--ficha-tinta-2); }
+
+.amx-v2 .amx-mapa .semantic-sigil   { stroke: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .sigil-fill       { fill: var(--ficha-tinta-2); }
+
+.amx-v2 .amx-ent-reiniciar {
+  min-height: 44px;
+  margin-top: 16px;
+  padding: 0 18px;
+  background: var(--carton-alto);
+  border: 1px solid var(--carton-filo);
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--carton-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-ent-reiniciar:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}

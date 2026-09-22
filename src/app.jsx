@@ -25,6 +25,9 @@ const SCREEN_TO_PATH = {
   home: '', catalog: 'arsenal', accesorios: 'accesorios',
   calibres: 'calibres', campos: 'campos', experiencias: 'experiencias',
   compare: 'comparar', legal: 'legalidad', about: 'acerca',
+  'legal-req': 'legalidad/requisitos', entrevista: 'legalidad/puedo-comprar',
+  'legal-federal': 'legalidad/federal', 'legal-estatal': 'legalidad/estatal',
+  'legal-permisos': 'legalidad/permisos',
   faq: 'preguntas', menu: 'mas', traumaticas: 'traumaticas',
   soporte: 'soporte',
   municiones: 'municiones',
@@ -159,6 +162,14 @@ function amxParsePath(pathname) {
       ? { mode: 'sucursal', value: SIGLA }
       : { mode: 'all' } });
   }
+  // Las ramas de Legalidad: /legalidad/requisitos y /legalidad/puedo-comprar.
+  // Van ANTES de la búsqueda de un solo segmento porque esa exige `seg.length === 1`
+  // y estas son de dos; y antes del fallback de accesorios, que si no se las tragaría.
+  // Una rama desconocida cae en el hub de Legalidad, nunca en la portada: quien llega
+  // con un enlace viejo aterriza en la sección que buscaba.
+  if (seg[0] === SCREEN_TO_PATH.legal && seg[1]) {
+    return Object.assign({}, VACIO, { screen: PATH_TO_SCREEN[seg[0] + '/' + seg[1]] || 'legal' });
+  }
   // Pantallas con nombre propio (/arsenal, /calibres…) y el listado de municiones
   if (seg.length === 1 && PATH_TO_SCREEN[seg[0]]) {
     return Object.assign({}, VACIO, { screen: PATH_TO_SCREEN[seg[0]] });
@@ -251,7 +262,7 @@ function App() {
     if (skipPush.current) { skipPush.current = false; return; }
     // Basta comparar la dirección que toca con la que hay. Al depender también
     // del filtro, /arsenal y /pistolas son direcciones distintas.
-    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter, compareIds, calibreId);
+    const url = amxBuildUrl(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds);
     if (window.location.pathname === url) return;
     try {
       window.history[reemplazar ? 'replaceState' : 'pushState']({ screen, productId, accesorioId, municionId, calibreId }, '', url);
@@ -282,7 +293,7 @@ function App() {
       // eso mismo skipPush vuelve a false, o se tragaría el siguiente pushState.
       if (s.screen === 'compare') {
         skipPush.current = false;
-        const url = amxBuildUrl('compare', null, null, null, null, idsVivos.current);
+        const url = amxBuildUrl('compare', null, null, null, null, null, idsVivos.current);
         if (window.location.pathname !== url) {
           try { window.history.replaceState(window.history.state, '', url); } catch (e) {}
         }
@@ -453,15 +464,19 @@ function App() {
     accesorios: 'Accesorios', accesorio: 'Ficha',
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
+    'legal-req': 'Requisitos', entrevista: '¿Puedo comprar un arma?',
+    'legal-federal': 'Marco federal', 'legal-estatal': 'Por estado', 'legal-permisos': 'Permisos',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
     calibres: 'Calibres', calibre: 'Calibre', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas', 'legal-req', 'entrevista', 'legal-federal', 'legal-estatal', 'legal-permisos'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
-    legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
+    legal: 'legal', 'legal-req': 'legal', entrevista: 'legal',
+    'legal-federal': 'legal', 'legal-estatal': 'legal', 'legal-permisos': 'legal',
+    menu: 'menu', about: 'about', faq: 'faq',
     calibres: 'menu', calibre: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
     soporte: 'menu',
     municiones: 'menu', municion: 'menu',
@@ -498,7 +513,17 @@ function App() {
       buscarLado={buscarLado}
       onBuscar={setBuscarLado} />;
   } else if (screen === 'legal') {
-    content = <window.LegalScreen onNav={navigate} />;
+    content = <window.LegalidadHub onNav={navigate} />;
+  } else if (screen === 'legal-req') {
+    content = <window.LegalidadRequisitos onNav={navigate} />;
+  } else if (screen === 'legal-federal') {
+    content = <window.LegalidadFederal onNav={navigate} />;
+  } else if (screen === 'legal-estatal') {
+    content = <window.LegalidadEstatal onNav={navigate} />;
+  } else if (screen === 'legal-permisos') {
+    content = <window.LegalidadPermisos onNav={navigate} />;
+  } else if (screen === 'entrevista') {
+    content = <window.EntrevistaScreen onNav={navigate} />;
   } else if (screen === 'about') {
     content = <window.AboutScreen />;
   } else if (screen === 'faq') {

@@ -152,6 +152,8 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           a la izquierda y la copia a la derecha. El rótulo «ARMA DESTACADA» que
           iba suelto sobre el lienzo ahora es la pestaña del folder, que es
           donde se rotula un expediente. */}
+      {window.HomeEntrevistaBloque &&
+        <window.HomeEntrevistaBloque onNav={onNav} />}
       {destacadas.length > 0 &&
       <div style={{ ...containerMax, padding: `16px ${PAD}px 4px` }}>
         <div className="amx-dest-lista">
@@ -795,3 +797,19 @@ function ArsenalHubScreen({ onNav = () => {} }) {
   );
 }
 window.ArsenalHubScreen = ArsenalHubScreen;
+
+// ════════════════════════════════════════════════════════════════
+// HOME — Bloque de entrevista en la portada
+// ════════════════════════════════════════════════════════════════
+function HomeEntrevistaBloque() {
+  const A = window.AMX_ENTREVISTA;
+  if (!A || !A.preguntas || !A.preguntas.length) return null;
+
+  return (
+    <section className="amx-hent" aria-labelledby="hent-tit">
+      <h2 id="hent-tit" className="amx-hent-tit">Contesta unas preguntas y conoce si cumples los requisitos</h2>
+      <window.EntrevistaCuerpo modoPortada />
+    </section>
+  );
+}
+window.HomeEntrevistaBloque = HomeEntrevistaBloque;

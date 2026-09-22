@@ -681,14 +681,13 @@ window.ArmaForm = ArmaForm;
 // PAGES — editor de páginas Legal / FAQ / About
 // ════════════════════════════════════════════════════════════════
 function PagesTab() {
-  const [sub, setSub] = useState('legal');
+  const [sub, setSub] = useState('faq');
   return (
     <div>
       <SectionHead title="Páginas" sub="Editar contenido visible al usuario en la app pública" />
 
       <div style={{ display: 'flex', gap: 0, marginBottom: 18, borderBottom: `1px solid ${P.border}` }}>
         {[
-          { id: 'legal', label: 'Legalidad' },
           { id: 'faq',   label: 'FAQ' },
           { id: 'about', label: 'Acerca' },
         ].map(t => (
@@ -704,47 +703,12 @@ function PagesTab() {
         ))}
       </div>
 
-      {sub === 'legal' && <LegalEditor />}
       {sub === 'faq'   && <FAQEditor />}
       {sub === 'about' && <AboutEditor />}
     </div>
   );
 }
 window.PagesTab = PagesTab;
-
-function LegalEditor() {
-  const [v, setV] = useState(window.Store.getPages().legal);
-  const set = (k, val) => setV(prev => ({ ...prev, [k]: val }));
-  const save = () => { window.Store.updatePage('legal', v); alert('✓ Página legal guardada.'); };
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-      <FormField label="Eyebrow"><input value={v.eyebrow} onChange={(e) => set('eyebrow', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Título"><input value={v.title} onChange={(e) => set('title', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Introducción" span="2"><textarea value={v.intro} onChange={(e) => set('intro', e.target.value)} style={taStyle()} rows={3} /></FormField>
-
-      <FormField label="Requisitos SEDENA (uno por línea)" span="2">
-        <textarea value={v.requisitos.join('\n')} onChange={(e) => set('requisitos', e.target.value.split('\n'))} style={taStyle()} rows={7} />
-      </FormField>
-
-      <FormField label="Pasos DCAM (formato: TÍTULO | descripción, uno por línea)" span="2">
-        <textarea value={v.pasos.map(p => p.t + ' | ' + p.d).join('\n')}
-          onChange={(e) => set('pasos', e.target.value.split('\n').map(l => {
-            const [t, ...d] = l.split('|');
-            return { t: (t||'').trim(), d: d.join('|').trim() };
-          }))}
-          style={taStyle()} rows={6} />
-      </FormField>
-
-      <FormField label="WhatsApp (con código país)"><input value={v.whatsapp_phone} onChange={(e) => set('whatsapp_phone', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Mensaje predefinido"><input value={v.whatsapp_msg} onChange={(e) => set('whatsapp_msg', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Pitch de la asesoría" span="2"><textarea value={v.whatsapp_pitch} onChange={(e) => set('whatsapp_pitch', e.target.value)} style={taStyle()} rows={3} /></FormField>
-
-      <div style={{ gridColumn: '1/-1', textAlign: 'right' }}>
-        <button onClick={save} style={btnPrimary}>💾 Guardar página Legal</button>
-      </div>
-    </div>
-  );
-}
 
 function FAQEditor() {
   const [items, setItems] = useState(window.Store.getPages().faq);

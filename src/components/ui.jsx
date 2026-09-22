@@ -2174,6 +2174,191 @@ function CintaDymo({ children, nivel = 2, id, chica = false }) {
 window.CintaDymo = CintaDymo;
 
 // ──────────────────────────────────────────────────────────────
+// ESCRITORIO DE PAPELES — documentos ganados en la entrevista
+// ──────────────────────────────────────────────────────────────
+const AMX_ENTREVISTA_ARTES = {
+  'pa-identificacion': 'ine.webp',
+  'pa-acta-nacimiento': 'acta-nacimiento.webp',
+  'pa-curp': 'curp.webp',
+  'pa-smn': 'cartilla-militar.webp',
+  'pa-ingresos': 'constancia-ingresos.webp',
+  'pa-antecedentes': 'antecedentes-no-penales.webp',
+  'pa-domicilio': 'comprobante-domicilio.webp',
+  'pa-medico': 'certificados-medicos.webp',
+  'pa-club': 'licencia-club-tiro.webp',
+  'pa-socio-activo': 'constancia-club-cinegetico.webp',
+  'pa-permiso-coleccion': 'permiso-coleccionista.webp',
+  'pa-residencia': 'tarjeta-residente.webp',
+};
+
+// EL ACOMODO (21-sep-2026): los documentos se ponen en orden de lectura —se
+// llena de izquierda a derecha y se baja de renglón—, en lugar de las diez
+// plazas dispersas que había antes, donde el último en llegar tomaba el centro
+// y empujaba al resto. Con pocos documentos aquello los amontonaba arriba y
+// dejaba media mesa vacía.
+//
+// La rejilla se calcula con el número de documentos y con el ancho de papel que
+// fija `amxMedidaMesa`, así que reparte el espacio en vez de repetir posiciones
+// dibujadas a mano: dos documentos ocupan la mesa igual de bien que diez. Sigue
+// siendo una función pura de la lista, como antes: recargar con los diez ya
+// ganados da exactamente la misma mesa que haberlos ganado uno a uno.
+//
+// `x`/`y` son la esquina superior izquierda en % de la mesa y `r` el giro en
+// grados. El giro es fijo por posición, nunca aleatorio: es lo que evita que
+// esto se lea como una cuadrícula de fotos.
+const AMX_GIRO_PAPEL = [-3, 2, -2, 3, -1, 2, -3, 1, 3, -2];
+const AMX_MESA_MARGEN = 4;          // % de mesa libre en cada borde
+const AMX_MESA_PROPORCION = 358 / 300;  // la que declara .amx-ent-pila
+
+function amxPlazasDocumentos(documentos) {
+  const porDocumento = {};
+  const n = documentos.length;
+  if (!n) return porDocumento;
+
+  const m = amxMedidaMesa(n);
+  // El alto del papel en % del alto de la MESA. No se toma de `amxMedidaMesa`
+  // porque aquel lo calcula contra `rel`, y el alto de la mesa dejó de salir de
+  // `rel`: .amx-ent-pila la fija en 358 / 300.
+  const alto = m.papel * (100 / 78) * AMX_MESA_PROPORCION;
+  const util = 100 - AMX_MESA_MARGEN * 2;
+  const caben = Math.max(1, Math.floor(util / m.papel));
+  const columnas = Math.min(caben, Math.ceil(Math.sqrt(n)));
+  const filas = Math.ceil(n / columnas);
+
+  // El paso reparte los papeles de borde a borde del área útil; la última fila,
+  // si viene incompleta, se centra con ese mismo paso para que no quede coja.
+  const paso = columnas > 1 ? (util - m.papel) / (columnas - 1) : 0;
+  const pasoY = filas > 1 ? Math.max(0, (util - alto) / (filas - 1)) : 0;
+
+  for (let i = 0; i < n; i++) {
+    const fila = Math.floor(i / columnas);
+    const columna = i % columnas;
+    const enEstaFila = Math.min(columnas, n - fila * columnas);
+    const anchoFila = (enEstaFila - 1) * paso + m.papel;
+    const x = (100 - anchoFila) / 2 + columna * paso;
+    const y = filas > 1 ? AMX_MESA_MARGEN + fila * pasoY : (100 - alto) / 2;
+    porDocumento[documentos[i]] = { x: x, y: y, r: AMX_GIRO_PAPEL[i % AMX_GIRO_PAPEL.length] };
+  }
+  return porDocumento;
+}
+window.amxPlazasDocumentos = amxPlazasDocumentos;
+
+// La mesa se ajusta a lo que hay encima, para que nunca se vea medio vacía:
+// pocos documentos, papeles grandes y mesa baja; muchos, papeles chicos y mesa
+// alta. Interpola entre anclajes en vez de saltar por rangos, así al entrar un
+// documento la mesa se reorganiza de un tirón con la transición que ya existe.
+//
+// El techo no es estético, es geométrico: las plazas llegan hasta x = 258 de
+// 358 (el 72 % de la mesa), así que un papel mucho más ancho se saldría por la
+// derecha. `min()` en el CSS lo contiene contra el borde, y los anclajes se
+// quedan por debajo para no tener que apoyarse en ese tope.
+// `rel` es el alto de la mesa en las unidades de las plazas (que se trazaron
+// sobre 358 × 280), no en píxeles: así la mesa es proporcional y funciona igual
+// en un teléfono que en un monitor. `papel` es su ancho en % de la mesa.
+const AMX_MESA_ANCLAJES = [
+  { n: 1, rel: 150, papel: 32 },
+  { n: 2, rel: 170, papel: 30 },
+  { n: 4, rel: 220, papel: 28 },
+  { n: 7, rel: 260, papel: 24 },
+  { n: 10, rel: 300, papel: 22 },
+];
+
+function amxMedidaMesa(n) {
+  const A = AMX_MESA_ANCLAJES;
+  const interpola = function (a, b, t) {
+    return { rel: a.rel + (b.rel - a.rel) * t, papel: a.papel + (b.papel - a.papel) * t };
+  };
+  let m = { rel: A[A.length - 1].rel, papel: A[A.length - 1].papel };
+  if (n <= A[0].n) m = { rel: A[0].rel, papel: A[0].papel };
+  else {
+    for (let i = 1; i < A.length; i++) {
+      if (n <= A[i].n) { m = interpola(A[i - 1], A[i], (n - A[i - 1].n) / (A[i].n - A[i - 1].n)); break; }
+    }
+  }
+  // El alto del papel en % de la mesa. El papel guarda la proporción 78 × 100,
+  // así que su alto sale de su ancho por 100/78, y se pasa a % del alto de la
+  // mesa multiplicando por 358/rel. Es lo que el CSS necesita para que `min()`
+  // pueda sujetarlo contra el borde de abajo en vez de dejarlo salirse.
+  m.altoPapel = m.papel * (100 / 78) * (358 / m.rel);
+  return m;
+}
+window.amxMedidaMesa = amxMedidaMesa;
+
+const PapelEntrevista = React.memo(function PapelEntrevista({ id, indice, plaza, visible }) {
+  const [fallo, setFallo] = React.useState(false);
+  const [revelado, setRevelado] = React.useState(false);
+  // Arranca en `false` aunque el papel ya esté visible, y no en `visible`: el
+  // escritorio no existe hasta que se contesta la primera pregunta, así que sus
+  // documentos NACEN visibles. Tomando `visible` como punto de partida no había
+  // paso de oculto a visible que detectar y los primeros documentos —los que
+  // más se miran— nunca se animaban: solo aparecían en su sitio.
+  const [prevVisible, setPrevVisible] = React.useState(false);
+  const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
+  const requisito = requisitos.find(function (r) { return r.id === id; });
+  const nombre = requisito ? requisito.nombre : id;
+  const archivo = AMX_ENTREVISTA_ARTES[id];
+  // Los papeles que aún no se han ganado no tienen sitio: esperan en el centro
+  // con opacidad 0, y desde ahí los coloca su plaza cuando llega su turno.
+  const p = plaza || { x: 50, y: 50, r: 0 };
+  // Detectar cuando pasa de oculto a visible para disparar la animación
+  React.useEffect(function () {
+    if (!prevVisible && visible) {
+      setRevelado(true);
+    }
+    setPrevVisible(visible);
+  }, [visible, prevVisible]);
+  return (
+    <div className={'amx-ent-papel' + (revelado ? ' amx-ent-papel-revelado' : '')} style={{
+      // En % de LA MESA, no del papel: si fueran del papel, al agrandarlo las
+      // plazas se separarían con él y las de los bordes se saldrían.
+      '--amx-plaza-x': p.x + '%',
+      '--amx-plaza-y': p.y + '%',
+      '--amx-plaza-r': p.r + 'deg',
+      '--amx-papel-i': indice,
+      opacity: visible ? 1 : 0,
+      pointerEvents: visible ? 'auto' : 'none',
+    }}>
+      {!fallo && archivo ? (
+        <img src={'imagenes/entrevista/' + archivo} alt="" onError={function () { setFallo(true); }} />
+      ) : (
+        <div className="amx-ent-papel-fallback"><span>{nombre}</span></div>
+      )}
+    </div>
+  );
+}, function PapelEntrevistaAreEqual(prev, next) {
+  // Solo se re-renderiza si el documento, su plaza o su visibilidad cambiaron.
+  // Los componentes NUNCA se desmontan, así la transición CSS siempre funciona.
+  // La plaza es un objeto nuevo en cada cálculo, así que se comparan sus valores.
+  const a = prev.plaza, b = next.plaza;
+  const mismaPlaza = a === b || (!!a && !!b && a.x === b.x && a.y === b.y && a.r === b.r);
+  return prev.id === next.id && mismaPlaza && prev.visible === next.visible;
+});
+
+function EscritorioPapeles({ documentos = [] }) {
+  // Renderizar TODOS los documentos siempre en el DOM. Los que aún no se han
+  // ganado se muestran con opacity: 0 y pointer-events: none, así nunca se
+  // desmontan y la transición CSS siempre funciona.
+  const todosIds = Object.keys(AMX_ENTREVISTA_ARTES);
+  const plazas = amxPlazasDocumentos(documentos);
+  const medida = amxMedidaMesa(documentos.length);
+  return (
+    <div className="amx-ent-escritorio" aria-hidden="true">
+      <div className="amx-ent-pila" style={{
+        '--amx-mesa-rel': medida.rel.toFixed(1),
+        '--amx-ancho-papel': medida.papel.toFixed(2) + '%',
+        '--amx-alto-papel': medida.altoPapel.toFixed(2) + '%',
+      }}>
+        {todosIds.map(function (id, indice) {
+          const visible = documentos.indexOf(id) !== -1;
+          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || null} visible={visible} />;
+        })}
+      </div>
+    </div>
+  );
+}
+window.EscritorioPapeles = EscritorioPapeles;
+
+// ──────────────────────────────────────────────────────────────
 // NOTA DE ERRATA — el precio que la DCAM publicó mal
 // Saulo, 13-sep-2026: «Cuando pase eso hay que colocar el último precio
 // conocido y una nota indicando que probablemente sea un error de la
@@ -3538,3 +3723,55 @@ class PantallaRota extends React.Component {
   }
 }
 window.PantallaRota = PantallaRota;
+
+// ──────────────────────────────────────────────────────────────
+// CITA DE FUENTE — pie de cita normativa
+// ──────────────────────────────────────────────────────────────
+function CitaFuente({ fuente }) {
+  if (!fuente || !fuente.url) {
+    return fuente && fuente.titulo ? <p className="amx-cita">{fuente.titulo}</p> : null;
+  }
+  const titulo = fuente.titulo || '';
+  const fechaTexto = window.amxLegalFecha ? window.amxLegalFecha(fuente.fechaConsulta) : '';
+  const hayFecha = fechaTexto !== '';
+  const esPdf = fuente.pdf === true;
+
+  return (
+    <p className="amx-cita">
+      Fuente:{' '}
+      <a
+        href={fuente.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={esPdf
+          ? titulo + ' (PDF, se abre en una pestaña nueva)'
+          : titulo + ' (se abre en una pestaña nueva)'}
+      >
+        {titulo}
+        {esPdf && <span aria-hidden="true"> ↗</span>}
+      </a>
+      {fuente.emisor && <> ({fuente.emisor})</>}
+      {hayFecha && <> · Consultado el {fechaTexto}</>}
+    </p>
+  );
+}
+window.CitaFuente = CitaFuente;
+
+// ──────────────────────────────────────────────────────────────
+// AVISO DE TRANSPARENCIA — bloque informativo
+// ──────────────────────────────────────────────────────────────
+function AvisoTransparencia({ aviso, id = 'aviso-transparencia' }) {
+  if (!aviso) return null;
+  return (
+    <section className="amx-aviso" aria-labelledby={id}>
+      <span className="amx-copia-clip" aria-hidden="true" />
+      <div className="amx-fichero-carton">
+        <div className="amx-fichero-cab">
+          <h2 id={id} className="amx-aviso-tit">{aviso.titulo}</h2>
+        </div>
+        {aviso.parrafos.map((t, i) => <p key={i} className="amx-aviso-texto">{t}</p>)}
+      </div>
+    </section>
+  );
+}
+window.AvisoTransparencia = AvisoTransparencia;

@@ -6,9 +6,9 @@
 
 <!-- cifras:inicio -->
 Catálogo actual: **252 armas · 40 accesorios · 102 municiones**,
-servidas como **449 páginas HTML prerenderizadas** para que los buscadores y los
+servidas como **454 páginas HTML prerenderizadas** para que los buscadores y los
 bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap declara
-**445 URLs**, 408 de ellas con la fecha real de su inventario (la última, 2026-09-18).
+**450 URLs**, 408 de ellas con la fecha real de su inventario (la última, 2026-09-18).
 
 <sub>Bloque generado por `npm run cifras` desde el propio build. No editar a mano.</sub>
 <!-- cifras:fin -->
@@ -176,11 +176,32 @@ Sirve para elegir el calibre antes que el arma: qué se usa para defensa, qué p
 caza, cuánto retroceso tiene y cuántas opciones hay en el catálogo. Las cifras son divulgativas y
 varían según marca y munición, y la guía lo advierte.
 
+### Legalidad
+
+Cinco hojas del mismo expediente, y **toda afirmación trae su fuente oficial y la fecha en que
+se consultó**: el marco federal como una escalera de normas —de la Constitución al formato de
+ventanilla—, lo que de verdad cambia por estado, la ficha de cada permiso y los requisitos de
+los **dos trámites que se confunden**: el permiso extraordinario ante el Registro Federal de
+Armas y la compra en la DCAM. No son el mismo papeleo, y creer que sí es lo que hace que
+alguien llegue al mostrador sin expediente.
+
+Escrita sobre la Ley Federal de Armas de Fuego y Explosivos **reformada el 29 de mayo de 2025**,
+y con los escenarios que el formato distingue y casi nadie cuenta: asalariado, independiente,
+pensionado, ejidatario, comunero, jornalero, coleccionista, socio de club y militar.
+
+**«¿Puedo comprar un arma?»** es la entrevista: quince preguntas sobre tu situación —ninguna
+pide un dato personal, todas las respuestas son categorías— y al final dice qué papeles te
+tocan, cuál te falta y cómo se consigue. Cuando algo no procede lo dice sin rodeos y sin
+ofrecer un remedio que no existe. Y cuando reúnes todo, tampoco promete nada: la autorización
+la decide la autoridad, no un cuestionario.
+
+Lo que no está verificado **se declara** en vez de rellenarse: 15 de las 32 entidades todavía
+no tienen portal de antecedentes penales comprobado, y la página lo dice.
+
 ### Y además
 
 - **Municiones y accesorios** del inventario oficial, con marca, compatibilidad y precio.
-- **Tenencia legal** — requisitos y pasos del trámite ante la SEDENA conforme a la Ley Federal
-  de Armas de Fuego y Explosivos, y **preguntas frecuentes** sobre licencias y portación.
+- **Preguntas frecuentes** sobre licencias, calibres permitidos y portación.
 - **Armas traumáticas** — defensa menos letal por CO₂, que no son armas de fuego y no piden
   permiso; la duda más repetida del público.
 - **Prerender.** La app pinta con JavaScript, y hasta las 321 páginas el sitio era invisible

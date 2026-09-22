@@ -74,27 +74,6 @@
   const PRICE_HISTORY_SEED = window.AMX_PRICE_HISTORY_SEED || {};
 
   const DEFAULT_PAGES = {
-    legal: {
-      eyebrow: '§ LEGALIDAD · MX',
-      title: 'Tenencia legal de armas de fuego',
-      intro: 'Resumen de los requisitos y pasos para la posesión legal en México conforme a la Ley Federal de Armas de Fuego y Explosivos.',
-      requisitos: [
-        'Original del permiso extraordinario para la adquisición de arma de fuego, cartuchos y/o accesorios, vigente (DEFENSA-02-040, lo expide el Registro Federal de Armas de Fuego)',
-        'Original de una identificación oficial vigente (credencial para votar, pasaporte, cartilla del Servicio Militar Nacional o cédula profesional con fotografía)',
-        'Comprobante original del pago de la hoja de ayuda DEFENSA-02-062 (registro del arma), uno por cada arma',
-        'Copia simple de la Constancia de Situación Fiscal, solo si necesitas factura',
-      ],
-      pasos: [
-        { t: 'Formato y documentos',          d: 'Llenar y firmar la solicitud DEFENSA-02-040 para civiles (el formato está en gob.mx) y reunir la documentación que pide. Se entrega en persona en la Dirección General del Registro Federal de Armas de Fuego y Control de Explosivos (Av. Industria Militar 1111, Campo Militar No. 1-D, Naucalpan, Edo. Méx.) o se envía por paquetería. Quien vive en el interior de la República también puede enviarla por correo certificado, salvo los habitantes de la Ciudad de México, el Estado de México, Querétaro, Hidalgo y Cuernavaca.' },
-        { t: 'Solicitud de permiso',          d: 'Pedir el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040), para protección de domicilio o parcela, actividades cinegéticas o tiro deportivo y caza, según el caso. En una misma solicitud se pueden pedir hasta tres armas de fuego y hasta tres cantidades de cartuchos; en actividades cinegéticas y tiro deportivo, se puede volver a solicitar la adquisición de armas una vez transcurridos 6 meses de haber adquirido el material autorizado en el último permiso. Pago de derechos.' },
-        { t: 'Visita a la DCAM u OTCA',        d: 'La DCAM atiende en persona en el Campo Militar No. 1-D (Av. Industria Militar 1111, Col. Lomas de Tecamachalco, Naucalpan, Edo. Méx.): las personas físicas con permiso extraordinario entran sin cita, y se otorgan 80 turnos de 08:00 a 13:00, de lunes a viernes (las personas morales piden cita en facturas.dcam@defensa.gob.mx). A la OTCA, en Monterrey, N.L., que solo atiende al público que radica en Coahuila, Nuevo León, San Luis Potosí y Tamaulipas, agendar visita. Llevar documentación completa.' },
-        { t: 'Selección y compra',             d: 'Elegir arma del catálogo oficial. La adquisición civil solo puede hacerse por los canales oficiales: la DCAM o la OTCA.' },
-        { t: 'Registro federal del arma',      d: 'Toda arma adquirida queda registrada a tu nombre en el Registro Federal de Armas (RFA).' },
-      ],
-      whatsapp_phone: '525555555555',
-      whatsapp_msg: 'Hola, me interesa asesoría para trámite SEDENA',
-      whatsapp_pitch: 'El acompañamiento legal para el trámite SEDENA es prestado por un abogado externo especializado, en lo individual y bajo su propia cédula profesional. Armas M&S no es despacho jurídico y únicamente facilita el contacto con el profesional.',
-    },
     faq: [
       { tema: 'Traumáticas', q: '¿Necesito permiso de la SEDENA para una arma traumática?', a: 'No. Las armas traumáticas (HDP 50, Secure 68P y HDX 68) son dispositivos menos letales accionados por gas CO₂; al no usar pólvora no son armas de fuego y, conforme al Artículo 13 de la LFAFE —que permite dispositivos de hasta 140 Joules de energía—, no requieren permiso ni registro ante la SEDENA. Puedes adquirirlas siendo mayor de edad.' },
       { tema: 'Traumáticas', q: '¿Puedo adquirir una arma traumática directamente con ustedes?', a: 'Sí. Las armas traumáticas son los únicos tres modelos de armamento que comercializamos y puedes adquirirlas directamente en armasmys.com, sin trámite ante la SEDENA. Las armas de fuego del resto de la app se muestran solo con fines informativos y de transparencia.' },
