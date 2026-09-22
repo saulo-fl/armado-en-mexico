@@ -2576,15 +2576,31 @@
    accesorios. Las cajas se apoyan en la tabla y la etiqueta de precio va
    pegada con cinta canela al canto. La madera es la misma `--mesa-madera` del
    puesto del Home. */
-.amx-v2 .amx-vitrina {
+/* LA PARED DEL MUEBLE (21-sep-2026). El canto de madera y el fondo de la
+   vitrina de la ficha de arma dejan de ser suyos: los comparten los demás
+   muebles del sitio. Una repisa sin pared detrás flota sobre el fondo de la
+   página y se lee como un error, no como un mueble. El relleno lo pone cada
+   uno, que no todos guardan lo mismo. */
+.amx-v2 .amx-vitrina,
+.amx-v2 .amx-vitrina-acc-seccion,
+.amx-v2 .amx-anaquel {
   position: relative;
-  padding: 14px 12px 10px;
   background: linear-gradient(180deg, #E4DDCD 0%, var(--vitrina-fondo) 22%, #E9E3D6 100%);
   border: 10px solid var(--mesa-canto);
   border-bottom-width: 14px;
   border-radius: 6px;
   box-shadow: inset 0 10px 18px -12px rgba(23, 27, 25, .45), var(--sombra);
   color: var(--manila-tinta);
+}
+.amx-v2 .amx-vitrina {
+  padding: 14px 12px 10px;
+}
+/* El mostrador de calibres: guarda una sola repisa que se desliza, así que el
+   canto de abajo va pegado a ella y el de arriba deja aire para los cartuchos
+   altos, que sobresalen por encima de la madera. */
+.amx-v2 .amx-anaquel--mostrador {
+  padding: 10px 10px 0;
+  margin-top: 10px;
 }
 @media (min-width: 1024px) { .amx-v2 .amx-vitrina { padding: 18px 20px 14px; } }
 .amx-v2 .amx-repisa + .amx-repisa { margin-top: 26px; }
@@ -4113,6 +4129,12 @@
   outline-offset: -3px;               /* por dentro: la tira recorta lo de fuera */
 }
 
+/* Cada categoría de accesorios es un mueble: su rótulo y sus baldas dentro del
+   mismo canto de madera, en vez de repisas sueltas sobre el fondo de la
+   página. Mismo canto y misma pared que la vitrina de la ficha de arma. */
+.amx-v2 .amx-vitrina-acc-seccion {
+  padding: 14px 12px 12px;
+}
 .amx-v2 .amx-vitrina-acc-seccion + .amx-vitrina-acc-seccion { margin-top: var(--e5); }
 .amx-v2 .amx-vitrina-acc-tramo + .amx-vitrina-acc-tramo { margin-top: var(--e4); }
 
@@ -4302,9 +4324,13 @@
 /* CALIBRE — la repisa de la vitrina convertida en mostrador: una sola tabla que
    se desliza también en escritorio (en la vitrina, desde 1024 px, se parte en
    filas) y sin el marco de la vitrina. El cartucho mide lo que su largo real. */
+/* El mostrador NO lleva tabla de madera: el anaquel ya pone la pared detrás y
+   la repisa cruzaba por delante de los cartuchos, que es lo que se mira. Se
+   deslizan mucho, y la madera corriendo debajo mareaba. Quedan el fondo, los
+   cartuchos y sus etiquetas. La mesa se conserva donde sí sostiene algo: las
+   baldas de Accesorios. */
 .amx-v2 .amx-mostrador {
   --alto-foto: 150px;
-  --mesa-superficie: var(--mesa-madera);
   margin: 0;
   padding: 0 0 8px;
 }
@@ -4321,10 +4347,6 @@
    alto que el ::before: el canto de la tabla queda 8 px por debajo de la base de las
    fotos, y la madera trae la cubierta en su 80 % de arriba (de ahí el `/ .8`). */
 .amx-v2 .amx-mostrador .amx-repisa-carril::before { content: none; }
-.amx-v2 .amx-mostrador .amx-repisa-carril {
-  background: var(--mesa-superficie)
-    0 calc(10px + var(--alto-foto) - var(--fondo-repisa)) / auto calc((var(--fondo-repisa) + 8px) / .8) repeat-x;
-}
 /* El ancho de la celda sale del de la pantalla para que en cualquier teléfono se
    vean 3,4 calibres: el que asoma a medias es lo que dice que la mesa se desliza.
    Con 104 px fijos, a 384 y 390 px solo asomaban 8 y 14 px. */
@@ -6599,8 +6621,8 @@
 }
 .amx-v2 .amx-ent-opciones {
   display: grid;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 0;
+  margin-top: 6px;
 }
 /* Modo portada (HOME, sin respuestas aún): preguntas en línea horizontal,
    botones cortos a la derecha. No apilados, no a todo el ancho. */
@@ -6614,36 +6636,53 @@
   width: auto;
   flex: 0 0 auto;
 }
+/* CADA RESPUESTA ES UN RENGLÓN QUE SE MARCA (21-sep-2026). Eran botones con
+   fondo, sombra y flecha: piezas de aplicación en medio de una hoja de papel.
+   Ahora la entrevista entera se lee como el formato que es —casilla, etiqueta
+   y su raya—, igual que la primera pregunta de la portada. El área pulsable
+   sigue siendo el renglón completo, con sus 46 px de alto. */
 .amx-v2 button.amx-ent-opcion {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  justify-content: flex-start;
+  gap: 12px;
   width: 100%;
-  min-height: 44px;
-  padding: 11px 16px;
+  min-height: 46px;
+  padding: 10px 6px;
   border: 0;
-  background: var(--ficha);
+  border-bottom: 1px solid color-mix(in srgb, var(--manila-tinta) 20%, transparent);
+  background: transparent;
   color: var(--ficha-tinta);
   font-family: var(--sans);
   font-size: 16px;
   line-height: 1.35;
   text-align: left;
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(23, 27, 25, .15);
-  border-radius: 0 8px 0 0;
+  box-shadow: none;
+  border-radius: 0;
 }
-.amx-v2 button.amx-ent-opcion::after {
+.amx-v2 .amx-ent-opciones .amx-ent-opcion:last-child {
+  border-bottom: 0;
+}
+/* La casilla del formato. Se rellena al marcarla, como una X de bolígrafo. */
+.amx-v2 button.amx-ent-opcion::before {
   content: '';
   flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
-  border-top: 2px solid currentColor;
-  border-right: 2px solid currentColor;
-  transform: rotate(45deg);
+  width: 19px;
+  height: 19px;
+  border: 1.5px solid var(--ficha-tinta-2);
+  border-radius: 1px;
+}
+.amx-v2 button.amx-ent-opcion::after {
+  content: none;
 }
 .amx-v2 button.amx-ent-opcion:hover {
-  background: var(--oficio-2);
+  background: color-mix(in srgb, var(--manila-tinta) 6%, transparent);
+}
+.amx-v2 button.amx-ent-opcion:hover::before,
+.amx-v2 button.amx-ent-opcion:focus-visible::before {
+  border-color: var(--ficha-tinta);
+  background: color-mix(in srgb, var(--ficha-tinta) 8%, transparent);
 }
 .amx-v2 button.amx-ent-opcion:focus-visible,
 .amx-v2 .amx-ent-regresar:focus-visible,
@@ -6824,38 +6863,88 @@
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-mesa {
   display: block;
 }
-.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-folder {
-  padding: 0;
-  background: transparent;
-}
+/* LA PRIMERA PREGUNTA ES UN RENGLÓN DE FORMATO (21-sep-2026). Era una caja
+   blanca dentro de otra caja blanca: la única superficie del sitio sin
+   metáfora física, y se notaba al lado de los folders, los sellos y las
+   cintas. Ahora es lo que el contenido ES —un renglón del DEFENSA-02-040—,
+   sobre la misma hoja `amx-oficio` que usan la FAQ y la clasificación, con su
+   membrete arriba y respuestas que se marcan como casillas. El marcado sigue
+   siendo el mismo `fieldset` con `role="radiogroup"`: cambia la piel. */
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-acciones {
   display: none;
 }
-/* En modo compacto: pregunta y botones en la misma fila, sin reserva de altura. */
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 18px 14px;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  /* Sin regla propia: la doble línea del membrete ya separa el encabezado del
+     renglón, y dos reglas seguidas dejaban una banda vacía en medio. */
+  padding: 12px 0 2px;
 }
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta legend {
   min-height: 0;
   flex: 0 1 auto;
   margin: 0;
 }
+/* El folio del renglón, como el número de pregunta de un formato impreso. */
+.amx-v2 .amx-ent-folio {
+  display: inline-block;
+  flex: 0 0 auto;
+  /* Arriba, a la altura del primer renglón: en una pregunta de cuatro líneas,
+     centrado se quedaba flotando en mitad del párrafo. */
+  align-self: flex-start;
+  margin-top: 3px;
+  margin-inline-end: 10px;
+  padding: 1px 7px;
+  border: 1px solid color-mix(in srgb, var(--ficha-tinta-2) 60%, transparent);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: .1em;
+  color: var(--ficha-tinta-2);
+  vertical-align: middle;
+}
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones {
   flex: 0 0 auto;
-  gap: 8px;
+  gap: 4px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-oficio-membrete > span {
+  white-space: nowrap;
+}
+/* Las respuestas se marcan, no se pulsan: cuadro vacío y etiqueta en tinta
+   normal. Nada de fondo ni de flecha, que es lo que las hacía parecer botones
+   de aplicación en medio de una hoja de papel. */
+/* En la portada el renglón va en línea con la pregunta, así que no lleva su
+   raya: la separación la da el espacio, no una línea que cortaría la frase. */
+.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion {
+  width: auto;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 12px 0 6px;
+  border-bottom: 0;
 }
 @media (max-width: 600px) {
   /* La portada sin respuestas todavía no es una mesa: es una sola línea, así
      que no reserva alto ni márgenes laterales de sección. */
   .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) {
     min-height: 0;
-    padding: 12px 0;
+    padding: 12px 10px;
   }
-  .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) .amx-hent-tit {
-    padding-inline: 8px;
+  .amx-v2 .amx-ent-membrete-marca {
+    display: none;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-folder.amx-oficio {
+    padding: 14px 12px 16px;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
+    gap: 10px 12px;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion {
+    gap: 7px;
+    padding: 0 8px 0 4px;
   }
   /* Contestada la primera pregunta el título se retira: la pregunta sube y la
      mesa con los documentos entra en pantalla, que es lo que hay que ver a

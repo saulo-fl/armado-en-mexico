@@ -62,6 +62,18 @@ function amxEntrevistaTextoEspaciado(ctx, texto, centroX, y, espacio) {
   });
 }
 
+// Devuelve la imagen ya cargada, o null si no se pudo: la hoja se dibuja igual
+// sin ella. Nunca rechaza, porque un dibujo que falta no puede tumbar el PNG
+// entero cuando alguien pulsa Guardar Test.
+function amxEntrevistaCargarImagen(ruta) {
+  return new Promise(function (resolve) {
+    const imagen = new window.Image();
+    imagen.onload = function () { resolve(imagen); };
+    imagen.onerror = function () { resolve(null); };
+    imagen.src = ruta;
+  });
+}
+
 async function amxEntrevistaCrearHoja(d) {
   if (document.fonts && document.fonts.ready) await document.fonts.ready;
 
@@ -110,7 +122,12 @@ async function amxEntrevistaCrearHoja(d) {
   fuente(400, 26, '"JetBrains Mono", monospace');
   const lineasPie = amxEntrevistaAjustarTexto(ctx, AMX_ENTREVISTA_PIE, ANCHO_TEXTO - 40);
   const altoPie = lineasPie.length * 39;
-  const alto = Math.max(1100, Math.ceil(y + 120 + altoPie + 130));
+  // El pie de la hoja, de arriba abajo: el reclamo, la advertencia y la marca.
+  // La hoja se comparte, así que el reclamo va en cuerpo grande —es lo único
+  // que trae gente de vuelta— y la dirección ya no se repite tres veces.
+  const ALTO_RECLAMO = 74;
+  const ALTO_MARCA = 92;
+  const alto = Math.max(1100, Math.ceil(y + 60 + ALTO_RECLAMO + altoPie + ALTO_MARCA + 24));
   canvas.height = alto;
   ctx = canvas.getContext('2d');
 
@@ -162,15 +179,45 @@ async function amxEntrevistaCrearHoja(d) {
     });
   });
 
+  ctx.textAlign = 'center';
+  // 1 — El reclamo, lo más grande del pie.
+  const marcaCentroY = alto - ALTO_MARCA / 2 - 34;
+  const pieY = marcaCentroY - ALTO_MARCA / 2 - 26 - (lineasPie.length - 1) * 39;
+  fuente(700, 42, 'Archivo, sans-serif');
+  ctx.fillStyle = '#1C1D1F';
+  ctx.fillText('¡Haz tu test en armado.mx!', ANCHO / 2, pieY - 52);
+
+  // 2 — La advertencia, en el cuerpo pequeño de siempre.
   fuente(400, 26, '"JetBrains Mono", monospace');
   ctx.fillStyle = '#59605C';
-  ctx.textAlign = 'center';
-  const pieY = alto - 130 - altoPie;
   lineasPie.forEach(function (lineaPie, i) {
     ctx.fillText(lineaPie, ANCHO / 2, pieY + i * 39);
   });
-  fuente(700, 24, '"JetBrains Mono", monospace');
-  ctx.fillText('armado.mx', ANCHO / 2, alto - 52);
+
+  // 3 — La marca: el isotipo y el logotipo al lado, como en la cabecera del
+  // sitio. Sustituye al «armado.mx» suelto que repetía la dirección por
+  // tercera vez. Si el isotipo no carga, se cae a solo el logotipo: una hoja
+  // sin pie de marca sería peor que una sin dibujo.
+  const isotipo = await amxEntrevistaCargarImagen('imagenes/isotipo-armado.webp');
+  const LADO = 76;
+  const SEPARACION = 26;
+  const ESPACIADO = 3;
+  fuente(700, 32, 'Archivo, sans-serif');
+  const logotipo = 'ARMADO EN MÉXICO';
+  const anchoLogotipo = Array.from(logotipo).reduce(function (total, caracter) {
+    return total + ctx.measureText(caracter).width;
+  }, 0) + Math.max(0, Array.from(logotipo).length - 1) * ESPACIADO;
+  const anchoMarca = (isotipo ? LADO + SEPARACION : 0) + anchoLogotipo;
+  let marcaX = (ANCHO - anchoMarca) / 2;
+  if (isotipo) {
+    ctx.drawImage(isotipo, marcaX, marcaCentroY - LADO / 2, LADO, LADO);
+    marcaX += LADO + SEPARACION;
+  }
+  ctx.fillStyle = '#1C1D1F';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  amxEntrevistaTextoEspaciado(ctx, logotipo, marcaX + anchoLogotipo / 2, marcaCentroY, ESPACIADO);
+  ctx.textBaseline = 'alphabetic';
 
   return canvas;
 }
@@ -341,7 +388,11 @@ function EntrevistaCuerpo({ modoPortada = false }) {
       {/* La altura estable evita que salten las respuestas; el texto se apoya
           abajo para que la pregunta corta no deje un hueco encima de ellas. */}
       <legend id={'amx-ent-p-' + p.id} ref={enunciadoRef} className="amx-ent-pregunta-enunciado"
-        data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}><span>{p.texto}</span></legend>
+        data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}>
+        {/* El folio del renglón, como en un formato impreso. Va oculto al
+            lector de pantalla: numera, no dice nada que la pregunta no diga. */}
+        <span className="amx-ent-folio" aria-hidden="true">{d.recorrido.length + 1}</span>
+        <span>{p.texto}</span></legend>
       <div className={'amx-ent-opciones' + (compacta ? ' amx-ent-opciones--compacta' : '')}
         role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
         {p.opciones.map(function (o) {
@@ -399,7 +450,19 @@ function EntrevistaCuerpo({ modoPortada = false }) {
         <window.EscritorioPapeles documentos={d.documentos} />
       )}
       <div className="amx-ent-mesa">
-        <div className="amx-ent-folder">
+        {/* Toda la entrevista se sirve sobre la misma hoja de oficio que usan la
+            FAQ y la clasificación, con su membrete: cada pregunta es un renglón
+            del formato, no una tarjeta de aplicación. */}
+        <div className="amx-ent-folder amx-oficio">
+          {!final && (
+            <div className="amx-oficio-membrete" aria-hidden="true">
+              {/* En el teléfono el membrete se queda solo con lo que aporta: la
+                  marca ya está en la cabecera del sitio y partida en dos
+                  renglones estorbaba más de lo que decía. */}
+              <span><span className="amx-ent-membrete-marca">Armado en México · </span>Autodiagnóstico</span>
+              <span>DEFENSA-02-040</span>
+            </div>
+          )}
           {pregunta}
           {dictamen}
           <div className="amx-ent-acciones">

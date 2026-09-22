@@ -3231,6 +3231,9 @@ window.HojaClasificacion = HojaClasificacion;
 // delante y la luz de los puestos detrás. Sin foto, la silueta de pie.
 function MostradorCalibres({ calibres, onAbrir }) {
   return (
+    // La repisa va dentro de su mueble: sola, flotaba sobre el fondo de la
+    // página. El canto y la pared son los mismos de la vitrina de la ficha.
+    <div className="amx-anaquel amx-anaquel--mostrador">
     <div className="amx-repisa-fila amx-mostrador" role="region" aria-label="Calibres" tabIndex={0}>
       <ul className="amx-repisa-carril">
         {calibres.map((c) => (
@@ -3250,6 +3253,7 @@ function MostradorCalibres({ calibres, onAbrir }) {
           </li>
         ))}
       </ul>
+    </div>
     </div>
   );
 }

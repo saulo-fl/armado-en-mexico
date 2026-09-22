@@ -371,3 +371,19 @@ test('un documento recién ganado se anima; no basta con que exista la regla', (
   assert.match(css, /\.amx-ent-papel\.amx-ent-papel-revelado \{\s*animation-name: amx-ent-papel-entra;/,
     'la clase de revelado es la que enciende la animación');
 });
+
+test('la hoja que se comparte invita a hacer el test y firma con la marca', () => {
+  const hoja = readFileSync(
+    fileURLToPath(new URL('../src/screens/screens-entrevista.jsx', import.meta.url)), 'utf8');
+  // La hoja sale del sitio y circula sola: el reclamo es lo único que trae
+  // gente de vuelta, así que va en cuerpo grande y antes de la advertencia.
+  assert.match(hoja, /'¡Haz tu test en armado\.mx!'/,
+    'falta el reclamo de la hoja compartible');
+  assert.match(hoja, /AMX_ENTREVISTA_PIE = 'Autodiagnóstico hecho en armado\.mx/,
+    'la advertencia de que esto no es un trámite no puede desaparecer');
+  // La dirección ya sale dos veces arriba: el pie firma con el isotipo y el
+  // logotipo, no con un tercer «armado.mx» suelto.
+  assert.match(hoja, /isotipo-armado\.webp/, 'el pie debe firmar con el isotipo');
+  assert.doesNotMatch(hoja, /fillText\('armado\.mx'/,
+    'sobra el armado.mx suelto del pie: lo sustituye la marca');
+});
