@@ -62,6 +62,18 @@ function amxEntrevistaTextoEspaciado(ctx, texto, centroX, y, espacio) {
   });
 }
 
+// Devuelve la imagen ya cargada, o null si no se pudo: la hoja se dibuja igual
+// sin ella. Nunca rechaza, porque un dibujo que falta no puede tumbar el PNG
+// entero cuando alguien pulsa Guardar Test.
+function amxEntrevistaCargarImagen(ruta) {
+  return new Promise(function (resolve) {
+    const imagen = new window.Image();
+    imagen.onload = function () { resolve(imagen); };
+    imagen.onerror = function () { resolve(null); };
+    imagen.src = ruta;
+  });
+}
+
 async function amxEntrevistaCrearHoja(d) {
   if (document.fonts && document.fonts.ready) await document.fonts.ready;
 
@@ -110,7 +122,12 @@ async function amxEntrevistaCrearHoja(d) {
   fuente(400, 26, '"JetBrains Mono", monospace');
   const lineasPie = amxEntrevistaAjustarTexto(ctx, AMX_ENTREVISTA_PIE, ANCHO_TEXTO - 40);
   const altoPie = lineasPie.length * 39;
-  const alto = Math.max(1100, Math.ceil(y + 120 + altoPie + 130));
+  // El pie de la hoja, de arriba abajo: el reclamo, la advertencia y la marca.
+  // La hoja se comparte, así que el reclamo va en cuerpo grande —es lo único
+  // que trae gente de vuelta— y la dirección ya no se repite tres veces.
+  const ALTO_RECLAMO = 74;
+  const ALTO_MARCA = 92;
+  const alto = Math.max(1100, Math.ceil(y + 60 + ALTO_RECLAMO + altoPie + ALTO_MARCA + 24));
   canvas.height = alto;
   ctx = canvas.getContext('2d');
 
@@ -162,15 +179,45 @@ async function amxEntrevistaCrearHoja(d) {
     });
   });
 
+  ctx.textAlign = 'center';
+  // 1 — El reclamo, lo más grande del pie.
+  const marcaCentroY = alto - ALTO_MARCA / 2 - 34;
+  const pieY = marcaCentroY - ALTO_MARCA / 2 - 26 - (lineasPie.length - 1) * 39;
+  fuente(700, 42, 'Archivo, sans-serif');
+  ctx.fillStyle = '#1C1D1F';
+  ctx.fillText('¡Haz tu test en armado.mx!', ANCHO / 2, pieY - 52);
+
+  // 2 — La advertencia, en el cuerpo pequeño de siempre.
   fuente(400, 26, '"JetBrains Mono", monospace');
   ctx.fillStyle = '#59605C';
-  ctx.textAlign = 'center';
-  const pieY = alto - 130 - altoPie;
   lineasPie.forEach(function (lineaPie, i) {
     ctx.fillText(lineaPie, ANCHO / 2, pieY + i * 39);
   });
-  fuente(700, 24, '"JetBrains Mono", monospace');
-  ctx.fillText('armado.mx', ANCHO / 2, alto - 52);
+
+  // 3 — La marca: el isotipo y el logotipo al lado, como en la cabecera del
+  // sitio. Sustituye al «armado.mx» suelto que repetía la dirección por
+  // tercera vez. Si el isotipo no carga, se cae a solo el logotipo: una hoja
+  // sin pie de marca sería peor que una sin dibujo.
+  const isotipo = await amxEntrevistaCargarImagen('imagenes/isotipo-armado.webp');
+  const LADO = 76;
+  const SEPARACION = 26;
+  const ESPACIADO = 3;
+  fuente(700, 32, 'Archivo, sans-serif');
+  const logotipo = 'ARMADO EN MÉXICO';
+  const anchoLogotipo = Array.from(logotipo).reduce(function (total, caracter) {
+    return total + ctx.measureText(caracter).width;
+  }, 0) + Math.max(0, Array.from(logotipo).length - 1) * ESPACIADO;
+  const anchoMarca = (isotipo ? LADO + SEPARACION : 0) + anchoLogotipo;
+  let marcaX = (ANCHO - anchoMarca) / 2;
+  if (isotipo) {
+    ctx.drawImage(isotipo, marcaX, marcaCentroY - LADO / 2, LADO, LADO);
+    marcaX += LADO + SEPARACION;
+  }
+  ctx.fillStyle = '#1C1D1F';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  amxEntrevistaTextoEspaciado(ctx, logotipo, marcaX + anchoLogotipo / 2, marcaCentroY, ESPACIADO);
+  ctx.textBaseline = 'alphabetic';
 
   return canvas;
 }
