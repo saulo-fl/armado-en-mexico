@@ -97,6 +97,18 @@
       if (Array.isArray(req.escenarios) && req.escenarios.length === 1 && req.escenarios[0] === '*') {
         incluir = true;
       }
+      // b') escenarios propios (p. ej. ['extranjero']) sin variantes: entra si casa con
+      // lo elegido, y en MODO CATÁLOGO entra siempre, con `escenarios` a la vista para
+      // que la pantalla diga «Solo si: …». Antes se descartaba y la ficha del permiso
+      // perdía el documento de residencia que sí pide a una persona extranjera.
+      else if (Array.isArray(req.escenarios) && !Array.isArray(req.variantes)) {
+        var pedidos = [];
+        for (var ejeP in escenarios) {
+          if (Object.prototype.hasOwnProperty.call(escenarios, ejeP) && escenarios[ejeP]) pedidos.push(escenarios[ejeP]);
+        }
+        if (!pedidos.length) incluir = true;
+        else for (var q = 0; q < req.escenarios.length; q++) if (pedidos.indexOf(req.escenarios[q]) !== -1) { incluir = true; break; }
+      }
       // c) si tiene variantes, busca una que case con los escenarios
       else if (Array.isArray(req.variantes)) {
         // `escenarios` viene por eje —{ ingresos: 'ejidatario' }— o como lista de ids.
@@ -157,6 +169,73 @@
   }
 
   /**
+   * Lo federal se lee por la pregunta que trae la persona, no por la jerarquía de las
+   * normas (decisión de Saulo, 22-sep-2026, hilo 3 de Penpot): primero qué puede tener,
+   * luego qué papel llena, luego cuánto cuesta. La jerarquía se ve dentro de cada grupo,
+   * porque el orden de los ids respeta el rango. Una norma que no esté en esta tabla no
+   * se publica en esa pantalla: hoy es el caso del Acuerdo de simplificación de 2026,
+   * del que no hay texto confirmado.
+   */
+  var AMX_PREGUNTAS_FEDERAL = [
+    { id: 'tener', corto: 'Qué puedo tener', pregunta: '¿Qué arma puedo tener y dónde?',
+      normas: ['constitucion', 'lfafe'] },
+    { id: 'papel', corto: 'Qué papel lleno', pregunta: '¿Qué papel lleno y con qué documentos?',
+      normas: ['reglamento', 'acuerdo-medico', 'formato-02040', 'requisitos-dcam'] },
+    { id: 'costo', corto: 'Cuánto cuesta', pregunta: '¿Cuánto cuesta cada trámite?',
+      normas: ['lfd', 'costos-2026'] },
+  ];
+
+  function amxNormasPorPregunta(corpus) {
+    var normas = corpus.normas || [];
+    var grupos = [];
+    for (var i = 0; i < AMX_PREGUNTAS_FEDERAL.length; i++) {
+      var g = AMX_PREGUNTAS_FEDERAL[i];
+      var lista = [];
+      for (var j = 0; j < g.normas.length; j++) {
+        for (var k = 0; k < normas.length; k++) {
+          if (normas[k].id === g.normas[j]) { lista.push(normas[k]); break; }
+        }
+      }
+      if (lista.length) grupos.push({ id: g.id, corto: g.corto, pregunta: g.pregunta, normas: lista });
+    }
+    return grupos;
+  }
+
+  /**
+   * La vigencia de una cuota, para pintarla junto al importe (hilo 7). Lo único que el
+   * corpus respalda es el AÑO de la cuota (`costo.anio`, de la Ley Federal de Derechos);
+   * cuándo la sustituye la siguiente no está en ninguna fuente, así que no se afirma.
+   */
+  function amxVigenciaCuota(costo) {
+    if (!costo || !costo.anio) return '';
+    var anio = parseInt(costo.anio, 10);
+    if (isNaN(anio)) return '';
+    return 'Cuota vigente ' + anio;
+  }
+
+  /** «$15,804.77» y «$490», como los escribe el propio corpus. */
+  function amxImporte(monto) {
+    var n = Number(monto);
+    if (isNaN(n)) return String(monto);
+    var decimales = n % 1 ? 2 : 0;
+    return '$' + n.toLocaleString('es-MX', { minimumFractionDigits: decimales, maximumFractionDigits: 2 });
+  }
+
+  /**
+   * «Solo si: Persona extranjera». Un requisito con escenarios propios (sin variantes)
+   * entra en el catálogo de un trámite, pero hay que decir a quién aplica.
+   */
+  function amxRotuloEscenarios(corpus, escenarios) {
+    if (!Array.isArray(escenarios) || !escenarios.length || escenarios[0] === '*') return '';
+    var etiquetas = [];
+    for (var i = 0; i < escenarios.length; i++) {
+      var e = (corpus.escenarios || []).find(function (x) { return x.id === escenarios[i]; });
+      etiquetas.push(e ? e.label : escenarios[i]);
+    }
+    return 'Solo si: ' + etiquetas.join(' · ');
+  }
+
+  /**
    * Busca una entidad del corpus por su id.
    */
   function amxLegalEntidad(corpus, id) {
@@ -192,4 +271,8 @@
   window.amxRequisitosDe = amxRequisitosDe;
   window.amxLegalEntidad = amxLegalEntidad;
   window.amxLegalFecha = amxLegalFecha;
+  window.amxNormasPorPregunta = amxNormasPorPregunta;
+  window.amxVigenciaCuota = amxVigenciaCuota;
+  window.amxImporte = amxImporte;
+  window.amxRotuloEscenarios = amxRotuloEscenarios;
 })();

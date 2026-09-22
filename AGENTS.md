@@ -285,15 +285,16 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
    `index.html` lo crea por JS, y eso no basta: el *preload scanner* pide los
    `<script src="app.js">` **antes** de ejecutar ese inline, resolviéndolos contra
    `/pistolas/` → 18 peticiones 404 por visita. Con la etiqueta estática: 0.
-2. **NO añadas un `_redirects`** (hoy no existe, y es deliberado). Coexisten
-   `pistolas.html` (listado) y el directorio `pistolas/` (fichas); la documentación
-   de Cloudflare no define cuál gana en `/pistolas`, pero **empíricamente gana el
-   fichero**, que es justo lo que se quiere. Forzarlo con un rewrite
-   `/pistolas → /pistolas.html 200` provoca un **bucle infinito**: Pages redirige
-   todo `.html` a su versión sin extensión, así que el rewrite se persigue a sí
-   mismo. Ya ocurrió una vez. Y **nunca un catch-all `/*`**: en Pages los redirects
-   se siguen exista o no el asset, y se comería `sitemap.xml`, `robots.txt`,
-   `app.js` e `imagenes/`.
+2. **`public/_redirects` solo admite redirecciones 301 literales** (desde el
+   22-sep-2026 existe, con dos: las rutas viejas de Legalidad a `/legalidad/tramites`).
+   Nunca un rewrite `200` ni un comodín. Coexisten `pistolas.html` (listado) y el
+   directorio `pistolas/` (fichas); la documentación de Cloudflare no define cuál gana
+   en `/pistolas`, pero **empíricamente gana el fichero**, que es justo lo que se
+   quiere. Forzarlo con un rewrite `/pistolas → /pistolas.html 200` provoca un
+   **bucle infinito**: Pages redirige todo `.html` a su versión sin extensión, así
+   que el rewrite se persigue a sí mismo. Ya ocurrió una vez. Y **nunca un catch-all
+   `/*`**: en Pages los redirects se siguen exista o no el asset, y se comería
+   `sitemap.xml`, `robots.txt`, `app.js` e `imagenes/`.
 
 `sitemap.xml` y `robots.txt` salen del mismo script. El `lastmod` sale de la **fecha del
 inventario** del que viene cada artículo (los historiales de precio la traen, una por
