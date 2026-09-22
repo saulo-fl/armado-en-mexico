@@ -101,9 +101,27 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
   for (const h of huecos) {
     if (h.nota) assert.ok(!t2.includes(h.nota.slice(0, 40)), 'la nota interna del hueco ' + h.tabla + '/' + h.id + ' sale en pantalla');
   }
-  // Tres carpetas más documentos: Requisitos y Permisos ya no existen por separado.
-  assert.match(t2, /Trámites/);
-  assert.doesNotMatch(t2, /\bPermisos\b/, 'la carpeta «Permisos» tiene que haberse fundido en Trámites');
+  // UNA SOLA PÁGINA (22-sep-2026): las cuatro secciones están dentro del hub, plegadas,
+  // y nada manda a otra pantalla. Lo que antes vivía en /legalidad/federal, /estatal,
+  // /tramites y /documentos tiene que estar aquí.
+  assert.match(t2, /Qué arma puedo tener y dónde/, 'lo federal no está en el hub');
+  assert.match(t2, /Elige tu estado/, 'lo estatal no está en el hub');
+  assert.match(t2, /Posesión no es portación/, 'los trámites no están en el hub');
+  assert.match(t2, /Documentos oficiales/, 'los documentos no están en el hub');
+  // Cuatro folders exactos y trece plegables dentro (3 preguntas + 1 «por qué no hay ley
+  // estatal» + 6 trámites + 3 grupos de documentos); un solo botón, el de la entrevista
+  // (el arnés no carga ui.jsx, así que ReportarError no cuenta).
+  const conClase = (nodo, clase, n = { v: 0 }) => {
+    if (!nodo || typeof nodo !== 'object') return n.v;
+    if (Array.isArray(nodo)) { nodo.forEach((x) => conClase(x, clase, n)); return n.v; }
+    if (nodo.props && typeof nodo.props.className === 'string' && nodo.props.className.split(' ').includes(clase)) n.v++;
+    if (typeof nodo.tipo === 'function') conClase(nodo.tipo(nodo.props), clase, n);
+    (nodo.hijos || []).forEach((x) => conClase(x, clase, n));
+    return n.v;
+  };
+  assert.equal(conClase(arbol, 'amx-leg-folder'), 4, 'el cajón lleva exactamente cuatro folders');
+  assert.equal(conClase(arbol, 'amx-leg-plegable'), 13, 'dentro de los folders van trece plegables');
+  assert.equal(contar(arbol, 'button'), 1, 'el único botón del hub es el de la entrevista');
 });
 
 test('LegalidadTramites separa PERMISO de COMPRA, que es el error que corrige', (t) => {
@@ -344,6 +362,10 @@ test('el prerender no publica ningún hueco: ni como afirmación ni como lista',
     // …y su nota interna tampoco: desde el 22-sep-2026 los huecos son de desarrollo
     // (check-legal.mjs y docs/fuentes/legalidad.md), no del público (hilo 2).
     assert.doesNotMatch(html, /falta por verificar/i, seccion + ': volvió el bloque de huecos');
+    // La regla de traumáticas de un estado en revisión tampoco se afirma (CDMX, Morelos).
+    for (const e of C.entidades.filter((x) => x.traumaticas && x.traumaticas.revisar)) {
+      assert.ok(!html.includes(e.traumaticas.texto.slice(0, 40).replace(/&/g, '&amp;')), seccion + ': traumáticas de ' + e.id + ' está en revisión y sale afirmado');
+    }
     for (const h of huecos) {
       if (h.nota) assert.ok(!html.includes(h.nota.slice(0, 40).replace(/&/g, '&amp;')),
         seccion + ': la nota interna del hueco ' + h.tabla + '/' + h.id + ' llega al HTML');
@@ -351,29 +373,21 @@ test('el prerender no publica ningún hueco: ni como afirmación ni como lista',
   }
 });
 
-// Toda carpeta del hub tiene que llevar a una pantalla que EXISTE y estar dada de alta en
-// el router. Una carpeta que navega a una clave inventada no da error: no hace nada, y eso
-// no se nota hasta que alguien la pulsa. Pasó con 'legal-requisitos', que el router llama
-// 'legal-req'.
-test('las carpetas del hub llevan a pantallas que existen y están ruteadas', () => {
+// Cada sección del cajón tiene su ruta profunda (/legalidad/<id>), que sigue indexada y
+// enlazada y abre el hub con ese folder desplegado. Una sección sin ruta en el router se
+// quedaría sin página estática; una ruta sin sección abriría el hub cerrado.
+test('cada sección del cajón tiene su ruta profunda en el router', () => {
   const app = readFileSync(raiz('src/app.jsx'), 'utf8');
   const src = readFileSync(raiz('src/screens/screens-legalidad.jsx'), 'utf8');
-  const claves = [...src.matchAll(/clave:\s*'([^']+)'/g)].map((m) => m[1]);
-  assert.ok(claves.length >= 4, 'se esperaban al menos cuatro carpetas, hay ' + claves.length);
-  const bloque = app.match(/const SCREEN_TO_PATH = \{[\s\S]*?\n\};/);
-  assert.ok(bloque, 'no encuentro SCREEN_TO_PATH en app.jsx');
-  const mapa = bloque[0];
-  for (const c of claves) {
-    assert.match(app, new RegExp("screen === '" + c + "'"),
-      'la carpeta «' + c + '» navega a una pantalla que el router no monta: el botón no haría nada');
-    // Se busca DENTRO de SCREEN_TO_PATH, no en todo app.jsx: la misma clave
-    // aparece en los mapas de rótulos y de pestaña, así que buscarla en el
-    // archivo entero daba por buena una ruta que no existía (comprobado
-    // borrándola: el test seguía pasando). La clave va entrecomillada o
-    // desnuda, y los escapes van dobles al construir la expresión desde
-    // cadena: `"\b"` es el carácter de retroceso, no el límite de palabra.
-    const enMapa = new RegExp("[{,]\\s*'?" + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'?\\s*:");
-    assert.ok(enMapa.test(mapa), 'la carpeta «' + c + '» no tiene ruta en SCREEN_TO_PATH');
+  const bloque = src.match(/const LEGALIDAD_SECCIONES = \[[\s\S]*?\n\];/);
+  assert.ok(bloque, 'no encuentro LEGALIDAD_SECCIONES');
+  const ids = [...bloque[0].matchAll(/\bid:\s*'([^']+)'/g)].map((m) => m[1]);
+  assert.deepEqual(ids, ['federal', 'estatal', 'tramites', 'documentos']);
+  const mapa = app.match(/const SCREEN_TO_PATH = \{[\s\S]*?\n\};/)[0];
+  for (const id of ids) {
+    assert.match(mapa, new RegExp("'legal-" + id + "':\\s*'legalidad/" + id + "'"), 'legal-' + id + ' no tiene ruta en SCREEN_TO_PATH');
+    assert.match(app, new RegExp("screen === 'legal-" + id + "'"), 'legal-' + id + ' no se monta en el router');
+    assert.match(src, new RegExp('seccion="' + id + '"'), 'la ruta profunda de ' + id + ' no abre su folder');
   }
 });
 

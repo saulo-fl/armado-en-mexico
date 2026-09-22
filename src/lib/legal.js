@@ -71,6 +71,9 @@
         if (it.antecedentes && it.antecedentes.revisar === true) {
           apuntar('entidades/antecedentes', it.id, it.antecedentes.nota);
         }
+        if (it.traumaticas && it.traumaticas.revisar === true) {
+          apuntar('entidades/traumaticas', it.id, it.traumaticas.nota);
+        }
       }
     }
     return resultado;

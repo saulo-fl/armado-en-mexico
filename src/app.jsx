@@ -529,7 +529,7 @@ function App() {
   } else if (screen === 'legal-tramites') {
     content = <window.LegalidadTramites onNav={navigate} />;
   } else if (screen === 'legal-documentos') {
-    content = <window.LegalidadDocumentos />;
+    content = <window.LegalidadDocumentos onNav={navigate} />;
   } else if (screen === 'entrevista') {
     content = <window.EntrevistaScreen onNav={navigate} />;
   } else if (screen === 'about') {
