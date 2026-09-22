@@ -388,7 +388,11 @@ function EntrevistaCuerpo({ modoPortada = false }) {
       {/* La altura estable evita que salten las respuestas; el texto se apoya
           abajo para que la pregunta corta no deje un hueco encima de ellas. */}
       <legend id={'amx-ent-p-' + p.id} ref={enunciadoRef} className="amx-ent-pregunta-enunciado"
-        data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}><span>{p.texto}</span></legend>
+        data-largo={p.texto.length > 80 ? 'mucho' : p.texto.length > 45 ? 'medio' : 'poco'}>
+        {/* El folio del renglón, como en un formato impreso. Va oculto al
+            lector de pantalla: numera, no dice nada que la pregunta no diga. */}
+        {compacta && <span className="amx-ent-folio" aria-hidden="true">{d.recorrido.length + 1}</span>}
+        <span>{p.texto}</span></legend>
       <div className={'amx-ent-opciones' + (compacta ? ' amx-ent-opciones--compacta' : '')}
         role="radiogroup" aria-labelledby={'amx-ent-p-' + p.id}>
         {p.opciones.map(function (o) {
@@ -446,7 +450,19 @@ function EntrevistaCuerpo({ modoPortada = false }) {
         <window.EscritorioPapeles documentos={d.documentos} />
       )}
       <div className="amx-ent-mesa">
-        <div className="amx-ent-folder">
+        {/* En la portada la pregunta se sirve sobre la misma hoja de oficio que
+            usan la FAQ y la clasificación, con su membrete: es un renglón del
+            formato, no una tarjeta de aplicación. */}
+        <div className={'amx-ent-folder' + (compacta ? ' amx-oficio' : '')}>
+          {compacta && (
+            <div className="amx-oficio-membrete" aria-hidden="true">
+              {/* En el teléfono el membrete se queda solo con lo que aporta: la
+                  marca ya está en la cabecera del sitio y partida en dos
+                  renglones estorbaba más de lo que decía. */}
+              <span><span className="amx-ent-membrete-marca">Armado en México · </span>Autodiagnóstico</span>
+              <span>DEFENSA-02-040</span>
+            </div>
+          )}
           {pregunta}
           {dictamen}
           <div className="amx-ent-acciones">

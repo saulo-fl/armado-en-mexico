@@ -143,6 +143,23 @@ test('en el teléfono la entrevista de la portada cabe en pantalla', () => {
     'en móvil el enunciado no debe reservar los tres renglones');
 });
 
+test('la primera pregunta de la portada es un renglón de formato, no una tarjeta', () => {
+  const cuerpo = readFileSync(raiz('src/screens/screens-entrevista.jsx'), 'utf8');
+  const estilos = readFileSync(raiz('src/styles/estilo.css'), 'utf8');
+  // Se sirve sobre la MISMA hoja que la FAQ y la clasificación, con su
+  // membrete: era la única superficie del sitio sin metáfora física.
+  assert.match(cuerpo, /amx-ent-folder' \+ \(compacta \? ' amx-oficio'/,
+    'en la portada la pregunta debe ir sobre la hoja de oficio');
+  assert.match(cuerpo, /amx-oficio-membrete[\s\S]{0,400}DEFENSA-02-040/,
+    'falta el membrete del formato');
+  // Las respuestas se marcan, no se pulsan: cuadro vacío y sin flecha.
+  assert.match(estilos,
+    /--compacto button\.amx-ent-opcion::before \{[^}]*border: 1\.5px/,
+    'las respuestas de la portada deben llevar su casilla');
+  assert.match(estilos, /--compacto button\.amx-ent-opcion::after \{\s*content: none;/,
+    'la flecha de botón sobra en una casilla');
+});
+
 test('la mesa va arriba de las preguntas y los documentos suben hacia ella', () => {
   const cuerpo = readFileSync(raiz('src/screens/screens-entrevista.jsx'), 'utf8');
   const estilos = readFileSync(raiz('src/styles/estilo.css'), 'utf8');
