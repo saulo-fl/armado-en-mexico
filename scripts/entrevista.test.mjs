@@ -70,6 +70,7 @@ test('una mujer nacida en México nunca recibe la pregunta de cartilla', functio
     nacimiento: 'mx',
     sexo: 'mujer',
     edad: 'si',
+    militar: 'no',
     'modo-vivir': 'asalariado',
     'carta-trabajo': 'si',
     antecedentes: 'no',
@@ -80,6 +81,38 @@ test('una mujer nacida en México nunca recibe la pregunta de cartilla', functio
   });
   assert.equal(r.estado, 'completa');
   assert.equal(r.recorrido.some(function (x) { return x.pregunta.id === 'cartilla'; }), false);
+});
+
+test('al personal militar no se le pregunta por la cartilla', function () {
+  // Antes «Soy personal militar» era una opción DENTRO de la cartilla, así que
+  // la pregunta llegaba igual y el militar sin cartilla liberada se llevaba un
+  // impedimento que no le corresponde. Ahora se pregunta antes y se le salta.
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, {
+    nacimiento: 'mx', sexo: 'hombre', edad: 'si', militar: 'si',
+  });
+  assert.equal(r.recorrido.some(function (x) { return x.pregunta.id === 'cartilla'; }), false);
+  assert.equal(r.documentos.includes('pa-smn'), false);
+  assert.equal(r.escenarios.includes('militar'), true);
+});
+
+test('una mujer militar también recibe el aviso del formato militar', function () {
+  // El caso que la versión anterior no cubría: la cartilla no se le preguntaba,
+  // así que nunca veía la opción y se iba con el expediente civil sin aviso.
+  var r = amxEvaluarEntrevista(ENTREVISTA_ACTUAL, {
+    nacimiento: 'mx', sexo: 'mujer', edad: 'si', militar: 'si',
+  });
+  assert.equal(r.escenarios.includes('militar'), true);
+  assert.ok(r.avisos.some(function (a) { return /formato de CIVILES/.test(a.texto); }),
+    'no sale el aviso de que esta entrevista es la de civiles');
+});
+
+test('la pregunta del trabajo tiene cuatro respuestas y ninguna salida de escape', function () {
+  var p = ENTREVISTA_ACTUAL.preguntas.find(function (x) { return x.id === 'modo-vivir'; });
+  assert.equal(p.texto, '¿Cómo es tu trabajo?');
+  assert.equal(p.opciones.length, 4);
+  assert.equal(p.opciones.some(function (o) { return o.id === 'ninguno'; }), false);
+  // El dato que vivía en el impedimento de la quinta opción no se pierde.
+  assert.match(p.ayuda, /contador público con cédula profesional/);
 });
 
 test('una persona extranjera recibe residencia y no acta de nacimiento', function () {

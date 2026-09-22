@@ -135,6 +135,37 @@
         ],
       },
       {
+        // Va ANTES de la cartilla a propósito. Si se preguntara después, un
+        // militar sin cartilla liberada se llevaría primero el impedimento de
+        // cartilla y luego el aviso de que esta entrevista no es la suya: dos
+        // dictámenes que se contradicen. Preguntando aquí, la cartilla ni
+        // siquiera se le pregunta. Se pregunta a todos, no solo a los hombres
+        // nacidos en México: en la versión anterior era una opción DENTRO de la
+        // cartilla, así que una mujer militar nunca llegaba a ver el aviso.
+        clave: 'mil',
+        id: 'militar',
+        etapa: 'quien',
+        texto: '¿Eres personal militar?',
+        opciones: [
+          {
+            clave: 's',
+            id: 'si',
+            texto: 'Sí',
+            aviso: {
+              texto: 'Esta entrevista está hecha sobre el formato de CIVILES. El personal militar usa la versión MILITAR del 02-040 y se identifica con su credencial militar vigente (CIM o TIM) junto con credencial para votar, pasaporte, cartilla del Servicio Militar Nacional o cédula profesional con fotografía.',
+              remedio: 'Pide el formato militar y la lista de documentos en tu unidad, dependencia o instalación de adscripción. El corpus de armado.mx no verificó qué documento sustituye a la cartilla para el personal militar en este trámite, así que confírmalo ahí antes de armar nada.',
+              fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 1 del anverso, variante de personal militar; hueco anotado en el corpus sobre el documento sustituto.',
+            },
+            escenario: 'militar',
+          },
+          {
+            clave: 'n',
+            id: 'no',
+            texto: 'No',
+          },
+        ],
+      },
+      {
         clave: 'car',
         id: 'cartilla',
         etapa: 'quien',
@@ -147,6 +178,12 @@
           {
             pregunta: 'sexo',
             es: ['hombre'],
+          },
+          {
+            // Al militar no se le pide la cartilla: se identifica con su
+            // credencial militar y su trámite es el del formato MILITAR.
+            pregunta: 'militar',
+            es: ['no'],
           },
         ],
         opciones: [
@@ -169,25 +206,17 @@
             },
             escenario: 'hombre',
           },
-          {
-            clave: 'mil',
-            id: 'militar',
-            texto: 'Soy personal militar',
-            aviso: {
-              texto: 'Esta entrevista está hecha sobre el formato de CIVILES. El personal militar usa la versión MILITAR del 02-040 y se identifica con su credencial militar vigente (CIM o TIM) junto con credencial para votar, pasaporte, cartilla del Servicio Militar Nacional o cédula profesional con fotografía.',
-              remedio: 'Pide el formato militar y la lista de documentos en tu unidad, dependencia o instalación de adscripción. El corpus de armado.mx no verificó qué documento sustituye a la cartilla para el personal militar en este trámite, así que confírmalo ahí antes de armar nada.',
-              fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 1 del anverso, variante de personal militar; hueco anotado en el corpus sobre el documento sustituto.',
-            },
-            escenario: 'militar',
-          },
         ],
       },
       {
         clave: 'viv',
         id: 'modo-vivir',
         etapa: 'vivir',
-        texto: '¿De qué vives hoy?',
-        ayuda: 'El comprobante de ingresos es el requisito que más solicitudes detiene, y el documento cambia según de dónde venga tu dinero. Ojo: el certificado de «modo honesto de vivir» que quizá hayas oído nombrar es de la licencia de portación, no de este permiso.',
+        texto: '¿Cómo es tu trabajo?',
+        // La salida del contador estaba en el impedimento de una quinta opción,
+        // «Ninguna de las cuatro», que se quitó: el dato no vive en ningún otro
+        // sitio del corpus, así que se conserva aquí.
+        ayuda: 'El comprobante de ingresos es el requisito que más solicitudes detiene, y el documento cambia según de dónde venga tu dinero. El formato solo reconoce estas cuatro maneras de acreditarlo; si no encajas en ninguna, la puerta que queda abierta es la del contador público con cédula profesional, que puede expedir el documento original. Ojo: el certificado de «modo honesto de vivir» que quizá hayas oído nombrar es de la licencia de portación, no de este permiso.',
         opciones: [
           {
             clave: 'a',
@@ -212,17 +241,6 @@
             id: 'ejidatario',
             texto: 'Soy ejidatario, comunero o jornalero del campo',
             escenario: 'ejidatario',
-          },
-          {
-            clave: 'n',
-            id: 'ninguno',
-            texto: 'Ninguna de las cuatro',
-            impedimento: {
-              tipo: 'subsanable',
-              motivo: 'El requisito 2 del formato solo reconoce cuatro maneras de acreditar ingresos: carta de trabajo del patrón, constancia de un contador público con cédula, documento de la pensión, o certificado de ejidatario, comunero o jornalero. No hay una quinta casilla.',
-              remedio: 'La puerta que queda abierta es la del contador: un documento original expedido por un contador público con cédula profesional, con la fotocopia de su cédula por ambos lados ampliada al 200%. Si tus ingresos se pueden sustentar, un contador titulado puede firmarlo.',
-              fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 2 del anverso e instructivo punto 13.',
-            },
           },
         ],
       },

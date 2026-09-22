@@ -143,6 +143,25 @@ test('en el teléfono la entrevista de la portada cabe en pantalla', () => {
     'en móvil el enunciado no debe reservar los tres renglones');
 });
 
+test('la mesa va arriba de las preguntas y los documentos suben hacia ella', () => {
+  const cuerpo = readFileSync(raiz('src/screens/screens-entrevista.jsx'), 'utf8');
+  const estilos = readFileSync(raiz('src/styles/estilo.css'), 'utf8');
+  // El escritorio se pinta ANTES que la tarjeta: es lo que impide que una
+  // pregunta con cuatro respuestas largas lo empuje fuera de la pantalla.
+  const escritorio = cuerpo.indexOf('window.EscritorioPapeles');
+  const tarjeta = cuerpo.indexOf('className="amx-ent-mesa"');
+  assert.ok(escritorio !== -1 && tarjeta !== -1, 'no encuentro el escritorio o la tarjeta');
+  assert.ok(escritorio < tarjeta,
+    'el escritorio debe ir antes que la tarjeta, también en el orden del DOM');
+  // Con la mesa arriba, el documento entra desde ABAJO: parece salir de la
+  // respuesta que se acaba de tocar. Una sola dirección en todas las pantallas.
+  assert.match(estilos,
+    /@keyframes amx-ent-papel-entra \{\s*from \{[^}]*var\(--amx-plaza-y\) \+ 210%\)/,
+    'el papel debe entrar desde abajo');
+  assert.doesNotMatch(estilos, /amx-ent-papel-entra-escritorio/,
+    'sobra el override de escritorio: la dirección es la misma en toda pantalla');
+});
+
 test('ninguna pantalla promete que el permiso se vaya a otorgar', (t) => {
   const fuentes = ['src/screens/screens-legalidad.jsx', 'src/screens/screens-entrevista.jsx'];
   let miradas = 0;
