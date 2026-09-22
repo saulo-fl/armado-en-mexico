@@ -87,3 +87,24 @@ La investigacion completa â€”631 hallazgos, 568 verificados, 159 URLs oficialesâ
 repo, en `contratos-legalidad/` de la carpeta del proyecto, junto con el insumo del que se
 volco este archivo. No se commitea: aqui solo va lo del sitio, y cada afirmacion publicada ya
 trae su fundamento y su enlace dentro de `data-legal.js`.
+
+## Copias PDF para consulta (22-sep-2026)
+
+`public/documentos-legales/` contiene 19 PDF descargados de las URL oficiales: 13 del
+catalogo `fuentes`, cuatro leyes nombradas en la entrevista y los requisitos, y dos
+formularios estatales. `archivoLocal` conserva la ruta de cada copia y `url` conserva
+la fuente oficial. La pagina `/legalidad/documentos` muestra ambas; el sitemap incluye
+los 19 PDF. `scripts/documentos-legales.test.mjs` comprueba que no falte ninguno ni
+haya archivos sin ficha. El build copia `public/` a `out/` sin transformar el PDF.
+
+Estas copias son una fotografia del texto descargado, no una afirmacion de vigencia
+permanente. Al actualizar una ley, reemplazar su PDF desde la misma fuente oficial,
+comprobar el texto y los cambios legales que afecten al sitio, y correr build y tests.
+El formato RFA-LC-017 es de 2010 y las preguntas frecuentes de DCAM contienen cifras
+obsoletas: sus advertencias siguen visibles en el indice.
+
+Quedan sin copia local la sentencia de la Controversia 505/2023 (el servidor SCJN
+entrega una pagina HTML de bloqueo; el texto oficial alternativo esta en el DOF) y
+los dos acuerdos marcados como `revisar` por falta de texto oficial confirmado.
+Las diez fuentes que son paginas web se enlazan a la autoridad: no se presentan como
+PDF oficiales generados por este proyecto.

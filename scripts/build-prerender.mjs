@@ -22,7 +22,7 @@
 // Se ejecuta desde `npm run build`, después de Babel.
 // ============================================================================
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
 import { renderSoporteHtml } from './prerender-soporte.mjs';
@@ -474,6 +474,9 @@ const FIJAS = [
   { ruta: 'legalidad/permisos', titulo: 'Permisos y licencias de armas en México — posesión no es portación', enSitemap: true,
     desc: 'Ficha de cada trámite ante la Secretaría de la Defensa Nacional: qué habilita, qué no habilita, cuánto cuesta y con qué homoclave.',
     cuerpo: renderLegalHtml(LEGAL, 'permisos', win) },
+  { ruta: 'legalidad/documentos', titulo: 'Documentos legales y fuentes oficiales en PDF', enSitemap: true,
+    desc: 'Constitución, leyes, reglamento, formatos y requisitos oficiales citados en Armado en México. PDF alojados aquí y enlaces a sus fuentes oficiales.',
+    cuerpo: renderLegalHtml(LEGAL, 'documentos', win) },
   { ruta: 'legalidad/puedo-comprar', titulo: '¿Puedo comprar un arma? — entrevista sobre los requisitos', enSitemap: true,
     desc: 'Quince preguntas sobre tu situación, ninguna con datos personales, para saber qué papeles te pide el formato DEFENSA-02-040 y cuál te falta.',
     cuerpo: renderEntrevistaHtml(ENTREVISTA, LEGAL, win) },
@@ -528,8 +531,15 @@ for (const p of FIJAS) {
 // no salen de un data-*.js, así que siguen SIN lastmod.
 // La portada lleva la más reciente de todas: es lo que cambia cuando cambia algo.
 
+const pdfLegales = [...Object.values(LEGAL.fuentes), ...(LEGAL.documentosComplementarios || [])]
+  .filter((f) => f.archivoLocal).map((f) => {
+    if (!existsSync(join(PUB, f.archivoLocal))) {
+      throw new Error(`Falta el PDF legal: ${f.archivoLocal}`);
+    }
+    return { ruta: f.archivoLocal, enSitemap: true };
+  });
 const enSitemap = [{ ruta: '', enSitemap: true, lastmod: masReciente(paginas.map((p) => p.lastmod)) },
-  ...paginas].filter((p) => p.enSitemap);
+  ...paginas, ...pdfLegales].filter((p) => p.enSitemap);
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${enSitemap.map(({ ruta, lastmod }) => {

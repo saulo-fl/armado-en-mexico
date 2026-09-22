@@ -28,6 +28,7 @@ const SCREEN_TO_PATH = {
   'legal-req': 'legalidad/requisitos', entrevista: 'legalidad/puedo-comprar',
   'legal-federal': 'legalidad/federal', 'legal-estatal': 'legalidad/estatal',
   'legal-permisos': 'legalidad/permisos',
+  'legal-documentos': 'legalidad/documentos',
   faq: 'preguntas', menu: 'mas', traumaticas: 'traumaticas',
   soporte: 'soporte',
   municiones: 'municiones',
@@ -466,16 +467,18 @@ function App() {
     compare: 'Comparador', legal: 'Legalidad',
     'legal-req': 'Requisitos', entrevista: '¿Puedo comprar un arma?',
     'legal-federal': 'Marco federal', 'legal-estatal': 'Por estado', 'legal-permisos': 'Permisos',
+    'legal-documentos': 'Documentos legales',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
     calibres: 'Calibres', calibre: 'Calibre', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas', 'legal-req', 'entrevista', 'legal-federal', 'legal-estatal', 'legal-permisos'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas', 'legal-req', 'entrevista', 'legal-federal', 'legal-estatal', 'legal-permisos', 'legal-documentos'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
     legal: 'legal', 'legal-req': 'legal', entrevista: 'legal',
     'legal-federal': 'legal', 'legal-estatal': 'legal', 'legal-permisos': 'legal',
+    'legal-documentos': 'legal',
     menu: 'menu', about: 'about', faq: 'faq',
     calibres: 'menu', calibre: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
     soporte: 'menu',
@@ -522,6 +525,8 @@ function App() {
     content = <window.LegalidadEstatal onNav={navigate} />;
   } else if (screen === 'legal-permisos') {
     content = <window.LegalidadPermisos onNav={navigate} />;
+  } else if (screen === 'legal-documentos') {
+    content = <window.LegalidadDocumentos />;
   } else if (screen === 'entrevista') {
     content = <window.EntrevistaScreen onNav={navigate} />;
   } else if (screen === 'about') {

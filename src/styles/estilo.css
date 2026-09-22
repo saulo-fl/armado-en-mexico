@@ -6227,6 +6227,36 @@
   color: var(--ficha-tinta);
   margin-top: 0;
 }
+.amx-v2 .amx-leg-documentos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.amx-v2 .amx-leg-documentos li {
+  border-top: 1px solid var(--carton-filo);
+  padding: 12px 0;
+  line-height: 1.5;
+}
+.amx-v2 .amx-leg-documentos strong,
+.amx-v2 .amx-leg-documentos span {
+  display: block;
+}
+.amx-v2 .amx-leg-documentos span,
+.amx-v2 .amx-leg-documentos p {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-leg-documentos a {
+  display: inline-block;
+  margin: 6px 16px 0 0;
+  color: var(--ficha-tinta);
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-leg-documentos a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
 .amx-v2 .amx-leg-dependencia {
   font-family: var(--mono);
   font-size: 13px;

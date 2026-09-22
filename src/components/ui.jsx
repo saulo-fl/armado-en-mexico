@@ -3739,12 +3739,13 @@ function CitaFuente({ fuente }) {
   const fechaTexto = window.amxLegalFecha ? window.amxLegalFecha(fuente.fechaConsulta) : '';
   const hayFecha = fechaTexto !== '';
   const esPdf = fuente.pdf === true;
+  const enlace = fuente.archivoLocal ? '/' + fuente.archivoLocal : fuente.url;
 
   return (
     <p className="amx-cita">
       Fuente:{' '}
       <a
-        href={fuente.url}
+        href={enlace}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={esPdf
@@ -3754,6 +3755,7 @@ function CitaFuente({ fuente }) {
         {titulo}
         {esPdf && <span aria-hidden="true"> ↗</span>}
       </a>
+      {fuente.archivoLocal && <> · <a href={fuente.url} target="_blank" rel="noopener noreferrer">Fuente oficial</a></>}
       {fuente.emisor && <> ({fuente.emisor})</>}
       {hayFecha && <> · Consultado el {fechaTexto}</>}
     </p>
