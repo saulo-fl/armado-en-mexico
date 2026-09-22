@@ -2191,47 +2191,57 @@ const AMX_ENTREVISTA_ARTES = {
   'pa-residencia': 'tarjeta-residente.webp',
 };
 
-// LAS PLAZAS (20-sep-2026): el recorrido más largo entrega diez documentos,
-// así que diez plazas sobre la mesa de 358 × 280; el papel mide 78 × 100.
-// `x`/`y` son la esquina superior izquierda en coordenadas de la mesa y `r`
-// el giro en grados. El giro es FIJO por plaza: cada papel siempre cae igual,
-// nunca aleatorio. estilo.css las convierte a % del tamaño propio del papel
-// (x/78 del ancho, y del alto) con la misma relación de aspecto de la mesa.
-const AMX_ENTREVISTA_PLAZAS = [
-  { x: 140, y: 90, r: -2 },   // 1 — el centro
-  { x: 18, y: 22, r: -7 },    // 2
-  { x: 240, y: 16, r: 5 },    // 3
-  { x: 14, y: 150, r: 4 },    // 4
-  { x: 258, y: 152, r: -5 },  // 5
-  { x: 136, y: 172, r: 3 },   // 6
-  { x: 66, y: 86, r: 7 },     // 7
-  { x: 214, y: 88, r: -4 },   // 8
-  { x: 96, y: 14, r: -3 },    // 9
-  { x: 180, y: 168, r: 6 },   // 10
-];
+// EL ACOMODO (21-sep-2026): los documentos se ponen en orden de lectura —se
+// llena de izquierda a derecha y se baja de renglón—, en lugar de las diez
+// plazas dispersas que había antes, donde el último en llegar tomaba el centro
+// y empujaba al resto. Con pocos documentos aquello los amontonaba arriba y
+// dejaba media mesa vacía.
+//
+// La rejilla se calcula con el número de documentos y con el ancho de papel que
+// fija `amxMedidaMesa`, así que reparte el espacio en vez de repetir posiciones
+// dibujadas a mano: dos documentos ocupan la mesa igual de bien que diez. Sigue
+// siendo una función pura de la lista, como antes: recargar con los diez ya
+// ganados da exactamente la misma mesa que haberlos ganado uno a uno.
+//
+// `x`/`y` son la esquina superior izquierda en % de la mesa y `r` el giro en
+// grados. El giro es fijo por posición, nunca aleatorio: es lo que evita que
+// esto se lea como una cuadrícula de fotos.
+const AMX_GIRO_PAPEL = [-3, 2, -2, 3, -1, 2, -3, 1, 3, -2];
+const AMX_MESA_MARGEN = 4;          // % de mesa libre en cada borde
+const AMX_MESA_PROPORCION = 358 / 300;  // la que declara .amx-ent-pila
 
-// El último en llegar toma la plaza 1 (el centro) y el que estaba ahí se mueve
-// a la primera plaza libre. Se simulan los arribos en orden sobre la lista, así
-// el resultado es una función pura de los documentos: responder tres seguidas
-// o recargar con los diez ya ganados da la misma mesa. Nunca hay más de diez
-// papeles que plazas (diez, justo), así el desplazado siempre encuentra sitio.
 function amxPlazasDocumentos(documentos) {
-  const ocupada = {};
-  for (let i = 0; i < documentos.length; i++) {
-    const saliente = ocupada[0];
-    ocupada[0] = documentos[i];
-    if (saliente !== undefined) {
-      let libre = 1;
-      while (libre < AMX_ENTREVISTA_PLAZAS.length && ocupada[libre] !== undefined) libre++;
-      ocupada[libre] = saliente;
-    }
-  }
   const porDocumento = {};
-  for (let p = 0; p < AMX_ENTREVISTA_PLAZAS.length; p++) {
-    if (ocupada[p] !== undefined) porDocumento[ocupada[p]] = p;
+  const n = documentos.length;
+  if (!n) return porDocumento;
+
+  const m = amxMedidaMesa(n);
+  // El alto del papel en % del alto de la MESA. No se toma de `amxMedidaMesa`
+  // porque aquel lo calcula contra `rel`, y el alto de la mesa dejó de salir de
+  // `rel`: .amx-ent-pila la fija en 358 / 300.
+  const alto = m.papel * (100 / 78) * AMX_MESA_PROPORCION;
+  const util = 100 - AMX_MESA_MARGEN * 2;
+  const caben = Math.max(1, Math.floor(util / m.papel));
+  const columnas = Math.min(caben, Math.ceil(Math.sqrt(n)));
+  const filas = Math.ceil(n / columnas);
+
+  // El paso reparte los papeles de borde a borde del área útil; la última fila,
+  // si viene incompleta, se centra con ese mismo paso para que no quede coja.
+  const paso = columnas > 1 ? (util - m.papel) / (columnas - 1) : 0;
+  const pasoY = filas > 1 ? Math.max(0, (util - alto) / (filas - 1)) : 0;
+
+  for (let i = 0; i < n; i++) {
+    const fila = Math.floor(i / columnas);
+    const columna = i % columnas;
+    const enEstaFila = Math.min(columnas, n - fila * columnas);
+    const anchoFila = (enEstaFila - 1) * paso + m.papel;
+    const x = (100 - anchoFila) / 2 + columna * paso;
+    const y = filas > 1 ? AMX_MESA_MARGEN + fila * pasoY : (100 - alto) / 2;
+    porDocumento[documentos[i]] = { x: x, y: y, r: AMX_GIRO_PAPEL[i % AMX_GIRO_PAPEL.length] };
   }
   return porDocumento;
 }
+window.amxPlazasDocumentos = amxPlazasDocumentos;
 
 // La mesa se ajusta a lo que hay encima, para que nunca se vea medio vacía:
 // pocos documentos, papeles grandes y mesa baja; muchos, papeles chicos y mesa
@@ -2277,12 +2287,19 @@ window.amxMedidaMesa = amxMedidaMesa;
 const PapelEntrevista = React.memo(function PapelEntrevista({ id, indice, plaza, visible }) {
   const [fallo, setFallo] = React.useState(false);
   const [revelado, setRevelado] = React.useState(false);
-  const [prevVisible, setPrevVisible] = React.useState(visible);
+  // Arranca en `false` aunque el papel ya esté visible, y no en `visible`: el
+  // escritorio no existe hasta que se contesta la primera pregunta, así que sus
+  // documentos NACEN visibles. Tomando `visible` como punto de partida no había
+  // paso de oculto a visible que detectar y los primeros documentos —los que
+  // más se miran— nunca se animaban: solo aparecían en su sitio.
+  const [prevVisible, setPrevVisible] = React.useState(false);
   const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
   const requisito = requisitos.find(function (r) { return r.id === id; });
   const nombre = requisito ? requisito.nombre : id;
   const archivo = AMX_ENTREVISTA_ARTES[id];
-  const p = AMX_ENTREVISTA_PLAZAS[plaza] || AMX_ENTREVISTA_PLAZAS[0];
+  // Los papeles que aún no se han ganado no tienen sitio: esperan en el centro
+  // con opacidad 0, y desde ahí los coloca su plaza cuando llega su turno.
+  const p = plaza || { x: 50, y: 50, r: 0 };
   // Detectar cuando pasa de oculto a visible para disparar la animación
   React.useEffect(function () {
     if (!prevVisible && visible) {
@@ -2294,8 +2311,8 @@ const PapelEntrevista = React.memo(function PapelEntrevista({ id, indice, plaza,
     <div className={'amx-ent-papel' + (revelado ? ' amx-ent-papel-revelado' : '')} style={{
       // En % de LA MESA, no del papel: si fueran del papel, al agrandarlo las
       // plazas se separarían con él y las de los bordes se saldrían.
-      '--amx-plaza-x': (p.x / 358 * 100) + '%',
-      '--amx-plaza-y': (p.y / 280 * 100) + '%',
+      '--amx-plaza-x': p.x + '%',
+      '--amx-plaza-y': p.y + '%',
       '--amx-plaza-r': p.r + 'deg',
       '--amx-papel-i': indice,
       opacity: visible ? 1 : 0,
@@ -2311,7 +2328,10 @@ const PapelEntrevista = React.memo(function PapelEntrevista({ id, indice, plaza,
 }, function PapelEntrevistaAreEqual(prev, next) {
   // Solo se re-renderiza si el documento, su plaza o su visibilidad cambiaron.
   // Los componentes NUNCA se desmontan, así la transición CSS siempre funciona.
-  return prev.id === next.id && prev.plaza === next.plaza && prev.visible === next.visible;
+  // La plaza es un objeto nuevo en cada cálculo, así que se comparan sus valores.
+  const a = prev.plaza, b = next.plaza;
+  const mismaPlaza = a === b || (!!a && !!b && a.x === b.x && a.y === b.y && a.r === b.r);
+  return prev.id === next.id && mismaPlaza && prev.visible === next.visible;
 });
 
 function EscritorioPapeles({ documentos = [] }) {
@@ -2330,7 +2350,7 @@ function EscritorioPapeles({ documentos = [] }) {
       }}>
         {todosIds.map(function (id, indice) {
           const visible = documentos.indexOf(id) !== -1;
-          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || 0} visible={visible} />;
+          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || null} visible={visible} />;
         })}
       </div>
     </div>

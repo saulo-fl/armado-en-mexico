@@ -6572,6 +6572,8 @@
 }
 .amx-v2 .amx-ent-cuerpo {
   margin-top: 14px;
+  /* Un respiro cuando la primera respuesta trae aquí el scroll. */
+  scroll-margin-top: 10px;
 }
 .amx-v2 .amx-ent-folder {
   overflow: hidden;
@@ -6672,7 +6674,9 @@
    papeles están apoyados, no flotando. */
 .amx-v2 .amx-ent-escritorio {
   position: relative;
-  margin: 18px -16px -16px;
+  /* La madera sangra a los lados, pero NO contra la pregunta: va encima de
+     ella y el texto pegado al borde oscuro se lee mal. */
+  margin: 0 -16px 22px;
   padding: 12px 16px 16px;
   overflow: hidden;
   background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
@@ -6714,7 +6718,15 @@
   aspect-ratio: 78 / 100;
   transform: rotate(var(--amx-plaza-r));
   transform-origin: 50% 85%;
-  animation: amx-ent-papel-entra 420ms cubic-bezier(.2,.75,.25,1) backwards;
+  /* Sin nombre a proposito: la enciende `.amx-ent-papel-revelado` cuando el
+     documento se gana. Declararla aqui con nombre la disparaba al MONTAR la
+     pagina, con el papel todavia invisible; para cuando se revelaba ya habia
+     terminado, y como la clase repite el mismo `animation-name`, el navegador
+     no la reinicia. Se veia solo la transicion de opacidad: el documento
+     apareciendo en su sitio en vez de subir desde abajo. */
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(.2,.75,.25,1);
+  animation-fill-mode: backwards;
   animation-delay: calc(var(--amx-papel-i) * 24ms);
   transition: transform 420ms cubic-bezier(.2,.75,.25,1),
               left 420ms cubic-bezier(.2,.75,.25,1),

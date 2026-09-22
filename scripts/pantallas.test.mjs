@@ -160,6 +160,12 @@ test('la mesa va arriba de las preguntas y los documentos suben hacia ella', () 
     'el papel debe entrar desde abajo');
   assert.doesNotMatch(estilos, /amx-ent-papel-entra-escritorio/,
     'sobra el override de escritorio: la dirección es la misma en toda pantalla');
+  // Con la mesa encima, contestar la primera pregunta empuja todo hacia abajo:
+  // el único empujón de scroll de la entrevista, y solo en la portada.
+  assert.match(cuerpo, /contestadas !== 1[\s\S]{0,220}scrollIntoView/,
+    'falta el scroll de la primera respuesta, o no está acotado a ella');
+  assert.match(cuerpo, /prefers-reduced-motion[\s\S]{0,200}scrollIntoView/,
+    'el scroll debe ser instantáneo para quien pide menos movimiento');
 });
 
 test('ninguna pantalla promete que el permiso se vaya a otorgar', (t) => {
