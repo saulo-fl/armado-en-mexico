@@ -6507,6 +6507,14 @@
   color: var(--ficha-tinta);
   margin-bottom: 6px;
 }
+.amx-v2 .amx-ent-avisos li a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-ent-avisos li a:hover {
+  color: var(--ficha-acento);
+}
 
 /* Bloque de portada */
 .amx-v2 .amx-hent {
