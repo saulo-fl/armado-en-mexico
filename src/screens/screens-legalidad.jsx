@@ -23,6 +23,7 @@ function LegalidadHub({ onNav }) {
     { clave: 'legal-estatal', tit: 'Estatal', desc: 'Dónde se saca cada papel según el estado donde vives.' },
     { clave: 'legal-req', tit: 'Requisitos', desc: 'Los papeles del permiso y los de la compra, que son dos listas distintas.' },
     { clave: 'legal-permisos', tit: 'Permisos', desc: 'Qué autoriza cada permiso y qué no. Posesión no es portación.' },
+    { clave: 'legal-documentos', tit: 'Documentos', desc: 'Textos oficiales y PDF de consulta alojados en Armado en México.' },
   ];
 
   const huecos = window.amxLegalHuecos(C);
@@ -73,6 +74,41 @@ function LegalidadHub({ onNav }) {
     </div>
   );
 }
+
+function LegalidadDocumentos() {
+  const C = window.AMX_LEGAL;
+  const fuentes = Object.values(C.fuentes);
+  const locales = fuentes.filter((f) => f.archivoLocal).concat(C.documentosComplementarios || []);
+  const web = fuentes.filter((f) => f.url && !f.archivoLocal);
+  const pendientes = fuentes.filter((f) => !f.url);
+
+  function grupo(titulo, items) {
+    return <section className="amx-leg-hoja" key={titulo}>
+      <h2>{titulo}</h2>
+      <ul className="amx-leg-documentos">
+        {items.map((f) => <li key={f.archivoLocal || f.url || f.titulo}>
+          <strong>{f.titulo}</strong>
+          {f.emisor && <span>{f.emisor}</span>}
+          {f.archivoLocal && <a href={'/' + f.archivoLocal} target="_blank" rel="noopener noreferrer">Abrir PDF en armado.mx</a>}
+          {f.url && <a href={f.url} target="_blank" rel="noopener noreferrer">Fuente oficial</a>}
+          {f.urlAlterna && <a href={f.urlAlterna} target="_blank" rel="noopener noreferrer">Texto oficial en DOF</a>}
+          {!f.url && <span>Texto oficial pendiente de verificar</span>}
+          {f.nota && <p>{f.nota}</p>}
+        </li>)}
+      </ul>
+    </section>;
+  }
+
+  return <div className="amx-leg">
+    <window.CintaDymo nivel={1}>Documentos legales</window.CintaDymo>
+    <p className="amx-leg-intro">Consulta los textos oficiales que sustentan esta guía. Las copias PDF se alojan aquí para facilitar su lectura; el enlace a la autoridad permite comprobar la versión vigente.</p>
+    {grupo('PDF disponibles en armado.mx', locales)}
+    {grupo('Fuentes oficiales en páginas web o PDF externo', web)}
+    {grupo('Textos pendientes de verificar', pendientes)}
+    <window.ReportarError tipo="legalidad" titulo="Documentos legales" ruta="/legalidad/documentos" />
+  </div>;
+}
+window.LegalidadDocumentos = LegalidadDocumentos;
 
 /* ----------------------------------------------------------------__ */
 /*  LegalidadRequisitos                                               */

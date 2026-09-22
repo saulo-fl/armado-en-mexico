@@ -27,7 +27,8 @@ function fuenteCita(fuente) {
       label += ' <span aria-hidden="true">↗</span>';
       aria = '(PDF, se abre en una pestaña nueva)';
     }
-    html += '<a href="' + esc(fuente.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + aria + '">' + label + '</a>';
+    html += '<a href="' + esc(fuente.archivoLocal ? '/' + fuente.archivoLocal : fuente.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + aria + '">' + label + '</a>';
+    if (fuente.archivoLocal) html += ' · <a href="' + esc(fuente.url) + '" target="_blank" rel="noopener noreferrer">Fuente oficial</a>';
   } else {
     html += titulo;
   }
@@ -137,10 +138,39 @@ export function renderLegalHtml(corpus, seccion, h) {
       '<li><a href="/legalidad/federal">Federal</a></li>' +
       '<li><a href="/legalidad/estatal">Estatal</a></li>' +
       '<li><a href="/legalidad/permisos">Permisos</a></li>' +
+      '<li><a href="/legalidad/documentos">Documentos legales</a></li>' +
       '</ul></nav>' +
       '<section aria-labelledby="huecos"><h2 id="huecos">Qué falta por verificar</h2>' +
       '<ul>' + huecosHtml + '</ul></section>' +
       '<nav aria-label="Más"><a href="/preguntas">Preguntas frecuentes</a> · <a href="/soporte">Soporte</a></nav>' +
+      '</article>';
+  }
+
+  if (seccion === 'documentos') {
+    var fuentes = Object.values(corpus.fuentes || {});
+    var locales = fuentes.filter(function(f) { return f.archivoLocal; })
+      .concat(corpus.documentosComplementarios || []);
+    var web = fuentes.filter(function(f) { return f.url && !f.archivoLocal; });
+    var pendientes = fuentes.filter(function(f) { return !f.url; });
+    function grupo(titulo, items) {
+      return '<section class="amx-leg-hoja"><h2>' + esc(titulo) + '</h2><ul class="amx-leg-documentos">' +
+        items.map(function(f) {
+          return '<li><strong>' + esc(f.titulo) + '</strong>' +
+            (f.emisor ? '<span>' + esc(f.emisor) + '</span>' : '') +
+            (f.archivoLocal ? '<a href="/' + esc(f.archivoLocal) + '">Abrir PDF en armado.mx</a>' : '') +
+            (f.url ? '<a href="' + esc(f.url) + '">Fuente oficial</a>' : '') +
+            (f.urlAlterna ? '<a href="' + esc(f.urlAlterna) + '">Texto oficial en DOF</a>' : '') +
+            (!f.url ? '<span>Texto oficial pendiente de verificar</span>' : '') +
+            (f.nota ? '<p>' + esc(f.nota) + '</p>' : '') + '</li>';
+        }).join('') + '</ul></section>';
+    }
+    return '<article class="amx-leg amx-v2">' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Documentos</nav>' +
+      '<h1>Documentos legales</h1>' +
+      '<p class="amx-leg-intro">Consulta los textos oficiales que sustentan esta guía. Las copias PDF se alojan aquí para facilitar su lectura; el enlace a la autoridad permite comprobar la versión vigente.</p>' +
+      grupo('PDF disponibles en armado.mx', locales) +
+      grupo('Fuentes oficiales en páginas web o PDF externo', web) +
+      grupo('Textos pendientes de verificar', pendientes) +
       '</article>';
   }
 
