@@ -6688,12 +6688,13 @@
    sobre una mesa de 280 px quedaba media madera desnuda (Saulo, 20-sep-2026). */
 .amx-v2 .amx-ent-pila {
   position: relative;
-  aspect-ratio: 358 / var(--amx-mesa-rel, 280);
+  /* Altura fija: la mesa no cambia de tamaño al agregar/quitar documentos.
+     Los papeles escalan proporcionalmente dentro del mismo contenedor.
+     `--amx-mesa-rel` se ignora aquí; la mesa siempre mide lo mismo. */
+  aspect-ratio: 358 / 300;
   width: 100%;
   max-width: 420px;
   margin-inline: auto;
-  /* La mesa es estática: cambia de tamaño sin transición.
-     Solo los documentos (amx-ent-papel) se animan. */
 }
 /* Un papel de 78 × 100 sobre la mesa de 358 × 280. La plaza le viene por
    variables desde ui.jsx: `--amx-plaza-x` es `x / 78 · 100 %` del propio ancho
@@ -6715,7 +6716,10 @@
   transform-origin: 50% 85%;
   animation: amx-ent-papel-entra 420ms cubic-bezier(.2,.75,.25,1) backwards;
   animation-delay: calc(var(--amx-papel-i) * 24ms);
-  transition: transform 420ms cubic-bezier(.2,.75,.25,1);
+  transition: transform 420ms cubic-bezier(.2,.75,.25,1),
+              left 420ms cubic-bezier(.2,.75,.25,1),
+              top 420ms cubic-bezier(.2,.75,.25,1),
+              opacity 420ms cubic-bezier(.2,.75,.25,1);
   filter: drop-shadow(0 5px 5px rgba(23, 27, 25, .2));
 }
 .amx-v2 .amx-ent-papel img,

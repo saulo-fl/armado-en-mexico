@@ -2274,7 +2274,7 @@ function amxMedidaMesa(n) {
 }
 window.amxMedidaMesa = amxMedidaMesa;
 
-function PapelEntrevista({ id, indice, plaza }) {
+const PapelEntrevista = React.memo(function PapelEntrevista({ id, indice, plaza, visible }) {
   const [fallo, setFallo] = React.useState(false);
   const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
   const requisito = requisitos.find(function (r) { return r.id === id; });
@@ -2289,6 +2289,8 @@ function PapelEntrevista({ id, indice, plaza }) {
       '--amx-plaza-y': (p.y / 280 * 100) + '%',
       '--amx-plaza-r': p.r + 'deg',
       '--amx-papel-i': indice,
+      opacity: visible ? 1 : 0,
+      pointerEvents: visible ? 'auto' : 'none',
     }}>
       {!fallo && archivo ? (
         <img src={'imagenes/entrevista/' + archivo} alt="" onError={function () { setFallo(true); }} />
@@ -2297,12 +2299,17 @@ function PapelEntrevista({ id, indice, plaza }) {
       )}
     </div>
   );
-}
+}, function PapelEntrevistaAreEqual(prev, next) {
+  // Solo se re-renderiza si el documento, su plaza o su visibilidad cambiaron.
+  // Los componentes NUNCA se desmontan, así la transición CSS siempre funciona.
+  return prev.id === next.id && prev.plaza === next.plaza && prev.visible === next.visible;
+});
 
 function EscritorioPapeles({ documentos = [] }) {
-  // Sin documentos NO HAY MESA. Antes de contestar la primera pregunta no hay
-  // nada que apoyar encima, y una mesa vacía solo ocupa alto (Saulo, 20-sep-2026).
-  if (!documentos.length) return null;
+  // Renderizar TODOS los documentos siempre en el DOM. Los que aún no se han
+  // ganado se muestran con opacity: 0 y pointer-events: none, así nunca se
+  // desmontan y la transición CSS siempre funciona.
+  const todosIds = Object.keys(AMX_ENTREVISTA_ARTES);
   const plazas = amxPlazasDocumentos(documentos);
   const medida = amxMedidaMesa(documentos.length);
   return (
@@ -2312,8 +2319,9 @@ function EscritorioPapeles({ documentos = [] }) {
         '--amx-ancho-papel': medida.papel.toFixed(2) + '%',
         '--amx-alto-papel': medida.altoPapel.toFixed(2) + '%',
       }}>
-        {documentos.map(function (id, indice) {
-          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || 0} />;
+        {todosIds.map(function (id, indice) {
+          const visible = documentos.indexOf(id) !== -1;
+          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || 0} visible={visible} />;
         })}
       </div>
     </div>
