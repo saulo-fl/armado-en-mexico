@@ -6758,7 +6758,7 @@
   position: relative;
   /* La madera sangra a los lados, pero NO contra la pregunta: va encima de
      ella y el texto pegado al borde oscuro se lee mal. */
-  margin: 0 -16px 22px;
+  margin: 0 -12px 22px;
   padding: 12px 16px 16px;
   overflow: hidden;
   background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
