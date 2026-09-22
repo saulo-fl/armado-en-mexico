@@ -376,6 +376,13 @@ function EntrevistaCuerpo({ modoPortada = false }) {
   return (
     <div className={'amx-ent-cuerpo' + (compacta ? ' amx-ent-cuerpo--compacto' : '')}>
       <div className="amx-ent-vivo amx-solo-lector" aria-live="polite" aria-atomic="true">{anuncio}</div>
+      {/* El escritorio va ARRIBA de las preguntas: así no lo empuja hacia abajo
+          una pregunta con cuatro respuestas largas, y se queda quieto mientras
+          se contesta. Se reordena aquí y no con `order` en CSS para que el
+          lector de pantalla lo recorra en el mismo orden en que se ve. */}
+      {!compacta && !final && d.recorrido.length > 0 && (
+        <window.EscritorioPapeles documentos={d.documentos} />
+      )}
       <div className="amx-ent-mesa">
         <div className="amx-ent-folder">
           {pregunta}
@@ -390,9 +397,6 @@ function EntrevistaCuerpo({ modoPortada = false }) {
           </div>
         </div>
       </div>
-      {!compacta && !final && d.recorrido.length > 0 && (
-        <window.EscritorioPapeles documentos={d.documentos} />
-      )}
     </div>
   );
 }
