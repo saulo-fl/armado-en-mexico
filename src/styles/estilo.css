@@ -6824,38 +6824,104 @@
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-mesa {
   display: block;
 }
-.amx-v2 .amx-ent-cuerpo--compacto .amx-ent-folder {
-  padding: 0;
-  background: transparent;
-}
+/* LA PRIMERA PREGUNTA ES UN RENGLÓN DE FORMATO (21-sep-2026). Era una caja
+   blanca dentro de otra caja blanca: la única superficie del sitio sin
+   metáfora física, y se notaba al lado de los folders, los sellos y las
+   cintas. Ahora es lo que el contenido ES —un renglón del DEFENSA-02-040—,
+   sobre la misma hoja `amx-oficio` que usan la FAQ y la clasificación, con su
+   membrete arriba y respuestas que se marcan como casillas. El marcado sigue
+   siendo el mismo `fieldset` con `role="radiogroup"`: cambia la piel. */
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-acciones {
   display: none;
 }
-/* En modo compacto: pregunta y botones en la misma fila, sin reserva de altura. */
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 18px 14px;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  /* Sin regla propia: la doble línea del membrete ya separa el encabezado del
+     renglón, y dos reglas seguidas dejaban una banda vacía en medio. */
+  padding: 12px 0 2px;
 }
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta legend {
   min-height: 0;
   flex: 0 1 auto;
   margin: 0;
 }
+/* El folio del renglón, como el número de pregunta de un formato impreso. */
+.amx-v2 .amx-ent-folio {
+  display: inline-block;
+  flex: 0 0 auto;
+  align-self: center;
+  margin-inline-end: 10px;
+  padding: 1px 7px;
+  border: 1px solid color-mix(in srgb, var(--ficha-tinta-2) 60%, transparent);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: .1em;
+  color: var(--ficha-tinta-2);
+  vertical-align: middle;
+}
 .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-opciones {
   flex: 0 0 auto;
-  gap: 8px;
+  gap: 4px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto .amx-oficio-membrete > span {
+  white-space: nowrap;
+}
+/* Las respuestas se marcan, no se pulsan: cuadro vacío y etiqueta en tinta
+   normal. Nada de fondo ni de flecha, que es lo que las hacía parecer botones
+   de aplicación en medio de una hoja de papel. */
+.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion {
+  width: auto;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 12px 0 6px;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  font-family: var(--sans);
+  font-size: 16px;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion::after {
+  content: none;
+}
+.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  border: 1.5px solid var(--ficha-tinta-2);
+  border-radius: 1px;
+}
+.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion:hover::before,
+.amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion:focus-visible::before {
+  border-color: var(--ficha-tinta);
+  background: color-mix(in srgb, var(--ficha-tinta) 8%, transparent);
 }
 @media (max-width: 600px) {
   /* La portada sin respuestas todavía no es una mesa: es una sola línea, así
      que no reserva alto ni márgenes laterales de sección. */
   .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) {
     min-height: 0;
-    padding: 12px 0;
+    padding: 12px 10px;
   }
-  .amx-v2 .amx-hent:has(.amx-ent-cuerpo--compacto) .amx-hent-tit {
-    padding-inline: 8px;
+  .amx-v2 .amx-ent-membrete-marca {
+    display: none;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-folder.amx-oficio {
+    padding: 14px 12px 16px;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto .amx-ent-pregunta {
+    gap: 10px 12px;
+  }
+  .amx-v2 .amx-ent-cuerpo--compacto button.amx-ent-opcion {
+    gap: 7px;
+    padding: 0 8px 0 4px;
   }
   /* Contestada la primera pregunta el título se retira: la pregunta sube y la
      mesa con los documentos entra en pantalla, que es lo que hay que ver a
