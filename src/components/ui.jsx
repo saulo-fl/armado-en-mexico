@@ -1931,7 +1931,11 @@ function FolderPregunta({ pregunta, tema, children }) {
         <div className="amx-oficio-membrete" aria-hidden="true">
           <span>Armado en México</span><span>{tema || 'Respuesta'}</span>
         </div>
-        <p className="amx-oficio-texto">{children}</p>
+        {/* La FAQ mete un párrafo; Legalidad (22-sep-2026) mete secciones enteras
+            dentro del folder, y un bloque no puede vivir en un <p>. */}
+        {typeof children === 'string'
+          ? <p className="amx-oficio-texto">{children}</p>
+          : <div className="amx-oficio-texto">{children}</div>}
       </div>
     </details>
   );

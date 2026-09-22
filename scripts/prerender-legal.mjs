@@ -145,7 +145,7 @@ export function renderLegalHtml(corpus, seccion, h) {
             (f.url ? '<a href="' + esc(f.url) + '">Fuente oficial</a>' : '') +
             (f.urlAlterna ? '<a href="' + esc(f.urlAlterna) + '">Texto oficial en DOF</a>' : '') +
             (!f.url ? '<span>Texto oficial pendiente de verificar</span>' : '') +
-            (f.nota ? '<p>' + esc(f.nota) + '</p>' : '') + '</li>';
+            (f.nota && !f.revisar ? '<p>' + esc(f.nota) + '</p>' : '') + '</li>';
         }).join('') + '</ul></section>';
     }
     return '<article class="amx-leg amx-v2">' +

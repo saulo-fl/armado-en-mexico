@@ -178,11 +178,11 @@ varían según marca y munición, y la guía lo advierte.
 
 ### Legalidad
 
-Cuatro hojas del mismo expediente, y **toda afirmación trae su fuente oficial y la fecha en que
-se consultó**: lo federal ordenado por la pregunta que traes —qué arma puedes tener, qué papel
-llenas, cuánto cuesta—, lo que de verdad cambia por estado, seis trámites ante la Defensa
-—cada uno con lo que habilita, su checklist y su cuota vigente— y los documentos oficiales
-en PDF. El permiso extraordinario ante el Registro Federal de Armas y la compra en la
+Una sola página, con la entrevista arriba y cuatro folders desplegables, y **toda afirmación
+trae su fuente oficial y la fecha en que se consultó**: lo federal ordenado por la pregunta que
+traes —qué arma puedes tener, qué papel llenas, cuánto cuesta—, lo que de verdad cambia por
+estado, seis trámites ante la Defensa —cada uno con lo que habilita, su checklist y su cuota
+vigente— y los documentos oficiales en PDF. El permiso extraordinario ante el Registro Federal de Armas y la compra en la
 DCAM son **dos trámites que se confunden**: no son el mismo papeleo, y creer que sí es lo que
 hace que alguien llegue al mostrador sin expediente.
 
