@@ -143,20 +143,27 @@ test('en el teléfono la entrevista de la portada cabe en pantalla', () => {
     'en móvil el enunciado no debe reservar los tres renglones');
 });
 
-test('la primera pregunta de la portada es un renglón de formato, no una tarjeta', () => {
+test('toda la entrevista se sirve sobre la hoja de formato, no en tarjetas', () => {
   const cuerpo = readFileSync(raiz('src/screens/screens-entrevista.jsx'), 'utf8');
   const estilos = readFileSync(raiz('src/styles/estilo.css'), 'utf8');
-  // Se sirve sobre la MISMA hoja que la FAQ y la clasificación, con su
-  // membrete: era la única superficie del sitio sin metáfora física.
-  assert.match(cuerpo, /amx-ent-folder' \+ \(compacta \? ' amx-oficio'/,
-    'en la portada la pregunta debe ir sobre la hoja de oficio');
+  // La MISMA hoja que la FAQ y la clasificación, con su membrete: era la única
+  // superficie del sitio sin metáfora física. Vale para todas las preguntas,
+  // no solo para la primera de la portada.
+  assert.match(cuerpo, /className="amx-ent-folder amx-oficio"/,
+    'la pregunta debe ir sobre la hoja de oficio');
   assert.match(cuerpo, /amx-oficio-membrete[\s\S]{0,400}DEFENSA-02-040/,
     'falta el membrete del formato');
-  // Las respuestas se marcan, no se pulsan: cuadro vacío y sin flecha.
-  assert.match(estilos,
-    /--compacto button\.amx-ent-opcion::before \{[^}]*border: 1\.5px/,
-    'las respuestas de la portada deben llevar su casilla');
-  assert.match(estilos, /--compacto button\.amx-ent-opcion::after \{\s*content: none;/,
+  assert.match(cuerpo, /className="amx-ent-folio"/, 'falta el folio del renglón');
+  // Cada respuesta es un renglón que se marca: casilla, etiqueta y su raya.
+  // Sin fondo, sin sombra y sin flecha, que era lo que las hacía botones.
+  const base = estilos.match(/\.amx-v2 button\.amx-ent-opcion \{[^}]*\}/);
+  assert.ok(base, 'no encuentro la regla base de la respuesta');
+  assert.match(base[0], /background: transparent/, 'la respuesta no puede llevar fondo');
+  assert.match(base[0], /box-shadow: none/, 'la respuesta no puede llevar sombra');
+  assert.match(base[0], /border-bottom: 1px solid/, 'a cada renglón le falta su raya');
+  assert.match(estilos, /button\.amx-ent-opcion::before \{[^}]*border: 1\.5px/,
+    'las respuestas deben llevar su casilla');
+  assert.match(estilos, /button\.amx-ent-opcion::after \{\s*content: none;/,
     'la flecha de botón sobra en una casilla');
 });
 
