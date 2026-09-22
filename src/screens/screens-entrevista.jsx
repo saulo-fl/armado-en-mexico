@@ -232,7 +232,12 @@ function amxLeerEntrevista(arbol) {
 
 function EntrevistaCuerpo({ modoPortada = false }) {
   const arbol = window.AMX_ENTREVISTA;
-  const [resp, setResp] = React.useState(function () { return amxLeerEntrevista(arbol); });
+  // Al montar, borra cualquier progreso guardado para que siempre empiece
+  // retraído en la primera pregunta.
+  React.useEffect(function () {
+    try { window.localStorage.removeItem(AMX_ENTREVISTA_STORAGE); } catch (e) {}
+  }, []);
+  const [resp, setResp] = React.useState(function () { return {}; });
   const [saliendo, setSaliendo] = React.useState(false);
   const [anuncio, setAnuncio] = React.useState('');
   const [guardando, setGuardando] = React.useState(false);
@@ -383,9 +388,11 @@ function EntrevistaCuerpo({ modoPortada = false }) {
                 onClick={guardarTest}>{guardando ? 'Preparando…' : 'Guardar Test'}</button>
             )}
           </div>
-          {!compacta && !final && <window.EscritorioPapeles documentos={d.documentos} />}
         </div>
       </div>
+      {!compacta && !final && d.recorrido.length > 0 && (
+        <window.EscritorioPapeles documentos={d.documentos} />
+      )}
     </div>
   );
 }
