@@ -6748,14 +6748,18 @@
   border-top: 2px solid var(--ficha-tinta-2);
   box-shadow: 0 8px 0 var(--carton-filo), 0 16px 0 var(--carton-filo);
 }
-/* La entrada: cae desde abajo a su plaza. Solo `from`: el `to` es el valor
+/* La entrada: cae desde arriba a su plaza. Solo `from`: el `to` es el valor
    base (la plaza, con su giro). `backwards` y no `both`: durante el delay el
    papel ya está en el punto de partida, y al terminar la animación deja de
    ocupar el transform y manda el valor base, que es el que recorre el cambio
    de plaza con `transition`. Con `forwards` la animación terminada clavaría
    el transform y el traslado no se vería. */
 @keyframes amx-ent-papel-entra {
-  from { opacity: 0; transform: translate(var(--amx-plaza-x), calc(var(--amx-plaza-y) + 130%)) rotate(0); }
+  from { opacity: 0; transform: translate(var(--amx-plaza-x), calc(var(--amx-plaza-y) - 130%)) rotate(0); }
+}
+/* Solo anima la primera vez que se revela; después solo usa la transición CSS */
+.amx-v2 .amx-ent-papel.amx-ent-papel-revelado {
+  animation-name: amx-ent-papel-entra;
 }
 .amx-v2 .amx-ent-acciones {
   display: flex;

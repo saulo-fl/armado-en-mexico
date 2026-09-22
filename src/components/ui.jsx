@@ -2276,13 +2276,22 @@ window.amxMedidaMesa = amxMedidaMesa;
 
 const PapelEntrevista = React.memo(function PapelEntrevista({ id, indice, plaza, visible }) {
   const [fallo, setFallo] = React.useState(false);
+  const [revelado, setRevelado] = React.useState(false);
+  const [prevVisible, setPrevVisible] = React.useState(visible);
   const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
   const requisito = requisitos.find(function (r) { return r.id === id; });
   const nombre = requisito ? requisito.nombre : id;
   const archivo = AMX_ENTREVISTA_ARTES[id];
   const p = AMX_ENTREVISTA_PLAZAS[plaza] || AMX_ENTREVISTA_PLAZAS[0];
+  // Detectar cuando pasa de oculto a visible para disparar la animación
+  React.useEffect(function () {
+    if (!prevVisible && visible) {
+      setRevelado(true);
+    }
+    setPrevVisible(visible);
+  }, [visible, prevVisible]);
   return (
-    <div className="amx-ent-papel" style={{
+    <div className={'amx-ent-papel' + (revelado ? ' amx-ent-papel-revelado' : '')} style={{
       // En % de LA MESA, no del papel: si fueran del papel, al agrandarlo las
       // plazas se separarían con él y las de los bordes se saldrían.
       '--amx-plaza-x': (p.x / 358 * 100) + '%',
