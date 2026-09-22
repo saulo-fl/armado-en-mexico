@@ -132,6 +132,15 @@ librerías, borrar boards ajenos, poner valores duros.
 - `fetch()` está bloqueado en el sandbox; imágenes solo con `uploadMediaUrl(url pública)`.
   El repo es público: `raw.githubusercontent.com/saulo-fl/armado-en-mexico/<rama>/docs/capturas/movil/<ruta>.webp`.
 - `remove()` sobre hijos de un componente solo los oculta.
+- Una **sombra interior** (`inner-shadow`) en un board lo deja EN BLANCO al exportar; solo `drop-shadow`.
+- Los contenedores de variantes recortan lo que sobresale (sellos rotados): `clipContent = false` y `resize`.
+- El orden de los hijos de un board flex es el del array `children`; tras `appendChild` en cadena
+  conviene leer `children` y corregir con `setParentIndex(0)` al último (así quedó header →
+  contenido → bottom-nav).
+- `characters = ''` es inválido; un override vacío se omite.
+- Solo se modifica la página enfocada («Cannot modify a page that is not currently active»): `openPage` primero.
+- Al recargar la pestaña, `storage` (helpers, medias subidas) se pierde; el lote de helpers se
+  vuelve a ejecutar y las imágenes se recuperan de una forma que ya las tenga (`fills[0].fillImage`).
 
 ## Sincronía y evidencia
 
