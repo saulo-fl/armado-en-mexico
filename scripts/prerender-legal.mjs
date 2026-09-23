@@ -115,6 +115,8 @@ export function renderLegalHtml(corpus, seccion, h) {
       '<section aria-labelledby="aviso"><h2 id="aviso">' + esc(corpus.avisoTransparencia.titulo) + '</h2>' +
       corpus.avisoTransparencia.parrafos.map(function(p) { return '<p>' + esc(p) + '</p>'; }).join('') +
       '</section>' +
+      '<p class="amx-leg-intro">Los niveles de legalidad de las armas en México se dividen en tres categorías: civil, seguridad privada y exclusivo del ejército. Cada nivel tiene requisitos y restricciones específicas que se detallan en los apartados siguientes.</p>' +
+      '<p class="amx-leg-intro">Además, actividades como la caza, el tiro deportivo y la coleccionista tienen regulaciones propias que se describen en los apartados de trámites y documentación.</p>' +
       '<p>' + esc(corpus.advertencia) + '</p>' +
       '<p>Actualizado el <time datetime="' + esc(corpus.actualizado) + '">' + h.amxLegalFecha(corpus.actualizado) + '</time></p>' +
       '<section aria-labelledby="entrevista"><h2 id="entrevista">¿Puedo comprar un arma?</h2>' +
