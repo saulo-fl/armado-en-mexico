@@ -58,10 +58,17 @@ function color(v) {
 // Los que tienen regla propia en el CSS se LEEN de ella (peso, tracking en em,
 // interlineado, mayúsculas); el tamaño del titular no está en la regla (lo
 // pone cada pantalla) y va fijo aquí. Penpot mide el tracking en px.
+// Escapa TODOS los metacaracteres de expresión regular, no solo `.` y `-`.
+// Escapar a medias es peor que no escapar: la barra invertida se colaba sin
+// tocar y podía alterar el patrón (lo cazó CodeQL, js/incomplete-sanitization).
+// Es el mismo cuerpo que la propuesta `RegExp.escape`.
+function escaparRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\\-]/g, '\\$&');
+}
 function regla(css, selector) {
-  const m = css.match(new RegExp(selector.replace(/[.\-]/g, '\\$&') + '\\s*\\{([^}]*)\\}'));
+  const m = css.match(new RegExp(escaparRegExp(selector) + '\\s*\\{([^}]*)\\}'));
   if (!m) throw new Error(`No encontré la regla ${selector}`);
-  const prop = (p) => (m[1].match(new RegExp(p + ':\\s*([^;]+);')) || [])[1]?.trim();
+  const prop = (p) => (m[1].match(new RegExp(escaparRegExp(p) + ':\\s*([^;]+);')) || [])[1]?.trim();
   return { peso: prop('font-weight'), tam: prop('font-size'), lh: prop('line-height'),
     em: prop('letter-spacing'), caja: prop('text-transform') };
 }
