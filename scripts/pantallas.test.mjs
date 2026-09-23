@@ -107,7 +107,10 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
   assert.match(t2, /Qué arma puedo tener y dónde/, 'lo federal no está en el hub');
   assert.match(t2, /Elige tu estado/, 'lo estatal no está en el hub');
   assert.match(t2, /Posesión no es portación/, 'los trámites no están en el hub');
-  assert.match(t2, /Documentos oficiales/, 'los documentos no están en el hub');
+  // No se busca el ROTULO del folder: desde el hilo 11 de Penpot los cuatro se titulan
+  // con la pregunta que resuelven, y un test atado al rótulo vigila el rótulo, no que el
+  // contenido esté aquí. Esta frase es del cuerpo de Documentos.
+  assert.match(t2, /Los textos oficiales que sustentan esta guía/, 'los documentos no están en el hub');
   // Cuatro folders exactos y trece plegables dentro (3 preguntas + 1 «por qué no hay ley
   // estatal» + 6 trámites + 3 grupos de documentos); un solo botón, el de la entrevista
   // (el arnés no carga ui.jsx, así que ReportarError no cuenta).
