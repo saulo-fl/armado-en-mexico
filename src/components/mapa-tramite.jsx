@@ -3,279 +3,510 @@
 // Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
 // (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
-// EL MAPA DEL TRÁMITE — las tres vías, de un vistazo.
+// EL MAPA DEL TRÁMITE — seis pasos y dos salidas.
 //
-// Generado con Archify a partir de `contratos-legalidad/mapa-tramite.workflow.json`, que
-// es la fuente: si el diagrama cambia, se regenera de ahí, no se edita este archivo a
-// mano. El SVG llega SIN un solo color ni fuente literal —todo va por 34 clases CSS— y
-// por eso se puede revestir con los tokens de papelería del sitio y seguir al tema claro
-// y oscuro. Las clases están en estilo.css, bloque «MAPA DEL TRÁMITE».
+// Sustituye al diagrama de las tres vías, que no se leía en el teléfono. La
+// geometría de la versión ancha la compila Archify desde
+// `contratos-legalidad/mapa-tramite-v2.workflow.json`; la alta se dibuja a mano
+// porque Archify solo compone en horizontal. Las dos comparten marcado —
+// `#node-<paso>`, `[data-edge-id]`, `.nodo-caja`— y por eso comparten el CSS y
+// el recorrido de aquí abajo.
 //
-// Va inline y no como <img>: un SVG servido por <img> no hereda el CSS de la página, y
-// entonces no podría seguir el selector de tema, que aquí tiene tres estados.
+// El SVG va inline y no en un <img>: servido como imagen no heredaría el CSS de
+// la página, y todo el color sale de las clases (bloque «MAPA DEL TRÁMITE» de
+// estilo.css) con los tokens de papelería del sitio.
+//
+// La única pieza que el visitante acciona son los botones SÍ / NO dentro de la
+// primera caja: encienden el camino que les toca. Sin JavaScript el diagrama
+// sigue siendo legible, solo que estático.
+
+/* ── Los pasos, y por dónde pasa cada respuesta ────────────────────────────
+   Un tramo es una flecha y el papel al que llega. Estas dos listas son la
+   fuente de la animación: si un paso cambia de `id`, aquí se nota. */
+const MAPA_CAMINO_SI = [
+  { flecha: 'si', paso: 'solicitud' },
+  { flecha: 'entrega', paso: 'espera' },
+  { flecha: 'plazo', paso: 'resolucion' },
+  { flecha: 'aprobado', paso: 'compra' },
+];
+const MAPA_CAMINO_NO = [{ flecha: 'no', paso: 'sin' }];
+const MAPA_PASOS = ['requisitos', 'solicitud', 'espera', 'resolucion', 'compra', 'sin'];
+const MAPA_FLECHAS = ['si', 'entrega', 'plazo', 'aprobado', 'no', 'rechazado'];
+
+// El recorrido, montado sobre un SVG ya pintado. Devuelve su propia limpieza:
+// al cambiar de orientación el SVG se reemplaza entero y hay que soltar todo.
+function montarRecorridoDelMapa(svg, anuncio) {
+  if (!svg) return function () {};
+
+  const vb = svg.viewBox.baseVal;
+  const FOCO = parseFloat(svg.dataset.escalaFoco || '2.35');
+  const TRAMO = parseFloat(svg.dataset.escalaTramo || '1.75');
+  const camara = svg.querySelector('[data-camara]');
+  if (!camara) return function () {};
+
+  const quieto = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const paso = (id) => svg.querySelector('#node-' + id);
+  const linea = (id) => svg.querySelector('path[data-edge-id="' + id + '"]');
+  const rotulo = (id) => svg.querySelector('g[data-edge-id="' + id + '"]');
+  const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+  const decir = (txt) => { if (anuncio) anuncio.textContent = txt; };
+
+  // Cada flecha lleva una copia encima: es la que se dibuja al recorrerla.
+  const trazos = {};
+  const capa = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  capa.setAttribute('aria-hidden', 'true');
+  MAPA_FLECHAS.forEach((id) => {
+    const p = linea(id);
+    if (!p) return;
+    const copia = p.cloneNode(false);
+    copia.removeAttribute('marker-end');
+    copia.setAttribute('class', 'amx-mapa-trazo');
+    copia.style.strokeWidth = (parseFloat(getComputedStyle(p).strokeWidth) + 1.4) + 'px';
+    capa.appendChild(copia);
+    trazos[id] = copia;
+  });
+  camara.appendChild(capa);
+
+  // Centrar algo = escalarlo y llevar su centro al centro del lienzo. El fondo
+  // se queda fuera del grupo de cámara, así que no viaja con el resto.
+  function caja(els) {
+    let c = null;
+    els.filter(Boolean).forEach((el) => {
+      const b = el.getBBox();
+      if (!c) { c = { x: b.x, y: b.y, width: b.width, height: b.height }; return; }
+      const x2 = Math.max(c.x + c.width, b.x + b.width);
+      const y2 = Math.max(c.y + c.height, b.y + b.height);
+      c.x = Math.min(c.x, b.x); c.y = Math.min(c.y, b.y);
+      c.width = x2 - c.x; c.height = y2 - c.y;
+    });
+    return c;
+  }
+
+  function encuadrar(els, escala, ms) {
+    const c = caja(els);
+    if (!c) return Promise.resolve();
+    const tx = vb.width / 2 - escala * (c.x + c.width / 2);
+    const ty = vb.height / 2 - escala * (c.y + c.height / 2);
+    camara.style.transitionDuration = (quieto ? 0 : ms) + 'ms';
+    camara.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + escala + ')';
+    return esperar(quieto ? 0 : ms);
+  }
+
+  function vistaGeneral(ms) {
+    camara.style.transitionDuration = (quieto ? 0 : ms) + 'ms';
+    camara.style.transform = 'translate(0px, 0px) scale(1)';
+    return esperar(quieto ? 0 : ms);
+  }
+
+  function marcar(el, clase) {
+    if (!el) return;
+    el.setAttribute('data-estado', '');
+    el.classList.remove('apagado', 'encendido', 'oculto');
+    if (clase) el.classList.add(clase);
+  }
+
+  function reposo() {
+    MAPA_PASOS.forEach((id) => marcar(paso(id), id === 'requisitos' ? 'encendido' : 'apagado'));
+    MAPA_FLECHAS.forEach((id) => {
+      marcar(linea(id), 'apagado');
+      marcar(rotulo(id), 'apagado');
+      const t = trazos[id];
+      if (t) { t.classList.remove('corriendo'); t.style.transition = 'none'; }
+    });
+    decir('');
+  }
+
+  function dibujar(id, ms) {
+    const t = trazos[id];
+    if (!t) return Promise.resolve();
+    const largo = t.getTotalLength();
+    t.style.transition = 'none';
+    t.style.strokeDasharray = largo + ' ' + largo;
+    t.style.strokeDashoffset = largo;
+    t.classList.add('corriendo');
+    if (quieto) { t.style.strokeDashoffset = '0'; return Promise.resolve(); }
+    return new Promise((listo) => {
+      requestAnimationFrame(() => {
+        t.style.transition = 'stroke-dashoffset ' + ms + 'ms cubic-bezier(.4, 0, .2, 1)';
+        t.style.strokeDashoffset = '0';
+        setTimeout(listo, ms);
+      });
+    });
+  }
+
+  let tanda = 0;
+  let vivo = true;
+  async function recorrer(camino, boton) {
+    const mia = ++tanda;
+    const sigo = () => vivo && mia === tanda;
+    apagarBrillo();
+    reposo();
+    botones.forEach((b) => {
+      b.setAttribute('data-activo', String(b === boton));
+      b.setAttribute('aria-pressed', String(b === boton));
+    });
+
+    // 1. Fuera todo lo demás y la cámara se acerca a la pregunta.
+    MAPA_PASOS.forEach((id) => { if (id !== 'requisitos') marcar(paso(id), 'oculto'); });
+    MAPA_FLECHAS.forEach((id) => { marcar(linea(id), 'oculto'); marcar(rotulo(id), 'oculto'); });
+    await encuadrar([paso('requisitos')], FOCO, 700);
+    if (!sigo()) return;
+    await esperar(430);
+    if (!sigo()) return;
+
+    // 2. El recorrido, con la cámara acompañando cada tramo.
+    for (let i = 0; i < camino.length; i++) {
+      const tramo = camino[i];
+      const destino = paso(tramo.paso);
+      marcar(linea(tramo.flecha), 'encendido');
+      marcar(rotulo(tramo.flecha), 'encendido');
+      marcar(destino, 'apagado');
+      await encuadrar([linea(tramo.flecha), destino], TRAMO, 620);
+      if (!sigo()) return;
+      await dibujar(tramo.flecha, 540);
+      if (!sigo()) return;
+      marcar(destino, 'encendido');
+      decir(destino ? destino.getAttribute('data-node-label') : '');
+      await esperar(260);
+      if (!sigo()) return;
+    }
+
+    // 3. Vuelta a la vista general; lo no recorrido queda en segundo plano.
+    MAPA_PASOS.forEach((id) => { if (paso(id).classList.contains('oculto')) marcar(paso(id), 'apagado'); });
+    MAPA_FLECHAS.forEach((id) => {
+      if (linea(id).classList.contains('oculto')) { marcar(linea(id), 'apagado'); marcar(rotulo(id), 'apagado'); }
+    });
+    await vistaGeneral(880);
+    if (!sigo()) return;
+    const ultimo = paso(camino[camino.length - 1].paso);
+    decir('Fin del recorrido: ' + ultimo.getAttribute('data-node-label'));
+  }
+
+  // El brillo que recorre el contorno del SÍ hasta que alguien lo usa.
+  const brillo = svg.querySelector('.amx-mapa-brillo');
+  let animacion = null;
+  if (brillo && !quieto && brillo.animate) {
+    let largo = 0;
+    try { largo = brillo.getTotalLength(); } catch (e) { largo = 0; }
+    if (!largo) largo = 2 * (brillo.width.baseVal.value + brillo.height.baseVal.value);
+    brillo.style.strokeDasharray = (largo * 0.18) + ' ' + largo;
+    animacion = brillo.animate(
+      [{ strokeDashoffset: largo }, { strokeDashoffset: 0 }],
+      { duration: 2600, iterations: Infinity, easing: 'linear' }
+    );
+  } else if (brillo) {
+    brillo.classList.add('quieto');
+  }
+  function apagarBrillo() {
+    if (animacion) { animacion.cancel(); animacion = null; }
+    if (brillo) brillo.classList.add('quieto');
+  }
+
+  const botones = Array.prototype.slice.call(svg.querySelectorAll('.amx-mapa-boton'));
+  const sueltos = [];
+  botones.forEach((b) => {
+    const camino = b.classList.contains('amx-mapa-si') ? MAPA_CAMINO_SI : MAPA_CAMINO_NO;
+    const alPulsar = () => recorrer(camino, b);
+    const alTeclear = (e) => {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); recorrer(camino, b); }
+    };
+    b.addEventListener('click', alPulsar);
+    b.addEventListener('keydown', alTeclear);
+    sueltos.push(() => { b.removeEventListener('click', alPulsar); b.removeEventListener('keydown', alTeclear); });
+  });
+
+  reposo();
+
+  return function limpiar() {
+    vivo = false;
+    apagarBrillo();
+    sueltos.forEach((f) => f());
+  };
+}
+
+function MapaTramiteAncho() {
+  return (
+<svg className="amx-mapa-svg amx-mapa-ancho" data-escala-foco="2.35" data-escala-tramo="1.75" viewBox="0 0 1142 364" role="img" aria-labelledby="mapa-titulo mapa-desc">
+            <title id="mapa-titulo">Cómo se compra un arma en México</title>
+            <desc id="mapa-desc">Del requisito a la compra, con las dos salidas que dejan sin arma.</desc>
+            {/* Definitions */}
+            <defs>
+              <marker id="mapa-punta" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" className="m-default" />
+              </marker>
+              <marker id="mapa-punta-si" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" className="m-emphasis" />
+              </marker>
+              <marker id="mapa-punta-no" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" className="m-security" />
+              </marker>
+              <pattern id="mapa-rejilla" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" className="c-grid" strokeWidth="0.5"/>
+              </pattern>
+        
+              <filter id="mapa-grano" x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+                <feColorMatrix type="saturate" values="0"/>
+              </filter>
+            </defs>
+
+            {/* Background Grid */}
+            <rect width="100%" height="100%" fill="url(#mapa-rejilla)" />
+            <g data-camara="">
+
+            {/* Swimlanes */}
+            <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-0" x="40" y="52" width="1086" height="138" rx="10" className="c-lane" strokeWidth="1"/>
+
+            <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-1" x="40" y="210" width="1086" height="138" rx="10" className="c-lane" strokeWidth="1"/>
+            <rect data-graph-role="structural-frame" data-composition-frame-kind="exception-lane" data-composition-frame-id="lane-1-exception" x="46" y="216" width="1074" height="126" rx="8" className="c-security-group" strokeWidth="1"/>
+
+            {/* Las flechas */}
+            <path data-edge-from="resolucion" data-edge-to="compra" data-edge-label="aprobado" data-edge-key="0" data-edge-id="aprobado" data-composition-points="816,136;872.4,136" d="M 816 136 L 872.4 136" className="a-emphasis" strokeWidth="1.8" markerEnd="url(#mapa-punta-si)"/>
+            <path data-edge-from="solicitud" data-edge-to="espera" data-edge-key="1" data-edge-id="entrega" data-composition-points="472,136;500,136" d="M 472 136 L 500 136" className="a-default" strokeWidth="1.4" markerEnd="url(#mapa-punta)"/>
+            <path data-edge-from="requisitos" data-edge-to="sin" data-edge-label="no" data-edge-key="2" data-edge-id="no" data-composition-points="48,136;20,136;20,294;70,294" d="M 48 136 L 20 136 L 20 294 L 70 294" className="a-security" strokeWidth="1.4" markerEnd="url(#mapa-punta-no)"/>
+            <path data-edge-from="espera" data-edge-to="resolucion" data-edge-key="3" data-edge-id="plazo" data-composition-points="648,136;676,136" d="M 648 136 L 676 136" className="a-default" strokeWidth="1.4" markerEnd="url(#mapa-punta)"/>
+            <path data-edge-from="resolucion" data-edge-to="requisitos" data-edge-label="rechazado" data-edge-key="4" data-edge-id="rechazado" data-composition-points="746,110;746,36;166,36;166,86" d="M 746 110 L 746 36 L 166 36 L 166 86" className="a-security" strokeWidth="1.4" markerEnd="url(#mapa-punta-no)"/>
+            <path data-edge-from="requisitos" data-edge-to="solicitud" data-edge-label="sí" data-edge-key="5" data-edge-id="si" data-composition-points="284,136;322,136" d="M 284 136 L 322 136" className="a-emphasis" strokeWidth="1.8" markerEnd="url(#mapa-punta-si)"/>
+
+            {/* Los papeles */}
+            <g id="node-requisitos" data-node-id="requisitos" data-node-label="¿Crees que reúnes los requisitos?" data-node-kind="frontend">
+              <title>¿Crees que reúnes los requisitos?</title>
+              <rect x="48" y="86" width="236" height="100" rx="6" className="c-mask"/>
+              <rect x="48" y="86" width="236" height="100" rx="6" className="c-frontend nodo-caja" strokeWidth="1.5"/>
+              <g aria-hidden="true" data-semantic-sigil="frontend" className="semantic-sigil s-frontend" transform="translate(54 92) scale(0.6875)">
+                <rect x="2" y="3" width="12" height="10" rx="2"/>
+                <path d="M2 6.5h12"/>
+                <circle cx="4.1" cy="4.8" r=".7" className="sigil-fill"/>
+                <circle cx="6.3" cy="4.8" r=".7" className="sigil-fill"/>
+              </g>
+              <text data-node-label="" x="166" y="107" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">¿Crees que reúnes los requisitos?</text>
+            </g>
+
+            <g id="node-solicitud" data-node-id="solicitud" data-node-label="Haces tu solicitud" data-node-kind="frontend">
+              <title>Haces tu solicitud</title>
+              <rect x="322" y="110" width="150" height="52" rx="6" className="c-mask"/>
+              <rect x="322" y="110" width="150" height="52" rx="6" className="c-frontend nodo-caja" strokeWidth="1.5"/>
+              <g aria-hidden="true" data-semantic-sigil="frontend" className="semantic-sigil s-frontend" transform="translate(328 116) scale(0.6875)">
+                <rect x="2" y="3" width="12" height="10" rx="2"/>
+                <path d="M2 6.5h12"/>
+                <circle cx="4.1" cy="4.8" r=".7" className="sigil-fill"/>
+                <circle cx="6.3" cy="4.8" r=".7" className="sigil-fill"/>
+              </g>
+              <text data-node-label="" x="397" y="131" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Haces tu solicitud</text>
+            </g>
+
+            <g id="node-espera" data-node-id="espera" data-node-label="45 a 60 días hábiles" data-node-kind="messagebus">
+              <title>45 a 60 días hábiles</title>
+              <rect x="500" y="110" width="148" height="52" rx="6" className="c-mask"/>
+              <rect x="500" y="110" width="148" height="52" rx="6" className="c-messagebus nodo-caja" strokeWidth="1.5"/>
+              <g aria-hidden="true" data-semantic-sigil="messagebus" className="semantic-sigil s-messagebus" transform="translate(506 116) scale(0.6875)">
+                <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
+                <circle cx="5" cy="4.5" r="1" className="sigil-fill"/>
+                <circle cx="10.5" cy="8" r="1" className="sigil-fill"/>
+                <circle cx="7" cy="11.5" r="1" className="sigil-fill"/>
+              </g>
+              <text data-node-label="" x="574" y="131" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">45 a 60 días hábiles</text>
+            </g>
+
+            <g id="node-resolucion" data-node-id="resolucion" data-node-label="Resolución" data-node-kind="security">
+              <title>Resolución</title>
+              <rect x="676" y="110" width="140" height="52" rx="6" className="c-mask"/>
+              <rect x="676" y="110" width="140" height="52" rx="6" className="c-security nodo-caja" strokeWidth="1.5"/>
+              <g aria-hidden="true" data-semantic-sigil="security" className="semantic-sigil s-security" transform="translate(682 116) scale(0.6875)">
+                <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+                <path d="m5.8 8 1.5 1.5 3-3"/>
+              </g>
+              <text data-node-label="" x="746" y="131" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Resolución</text>
+            </g>
+
+            <g id="node-compra" data-node-id="compra" data-node-label="Compras tu arma" data-node-kind="cloud">
+              <title>Compras tu arma</title>
+              <rect x="872.4" y="110" width="150" height="52" rx="6" className="c-mask"/>
+              <rect x="872.4" y="110" width="150" height="52" rx="6" className="c-cloud nodo-caja" strokeWidth="1.5"/>
+              <g aria-hidden="true" data-semantic-sigil="cloud" className="semantic-sigil s-cloud" transform="translate(878.4 116) scale(0.6875)">
+                <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
+              </g>
+              <text data-node-label="" x="947.4" y="131" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Compras tu arma</text>
+            </g>
+
+            <g id="node-sin" data-node-id="sin" data-node-label="No puedes comprar un arma" data-node-kind="security">
+              <title>No puedes comprar un arma</title>
+              <rect x="70" y="268" width="192" height="52" rx="6" className="c-mask"/>
+              <rect x="70" y="268" width="192" height="52" rx="6" className="c-security nodo-caja" strokeWidth="1.5"/>
+              <g aria-hidden="true" data-semantic-sigil="security" className="semantic-sigil s-security" transform="translate(76 274) scale(0.6875)">
+                <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
+                <path d="m5.8 8 1.5 1.5 3-3"/>
+              </g>
+              <text data-node-label="" x="166" y="289" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">No puedes comprar un arma</text>
+            </g>
+
+            {/* Lo que dice cada flecha */}
+            <g data-detail="context" data-edge-from="resolucion" data-edge-to="compra" data-edge-label="aprobado" data-edge-key="0" data-edge-id="aprobado">
+              <rect x="820" y="116" width="48.4" height="14" rx="3" className="c-mask"/>
+              <text x="844.2" y="126" className="t-backend" fontSize="8" textAnchor="middle">aprobado</text>
+            </g>
+
+            <g data-detail="context" data-edge-from="requisitos" data-edge-to="sin" data-edge-label="no" data-edge-key="2" data-edge-id="no">
+              <rect x="30" y="274" width="30" height="14" rx="3" className="c-mask"/>
+              <text x="45" y="284" className="t-security" fontSize="8" textAnchor="middle">no</text>
+            </g>
+
+            <g data-detail="context" data-edge-from="resolucion" data-edge-to="requisitos" data-edge-label="rechazado" data-edge-key="4" data-edge-id="rechazado">
+              <rect x="429.4" y="16" width="53.199999999999996" height="14" rx="3" className="c-mask"/>
+              <text x="456" y="26" className="t-security" fontSize="8" textAnchor="middle">rechazado</text>
+            </g>
+            <g data-detail="context" data-edge-from="requisitos" data-edge-to="solicitud" data-edge-label="sí" data-edge-key="5" data-edge-id="si">
+              <rect x="288" y="116" width="30" height="14" rx="3" className="c-mask"/>
+              <text x="303" y="126" className="t-backend" fontSize="8" textAnchor="middle">sí</text>
+            </g>
+
+        
+              {/* SÍ / NO: arrancan el recorrido */}
+              <g className="amx-mapa-boton amx-mapa-si" role="button" tabIndex="0" aria-pressed="false"
+                 aria-label="Sí, creo que reúno los requisitos. Recorrer el trámite completo">
+                <rect className="amx-mapa-cuerpo" x="66" y="130" width="94" height="32" rx="2"/>
+                <rect className="amx-mapa-brillo" x="66" y="130" width="94" height="32" rx="2"/>
+                <text x="113" y="147">SÍ</text>
+              </g>
+              <g className="amx-mapa-boton amx-mapa-no" role="button" tabIndex="0" aria-pressed="false"
+                 aria-label="No, no reúno los requisitos. Ver a dónde lleva">
+                <rect className="amx-mapa-cuerpo" x="172" y="130" width="94" height="32" rx="2"/>
+                <text x="219" y="147">NO</text>
+              </g>
+            </g>
+            <rect width="100%" height="100%" filter="url(#mapa-grano)" opacity=".055" style={{ pointerEvents: 'none' }}/>
+          </svg>
+  );
+}
+
+function MapaTramiteAlto() {
+  return (
+<svg className="amx-mapa-svg amx-mapa-alto" viewBox="0 0 360 668" role="img" data-escala-foco="1.22" data-escala-tramo="1.14"
+         aria-labelledby="mapa-titulo mapa-desc">
+      <title id="mapa-titulo">Cómo se compra un arma en México</title>
+      <desc id="mapa-desc">Del requisito a la compra, con las dos salidas que dejan sin arma.</desc>
+      <defs>
+        <marker id="mapa-punta" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" className="m-default"/>
+        </marker>
+        <marker id="mapa-punta-si" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" className="m-emphasis"/>
+        </marker>
+        <marker id="mapa-punta-no" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+          <polygon points="0 0, 9 3.5, 0 7" className="m-security"/>
+        </marker>
+        <pattern id="mapa-rejilla" width="28" height="28" patternUnits="userSpaceOnUse">
+          <path d="M 28 0 L 0 0 0 28" className="c-grid" strokeWidth="0.5"/>
+        </pattern>
+        <filter id="mapa-grano" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+          <feColorMatrix type="saturate" values="0"/>
+        </filter>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#mapa-rejilla)"/>
+      <g data-camara="">
+            <rect x="26" y="34" width="308" height="514" rx="8" className="c-lane" strokeWidth="1"/>
+            <rect x="26" y="586" width="308" height="76" rx="8" className="c-security-group" strokeWidth="1"/>
+            <path data-edge-id="si" d="M 180.0 162.0 L 180.0 195.0" className="a-emphasis" fill="none" strokeWidth="1.8" markerEnd="url(#mapa-punta-si)"/>
+            <path data-edge-id="entrega" d="M 180.0 256.0 L 180.0 289.0" className="a-default" fill="none" strokeWidth="1.4" markerEnd="url(#mapa-punta)"/>
+            <path data-edge-id="plazo" d="M 180.0 350.0 L 180.0 383.0" className="a-default" fill="none" strokeWidth="1.4" markerEnd="url(#mapa-punta)"/>
+            <path data-edge-id="aprobado" d="M 180.0 444.0 L 180.0 477.0" className="a-emphasis" fill="none" strokeWidth="1.8" markerEnd="url(#mapa-punta-si)"/>
+            <path data-edge-id="no" d="M 320.0 103.0 L 344.0 103.0 L 344.0 624.0 L 325.0 624.0" className="a-security" fill="none" strokeWidth="1.4" markerEnd="url(#mapa-punta-no)"/>
+            <path data-edge-id="rechazado" d="M 40.0 416.0 L 16.0 416.0 L 16.0 12.0 L 180.0 12.0 L 180.0 39.0" className="a-security" fill="none" strokeWidth="1.4" markerEnd="url(#mapa-punta-no)"/>
+            <g data-edge-id="si">
+              <rect x="198.8" y="174.0" width="22.4" height="15" rx="2" className="c-mask"/>
+              <text x="210.0" y="185.0" className="t-backend" fontSize="10" textAnchor="middle">sí</text>
+            </g>
+            <g data-edge-id="aprobado">
+              <rect x="198.2" y="456.0" width="59.6" height="15" rx="2" className="c-mask"/>
+              <text x="228.0" y="467.0" className="t-backend" fontSize="10" textAnchor="middle">aprobado</text>
+            </g>
+            <g data-edge-id="no">
+              <rect x="315.8" y="352.5" width="22.4" height="15" rx="2" className="c-mask"/>
+              <text x="327.0" y="363.5" className="t-security" fontSize="10" textAnchor="middle">no</text>
+            </g>
+            <g data-edge-id="rechazado">
+              <rect x="107.1" y="5.0" width="65.8" height="15" rx="2" className="c-mask"/>
+              <text x="140.0" y="16.0" className="t-security" fontSize="10" textAnchor="middle">rechazado</text>
+            </g>
+            <g id="node-requisitos" data-node-label="¿Crees que reúnes los requisitos?">
+              <rect x="40" y="44" width="280" height="118" className="nodo-caja"/>
+              <text x="180.0" y="70.0" className="t-primary" fontSize="13" fontWeight="600" textAnchor="middle">¿Crees que reúnes los requisitos?</text>
+            </g>
+            <g id="node-solicitud" data-node-label="Haces tu solicitud">
+              <rect x="40" y="200" width="280" height="56" className="nodo-caja"/>
+              <text x="180.0" y="232.5" className="t-primary" fontSize="13" fontWeight="600" textAnchor="middle">Haces tu solicitud</text>
+            </g>
+            <g id="node-espera" data-node-label="45 a 60 días hábiles">
+              <rect x="40" y="294" width="280" height="56" className="nodo-caja"/>
+              <text x="180.0" y="326.5" className="t-primary" fontSize="13" fontWeight="600" textAnchor="middle">45 a 60 días hábiles</text>
+            </g>
+            <g id="node-resolucion" data-node-label="Resolución">
+              <rect x="40" y="388" width="280" height="56" className="nodo-caja"/>
+              <text x="180.0" y="420.5" className="t-primary" fontSize="13" fontWeight="600" textAnchor="middle">Resolución</text>
+            </g>
+            <g id="node-compra" data-node-label="Compras tu arma">
+              <rect x="40" y="482" width="280" height="56" className="nodo-caja"/>
+              <text x="180.0" y="514.5" className="t-primary" fontSize="13" fontWeight="600" textAnchor="middle">Compras tu arma</text>
+            </g>
+            <g id="node-sin" data-node-label="No puedes comprar un arma">
+              <rect x="40" y="596" width="280" height="56" className="nodo-caja"/>
+              <text x="180.0" y="628.5" className="t-primary" fontSize="13" fontWeight="600" textAnchor="middle">No puedes comprar un arma</text>
+            </g>
+            <g className="amx-mapa-boton amx-mapa-si" role="button" tabIndex="0" aria-pressed="false"
+               aria-label="Sí, creo que reúno los requisitos. Recorrer el trámite completo">
+              <rect className="amx-mapa-cuerpo" x="56" y="93" width="118" height="48" rx="2"/>
+              <rect className="amx-mapa-brillo" x="56" y="93" width="118" height="48" rx="2"/>
+              <text x="115" y="118" fontSize="15">SÍ</text>
+            </g>
+            <g className="amx-mapa-boton amx-mapa-no" role="button" tabIndex="0" aria-pressed="false"
+               aria-label="No, no reúno los requisitos. Ver a dónde lleva">
+              <rect className="amx-mapa-cuerpo" x="186" y="93" width="118" height="48" rx="2"/>
+              <text x="245" y="118" fontSize="15">NO</text>
+            </g>
+          </g>
+      <rect width="100%" height="100%" filter="url(#mapa-grano)" opacity=".055" style={{ pointerEvents: 'none' }}/>
+    </svg>
+  );
+}
 
 function MapaTramite() {
+  // El diagrama ancho pide 720 px para que los rótulos se lean; por debajo se
+  // sirve el mismo trámite apilado. Se elige uno, no se ocultan los dos.
+  const consulta = '(min-width: 760px)';
+  const [ancho, setAncho] = React.useState(
+    () => (typeof window !== 'undefined' && window.matchMedia ? window.matchMedia(consulta).matches : true)
+  );
+  const caja = React.useRef(null);
+  const anuncio = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!window.matchMedia) return undefined;
+    const mq = window.matchMedia(consulta);
+    const alCambiar = (e) => setAncho(e.matches);
+    // Safari < 14 no tiene addEventListener en MediaQueryList.
+    if (mq.addEventListener) mq.addEventListener('change', alCambiar);
+    else mq.addListener(alCambiar);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', alCambiar);
+      else mq.removeListener(alCambiar);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    if (!caja.current) return undefined;
+    return montarRecorridoDelMapa(caja.current.querySelector('svg'), anuncio.current);
+  }, [ancho]);
+
   return (
     <figure className="amx-mapa" role="group" aria-labelledby="mapa-pie">
-      <svg viewBox="0 0 1235 660" role="img" lang="en" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase" className="amx-mapa-svg" role="img" aria-label="Diagrama de las tres vías del trámite de armas en México">
-        <title id="archify-diagram-title">Las tres vías del trámite de armas en México</title>
-        <desc id="archify-diagram-description">A workflow diagram generated by Archify.</desc>
-        
-        <defs>
-          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" className="m-default" />
-          </marker>
-          <marker id="arrowhead-emphasis" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" className="m-emphasis" />
-          </marker>
-          <marker id="arrowhead-security" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" className="m-security" />
-          </marker>
-          <marker id="arrowhead-dashed" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" className="m-dashed" />
-          </marker>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" className="c-grid" strokeWidth="0.5"/>
-          </pattern>
-        </defs>
-
-        
-        <rect width="100%" height="100%" fill="url(#grid)" />
-
-        
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-0" x="40" y="52" width="1064" height="106" rx="10" className="c-lane" strokeWidth="1"/>
-        <text x="54" y="74" className="t-dim" fontSize="10" fontWeight="600">01 / Tú</text>
-
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-1" x="40" y="178" width="1064" height="106" rx="10" className="c-lane" strokeWidth="1"/>
-        <text x="54" y="200" className="t-dim" fontSize="10" fontWeight="600">02 / Registro Federal de Armas (DGRFAFyCE)</text>
-
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-2" x="40" y="304" width="1064" height="106" rx="10" className="c-lane" strokeWidth="1"/>
-        <text x="54" y="326" className="t-dim" fontSize="10" fontWeight="600">03 / Comercialización (DCAM · OTCA)</text>
-
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="lane" data-composition-frame-id="lane-3" x="40" y="430" width="1064" height="106" rx="10" className="c-lane" strokeWidth="1"/>
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="exception-lane" data-composition-frame-id="lane-3-exception" x="46" y="436" width="1052" height="94" rx="8" className="c-security-group" strokeWidth="1"/>
-        <text x="54" y="452" className="t-security" fontSize="10" fontWeight="600">EX / Trámites aparte</text>
-
-        
-        <line x1="82" y1="35" x2="357" y2="35" className="a-default" strokeWidth="1.1"/>
-        <rect x="82" y="27" width="275" height="16" rx="4" className="c-mask"/>
-        <text x="219.5" y="39" className="t-muted" fontSize="8" fontWeight="600" textAnchor="middle">Reunir los papeles</text>
-        <line x1="509.79999999999995" y1="35" x2="721.8" y2="35" className="a-emphasis" strokeWidth="1.1"/>
-        <rect x="509.79999999999995" y="27" width="212" height="16" rx="4" className="c-mask"/>
-        <text x="615.8" y="39" className="t-backend" fontSize="8" fontWeight="600" textAnchor="middle">El permiso</text>
-        <line x1="836.1999999999998" y1="35" x2="1076.1999999999998" y2="35" className="a-dashed" strokeWidth="1.1"/>
-        <rect x="836.1999999999998" y="27" width="239.9999999999999" height="16" rx="4" className="c-mask"/>
-        <text x="956.1999999999998" y="39" className="t-messagebus" fontSize="8" fontWeight="600" textAnchor="middle">La compra y el registro</text>
-
-        
-
-
-        
-        <path data-edge-from="antecedentes" data-edge-to="negado" data-edge-label="con antecedentes" data-edge-key="0" data-composition-points="386,120;402,120;402,294;555.8,294;555.8,472" d="M 386 120 L 402 120 L 402 294 L 555.8 294 L 555.8 472" className="a-security" strokeWidth="1.4" markerEnd="url(#arrowhead-security)"/>
-        <path data-edge-from="antecedentes" data-edge-to="solicitud" data-edge-label="sin antecedentes" data-edge-key="1" data-composition-points="311,94;311,78;555.8,78;555.8,94" d="M 311 94 L 311 78 L 555.8 78 L 555.8 94" className="a-emphasis" strokeWidth="1.8" markerEnd="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="compra" data-edge-to="registro" data-edge-key="2" data-composition-points="882.1999999999999,398;882.1999999999999,426;1030.1999999999998,426;1030.1999999999998,406" d="M 882.1999999999999 398 L 882.1999999999999 426 L 1030.1999999999998 426 L 1030.1999999999998 406" className="a-default" strokeWidth="1.4" markerEnd="url(#arrowhead)"/>
-        <path data-edge-from="expediente" data-edge-to="antecedentes" data-edge-key="3" data-composition-points="208,120;236,120" d="M 208 120 L 236 120" className="a-default" strokeWidth="1.4" markerEnd="url(#arrowhead)"/>
-        <path data-edge-from="permiso" data-edge-to="compra" data-edge-label="dentro de 4 meses" data-edge-key="4" data-composition-points="882.1999999999999,212;882.1999999999999,162;958.1999999999999,162;958.1999999999999,372;942.1999999999999,372" d="M 882.1999999999999 212 L 882.1999999999999 162 L 958.1999999999999 162 L 958.1999999999999 372 L 942.1999999999999 372" className="a-emphasis" strokeWidth="1.8" markerEnd="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="registro" data-edge-to="portacion" data-edge-label="portar exige otra licencia" data-edge-key="5" data-composition-points="970.1999999999998,379;954.1999999999998,379;954.1999999999998,552;882.1999999999999,552;882.1999999999999,532" d="M 970.1999999999998 379 L 954.1999999999998 379 L 954.1999999999998 552 L 882.1999999999999 552 L 882.1999999999999 532" className="a-dashed" strokeWidth="1.4" markerEnd="url(#arrowhead-dashed)"/>
-        <path data-edge-from="registro" data-edge-to="transporte" data-edge-label="trasladarla, otro permiso" data-edge-key="6" data-composition-points="1090.1999999999998,372;1216.2,372;1216.2,498;1095.1999999999998,498" d="M 1090.1999999999998 372 L 1216.2 372 L 1216.2 498 L 1095.1999999999998 498" className="a-dashed" strokeWidth="1.4" markerEnd="url(#arrowhead-dashed)"/>
-        <path data-edge-from="resuelve" data-edge-to="permiso" data-edge-label="autoriza" data-edge-key="7" data-composition-points="675.8,280;675.8,296;882.1999999999999,296;882.1999999999999,280" d="M 675.8 280 L 675.8 296 L 882.1999999999999 296 L 882.1999999999999 280" className="a-emphasis" strokeWidth="1.8" markerEnd="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="solicitud" data-edge-to="resuelve" data-edge-key="8" data-composition-points="555.8,146;555.8,246;600.8,246" d="M 555.8 146 L 555.8 246 L 600.8 246" className="a-default" strokeWidth="1.4" markerEnd="url(#arrowhead)"/>
-
-        
-        <g id="node-expediente" data-node-id="expediente" data-node-label="Tu expediente" tabindex="0" role="button" aria-label="Focus Tu expediente, identidad, ingresos, domicilio, Tú › Reunir los papeles" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="identidad, ingresos, domicilio" data-node-tag="3 van en original" data-node-context="Tú › Reunir los papeles">
-          <title>Tu expediente · identidad, ingresos, domicilio · Tú › Reunir los papeles · 3 van en original</title>
-          <rect x="48" y="86" width="160" height="68" rx="6" className="c-mask"/>
-          <rect x="48" y="86" width="160" height="68" rx="6" className="c-frontend" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" className="semantic-sigil s-frontend" transform="translate(54 92) scale(0.6875)">
-            <rect x="2" y="3" width="12" height="10" rx="2"/>
-            <path d="M2 6.5h12"/>
-            <circle cx="4.1" cy="4.8" r=".7" className="sigil-fill"/>
-            <circle cx="6.3" cy="4.8" r=".7" className="sigil-fill"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="128" y="107" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Tu expediente</text>
-          <text data-detail="context" x="128" y="124" className="t-muted" fontSize="8" textAnchor="middle">identidad, ingresos, domicilio</text>
-        <text data-detail="fine" x="128" y="142" className="t-frontend" fontSize="7" textAnchor="middle">3 van en original</text>
-        </g>
-
-        <g id="node-antecedentes" data-node-id="antecedentes" data-node-label="Antecedentes" tabindex="0" role="button" aria-label="Focus Antecedentes, de tu estado · 6 meses, Tú › Reunir los papeles" aria-pressed="false" data-node-kind="security" data-node-sublabel="de tu estado · 6 meses" data-node-context="Tú › Reunir los papeles">
-          <title>Antecedentes · de tu estado · 6 meses · Tú › Reunir los papeles</title>
-          <rect x="236" y="94" width="150" height="52" rx="6" className="c-mask"/>
-          <rect x="236" y="94" width="150" height="52" rx="6" className="c-security" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" className="semantic-sigil s-security" transform="translate(242 100) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="311" y="115" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Antecedentes</text>
-          <text data-detail="context" x="311" y="132" className="t-muted" fontSize="8" textAnchor="middle">de tu estado · 6 meses</text>
-        </g>
-
-        <g id="node-solicitud" data-node-id="solicitud" data-node-label="Solicitud" tabindex="0" role="button" aria-label="Focus Solicitud, formato DEFENSA-02-040, Tú › El permiso" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="formato DEFENSA-02-040" data-node-context="Tú › El permiso">
-          <title>Solicitud · formato DEFENSA-02-040 · Tú › El permiso</title>
-          <rect x="480.79999999999995" y="94" width="150" height="52" rx="6" className="c-mask"/>
-          <rect x="480.79999999999995" y="94" width="150" height="52" rx="6" className="c-frontend" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" className="semantic-sigil s-frontend" transform="translate(486.79999999999995 100) scale(0.6875)">
-            <rect x="2" y="3" width="12" height="10" rx="2"/>
-            <path d="M2 6.5h12"/>
-            <circle cx="4.1" cy="4.8" r=".7" className="sigil-fill"/>
-            <circle cx="6.3" cy="4.8" r=".7" className="sigil-fill"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="555.8" y="115" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Solicitud</text>
-          <text data-detail="context" x="555.8" y="132" className="t-muted" fontSize="8" textAnchor="middle">formato DEFENSA-02-040</text>
-        </g>
-
-        <g id="node-resuelve" data-node-id="resuelve" data-node-label="Resolución" tabindex="0" role="button" aria-label="Focus Resolución, 45 a 60 días hábiles, Registro Federal de Armas (DGRFAFyCE) › El permiso" aria-pressed="false" data-node-kind="security" data-node-sublabel="45 a 60 días hábiles" data-node-tag="$490" data-node-context="Registro Federal de Armas (DGRFAFyCE) › El permiso">
-          <title>Resolución · 45 a 60 días hábiles · Registro Federal de Armas (DGRFAFyCE) › El permiso · $490</title>
-          <rect x="600.8" y="212" width="150" height="68" rx="6" className="c-mask"/>
-          <rect x="600.8" y="212" width="150" height="68" rx="6" className="c-security" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" className="semantic-sigil s-security" transform="translate(606.8 218) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="675.8" y="233" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Resolución</text>
-          <text data-detail="context" x="675.8" y="250" className="t-muted" fontSize="8" textAnchor="middle">45 a 60 días hábiles</text>
-        <text data-detail="fine" x="675.8" y="268" className="t-security" fontSize="7" textAnchor="middle">$490</text>
-        </g>
-
-        <g id="node-permiso" data-node-id="permiso" data-node-label="Permiso de compra" tabindex="0" role="button" aria-label="Focus Permiso de compra, vale 4 meses, Registro Federal de Armas (DGRFAFyCE) › La compra y el registro" aria-pressed="false" data-node-kind="backend" data-node-sublabel="vale 4 meses" data-node-tag="no es portación" data-node-context="Registro Federal de Armas (DGRFAFyCE) › La compra y el registro">
-          <title>Permiso de compra · vale 4 meses · Registro Federal de Armas (DGRFAFyCE) › La compra y el registro · no es portación</title>
-          <rect x="807.1999999999999" y="212" width="150" height="68" rx="6" className="c-mask"/>
-          <rect x="807.1999999999999" y="212" width="150" height="68" rx="6" className="c-backend" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="backend" className="semantic-sigil s-backend" transform="translate(813.1999999999999 218) scale(0.6875)">
-            <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="882.1999999999999" y="233" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Permiso de compra</text>
-          <text data-detail="context" x="882.1999999999999" y="250" className="t-muted" fontSize="8" textAnchor="middle">vale 4 meses</text>
-        <text data-detail="fine" x="882.1999999999999" y="268" className="t-backend" fontSize="7" textAnchor="middle">no es portación</text>
-        </g>
-
-        <g id="node-compra" data-node-id="compra" data-node-label="Compras el arma" tabindex="0" role="button" aria-label="Focus Compras el arma, DCAM u OTCA, Comercialización (DCAM · OTCA) › La compra y el registro" aria-pressed="false" data-node-kind="cloud" data-node-sublabel="DCAM u OTCA" data-node-context="Comercialización (DCAM · OTCA) › La compra y el registro">
-          <title>Compras el arma · DCAM u OTCA · Comercialización (DCAM · OTCA) › La compra y el registro</title>
-          <rect x="822.1999999999999" y="346" width="120" height="52" rx="6" className="c-mask"/>
-          <rect x="822.1999999999999" y="346" width="120" height="52" rx="6" className="c-cloud" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="cloud" className="semantic-sigil s-cloud" transform="translate(828.1999999999999 352) scale(0.6875)">
-            <path d="M4.3 12.5h7.3a2.4 2.4 0 0 0 .2-4.8 4 4 0 0 0-7.5-1.3A3.1 3.1 0 0 0 4.3 12.5Z"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="882.1999999999999" y="367" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Compras el arma</text>
-          <text data-detail="context" x="882.1999999999999" y="384" className="t-muted" fontSize="8" textAnchor="middle">DCAM u OTCA</text>
-        </g>
-
-        <g id="node-registro" data-node-id="registro" data-node-label="Arma registrada" tabindex="0" role="button" aria-label="Focus Arma registrada, no caduca, Comercialización (DCAM · OTCA) › La compra y el registro" aria-pressed="false" data-node-kind="database" data-node-sublabel="no caduca" data-node-tag="$201" data-node-context="Comercialización (DCAM · OTCA) › La compra y el registro">
-          <title>Arma registrada · no caduca · Comercialización (DCAM · OTCA) › La compra y el registro · $201</title>
-          <rect x="970.1999999999998" y="338" width="120" height="68" rx="6" className="c-mask"/>
-          <rect x="970.1999999999998" y="338" width="120" height="68" rx="6" className="c-database" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="database" className="semantic-sigil s-database" transform="translate(976.1999999999998 344) scale(0.6875)">
-            <ellipse cx="8" cy="4" rx="5" ry="2"/>
-            <path d="M3 4v8c0 1.1 2.2 2 5 2s5-.9 5-2V4M3 8c0 1.1 2.2 2 5 2s5-.9 5-2"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="1030.1999999999998" y="359" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Arma registrada</text>
-          <text data-detail="context" x="1030.1999999999998" y="376" className="t-muted" fontSize="8" textAnchor="middle">no caduca</text>
-        <text data-detail="fine" x="1030.1999999999998" y="394" className="t-database" fontSize="7" textAnchor="middle">$201</text>
-        </g>
-
-        <g id="node-negado" data-node-id="negado" data-node-label="No se expide" tabindex="0" role="button" aria-label="Focus No se expide, sin excepción, Trámites aparte › El permiso" aria-pressed="false" data-node-kind="security" data-node-sublabel="sin excepción" data-node-context="Trámites aparte › El permiso">
-          <title>No se expide · sin excepción · Trámites aparte › El permiso</title>
-          <rect x="490.79999999999995" y="472" width="130" height="52" rx="6" className="c-mask"/>
-          <rect x="490.79999999999995" y="472" width="130" height="52" rx="6" className="c-security" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="security" className="semantic-sigil s-security" transform="translate(496.79999999999995 478) scale(0.6875)">
-            <path d="M8 2.2 13 4v3.5c0 3.1-1.8 5.4-5 6.5-3.2-1.1-5-3.4-5-6.5V4Z"/>
-            <path d="m5.8 8 1.5 1.5 3-3"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="555.8" y="493" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">No se expide</text>
-          <text data-detail="context" x="555.8" y="510" className="t-muted" fontSize="8" textAnchor="middle">sin excepción</text>
-        </g>
-
-        <g id="node-portacion" data-node-id="portacion" data-node-label="Portación" tabindex="0" role="button" aria-label="Focus Portación, licencia DEFENSA-02-025, Trámites aparte › La compra y el registro" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="licencia DEFENSA-02-025" data-node-tag="otro trámite" data-node-context="Trámites aparte › La compra y el registro">
-          <title>Portación · licencia DEFENSA-02-025 · Trámites aparte › La compra y el registro · otro trámite</title>
-          <rect x="817.1999999999999" y="464" width="130" height="68" rx="6" className="c-mask"/>
-          <rect x="817.1999999999999" y="464" width="130" height="68" rx="6" className="c-messagebus" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="messagebus" className="semantic-sigil s-messagebus" transform="translate(823.1999999999999 470) scale(0.6875)">
-            <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
-            <circle cx="5" cy="4.5" r="1" className="sigil-fill"/>
-            <circle cx="10.5" cy="8" r="1" className="sigil-fill"/>
-            <circle cx="7" cy="11.5" r="1" className="sigil-fill"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="882.1999999999999" y="485" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Portación</text>
-          <text data-detail="context" x="882.1999999999999" y="502" className="t-muted" fontSize="8" textAnchor="middle">licencia DEFENSA-02-025</text>
-        <text data-detail="fine" x="882.1999999999999" y="520" className="t-messagebus" fontSize="7" textAnchor="middle">otro trámite</text>
-        </g>
-
-        <g id="node-transporte" data-node-id="transporte" data-node-label="Transporte" tabindex="0" role="button" aria-label="Focus Transporte, permiso DEFENSA-02-045, Trámites aparte › La compra y el registro" aria-pressed="false" data-node-kind="messagebus" data-node-sublabel="permiso DEFENSA-02-045" data-node-tag="otro trámite" data-node-context="Trámites aparte › La compra y el registro">
-          <title>Transporte · permiso DEFENSA-02-045 · Trámites aparte › La compra y el registro · otro trámite</title>
-          <rect x="965.1999999999998" y="464" width="130" height="68" rx="6" className="c-mask"/>
-          <rect x="965.1999999999998" y="464" width="130" height="68" rx="6" className="c-messagebus" strokeWidth="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="messagebus" className="semantic-sigil s-messagebus" transform="translate(971.1999999999998 470) scale(0.6875)">
-            <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11"/>
-            <circle cx="5" cy="4.5" r="1" className="sigil-fill"/>
-            <circle cx="10.5" cy="8" r="1" className="sigil-fill"/>
-            <circle cx="7" cy="11.5" r="1" className="sigil-fill"/>
-          </g>
-          <text data-node-label="" data-detail-anchor="" x="1030.1999999999998" y="485" className="t-primary" fontSize="11" fontWeight="600" textAnchor="middle">Transporte</text>
-          <text data-detail="context" x="1030.1999999999998" y="502" className="t-muted" fontSize="8" textAnchor="middle">permiso DEFENSA-02-045</text>
-        <text data-detail="fine" x="1030.1999999999998" y="520" className="t-messagebus" fontSize="7" textAnchor="middle">otro trámite</text>
-        </g>
-
-        
-        <g data-detail="context" data-edge-from="antecedentes" data-edge-to="negado" data-edge-label="con antecedentes" data-edge-key="0">
-          <rect x="435.5" y="274" width="86.8" height="14" rx="3" className="c-mask"/>
-          <text x="478.9" y="284" className="t-security" fontSize="8" textAnchor="middle">con antecedentes</text>
-        </g>
-        <g data-detail="context" data-edge-from="antecedentes" data-edge-to="solicitud" data-edge-label="sin antecedentes" data-edge-key="1">
-          <rect x="390" y="58" width="86.8" height="14" rx="3" className="c-mask"/>
-          <text x="433.4" y="68" className="t-backend" fontSize="8" textAnchor="middle">sin antecedentes</text>
-        </g>
-
-
-        <g data-detail="context" data-edge-from="permiso" data-edge-to="compra" data-edge-label="dentro de 4 meses" data-edge-key="4">
-          <rect x="874.4" y="142" width="91.6" height="14" rx="3" className="c-mask"/>
-          <text x="920.1999999999999" y="152" className="t-backend" fontSize="8" textAnchor="middle">dentro de 4 meses</text>
-        </g>
-        <g data-detail="context" data-edge-from="registro" data-edge-to="portacion" data-edge-label="portar exige otra licencia" data-edge-key="5">
-          <rect x="850.7999999999998" y="532" width="134.8" height="14" rx="3" className="c-mask"/>
-          <text x="918.1999999999998" y="542" className="t-database" fontSize="8" textAnchor="middle">portar exige otra licencia</text>
-        </g>
-        <g data-detail="context" data-edge-from="registro" data-edge-to="transporte" data-edge-label="trasladarla, otro permiso" data-edge-key="6">
-          <rect x="1088.1999999999998" y="352" width="130" height="14" rx="3" className="c-mask"/>
-          <text x="1153.1999999999998" y="362" className="t-database" fontSize="8" textAnchor="middle">trasladarla, otro permiso</text>
-        </g>
-        <g data-detail="context" data-edge-from="resuelve" data-edge-to="permiso" data-edge-label="autoriza" data-edge-key="7">
-          <rect x="754.8" y="276" width="48.4" height="14" rx="3" className="c-mask"/>
-          <text x="779" y="286" className="t-backend" fontSize="8" textAnchor="middle">autoriza</text>
-        </g>
-
-
-        
-        <g data-legend="" data-legend-bridge="">
-          <text x="20" y="560" className="t-primary" fontSize="12" fontWeight="650">Legend</text>
-          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="User UI" data-legend-x="20" data-legend-baseline="580" data-legend-width="74">
-            <rect x="20" y="572" width="14" height="9" rx="2" className="c-frontend" strokeWidth="1"/>
-            <text x="42" y="580" className="t-muted" fontSize="7.5" fontWeight="500">User UI</text>
-          </g>
-          <g data-legend-semantic-kind="backend" data-legend-kind="backend" data-legend-label="Agent logic" data-legend-x="101" data-legend-baseline="580" data-legend-width="91">
-            <rect x="101" y="572" width="14" height="9" rx="2" className="c-backend" strokeWidth="1"/>
-            <text x="123" y="580" className="t-muted" fontSize="7.5" fontWeight="500">Agent logic</text>
-          </g>
-          <g data-legend-semantic-kind="security" data-legend-kind="security" data-legend-label="Policy" data-legend-x="199" data-legend-baseline="580" data-legend-width="70">
-            <rect x="199" y="572" width="14" height="9" rx="2" className="c-security" strokeWidth="1"/>
-            <text x="221" y="580" className="t-muted" fontSize="7.5" fontWeight="500">Policy</text>
-          </g>
-          <g data-legend-semantic-kind="messagebus" data-legend-kind="messagebus" data-legend-label="Tool action" data-legend-x="276" data-legend-baseline="580" data-legend-width="91">
-            <rect x="276" y="572" width="14" height="9" rx="2" className="c-messagebus" strokeWidth="1"/>
-            <text x="298" y="580" className="t-muted" fontSize="7.5" fontWeight="500">Tool action</text>
-          </g>
-          <g data-legend-semantic-kind="database" data-legend-kind="database" data-legend-label="Context / trace" data-legend-x="374" data-legend-baseline="580" data-legend-width="109">
-            <rect x="374" y="572" width="14" height="9" rx="2" className="c-database" strokeWidth="1"/>
-            <text x="396" y="580" className="t-muted" fontSize="7.5" fontWeight="500">Context / trace</text>
-          </g>
-          <g data-legend-semantic-kind="cloud" data-legend-kind="cloud" data-legend-label="Cloud service" data-legend-x="490" data-legend-baseline="580" data-legend-width="100">
-            <rect x="490" y="572" width="14" height="9" rx="2" className="c-cloud" strokeWidth="1"/>
-            <text x="512" y="580" className="t-muted" fontSize="7.5" fontWeight="500">Cloud service</text>
-          </g>
-        </g>
-      </svg>
+      <div className="amx-mapa-caja" ref={caja}>
+        {ancho ? <MapaTramiteAncho /> : <MapaTramiteAlto />}
+      </div>
+      <p className="amx-solo-lector" role="status" aria-live="polite" ref={anuncio}></p>
       <figcaption id="mapa-pie" className="amx-mapa-pie">
-        Las tres vías del trámite. El permiso lo expide el Registro Federal de Armas; la
-        compra se hace después en la DCAM o la OTCA; portar y trasladar el arma son
-        permisos distintos.
+        Del requisito a la compra. Si la resolución es negativa el trámite vuelve al
+        principio; la Defensa resuelve en 45 a 60 días hábiles según la ficha vigente.
       </figcaption>
     </figure>
   );

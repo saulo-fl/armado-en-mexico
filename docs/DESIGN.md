@@ -1331,3 +1331,6 @@ Es un sitio publicado, divulgativo y con contenido de referencia legal.
 4. **Antes de publicar:** las skills `verificar-app` y `fidelidad-diseno`, con capturas antes/después.
 5. **Prueba de no-genérico.** Antes de dar por buena una pantalla, la pregunta es:
    *¿produciría esto mismo para cualquier catálogo oscuro?* Si la respuesta es sí, se revisa.
+6. **Lo nuevo se propone en Penpot, lo publicado se mira en el navegador.** El archivo «Wire
+   Frame» consume estos tokens (`npm run tokens` → `docs/penpot/tokens.json`); nunca al revés.
+   Reglas, mapa y trampas en `docs/PENPOT.md`.

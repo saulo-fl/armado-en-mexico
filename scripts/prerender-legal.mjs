@@ -115,16 +115,18 @@ export function renderLegalHtml(corpus, seccion, h) {
       '<section aria-labelledby="aviso"><h2 id="aviso">' + esc(corpus.avisoTransparencia.titulo) + '</h2>' +
       corpus.avisoTransparencia.parrafos.map(function(p) { return '<p>' + esc(p) + '</p>'; }).join('') +
       '</section>' +
+      '<p class="amx-leg-intro">Los niveles de legalidad de las armas en México se dividen en tres categorías: civil, seguridad privada y exclusivo del ejército. Cada nivel tiene requisitos y restricciones específicas que se detallan en los apartados siguientes.</p>' +
+      '<p class="amx-leg-intro">Además, actividades como la caza, el tiro deportivo y la coleccionista tienen regulaciones propias que se describen en los apartados de trámites y documentación.</p>' +
       '<p>' + esc(corpus.advertencia) + '</p>' +
       '<p>Actualizado el <time datetime="' + esc(corpus.actualizado) + '">' + h.amxLegalFecha(corpus.actualizado) + '</time></p>' +
       '<section aria-labelledby="entrevista"><h2 id="entrevista">¿Puedo comprar un arma?</h2>' +
       '<p>Contesta unas preguntas sobre tu situación —ninguna pide un dato personal— y llévate el dictamen con los documentos que te corresponden. ' +
       '<a href="/legalidad/puedo-comprar">Empezar la entrevista</a></p></section>' +
       '<nav aria-label="Secciones"><ul>' +
-      '<li><a href="/legalidad/federal">Lo federal</a>: qué arma puedes tener, qué papel llenas y cuánto cuesta; la Constitución, la ley reformada en 2025, el reglamento, los formatos y las cuotas.</li>' +
-      '<li><a href="/legalidad/estatal">Lo que cambia por estado</a>: dónde sacas la constancia de antecedentes penales, en qué armería compras y si puedes mandar la solicitud por correo.</li>' +
-      '<li><a href="/legalidad/tramites">Trámites</a>: seis trámites ante la Defensa, con lo que habilita cada uno, su checklist y su cuota vigente.</li>' +
-      '<li><a href="/legalidad/documentos">Documentos legales</a>: textos oficiales y PDF de consulta alojados en Armado en México.</li>' +
+      '<li><a href="/legalidad/federal">¿Qué arma puedo tener y portar?</a>: qué arma puedes tener, qué papel llenas y cuánto cuesta; la Constitución, la ley reformada en 2025, el reglamento, los formatos y las cuotas.</li>' +
+      '<li><a href="/legalidad/estatal">¿Dónde hago los papeles en mi estado?</a>: dónde sacas la constancia de antecedentes penales, en qué armería compras y si puedes mandar la solicitud por correo.</li>' +
+      '<li><a href="/legalidad/tramites">¿Cómo saco mi permiso, paso a paso?</a>: seis trámites ante la Defensa, con lo que habilita cada uno, su checklist y su cuota vigente.</li>' +
+      '<li><a href="/legalidad/documentos">¿Dónde están la ley y los formatos?</a>: textos oficiales y PDF de consulta alojados en Armado en México.</li>' +
       '</ul></nav>' +
       '<nav aria-label="Más"><a href="/preguntas">Preguntas frecuentes</a> · <a href="/soporte">Soporte</a></nav>' +
       '</article>';
@@ -193,8 +195,8 @@ export function renderLegalHtml(corpus, seccion, h) {
     }).join('');
 
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Lo federal</nav>' +
-      '<h1>Lo federal</h1>' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › ¿Qué arma puedo tener y portar?</nav>' +
+      '<h1>¿Qué arma puedo tener y portar?</h1>' +
       '<p class="amx-leg-intro">Las armas de fuego en México son competencia exclusiva del ' +
       'Congreso de la Unión: ningún estado ni municipio puede crear permisos, licencias ni ' +
       'registros de armas de fuego. Las normas van ordenadas por la pregunta que traes; la ' +
@@ -237,8 +239,8 @@ export function renderLegalHtml(corpus, seccion, h) {
     }).join('');
 
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Lo que cambia por estado</nav>' +
-      '<h1>Lo que cambia por estado</h1>' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › ¿Dónde hago los papeles en mi estado?</nav>' +
+      '<h1>¿Dónde hago los papeles en mi estado?</h1>' +
       '<p class="amx-leg-advertencia">' + esc(corpus.noHayEstatal) + '</p>' +
       fichas +
       '</article>';

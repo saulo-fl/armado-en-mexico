@@ -471,7 +471,7 @@ function App() {
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
     entrevista: '¿Puedo comprar un arma?',
-    'legal-federal': 'Lo federal', 'legal-estatal': 'Por estado', 'legal-tramites': 'Trámites',
+    'legal-federal': 'Federal', 'legal-estatal': 'Por estado', 'legal-tramites': 'Trámites',
     'legal-documentos': 'Documentos legales',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
     calibres: 'Calibres', calibre: 'Calibre', campos: 'Campos de tiro', experiencias: 'Experiencias',
