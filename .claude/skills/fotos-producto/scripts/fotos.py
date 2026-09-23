@@ -406,44 +406,54 @@ def metricas(rgb_orig, alfa_orig, rgba_final, origen_px, peso_kb):
 
 
 def semaforo(m):
-    rojo, ambar = [], []
+    # `niveles` es metrica -> peor nivel que alcanzo, y es lo que pinta la hoja. Existe
+    # porque la hoja reimplementaba los nueve umbrales en JavaScript y ya divergieron
+    # una vez (31-ago-2026: pintaba halo>18 en rojo cuando aqui era ambar desde el
+    # 27-ago). Los umbrales viven SOLO aqui; alli solo se leen.
+    rojo, ambar, niveles = [], [], {}
+
+    def mal(clave, nivel, texto):
+        (rojo if nivel == "rojo" else ambar).append(texto)
+        if niveles.get(clave) != "rojo":
+            niveles[clave] = nivel
+
     # Apuntar a la izquierda AVISA, no bloquea (31-ago-2026, decision de Saulo).
     # Nunca se espeja — invertiria inscripciones y ventana de expulsion — pero hay
     # fabricantes que solo publican de ese lado: las seis Mendoza RM22 son foto
     # oficial 5906x1329 y las seis miran a la izquierda. Si el fabricante tiene
     # lateral derecha, se usa esa; si no, entra asi. Lo decide el humano.
-    if m["canon"] == "izquierda":             ambar.append("apunta a la izquierda: vale solo si el fabricante no publica lateral derecha")
-    if m["resolucion"] < MIN_LADO:            rojo.append(f"resolucion {m['resolucion']}px")
-    if m["llenado"] < 20:                     rojo.append(f"mascara rota: el arma llena el {m['llenado']}% de su bbox")
-    if m["alpha_pct"] > 92:                   rojo.append(f"no recorto nada ({m['alpha_pct']}%)")
-    if m["huecos_px"] == 0:                   rojo.append("sin huecos internos: mascara rellenada")
+    if m["canon"] == "izquierda":             mal("canon", "ambar", "apunta a la izquierda: vale solo si el fabricante no publica lateral derecha")
+    if m["resolucion"] < MIN_LADO:            mal("resolucion", "rojo", f"resolucion {m['resolucion']}px")
+    if m["llenado"] < 20:                     mal("llenado", "rojo", f"mascara rota: el arma llena el {m['llenado']}% de su bbox")
+    if m["alpha_pct"] > 92:                   mal("llenado", "rojo", f"no recorto nada ({m['alpha_pct']}%)")
+    if m["huecos_px"] == 0:                   mal("huecos", "rojo", "sin huecos internos: mascara rellenada")
     # El halo alto NO bloquea, avisa. Un objeto oscuro sobre fondo claro tiene un
     # borde antialias intrinsecamente mas claro que el objeto: es muestreo, no un
     # defecto. Medido: recortes impecables (Canik METE SFX, Beretta 80X) marcan
     # +68 y se ven perfectos. Solo un halo flagrante bloquea. El borde
     # ennegrecido si es un defecto real: sale de dividir por alfa muy baja.
-    if m["halo"] > 120:                       rojo.append(f"halo flagrante (+{m['halo']})")
-    elif m["halo"] > 18:                      ambar.append(f"halo claro (+{m['halo']}), revisar borde")
-    if m["halo"] < -25:                       rojo.append(f"borde ennegrecido ({m['halo']})")
-    if m["borde_recortado"] > 0.5:            rojo.append(f"arma cortada en el origen ({m['borde_recortado']}%)")
+    if m["halo"] > 120:                       mal("halo", "rojo", f"halo flagrante (+{m['halo']})")
+    elif m["halo"] > 18:                      mal("halo", "ambar", f"halo claro (+{m['halo']}), revisar borde")
+    if m["halo"] < -25:                       mal("halo", "rojo", f"borde ennegrecido ({m['halo']})")
+    if m["borde_recortado"] > 0.5:            mal("borde_recortado", "rojo", f"arma cortada en el origen ({m['borde_recortado']}%)")
     # Ya no hay rama "dejo fondo": la mordida esta acotada a 1 por construccion.
     # Ese modo lo cubre `alpha_pct > 92` / `llenado`. Si vuelve a aparecer una
     # mascara que se traga el fondo sin disparar ninguna de las dos, medir antes
     # de anadir un umbral nuevo.
     if m["mordida"] is not None and m["mordida"] < 0.93:
-        rojo.append(f"mordida {m['mordida']}: se comio parte")
-    if 0 < m["huecos_rel"] < 1.0:             ambar.append(f"huecos minimos ({m['huecos_rel']}% del arma)")
-    if m["dureza_borde"] < 0.8:               ambar.append(f"borde duro ({m['dureza_borde']})")
-    if m["dureza_borde"] > 6:                 ambar.append(f"borde lavado ({m['dureza_borde']})")
+        mal("mordida", "rojo", f"mordida {m['mordida']}: se comio parte")
+    if 0 < m["huecos_rel"] < 1.0:             mal("huecos", "ambar", f"huecos minimos ({m['huecos_rel']}% del arma)")
+    if m["dureza_borde"] < 0.8:               mal("dureza_borde", "ambar", f"borde duro ({m['dureza_borde']})")
+    if m["dureza_borde"] > 6:                 mal("dureza_borde", "ambar", f"borde lavado ({m['dureza_borde']})")
     # Sigma alto = fondo con textura, casi siempre una escena. Medido sobre las 28:
     # ninguna foto BUENA paso de 20.0, y por encima de 25 solo hay malas — dos con
     # una persona sosteniendo el arma (CZ 600 American 41.3, Retay Gordion 50.6),
     # que antes salian ambar y se colaban a la aprobacion. Por eso ahora bloquea.
-    if m["fondo_sigma"] > 25:                 rojo.append(f"foto de escena, no de producto (sigma {m['fondo_sigma']})")
-    elif m["fondo_sigma"] > 12:               ambar.append(f"fondo con textura (sigma {m['fondo_sigma']})")
-    if m["peso_kb"] > 140:                    ambar.append(f"pesa {m['peso_kb']} KB")
-    if m["luminancia_sujeto"] < 45:           ambar.append(f"arma muy oscura (L {m['luminancia_sujeto']})")
-    return ("rojo" if rojo else "ambar" if ambar else "verde"), rojo + ambar
+    if m["fondo_sigma"] > 25:                 mal("fondo_sigma", "rojo", f"foto de escena, no de producto (sigma {m['fondo_sigma']})")
+    elif m["fondo_sigma"] > 12:               mal("fondo_sigma", "ambar", f"fondo con textura (sigma {m['fondo_sigma']})")
+    if m["peso_kb"] > 140:                    mal("peso_kb", "ambar", f"pesa {m['peso_kb']} KB")
+    if m["luminancia_sujeto"] < 45:           mal("luminancia", "ambar", f"arma muy oscura (L {m['luminancia_sujeto']})")
+    return ("rojo" if rojo else "ambar" if ambar else "verde"), rojo + ambar, niveles
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -506,13 +516,13 @@ def preparar(args):
         final.save(dst, "WEBP", quality=args.calidad, method=6)
 
         m = metricas(rgb_orig, alfa, np.array(final), px, dst.stat().st_size / 1024)
-        color, notas = semaforo(m)
+        color, notas, niveles = semaforo(m)
         informe.append({**_ficha(arma), "estado": "PROCESADA", "origen": str(origen),
                         "origen_px": px, "archivo": dst.name,
                         "actual": arma.get("img", ""), "traia_alfa": alfa_previo is not None
                         and bool((alfa_previo < 250).any()),
                         "alfa_de_fabrica": de_fabrica,
-                        "metricas": m, "color": color, "notas": notas,
+                        "metricas": m, "color": color, "notas": notas, "niveles": niveles,
                         "segundos": round(time.time() - t0, 1)})
         print(f"{etq}: {color.upper()} {final.size[0]}x{final.size[1]} "
               f"{m['peso_kb']}KB {round(time.time()-t0,1)}s"
@@ -742,6 +752,37 @@ def autocheck(args=None):
     assert col(borde_recortado=0.6) == "rojo", "arma cortada en el origen"
     assert col(canon="izquierda") == "ambar", "avisa, no bloquea (las seis Mendoza RM22)"
 
+    # `niveles` es lo que pinta la hoja: si una regla no lo rellena, su badge sale
+    # verde y el humano aprueba un defecto sin verlo. Se comprueba por metrica.
+    niv = lambda **k: semaforo({**_BASE, **k})[2]
+    assert niv(halo=68)["halo"] == "ambar", "el nivel tiene que llegar a la hoja"
+    assert niv(halo=130)["halo"] == "rojo"
+    assert niv(fondo_sigma=41.3)["fondo_sigma"] == "rojo"
+    assert niv(huecos_px=0)["huecos"] == "rojo"
+    assert niv(alpha_pct=93.0)["llenado"] == "rojo", "alpha_pct pinta el badge de llenado"
+    assert niv(resolucion=899)["resolucion"] == "rojo"
+    assert niv(canon="izquierda")["canon"] == "ambar"
+    assert niv() == {}, "una foto impecable no pinta ningun badge de color"
+    # rojo gana sobre ambar en la misma metrica: halo<-25 y halo>18 comparten clave
+    assert niv(halo=-30)["halo"] == "rojo"
+
+    # LA HOJA NO PUEDE TENER UMBRALES. Los tuvo, en un espejo manual de estas mismas
+    # nueve reglas escrito en JavaScript, y divergio (31-ago-2026: pintaba halo>18 en
+    # rojo cuando aqui ya era ambar). Esto era un comentario pidiendo cuidado; ahora
+    # es un assert, que es lo unico que de verdad lo impide.
+    fuente = Path(__file__).read_text("utf-8")
+    # con el salto de linea delante: si no, la busqueda se encuentra a SI MISMA,
+    # porque esta linea contiene la cadena que busca y esta antes que la funcion.
+    cuerpo_hoja = fuente[fuente.index(chr(10) + "def hoja("):]
+    for prohibido in ("m.llenado <", "m.alpha_pct >", "m.huecos_px ===", "m.huecos_rel <",
+                      "m.halo >", "m.halo <", "m.dureza_borde <", "m.dureza_borde >",
+                      "m.fondo_sigma >", "m.mordida <", "m.canon ===", "m.resolucion <",
+                      "m.peso_kb >"):
+        assert prohibido not in cuerpo_hoja, (
+            f"la hoja volvio a comparar un umbral a mano ({prohibido!r}): "
+            "usa r.niveles, que lo resuelve semaforo()")
+    assert "r.niveles" in cuerpo_hoja, "la hoja tiene que leer los niveles de semaforo()"
+
     print("autocheck: ok")
     return 0
 
@@ -819,6 +860,26 @@ def _veredictos():
         return {}
 
 
+def rehacer_hoja(args=None):
+    """Rehace la hoja desde informe.json, sin volver a inferir ninguna mascara.
+
+    Hace falta cuando lo que cambia es la HOJA y no las fotos: un orden nuevo, un
+    badge nuevo, o —el caso que lo estreno— filas guardadas antes de que semaforo()
+    devolviera `niveles`. Reprocesar para eso cuesta 25 s por foto y no cambia un
+    solo pixel.
+    """
+    ruta = TRABAJO / "informe.json"
+    if not ruta.exists():
+        sys.exit(f"no hay informe todavia: {ruta}")
+    informe = json.loads(ruta.read_text("utf-8"))
+    hoja(informe)
+    ruta.write_text(json.dumps(informe, ensure_ascii=False, indent=1), "utf-8")
+    n = lambda c: sum(1 for r in informe if r.get("color") == c)
+    print(f"{len(informe)} filas · verde {n('verde')} · ambar {n('ambar')} · rojo {n('rojo')}")
+    print(f"hoja: {HOJA if 'HOJA' in globals() else TRABAJO / 'hoja-de-contactos.html'}")
+    return 0
+
+
 def pendientes(args):
     """El censo, medido. Es el input del que busca fotos, y no sale de ningun doc.
 
@@ -884,6 +945,14 @@ def pendientes(args):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def hoja(informe):
+    # Una fila guardada antes de que semaforo() devolviera `niveles` no los trae, y
+    # sin ellos la hoja pinta TODOS los badges en verde: el humano aprobaria un rojo
+    # sin verlo. Se recalculan de sus metricas, que ya estan en el informe — mas
+    # barato que reinferir 25 s por foto, y mismo resultado porque los umbrales
+    # viven en un solo sitio.
+    for r in informe:
+        if r.get("estado") == "PROCESADA" and not r.get("niveles") and r.get("metricas"):
+            r["niveles"] = semaforo(r["metricas"])[2]
     # fondo y filtro copiados literalmente de screens-2.jsx:186-198
     HERO_BG = "radial-gradient(ellipse at 50% 50%, #2C2C2C 0%, #1A1A1A 100%)"
     HERO_FX = "grayscale(0.1) contrast(1.15) drop-shadow(0 8px 24px rgba(0,0,0,.6))"
@@ -952,19 +1021,23 @@ function pinta() {{
   document.getElementById('lista').innerHTML = D.map((r, i) => {{
     if (r.estado !== 'PROCESADA') return filaSimple(r, i);
     const m = r.metricas, e = est[r.id] || {{}};
+    // Los umbrales NO estan aqui: los pone semaforo() en fotos.py y llegan ya
+    // resueltos en r.niveles (metrica -> peor nivel). Antes esto era un espejo
+    // manual de las nueve reglas y divergio una vez (31-ago-2026: pintaba halo>18
+    // en rojo cuando semaforo() lo daba ambar desde el 27-ago). Si añades una
+    // metrica, dale su clave en `mal(...)` alli y leela aqui.
+    const N = r.niveles || {{}};
+    const b = (t, clave) => badge(t, N[clave] || 'verde');
     const mets = [
-      // OJO: estos umbrales son un ESPEJO de semaforo() en fotos.py. Si cambias
-      // uno alli, cambialo aqui. Ya divergieron una vez (31-ago-2026): la hoja
-      // pintaba halo>18 en rojo cuando semaforo() lo daba ambar desde el 27-ago.
-      badge(`llenado ${{m.llenado}}%`, m.llenado < 20 || m.alpha_pct > 92 ? 'rojo' : 'verde'),
-      badge(`huecos ${{m.huecos_rel}}%`, m.huecos_px === 0 ? 'rojo' : m.huecos_rel < 1.0 ? 'ambar' : 'verde'),
-      badge(`halo ${{m.halo}}`, m.halo > 120 || m.halo < -25 ? 'rojo' : m.halo > 18 ? 'ambar' : 'verde'),
-      badge(`borde ${{m.dureza_borde}}`, m.dureza_borde < 0.8 || m.dureza_borde > 6 ? 'ambar' : 'verde'),
-      badge(`fondo σ${{m.fondo_sigma}}`, m.fondo_sigma > 25 ? 'rojo' : m.fondo_sigma > 12 ? 'ambar' : 'verde'),
-      m.mordida !== null ? badge(`mordida ${{m.mordida}}`, m.mordida < 0.93 ? 'rojo' : 'verde') : '',
-      badge(`cañón ${{m.canon}}`, m.canon === 'izquierda' ? 'ambar' : 'verde'),
-      badge(`${{m.resolucion}}px`, m.resolucion < {MIN_LADO} ? 'rojo' : 'verde'),
-      badge(`${{m.peso_kb}}KB`, m.peso_kb > 140 ? 'ambar' : 'verde'),
+      b(`llenado ${{m.llenado}}%`, 'llenado'),
+      b(`huecos ${{m.huecos_rel}}%`, 'huecos'),
+      b(`halo ${{m.halo}}`, 'halo'),
+      b(`borde ${{m.dureza_borde}}`, 'dureza_borde'),
+      b(`fondo σ${{m.fondo_sigma}}`, 'fondo_sigma'),
+      m.mordida !== null ? b(`mordida ${{m.mordida}}`, 'mordida') : '',
+      b(`cañón ${{m.canon}}`, 'canon'),
+      b(`${{m.resolucion}}px`, 'resolucion'),
+      b(`${{m.peso_kb}}KB`, 'peso_kb'),
     ].join('');
     return `<div class="fila ${{e.estado||''}} ${{i===sel?'sel':''}}" id="f${{i}}" data-color="${{r.color}}">
       <div class="panel hero"><span class="tag">ACTUAL</span><img src="${{actualSrc(r)}}"></div>
@@ -1076,6 +1149,9 @@ def main():
     p = sub.add_parser("verificar")
     p.add_argument("--tipo", help="detalla las sin alfa de este tipo")
     p.set_defaults(fn=verificar)
+
+    p = sub.add_parser("hoja")
+    p.set_defaults(fn=rehacer_hoja)
 
     p = sub.add_parser("autocheck")
     p.set_defaults(fn=autocheck)
