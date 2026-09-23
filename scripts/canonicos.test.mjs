@@ -41,6 +41,12 @@ const OUT = fileURLToPath(new URL('../out', import.meta.url));
 const SITIO = 'https://armado.mx';
 const hayBuild = existsSync(join(OUT, 'sitemap.xml'));
 
+// Sin `out/` la suite se salta sola, para que `npm test` (que corre ANTES del
+// build) no falle en un checkout limpio. Pero saltarse todo en silencio es
+// justo como un gate deja de ser un gate: en CI se exporta CANONICOS_EXIGE_BUILD=1
+// y entonces la falta de build es un fallo duro, no un salto.
+const EXIGE_BUILD = process.env.CANONICOS_EXIGE_BUILD === '1';
+
 function htmls(dir, acc = []) {
   for (const e of readdirSync(dir)) {
     const p = join(dir, e);
@@ -53,8 +59,8 @@ function htmls(dir, acc = []) {
 const sitemap = hayBuild ? readFileSync(join(OUT, 'sitemap.xml'), 'utf8') : '';
 const urlsSitemap = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 
-test('hay un build en out/ que auditar', () => {
-  assert.ok(hayBuild, 'no existe out/sitemap.xml — corre `npm run build` antes');
+test('hay un build en out/ que auditar', { skip: (hayBuild || EXIGE_BUILD) ? false : 'no hay out/ — esta suite la corre el CI tras el build' }, () => {
+  assert.ok(hayBuild, 'CANONICOS_EXIGE_BUILD=1 pero no existe out/sitemap.xml: corre `npm run build` antes');
 });
 
 test('ninguna URL del sitemap termina en /index', { skip: !hayBuild }, () => {

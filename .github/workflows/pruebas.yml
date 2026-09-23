@@ -55,3 +55,7 @@ jobs:
       # una URL que Pages sirve como 308: canonical roto, señal descartada.
       - name: URLs canónicas y enlaces internos
         run: node --test scripts/canonicos.test.mjs
+        env:
+          # Sin esto la suite se saltaría sola si el build no dejó out/, y un
+          # gate que se salta en silencio no es un gate.
+          CANONICOS_EXIGE_BUILD: '1'
