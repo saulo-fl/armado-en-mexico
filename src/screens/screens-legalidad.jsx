@@ -66,12 +66,16 @@ function LegalidadFederalCuerpo({ C }) {
   let n = 0;
   return (
     <div className="amx-leg-cuerpo">
-      <p className="amx-leg-intro">
-        Las armas de fuego son competencia exclusiva del Congreso de la Unión: ningún
-        estado ni municipio puede crear permisos, licencias ni registros. Las normas van
-        por la pregunta que traes; la jerarquía —de la Constitución al formato de
-        ventanilla— se ve dentro de cada una.
-      </p>
+        <p className="amx-leg-intro">
+          Los niveles de legalidad de las armas en México se dividen en tres categorías:
+          civil, seguridad privada y exclusivo del ejército. Cada nivel tiene requisitos
+          y restricciones específicas que se detallan en los apartados siguientes.
+        </p>
+        <p className="amx-leg-intro">
+          Además, actividades como la caza, el tiro deportivo y la coleccionista tienen
+          regulaciones propias que se describen en los apartados de trámites y
+          documentación.
+        </p>
       {grupos.map((g) => {
         const desde = n;
         n += g.normas.length;
@@ -102,11 +106,11 @@ function LegalidadEstatalCuerpo({ C }) {
 
   return (
     <div className="amx-leg-cuerpo">
-      <p className="amx-leg-intro">
-        No hay ley estatal de armas. Lo que sí cambia por estado es dónde sacas la
-        constancia de antecedentes penales, en qué armería compras y si puedes mandar la
-        solicitud por correo certificado.
-      </p>
+        <p className="amx-leg-intro">
+          En cada estado la obtención de armas se regula por la ley federal, pero los
+          trámites de antecedentes penales, armerías y envío por correo certificado
+          varían. A continuación se muestra la información específica por estado.
+        </p>
       <label className="amx-leg-selector">
         <span>Elige tu estado</span>
         {/* Las entidades sin portal verificado se quedan en el selector, en gris y con
@@ -284,13 +288,12 @@ function LegalidadTramitesCuerpo({ C }) {
   const tramites = C.tramites;
   return (
     <div className="amx-leg-cuerpo">
-      <p className="amx-leg-intro">
-        Seis trámites ante la Secretaría de la Defensa Nacional: el permiso extraordinario
-        de adquisición, la compra en la DCAM y el registro del arma; y aparte la licencia
-        de portación, el permiso de colección y el de transporte. El permiso y la compra
-        son dos trámites distintos: creer que son el mismo papeleo es lo que hace que
-        alguien llegue al mostrador sin expediente.
-      </p>
+        <p className="amx-leg-intro">
+          Los trámites ante la Secretaría de la Defensa Nacional incluyen la compra del arma,
+          el permiso de portación, el permiso de colección y el permiso de transporte.
+          Cada trámite tiene requisitos, costos y plazos específicos que se describen a
+          continuación.
+        </p>
       <p className="amx-leg-advertencia">{C.advertencia}</p>
       <section className="amx-leg-contraste">
         <h3>Posesión no es portación</h3>
@@ -339,7 +342,7 @@ function LegalidadDocumentosCuerpo({ C }) {
   }
 
   return <div className="amx-leg-cuerpo">
-    <p className="amx-leg-intro">Los textos oficiales que sustentan esta guía. Las copias PDF se alojan aquí para facilitar su lectura; el enlace a la autoridad permite comprobar la versión vigente.</p>
+    <p className="amx-leg-intro">Fundamento legal. Los textos oficiales que sustentan esta guía se presentan a continuación, con enlaces a las fuentes y copias PDF cuando están disponibles.</p>
     {grupo('PDF en armado.mx', locales)}
     {grupo('Fuentes oficiales en la web', web)}
     {grupo('Pendientes de verificar', pendientes)}
@@ -359,10 +362,10 @@ function LegalidadDocumentosCuerpo({ C }) {
 // «Lo federal» y «Documentos oficiales» no dicen de qué trata el apartado ni a quien
 // conoce el material. Esto es una plataforma educativa: el rótulo enseña, no evoca.
 const LEGALIDAD_SECCIONES = [
-  { id: 'federal', tema: 'Federal', titulo: '¿Qué arma puedo tener y portar?', desc: 'Lo que la ley federal permite: calibres, cuántas y dónde.', Cuerpo: LegalidadFederalCuerpo },
+  { id: 'federal', tema: 'Federal', titulo: '¿Qué arma puedo tener y portar?', desc: 'Los niveles de legalidad: civil, seguridad privada y exclusivo del ejército.', Cuerpo: LegalidadFederalCuerpo },
   { id: 'estatal', tema: 'Por estado', titulo: '¿Dónde hago los papeles en mi estado?', desc: 'Antecedentes penales, armerías y correo, estado por estado.', Cuerpo: LegalidadEstatalCuerpo },
   { id: 'tramites', tema: 'Trámites', titulo: '¿Cómo saco mi permiso, paso a paso?', desc: 'Los seis trámites ante la Defensa: requisitos y costo.', Cuerpo: LegalidadTramitesCuerpo },
-  { id: 'documentos', tema: 'Documentos', titulo: '¿Dónde están la ley y los formatos?', desc: 'Leyes, reglamento y formatos en PDF, con su fuente.', Cuerpo: LegalidadDocumentosCuerpo },
+  { id: 'documentos', tema: 'Documentos', titulo: 'Fundamento legal', desc: 'Leyes, reglamento y formatos en PDF, con su fuente.', Cuerpo: LegalidadDocumentosCuerpo },
 ];
 
 function LegalidadHub({ onNav, seccion }) {
