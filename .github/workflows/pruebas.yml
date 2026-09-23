@@ -47,3 +47,11 @@ jobs:
       # Lo que las pruebas no ven porque no ejecutan los componentes, aquí se ve.
       - name: Smoke en el navegador
         run: npm run smoke
+
+      # VA DESPUÉS DEL BUILD A PROPÓSITO: audita out/ (sitemap, canonical de cada
+      # página y enlaces internos), así que en `npm test` —que corre antes— se
+      # salta sola por falta de build. Aquí es donde de verdad comprueba algo.
+      # Cazó el canonical del hub de Legalidad apuntando a /legalidad/index,
+      # una URL que Pages sirve como 308: canonical roto, señal descartada.
+      - name: URLs canónicas y enlaces internos
+        run: node --test scripts/canonicos.test.mjs
