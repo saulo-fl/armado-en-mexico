@@ -754,7 +754,7 @@ def autocheck(args=None):
 ESTADOS = {
     "LISTA":       "foto propia con alfa: nada que hacer",
     "POR_PROCESAR": "sin foto, pero su origen ya esta en fotos-fuente: solo falta `preparar`",
-    "RECORTABLE":  "fondo opaco y hay original externo >=900: `preparar`, sin buscar nada",
+    "RECORTABLE":  "fondo opaco y hay original externo >=900: intenta `preparar`, sin buscar nada",
     "RECOMPRIMIR": "fondo opaco y solo el WebP servido llega a 900: recomprimir es el ultimo recurso",
     "RESUSTITUIR": "fondo opaco y ningun origen llega a 900: hace falta OTRA foto",
     "SIN_FOTO":    "sin foto y sin origen: hace falta CONSEGUIR la foto",
@@ -799,6 +799,26 @@ def _estado(arma):
     return "RESUSTITUIR", max(ext, prop), mejor
 
 
+def _veredictos():
+    """Lo que el pipeline YA dijo de cada arma, de `informe.json`.
+
+    El censo mide pixeles, y con pixeles no se puede saber si la foto es de escena,
+    si el arma esta cortada por el borde o si al recortarla se queda en 478 px. Eso
+    solo lo dice la inferencia. Medido el 22-sep: de 30 armas clasificadas como
+    RECORTABLE —origen externo de sobra— 22 salieron ROJAS, y ninguna por el recorte:
+    escenas con sigma de 41 a 70, una Breda cortada al 68 %, tres Retay que caian a
+    801 px. Sin leer esto, el censo las sigue llamando recortables y alguien las
+    reintenta. El veredicto del pipeline manda sobre la medida de pixeles.
+    """
+    ruta = TRABAJO / "informe.json"
+    if not ruta.exists():
+        return {}
+    try:
+        return {r["id"]: r for r in json.loads(ruta.read_text("utf-8"))}
+    except Exception:
+        return {}
+
+
 def pendientes(args):
     """El censo, medido. Es el input del que busca fotos, y no sale de ningun doc.
 
@@ -806,10 +826,22 @@ def pendientes(args):
     cuando ya eran 253 y 123: un documento con cifras caduca, este comando no.
     """
     db = catalogo()
+    vistos = _veredictos()
     filas = []
     for a in db:
         est, px, mejor = _estado(a)
+        nota = ""
+        v = vistos.get(a["id"])
+        if v and est in ("RECORTABLE", "RECOMPRIMIR", "POR_PROCESAR"):
+            # ya se intento: si el pipeline la rechazo, no es recortable, hace falta OTRA foto
+            if v.get("color") == "rojo":
+                est, nota = "RESUSTITUIR", "el pipeline la rechazo: " + "; ".join(v.get("notas") or [])
+            elif v.get("estado") == "RESUSTITUIR":
+                est, nota = "RESUSTITUIR", "sin origen util: " + "; ".join(v.get("notas") or [])
+            elif v.get("color"):
+                nota = f"ya procesada, sale {v['color']}: pendiente de aprobar en la hoja"
         filas.append({
+            "nota": nota,
             "clase": "arma", "id": a["id"], "marca": a.get("marca") or "",
             "marca_clave": _sin_tildes(a.get("marca") or "").lower().strip(),
             "nombre": a["nombre"], "tipo": a.get("tipo") or "",
