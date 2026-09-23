@@ -31,6 +31,7 @@ pelea. Si algún día hay wheel oficial para Blackwell, basta con cambiar los
 providers de la sesión de rembg.
 """
 import argparse, json, re, shutil, subprocess, sys, time, unicodedata
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -58,6 +59,31 @@ ANCHO = 1200
 CALIDAD = 80
 MARGEN = 0.02           # del lado mayor, alrededor del bbox del alfa
 
+
+def sin_foto_propia(ruta):
+    """La silueta NO es una foto del arma: es el placeholder de su tipo.
+
+    Desde el 8-sep-2026 `data.js` ya no deja `img` vacio — al cargar le pone
+    `imagenes/silueta-<tipo>.webp` a cada arma sin foto (data.js:1166), y
+    `catalogo()` lo lee con node, asi que aqui llega la silueta, no "".
+    Tratarla como foto rompia tres cosas a la vez, y las tres en silencio:
+
+      - `mejor_origen()` la aceptaba como origen. Las siluetas miden EXACTAMENTE
+        900 px de lado mayor, asi que `MIN_LADO` no las para (900 < 900 es False)
+        y el pipeline recortaba la silueta creyendo que era el arma.
+      - `aplicar()` veia una ruta que empieza por `imagenes/` y tomaba la rama de
+        sustitucion: `shutil.copy2` PISABA `public/imagenes/silueta-pistola.webp`,
+        el placeholder que comparten las 22 pistolas sin foto, y le ponia `?v=2`
+        a una sola arma.
+      - `verificar()` las contaba como "con alfa" (la silueta tiene alfa), asi
+        que decia 252 de 252 y tapaba las 122 armas sin foto.
+
+    Es el mismo predicado que `armaSinFoto` (ui.jsx) y `fixArmaImg` (store.js).
+    El aviso de data.js:1156 dice "los tres sitios"; con este, son cuatro.
+    """
+    ruta = str(ruta or "")
+    return not ruta.startswith("imagenes/") or "/silueta-" in ruta
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Catálogo: data.js es la ÚNICA fuente de verdad del tipo de arma. El correlativo
 # NNN del nombre de archivo NO es contiguo por tipo (042-060 son escopetas).
@@ -66,7 +92,8 @@ MARGEN = 0.02           # del lado mayor, alrededor del bbox del alfa
 def catalogo():
     js = ("global.window=global;require('./data.js');"
           "console.log(JSON.stringify((window.DB||[]).map(a=>"
-          "({id:a.id,nombre:a.nombre,marca:a.marca,tipo:a.tipo,calibre:a.calibre,img:a.img}))))")
+          "({id:a.id,nombre:a.nombre,marca:a.marca,tipo:a.tipo,calibre:a.calibre,"
+          "img:a.img,dcamRef:a.dcamRef}))))")
     # cwd=DATOS: data.js ya no vive en la raiz. encoding: ver catalogo() de cajas.py.
     out = subprocess.run(["node", "-e", js], cwd=DATOS, capture_output=True,
                          text=True, encoding="utf-8", check=True)
@@ -114,25 +141,37 @@ def _alfa_de_fabrica(alfa):
     return marco_libre > 0.90 and 0.02 < cuerpo < 0.92
 
 
+def _candidatos(arma):
+    """Los origenes posibles de un arma, con bandera de si son EXTERNOS al repo.
+
+    `externo` separa "hay una foto de fuera que puedo recortar" de "solo tengo el
+    WebP que ya sirvo": recortar el segundo es recomprimir un WebP, que es el
+    ultimo recurso y no el primero. `pendientes()` decide con esa bandera.
+    """
+    # Lo descargado de fuera, por id de arma
+    cands = [(p, True) for p in sorted(FUENTE.glob(f"{arma['id']}.*"))
+                              + sorted(FUENTE.glob(f"{arma['id']}_*"))]
+    ruta_repo = str(arma.get("img") or "")
+    if not sin_foto_propia(ruta_repo):
+        p = PUBLICO / ruta_repo.split("?")[0]
+        if p.exists():
+            cands.append((p, False))          # el WebP que ya se sirve
+        # el original sin comprimir, por su correlativo NNN
+        nnn = Path(ruta_repo).stem.split("_")[0]
+        cands += [(q, True) for q in sorted(ORIGINALES.glob(f"{nnn}_*"))]
+    return cands
+
+
 def mejor_origen(arma):
     """La copia de mayor resolución entre lo conseguido de fuera y lo que ya hay.
 
-    Las armas 112-192 no tienen foto ninguna: `img` viene vacio y `data.js` les
-    pone un placeholder SVG al cargar. Para esas, `fotos-fuente/<id>.*` es el
-    UNICO origen posible, asi que se mira siempre, tenga o no ruta en el repo.
+    Las armas sin foto propia no tienen origen en el repo — `data.js` les asigna
+    la silueta de su tipo al cargar, y `sin_foto_propia()` la descarta. Para esas,
+    `fotos-fuente/<id>.*` es el UNICO origen posible, asi que se mira siempre,
+    tenga o no ruta en el repo.
     """
-    # Lo descargado de fuera, por id de arma
-    cands = sorted(FUENTE.glob(f"{arma['id']}.*")) + sorted(FUENTE.glob(f"{arma['id']}_*"))
-    ruta_repo = str(arma.get("img") or "")
-    if ruta_repo.startswith("imagenes/"):
-        p = PUBLICO / ruta_repo.split("?")[0]
-        if p.exists():
-            cands.append(p)
-        # el original sin comprimir, por su correlativo NNN
-        nnn = Path(ruta_repo).stem.split("_")[0]
-        cands += sorted(ORIGINALES.glob(f"{nnn}_*"))
     elegida = elegida_px = None
-    for p in cands:
+    for p, _externo in _candidatos(arma):
         try:
             with Image.open(p) as im:
                 px = max(im.size)
@@ -480,7 +519,21 @@ def preparar(args):
               + ("  [alfa de fabrica]" if de_fabrica else "")
               + (f"  <- {'; '.join(notas)}" if notas else ""))
 
-    (TRABAJO / "informe.json").write_text(json.dumps(informe, ensure_ascii=False, indent=1), "utf-8")
+    # El informe ACUMULA entre corridas, y la hoja muestra todo lo que hay en
+    # 3-final — igual que accesorios.py y cajas.py. Antes se reescribia entero, asi
+    # que la tanda anterior se perdia y habia que procesar las 253 de una sentada
+    # (a ~25 s por foto en CPU) para tener una sola hoja. Se conserva lo previo cuyo
+    # WebP siga vivo, y lo que no llego a producir archivo (RESUSTITUIR/SIN_ORIGEN)
+    # porque es justo la lista de lo que falta conseguir.
+    ruta_informe = TRABAJO / "informe.json"
+    previas = {}
+    if ruta_informe.exists():
+        previas = {r["id"]: r for r in json.loads(ruta_informe.read_text("utf-8"))}
+    previas.update({r["id"]: r for r in informe})
+    vivos = {q.name for q in (TRABAJO / "3-final").glob("*.webp")}
+    informe = [r for r in sorted(previas.values(), key=lambda r: r["id"])
+               if r.get("estado") != "PROCESADA" or r.get("archivo") in vivos]
+    ruta_informe.write_text(json.dumps(informe, ensure_ascii=False, indent=1), "utf-8")
     hoja(informe)
     n = lambda c: sum(1 for r in informe if r.get("color") == c)
     print(f"\nverde {n('verde')} · ambar {n('ambar')} · rojo {n('rojo')} · "
@@ -543,7 +596,7 @@ def aplicar(args):
             print(f"  #{i}: sin foto procesada, se salta")
             continue
         actual = str(r.get("actual") or "")
-        if not actual.startswith("imagenes/"):
+        if sin_foto_propia(actual):
             # Alta nueva: el arma no tenia foto (data.js le pone el placeholder SVG
             # al cargar, porque su `img` viene vacio). Se le da ruta propia y se
             # rellena el hueco `img` de su mk(), que es el 15o argumento.
@@ -616,10 +669,15 @@ def aplicar(args):
 
 def verificar(args):
     db = catalogo()
-    sin_alfa, faltan, ok = [], [], 0
+    sin_alfa, faltan, sin_foto, ok = [], [], [], 0
     for a in db:
         ruta = str(a.get("img") or "")
-        if not ruta.startswith("imagenes/"):
+        if sin_foto_propia(ruta):
+            # Su silueta de tipo, o sin ruta: el hueco que hay que llenar. Desde
+            # que data.js asigna la silueta (8-sep) esto ya no caia en el
+            # `continue`, entraba al conteo y sumaba a "con alfa" — la silueta
+            # tiene alfa. Resultado: "252 con alfa" y las 122 armas tapadas.
+            sin_foto.append((a["id"], a["tipo"], a["nombre"]))
             continue
         p = PUBLICO / ruta.split("?")[0]
         if not p.exists():
@@ -628,7 +686,8 @@ def verificar(args):
         with Image.open(p) as im:
             alfa = im.convert("RGBA").getchannel("A")
             (ok := ok + 1) if alfa.getextrema()[0] < 250 else sin_alfa.append((a["id"], a["tipo"], p.name))
-    print(f"con alfa: {ok} | sin alfa: {len(sin_alfa)} | rutas rotas: {len(faltan)}")
+    print(f"con alfa: {ok} | sin alfa: {len(sin_alfa)} | "
+          f"sin foto propia: {len(sin_foto)} | rutas rotas: {len(faltan)}")
     for id_, ruta in faltan:
         print(f"  ROTA  #{id_} {ruta}")
     if args.tipo:
@@ -636,7 +695,154 @@ def verificar(args):
         print(f"\nsin alfa en {args.tipo}: {len(del_tipo)}")
         for id_, _, n in del_tipo:
             print(f"  #{id_} {n}")
+        del_tipo = [x for x in sin_foto if x[1] == args.tipo]
+        print()
+        print(f"sin foto propia en {args.tipo}: {len(del_tipo)}")
+        for id_, _, n in del_tipo:
+            print(f"  #{id_} {n}")
     return 1 if faltan else 0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Subcomando: autocheck — fija con asserts lo que se rompio alguna vez en silencio.
+# Cada numero es el que justifico su umbral; si cambias uno, este check te lo dice.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Metricas de una foto impecable. Cada assert mueve UNA y comprueba su rama.
+_BASE = dict(canon="derecha", resolucion=1200, llenado=35.0, alpha_pct=30.0,
+             huecos_px=800, huecos_pct=2.0, huecos_rel=1.5, halo=5.0,
+             dureza_borde=2.0, borde_recortado=0.1, fondo_sigma=8.0, mordida=0.99,
+             peso_kb=90.0, luminancia_sujeto=70.0)
+
+
+def autocheck(args=None):
+    col = lambda **k: semaforo({**_BASE, **k})[0]
+
+    # sin_foto_propia: el bug del 22-sep. La silueta mide 900 px justos, asi que
+    # MIN_LADO no la paraba, y `aplicar` PISABA el placeholder compartido.
+    assert sin_foto_propia("imagenes/silueta-pistola.webp"), "la silueta no es foto"
+    assert sin_foto_propia("imagenes/silueta-escopeta.webp?v=3"), "ni con cache-buster"
+    assert sin_foto_propia(""), "sin ruta es sin foto"
+    assert sin_foto_propia(None), "None es sin foto"
+    assert sin_foto_propia("data:image/svg+xml;base64,AAA"), "el data-URI viejo, tambien"
+    assert not sin_foto_propia("imagenes/013_Beretta_80x_Cheetah.webp"), "esta SI es foto"
+    assert not sin_foto_propia("imagenes/Benelli_Vinci.webp?v=2"), "y esta tambien"
+
+    # semaforo: los umbrales, con el caso medido que fijo cada uno.
+    assert col() == "verde"
+    assert col(huecos_px=0) == "rojo", "mascara rellenada (las dos Retay, el Gordion)"
+    assert col(resolucion=899) == "rojo" and col(resolucion=900) == "verde", "MIN_LADO"
+    assert col(halo=68) == "ambar", "recortes impecables marcan +68 (Canik METE SFX)"
+    assert col(halo=130) == "rojo", "halo flagrante"
+    assert col(halo=-30) == "rojo", "borde ennegrecido: division por alfa baja"
+    assert col(fondo_sigma=20.0) == "ambar", "ninguna foto BUENA paso de 20.0"
+    assert col(fondo_sigma=41.3) == "rojo", "CZ 600 American: persona sosteniendo el arma"
+    assert col(mordida=0.92) == "rojo" and col(mordida=0.93) == "verde"
+    assert col(llenado=19.0) == "rojo" and col(alpha_pct=93.0) == "rojo"
+    assert col(borde_recortado=0.6) == "rojo", "arma cortada en el origen"
+    assert col(canon="izquierda") == "ambar", "avisa, no bloquea (las seis Mendoza RM22)"
+
+    print("autocheck: ok")
+    return 0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Subcomando: pendientes — el censo. Que necesita cada arma, medido contra disco.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Que hay que hacer con cada arma. El orden es el de menor a mayor coste.
+ESTADOS = {
+    "LISTA":       "foto propia con alfa: nada que hacer",
+    "POR_PROCESAR": "sin foto, pero su origen ya esta en fotos-fuente: solo falta `preparar`",
+    "RECORTABLE":  "fondo opaco y hay original externo >=900: `preparar`, sin buscar nada",
+    "RECOMPRIMIR": "fondo opaco y solo el WebP servido llega a 900: recomprimir es el ultimo recurso",
+    "RESUSTITUIR": "fondo opaco y ningun origen llega a 900: hace falta OTRA foto",
+    "SIN_FOTO":    "sin foto y sin origen: hace falta CONSEGUIR la foto",
+}
+NECESITAN_WEB = ("SIN_FOTO", "RESUSTITUIR")
+
+
+def _estado(arma):
+    """Clasifica un arma y devuelve (estado, px del mejor origen, ruta del mejor).
+
+    La distincion que importa: `externo` (fotos-fuente o el original sin comprimir
+    de la descarga DCAM) contra el WebP que ya se sirve. Recortar el externo es el
+    pipeline normal; recortar el servido es recomprimir un WebP ya comprimido.
+    """
+    ext = prop = 0
+    mejor = None
+    for q, externo in _candidatos(arma):
+        try:
+            with Image.open(q) as im:
+                px = max(im.size)
+        except Exception:
+            continue
+        if externo:
+            if px > ext:
+                ext, mejor = px, q
+        else:
+            prop = max(prop, px)
+    if sin_foto_propia(arma.get("img")):
+        return ("POR_PROCESAR" if ext >= MIN_LADO else "SIN_FOTO"), ext, mejor
+    servida = PUBLICO / str(arma["img"]).split("?")[0]
+    try:
+        with Image.open(servida) as im:
+            alfa = im.convert("RGBA").getchannel("A")
+        if alfa.getextrema()[0] < 250:
+            return "LISTA", max(ext, prop), mejor
+    except Exception:
+        pass
+    if ext >= MIN_LADO:
+        return "RECORTABLE", ext, mejor
+    if prop >= MIN_LADO:
+        return "RECOMPRIMIR", prop, servida
+    return "RESUSTITUIR", max(ext, prop), mejor
+
+
+def pendientes(args):
+    """El censo, medido. Es el input del que busca fotos, y no sale de ningun doc.
+
+    `docs/PLACEHOLDERS.md` llevaba tres semanas diciendo «192 armas, 81 sin foto»
+    cuando ya eran 253 y 123: un documento con cifras caduca, este comando no.
+    """
+    db = catalogo()
+    filas = []
+    for a in db:
+        est, px, mejor = _estado(a)
+        filas.append({
+            "clase": "arma", "id": a["id"], "marca": a.get("marca") or "",
+            "marca_clave": _sin_tildes(a.get("marca") or "").lower().strip(),
+            "nombre": a["nombre"], "tipo": a.get("tipo") or "",
+            "calibre": a.get("calibre") or "", "dcamRef": a.get("dcamRef") or "",
+            "estado": est, "mejor_px": px,
+            "mejor_origen": mejor.name if mejor else "",
+        })
+    if args.estado:
+        filas = [f for f in filas if f["estado"] == args.estado]
+    elif args.web:
+        filas = [f for f in filas if f["estado"] in NECESITAN_WEB]
+
+    if args.ids:                       # para encadenar: preparar --solo $(... --ids)
+        print(",".join(str(f["id"]) for f in filas))
+        return 0
+    if args.json:
+        print(json.dumps(filas, ensure_ascii=False, indent=1))
+        return 0
+
+    cuenta = Counter(f["estado"] for f in filas)
+    print(f"{len(db)} armas en data.js")
+    for est in ESTADOS:
+        if cuenta.get(est):
+            print(f"  {cuenta[est]:>4}  {est:<12} {ESTADOS[est]}")
+    web = [f for f in filas if f["estado"] in NECESITAN_WEB]
+    if web:
+        print(f"{chr(10)}hace falta buscar en la web: {len(web)}")
+        # por marca NORMALIZADA: el catalogo trae «Ceska Zbrojovka» Y «Česká
+        # Zbrojovka» como marcas distintas, y sin unirlas el grupo de 27 se parte
+        # en 26 + 1 y alguien investiga czub.cz dos veces.
+        por_marca = Counter(f["marca_clave"] or "(sin marca)" for f in web)
+        print("  " + " | ".join(f"{m} {n}" for m, n in por_marca.most_common()))
+    return 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -813,6 +1019,13 @@ pinta();
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
+    # stdout en UTF-8: la consola de Windows es cp1252 y no sabe escribir la C con
+    # hacek de «Ceska Zbrojovka». Es el mismo gotcha que reventó catalogo() con
+    # «Águila», del otro lado de la tuberia. Se arregla una vez, para todo.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -831,6 +1044,16 @@ def main():
     p = sub.add_parser("verificar")
     p.add_argument("--tipo", help="detalla las sin alfa de este tipo")
     p.set_defaults(fn=verificar)
+
+    p = sub.add_parser("autocheck")
+    p.set_defaults(fn=autocheck)
+
+    p = sub.add_parser("pendientes")
+    p.add_argument("--json", action="store_true", help="el censo entero, para el buscador")
+    p.add_argument("--ids", action="store_true", help="solo los ids, en coma: para --solo")
+    p.add_argument("--estado", choices=sorted(ESTADOS), help="filtra por un estado")
+    p.add_argument("--web", action="store_true", help=f"solo los que necesitan web: {' y '.join(NECESITAN_WEB)}")
+    p.set_defaults(fn=pendientes)
 
     args = ap.parse_args()
     sys.exit(args.fn(args) or 0)
