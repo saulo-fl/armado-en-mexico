@@ -206,6 +206,56 @@ test('amxLegalHuecos tambien encuentra los huecos anidados', function () {
   assert.equal(variante.id, 'r1/extranjero', 'la variante se identifica por requisito y escenario');
 });
 
+// Legalidad v2 (22-sep-2026): lo federal se lee por pregunta ciudadana. La tabla vive en
+// legal.js; esta prueba fija que cada id resuelve contra el corpus real, que ninguna norma
+// sale dos veces y que la norma sin texto confirmado se queda fuera mientras esté en
+// revisión.
+test('amxNormasPorPregunta agrupa el corpus real en tres preguntas sin repetir normas', function () {
+  var corpusReal = {};
+  var ctx = { window: corpusReal };
+  vm.runInNewContext(readFileSync(fileURLToPath(new URL('../src/data/data-legal.js', import.meta.url)), 'utf8'), ctx);
+  var C = corpusReal.AMX_LEGAL;
+  var grupos = amxNormasPorPregunta(C);
+  assert.equal(grupos.length, 3);
+  var ids = [];
+  grupos.forEach(function (g) {
+    assert.ok(g.corto && g.pregunta, 'cada grupo lleva rótulo corto y pregunta entera');
+    assert.ok(g.normas.length > 0, g.id + ' se quedó sin normas');
+    g.normas.forEach(function (n) { ids.push(n.id); });
+  });
+  assert.equal(new Set(ids).size, ids.length, 'una norma no puede salir en dos preguntas');
+  assert.ok(ids.indexOf('constitucion') === 0, 'la Constitución abre la primera pregunta');
+  var simpl = C.normas.find(function (n) { return n.id === 'acuerdo-simplificacion'; });
+  if (simpl && simpl.revisar) assert.equal(ids.indexOf('acuerdo-simplificacion'), -1, 'sin texto confirmado no se publica');
+});
+
+test('amxVigenciaCuota dice solo el año de la cuota (lo único que el corpus respalda), y calla sin año', function () {
+  assert.equal(amxVigenciaCuota({ monto: 490, moneda: 'MXN', anio: 2026 }), 'Cuota vigente 2026');
+  assert.equal(amxImporte(15804.77), '$15,804.77');
+  assert.equal(amxImporte(490), '$490');
+  assert.equal(amxVigenciaCuota({ monto: 490, moneda: 'MXN' }), '');
+  assert.equal(amxVigenciaCuota(null), '');
+});
+
+// Un requisito con escenarios propios y sin variantes (la tarjeta de residencia, solo
+// para extranjeros) tiene que entrar en el catálogo con su rótulo, y seguir entrando
+// solo cuando el escenario casa.
+test('un requisito con escenarios propios entra en modo catálogo y filtra por escenario', function () {
+  var corpus = {
+    escenarios: [{ id: 'extranjero', eje: 'persona', label: 'Persona extranjera' }],
+    requisitos: [
+      { id: 'residencia', tramite: 't1', orden: 9, nombre: 'Tarjeta de residente', escenarios: ['extranjero'] },
+      { id: 'curp', tramite: 't1', orden: 2, nombre: 'CURP', escenarios: ['*'] },
+    ],
+  };
+  var catalogo = amxRequisitosDe(corpus, 't1', {});
+  assert.deepEqual(catalogo.map(function (r) { return r.id; }), ['curp', 'residencia']);
+  assert.equal(amxRotuloEscenarios(corpus, catalogo[1].escenarios), 'Solo si: Persona extranjera');
+  assert.equal(amxRotuloEscenarios(corpus, catalogo[0].escenarios), '');
+  assert.deepEqual(amxRequisitosDe(corpus, 't1', { persona: 'extranjero' }).map(function (r) { return r.id; }), ['curp', 'residencia']);
+  assert.deepEqual(amxRequisitosDe(corpus, 't1', { persona: 'hombre' }).map(function (r) { return r.id; }), ['curp']);
+});
+
 // MODO CATÁLOGO. La pantalla de Requisitos enseña el trámite entero, sin persona a la que
 // adaptarlo. Si `amxRequisitosDe` descartara ahí los requisitos con variantes, esa pantalla
 // se quedaría sin la carta de trabajo, sin la constancia del contador y sin el certificado

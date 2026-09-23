@@ -178,12 +178,13 @@ varían según marca y munición, y la guía lo advierte.
 
 ### Legalidad
 
-Cinco hojas del mismo expediente, y **toda afirmación trae su fuente oficial y la fecha en que
-se consultó**: el marco federal como una escalera de normas —de la Constitución al formato de
-ventanilla—, lo que de verdad cambia por estado, la ficha de cada permiso y los requisitos de
-los **dos trámites que se confunden**: el permiso extraordinario ante el Registro Federal de
-Armas y la compra en la DCAM. No son el mismo papeleo, y creer que sí es lo que hace que
-alguien llegue al mostrador sin expediente.
+Una sola página, con la entrevista arriba y cuatro folders desplegables, y **toda afirmación
+trae su fuente oficial y la fecha en que se consultó**: lo federal ordenado por la pregunta que
+traes —qué arma puedes tener, qué papel llenas, cuánto cuesta—, lo que de verdad cambia por
+estado, seis trámites ante la Defensa —cada uno con lo que habilita, su checklist y su cuota
+vigente— y los documentos oficiales en PDF. El permiso extraordinario ante el Registro Federal de Armas y la compra en la
+DCAM son **dos trámites que se confunden**: no son el mismo papeleo, y creer que sí es lo que
+hace que alguien llegue al mostrador sin expediente.
 
 Escrita sobre la Ley Federal de Armas de Fuego y Explosivos **reformada el 29 de mayo de 2025**,
 y con los escenarios que el formato distingue y casi nadie cuenta: asalariado, independiente,
@@ -195,8 +196,8 @@ tocan, cuál te falta y cómo se consigue. Cuando algo no procede lo dice sin ro
 ofrecer un remedio que no existe. Y cuando reúnes todo, tampoco promete nada: la autorización
 la decide la autoridad, no un cuestionario.
 
-Lo que no está verificado **se declara** en vez de rellenarse: 15 de las 32 entidades todavía
-no tienen portal de antecedentes penales comprobado, y la página lo dice.
+Lo que no está verificado **se declara** en vez de rellenarse: 14 de las 32 entidades todavía
+no tienen portal de antecedentes penales comprobado, y el selector lo dice junto a su nombre.
 
 ### Y además
 

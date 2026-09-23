@@ -62,6 +62,9 @@ async function urlsDelSitemap() {
     .sort();
   const porFamilia = new Map();
   for (const r of rutas) {
+    // Los PDF del sitemap abren el visor de Chrome y abortan la navegación de
+    // Puppeteer; este smoke comprueba pantallas HTML. Los PDF tienen su test propio.
+    if (/\.pdf$/i.test(r)) continue;
     const tramos = r.split('/').filter(Boolean);
     // La PROFUNDIDAD entra en la clave, y no es un detalle: /pistolas es el
     // listado y /pistolas/glock-19 es la ficha, que son dos pantallas

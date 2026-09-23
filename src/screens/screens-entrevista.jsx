@@ -424,10 +424,35 @@ function EntrevistaCuerpo({ modoPortada = false }) {
         <p className="amx-ent-remedio">{d.impedimento.remedio}</p>
       )}
       {d.impedimento && d.impedimento.nota && <p className="amx-ent-nota">{d.impedimento.nota}</p>}
+      {/* Los avisos son erratas del formato frente a la ley (o frente a la práctica de
+          ventanilla) y se marcan como tales, con el signo de la nota de errata del sitio
+          y no con un sello (decisión de Saulo, 22-sep-2026, hilo 8). */}
       {d.avisos && d.avisos.length > 0 && (
-        <ul className="amx-ent-avisos">
-          {d.avisos.map(function (a, i) { return <li key={i}>{a.texto}</li>; })}
-        </ul>
+        <details className="amx-leg-plegable amx-ent-notas">
+          {/* PLEGADAS (hilo 12 de Penpot, 22-sep-2026). Son dos párrafos largos y se
+              comían la mitad del dictamen: lo que se viene a leer aquí es el sello y
+              los documentos que te tocan. No se van a otra página —el dato se pierde
+              de vista—, se quedan aquí a un toque. */}
+          <summary>
+            {/* El signo va en el rótulo y no suelto: el summary reparte sus hijos con
+                `space-between` y lo mandaría al otro extremo, lejos de su texto. */}
+            <span className="amx-ent-notas-rotulo">
+              <span className="amx-errata-signo" aria-hidden="true">{'⚠︎'}</span>
+              {d.avisos.length === 1 ? '1 nota sobre el formato' : d.avisos.length + ' notas sobre el formato'}
+            </span>
+          </summary>
+          <ul className="amx-ent-avisos">
+            {d.avisos.map(function (a, i) {
+              return (
+                <li key={i} className="amx-errata amx-ent-errata">
+                  {/* U+FE0E: el signo en texto, no como emoji (iOS lo pinta a color). */}
+                  <span className="amx-errata-signo" aria-hidden="true">{'⚠︎'}</span>
+                  <span dangerouslySetInnerHTML={{ __html: a.texto }}></span>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
       )}
       <h2>Documentos que te corresponden</h2>
       <ul className="amx-ent-documentos-finales">

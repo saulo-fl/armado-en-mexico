@@ -89,17 +89,47 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
   assert.ok(arbol, 'devolvió vacío');
   const t2 = texto(arbol);
   assert.match(t2, /Legalidad/i);
-  // El bloque de honestidad es la razón de ser del hub: si no lista los huecos, el sitio
-  // parece más verificado de lo que está.
-  assert.match(t2, /falta por verificar/i, 'no pinta el bloque de huecos');
+  // Legalidad v2 (22-sep-2026, hilos 1 y 2): la entrevista va arriba, con su botón, y los
+  // huecos del corpus NO se publican: son de desarrollo (check-legal.mjs los sigue
+  // contando), y la nota interna de un hueco no puede aparecer en pantalla.
+  assert.match(t2, /Puedo comprar un arma/, 'no pinta la llamada a la entrevista');
+  assert.match(t2, /Empezar la entrevista/, 'no pinta el botón de la entrevista');
+  assert.doesNotMatch(t2, /Contesta \d+ preguntas/, 'siete de las preguntas son condicionales: la cifra inflaría el esfuerzo');
+  assert.doesNotMatch(t2, /falta por verificar/i, 'el bloque de huecos volvió al hub');
   const huecos = win.amxLegalHuecos(win.AMX_LEGAL);
   assert.ok(huecos.length > 20, 'el corpus debería traer más de 20 huecos, trae ' + huecos.length);
-  assert.ok(t2.includes(huecos[0].nota.slice(0, 40)), 'la nota del primer hueco no sale en pantalla');
+  for (const h of huecos) {
+    if (h.nota) assert.ok(!t2.includes(h.nota.slice(0, 40)), 'la nota interna del hueco ' + h.tabla + '/' + h.id + ' sale en pantalla');
+  }
+  // UNA SOLA PÁGINA (22-sep-2026): las cuatro secciones están dentro del hub, plegadas,
+  // y nada manda a otra pantalla. Lo que antes vivía en /legalidad/federal, /estatal,
+  // /tramites y /documentos tiene que estar aquí.
+  assert.match(t2, /Qué arma puedo tener y dónde/, 'lo federal no está en el hub');
+  assert.match(t2, /Elige tu estado/, 'lo estatal no está en el hub');
+  assert.match(t2, /Posesión no es portación/, 'los trámites no están en el hub');
+  // No se busca el ROTULO del folder: desde el hilo 11 de Penpot los cuatro se titulan
+  // con la pregunta que resuelven, y un test atado al rótulo vigila el rótulo, no que el
+  // contenido esté aquí. Esta frase es del cuerpo de Documentos.
+  assert.match(t2, /Los textos oficiales que sustentan esta guía/, 'los documentos no están en el hub');
+  // Cuatro folders exactos y trece plegables dentro (3 preguntas + 1 «por qué no hay ley
+  // estatal» + 6 trámites + 3 grupos de documentos); un solo botón, el de la entrevista
+  // (el arnés no carga ui.jsx, así que ReportarError no cuenta).
+  const conClase = (nodo, clase, n = { v: 0 }) => {
+    if (!nodo || typeof nodo !== 'object') return n.v;
+    if (Array.isArray(nodo)) { nodo.forEach((x) => conClase(x, clase, n)); return n.v; }
+    if (nodo.props && typeof nodo.props.className === 'string' && nodo.props.className.split(' ').includes(clase)) n.v++;
+    if (typeof nodo.tipo === 'function') conClase(nodo.tipo(nodo.props), clase, n);
+    (nodo.hijos || []).forEach((x) => conClase(x, clase, n));
+    return n.v;
+  };
+  assert.equal(conClase(arbol, 'amx-leg-folder'), 4, 'el cajón lleva exactamente cuatro folders');
+  assert.equal(conClase(arbol, 'amx-leg-plegable'), 13, 'dentro de los folders van trece plegables');
+  assert.equal(contar(arbol, 'button'), 1, 'el único botón del hub es el de la entrevista');
 });
 
-test('LegalidadRequisitos separa PERMISO de COMPRA, que es el error que corrige', (t) => {
-  if (!win.LegalidadRequisitos) return t.skip('pantalla aún no escrita');
-  const t2 = texto(win.LegalidadRequisitos({ onNav: () => {} }));
+test('LegalidadTramites separa PERMISO de COMPRA, que es el error que corrige', (t) => {
+  if (!win.LegalidadTramites) return t.skip('pantalla aún no escrita');
+  const t2 = texto(win.LegalidadTramites({ onNav: () => {} }));
   const C = win.AMX_LEGAL;
   const permiso = C.tramites.find((x) => x.id === 'permiso-adquisicion');
   const compra = C.tramites.find((x) => x.id === 'compra-dcam');
@@ -110,6 +140,64 @@ test('LegalidadRequisitos separa PERMISO de COMPRA, que es el error que corrige'
   // Y la variante del ejidatario, que es la que más cuesta encontrar en el formato.
   assert.match(t2, /Registro Agrario Nacional/, 'no sale la variante del ejidatario');
   assert.doesNotMatch(t2, /Requisitos SEDENA/, 'el rótulo equivocado no puede volver');
+  // Y lo que antes vivía en Permisos: los seis trámites, cada uno con su paso, su
+  // importe y la vigencia de la cuota junto a él (hilos 6 y 7).
+  for (const tr of C.tramites) assert.ok(t2.includes(tr.nombre), 'falta el trámite ' + tr.id);
+  assert.match(t2, /Posesión no es portación/);
+  assert.match(t2, /Cuota vigente 2026/, 'la vigencia de la cuota no sale junto al importe');
+  assert.match(t2, /\$15,804\.77/, 'el importe va con separador de miles');
+  assert.doesNotMatch(t2, /Paso \d+ de \d+/, 'el orden del corpus no es una cronología: nada de «Paso N de M»');
+  // Un extranjero tiene que ver el documento de residencia, y saber que es solo para él.
+  assert.match(t2, /Solo si: Persona extranjera/);
+  // Ningún hueco interno llega a la pantalla: ni requisitos ni variantes en revisión (hilo 2).
+  for (const r of C.requisitos) {
+    if (r.revisar) assert.ok(!t2.includes(r.nombre), 'el requisito en revisión «' + r.id + '» sale en pantalla');
+    for (const v of r.variantes || []) {
+      if (v.revisar && v.documento) assert.ok(!t2.includes(v.documento), 'la variante en revisión «' + r.id + '/' + v.escenario + '» sale en pantalla');
+    }
+  }
+});
+
+// Bots y personas ven el mismo checklist: el prerender usa la misma lista que la pantalla.
+test('el checklist de cada trámite cuenta lo mismo en pantalla y en el prerender', () => {
+  const t2 = texto(win.LegalidadTramites({ onNav: () => {} }));
+  const html = renderLegalHtml(win.AMX_LEGAL, 'tramites', helpers);
+  const cuenta = (s) => [...s.matchAll(/(\d+) requisitos · checklist/g)].map((m) => Number(m[1]));
+  assert.ok(cuenta(t2).length === win.AMX_LEGAL.tramites.length, 'falta el sumario de algún trámite en pantalla');
+  assert.deepEqual(cuenta(t2), cuenta(html));
+});
+
+test('LegalidadFederal va por pregunta ciudadana y no publica el hueco de una norma', (t) => {
+  if (!win.LegalidadFederal) return t.skip('pantalla aún no escrita');
+  const t2 = texto(win.LegalidadFederal({ onNav: () => {} }));
+  const C = win.AMX_LEGAL;
+  assert.match(t2, /Qué arma puedo tener y dónde/);
+  assert.match(t2, /Qué papel lleno/);
+  assert.match(t2, /Cuánto cuesta cada trámite/);
+  assert.doesNotMatch(t2, /Pendiente de verificar/, 'el hueco de una norma es interno (hilo 2)');
+  // Una norma en revisión no publica su resumen ni su nota de vigencia (afirmaciones sin
+  // verificar), pero sí su fuente y una línea neutra.
+  for (const n of C.normas.filter((x) => x.revisar)) {
+    if (n.resumen) assert.ok(!t2.includes(n.resumen.slice(0, 40)), 'la norma en revisión «' + n.id + '» publica su resumen');
+    if (n.notaVigencia) assert.ok(!t2.includes(n.notaVigencia.slice(0, 40)), 'la norma en revisión «' + n.id + '» publica su nota de vigencia');
+  }
+  assert.match(t2, /En verificación/);
+  // La norma sin texto confirmado no se publica hasta verificarse.
+  const simpl = C.normas.find((n) => n.id === 'acuerdo-simplificacion');
+  if (simpl && simpl.revisar) assert.ok(!t2.includes(simpl.titulo), 'el Acuerdo de simplificación no debe publicarse sin texto');
+  // Los artículos, como resumen + cita (hilo 4).
+  assert.match(t2, /artículos · resumen y cita/);
+});
+
+test('LegalidadEstatal deja en el selector a las entidades sin portal, en gris y avisando', (t) => {
+  if (!win.LegalidadEstatal) return t.skip('pantalla aún no escrita');
+  const arbol = win.LegalidadEstatal({ onNav: () => {} });
+  const t2 = texto(arbol);
+  const C = win.AMX_LEGAL;
+  const sinPortal = C.entidades.filter((e) => e.antecedentes && e.antecedentes.revisar);
+  assert.ok(sinPortal.length > 0, 'el corpus debería traer entidades sin portal');
+  for (const e of sinPortal) assert.ok(t2.includes(e.nombre + ' · portal sin verificar'), e.nombre + ' no avisa en el selector');
+  assert.equal(contar(arbol, 'option'), C.entidades.length + 1, 'todas las entidades siguen en el selector');
 });
 
 test('la entrevista arranca por la primera pregunta y no por otra', (t) => {
@@ -213,8 +301,8 @@ test('ninguna pantalla promete que el permiso se vaya a otorgar', (t) => {
 // lista de definiciones se pintaba con los términos EN BLANCO, y compilaba igual. Esta
 // prueba fija que el rótulo de cada variante y su autoridad emisora aparecen de verdad.
 test('cada variante muestra su escenario y quién expide el documento', (t) => {
-  if (!win.LegalidadRequisitos) return t.skip('pantalla aún no escrita');
-  const t2 = texto(win.LegalidadRequisitos({ onNav: () => {} }));
+  if (!win.LegalidadTramites) return t.skip('pantalla aún no escrita');
+  const t2 = texto(win.LegalidadTramites({ onNav: () => {} }));
   for (const e of ['asalariado', 'independiente', 'pensionado', 'ejidatario']) {
     assert.ok(t2.includes(e), 'no sale el rótulo de la variante «' + e + '»');
   }
@@ -231,12 +319,17 @@ import { renderLegalHtml } from './prerender-legal.mjs';
 const helpers = {
   amxLegalFuente: win.amxLegalFuente, amxLegalHuecos: win.amxLegalHuecos,
   amxRequisitosDe: win.amxRequisitosDe, amxLegalFecha: win.amxLegalFecha,
+  amxNormasPorPregunta: win.amxNormasPorPregunta, amxVigenciaCuota: win.amxVigenciaCuota,
+  amxImporte: win.amxImporte, amxRotuloEscenarios: win.amxRotuloEscenarios,
 };
 
 test('el prerender sirve contenido de verdad, no un esqueleto', () => {
-  for (const seccion of ['hub', 'requisitos']) {
+  // El hub es corto a propósito desde que los huecos dejaron de publicarse (22-sep-2026):
+  // intro, aviso, la entrevista y las cuatro carpetas con su descripción.
+  const minimo = { hub: 2000, tramites: 4000, federal: 4000 };
+  for (const seccion of ['hub', 'tramites', 'federal']) {
     const html = renderLegalHtml(win.AMX_LEGAL, seccion, helpers);
-    assert.ok(html.length > 4000, seccion + ': solo ' + html.length + ' caracteres, es un esqueleto');
+    assert.ok(html.length > minimo[seccion], seccion + ': solo ' + html.length + ' caracteres, es un esqueleto');
     assert.equal((html.match(/<h1/g) || []).length, 1, seccion + ': debe haber exactamente un <h1>');
     // Es HTML para bots y para quien no tiene JavaScript: nada operativo.
     for (const tag of ['<form', '<input', '<select', '<button']) {
@@ -245,56 +338,59 @@ test('el prerender sirve contenido de verdad, no un esqueleto', () => {
   }
 });
 
-test('el prerender de Requisitos separa los dos trámites y cita sus fuentes', () => {
-  const html = renderLegalHtml(win.AMX_LEGAL, 'requisitos', helpers);
+test('el prerender de Trámites trae los seis trámites, su checklist y cita sus fuentes', () => {
+  const html = renderLegalHtml(win.AMX_LEGAL, 'tramites', helpers);
   const C = win.AMX_LEGAL;
-  for (const id of ['permiso-adquisicion', 'compra-dcam']) {
-    const t = C.tramites.find((x) => x.id === id);
-    assert.ok(html.includes(t.nombre.slice(0, 40)), 'falta el trámite ' + id);
+  for (const t of C.tramites) {
+    assert.ok(html.includes(t.nombre.slice(0, 40).replace(/&/g, '&amp;')), 'falta el trámite ' + t.id);
   }
+  assert.match(html, /<details class="amx-leg-plegable" open>/, 'la checklist del primer trámite viene abierta');
+  assert.match(html, /Cuota vigente 2026/, 'la vigencia de la cuota no llega al HTML');
+  assert.match(html, /Solo si: Persona extranjera/, 'el requisito solo para extranjeros no dice a quién aplica');
   assert.match(html, /Registro Agrario Nacional/, 'falta la variante del ejidatario');
   assert.match(html, /rel="noopener noreferrer"/, 'los enlaces externos van con rel noopener');
   assert.match(html, /se abre en una pestaña nueva/, 'los enlaces externos lo dicen al lector de pantalla');
 });
 
-test('el prerender no publica ningún hueco como afirmación', () => {
-  const html = renderLegalHtml(win.AMX_LEGAL, 'hub', helpers);
+test('el prerender no publica ningún hueco: ni como afirmación ni como lista', () => {
   const C = win.AMX_LEGAL;
-  // Un trámite marcado `revisar` no puede salir como si estuviera verificado…
-  for (const t of C.tramites.filter((x) => x.revisar)) {
-    assert.ok(!html.includes(t.nombre), 'el trámite "' + t.id + '" está marcado como hueco y sale afirmado');
-  }
-  // …pero su nota SÍ tiene que salir, en el bloque de lo que falta por verificar.
   const huecos = win.amxLegalHuecos(C);
   assert.ok(huecos.length > 20);
-  assert.match(html, /falta por verificar/i, 'no sale el bloque de huecos');
-  assert.ok(html.includes(huecos[0].nota.slice(0, 40).replace(/&/g, '&amp;')),
-    'la nota del primer hueco no llega al HTML');
+  for (const seccion of ['hub', 'tramites', 'federal', 'estatal']) {
+    const html = renderLegalHtml(win.AMX_LEGAL, seccion, helpers);
+    // Un trámite marcado `revisar` no puede salir como si estuviera verificado…
+    for (const t of C.tramites.filter((x) => x.revisar)) {
+      assert.ok(!html.includes(t.nombre), seccion + ': el trámite "' + t.id + '" está marcado como hueco y sale afirmado');
+    }
+    // …y su nota interna tampoco: desde el 22-sep-2026 los huecos son de desarrollo
+    // (check-legal.mjs y docs/fuentes/legalidad.md), no del público (hilo 2).
+    assert.doesNotMatch(html, /falta por verificar/i, seccion + ': volvió el bloque de huecos');
+    // La regla de traumáticas de un estado en revisión tampoco se afirma (CDMX, Morelos).
+    for (const e of C.entidades.filter((x) => x.traumaticas && x.traumaticas.revisar)) {
+      assert.ok(!html.includes(e.traumaticas.texto.slice(0, 40).replace(/&/g, '&amp;')), seccion + ': traumáticas de ' + e.id + ' está en revisión y sale afirmado');
+    }
+    for (const h of huecos) {
+      if (h.nota) assert.ok(!html.includes(h.nota.slice(0, 40).replace(/&/g, '&amp;')),
+        seccion + ': la nota interna del hueco ' + h.tabla + '/' + h.id + ' llega al HTML');
+    }
+  }
 });
 
-// Toda carpeta del hub tiene que llevar a una pantalla que EXISTE y estar dada de alta en
-// el router. Una carpeta que navega a una clave inventada no da error: no hace nada, y eso
-// no se nota hasta que alguien la pulsa. Pasó con 'legal-requisitos', que el router llama
-// 'legal-req'.
-test('las carpetas del hub llevan a pantallas que existen y están ruteadas', () => {
+// Cada sección del cajón tiene su ruta profunda (/legalidad/<id>), que sigue indexada y
+// enlazada y abre el hub con ese folder desplegado. Una sección sin ruta en el router se
+// quedaría sin página estática; una ruta sin sección abriría el hub cerrado.
+test('cada sección del cajón tiene su ruta profunda en el router', () => {
   const app = readFileSync(raiz('src/app.jsx'), 'utf8');
   const src = readFileSync(raiz('src/screens/screens-legalidad.jsx'), 'utf8');
-  const claves = [...src.matchAll(/clave:\s*'([^']+)'/g)].map((m) => m[1]);
-  assert.ok(claves.length >= 4, 'se esperaban al menos cuatro carpetas, hay ' + claves.length);
-  const bloque = app.match(/const SCREEN_TO_PATH = \{[\s\S]*?\n\};/);
-  assert.ok(bloque, 'no encuentro SCREEN_TO_PATH en app.jsx');
-  const mapa = bloque[0];
-  for (const c of claves) {
-    assert.match(app, new RegExp("screen === '" + c + "'"),
-      'la carpeta «' + c + '» navega a una pantalla que el router no monta: el botón no haría nada');
-    // Se busca DENTRO de SCREEN_TO_PATH, no en todo app.jsx: la misma clave
-    // aparece en los mapas de rótulos y de pestaña, así que buscarla en el
-    // archivo entero daba por buena una ruta que no existía (comprobado
-    // borrándola: el test seguía pasando). La clave va entrecomillada o
-    // desnuda, y los escapes van dobles al construir la expresión desde
-    // cadena: `"\b"` es el carácter de retroceso, no el límite de palabra.
-    const enMapa = new RegExp("[{,]\\s*'?" + c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "'?\\s*:");
-    assert.ok(enMapa.test(mapa), 'la carpeta «' + c + '» no tiene ruta en SCREEN_TO_PATH');
+  const bloque = src.match(/const LEGALIDAD_SECCIONES = \[[\s\S]*?\n\];/);
+  assert.ok(bloque, 'no encuentro LEGALIDAD_SECCIONES');
+  const ids = [...bloque[0].matchAll(/\bid:\s*'([^']+)'/g)].map((m) => m[1]);
+  assert.deepEqual(ids, ['federal', 'estatal', 'tramites', 'documentos']);
+  const mapa = app.match(/const SCREEN_TO_PATH = \{[\s\S]*?\n\};/)[0];
+  for (const id of ids) {
+    assert.match(mapa, new RegExp("'legal-" + id + "':\\s*'legalidad/" + id + "'"), 'legal-' + id + ' no tiene ruta en SCREEN_TO_PATH');
+    assert.match(app, new RegExp("screen === 'legal-" + id + "'"), 'legal-' + id + ' no se monta en el router');
+    assert.match(src, new RegExp('seccion="' + id + '"'), 'la ruta profunda de ' + id + ' no abre su folder');
   }
 });
 
