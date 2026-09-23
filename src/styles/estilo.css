@@ -6109,6 +6109,12 @@
   color: var(--ficha-tinta);
   margin: 8px 0 0;
 }
+/* El clip va a la ESQUINA, no al centro (hilo 9 de Penpot, 22-sep-2026): en su
+   sitio de origen —la copia de la ficha, donde pisa el canto de una foto— el
+   22 % cae en papel vacío; aquí caía justo sobre el rótulo AVISO DE
+   TRANSPARENCIA y se lo comía. Mismo anclaje que el aviso de la FAQ, que ya
+   estaba resuelto así. */
+.amx-v2 .amx-aviso .amx-copia-clip { top: -18px; right: 34px; left: auto; }
 
 /* ── LEGALIDAD, REQUISITOS Y LA ENTREVISTA ──────────────────────────── */
 
@@ -6383,6 +6389,12 @@
 .amx-v2 .amx-ent-avisos { list-style: none; padding-left: 0; }
 .amx-v2 .amx-ent-errata { color: var(--ficha-tinta); }
 .amx-v2 .amx-ent-errata .amx-errata-signo { color: var(--sello-restr); }
+/* El plegable que guarda esas erratas en el dictamen: es el mismo `.amx-leg-plegable`
+   de Legalidad —mismo papel, mismo +/−—, con el signo delante del rótulo para que se
+   note que ahí dentro hay una advertencia y no una nota de formato cualquiera. */
+.amx-v2 .amx-ent-notas { text-align: left; margin-bottom: 16px; }
+.amx-v2 .amx-ent-notas-rotulo { display: inline-flex; align-items: center; gap: 8px; }
+.amx-v2 .amx-ent-notas-rotulo .amx-errata-signo { color: var(--sello-restr); }
 .amx-v2 .amx-leg-hoja {
   background: var(--oficio);
   padding: 16px;
@@ -6893,10 +6905,18 @@
 }
 .amx-v2 button.amx-ent-opcion:focus-visible,
 .amx-v2 .amx-ent-regresar:focus-visible,
-.amx-v2 .amx-ent-guardar:focus-visible,
-.amx-v2 .amx-ent-dictamen:focus-visible {
+.amx-v2 .amx-ent-guardar:focus-visible {
   outline: 3px solid var(--manila-tinta);
   outline-offset: -3px;
+}
+/* EL DICTAMEN NO LLEVA ANILLO DE FOCO (hilo 12 de Penpot, 22-sep-2026). No es un
+   control: es el destino al que se manda el foco para que el lector de pantalla
+   lea el resultado, y a él no se llega con Tab (`tabindex="-1"`). Con el anillo
+   puesto, los 3px con `outline-offset: -3px` se pintaban POR DENTRO y cruzaban
+   el texto del dictamen —eso era el «margen negro» que corta las líneas—. */
+.amx-v2 .amx-ent-dictamen:focus,
+.amx-v2 .amx-ent-dictamen:focus-visible {
+  outline: none;
 }
 .amx-v2 .amx-ent-pregunta--entra {
   animation: amx-ent-pregunta-entra 220ms ease-out both;

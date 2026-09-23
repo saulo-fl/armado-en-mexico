@@ -355,11 +355,14 @@ function LegalidadDocumentosCuerpo({ C }) {
 // desplegado. Las descripciones no pueden contradecir al corpus: no hay normativa
 // estatal de armas (`noHayEstatal`), lo que cambia por estado es dónde se hacen
 // algunos papeles.
+// Los títulos son LA PREGUNTA que resuelve cada folder (hilo 11 de Penpot, 22-sep-2026):
+// «Lo federal» y «Documentos oficiales» no dicen de qué trata el apartado ni a quien
+// conoce el material. Esto es una plataforma educativa: el rótulo enseña, no evoca.
 const LEGALIDAD_SECCIONES = [
-  { id: 'federal', tema: 'Federal', titulo: 'Lo federal', desc: 'Qué arma puedes tener, qué papel llenas y cuánto cuesta.', Cuerpo: LegalidadFederalCuerpo },
-  { id: 'estatal', tema: 'Por estado', titulo: 'Lo que cambia por estado', desc: 'Antecedentes penales, armería y correo, estado por estado.', Cuerpo: LegalidadEstatalCuerpo },
-  { id: 'tramites', tema: 'Trámites', titulo: 'Los trámites, con su checklist', desc: 'Seis trámites ante la Defensa: qué habilita cada uno y cuánto cuesta.', Cuerpo: LegalidadTramitesCuerpo },
-  { id: 'documentos', tema: 'Documentos', titulo: 'Documentos oficiales', desc: 'Leyes, reglamento y formatos en PDF, con su fuente.', Cuerpo: LegalidadDocumentosCuerpo },
+  { id: 'federal', tema: 'Federal', titulo: '¿Qué arma puedo tener y portar?', desc: 'Lo que la ley federal permite: calibres, cuántas y dónde.', Cuerpo: LegalidadFederalCuerpo },
+  { id: 'estatal', tema: 'Por estado', titulo: '¿Dónde hago los papeles en mi estado?', desc: 'Antecedentes penales, armerías y correo, estado por estado.', Cuerpo: LegalidadEstatalCuerpo },
+  { id: 'tramites', tema: 'Trámites', titulo: '¿Cómo saco mi permiso, paso a paso?', desc: 'Los seis trámites ante la Defensa: requisitos y costo.', Cuerpo: LegalidadTramitesCuerpo },
+  { id: 'documentos', tema: 'Documentos', titulo: '¿Dónde están la ley y los formatos?', desc: 'Leyes, reglamento y formatos en PDF, con su fuente.', Cuerpo: LegalidadDocumentosCuerpo },
 ];
 
 function LegalidadHub({ onNav, seccion }) {
@@ -386,7 +389,6 @@ function LegalidadHub({ onNav, seccion }) {
   return (
     <div className="amx-leg">
       <window.CintaDymo nivel={1}>Legalidad</window.CintaDymo>
-      <p className="amx-leg-eyebrow">{C.portada.eyebrow} · actualizado el {window.amxLegalFecha(C.actualizado)}</p>
       <p className="amx-leg-intro">{C.portada.intro}</p>
       <p className="amx-leg-advertencia">{C.advertencia}</p>
       <window.AvisoTransparencia aviso={C.avisoTransparencia} />
@@ -415,7 +417,11 @@ function LegalidadHub({ onNav, seccion }) {
             key={s.id}
             id={'leg-' + s.id}
             className="amx-faq-folder amx-leg-folder"
-            open={seccion === s.id}
+            /* Los cuatro folders nacen ABIERTOS (decisión de Saulo, 22-sep-2026): esto es
+               material de consulta, y un cajón cerrado esconde de qué trata la página. Lo
+               que nace plegado son los documentos de dentro —cada `<details>` del cuerpo—,
+               que es donde de verdad hay texto largo. */
+            open
             ref={seccion === s.id ? abiertoRef : undefined}
           >
             <summary>
@@ -436,6 +442,10 @@ function LegalidadHub({ onNav, seccion }) {
           </details>
         ))}
       </div>
+
+      {/* La fecha cierra la hoja, no la abre (hilo 10 de Penpot, 22-sep-2026): arriba
+          repetía la cinta que ya dice LEGALIDAD y empujaba la entrada real de la página. */}
+      <p className="amx-leg-fecha">Actualizado el {window.amxLegalFecha(C.actualizado)}</p>
 
       <window.ReportarError tipo="legalidad" titulo="Legalidad" ruta="/legalidad" />
     </div>
