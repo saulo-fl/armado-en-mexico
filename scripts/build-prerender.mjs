@@ -22,7 +22,7 @@
 // Se ejecuta desde `npm run build`, después de Babel.
 // ============================================================================
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
 import { renderSoporteHtml } from './prerender-soporte.mjs';
@@ -462,18 +462,20 @@ const FIJAS = [
   { ruta: 'legalidad', titulo: 'Tenencia legal de armas en México — requisitos y trámite SEDENA', enSitemap: true,
     desc: 'Los permisos, los papeles y la ley detrás de tener un arma legalmente en México, con la fuente y la fecha de cada afirmación.',
     cuerpo: renderLegalHtml(LEGAL, 'hub', win) },
-  { ruta: 'legalidad/requisitos', titulo: 'Requisitos para comprar un arma en México — permiso y compra', enSitemap: true,
-    desc: 'Los papeles que pide el permiso extraordinario ante el Registro Federal y los que pide la compra en la DCAM. Son dos trámites distintos.',
-    cuerpo: renderLegalHtml(LEGAL, 'requisitos', win) },
-  { ruta: 'legalidad/federal', titulo: 'Marco federal de armas en México — la escalera de normas', enSitemap: true,
-    desc: 'Constitución, Ley Federal de Armas de Fuego y Explosivos y su reglamento: qué norma manda sobre qué, con el artículo y la fuente de cada afirmación.',
+  { ruta: 'legalidad/federal', titulo: 'Lo federal — qué arma puedes tener, qué papel llenas y cuánto cuesta', enSitemap: true,
+    desc: 'Constitución, Ley Federal de Armas de Fuego y Explosivos, reglamento, formatos y cuotas, ordenados por la pregunta que traes, con el artículo y la fuente de cada afirmación.',
     cuerpo: renderLegalHtml(LEGAL, 'federal', win) },
   { ruta: 'legalidad/estatal', titulo: 'Lo que cambia por estado — antecedentes penales y ventanilla', enSitemap: true,
     desc: 'Las armas de fuego son competencia federal. Lo que sí cambia por estado: dónde sacas la constancia de antecedentes penales, si puedes enviar por correo y qué ventanilla te toca.',
     cuerpo: renderLegalHtml(LEGAL, 'estatal', win) },
-  { ruta: 'legalidad/permisos', titulo: 'Permisos y licencias de armas en México — posesión no es portación', enSitemap: true,
-    desc: 'Ficha de cada trámite ante la Secretaría de la Defensa Nacional: qué habilita, qué no habilita, cuánto cuesta y con qué homoclave.',
-    cuerpo: renderLegalHtml(LEGAL, 'permisos', win) },
+  // Requisitos y Permisos se fundieron aquí (22-sep-2026). Las dos direcciones viejas
+  // las redirige public/_redirects con 301: no se prerenderizan y salen del sitemap.
+  { ruta: 'legalidad/tramites', titulo: 'Trámites de armas en México — permiso, compra, registro y portación', enSitemap: true,
+    desc: 'Los seis trámites ante la Secretaría de la Defensa Nacional en el orden en que se hacen: qué habilita cada uno, su checklist de requisitos y su cuota vigente. Posesión no es portación.',
+    cuerpo: renderLegalHtml(LEGAL, 'tramites', win) },
+  { ruta: 'legalidad/documentos', titulo: 'Documentos legales y fuentes oficiales en PDF', enSitemap: true,
+    desc: 'Constitución, leyes, reglamento, formatos y requisitos oficiales citados en Armado en México. PDF alojados aquí y enlaces a sus fuentes oficiales.',
+    cuerpo: renderLegalHtml(LEGAL, 'documentos', win) },
   { ruta: 'legalidad/puedo-comprar', titulo: '¿Puedo comprar un arma? — entrevista sobre los requisitos', enSitemap: true,
     desc: 'Quince preguntas sobre tu situación, ninguna con datos personales, para saber qué papeles te pide el formato DEFENSA-02-040 y cuál te falta.',
     cuerpo: renderEntrevistaHtml(ENTREVISTA, LEGAL, win) },
@@ -528,8 +530,15 @@ for (const p of FIJAS) {
 // no salen de un data-*.js, así que siguen SIN lastmod.
 // La portada lleva la más reciente de todas: es lo que cambia cuando cambia algo.
 
+const pdfLegales = [...Object.values(LEGAL.fuentes), ...(LEGAL.documentosComplementarios || [])]
+  .filter((f) => f.archivoLocal).map((f) => {
+    if (!existsSync(join(PUB, f.archivoLocal))) {
+      throw new Error(`Falta el PDF legal: ${f.archivoLocal}`);
+    }
+    return { ruta: f.archivoLocal, enSitemap: true };
+  });
 const enSitemap = [{ ruta: '', enSitemap: true, lastmod: masReciente(paginas.map((p) => p.lastmod)) },
-  ...paginas].filter((p) => p.enSitemap);
+  ...paginas, ...pdfLegales].filter((p) => p.enSitemap);
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${enSitemap.map(({ ruta, lastmod }) => {
