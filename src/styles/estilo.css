@@ -7398,85 +7398,139 @@
 }
 
 /* ── MAPA DEL TRÁMITE ─────────────────────────────────────────────────────────
-   El SVG que genera Archify llega sin un solo color ni fuente literal: todo va
-   por estas 34 clases. Eso es lo que permite vestirlo con la papelería del
-   sitio y que siga al tema, en vez de traer su propia paleta.
+   Seis pasos y dos salidas, en dos orientaciones: la ancha la compila Archify y
+   la alta se dibuja a mano (Archify solo compone en horizontal). Las dos traen
+   el mismo marcado —`#node-<paso>`, `[data-edge-id]`, `.nodo-caja`— así que
+   todo lo de aquí abajo sirve para las dos.
 
+   Ni un color literal llega desde el SVG: cada pieza es un papel del archivero.
    Como todo lo que vive sobre papel (§5.5), aquí NO entra ninguna variable de
-   tema: solo tokens de papelería.
+   tema: solo tokens de papelería, iguales en claro y en oscuro.
    ────────────────────────────────────────────────────────────────────────── */
 .amx-v2 .amx-mapa {
   margin: 22px 0;
   padding: 0;
-  overflow-x: auto;          /* el diagrama es ancho; el resto de la página no scrollea */
+}
+.amx-v2 .amx-mapa-caja {
+  overflow-x: auto;          /* solo la versión ancha desborda; el resto no scrollea */
 }
 .amx-v2 .amx-mapa-svg {
   display: block;
   width: 100%;
-  min-width: 720px;          /* por debajo de esto los rótulos dejan de leerse */
   height: auto;
+}
+.amx-v2 .amx-mapa-ancho {
+  min-width: 680px;          /* por debajo de esto los rótulos dejan de leerse */
 }
 .amx-v2 .amx-mapa-pie {
   font-family: var(--mono);
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--tinta-2);
-  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
 }
 
-/* Superficies: el lienzo es papel, los carriles el papel alterno, las cajas
-   fichas de fichero. La máscara tapa la línea que pasa bajo una etiqueta, así
-   que tiene que ser del mismo color que el papel. */
-.amx-v2 .amx-mapa .c-grid           { fill: none; stroke: var(--carton-filo); }
-.amx-v2 .amx-mapa .c-lane           { fill: var(--oficio-2); }
-.amx-v2 .amx-mapa .c-mask           { fill: var(--oficio); }
-.amx-v2 .amx-mapa .c-frontend,
-.amx-v2 .amx-mapa .c-cloud          { fill: var(--ficha); }
-.amx-v2 .amx-mapa .c-backend,
-.amx-v2 .amx-mapa .c-messagebus     { fill: var(--oficio-2); }
-.amx-v2 .amx-mapa .c-database       { fill: var(--carton-alto); }
-.amx-v2 .amx-mapa .c-security,
-.amx-v2 .amx-mapa .c-security-group { fill: var(--ficha); }
+/* El papel de fondo y los dos recuadros que agrupan */
+.amx-v2 .amx-mapa .c-grid           { fill: none; stroke: var(--carton-filo); opacity: .35; }
+.amx-v2 .amx-mapa .c-lane           { fill: var(--oficio); stroke: var(--carton-filo); opacity: .75; }
+.amx-v2 .amx-mapa .c-security-group { fill: none; stroke: var(--sello-restr); opacity: .45; }
+.amx-v2 .amx-mapa .c-mask           { fill: var(--oficio); stroke: none; }
 
-/* Trazos: el filo del cartón para todo, y el sello rojo donde la norma cierra
-   una puerta —los antecedentes penales y lo que no autoriza el permiso—. */
-.amx-v2 .amx-mapa .s-frontend,
-.amx-v2 .amx-mapa .s-backend,
-.amx-v2 .amx-mapa .s-cloud,
-.amx-v2 .amx-mapa .s-database,
-.amx-v2 .amx-mapa .s-messagebus     { stroke: var(--carton-filo); }
-.amx-v2 .amx-mapa .s-security       { stroke: var(--sello-restr); }
+/* Cada paso es un papel distinto: carpeta, oficio, etiqueta, talón, kardex */
+.amx-v2 .amx-mapa .nodo-caja        { stroke-width: 1.4; }
+.amx-v2 .amx-mapa #node-requisitos .nodo-caja { fill: var(--carton-alto); stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa #node-solicitud  .nodo-caja { fill: var(--oficio);      stroke: var(--copia-filo); }
+.amx-v2 .amx-mapa #node-espera     .nodo-caja { fill: var(--etiqueta);    stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa #node-resolucion .nodo-caja { fill: var(--talon);       stroke: var(--talon-filo); }
+.amx-v2 .amx-mapa #node-compra     .nodo-caja { fill: var(--kardex);      stroke: var(--kardex-linea); }
+.amx-v2 .amx-mapa #node-sin        .nodo-caja { fill: var(--talon);       stroke: var(--sello-restr); }
 
-/* Tinta. */
-.amx-v2 .amx-mapa .t-primary,
-.amx-v2 .amx-mapa .t-frontend,
-.amx-v2 .amx-mapa .t-backend,
-.amx-v2 .amx-mapa .t-database,
-.amx-v2 .amx-mapa .t-messagebus     { fill: var(--ficha-tinta); }
+/* Ningún papel queda perfectamente recto sobre la mesa. Más de medio grado y
+   las flechas se despegan de las cajas. */
+.amx-v2 .amx-mapa g[id^="node-"] { transform-box: fill-box; transform-origin: center; }
+.amx-v2 .amx-mapa #node-requisitos { transform: rotate(-.3deg); }
+.amx-v2 .amx-mapa #node-solicitud  { transform: rotate(.35deg); }
+.amx-v2 .amx-mapa #node-espera     { transform: rotate(-.4deg); }
+.amx-v2 .amx-mapa #node-resolucion { transform: rotate(.25deg); }
+.amx-v2 .amx-mapa #node-compra     { transform: rotate(-.35deg); }
+.amx-v2 .amx-mapa #node-sin        { transform: rotate(.4deg); }
+
+/* Tintas: lo mecanografiado, lo anotado y los dos sellos */
+.amx-v2 .amx-mapa .t-primary        { fill: var(--ficha-tinta); }
 .amx-v2 .amx-mapa .t-dim,
 .amx-v2 .amx-mapa .t-muted          { fill: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .t-backend        { fill: var(--sello-civil); }
 .amx-v2 .amx-mapa .t-security       { fill: var(--sello-restr); }
 
-/* Aristas: el camino principal en verde de sello, lo que corta en rojo, y lo
-   que es «otro trámite» punteado y en tinta secundaria. */
-/* Las aristas son <path> y <line>. El `fill: none` NO es decorativo: sin el, el
-   navegador rellena la curva de la arista con negro y se come el diagrama. */
+/* Flechas. El `fill: none` NO es decorativo: sin él el navegador rellena la
+   curva de negro y se come el diagrama. */
 .amx-v2 .amx-mapa .a-default,
 .amx-v2 .amx-mapa .a-emphasis,
 .amx-v2 .amx-mapa .a-security,
-.amx-v2 .amx-mapa .a-dashed,
-.amx-v2 .amx-mapa .semantic-sigil   { fill: none; }
-.amx-v2 .amx-mapa .a-default        { stroke: var(--carton-filo); }
-.amx-v2 .amx-mapa .a-emphasis       { stroke: var(--sello-civil); }
-.amx-v2 .amx-mapa .a-security       { stroke: var(--sello-restr); }
-.amx-v2 .amx-mapa .a-dashed         { stroke: var(--ficha-tinta-2); }
-.amx-v2 .amx-mapa .m-default        { fill: var(--carton-filo); }
+.amx-v2 .amx-mapa .semantic-sigil,
+.amx-v2 .amx-mapa .amx-mapa-trazo   { fill: none; }
+.amx-v2 .amx-mapa .a-default        { stroke: var(--ficha-tinta-2); opacity: .85; }
+.amx-v2 .amx-mapa .a-emphasis       { stroke: var(--sello-civil); opacity: .92; }
+.amx-v2 .amx-mapa .a-security       { stroke: var(--sello-restr); opacity: .75; stroke-dasharray: 5 4; }
+.amx-v2 .amx-mapa .m-default        { fill: var(--ficha-tinta-2); }
 .amx-v2 .amx-mapa .m-emphasis       { fill: var(--sello-civil); }
 .amx-v2 .amx-mapa .m-security       { fill: var(--sello-restr); }
-.amx-v2 .amx-mapa .m-dashed         { fill: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .semantic-sigil   { stroke: var(--ficha-tinta-2); opacity: .5; }
+.amx-v2 .amx-mapa .sigil-fill       { fill: var(--ficha-tinta-2); stroke: none; }
 
-.amx-v2 .amx-mapa .semantic-sigil   { stroke: var(--ficha-tinta-2); }
-.amx-v2 .amx-mapa .sigil-fill       { fill: var(--ficha-tinta-2); }
+/* ── El recorrido ─────────────────────────────────────────────────────────
+   La cámara es un grupo que se escala y traslada; el fondo se queda fuera de
+   ella y por eso no viaja. Lo que aún no se ha recorrido espera en segundo
+   plano, no desaparece: el diagrama se lee entero sin tocar nada. */
+.amx-v2 .amx-mapa [data-camara] {
+  transition: transform 780ms cubic-bezier(.33, 0, .2, 1);
+  transform-origin: 0 0;
+}
+.amx-v2 .amx-mapa [data-estado]          { transition: opacity .42s ease; }
+.amx-v2 .amx-mapa [data-estado].apagado  { opacity: .42; }
+.amx-v2 .amx-mapa [data-estado].encendido{ opacity: 1; }
+.amx-v2 .amx-mapa [data-estado].oculto   { opacity: 0; }
+.amx-v2 .amx-mapa .amx-mapa-trazo {
+  stroke-linecap: round;
+  opacity: 0;
+  pointer-events: none;
+}
+.amx-v2 .amx-mapa .amx-mapa-trazo.corriendo { opacity: 1; }
+
+/* Los botones SÍ / NO, dentro de la carpeta de la pregunta */
+.amx-v2 .amx-mapa .amx-mapa-boton { cursor: pointer; }
+.amx-v2 .amx-mapa .amx-mapa-cuerpo { stroke-width: 1.5; transition: fill .2s ease; }
+.amx-v2 .amx-mapa .amx-mapa-boton text {
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+.amx-v2 .amx-mapa .amx-mapa-si .amx-mapa-cuerpo { fill: var(--kardex); stroke: var(--sello-civil); }
+.amx-v2 .amx-mapa .amx-mapa-si text             { fill: var(--sello-civil); }
+.amx-v2 .amx-mapa .amx-mapa-no .amx-mapa-cuerpo { fill: var(--talon); stroke: var(--sello-restr); }
+.amx-v2 .amx-mapa .amx-mapa-no text             { fill: var(--sello-restr); }
+.amx-v2 .amx-mapa .amx-mapa-boton:hover .amx-mapa-cuerpo { fill: var(--oficio); }
+.amx-v2 .amx-mapa .amx-mapa-boton:focus-visible { outline: none; }
+.amx-v2 .amx-mapa .amx-mapa-boton:focus-visible .amx-mapa-cuerpo { stroke-width: 3; }
+.amx-v2 .amx-mapa .amx-mapa-boton[data-activo="true"] .amx-mapa-cuerpo { stroke-width: 2.6; }
+
+/* El brillo que da la vuelta al SÍ hasta que alguien lo usa. Es una llamada de
+   atención, no información: al primer clic se apaga y no vuelve. */
+.amx-v2 .amx-mapa .amx-mapa-brillo {
+  fill: none;
+  stroke: var(--loteria-lamina);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.amx-v2 .amx-mapa .amx-mapa-brillo.quieto { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-mapa [data-camara],
+  .amx-v2 .amx-mapa [data-estado] { transition: none; }
+  .amx-v2 .amx-mapa .amx-mapa-brillo { display: none; }
+}
 
 .amx-v2 .amx-ent-reiniciar {
   min-height: 44px;
