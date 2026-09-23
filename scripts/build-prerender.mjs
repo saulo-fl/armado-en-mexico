@@ -459,7 +459,7 @@ const FIJAS = [
     desc: 'La sección Arsenal: los tipos de armas, las armerías DCAM y OTCA, y el catálogo completo con filtros por tipo, calibre, uso, precio y disponibilidad.' },
   { ruta: 'calibres', titulo: 'Guía de calibres', enSitemap: true,
     desc: 'Los 30 calibres de la guía, de menor a mayor: qué son, qué tan fuerte pega cada uno, su balística y cuáles puede adquirir un civil en México.' },
-  { ruta: 'legalidad/index', titulo: 'Tenencia legal de armas en México — requisitos y trámite SEDENA', enSitemap: true,
+  { ruta: 'legalidad', titulo: 'Tenencia legal de armas en México — requisitos y trámite SEDENA', enSitemap: true,
     desc: 'Los permisos, los papeles y la ley detrás de tener un arma legalmente en México, con la fuente y la fecha de cada afirmación.',
     cuerpo: renderLegalHtml(LEGAL, 'hub', win) },
   { ruta: 'legalidad/federal', titulo: 'Lo federal — qué arma puedes tener, qué papel llenas y cuánto cuesta', enSitemap: true,
