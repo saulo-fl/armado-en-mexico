@@ -175,7 +175,7 @@ window.DB = [
     "Evolución del PT58 con cañón ligeramente más largo. Mecanismo doble acción / simple acción con seguro de descenso. Apreciada en clubes de tiro y por su capacidad."),
 
   mk(4, "Bersa Thunder 380", "Bersa", "pistola", "Argentina", ".380 ACP", "7+1", "565g", "165mm", "Semi-auto, DA/SA", 1995, "dcam", "9936.59", "PISTOLA CAL .380 BERSA THUNDER",
-    "imagenes/004_Bersa_Thunder_380.webp?v=2",
+    "imagenes/004_Bersa_Thunder_380.webp?v=3",
     "Pistola compacta argentina inspirada en la Walther PPK. Una de las opciones más económicas y confiables en .380 ACP para portar oculto."),
 
   mk(5, "Ruger LCP", "Ruger", "pistola", "EE.UU.", ".380 ACP", "6+1", "270g", "133mm", "Semi-auto, DAO subcompacta", 2008, "dcam", "9110.35", "PISTOLA CAL .380 RUGER LCP NEGRO",
@@ -191,15 +191,15 @@ window.DB = [
     "Revolucionó el segmento de subcompactas. Acabado nitrón resistente a la corrosión. Versión .380 disponible en México para civiles."),
 
   mk(8, "CZ P-07", "Ceska Zbrojovka", "pistola", "Rep. Checa", ".380 ACP", "15+1", "800g", "185mm", "Semi-auto, DA/SA con Omega trigger", 2012, "dcam", "11436", "PISTOLA CAL .380 CESKA CZ P-07",
-    "imagenes/008_CZ_P-07.webp",
+    "imagenes/008_CZ_P-07.webp?v=2",
     "Pistola checa de servicio con sistema de gatillo Omega intercambiable. Variante .380 ACP especialmente fabricada para mercados con restricción de calibre."),
 
   mk(9, "CZ P-10 C", "Ceska Zbrojovka", "pistola", "Rep. Checa", ".380 ACP", "15+1", "740g", "185mm", "Semi-auto, striker-fired", 2017, "dcam", "11710.67", "PISTOLA CAL .380 CESKA CZ P-10 C 15C",
-    "imagenes/009_CZ_P-10_C.webp",
+    "imagenes/009_CZ_P-10_C.webp?v=2",
     "Compact striker-fired checa con uno de los mejores gatillos de fábrica del mercado. Versión .380 para el mercado mexicano."),
 
   mk(10, "CZ Shadow 2", "Ceska Zbrojovka", "pistola", "Rep. Checa", ".380 ACP", "17+1", "1270g", "206mm", "Semi-auto, DA/SA armazón metálico", 2016, "dcam", "32435.3", "PISTOLA CAL .380 CESKA CZ SHADOW 2",
-    "imagenes/010_CZ_Shadow_2.webp",
+    "imagenes/010_CZ_Shadow_2.webp?v=2",
     "Pistola de competición premium. Armazón de aluminio, cañón de acero inoxidable. Elección de campeones de IPSC. Versión .380 hecha para el mercado mexicano."),
 
   mk(11, "Glock 25", "Glock", "pistola", "Austria", ".380 ACP", "15+1", "560g", "172mm", "Semi-auto, Safe Action striker", 1995, "dcam", "10861.7", "PISTOLA CAL .380 GLOCK MOD. 25",
@@ -215,7 +215,7 @@ window.DB = [
     "Renacimiento moderno de la serie 80 de Beretta, en acabado negro. Compacta en calibre .380, fabricada en Italia. Ideal para defensa de hogar con elegancia europea."),
 
   mk(14, "Browning 1911-380", "Browning", "pistola", "EE.UU.", ".380 ACP", "8+1", "453g", "190mm", "Semi-auto, SA estilo 1911", 2011, "dcam", "21070.90", "PISTOLA 380 ACP BROWNING 1911-380",
-    "imagenes/014_Browning_1911-380.webp",
+    "imagenes/014_Browning_1911-380.webp?v=2",
     "Versión a escala 85% del clásico 1911 de John Browning, en calibre civil .380 ACP. Mantiene la estética y el manejo del 1911 original."),
 
   // ═══════════════════════════════════════════════════════════
@@ -229,11 +229,11 @@ window.DB = [
   //  PISTOLAS .22 LR — USO CIVIL (DCAM)
   // ═══════════════════════════════════════════════════════════
   mk(16, "Browning 1911-22", "Browning", "pistola", "EE.UU.", ".22 LR", "10+1", "440g", "190mm", "Semi-auto, SA estilo 1911", 2011, "dcam", "18021.17", "PIST. SEMIA. CAL .22 L.R. BROWNING 1911",
-    "imagenes/015_Browning_1911-22.webp",
+    "imagenes/015_Browning_1911-22.webp?v=2",
     "Versión .22 LR del clásico 1911. Excelente herramienta de entrenamiento económico para quienes manejan 1911 calibre mayor. Apta para tiro deportivo."),
 
   mk(17, "Browning Buck Mark", "Browning", "pistola", "EE.UU.", ".22 LR", "10+1", "964g", "240mm", "Semi-auto, blow-back competición", 1985, "dcam", "14456.12", "PISTOLA 22 L.R. BROWNING BUCKMARK",
-    "imagenes/016_Browning_Buck_Mark.webp",
+    "imagenes/016_Browning_Buck_Mark.webp?v=2",
     "Pistola .22 LR de competición americana. Cañón fijo, gatillo de competencia. Una de las pistolas .22 más vendidas del mundo para tiro deportivo."),
 
   mk(18, "SIG Sauer P322", "SIG Sauer", "pistola", "EE.UU.", ".22 LR", "20+1", "478g", "188mm", "Semi-auto, blow-back", 2022, "dcam", "14443.75", "PISTOLA 22 LR SIG SAUER P322 NIT NEG",
@@ -244,11 +244,11 @@ window.DB = [
   //  REVÓLVERES .38 SPECIAL — USO CIVIL (DCAM)
   // ═══════════════════════════════════════════════════════════
   mk(19, "Taurus 856 Acero Inox", "Taurus", "revolver", "Brasil", ".38 Special", "6", "626g", "190mm", "Revólver DA/SA cañón 3\"", 2018, "dcam", "9653.98", "REVOLVER TAURUS 856 CAÑÓN 3\" CAL .38 SPL AC INOX",
-    "imagenes/018_Taurus_856_Acero_Inox.webp?v=2",
+    "imagenes/018_Taurus_856_Acero_Inox.webp?v=3",
     "Revólver compacto de 6 tiros en acero inoxidable. Cañón 3\" balance ideal entre portabilidad y precisión. Excelente para defensa de hogar y portación."),
 
   mk(20, "Taurus 856 Pavón Mate", "Taurus", "revolver", "Brasil", ".38 Special", "6", "626g", "190mm", "Revólver DA/SA cañón 3\"", 2018, "dcam", "9290.43", "REVOLVER TAURUS 856 CAÑÓN 3\" CAL .38 SPL PV MT",
-    "imagenes/019_Taurus_856_Pavon_Mate.webp?v=2",
+    "imagenes/019_Taurus_856_Pavon_Mate.webp?v=3",
     "Versión con acabado pavón mate del Taurus 856. Mismo desempeño, presentación táctica discreta."),
 
   mk(21, "Taurus 856 Tungsten", "Taurus", "revolver", "Brasil", ".38 Special", "6", "626g", "190mm", "Revólver DA/SA cañón 3\"", 2020, "dcam", "10744.65", "REVOLVER TAURUS 856 CAÑÓN 3\" CAL .38 SPL TUNGSTENO",
@@ -448,7 +448,7 @@ window.DB = [
     "Nuevo calibre 6.5 Precision Rifle Cartridge. Diseñado para precisión a larga distancia. Tendencia entre cazadores modernos."),
 
   mk(65, "Winchester XPR Thumb .243", "Winchester", "rifle", "EE.UU.", ".243 Winchester", "3+1", "3000g", "1100mm", "Cerrojo, culata thumbhole", 2017, "dcam", "27724.87", "RIFLE WINCHESTER XPR V. THUMB L. CAL .243",
-    "imagenes/038_Winchester_XPR_Thumb_.243.webp",
+    "imagenes/038_Winchester_XPR_Thumb_.243.webp?v=2",
     "XPR con culata thumbhole laminada. Excelente ergonomía para sesiones largas en banco."),
 
   mk(66, "Winchester XPR Sintético .270", "Winchester", "rifle", "EE.UU.", ".270 Winchester", "3+1", "2950g", "1100mm", "Cerrojo bolt-action", 2015, "dcam", "22179.90", "RIFLE WINCHESTER XPR V. SINT. CAL .270",
@@ -499,7 +499,7 @@ window.DB = [
     "Carabina bullpup de las fuerzas especiales israelíes. Compacta y precisa. Exclusiva militar."),
 
   mk(77, "CZ BREN 2", "Ceska Zbrojovka", "carabina", "Rep. Checa", "5.56x45mm", "30", "3600g", "700mm", "Semi-auto, pistón corto", 2015, "ejercito", "48272.53", "RIFLE CAL 5.56X45 mm CESKA BREN 2",
-    "imagenes/107_CZ_BREN_2.webp",
+    "imagenes/107_CZ_BREN_2.webp?v=2",
     "Fusil de asalto modular checo. Adoptado por varias fuerzas armadas. Exclusivo de Fuerzas Armadas en México."),
 
   mk(78, "IWI ARAD 5.56", "IWI", "carabina", "Israel", "5.56x45mm", "30", "3200g", "780mm", "Semi-auto, plataforma AR", 2022, "ejercito", "42947.43", "FUSIL 5.56X45MM IWI ARAD",
