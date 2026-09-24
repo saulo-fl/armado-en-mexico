@@ -257,6 +257,30 @@ def test_sonda_precio_exige_el_registro_nuevo_no_solo_el_precio_suelto():
     assert pub["paso"] == "d1" and "precio" in pub["bloqueado"], pub
 
 
+# ── Task 6: pr_revision ──────────────────────────────────────────────────────
+
+DUD = {"catalogo": "armas", "fecha": "2026-10-01", "pdf": "/x.pdf",
+       "dudosos": [{"tipo": "agotado", "id": 100, "nombre": "Beretta DT11"}]}
+
+
+def test_revision_con_claude_abre_pr_sin_merge():
+    resp = dict(RESP, **{"claude": (0, "listo"), "git status --porcelain": (0, " M src/data/data.js\n M scripts/dcam/mapeo-dcam.json\n"),
+                         "gh pr create --base main": (0, "https://github.com/saulo-fl/armado-en-mexico/pull/303\n")})
+    ent = Falso(resp)
+    pub = publicar.pr_revision(ent, Path("/trabajo"), {}, DUD)
+    assert pub["dudoso"]["paso"] == "hecho" and pub["dudoso"]["pr"] == 303, pub
+    assert not any("pr merge" in l for l in ent.llamadas)
+    assert any("PR por revisar" in a for a in ent.avisos), ent.avisos
+
+
+def test_revision_si_claude_falla_abre_issue():
+    resp = dict(RESP, **{"claude": (124, "timeout"), "gh issue create": (0, "https://github.com/saulo-fl/armado-en-mexico/issues/88\n")})
+    ent = Falso(resp)
+    pub = publicar.pr_revision(ent, Path("/trabajo"), {}, DUD)
+    assert pub["dudoso"] == {"paso": "issue", "issue": 88}, pub
+    assert any("investigación incompleta" in a for a in ent.avisos), ent.avisos
+
+
 if __name__ == "__main__":
     pruebas = [f for n, f in sorted(globals().items()) if n.startswith("test_")]
     for f in pruebas:

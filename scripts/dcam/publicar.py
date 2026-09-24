@@ -353,3 +353,102 @@ def publicar_seguro(ent: Entorno, trabajo: Path, pub: dict, plan: dict, plazo_se
     ent.avisar(f"✅ Publicado inventario DCAM ({catalogo}) del {plan['fecha']}: "
                f"{len(plan['seguros'])} fichas actualizadas · PR #{pub['pr_main']}")
     return pub
+
+
+CLAUDE = "/home/saulo/.local/bin/claude"
+HERRAMIENTAS = "Read,Edit,Write,Glob,Grep,WebSearch,WebFetch,Bash(node:*),Bash(python3:*)"
+PROMPT = Path(__file__).resolve().parent / "prompt-revision.md"
+
+
+def _tabla_dudosos(plan: dict) -> str:
+    filas = ["| tipo | id | detalle |", "|---|---|---|"]
+    for d in plan["dudosos"]:
+        detalle = d.get("nombre") or json.dumps(d.get("renglon", {}), ensure_ascii=False)
+        filas.append(f"| {d['tipo']} | {d.get('id', '—')} | {detalle} |")
+    return "\n".join(filas)
+
+
+def _pr_existente(ent, trabajo, rama, base):
+    """Busca un PR ya abierto o cerrado de `rama` contra `base` (mismo orden de argumentos
+    que `paso_pr` de `publicar_seguro`, para no crear uno duplicado)."""
+    c, out = ent.sh(["gh", "pr", "list", "--repo", REPO, "--head", rama, "--base", base,
+                     "--state", "all", "--json", "number,state"], cwd=str(trabajo))
+    if c or not out.strip():
+        return None
+    existentes = _primer_json(out)
+    return existentes[0]["number"] if existentes else None
+
+
+def pr_revision(ent: Entorno, trabajo: Path, pub: dict, plan: dict, timeout_seg: int = 2700) -> dict:
+    """Casos dudosos: corre `claude -p` con el prompt versionado sobre la rama de revisión y
+    abre un PR a main + gemelo a develop (nunca mergea). Si claude falla o supera el tiempo,
+    no deja cambios, o `auditar.js` encuentra hallazgos — o revienta algo inesperado en el
+    camino — abre un issue en su lugar y avisa. Nunca deja escapar una excepción."""
+    rama = rama_de(plan["catalogo"], plan["fecha"], revision=True)
+    resumen = f"{len(plan['dudosos'])} casos: " + ", ".join(sorted({d['tipo'] for d in plan['dudosos']}))
+    motivo, numeros, tmp = None, None, None
+    try:
+        _git(ent, trabajo, "fetch", "--quiet", "origin", "main")
+        ent.sh(["git", "checkout", "-f", "-B", rama, "origin/main"], cwd=str(trabajo))
+        ent.sh(["git", "clean", "-fd"], cwd=str(trabajo))   # el clon de trabajo puede traer sobras de publicar_seguro
+        tmp = Path(tempfile.mkdtemp(prefix="dcam-rev-"))
+        (tmp / "dudosos.json").write_text(json.dumps(plan["dudosos"], ensure_ascii=False, indent=1), encoding="utf-8")
+        texto = (PROMPT.read_text(encoding="utf-8") if PROMPT.exists() else "{CATALOGO} {FECHA} {PDF} {DUDOSOS} {RESUMEN}")
+        texto = (texto.replace("{CATALOGO}", plan["catalogo"]).replace("{FECHA}", plan["fecha"])
+                 .replace("{PDF}", plan["pdf"]).replace("{DUDOSOS}", str(tmp / "dudosos.json")).replace("{RESUMEN}", str(tmp / "resumen.md")))
+        c, out = ent.sh(["timeout", str(timeout_seg), CLAUDE, "-p", texto, "--allowedTools", HERRAMIENTAS], cwd=str(trabajo))
+        cambios, c_aud = [], 0
+        if c == 0:
+            _c, st = ent.sh(["git", "status", "--porcelain"], cwd=str(trabajo))
+            cambios = [l[3:] for l in st.splitlines() if l.strip()]
+            c_aud, _ = ent.sh(["node", ".claude/skills/conciliar-inventario/scripts/auditar.js"], cwd=str(trabajo))
+        if c != 0 or not cambios or c_aud != 0:
+            motivo = "claude -p falló o superó el tiempo" if c != 0 else ("sin cambios" if not cambios else "auditar.js con hallazgos")
+        else:
+            titulo = f"Revisión del inventario DCAM ({plan['catalogo']}) del {plan['fecha']}: {len(plan['dudosos'])} casos"
+            ent.sh(["git", "add", "--", *cambios], cwd=str(trabajo))
+            ent.sh(["git", "commit", "-m", titulo], cwd=str(trabajo))
+            _git(ent, trabajo, "push", "-u", "origin", rama)
+            cuerpo = (tmp / "resumen.md").read_text(encoding="utf-8") if (tmp / "resumen.md").exists() else _tabla_dudosos(plan)
+            numeros = []
+            for base in ("main", "develop"):
+                n = _pr_existente(ent, trabajo, rama, base)
+                if n is None:
+                    _c, o = ent.sh(["gh", "pr", "create", "--base", base, "--repo", REPO, "--head", rama,
+                                    "--title", titulo if base == "main" else f"[develop] {titulo}", "--body", cuerpo], cwd=str(trabajo))
+                    n = int(o.strip().rstrip("/").split("/")[-1]) if o.strip().startswith("http") else None
+                numeros.append(n)
+    except Exception as e:   # cualquier tropiezo inesperado se trata como "no se pudo", nunca revienta la corrida
+        motivo = f"excepción inesperada: {e!r}"
+
+    if motivo:
+        n = None
+        try:
+            ent.sh(["git", "checkout", "--", "."], cwd=str(trabajo))
+            args = ["gh", "issue", "create", "--repo", REPO, "--title",
+                    f"Inventario DCAM ({plan['catalogo']}) del {plan['fecha']}: casos por revisar (investigación incompleta)"]
+            cuerpo_issue = f"{motivo}.\n\n{_tabla_dudosos(plan)}"
+            if tmp is None:
+                tmp = Path(tempfile.mkdtemp(prefix="dcam-rev-"))
+            (tmp / "issue.md").write_text(cuerpo_issue, encoding="utf-8")
+            # --body-file en vez de --body: el texto de `motivo` (p. ej. "claude -p falló…")
+            # puede coincidir con patrones de otros comandos si viaja inline en el argumento.
+            args += ["--body-file", str(tmp / "issue.md")]
+            c2, out2 = ent.sh(args, cwd=str(trabajo))
+            if c2 == 0 and out2.strip():
+                n = int(out2.strip().rstrip("/").split("/")[-1])
+        except Exception:
+            pass
+        pub["dudoso"] = {"paso": "issue", "issue": n}
+        try:
+            ent.avisar(f"🔎 DCAM ({plan['catalogo']} {plan['fecha']}): investigación incompleta ({motivo}); issue #{n} · {resumen}")
+        except Exception:
+            pass
+        return pub
+
+    pub["dudoso"] = {"paso": "hecho", "pr": numeros[0], "pr_develop": numeros[1]}
+    try:
+        ent.avisar(f"🔎 PR por revisar #{numeros[0]} (DCAM {plan['catalogo']} {plan['fecha']}): {resumen}")
+    except Exception:
+        pass
+    return pub
