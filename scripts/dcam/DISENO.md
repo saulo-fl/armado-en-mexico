@@ -466,3 +466,33 @@ para `saulo`.
 
 Pieza 3 (sincronización legal y bloque de Legalidad) · inventarios de OTCA (el vigía no los
 lee) · fotos de fichas nuevas (siguen con marcador de posición) · vigilante externo.
+
+## Pieza 2 — IMPLEMENTADA (19-sep-2026)
+
+Cadena real: `vigia.py` escribe `pendiente-conciliar.json` → `dcam-conciliar.path` (inotify) →
+`dcam-conciliar.service` → `infra/conciliar.sh` → subagente `openclaw` con la skill
+`conciliar-inventario` → dos Draft-PR (main y develop). No existen `conciliar.py` ni
+`mapeo-dcam.json`: eso era el diseño de papel.
+
+Requisitos en APOLO: `openclaw`, `jq`, `flock`, `curl`, `gh`, `node` y el `.venv` con PyMuPDF.
+
+El repo es la **fuente**; `/etc/systemd/system` e `infra/` son **copias** (de root y de usuario).
+Tras cada merge que toque `scripts/dcam/` hay que reinstalar a mano:
+
+    R=/home/saulo/apps/dcam-bot/repo/scripts/dcam
+    install -m0755 $R/conciliar.sh /home/saulo/apps/dcam-bot/infra/conciliar.sh
+    sudo install -m0644 $R/systemd/dcam-vigia.service $R/systemd/dcam-vigia.timer                         $R/systemd/dcam-conciliar.path $R/systemd/dcam-conciliar.service                         /etc/systemd/system/
+    sudo systemctl daemon-reload
+    # si cambió la unit .path, además: sudo systemctl restart dcam-conciliar.path
+    # (para rearmar el watch de inotify)
+
+Recuperar una conciliación fallida (la señal `.fallida` es terminal por diseño): mira el motivo
+en `conciliar.log` y vuelve a crear el archivo, lo que re-dispara el `.path`:
+
+    cd /home/saulo/apps/dcam-bot && cp pendiente-conciliar.json.fallida pendiente-conciliar.json
+
+**Por qué el vigía fuerza `main` en cada arranque** (los dos `ExecStartPre` con `flock`): el
+subagente deja el clon en `auto/inventario-<FECHA>`, y GitHub borra esa rama al mergear los PR.
+Sin forzar `main`, el `git pull` falla en silencio cada noche y el clon se congela en una rama
+muerta —fue la causa del auto-desarme del 18-sep-2026—. Van bajo el `flock` del conciliador
+porque `switch --force` descarta cambios del mismo árbol donde el subagente trabaja ~35 minutos.

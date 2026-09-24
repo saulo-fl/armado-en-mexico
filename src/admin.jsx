@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Admin Panel
 // Backend de gestión para Saulo Flores
 
@@ -554,7 +559,7 @@ function ArmaForm({ arma, mode, onSave, onCancel }) {
           </FormField>
 
           <FormField label="Disponibilidad (una por línea)" span="2">
-            <textarea value={f.disponibilidad} onChange={(e) => set('disponibilidad', e.target.value)} style={taStyle()} rows={2} placeholder={"DCAM CDMX\nOTCA Monterrey"} />
+            <textarea value={f.disponibilidad} onChange={(e) => set('disponibilidad', e.target.value)} style={taStyle()} rows={2} placeholder={"DCAM Naucalpan\nOTCA Monterrey"} />
           </FormField>
 
           <FormField label="Precio (texto)">
@@ -676,14 +681,13 @@ window.ArmaForm = ArmaForm;
 // PAGES — editor de páginas Legal / FAQ / About
 // ════════════════════════════════════════════════════════════════
 function PagesTab() {
-  const [sub, setSub] = useState('legal');
+  const [sub, setSub] = useState('faq');
   return (
     <div>
       <SectionHead title="Páginas" sub="Editar contenido visible al usuario en la app pública" />
 
       <div style={{ display: 'flex', gap: 0, marginBottom: 18, borderBottom: `1px solid ${P.border}` }}>
         {[
-          { id: 'legal', label: 'Legalidad' },
           { id: 'faq',   label: 'FAQ' },
           { id: 'about', label: 'Acerca' },
         ].map(t => (
@@ -699,7 +703,6 @@ function PagesTab() {
         ))}
       </div>
 
-      {sub === 'legal' && <LegalEditor />}
       {sub === 'faq'   && <FAQEditor />}
       {sub === 'about' && <AboutEditor />}
     </div>
@@ -707,44 +710,10 @@ function PagesTab() {
 }
 window.PagesTab = PagesTab;
 
-function LegalEditor() {
-  const [v, setV] = useState(window.Store.getPages().legal);
-  const set = (k, val) => setV(prev => ({ ...prev, [k]: val }));
-  const save = () => { window.Store.updatePage('legal', v); alert('✓ Página legal guardada.'); };
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-      <FormField label="Eyebrow"><input value={v.eyebrow} onChange={(e) => set('eyebrow', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Título"><input value={v.title} onChange={(e) => set('title', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Introducción" span="2"><textarea value={v.intro} onChange={(e) => set('intro', e.target.value)} style={taStyle()} rows={3} /></FormField>
-
-      <FormField label="Requisitos SEDENA (uno por línea)" span="2">
-        <textarea value={v.requisitos.join('\n')} onChange={(e) => set('requisitos', e.target.value.split('\n'))} style={taStyle()} rows={7} />
-      </FormField>
-
-      <FormField label="Pasos DCAM (formato: TÍTULO | descripción, uno por línea)" span="2">
-        <textarea value={v.pasos.map(p => p.t + ' | ' + p.d).join('\n')}
-          onChange={(e) => set('pasos', e.target.value.split('\n').map(l => {
-            const [t, ...d] = l.split('|');
-            return { t: (t||'').trim(), d: d.join('|').trim() };
-          }))}
-          style={taStyle()} rows={6} />
-      </FormField>
-
-      <FormField label="WhatsApp (con código país)"><input value={v.whatsapp_phone} onChange={(e) => set('whatsapp_phone', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Mensaje predefinido"><input value={v.whatsapp_msg} onChange={(e) => set('whatsapp_msg', e.target.value)} style={inpStyle()} /></FormField>
-      <FormField label="Pitch de la asesoría" span="2"><textarea value={v.whatsapp_pitch} onChange={(e) => set('whatsapp_pitch', e.target.value)} style={taStyle()} rows={3} /></FormField>
-
-      <div style={{ gridColumn: '1/-1', textAlign: 'right' }}>
-        <button onClick={save} style={btnPrimary}>💾 Guardar página Legal</button>
-      </div>
-    </div>
-  );
-}
-
 function FAQEditor() {
   const [items, setItems] = useState(window.Store.getPages().faq);
   const set = (i, k, val) => setItems(prev => prev.map((it, idx) => idx === i ? { ...it, [k]: val } : it));
-  const add = () => setItems(prev => [...prev, { q: '', a: '' }]);
+  const add = () => setItems(prev => [...prev, { tema: '', q: '', a: '' }]);
   const del = (i) => { if (confirm('¿Eliminar esta pregunta?')) setItems(prev => prev.filter((_, idx) => idx !== i)); };
   const move = (i, dir) => {
     setItems(prev => {
@@ -779,6 +748,11 @@ function FAQEditor() {
                 <button onClick={() => del(i)} style={Object.assign({}, btnTiny, { color: P.red })}>✕</button>
               </div>
             </div>
+            {/* El tema va rotulado en la pestaña del folder de /preguntas, y
+                ahí solo cabe un tercio del ancho del cartón: una palabra. */}
+            <input value={it.tema || ''} onChange={(e) => set(i, 'tema', e.target.value)} maxLength={12}
+              style={Object.assign({}, inpStyle(), { maxWidth: 180 })} placeholder="Tema (pestaña)" />
+            <div style={{ height: 8 }} />
             <input value={it.q} onChange={(e) => set(i, 'q', e.target.value)} style={inpStyle()} placeholder="Pregunta" />
             <div style={{ height: 8 }} />
             <textarea value={it.a} onChange={(e) => set(i, 'a', e.target.value)} style={taStyle()} rows={3} placeholder="Respuesta" />
@@ -1276,6 +1250,13 @@ function ReportsTab() {
                 <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.textDim, marginBottom: 6 }}>
                   Señala: {d.reviewId}
                 </div>}
+              <div style={{ marginBottom: 8, padding: '8px 10px', background: P.bg, border: `1px solid ${P.border}`, fontSize: 12 }}>
+                <div style={{ marginBottom: 4 }}>{d.entidadNombre || 'Entidad no identificada'}</div>
+                <div style={{ color: P.textDim, fontFamily: 'JetBrains Mono, monospace', fontSize: 10 }}>
+                  {String(d.tipo || 'otro')} · {d.entidadId || 'sin id'} · {d.reviewId || 'captura manual'}
+                </div>
+                {d.reviewExcerpt && <blockquote style={{ margin: '6px 0 0', padding: '4px 10px', borderLeft: `2px solid ${P.amber}`, color: P.textDim, fontSize: 11 }}>{d.reviewExcerpt}</blockquote>}
+              </div>
               <div style={{
                 fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.text,
                 lineHeight: 1.65, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', marginBottom: 9
@@ -1326,7 +1307,7 @@ function BulkImportTab() {
 
   const downloadTemplate = () => {
     const headers = 'id,nombre,marca,tipo,pais,calibre,capacidad,peso,longitud,mecanismo,anio,era,img,avail,availLabel,priceExact,priceLvl,dcamRef,legalTit,legalDesc,disponibilidad,uses,historia';
-    const sample = ',Ejemplo Pistola,Marca X,pistola,México,9mm Parabellum,15+1,750g,185mm,"Semi-auto, striker",2025,moderno,,dcam,Uso civil — DCAM,"$10,000 MXN",2,REF DCAM ABC,Civil — DCAM,Descripción legal,DCAM CDMX;OTCA Monterrey,domicilio;club,Texto de la historia';
+    const sample = ',Ejemplo Pistola,Marca X,pistola,México,9mm Parabellum,15+1,750g,185mm,"Semi-auto, striker",2025,moderno,,dcam,Uso civil — DCAM,"$10,000 MXN",2,REF DCAM ABC,Civil — DCAM,Descripción legal,DCAM Naucalpan;OTCA Monterrey,domicilio;club,Texto de la historia';
     const blob = new Blob([headers + '\n' + sample], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');

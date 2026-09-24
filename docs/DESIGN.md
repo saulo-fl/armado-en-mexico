@@ -249,20 +249,9 @@ ARSENAL
 
 [ Buscar... ]
 
-[Filtros]
+[Tipo ▾][Calibre ▾][Armería ▾] →
 ```
-Filtros:
-Tipo.
-Fabricante.
-País.
-Año.
-Calibre.
-Acción.
-Estado/estatus, si aplica.
-No cargar todos los filtros simultáneamente en móvil.
-Usar:
-FILTRAR
-que abre un bottom sheet.
+Filtros: los de §5.10 (16-sep-2026), que sustituyen al «FILTRAR que abre un bottom sheet» que pedía este brief.
 ---
 9. Listado de armas
 Cada resultado debe ser una card.
@@ -590,16 +579,28 @@ MUNICIONES RELACIONADAS
 ```
 ---
 22. SOPORTE Y NORMAS
-Sección documental.
-Debe contener:
-Normas de uso de la plataforma.
-Política de contenido.
-Fuentes de información.
-Criterios de clasificación.
-Correcciones.
-Reportar información incorrecta.
-Contacto.
-Puede utilizar un diseño parecido a documentación técnica.
+Rediseño del 19-sep-2026: manual de convivencia vintage + formato de denuncia privada.
+
+Concepto: archivo físico del sitio (papel oficio, carpetas manila, hojas siempre visibles).
+Ancho aproximado: 920 px centrado. Papel fijo en tema oscuro. Breakpoint estructural: 1024 px (2 × 2 grid).
+Clases CSS: `.amx-soporte-*` (portada, aviso, reglas, regla, carbon, formato).
+
+Estructura:
+- Portada: h1 Dymo, apertura y alcance.
+- Aviso: prohibido comprar/vender (antes de las normas).
+- Normas: cuatro hojas siempre visibles (no acordeones), 1 columna < 1024 px, 2 × 2 desde 1024 px.
+- Moderación: copia al carbón + acciones reales.
+- Denuncia: formulario privado con contexto de reseña (no persiste en localStorage, no va a URL).
+- Directorio: clasificación, corrección pública vía GitHub Issues, fuentes aceptables, FAQ y Legalidad.
+
+Diferencia entre denuncia privada y corrección pública:
+- Denuncia: formulario en /soporte, solo backend escribe en D1, contexto en memoria React.
+- Corrección: Issue Form público en GitHub, PR opcional posterior a revisión editorial.
+
+ReportarError: primitiva reutilizable que aparece al final de arma, accesorio, munición, calibre, Legalidad y FAQ. NO en Inicio, Arsenal, Comparador, Más, Acerca, Tutorial ni Soporte.
+
+Textos prohibidos (no afirmar): bloqueo inmediato, reporte a autoridades, 24/48 horas, te contamos en qué quedó.
+Textos vigentes: opiniones negativas fundadas protegidas, fabricantes pueden corregir declarando relación.
 ---
 23. PREGUNTAS FRECUENTES
 FAQ con acordeones.
@@ -1042,7 +1043,7 @@ Dos condiciones, las dos aprendidas a golpes:
 - **En la tinta del sitio `rgba(23,27,25,…)`, nunca teñida con el verde.** Una sombra de color es
   un halo cromático: otro tic de interfaz generada. El detector lo marca como `dark-glow`.
 - **Máximo 18px de blur** (24px en hover, y solo ahí). El coste de una sombra escala con el
-  cuadrado del radio, y son 321 páginas con muchas tarjetas.
+  cuadrado del radio, y el sitio son cientos de páginas con muchas tarjetas cada una.
 
 ### 5.2 Escala de espaciado — 6 valores, no 36
 
@@ -1109,7 +1110,8 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   milimétrico con su registro y los anexos grapados (historial y PDFs); los separadores con la
   hoja de oficio (Legalidad · Usos · Antecedentes). Fuera del folder: la vitrina con dos repisas
   (munición y accesorios), la tele de los 80 (video), la tarjeta de comentarios y los expedientes
-  de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra.
+  de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra. Las letras van
+  alineadas: Saulo retiró los saltos por letra de todas las cintas el 16-sep-2026.
 - **Intensidad: papelería física, sin texturas.** Se permiten clips, grapas, cinta canela,
   perforaciones, papel autocopiante, cinta rotuladora y líneas de corte, dibujados en CSS o como
   recortes ligeros. Sigue prohibido lo de §27 («texturas de papel fuertes») y lo de §3: ningún
@@ -1146,6 +1148,124 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
 - **Dentro de un papel no se usa `PALETTE` ni `CLARO`** (siguen al tema y en oscuro dejarían tinta
   clara sobre papel claro): solo los tokens de la papelería, auditados por `contraste.mjs` en el
   grupo «LA PAPELERÍA DE LA FICHA DE ARMA». El anillo de foco sobre los papeles va en tinta.
+
+### 5.6 El comparador — dos fichas de fichero (14-sep-2026)
+
+Decidido con Saulo sección por sección (rama `Opus-5/RED-Comparar`). La regla de datos vive en
+`src/lib/cotejo.js`, con su prueba (`node --test scripts/cotejo.test.mjs`); las piezas, en `ui.jsx`, bloque
+«EL COMPARADOR»; la piel, en `estilo.css`, con el mismo nombre.
+
+- **Dos expedientes lado a lado, también en móvil:** la copia con grapa y sello legal encima de su ficha de
+  fichero, y «Cambiar · Quitar» debajo. Tocar la copia abre la ficha del arma. Título en cinta Dymo
+  «Comparador». Sin folder manila. En escritorio, la misma pila centrada y más grande (corte único 1024).
+- **El mismo dato a la misma altura** en las dos fichas (`subgrid`). Arriba lo que difiere, en el orden de la
+  ficha técnica; después «— iguales —» y lo que coincide. Existencias, siempre arriba.
+- **La ventaja se circula con rotulador rojo** (`--rotulador`), por regla fija: más capacidad (cargador +
+  recámara); menos peso, longitud y precio. Calibre, mecanismo, origen, año y existencias, nunca. Solo compite
+  un valor único y exacto: un rango, un «≈», un «varía» o un dato ausente se muestran sin círculo.
+  **Nunca una valoración que no salga de un dato de la ficha** (#130 retiró las barras por eso).
+- **La tira de diferencias:** la segunda arma frente a la primera, solo en cifras («+4 cartuchos · +27 g ·
+  +4 mm · +$5,765.48»), con «precios de fechas distintas» si los inventarios de los dos precios no son del
+  mismo día. El precio de «último conocido» compite, y su ficha lleva el sello.
+- **Elegir un arma es un `<dialog>`** con búsqueda por nombre, marca y calibre, sin salir de la pantalla. No
+  hay «modo selección» ni rótulos genéricos («SLOT A/B», «LOADOUT»): cada lado lleva el nombre de su arma.
+- **Estados:** sin armas, una hoja con «Ir al Arsenal»; con una, su expediente y una ficha en blanco.
+- **El enlace** `/comparar/<a>-vs-<b>` guarda la comparación; su orden es el de las armas. Fuera de Google
+  hasta la parte 2 (indexación), que tiene su propio spec.
+
+### 5.7 La vitrina de accesorios — un puesto de tianguis (15-sep-2026)
+
+Decidido con Saulo pregunta por pregunta (rama `Opus-5/RED-accesorios`). La regla de datos vive en
+`window.accesoriosVitrina` (`src/data/data-accesorios.js`), con su prueba (`node --test scripts/vitrina.test.mjs`);
+las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estilo.css`, con el mismo nombre.
+
+- **El catálogo es una vitrina como el puesto de Municiones del Home**, no una rejilla de tarjetas. Arriba, un
+  **toldo de lona rayada en verde de marca y crema** con «Accesorios» rotulado. Sin aviso legal y sin buscador.
+- **Separadores de fichero** (las pestañas de la ficha de arma) filtran por categoría: «Todas» y solo las categorías
+  con piezas, sin número y sin quedarse fijos. La pestaña vive en la URL (`/accesorios`, `/cargadores`…) y cambiarla
+  reemplaza la dirección en vez de apilarla.
+- **Secciones por categoría** con cinta Dymo sin número; dentro, **orden alfabético por nombre corto**.
+- **Los cargadores van en tramos** (16-sep-2026), también con «Todas»: por tipo de arma (Pistolas; Rifles, con los
+  fusiles; Escopetas) y dentro por calibre, cada tramo con su cinta Dymo chica (`<h3>`). `.223 Rem` y `5.56` van
+  aparte. El tramo de cada cargador vive en `ACC_TRAMO` (`data-accesorios.js`) y `auditar.js` falla si falta.
+- **Un puesto por pieza:** letrero de tianguis con **solo el nombre corto** (`corto`, máximo 2 renglones a 360 px; el
+  `aria-label` es el nombre corto seguido del nombre completo, para que quien dicta lo que ve pueda activarlo), la
+  vara y la **pieza sola**. Sin precio, sello ni existencias: eso vive en la ficha. Sin foto, la silueta de su
+  categoría, sola.
+- **La mesa cruza la fila entera** aunque falten puestos. 2 por fila en móvil, 4 entre 720 y 1023 px, 6 desde 1024.
+- **Tema oscuro:** lona, madera, letreros y fotos son objetos y no cambian; la silueta de respaldo sigue al tema
+  porque se recorta contra el lienzo.
+- **Las fotos** (la pieza sola recortada con alfa) son una entrega aparte, con su propio spec.
+
+### 5.8 La ficha de accesorio — el mismo expediente (15-sep-2026)
+
+Decidido con Saulo pregunta por pregunta (rama `Opus-5/RED-ficha-accesorio`). Las reglas de datos viven en
+`src/lib/cotejo.js` (`amxInventarioAccesorio`, `amxCompatAccesorio`), con su prueba (`npm test`); la pantalla, en
+`AccesorioFicha` (`screens-accesorios.jsx`); las primitivas son las de §5.5.
+
+- **Réplica exacta de la ficha de arma:** el mismo folder, los mismos papeles y el mismo reparto por filas desde
+  1024 px. La pestaña del folder lleva la categoría en singular (Cargador, Mira, Refacción, Culata).
+- **Cabecera:** el nombre corto (`corto`, el del letrero de la vitrina) de título, el nombre completo a máquina y la
+  descripción debajo.
+- **La copia lleva la silueta sola** de su categoría y el sello legal estampado; el faldón, bandera · marca · país. En
+  cuanto un accesorio tenga `img`, la foto sustituye a la silueta sin tocar la ficha.
+- **La ficha técnica** son las specs del inventario tal cual, más el origen.
+- **El talón va sin casilla** (no hay comparador de accesorios) y es fijo en móvil, como el arma. Aplica la misma
+  regla de errata y de «último precio conocido».
+- **Hojas: Compatibilidad · Legalidad**, y abre Compatibilidad.
+  - Compatibilidad dice «Sirve a:» con los primeros 6 enlaces y «Ver las N».
+  - Si la regla es universal: «cualquier arma con riel Picatinny. En el Arsenal:».
+  - Sin fichas, la plataforma del PDF «(sin ficha en el Arsenal)».
+  - Sin nada, no hay pestaña.
+  - Los enlaces a armas van sin `↗`: en el sitio `↗` es «abre un PDF».
+- **Debajo del folder:** «Armas compatibles» (todas, en expediente y sin ⇄) y «Opiniones». Sin accesorios
+  relacionados.
+
+### 5.9 El hub del Arsenal (15-sep-2026)
+
+Decidido con Saulo sección por sección (rama `Opus-5/RED-Arsenal`). Las cuentas viven en `src/lib/arsenal-hub.js`,
+con su prueba (`node --test scripts/arsenal-hub.test.mjs`); las piezas, en `ui.jsx`, bloque «EL HUB DEL ARSENAL»; la
+piel, en `estilo.css`, con el mismo nombre.
+
+- **Títulos en cinta Dymo** en las seis secciones, como fuera del folder de la ficha.
+- **Disponibilidad es la tarjeta de almacén:** un renglón por sucursal con las armas que tienen existencia en el
+  ÚLTIMO inventario de armas de esa sucursal y la fecha de ese inventario. Sin total: un arma puede estar en las dos.
+  Cada renglón abre el catálogo con Armería = esa sucursal y Disponibilidad = Con existencias, y la lista mide lo mismo
+  que el renglón. Las polaroids de Armería siguen abriendo todo lo de su armería, esté disponible o no.
+- **Con una armería elegida, «Con existencias» y «Agotadas» miran esa sucursal** (`amxTieneExistencia`). Antes
+  contaban existencias en cualquiera y se colaban armas que solo tenía la otra (la SIG Sauer P322 en DCAM).
+- **Clasificación legal es una hoja de oficio con los sellos de la ficha:** la palabra corta por debajo de 1024 px, la
+  etiqueta completa por encima; verde civil, rojo seguridad y exclusivo.
+- **Uso son polaroids apaisadas** con solo el nombre y fotos de banco libre, con su fuente anotada junto a
+  `USO_FOTOS`. Militar / Táctico no sale en el hub.
+- **Calibre es un mostrador que se desliza:** una sola tabla con los calibres que tienen armas, cada cartucho a escala
+  de su largo real y con su etiqueta de cartón (nombre y armas). Sin foto, la silueta de pie. El ancho de celda sale
+  del de la pantalla para que siempre asome el siguiente calibre.
+
+### 5.10 Los filtros de los catálogos (16-sep-2026)
+
+Decidido con Saulo pregunta por pregunta, con maqueta (rama `Opus-5/RED-Filtros`). Las cuentas viven en
+`src/lib/filtros.js`, con su prueba (`node --test scripts/filtros.test.mjs`); las piezas, en `ui.jsx`, bloque «LOS
+FILTROS DE LOS CATÁLOGOS»; la piel, en `estilo.css`, con el mismo nombre. Armas y municiones; Accesorios conserva
+sus separadores (§5.7).
+
+- **La banda verde solo lleva el buscador**, y su ✕ borra solo el texto. **Nada se queda fijo** al bajar. En móvil
+  el scroll lo lleva el cuerpo de `app.jsx`: un `sticky` con `top: 50` dejaba una franja vacía de 50 px.
+- **Una tira de chips que se desliza de lado**, igual en escritorio, con un degradado en el borde mientras hay más.
+  Armas: Tipo · Calibre · Armería · Disponibilidad · Precio · Más. Municiones: Calibre · Disponibilidad · Marca ·
+  Precio; su título y su aviso quedan arriba de la banda.
+- **Chip sin filtro: etiqueta de papel** con sombra, sin borde. **Con filtro: la cinta Dymo** rotulada con el valor y
+  su ✕, que lo quita sin abrir nada.
+- **Cada chip abre debajo una hoja que empuja el catálogo**, con una muesca hacia su chip. Se cierra al elegir, con
+  «Cerrar», con Esc o con su chip; tocar fuera no la cierra. En escritorio mide como máximo 560 px y se alinea bajo
+  su chip.
+- **Las opciones son casillas de formulario** en columnas parejas; una sola por filtro, marcada con ✕.
+- **El precio es una regla** con marcas y dos cursores: paso $1,000 y tope «$100,000+» en armas; por cartucho y sin
+  tope en municiones. Sus límites salen de los demás filtros y cambiar uno reinicia el rango.
+- **«Más»** (armas) abre Uso, Clasificación legal, Marca, Mecanismo y Era como renglones de formulario con puntos
+  guía; elegir cierra el renglón y deja la hoja abierta.
+- **Conteo y «Limpiar»** en un renglón bajo la tira («▸ 227 ARMAS · 1 FILTRO», sin total). «Limpiar» borra filtros,
+  precio y búsqueda, y solo sale si hay algo puesto.
 
 ---
 
@@ -1201,8 +1321,8 @@ Es un sitio publicado, divulgativo y con contenido de referencia legal.
 
 ## 8. Cómo se trabaja
 
-1. **Nunca sobre las 321 páginas.** Se itera en una página de galería con todos los primitivos.
-2. **Las primitivas antes que las pantallas.** Las ~15 de `ui.jsx` (`ArmaCard`, `FilterChip`,
+1. **Nunca sobre el sitio entero.** Se itera en una página de galería con todos los primitivos.
+2. **Las primitivas antes que las pantallas.** Las ~15 de `ui.jsx` (`ArmaCard`, `TiraFiltros`,
    `AvailBadge`, `TacticalCorners`, `SectionHeader`, `PriceLevel`…) propagan solas a todo el sitio.
    Las pantallas solo las componen.
 3. **La piel va al CSS, el layout se queda inline.** Una propiedad vive en un sitio o en el otro,
@@ -1211,3 +1331,6 @@ Es un sitio publicado, divulgativo y con contenido de referencia legal.
 4. **Antes de publicar:** las skills `verificar-app` y `fidelidad-diseno`, con capturas antes/después.
 5. **Prueba de no-genérico.** Antes de dar por buena una pantalla, la pregunta es:
    *¿produciría esto mismo para cualquier catálogo oscuro?* Si la respuesta es sí, se revisa.
+6. **Lo nuevo se propone en Penpot, lo publicado se mira en el navegador.** El archivo «Wire
+   Frame» consume estos tokens (`npm run tokens` → `docs/penpot/tokens.json`); nunca al revés.
+   Reglas, mapa y trampas en `docs/PENPOT.md`.

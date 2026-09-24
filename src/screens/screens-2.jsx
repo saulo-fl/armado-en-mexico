@@ -1,6 +1,11 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Pantallas de Producto, Comparador, Legal, FAQ, Acerca
 
-const { useState: useState2, useMemo: useMemo2 } = React;
+const { useState: useState2, useMemo: useMemo2, useEffect: useEffect2, useRef: useRef2 } = React;
 
 // ════════════════════════════════════════════════════════════════
 // PRODUCT — la ficha de un arma: el expediente completo
@@ -10,72 +15,7 @@ const { useState: useState2, useMemo: useMemo2 } = React;
 // docs/DESIGN.md §4.3. Aquí solo vive lo que depende del dato.
 // ════════════════════════════════════════════════════════════════
 
-// SEPARADORES de la hoja de oficio: Legalidad · Usos · Antecedentes.
-// Controlados desde fuera, porque el enlace «§ Ver situación legal» de la
-// copia tiene que poder abrir Legalidad. Conservan lo que ya tenían: rol
-// tablist, foco itinerante y flechas ←/→.
-// Viven FUERA de ProductScreen a propósito: un componente definido dentro de
-// otro remonta su subárbol en cada render (la trampa que documenta
-// fidelidad-diseno).
-function Panel({ children }) { return <React.Fragment>{children}</React.Fragment>; }
-
-function FichaTabs({ children, activo, onCambiar }) {
-  const paneles = React.Children.toArray(children).filter(Boolean);
-  const refs = React.useRef([]);
-  if (!paneles.length) return null;
-  const act = Math.min(activo, paneles.length - 1);
-
-  function onKey(e) {
-    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
-    if (!d) return;
-    e.preventDefault();
-    const n = (act + d + paneles.length) % paneles.length;
-    onCambiar(n);
-    if (refs.current[n]) refs.current[n].focus();
-  }
-
-  return (
-    <div>
-      <div className="amx-separadores-pestanas" role="tablist" aria-label="Documentos del expediente" onKeyDown={onKey}>
-        {paneles.map((p, i) => (
-          <button
-            key={i}
-            type="button"
-            ref={(el) => { refs.current[i] = el; }}
-            role="tab"
-            id={'ficha-tab-' + i}
-            aria-selected={i === act}
-            aria-controls={'ficha-panel-' + i}
-            tabIndex={i === act ? 0 : -1}
-            className="amx-separador"
-            onClick={() => onCambiar(i)}>
-            {p.props.label}
-          </button>
-        ))}
-      </div>
-      {/* LAS TRES HOJAS SE PINTAN, apiladas en la misma celda, y solo se ve la
-          activa. Antes se pintaba solo la activa y el folder crecía o encogía al
-          cambiar de pestaña —«puede marear o ser incómodo», Saulo, 13-sep-2026—.
-          Así la pila mide siempre lo que la hoja más larga. Las de detrás van
-          con `visibility: hidden` (estilo.css), que las saca del lector de
-          pantalla y del orden del tabulador sin quitarles el alto. */}
-      <div className="amx-oficio-pila">
-        {paneles.map((p, i) => (
-          <div key={i} className="amx-oficio" role="tabpanel" id={'ficha-panel-' + i}
-            aria-labelledby={'ficha-tab-' + i} data-activo={i === act ? 'si' : 'no'}>
-            {/* Membrete genérico del sitio: sin escudo ni emblema oficial (§6b). */}
-            <div className="amx-oficio-membrete" aria-hidden="true">
-              <span>Armado en México</span><span>{p.props.label}</span>
-            </div>
-            {p}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, compareIds, toggleCompare }) {
+function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, onNav, onReportReview, compareIds, toggleCompare }) {
   const vp = window.useViewport();
   // Las opiniones llegan en la hidratacion desde /api/state, DESPUES del primer
   // render. Sin esta suscripcion la etiqueta de la copia se quedaba vacia hasta
@@ -86,55 +26,14 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
   // La pestaña abierta: Legalidad (la 0) al llegar y al pasar de un arma a otra.
   const [tab, setTab] = useState2(0);
-  // El talón fijo de abajo (móvil) solo aparece cuando el de la ficha ya salió
-  // de la pantalla por arriba, así que nunca hay dos talones a la vista.
-  const [talonFuera, setTalonFuera] = useState2(false);
-  // …y se retira cuando asoma el pie de sitio, para no taparle el último renglón.
-  const [pieVisible, setPieVisible] = useState2(false);
-  const talonRef = React.useRef(null);
-  const fichaRef = React.useRef(null);
 
   useEffect(() => {
     if (arma && window.Store) window.Store.trackVisit(arma.id);
   }, [arma?.id]);
-  useEffect(() => { setTab(0); setTalonFuera(false); setPieVisible(false); }, [armaId]);
+  useEffect(() => { setTab(0); }, [armaId]);
 
-  // IntersectionObserver con la raíz implícita: recorta por los `overflow` de
-  // los ancestros, así que funciona igual si hace scroll la página que si lo
-  // hace el contenedor interno del shell móvil. Nada de escuchar el scroll.
-  // El margen de arriba descuenta la barra superior (64px), que tapa lo que
-  // pasa por debajo de ella.
-  //
-  // NO BASTA OBSERVAR EL TALÓN. En móvil va debajo de la ficha técnica, fuera
-  // de la pantalla al cargar, y un salto de scroll lo lleva de «debajo» a
-  // «encima» sin cruzar nunca la ventana: su estado no cambia y el observer no
-  // dispara (la misma trampa que obligó a observar el pie). Por eso se observan
-  // también las celdas del folder y las secciones de la ficha, que cubren la
-  // página entera: cualquier salto cambia la visibilidad de alguna, y en cada
-  // aviso se mide dónde quedó el talón.
-  useEffect(() => {
-    const el = talonRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const revisar = () => setTalonFuera(el.getBoundingClientRect().bottom < 64);
-    const io = new IntersectionObserver(revisar, { rootMargin: '-64px 0px 0px 0px' });
-    io.observe(el);
-    const ficha = fichaRef.current;
-    if (ficha) {
-      Array.from(ficha.children).forEach((c) => io.observe(c));
-      ficha.querySelectorAll('.amx-carpeta-grid > *').forEach((c) => io.observe(c));
-    }
-    // Se observa el pie del sitio y no un centinela al final de la ficha: un
-    // salto de scroll (ir al final, un fling largo) lleva el centinela de debajo
-    // de la ventana a encima SIN cruzarla, y el observer no dispara. El pie, al
-    // final de la página, siempre queda dentro.
-    // Se busca por su clase y NO por la etiqueta: cada opinión publicada lleva su
-    // propio <footer>, que va antes en el DOM. Con `querySelector('footer')` el
-    // talón vigilaba la primera opinión (revisión del PR #152).
-    const pie = document.querySelector('.amx-pie-sitio');
-    const ioPie = pie && new IntersectionObserver(([e]) => setPieVisible(e.isIntersecting));
-    if (ioPie) ioPie.observe(pie);
-    return () => { io.disconnect(); if (ioPie) ioPie.disconnect(); };
-  }, [armaId]);
+  // El talón fijo de abajo (móvil): ver useTalonFijo en ui.jsx.
+  const talon = window.useTalonFijo(armaId);
 
   if (!arma) return <div style={{ padding: 40, color: PALETTE.text }}>Arma no encontrada</div>;
 
@@ -148,45 +47,19 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   const priceHistory = window.Store ? window.Store.getPriceHistory(arma.id) : [];
   const manuales = window.Store ? window.Store.getManuales() : [];
   const manualById = (id) => (id ? manuales.find((m) => m.id === id) : null) || null;
-  // Inventario fuente del precio actual: el ligado al arma, el del registro más
-  // reciente, o el inventario principal del repo (fuente general de precios)
-  const currentManual = manualById(arma.priceManualId) ||
-    (priceHistory.length ? manualById(priceHistory[priceHistory.length - 1].manualId) : null) ||
-    (window.Store ? window.Store.getPrimaryManual() : null);
-  const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
-  const curSigla = curAut ? curAut.sigla : 'DCAM';
-  const precioActual = priceHistory.length ? priceHistory[priceHistory.length - 1].price : arma.priceExact;
-  const fechaPrecio = currentManual ? amxFmtManualDate(currentManual.fecha) : '';
-
-  // Existencias POR SUCURSAL (no hay primaria/secundaria): DCAM y OTCA se
-  // muestran por separado, cada una con su inventario fuente. Regla: SOLO
-  // cuenta el ÚLTIMO inventario de cada sucursal. Si el arma no aparece en él,
-  // se asume AGOTADA en esa sede.
-  const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'DCAM'))) || 'DCAM';
-  const latestByBranch = (sigla) => manuales.find((m) => autOf(m) === sigla) || null; // manuales: más reciente primero
-  const everIn = (sigla) => priceHistory.some((h) => autOf(manualById(h.manualId)) === sigla);
-  const branches = [];
-  const dcamQty = window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null;
-  const latestDcam = latestByBranch('DCAM');
-  if (dcamQty != null) {
-    branches.push({ sigla: 'DCAM', qty: dcamQty, manual: latestDcam, agotado: false });
-  } else if (everIn('DCAM') && latestDcam) {
-    branches.push({ sigla: 'DCAM', qty: null, manual: latestDcam, agotado: true });
-  }
-  const latestOtca = latestByBranch('OTCA');
-  if (latestOtca) {
-    const rec = priceHistory.find((h) => h.manualId === latestOtca.id);
-    if (rec && rec.qty != null) {
-      branches.push({ sigla: 'OTCA', qty: rec.qty, manual: latestOtca, agotado: false });
-    } else if (everIn('OTCA')) {
-      branches.push({ sigla: 'OTCA', qty: null, manual: latestOtca, agotado: true });
-    }
-  }
-  // ¿Hay un inventario de la MISMA sucursal más reciente que el del precio? Si lo
-  // hay, el arma ya no aparece en él y el precio es el último conocido: el talón
-  // lo sella (ver TalonComprobante). Fechas AAAA-MM-DD, comparables como texto.
-  const ultimoSuc = latestByBranch(curSigla);
-  const ultimoConocido = !!(currentManual && ultimoSuc && String(ultimoSuc.fecha || '') > String(currentManual.fecha || ''));
+  // Precio vigente, su fuente, «último precio conocido» y existencias por
+  // sucursal. La regla vive en src/lib/cotejo.js porque el comparador enseña lo
+  // mismo, y dos copias acabarían diciendo cosas distintas de la misma arma.
+  const inv = window.amxInventarioArma(arma, {
+    priceHistory, manuales,
+    existenciasDCAM: window.getArmaExistencias ? window.getArmaExistencias(arma.id) : null,
+    autoridad: window.manualAutoridad,
+  });
+  const curSigla = inv.sigla;
+  const precioActual = inv.precio;
+  const fechaPrecio = inv.manual ? amxFmtManualDate(inv.manual.fecha) : '';
+  const branches = inv.sucursales;
+  const ultimoConocido = inv.ultimoConocido;
 
   const related = window.DB.filter((a) => a.tipo === arma.tipo && a.id !== arma.id).slice(0, 4);
   const compat = window.getAccesoriosCompatibles ? window.getAccesoriosCompatibles(arma) : [];
@@ -210,7 +83,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
   return (
     <div style={{ paddingBottom: 90 }}>
-     <div ref={fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+     <div ref={talon.fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
       {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
       <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
@@ -255,7 +128,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             </div>
 
             <div className="amx-carpeta-talon">
-              <window.TalonComprobante talonRef={talonRef}
+              <window.TalonComprobante talonRef={talon.talonRef}
                 precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
                 ultimoConocido={ultimoConocido} historial={priceHistory}
                 enComparacion={inCmp} onComparar={comparar} />
@@ -267,13 +140,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
             <div className="amx-carpeta-almacen">
               <window.TarjetaAlmacen filas={branches} referencia={arma.dcamRef}
-                sigla={curSigla} nivelPrecio={arma.priceLvl} />
+                sigla={curSigla} nivelPrecio={arma.priceLvl} movil={!ancho} />
             </div>
 
             <div className="amx-carpeta-legal amx-separadores">
-                <FichaTabs activo={tab} onCambiar={setTab}>
+                <window.FichaTabs activo={tab} onCambiar={setTab}>
 
-                  <Panel label="Legalidad">
+                  <window.FichaPanel label="Legalidad">
                     <div className={'amx-oficio-banda amx-oficio-banda--' + sello.tono}>
                       <span>Clasificación: {sello.texto}</span>
                       <small>{arma.availLabel}</small>
@@ -290,30 +163,30 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     <button type="button" className="amx-oficio-boton" onClick={() => onNav('legal')}>
                       § Guía legal completa
                     </button>
-                  </Panel>
+                  </window.FichaPanel>
 
                   {arma.uses && arma.uses.length > 0 &&
-                    <Panel label="Usos">
+                    <window.FichaPanel label="Usos">
                       <ul className="amx-usos">
                         {arma.uses.map((u) => {
                           const meta = window.CATEGORIES.uso.find((x) => x.id === u);
                           return <li key={u}><span className="amx-sello">{meta ? meta.label : u}</span></li>;
                         })}
                       </ul>
-                    </Panel>}
+                    </window.FichaPanel>}
 
                   {arma.historia &&
-                    <Panel label="Antecedentes">
+                    <window.FichaPanel label="Antecedentes">
                       <p className="amx-oficio-maquina">{arma.historia}</p>
-                    </Panel>}
+                    </window.FichaPanel>}
 
-                </FichaTabs>
+                </window.FichaTabs>
             </div>
 
             {priceHistory.length > 0 &&
               <div className="amx-carpeta-historial">
                 <window.HistorialPrecios historial={priceHistory} manualById={manualById}
-                  plegarRegistro={!ancho} />
+                  movil={!ancho} />
               </div>}
           </div>
         </article>
@@ -375,7 +248,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             a la misma medida (Saulo, 13-sep-2026). */}
         <div className="amx-comentarios-marco">
           <OpinionBlock tipo="arma" entidadId={arma.id} entidadNombre={arma.nombre}
-            nombreTipo="arma" onNav={onNav} />
+            nombreTipo="arma" onNav={onNav} onReportReview={onReportReview} />
         </div>
       </section>
 
@@ -404,11 +277,13 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
       {/* El talón fijo (móvil): el mismo comprobante, en la zona del pulgar.
           Se oculta si el flotante de comparación está activo (mismo hueco). */}
-      {!ancho && talonFuera && !pieVisible && compareIds.length === 0 &&
+      {!ancho && talon.mostrar && compareIds.length === 0 &&
         <window.TalonComprobante fijo
           precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
           ultimoConocido={ultimoConocido} historial={priceHistory}
           enComparacion={inCmp} onComparar={comparar} />}
+
+      <window.ReportarError tipo="arma" titulo={arma.nombre} ruta={'/' + (window.amxSlugIndex().slugPorA[arma.id] || 'arsenal')} />
     </div>);
 
 }
@@ -426,7 +301,7 @@ window.ProductScreen = ProductScreen;
 // ════════════════════════════════════════════════════════════════
 const RESENA_MIN = 100, RESENA_MAX = 1200;
 
-function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
+function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav, onReportReview }) {
   const [, force] = useState2(0);
   useEffect(() => window.Store && window.Store.onChange(() => force((x) => x + 1)), []);
 
@@ -549,6 +424,13 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav }) {
                   </div>
                   <p>{r.texto}</p>
                   <footer>— {r.autor || 'Anónimo'}</footer>
+                  {onReportReview &&
+                    <button type="button" className="amx-opinion-denunciar"
+                      onClick={() => onReportReview(window.amxContextoDenuncia({
+                        review: r, tipo, entidadId, entidadNombre,
+                      }))}>
+                      Denunciar
+                    </button>}
                 </li>
               )}
             </ul>
@@ -672,940 +554,424 @@ function sInpStyle() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// COMPARE — Vista lado a lado tipo loadout
+// COMPARE — dos fichas de fichero lado a lado (rediseño del 14-sep-2026)
+// Qué se compara, quién gana y cómo se escribe la tira: src/lib/cotejo.js.
+// Las piezas: ui.jsx, bloque «EL COMPARADOR». Las reglas: docs/DESIGN.md §5.6.
 // ════════════════════════════════════════════════════════════════
-function CompareScreen({ ids, onOpenArma, onNav, removeFromCompare, openPickerForSlot }) {
+function CompareScreen({ ids, onOpenArma, onNav, onPoner, onQuitar, buscarLado, onBuscar }) {
   const vp = window.useViewport();
-  const a = ids[0] ? window.findArma(ids[0]) : null;
-  const b = ids[1] ? window.findArma(ids[1]) : null;
-
-  if (!a && !b) {
-    return (
-      <div style={{
-        padding: '60px 24px', textAlign: 'center',
-        fontFamily: 'JetBrains Mono, monospace',
-        color: PALETTE.textMuted
-      }}>
-        <div style={{ fontSize: 57.5, color: PALETTE.border, marginBottom: 16 }}>⇄</div>
-        <div style={{ fontSize: 17, marginBottom: 8, color: PALETTE.text }}>COMPARADOR VACÍO</div>
-        <div style={{ fontSize: 14.5, lineHeight: 1.6, marginBottom: 18 }}>
-          Selecciona armas desde el catálogo<br />tocando el botón ⇄ en cada tarjeta.
-        </div>
-        <button onClick={() => onNav('catalog')} style={{
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-          padding: '10px 22px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-          letterSpacing: '0.15em', textTransform: 'uppercase',
-          cursor: 'pointer'
-        }}>Ir al Arsenal</button>
-      </div>);
-
-  }
-
-  const padX = vp.isDesktop ? 28 : 12;
+  // Un solo corte, el del expediente: 1024px, como la ficha de arma.
+  const ancho = vp.width >= 1024;
+  // La que no existe se ignora y la que queda pasa a ser la primera (spec §8).
+  const [a = null, b = null] = ids.map((id) => window.findArma(id)).filter(Boolean);
+  const cotejo = a ? window.amxCotejar(a, b, window.amxInventarioDe(a), b ? window.amxInventarioDe(b) : null) : null;
+  // La búsqueda se titula con el arma del OTRO lado.
+  const otra = buscarLado === 'b' ? a : buscarLado === 'a' ? b : null;
   return (
-    <div style={{ paddingBottom: 90, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{
-        padding: `${vp.isDesktop ? 22 : 14}px ${padX}px 10px`,
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.amber,
-        letterSpacing: '0.2em', textTransform: 'uppercase',
-        textAlign: 'center'
-      }}>━━━ LOADOUT · COMPARATIVA ━━━</div>
-
-      {/* HEADERS LADO A LADO */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: vp.isDesktop ? 16 : 4,
-        padding: `0 ${padX}px 12px`
-      }}>
-        {[a, b].map((x, idx) =>
-        <CompareSlot key={idx} arma={x} side={idx === 0 ? 'A' : 'B'}
-        onOpen={() => x && onOpenArma(x.id)}
-        onRemove={() => x && removeFromCompare(x.id)}
-        onPick={() => openPickerForSlot(idx)} />
-        )}
-      </div>
-
-      {a && b &&
-      <div style={{ padding: `0 ${padX}px 16px` }}>
-          {/* SPEC ROWS */}
-          <SectionHeader>Ficha técnica</SectionHeader>
-          <div style={{
-          background: PALETTE.bgCard,
-          border: `1px solid ${PALETTE.border}`
-        }}>
-            {[
-          { l: 'Calibre', av: a.calibre, bv: b.calibre },
-          { l: 'Capacidad', av: a.capacidad, bv: b.capacidad },
-          { l: 'Peso', av: a.peso, bv: b.peso },
-          { l: 'Longitud', av: a.longitud, bv: b.longitud },
-          { l: 'Origen', av: a.pais, bv: b.pais },
-          { l: 'Año', av: a.anio, bv: b.anio },
-          { l: 'Mecanismo', av: a.mecanismo, bv: b.mecanismo },
-          { l: 'Precio', av: a.priceExact, bv: b.priceExact },
-          { l: 'Disponib.', av: a.availLabel, bv: b.availLabel }].
-          map((row, i) =>
-          <div key={i} style={{
-            display: 'grid', gridTemplateColumns: '1fr 80px 1fr',
-            borderBottom: `1px solid ${PALETTE.border}`,
-            padding: '8px 10px', alignItems: 'center', gap: 8,
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 14.5}}>
-                <div style={{ color: PALETTE.text, textAlign: 'right', lineHeight: 1.3 }}>{row.av}</div>
-                <div style={{
-              color: PALETTE.textMuted,
-              textAlign: 'center', letterSpacing: '0.1em',
-              textTransform: 'uppercase', fontSize: 12}}>{row.l}</div>
-                <div style={{ color: PALETTE.text, lineHeight: 1.3 }}>{row.bv}</div>
-              </div>
-          )}
-          </div>
-        </div>
-      }
-    </div>);
-
-}
-function CompareSlot({ arma, side, onOpen, onRemove, onPick }) {
-  if (!arma) {
-    return (
-      <button onClick={onPick} style={{
-        height: 230,
-        background: 'transparent',
-        border: `2px dashed ${PALETTE.border}`,
-        cursor: 'pointer',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        gap: 6,
-        fontFamily: 'JetBrains Mono, monospace',
-        color: PALETTE.textMuted
-      }}>
-        <div style={{ fontSize: 38.5, color: PALETTE.border }}>+</div>
-        <div style={{
-          fontSize: 13, letterSpacing: '0.18em', textTransform: 'uppercase'
-        }}>SLOT {side}</div>
-        <div style={{ fontSize: 13, color: PALETTE.textDim }}>Añadir arma</div>
-      </button>);
-
-  }
-  return (
-    <div style={{
-      background: PALETTE.bgCard,
-      border: `1px solid ${PALETTE.border}`,
-      padding: 10,
-      position: 'relative'
-    }}>
-      <TacticalCorners size={8} color={PALETTE.amber} />
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        marginBottom: 4
-      }}>
-        <span style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 12, color: PALETTE.amber,
-          letterSpacing: '0.2em'
-        }}>◆ SLOT {side}</span>
-        <button onClick={onRemove} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          color: PALETTE.textMuted, fontSize: 15.5, padding: 0
-        }}>✕</button>
-      </div>
-      <div style={{
-        height: 90,
-        background: `radial-gradient(ellipse at 50% 50%, ${PALETTE.bgElev} 0%, ${PALETTE.bg} 100%)`,
-        border: `1px solid ${PALETTE.border}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        marginBottom: 8, overflow: 'hidden'
-      }}>
-        <img src={arma.img} alt={arma.nombre} loading="lazy" decoding="async" style={{
-          maxWidth: '90%', maxHeight: '85%',
-          filter: 'grayscale(0.15) contrast(1.1)'
-        }} onError={(e) => {e.target.src = window.armaPlaceholder(arma);e.target.onerror = null;}} />
-      </div>
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 12, color: PALETTE.amber,
-        letterSpacing: '0.1em', textTransform: 'uppercase',
-        marginBottom: 2
-      }}>{arma.marca}</div>
-      <div style={{
-        fontFamily: 'Archivo, sans-serif',
-        fontSize: 15, fontWeight: 600,
-        color: PALETTE.text,
-        textTransform: 'uppercase',
-        lineHeight: 1.1, marginBottom: 4
-      }}>{arma.nombre}</div>
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.textDim,
-        marginBottom: 6
-      }}>{arma.calibre.replace(' Parabellum', '').replace('Winchester', 'Win')}</div>
-      <AvailBadge avail={arma.avail} compact />
-      <button onClick={onOpen} style={{
-        marginTop: 8, width: '100%',
-        background: 'transparent', border: `1px solid ${PALETTE.border}`,
-        color: PALETTE.text,
-        padding: '5px',
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, letterSpacing: '0.1em',
-        cursor: 'pointer', textTransform: 'uppercase'
-      }}>Ver ficha →</button>
-    </div>);
-
+    <div className="amx-cotejo-pantalla">
+      <window.CintaDymo nivel={1}>Comparador</window.CintaDymo>
+      {!a
+        ? <window.CotejoVacio onArsenal={() => onNav('catalog')} />
+        : <React.Fragment>
+            <window.CotejoFichas a={a} b={b} cotejo={cotejo} ancho={ancho}
+              onAbrir={onOpenArma} onCambiar={onBuscar} onQuitar={onQuitar} onElegir={onBuscar} />
+            {b && <window.TiraCotejo tira={window.amxTiraCotejo(a, b, cotejo)} />}
+          </React.Fragment>}
+      <window.BuscarArma abierta={buscarLado !== null}
+        titulo={otra ? 'Comparar con la ' + otra.nombre : 'Elegir arma'}
+        excluir={ids}
+        onElegir={(id) => { onPoner(buscarLado, id); onBuscar(null); }}
+        onCerrar={() => onBuscar(null)} />
+    </div>
+  );
 }
 window.CompareScreen = CompareScreen;
 
-// ════════════════════════════════════════════════════════════════
-// LEGAL — Página de legalidad con WhatsApp asesoría
-// ════════════════════════════════════════════════════════════════
-function LegalScreen({ onNav }) {
-  const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
-  const page = window.Store ? window.Store.getPages().legal : null;
-  const eyebrow = page?.eyebrow || '§ LEGALIDAD · MX';
-  const title = page?.title || 'Tenencia legal de armas de fuego';
-  const intro = page?.intro || 'Resumen de los requisitos y pasos para la posesión legal en México conforme a la Ley Federal de Armas de Fuego y Explosivos.';
-  const requisitos = page?.requisitos || ['Original del permiso extraordinario para la adquisición de arma de fuego, cartuchos y/o accesorios, vigente (DEFENSA-02-040, lo expide el Registro Federal de Armas de Fuego)', 'Original de una identificación oficial vigente (credencial para votar, pasaporte, cartilla del Servicio Militar Nacional o cédula profesional con fotografía)', 'Comprobante original del pago de la hoja de ayuda DEFENSA-02-062 (registro del arma), uno por cada arma', 'Copia simple de la Constancia de Situación Fiscal, solo si necesitas factura'];
-  const pasos = page?.pasos || [
-  { t: 'Registro en plataforma SEDENA', d: 'Crear cuenta en el portal oficial de Defensa Nacional y completar perfil con tus datos.' },
-  { t: 'Solicitud de permiso', d: 'Pedir el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040), para protección de domicilio o parcela, actividades cinegéticas o tiro deportivo y caza, según el caso. Pago de derechos.' },
-  { t: 'Visita a la DCAM u OTCA', d: 'La DCAM atiende en persona en el Campo Militar No. 1-D (Av. Industria Militar 1111, Col. Lomas de Tecamachalco, Naucalpan, Edo. Méx.): las personas físicas con permiso extraordinario entran sin cita, y se otorgan 80 turnos de 08:00 a 13:00, de lunes a viernes (las personas morales piden cita en facturas.dcam@defensa.gob.mx). A la OTCA, en Monterrey, N.L., agendar visita. Llevar documentación completa.' },
-  { t: 'Selección y compra', d: 'Elegir arma del catálogo oficial. La adquisición civil solo puede hacerse por los canales oficiales: la DCAM o la OTCA.' },
-  { t: 'Registro federal del arma', d: 'Toda arma adquirida queda registrada a tu nombre en el Registro Federal de Armas (RFA).' }];
-
-  const waPhone = page?.whatsapp_phone || '525555555555';
-  const waMsg = page?.whatsapp_msg || 'Hola, me interesa asesoría para trámite SEDENA';
-  const waPitch = page?.whatsapp_pitch || 'El acompañamiento legal para el trámite SEDENA es prestado por un abogado externo especializado, en lo individual y bajo su propia cédula profesional. Armas M&S no es despacho jurídico y únicamente facilita el contacto con el profesional.';
-  const decl = window.ARMADO_DECLARACION || { titulo: 'Declaración de intenciones', parrafos: [] };
-  return (
-    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{
-        padding: '20px 0',
-        textAlign: 'center',
-        borderBottom: `1px solid ${PALETTE.border}`,
-        marginBottom: 18
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', marginBottom: 6
-        }}>{eyebrow}</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif',
-          fontWeight: 700, fontSize: 23,
-          color: PALETTE.text,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em', lineHeight: 1.1
-        }}>{title}</div>
-        <div style={window.amxProsa({
-          fontSize: 16, marginTop: 10, maxWidth: 520, marginInline: 'auto', lineHeight: 1.6
-        })}>{intro}</div>
-      </div>
-
-      {/* DISCLAIMER OFICIAL — visible al principio */}
-      <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-        padding: '14px',
-        marginBottom: 22
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.redHi,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          marginBottom: 6,
-          fontWeight: 700
-        }}>▲ AVISO DE TRANSPARENCIA</div>
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S no forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Las armas de fuego se muestran solo con fines informativos y de transparencia: no las comercializamos, y no emitimos licencias, permisos ni trámites administrativos de ningún tipo. Armado en México y Armas M&amp;S tampoco prestan servicios jurídicos. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA.
-        </div>
-      </div>
-
-      {/* CATEGORÍAS LEGALES */}
-      <SectionHeader>Las 4 Categorías Legales</SectionHeader>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 22 }}>
-        {window.CATEGORIES.disponibilidad.map((d) =>
-        <div key={d.id} style={{
-          background: PALETTE.bgCard,
-          border: `1px solid ${window.amxColorAvail(d.color)}`,
-          boxShadow: CLARO.sombra,
-          padding: '12px 14px'
-        }}>
-            {/* El rótulo iba en d.color (data.js), pensado para el tema oscuro
-                anterior: el nombre de la categoría, que es la información de la
-                tarjeta, no se leía. El texto va en tinta (16.31:1 sobre la
-                tarjeta) y el color de la categoría es ahora el HAIRLINE ENTERO,
-                no una barra de 4px a la izquierda — misma información, sin el
-                tic de la pestaña lateral que veta §6. Medidos sobre la tarjeta:
-                #2F6B33 6.02:1 · #7D6108 5.49:1 · #A3341F 6.42:1. */}
-            <div style={{
-            fontFamily: 'Archivo, sans-serif',
-            fontWeight: 700, fontSize: 15,
-            color: PALETTE.text,
-            textTransform: 'uppercase', letterSpacing: '0.08em',
-            marginBottom: 4
-          }}>{d.label}</div>
-            <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{d.desc}</div>
-          </div>
-        )}
-        {/* 4ª categoría — Armas traumáticas (sin licencia).
-            Iba en '#FFFFFF' copiando el patrón del tema oscuro: sobre la tarjeta
-            el título daba 1.05:1 — la tarjeta entera parecía vacía. Es la única
-            categoría que sí vendemos, así que su identificador es el verde de
-            marca (11.67:1 sobre la tarjeta) en el mismo hairline que usan sus
-            tres hermanas, y el título va en tinta como ellas. */}
-        <div style={{
-          background: PALETTE.bgCard,
-          border: `1px solid ${PALETTE.amber}`,
-          boxShadow: CLARO.sombra,
-          padding: '12px 14px'
-        }}>
-          <div style={{
-            fontFamily: 'Archivo, sans-serif',
-            fontWeight: 700, fontSize: 15,
-            color: PALETTE.text,
-            textTransform: 'uppercase', letterSpacing: '0.08em',
-            marginBottom: 4
-          }}>Sin Licencia</div>
-          <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>Armas traumáticas. No letales impulsadas por aire comprimido, menores a 140 Joules de potencia.</div>
-        </div>
-      </div>
-
-      {/* REQUISITOS */}
-      <SectionHeader>Requisitos SEDENA</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard,
-        border: `1px solid ${PALETTE.border}`,
-        padding: '14px',
-        marginBottom: 22,
-        position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={PALETTE.amber} />
-        {requisitos.map((r, i) =>
-        <div key={i} style={window.amxProsa({
-          fontSize: 16, color: PALETTE.text, lineHeight: 1.5,
-          padding: '7px 0',
-          borderBottom: i < requisitos.length - 1 ? `1px solid ${PALETTE.border}` : 'none',
-          display: 'flex', alignItems: 'center', gap: 10
-        })}>
-            <span style={{
-            width: 18, height: 18,
-            border: `1px solid ${PALETTE.amber}`,
-            color: PALETTE.amber,
-            fontSize: 13, fontWeight: 700,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0
-          }}>{String(i + 1).padStart(2, '0')}</span>
-            <span>{r}</span>
-          </div>
-        )}
-      </div>
-
-      {/* PASOS DCAM */}
-      <SectionHeader>Pasos para comprar en DCAM</SectionHeader>
-      <div style={{ marginBottom: 22 }}>
-        {pasos.map((s, i) =>
-        <div key={i} style={{
-          display: 'flex', gap: 12,
-          padding: '12px 0',
-          borderBottom: i < pasos.length - 1 ? `1px solid ${PALETTE.border}` : 'none'
-        }}>
-            <div style={{
-            width: 32, height: 32,
-            background: PALETTE.bgElev,
-            border: `1.5px solid ${PALETTE.amber}`,
-            color: PALETTE.amber,
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-            fontSize: 16,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-            letterSpacing: '0'
-          }}>{String(i + 1).padStart(2, '0')}</div>
-            <div>
-              <div style={{
-              fontFamily: 'Archivo, sans-serif',
-              fontWeight: 600, fontSize: 15,
-              color: PALETTE.text,
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              marginBottom: 4
-            }}>{s.t}</div>
-              <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{s.d}</div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* ASESORÍA WHATSAPP — oculta por el momento (abogado externo / asesoría legal) */}
-      {false && (
-      <div style={{
-        background: `linear-gradient(135deg, ${PALETTE.bgCard} 0%, ${PALETTE.bgElev} 100%)`,
-        border: `1.5px solid ${PALETTE.amber}`,
-        padding: '16px 14px',
-        marginBottom: 16,
-        position: 'relative'
-      }}>
-        <TacticalCorners size={14} color={PALETTE.amber} thickness={2} />
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          marginBottom: 6
-        }}>▸ ABOGADO EXTERNO · ASESORÍA INDEPENDIENTE</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif',
-          fontWeight: 700, fontSize: 19,
-          color: PALETTE.text,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em', lineHeight: 1.1,
-          marginBottom: 8
-        }}>Acompañamiento legal<br />con abogado especializado</div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 14.5, color: PALETTE.textDim,
-          lineHeight: 1.6, marginBottom: 10
-        }}>{waPitch}</div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.textMuted,
-          lineHeight: 1.55, marginBottom: 14,
-          paddingTop: 8,
-          borderTop: `1px dashed ${PALETTE.border}`
-        }}>
-          <b style={{ color: PALETTE.textDim }}>Nota:</b> el servicio jurídico es prestado por un abogado externo bajo su propia cédula profesional. Armas M&amp;S no es despacho jurídico y únicamente facilita el contacto; los honorarios se pactan directamente con el profesional.
-        </div>
-        <a href={`https://wa.me/${waPhone}?text=${encodeURIComponent(waMsg)}`}
-        target="_blank" rel="noopener" style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
-          textDecoration: 'none',
-          padding: '12px 16px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-          letterSpacing: '0.15em', textTransform: 'uppercase'
-        }}>
-          <span>Contactar al abogado</span>
-          <span style={{ fontSize: 20.5}}>↗</span>
-        </a>
-      </div>
-      )}
-    </div>);
-
-}
-window.LegalScreen = LegalScreen;
 
 // ════════════════════════════════════════════════════════════════
-// ABOUT
+// ABOUT — el expediente del propio proyecto
+// Decidido con Saulo sección por sección (17-sep-2026). El folder manila lleva
+// la identidad: cabecera, el gafete de quien responde y la declaración. Fuera
+// del folder, cada sección con su cinta Dymo, como en la ficha de arma.
+// El aviso «no somos gobierno» va AL FINAL: Acerca es la sección personal, y el
+// aviso ya está claro en Inicio y en Legalidad.
+// NADA de folios ni números de expediente: no hay ningún registro real del que
+// salgan. El rótulo de la pestaña es el `eyebrow` del Store, que sí es un dato.
+// Dentro del papel no entra `amxProsa` (inyecta PALETTE.textDim, que sigue al
+// tema) ni PALETTE ni CLARO: el texto va con `.amx-oficio-texto`.
 // ════════════════════════════════════════════════════════════════
 function AboutScreen() {
   const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
+  // Un solo corte, 1024px, el mismo del resto del expediente: `vp.isDesktop`
+  // corta a 900 y dejaría una franja con el CSS de una columna y el espaciado
+  // de escritorio puesto.
+  const ancho = vp.width >= 1024;
+  const padX = ancho ? 28 : 16;
+  const sec = ancho ? 52 : 34;
   const page = window.Store ? window.Store.getPages().about : null;
   const eyebrow = page?.eyebrow || '◆ ACERCA DE';
   const title = page?.title || 'Armado en México';
   const mision = page?.mision || 'Divulgar de forma rigurosa la información técnica, histórica y legal sobre las armas de fuego disponibles para civiles en México.';
   const autor = page?.autor || 'Saulo Flores';
-  const empresa = page?.empresa || 'Armas M&S';
   const bio = page?.bio || 'Catálogo curado y mantenido con base en información oficial de DCAM, SEDENA y publicaciones técnicas de los fabricantes.';
-  const aviso = page?.aviso || 'Las armas de fuego de este catálogo se muestran únicamente con fines informativos y de transparencia. Las únicas que comercializamos son las tres armas traumáticas menos letales.';
+  const foto = page?.foto || null;
   const decl = window.ARMADO_DECLARACION || { titulo: 'Declaración de intenciones', parrafos: [] };
   return (
-    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 800, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div style={{
-        padding: '24px 0',
-        textAlign: 'center',
-        borderBottom: `1px solid ${PALETTE.border}`,
-        marginBottom: 18
-      }}>
-        {/* LOGO Armado en México */}
-        <div style={{
-          width: 132, margin: '0 auto 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 14 }} />
-        </div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', marginBottom: 6
-        }}>{eyebrow}</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif',
-          fontWeight: 700, fontSize: 26,
-          color: PALETTE.text,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em', lineHeight: 1.05
-        }}>{title}</div>
-      </div>
+    <div className="amx-acerca" style={{ padding: `${ancho ? 26 : 14}px ${padX}px 90px`, maxWidth: 800, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
 
-      {/* 1 ▸ DISCLAIMER OFICIAL — NO SOMOS GOBIERNO */}
-      <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-        padding: 14, marginBottom: 18
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.redHi,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          marginBottom: 6, fontWeight: 700
-        }}>▲ NO SOMOS GOBIERNO · FINES INFORMATIVOS</div>
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Lo único que comercializamos son las tres armas traumáticas menos letales.
-        </div>
-      </div>
+      {/* ══ EL EXPEDIENTE ══ */}
+      <article className="amx-carpeta" aria-labelledby="acerca-titulo">
+        <span className="amx-carpeta-rotulo">{eyebrow}</span>
 
-      {/* 2 ▸ DECLARACIÓN DE INTENCIONES */}
-      <SectionHeader>{decl.titulo}</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: CLARO.sombra,
-        padding: vp.isDesktop ? '20px 22px' : '16px', marginBottom: 18,
-      }}>
-        {decl.parrafos.map((t, i) => (
-          <p key={i} style={window.amxProsa({
-            margin: i === 0 ? 0 : '14px 0 0',
-            fontSize: 17.5, color: i === 0 ? PALETTE.text : PALETTE.textDim,
-          })}>{t}</p>
-        ))}
-        <div style={{
-          marginTop: 18, paddingTop: 12, borderTop: `1px dashed ${PALETTE.border}`,
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: PALETTE.textMuted, letterSpacing: '0.04em',
-        }}>Armado en México · ¡Protege lo que amas!</div>
-      </div>
+        {/* El DOM va en el orden de lectura del teléfono; en escritorio las
+            áreas lo reparten sin reordenarlo. */}
+        <div className="amx-acerca-grid">
+          <header className="amx-carpeta-cab amx-acerca-cab">
+            <img className="amx-acerca-logo" src="imagenes/logo-armado-mx.webp" alt="" />
+            <h1 id="acerca-titulo" className="t-titulo">{title}</h1>
+          </header>
 
-      {/* 3 ▸ MISIÓN */}
-      <SectionHeader>Misión</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard,
-        border: `1px solid ${PALETTE.border}`,
-        padding: 14, marginBottom: 18,
-        position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={PALETTE.amber} />
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>{mision}</div>
-      </div>
-
-      {/* 4 ▸ DIFERENCIA — ARMADO EN MÉXICO vs ARMAS M&S */}
-      <SectionHeader>Armado en México vs. Armas M&amp;S</SectionHeader>
-      <div style={{
-        display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr',
-        gap: 12, marginBottom: 18,
-      }}>
-        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, display: 'block' }} />
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armado en México</div>
-          </div>
-          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
-            Una <span style={{ color: PALETTE.text }}>enciclopedia libre</span> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.
-          </div>
-        </div>
-        <div style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`, padding: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 7, flexShrink: 0, background: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <img src="imagenes/logo-main.png" alt="Armas M&amp;S" style={{ width: '90%', height: 'auto', display: 'block' }} />
+          {/* La credencial y la misión, hombro con hombro; apiladas en el
+              teléfono. Lo pidió Saulo así para que la fila quede simétrica. */}
+          <div className="amx-acerca-identidad">
+            <div className="amx-acerca-gafete">
+              <window.Gafete
+                foto={foto}
+                nombre={autor}
+                cargos={['Creador de Armado en México', 'Co-Fundador de Armas M&S']} />
             </div>
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 16, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05 }}>Armas M&amp;S</div>
+
+            <section className="amx-oficio" aria-labelledby="acerca-mision">
+              <div className="amx-oficio-membrete" aria-hidden="true">
+                <span>Armado en México</span><span>Misión</span>
+              </div>
+              <h2 id="acerca-mision" className="amx-sr">Misión</h2>
+              <p className="amx-oficio-texto">{mision}</p>
+            </section>
           </div>
-          <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.65 }}>
-            Un <span style={{ color: PALETTE.text }}>proyecto digital de e-commerce</span> con tienda en <span style={{ color: PALETTE.amber }}>armasmys.com</span> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.
+
+          <div className="amx-acerca-papeles">
+            <section className="amx-oficio" aria-labelledby="acerca-declaracion">
+              <div className="amx-oficio-membrete" aria-hidden="true">
+                <span>Armado en México</span><span>{decl.titulo}</span>
+              </div>
+              {/* El membrete ya rotula la hoja: el encabezado va solo para el
+                  lector de pantalla (el membrete es aria-hidden). */}
+              <h2 id="acerca-declaracion" className="amx-sr">{decl.titulo}</h2>
+              {decl.parrafos.map((t, i) => <p key={i} className="amx-oficio-texto">{t}</p>)}
+              <p className="amx-acerca-colofon">Armado en México · ¡Protege lo que amas!</p>
+            </section>
           </div>
         </div>
-      </div>
+      </article>
 
-      {/* AUTOR */}
-      <SectionHeader>Autor</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard,
-        border: `1px solid ${PALETTE.border}`,
-        padding: 14, marginBottom: 18,
-        display: 'flex', gap: 16, alignItems: 'flex-start',
-        flexWrap: 'wrap'
-      }}>
-        {/* FOTO */}
-        <div style={{
-          width: 120, height: 120,
-          background: PALETTE.bgElev,
-          position: 'relative',
-          flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          overflow: 'hidden'
-        }}>
-          {window.Store && window.Store.getPages().about.foto ?
-          <img src={window.Store.getPages().about.foto} alt={autor}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(0.15) contrast(1.05)' }} /> :
-
-          <div style={{
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 13, color: PALETTE.textMuted,
-            letterSpacing: '0.15em', textAlign: 'center',
-            padding: 8, lineHeight: 1.5
-          }}>
-              <div style={{ fontSize: 38.5, color: PALETTE.amber, marginBottom: 4 }}>◯</div>
-              FOTO<br />PENDIENTE
+      {/* ══ LAS DOS ENTIDADES ══ */}
+      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-duo">
+        <window.CintaDymo id="acerca-duo">Armado en México vs. Armas M&amp;S</window.CintaDymo>
+        <div className="amx-acerca-duo">
+          <article className="amx-oficio">
+            <div className="amx-acerca-duo-cab">
+              <img src="imagenes/logo-armado-mx.webp" alt="" />
+              <h3 className="amx-oficio-tit">Armado en México</h3>
             </div>
-          }
+            <p className="amx-oficio-texto">Una <b>enciclopedia libre</b> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.</p>
+          </article>
+          <article className="amx-oficio">
+            <div className="amx-acerca-duo-cab">
+              <span className="amx-acerca-duo-placa"><img src="imagenes/logo-main.png" alt="" /></span>
+              <h3 className="amx-oficio-tit">Armas M&amp;S</h3>
+            </div>
+            <p className="amx-oficio-texto">Un <b>proyecto digital de e-commerce</b> con tienda en <b>armasmys.com</b> y de divulgación en redes sociales (YouTube, Facebook e Instagram) sobre armamento y defensa personal.</p>
+          </article>
         </div>
+      </section>
 
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700,
-            fontSize: 23, color: PALETTE.text,
-            textTransform: 'uppercase',
-            letterSpacing: '0.04em',
-            lineHeight: 1.1
-          }}>{autor}</div>
-          <div style={window.amxProsa({
-            fontSize: 16, color: PALETTE.amber, marginTop: 6, lineHeight: 1.5
-          })}>Co-Fundador de Armas M&amp;S<br />Creador de Armado en México</div>
-          <div style={window.amxProsa({ fontSize: 16, marginTop: 10, lineHeight: 1.65 })}>{bio}</div>
+      {/* ══ EL AVISO, AL FINAL ══ */}
+      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-aviso">
+        <window.CintaDymo id="acerca-aviso">Aviso</window.CintaDymo>
+        <div className="amx-oficio">
+          <div className="amx-oficio-membrete" aria-hidden="true">
+            <span>Armado en México</span><span>Aviso</span>
+          </div>
+          <h2 id="acerca-aviso" className="amx-acerca-filete">▲ No somos gobierno · Fines informativos</h2>
+          <p className="amx-oficio-texto">Armado en México y Armas M&amp;S NO forman parte de DEFENSA (anteriormente SEDENA), DCAM ni de ninguna dependencia del gobierno mexicano. Somos un proyecto privado divulgativo. No comercializamos armas de fuego, municiones ni accesorios para ellas: se muestran solo con fines informativos y de transparencia. No emitimos licencias ni permisos. Armado en México no realiza ningún tipo de comercialización, Armas M&amp;S realiza comercialización exclusivamente de productos de outdoors y defensa personal en su propia tienda digital (armasmys.com)</p>
         </div>
-      </div>
+      </section>
 
-      <div style={{
-        textAlign: 'center',
-        padding: '16px',
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.textMuted,
-        letterSpacing: '0.15em'
-      }}>━━━ EDICIÓN 2026 · v1.0 ━━━</div>
+      {/* ══ FUENTES ══ */}
+      <section style={{ padding: `${sec}px 0 0` }} aria-labelledby="acerca-fuente">
+        <div className="amx-oficio">
+          <div className="amx-oficio-membrete" aria-hidden="true">
+            <span>Armado en México</span><span>Fuentes</span>
+          </div>
+          <h2 id="acerca-fuente" className="amx-sr">Fuentes</h2>
+          <p className="amx-acerca-nota">{bio}</p>
+        </div>
+      </section>
     </div>);
 
 }
 window.AboutScreen = AboutScreen;
 
 // ════════════════════════════════════════════════════════════════
-// FAQ
+// SOPORTE — manual de convivencia + formato de denuncia
+// Rediseño del 19-sep-2026: convierte /soporte en un manual de convivencia
+// vintage, con hojas siempre visibles, formulario de denuncia privada con
+// contexto y corrección pública vía GitHub Issues.
 // ════════════════════════════════════════════════════════════════
-// ════════════════════════════════════════════════════════════════
-// SOPORTE — normas de la comunidad, denuncias y moderación
-// Existe porque la app acepta texto libre de desconocidos (las reseñas). Las
-// normas están adaptadas de las de Steam, recortadas a lo que aquí hay: no hay
-// Workshop, ni grupos, ni perfiles — hay reseñas y denuncias.
-// ════════════════════════════════════════════════════════════════
-function SoporteScreen({ onNav }) {
-  const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
-  const [den, setDen] = useState2({ reviewId: '', motivo: 'ilegal', detalle: '', email: '' });
-  const [denEnviada, setDenEnviada] = useState2(false);
+function SoportePortada({ contenido }) {
+  return (
+    <header className="amx-soporte-portada">
+      <window.CintaDymo nivel={1}>{contenido.titulo}</window.CintaDymo>
+      <p className="amx-soporte-apertura">{contenido.apertura}</p>
+      <p className="amx-soporte-alcance">{contenido.alcance}</p>
+    </header>
+  );
+}
+
+function SoporteAviso({ aviso }) {
+  return (
+    <section className="amx-soporte-aviso" aria-labelledby="soporte-limite">
+      <p className="amx-soporte-aviso-tit" id="soporte-limite">{aviso.titulo}</p>
+      <p>{aviso.intro}</p>
+      <ul>{aviso.puntos.map((p, i) => <li key={i}>{p}</li>)}</ul>
+      <p className="amx-soporte-alcance">{aviso.consecuencia}</p>
+    </section>
+  );
+}
+
+function SoporteHojaNorma({ norma }) {
+  return (
+    <section className="amx-soporte-regla">
+      <h3><span className="amx-soporte-num">NORMA {norma.numero}</span>{norma.titulo}</h3>
+      <ul>{norma.puntos.map((p, i) => <li key={i}>{p}</li>)}</ul>
+    </section>
+  );
+}
+
+function SoporteModeracion({ contenido }) {
+  return (
+    <section className="amx-soporte-carbon amx-soporte-moderacion" aria-labelledby="soporte-moderacion">
+      <h3 id="soporte-moderacion">Cómo se moderan las reseñas</h3>
+      <ul>{contenido.moderacion.map((p, i) => <li key={i}>{p}</li>)}</ul>
+      <h3>Acciones reales</h3>
+      <dl className="amx-soporte-acciones">
+        {contenido.acciones.map(([n, tit, desc]) => (
+          <div key={n} className="amx-soporte-accion">
+            <dt><span className="amx-soporte-num">{n}</span>{tit}</dt>
+            <dd>{desc}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+function SoporteDenuncia({ reportContext }) {
+  const contenido = window.AMX_SOPORTE_CONTENT;
+  const VACIA = { reviewId: '', tipo: 'otro', entidadId: '', entidadNombre: '', reviewExcerpt: '', motivo: 'ilegal', detalle: '', email: '' };
+  const [den, setDen] = useState2(() => Object.assign({}, VACIA, reportContext || {}));
+  const [estado, setEstado] = useState2({ kind: 'idle', error: '' });
+  const titleRef = useRef2(null);
+
+  useEffect2(() => {
+    if (!reportContext) return;
+    setDen(Object.assign({}, VACIA, reportContext));
+    setEstado({ kind: 'idle', error: '' });
+    requestAnimationFrame(() => titleRef.current && titleRef.current.focus());
+  }, [reportContext]);
+
   const setD = (k, v) => setDen((p) => Object.assign({}, p, { [k]: v }));
 
-  const MOTIVOS = [
-    { value: 'ilegal', label: 'Compraventa u otra actividad ilegal' },
-    { value: 'irrespetuoso', label: 'Insultos, acoso o amenazas' },
-    { value: 'fuera-de-tema', label: 'Fuera de tema o mensaje repetido' },
-    { value: 'comercial', label: 'Publicidad o contenido comercial' },
-    { value: 'manipulacion', label: 'Manipulación de la calificación' },
-    { value: 'datos', label: 'Datos personales de alguien' },
-    { value: 'otro', label: 'Otro' },
-  ];
-  const denListo = den.detalle.trim().length >= 20;
-  const enviarDenuncia = () => {
-    if (!denListo || !window.Store) return;
-    window.Store.addReport(den);
-    setDenEnviada(true);
+  const enviar = async (e) => {
+    e.preventDefault();
+    const detalle = den.detalle.trim();
+    if (detalle.length < 20 || detalle.length > 1200) return;
+    setEstado({ kind: 'submitting', error: '' });
+    const result = await window.Store.addReport(Object.assign({}, den, { detalle }));
+    if (result.ok) {
+      setDen(VACIA);
+      setEstado({ kind: 'success', error: '' });
+    } else {
+      setEstado({ kind: 'error', error: 'No pudimos enviar el reporte. Tus datos siguen en este formulario para que puedas reintentar.' });
+    }
   };
 
-  const Regla = ({ children }) => (
-    <div style={window.amxProsa({
-      fontSize: 16, color: PALETTE.text, lineHeight: 1.6, padding: '6px 0',
-      display: 'flex', gap: 9, alignItems: 'flex-start'
-    })}>
-      <span style={{ color: PALETTE.amber, flexShrink: 0 }}>▸</span>
-      <span>{children}</span>
-    </div>
-  );
+  const borrarContexto = () => {
+    setDen(Object.assign({}, VACIA, { motivo: den.motivo, detalle: den.detalle, email: den.email }));
+  };
+
+  const motivos = contenido.motivos.map(([v, l]) => ({ value: v, label: l }));
 
   return (
-    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
+    <section className="amx-soporte-carbon amx-soporte-denuncia" aria-labelledby="soporte-denuncia">
+      <h3 id="soporte-denuncia">Denunciar una reseña</h3>
+      <p>{contenido.denuncia.intro}</p>
+      <p className="amx-soporte-alcance">{contenido.denuncia.privacidad}</p>
 
-      <div style={{ padding: '20px 0', textAlign: 'center', borderBottom: `1px solid ${PALETTE.border}`, marginBottom: 18 }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', marginBottom: 6
-        }}>◈ SOPORTE</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23,
-          color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.04em', lineHeight: 1.1
-        }}>Normas de la comunidad</div>
-        <div style={window.amxProsa({
-          fontSize: 16, lineHeight: 1.6,
-          marginTop: 10, maxWidth: 620, marginLeft: 'auto', marginRight: 'auto'
-        })}>
-          Las reseñas las escriben personas y las lee cualquiera. Estas normas dicen qué
-          se puede publicar aquí, cómo denunciar lo que no cumple y qué pasa cuando se
-          incumplen.
+      {estado.kind === 'success' ? (
+        <div role="status" aria-live="polite" className="amx-soporte-exito">
+          <p className="amx-soporte-exito-tit">✓ {contenido.denuncia.exito}</p>
         </div>
-      </div>
+      ) : (
+        <form onSubmit={enviar} noValidate className="amx-soporte-formato">
+          {reportContext && (
+            <div className="amx-soporte-contexto">
+              <div>
+                <strong ref={titleRef} tabIndex="-1">
+                  {reportContext.entidadNombre || 'Entidad no identificada'}
+                </strong>
+                <button type="button" onClick={borrarContexto} className="amx-soporte-borrar">Borrar contexto</button>
+              </div>
+              <p className="amx-soporte-alcance">
+                {reportContext.tipo} · {reportContext.reviewId || 'captura manual'} · Autor: {reportContext.autor || 'Anónimo'}
+              </p>
+              {reportContext.reviewExcerpt && (
+                <blockquote>"{reportContext.reviewExcerpt}"</blockquote>
+              )}
+            </div>
+          )}
 
-      {/* Lo primero, no enterrado en una lista: el uso que NO se tolera. */}
-      <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-        padding: 14, marginBottom: 22
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.redHi,
-          letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8, fontWeight: 700
-        }}>▲ Prohibido usar esta app para comprar o vender</div>
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México es un catálogo <b>divulgativo</b>. Aquí no se comercializan
-          armas de fuego, municiones ni accesorios, y no somos intermediarios de ninguna
-          venta.
-          <div style={{ marginTop: 10 }}>
-            Cualquier intento de usar las reseñas —o cualquier otro canal de esta
-            aplicación— para <b>ofrecer, solicitar o intermediar la compraventa de armas,
-            municiones o accesorios fuera de los canales legales</b> (DCAM y OTCA, con la
-            autorización correspondiente de la SEDENA) conllevará el <b>bloqueo inmediato</b> y
-            el <b>reporte a las autoridades competentes</b>, junto con la información
-            asociada al envío.
-          </div>
-          <div style={{ marginTop: 10, color: PALETTE.textDim }}>
-            Lo mismo aplica a pedir o dar instrucciones para modificar un arma de forma
-            ilegal, alterar matrículas, o eludir el trámite ante la SEDENA.
-          </div>
-        </div>
-      </div>
-
-      <SectionHeader>Qué se puede publicar</SectionHeader>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 26 }}>
-
-        <window.Disclosure title="Respeto hacia las demás personas" defaultOpen>
-          <div>
-            <Regla>Nada de insultos, acoso ni burlas hacia otros usuarios, marcas, tiendas o autoridades.</Regla>
-            <Regla>Nada de amenazas ni de incitación a la violencia, ni en broma.</Regla>
-            <Regla>Nada de provocar peleas ni de discriminar por origen, género, religión, orientación o cualquier otra condición.</Regla>
-            <Regla>Nada de acusaciones públicas contra personas concretas.</Regla>
-            <Regla>Nada de publicar datos personales de nadie: nombres completos, domicilios, teléfonos, matrículas ni fotos de terceros.</Regla>
-          </div>
-        </window.Disclosure>
-
-        <window.Disclosure title="La reseña va sobre el producto">
-          <div>
-            <Regla>Escribe sobre el arma, el accesorio, la munición o el lugar que estás reseñando: cómo se comporta, para qué sirve, qué te sorprendió.</Regla>
-            <Regla>No uses las reseñas para hacer preguntas de trámite: para eso están las <b>preguntas frecuentes</b> y la <b>guía legal</b>.</Regla>
-            <Regla>No repitas la misma reseña en varias fichas.</Regla>
-          </div>
-        </window.Disclosure>
-
-        <window.Disclosure title="Nada comercial">
-          <div>
-            <Regla>Sin anuncios, sin promociones y sin enlaces a tiendas, propias o ajenas.</Regla>
-            <Regla>Sin ofertas de compra, venta, permuta o renta de nada.</Regla>
-            <Regla>Sin rifas, sorteos ni captación de clientes.</Regla>
-            <Regla>Si tienes una relación comercial con lo que reseñas —lo vendes, lo distribuyes, te lo regalaron— <b>dilo en la reseña</b>.</Regla>
-          </div>
-        </window.Disclosure>
-
-        <window.Disclosure title="No manipular la calificación">
-          <div>
-            <Regla>Una opinión por persona y por ficha.</Regla>
-            <Regla>Nada de enviar varias reseñas para inflar o hundir una calificación.</Regla>
-            <Regla>Nada de pagar, cobrar ni presionar a nadie por escribir una reseña.</Regla>
-            <Regla>Nada de campañas coordinadas contra un modelo, una marca o una tienda.</Regla>
-          </div>
-        </window.Disclosure>
-
-      </div>
-
-      <SectionHeader>Cómo se revisan las reseñas</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
-        padding: '14px 16px', marginBottom: 26, position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={PALETTE.amber} />
-        <div style={window.amxProsa({ fontSize: 16 })}>
-          <b style={{ color: PALETTE.text }}>Toda reseña se revisa antes de publicarse.</b> Al enviarla
-          entra en una cola y no aparece en la ficha hasta que alguien comprueba que
-          cumple estas normas. Puede tardar; que no se vea al instante no significa que
-          se haya rechazado.
-          <div style={{ marginTop: 10 }}>
-            Pedimos un mínimo de {RESENA_MIN} caracteres a propósito: una opinión sin
-            argumento no ayuda a nadie a decidir, y es lo que da derecho a que tu voto
-            cuente en la calificación.
-          </div>
-          <div style={{ marginTop: 10 }}>
-            Tu <b>correo no se publica nunca</b>: se guarda solo para poder contactarte si
-            hay un problema con tu reseña, y se descarta al aprobarla.
-          </div>
-        </div>
-      </div>
-
-      <SectionHeader>Qué pasa si se incumplen</SectionHeader>
-      <div style={{ marginBottom: 26 }}>
-        {[
-          ['01', 'No se publica', 'Si la reseña no cumple las normas, no llega a la ficha. Si dejaste correo, te avisamos del motivo.'],
-          ['02', 'Se retira lo ya publicado', 'Una reseña publicada puede retirarse después si se detecta —o se denuncia— que incumple.'],
-          ['03', 'Se restringe la participación', 'Quien incumple de forma repetida deja de poder publicar reseñas.'],
-          ['04', 'Bloqueo y reporte', 'En los casos graves —compraventa ilegal, amenazas, explotación de menores— el bloqueo es inmediato y se reporta a las autoridades competentes con la información del envío.'],
-        ].map(([n, tit, desc]) =>
-          <div key={n} style={{ display: 'flex', gap: 13, padding: '11px 0', borderBottom: `1px solid ${PALETTE.border}` }}>
-            <div style={{
-              width: 32, height: 32, flexShrink: 0,
-              border: `1px solid ${PALETTE.amber}`, color: PALETTE.amber,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 14, fontWeight: 700
-            }}>{n}</div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14.5,
-                color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4
-              }}>{tit}</div>
-              <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>{desc}</div>
+          <div className="amx-soporte-campos">
+            <div className="amx-soporte-ancho">
+              <label className="amx-renglon-etq" htmlFor="soporte-reviewId">Reseña denunciada</label>
+              <input id="soporte-reviewId" className="amx-renglon" value={den.reviewId}
+                onChange={(e) => setD('reviewId', e.target.value)}
+                placeholder="Ficha y autor, o el texto que empieza por…" />
+            </div>
+            <div>
+              <label className="amx-renglon-etq" htmlFor="soporte-motivo">Motivo</label>
+              <select id="soporte-motivo" className="amx-renglon" value={den.motivo}
+                onChange={(e) => setD('motivo', e.target.value)}>
+                {motivos.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="amx-renglon-etq" htmlFor="soporte-email">Correo (opcional)</label>
+              <input id="soporte-email" className="amx-renglon" type="email" value={den.email}
+                onChange={(e) => setD('email', e.target.value)} maxLength={160}
+                placeholder="para contarte en qué quedó" />
+            </div>
+            <div className="amx-soporte-ancho">
+              <label className="amx-renglon-etq" htmlFor="soporte-detalle">
+                ¿Qué pasa con la reseña? <span className="amx-soporte-req">*</span>
+              </label>
+              <textarea id="soporte-detalle" className="amx-renglon" value={den.detalle}
+                onChange={(e) => setD('detalle', e.target.value)}
+                rows={3} minLength={20} maxLength={1200} required
+                placeholder="Explica brevemente por qué incumple las normas." />
+              <p className="amx-renglon-ayuda" aria-describedby="soporte-detalle-count">
+                {den.detalle.length} / 20 mínimo — {den.detalle.length >= 20 ? '✓ mínimo alcanzado' : 'necesitas más detalle'}
+              </p>
             </div>
           </div>
-        )}
-        <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.65, marginTop: 12 })}>
-          <b style={{ color: PALETTE.text }}>¿Crees que nos equivocamos?</b> Denúncialo con el
-          formulario de abajo indicando qué reseña era y por qué crees que sí cumplía.
-          Moderar es un juicio y a veces sale mal; se revisa de nuevo.
+
+          <button type="submit" disabled={estado.kind === 'submitting'} className="amx-soporte-enviar">
+            {estado.kind === 'submitting' ? 'Enviando…' : estado.kind === 'error' ? 'Reintentar' : 'Enviar denuncia'}
+          </button>
+
+          {estado.kind === 'error' && (
+            <div role="alert" className="amx-soporte-error">{estado.error}</div>
+          )}
+        </form>
+      )}
+    </section>
+  );
+}
+
+function SoporteDirectorio({ contenido, onNav }) {
+  return (
+    <section className="amx-soporte-cierre">
+      <h3>{contenido.clasificacion.titulo}</h3>
+      <ul>{contenido.clasificacion.criterios.map((p, i) => <li key={i}>{p}</li>)}</ul>
+
+      <h3>{contenido.correccion.titulo}</h3>
+      <p>{contenido.correccion.intro}</p>
+      <ol>{contenido.correccion.pasos.map((p, i) => <li key={i}>{p}</li>)}</ol>
+
+      <h4>Fuentes aceptables</h4>
+      <ul>{contenido.correccion.fuentes.map((p, i) => <li key={i}>{p}</li>)}</ul>
+
+      <div className="amx-soporte-directorio">
+        {[['legal', '§ Guía legal completa'], ['faq', '? Preguntas frecuentes']].map(([id, txt]) => (
+          <button key={id} type="button" onClick={() => onNav && onNav(id)}>{txt} →</button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SoporteScreen({ onNav, reportContext }) {
+  const contenido = window.AMX_SOPORTE_CONTENT;
+  return (
+    <main className="amx-soporte">
+      <div className="amx-soporte-cabecera">
+        <span className="amx-soporte-cabecera-rotulo" aria-hidden="true">Comunidad</span>
+        <SoportePortada contenido={contenido} />
+        <SoporteAviso aviso={contenido.venta} />
+      </div>
+      <section className="amx-soporte-seccion-normas" aria-labelledby="soporte-normas-titulo">
+        <h2 id="soporte-normas-titulo">Normas</h2>
+        <div className="amx-soporte-reglas">
+          {contenido.normas.map((norma) => <SoporteHojaNorma key={norma.numero} norma={norma} />)}
         </div>
-      </div>
-
-      <SectionHeader>Denunciar contenido</SectionHeader>
-      <div style={{
-        background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra,
-        padding: '15px 16px', position: 'relative'
-      }}>
-        <TacticalCorners size={10} color={denEnviada ? PALETTE.green : PALETTE.amber} />
-        {denEnviada ?
-          <div>
-            <div style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16,
-              color: PALETTE.green, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8
-            }}>✓ Denuncia recibida</div>
-            <div style={window.amxProsa({ fontSize: 15.5, lineHeight: 1.6 })}>
-              La revisaremos. Si dejaste correo, te contamos en qué quedó.
-            </div>
-          </div>
-        :
-          <div>
-            <div style={window.amxProsa({ fontSize: 16, lineHeight: 1.65, marginBottom: 14 })}>
-              Si ves una reseña que incumple estas normas, cuéntanoslo. No hace falta que
-              respondas a quien la escribió: eso solo alarga el problema.
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : '1fr', columnGap: 12 }}>
-              {sfld('Qué reseña', 'reviewId', den, setD, { placeholder: 'Ficha y autor, o el texto que empieza por…', span: 2 })}
-              {sfld('Motivo', 'motivo', den, setD, { select: MOTIVOS })}
-              {sfld('Tu correo (opcional)', 'email', den, setD, { type: 'email', placeholder: 'para contarte en qué quedó' })}
-              {sfld('Qué pasa con ella', 'detalle', den, setD, { ta: true, rows: 3, required: true, span: 2, placeholder: 'Explica brevemente por qué incumple.' })}
-            </div>
-            <button type="button" onClick={enviarDenuncia} disabled={!denListo} style={{
-              width: '100%', marginTop: 4,
-              background: denListo ? PALETTE.amber : 'transparent',
-              color: denListo ? PALETTE.tintaSobreMarca : PALETTE.textMuted,
-              border: `1.5px solid ${denListo ? PALETTE.amber : PALETTE.border}`,
-              padding: '13px', minHeight: 48,
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              cursor: denListo ? 'pointer' : 'not-allowed'
-            }}>Enviar denuncia</button>
-          </div>}
-      </div>
-
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 22 }}>
-        {[['legal', '§ Guía legal completa'], ['faq', '? Preguntas frecuentes']].map(([id, txt]) =>
-          <button key={id} type="button" onClick={() => onNav && onNav(id)} style={{
-            flex: '1 1 200px', background: 'transparent', color: PALETTE.amber,
-            border: `1.5px dashed ${PALETTE.border}`, padding: '12px', minHeight: 48,
-            fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 13.5,
-            letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer'
-          }}>{txt} →</button>
-        )}
-      </div>
-    </div>);
-
+      </section>
+      <SoporteModeracion contenido={contenido} />
+      <SoporteDenuncia reportContext={reportContext} />
+      <SoporteDirectorio contenido={contenido} onNav={onNav} />
+    </main>
+  );
 }
 window.SoporteScreen = SoporteScreen;
 
+// ════════════════════════════════════════════════════════════════
+// FAQ — el cajón de expedientes
+// Rediseño del 18-sep-2026. Las 12 preguntas son folders manila apilados que
+// montan uno sobre otro; al abrir uno sale de dentro la hoja de oficio con la
+// respuesta. Arriba, el aviso de transparencia como ficha de fichero con clip.
+//
+// Las preguntas salen de Store —que sirve D1 si lo hay y, si no, el seed de
+// store.js—. Ya NO hay una pregunta de repuesto escrita aquí: era la misma
+// duplicación que AGENTS.md avisa, y con el texto legal desactualizándose por
+// su cuenta.
+// ════════════════════════════════════════════════════════════════
 function FAQScreen() {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
-  const [open, setOpen] = useState2(0);
-  const faqs = window.Store ? window.Store.getPages().faq : [
-  { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México un arma de fuego solo puede adquirirse por los canales oficiales: la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), en el Campo Militar No. 1-D, en Naucalpan, Estado de México (Av. Industria Militar 1111, Col. Lomas de Tecamachalco), y la OTCA, en Monterrey, N.L.' }];
+  const faqs = (window.Store && window.Store.getPages().faq) || [];
 
   return (
-    <div style={{ padding: `0 ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      {/* El header móvil ya no pinta el título de pantalla: este bloque es el
-          único encabezado y se centra en móvil para ocupar el sitio que dejó.
-          En escritorio/tablet pasa a la izquierda —TopNav tampoco pinta título—
-          para arrancar al margen de la columna de lectura de abajo. */}
-      <div style={{
-        padding: '20px 0',
-        textAlign: vp.isMobile ? 'center' : 'left',
-        borderBottom: `1px solid ${PALETTE.border}`,
-        marginBottom: 18
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.amber,
-          letterSpacing: '0.2em', marginBottom: 6
-        }}>? PREGUNTAS FRECUENTES</div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif',
-          fontWeight: 700, fontSize: 23,
-          color: PALETTE.text,
-          textTransform: 'uppercase',
-          letterSpacing: '0.04em', lineHeight: 1.1
-        }}>FAQ</div>
-      </div>
+    <div className="amx-faq" style={{
+      padding: `${vp.isDesktop ? 26 : 14}px ${padX}px 90px`,
+      maxWidth: 820, margin: '0 auto', width: '100%', boxSizing: 'border-box'
+    }}>
+      <window.CintaDymo nivel={1} id="faq-titulo">Preguntas frecuentes</window.CintaDymo>
 
-      {/* DISCLAIMER */}
-      <div style={{
-        background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-        padding: 14, marginBottom: 18
-      }}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13, color: PALETTE.redHi,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          marginBottom: 6, fontWeight: 700
-        }}>▲ AVISO DE TRANSPARENCIA</div>
-        <div style={window.amxProsa({ fontSize: 16.5, color: PALETTE.text })}>
-          Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
-          <br /><br />
-          Armas M&amp;S no presta servicios jurídicos.
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {faqs.map((f, i) =>
-        <div key={i} style={{
-          background: PALETTE.bgCard,
-          border: `1px solid ${open === i ? PALETTE.amber : PALETTE.border}`
-        }}>
-            <button onClick={() => setOpen(open === i ? -1 : i)} style={{
-            width: '100%',
-            background: 'none', border: 'none', cursor: 'pointer',
-            padding: '12px 14px',
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            gap: 10, textAlign: 'left'
-          }}>
-              <span style={{
-              fontFamily: 'Archivo, sans-serif',
-              fontWeight: 600, fontSize: 15,
-              color: open === i ? PALETTE.amber : PALETTE.text,
-              textTransform: 'uppercase',
-              letterSpacing: '0.04em',
-              lineHeight: 1.25,
-              flex: 1
-            }}>{f.q}</span>
-              <span style={{
-              color: PALETTE.amber,
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 19, flexShrink: 0
-            }}>{open === i ? '−' : '+'}</span>
-            </button>
-            {open === i &&
-          <div style={window.amxProsa({
-            padding: '0 14px 14px',
-            fontSize: 16.5,
-            borderTop: `1px dashed ${PALETTE.border}`,
-            paddingTop: 12
-          })}>{f.a}</div>
-          }
+      {/* ══ EL AVISO — la ficha de fichero, lo primero de la página ══ */}
+      {/* La cartulina es la MISMA ficha de fichero de la ficha técnica; el clip
+          va fuera de ella porque lleva la máscara de la perforación y una
+          máscara recorta lo que asome del borde. */}
+      <section className="amx-faq-aviso" aria-labelledby="faq-aviso">
+        <span className="amx-copia-clip" aria-hidden="true" />
+        <div className="amx-fichero-carton">
+          <div className="amx-fichero-cab">
+            <h2 id="faq-aviso" className="amx-faq-aviso-tit">▲ Aviso de transparencia</h2>
           </div>
+          <p className="amx-faq-aviso-texto">
+            Armado en México y Armas M&amp;S no son DEFENSA (anteriormente SEDENA) ni autoridad gubernamental. Las armas de fuego de esta app son informativas: no las comercializamos ni realizamos trámites ante ninguna dependencia. La única vía legal para adquirir un arma de fuego en México son los canales oficiales: la DCAM o la OTCA. Lo único que comercializamos directamente son las tres armas traumáticas menos letales.
+          </p>
+          <p className="amx-faq-aviso-texto">Armas M&amp;S no presta servicios jurídicos.</p>
+        </div>
+      </section>
+
+      {/* ══ EL CAJÓN ══ */}
+      <div className="amx-faq-cajon">
+        {faqs.map((f, i) =>
+          <window.FolderPregunta key={i} pregunta={f.q} tema={f.tema}>{f.a}</window.FolderPregunta>
         )}
       </div>
+
+      <window.ReportarError tipo="faq" titulo="Preguntas frecuentes" ruta="/preguntas" />
     </div>);
 
 }
@@ -1617,78 +983,69 @@ window.FAQScreen = FAQScreen;
 function MenuScreen({ onNav, onTutorial }) {
   const vp = window.useViewport();
   const padX = vp.isDesktop ? 28 : 16;
+
+  // Cada ítem lleva su imagen (silueta webp existente o glifo para los que no tienen asset).
+  // Las siluetas se pintan con mask-image sobre el fondo del folder, al estilo del resto del sitio.
   const items = [
-  { id: 'traumaticas', icon: '◎', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
-  { id: 'accesorios', icon: '▫', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
-  { id: 'municiones', icon: '◉', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
-  { id: 'calibres', icon: '◉', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
-  // Congeladas hasta el lanzamiento: visibles pero sin navegar. Ver PLACEHOLDERS.md.
-  { id: 'campos', icon: '◎', title: 'Campos de tiro (Próximamente)', desc: 'Clubes y polígonos aliados', proximamente: true },
-  { id: 'experiencias', icon: '✦', title: 'Experiencias (Próximamente)', desc: 'Formación y actividades de tiro', proximamente: true },
-  { id: 'legal', icon: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
-  { id: 'soporte', icon: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
-  { id: 'faq', icon: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
-  { id: 'about', icon: '◆', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
-  { id: 'tutorial', action: 'tutorial', icon: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' }];
+    { id: 'traumaticas', img: 'imagenes/silueta-pistola.webp', title: 'Armas traumáticas', desc: 'Defensa menos letal CO₂ .50/.68 · sin permiso SEDENA', accent: true },
+    { id: 'accesorios', img: 'imagenes/silueta-cargador.webp', title: 'Accesorios', desc: 'Equipamiento de adquisición legal en la DCAM · precio oficial' },
+    { id: 'municiones', img: 'imagenes/silueta-municion.webp', title: 'Municiones', desc: 'Cartuchos por calibre · precio de referencia DCAM / OTCA' },
+    { id: 'calibres', img: 'imagenes/silueta-municion.webp', title: 'Calibres', desc: 'Guía de munición: uso, balística y armas' },
+    { sep: true },
+    { id: 'campos', img: 'imagenes/silueta-rifle.webp', title: 'Campos de tiro', desc: 'Clubes y polígonos aliados', proximamente: true },
+    { id: 'experiencias', img: 'imagenes/silueta-escopeta.webp', title: 'Experiencias', desc: 'Formación y actividades de tiro', proximamente: true },
+    { sep: true },
+    { id: 'legal', glyph: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
+    { id: 'soporte', glyph: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
+    { id: 'faq', glyph: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
+    { id: 'about', img: 'imagenes/isotipo-armado.webp', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
+    { sep: true },
+    { id: 'tutorial', action: 'tutorial', glyph: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
+  ];
 
   return (
     <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 700, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      {/* Único encabezado de la pantalla desde que el header móvil dejó de
-          pintar título: centrado en móvil, al margen en escritorio/tablet. */}
       <div style={{
         fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.amber,
+        fontSize: 12, color: PALETTE.amber,
         letterSpacing: '0.2em', marginBottom: 14,
+        textTransform: 'uppercase',
         textAlign: vp.isMobile ? 'center' : 'left'
-      }}>☰ MÁS</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {items.map((it) =>
-        <button key={it.id} disabled={it.proximamente}
-          onClick={it.proximamente ? undefined : () => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)} style={{
-          background: it.accent ? `linear-gradient(135deg, ${PALETTE.bgCard} 0%, ${PALETTE.bgElev} 100%)` : PALETTE.bgCard,
-          border: `1px solid ${it.accent ? PALETTE.amber : PALETTE.border}`,
-          padding: '14px',
-          cursor: it.proximamente ? 'default' : 'pointer',
-          opacity: it.proximamente ? 0.55 : 1,
-          textAlign: 'left',
-          display: 'flex', alignItems: 'center', gap: 14
-        }}>
-            <span style={{
-            fontSize: 27.5, color: PALETTE.amber,
-            width: 30, textAlign: 'center',
-            fontFamily: 'JetBrains Mono, monospace'
-          }}>{it.icon}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{
-              fontFamily: 'Archivo, sans-serif',
-              fontWeight: 600, fontSize: 16,
-              color: PALETTE.text,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em'
-            }}>{it.title}</div>
-              <div style={window.amxProsa({
-                fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.45, marginTop: 2
-              })}>{it.desc}</div>
-            </div>
-            <span style={{ color: PALETTE.amber, fontSize: 20.5}}>›</span>
-          </button>
-        )}
+      }}>☰ ÍNDICE · MÁS</div>
+
+      <div className="amx-menu-folders">
+        {items.map((it, i) => {
+          if (it.sep) return <hr key={`sep-${i}`} className="amx-menu-sep" />;
+          const proximamente = it.proximamente;
+          const label = proximamente ? `${it.title} (Próximamente)` : it.title;
+          return (
+            <button
+              key={it.id}
+              className={`amx-menu-folder${it.accent ? ' amx-menu-folder--accent' : ''}`}
+              disabled={proximamente}
+              onClick={proximamente ? undefined : () => it.action === 'tutorial' ? (onTutorial && onTutorial()) : onNav(it.id)}
+            >
+              <span className="amx-menu-folder-icono">
+                {it.img
+                  ? <img src={it.img} alt="" width="36" height="36" loading="lazy"
+                      style={{ width: 36, height: 36, objectFit: 'contain', opacity: .7 }} />
+                  : <span className="amx-menu-folder-glyph">{it.glyph}</span>}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="amx-menu-folder-titulo">{label}</div>
+                <div className="amx-menu-folder-desc">{it.desc}</div>
+              </div>
+              <span className="amx-menu-folder-flecha">›</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div style={window.amxProsa({
-        marginTop: 30,
-        padding: '14px',
-        background: PALETTE.bgElev,
-        border: `1px dashed ${PALETTE.border}`,
-        fontSize: 15, color: PALETTE.textMuted, lineHeight: 1.6
-      })}>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', color: PALETTE.amber, fontWeight: 700,
-          letterSpacing: '0.15em', marginBottom: 4, fontSize: 13
-        }}>◆ ARMADO·MX</div>
+      <div className="amx-menu-pie">
+        <strong>◆ ARMADO·MX</strong>
         Catálogo divulgativo. Edición 2026. Contenido editado por Saulo Flores · Armas M&amp;S.
       </div>
     </div>);
 
 }
-window.MenuScreen = MenuScreen;
+window.MenuScreen = MenuScreen;

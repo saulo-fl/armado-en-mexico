@@ -1,131 +1,15 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Pantallas de ACCESORIOS DCAM
-// Card, carrusel de Home, catálogo con filtros, y ficha de detalle con el bloque
-// de precio + historial de inventarios (mismo patrón que las armas).
-// Expone en window: AccesorioCard, HomeAccesoriosSection, AccesoriosScreen, AccesorioFicha
+// Cartas de lotería del Home, la vitrina del catálogo (15-sep-2026) y la ficha
+// de cada accesorio, que desde el 15-sep-2026 es el mismo expediente que la
+// ficha de arma (spec «ficha-accesorio», decidido con Saulo pregunta por pregunta).
+// Expone en window: HomeAccesoriosSection, AccesoriosScreen, AccesorioFicha
 
-const { useState: useStateAcc, useMemo: useMemoAcc, useEffect: useEffectAcc } = React;
-
-// Fecha de inventario (YYYY-MM-DD) → texto es-MX
-function accFmtDate(f) {
-  if (!f) return '';
-  const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
-  if (isNaN(d)) return String(f);
-  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-function accCatMeta(id) {
-  return (window.ACCESORIO_CATEGORIES.categoria.find(c => c.id === id)) || { label: id, icon: '◆' };
-}
-
-// Aviso discreto cuando no hay fotografía real del accesorio
-// Respaldo cuando un accesorio no tiene fotografía propia — hoy, los 36 del
-// catálogo, así que es la vista por defecto y no un caso raro.
-// Era una cámara tachada en SVG dibujada a mano. Saulo retiró los SVG generados
-// el 8-sep-2026: ahora va la SILUETA de la categoría, el mismo lenguaje que las
-// armas. Se pinta como máscara, así que el color lo pone el CSS y sigue al tema.
-function AccNoImage({ acc, compact }) {
-  const forma = window.accesorioPlaceholder ? window.accesorioPlaceholder(acc) : null;
-  return (
-    <div role="img" aria-label={'Sin fotografía en expediente' + (acc && acc.nombre ? ': ' + acc.nombre : '')}
-      style={{
-        position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', gap: compact ? 6 : 10,
-        padding: '0 12px', textAlign: 'center', width: '100%', height: '100%',
-      }}>
-      {forma && (
-        <span className="amx-silueta-acc" aria-hidden="true"
-          style={{ '--silueta-forma': `url(${forma})`, height: compact ? 34 : 52 }} />
-      )}
-      <span style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        // 11px es el piso de texto funcional; los 10.5 de antes quedaban debajo.
-        fontSize: compact ? 11 : 12.5,
-        color: 'var(--tinta-2)', letterSpacing: '0.05em', lineHeight: 1.45,
-      }}>Sin fotografía{compact ? '' : ' en expediente'}</span>
-    </div>
-  );
-}
-window.AccNoImage = AccNoImage;
-
-// ════════════════════════════════════════════════════════════════
-// ACCESORIO CARD — tarjeta horizontal (gemela de ArmaCard)
-// ════════════════════════════════════════════════════════════════
-function AccesorioCard({ acc, onClick }) {
-  const P = window.PALETTE;
-  const [imgError, setImgError] = useStateAcc(false);
-  const cat = accCatMeta(acc.categoria);
-  return (
-    <div onClick={onClick} style={{
-      position: 'relative',
-      background: window.CLARO.panel,
-      borderRadius: window.CLARO.radio,
-      border: `1px solid ${window.CLARO.hair}`,
-      // La sombra la pone .amx-card en estilo.css (ver ui.jsx/ArmaCard).
-      cursor: 'pointer',
-      overflow: 'hidden',
-      height: '100%',
-      display: 'flex', flexDirection: 'row',
-      contentVisibility: 'auto',
-      containIntrinsicSize: 'auto 150px',
-    }} className="amx-card">
-      {/* imagen */}
-      <div style={{
-        width: '42%', flexShrink: 0, alignSelf: 'stretch', minHeight: 112,
-        background: `radial-gradient(circle at 50% 50%, ${window.CLARO.panelHi} 0%, ${P.bg} 100%)`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative', borderRight: `1px solid ${window.CLARO.hair}`, overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)`,
-        }} />
-        {window.isRealImage(acc.img) && !imgError ? (
-          <img src={acc.img} alt={acc.nombre}
-            loading="lazy" decoding="async" onError={() => setImgError(true)}
-            style={{ maxWidth: '88%', maxHeight: '88%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
-        ) : (
-          <AccNoImage acc={acc} compact />
-        )}
-        <span style={{
-          position: 'absolute', top: 6, left: 6,
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 600,
-          // Va sobre la PLACA fotográfica, clara en los dos temas: la tinta se
-          // fija a --tinta-placa. CLARO.tinta2 se aclara en oscuro y dejaría
-          // gris claro sobre casi blanco.
-          color: 'var(--tinta-placa)', background: 'rgba(250,249,245,0.92)', padding: '2px 6px', borderRadius: 4,
-          letterSpacing: '0.1em', textTransform: 'uppercase', borderLeft: '2px solid var(--tinta-placa)',
-        }}>{cat.icon} {cat.label.split(' ')[0]}</span>
-      </div>
-      {/* body */}
-      <div style={{ padding: '10px 12px 12px', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, minWidth: 0 }}>
-          {window.CountryFlag && <window.CountryFlag pais={acc.pais} height={12} />}
-          <span style={{
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2,
-            letterSpacing: '0.12em', textTransform: 'uppercase',
-            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-          }}>{acc.marca}</span>
-        </div>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16,
-          color: window.CLARO.tinta, textTransform: 'uppercase', lineHeight: 1.15, marginBottom: 6,
-          letterSpacing: '0.02em', height: 38,
-          display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden',
-        }}>{acc.nombre}</div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: window.CLARO.tinta2, marginBottom: 8,
-          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>
-          <span style={{ color: window.CLARO.tinta2 }}>CAT </span>{cat.label}
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px 8px', flexWrap: 'wrap', marginTop: 'auto' }}>
-          <window.AvailBadge avail={acc.avail} compact />
-          <window.PriceLevel lvl={acc.priceLvl} />
-        </div>
-      </div>
-    </div>
-  );
-}
-window.AccesorioCard = AccesorioCard;
+const { useState: useStateAcc } = React;
 
 // ════════════════════════════════════════════════════════════════
 // HOME — cartas de lotería de las categorías de accesorio
@@ -138,203 +22,85 @@ function HomeAccesoriosSection({ onNav }) {
   const counts = {};
   (window.ACCESORIOS || []).forEach(a => { counts[a.categoria] = (counts[a.categoria] || 0) + 1; });
 
-  // El número es cuántos accesorios hay en la categoría y el nombre va abajo.
-  // La figura sale de `accesorioPlaceholder`, que ya sabe mapear las diez
-  // categorías a las siluetas que existen —solo lee `.categoria`, por eso se le
-  // pasa un objeto de un campo.
+  // Mapeo de categorías de accesorio a sus ilustraciones de lotería.
+  // Las categorías con ilustración propia se usan directamente; las demás
+  // mantienen la silueta como respaldo.
+  const CARTAS_ACCESORIO = {
+    cargadores: 'carta-cargadores.webp',
+    opticas: 'carta-opticas.webp',
+    empunaduras: 'carta-empunaduras.webp',
+    refacciones: 'carta-refacciones.webp',
+  };
+
   return (
     <React.Fragment>
-      {cats.filter(c => counts[c.id]).map(c => (
-        <window.CartaLoteria key={c.id}
-          nombre={c.label}
-          cuenta={counts[c.id]}
-          unidad="accesorios"
-          forma={window.accesorioPlaceholder({ categoria: c.id })}
-          onClick={() => onNav && onNav('accesorios', { categoria: c.id })} />
-      ))}
+      {cats.filter(c => counts[c.id]).map(c => {
+        const ilustracion = CARTAS_ACCESORIO[c.id]
+          ? `imagenes/carta-${c.id}.webp`
+          : null;
+        return (
+          <window.CartaLoteria key={c.id}
+            nombre={c.label}
+            cuenta={counts[c.id]}
+            unidad="accesorios"
+            forma={ilustracion ? null : window.accesorioPlaceholder({ categoria: c.id })}
+            ilustracion={ilustracion}
+            onClick={() => onNav && onNav('accesorios', { categoria: c.id })} />
+        );
+      })}
     </React.Fragment>
   );
 }
 window.HomeAccesoriosSection = HomeAccesoriosSection;
 
 // ════════════════════════════════════════════════════════════════
-// CATÁLOGO DE ACCESORIOS — filtros + buscador + grid responsivo
+// CATÁLOGO DE ACCESORIOS — la vitrina (rediseño del 15-sep-2026)
+// Un puesto de tianguis como el de Municiones del Home: toldo de lona,
+// separadores de fichero por categoría y un puesto por pieza con SOLO su nombre
+// corto. Decidido con Saulo pregunta por pregunta (docs/DESIGN.md §5.7); él
+// retiró el buscador, los desplegables y el aviso de esta pantalla.
+// La categoría activa vive en la URL (app.jsx): aquí solo se lee y se avisa con
+// `onCategoria` al cambiar de separador.
 // ════════════════════════════════════════════════════════════════
-function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
-  const P = window.PALETTE;
+function AccesoriosScreen({ initialFilter, onOpenAccesorio, onCategoria }) {
   const vp = window.useViewport();
-  const cols = vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr';
-  const padX = vp.isDesktop ? 28 : 16;
+  // 2 por fila en móvil, 4 en tableta (solo para que no se rompa) y 6 desde el
+  // corte único de 1024 px.
+  const porFila = vp.width < 720 ? 2 : vp.width < 1024 ? 4 : 6;
+  const secciones = window.accesoriosVitrina('all');
+  const pedida = initialFilter && initialFilter.categoria;
+  const activo = secciones.some((s) => s.id === pedida) ? pedida : 'all';
+  const visibles = window.accesoriosVitrina(activo);
+  const opciones = [{ id: 'all', label: 'Todas' }].concat(secciones.map((s) => ({ id: s.id, label: s.label })));
 
-  const [query, setQuery] = useStateAcc('');
-  const [categoria, setCategoria] = useStateAcc((initialFilter && initialFilter.categoria) || 'all');
-  const [avail, setAvail] = useStateAcc('all');
-  const [marca, setMarca] = useStateAcc('all');
-  const [precio, setPrecio] = useStateAcc('all');
-
-  const todos = window.ACCESORIOS || [];
-  const marcas = useMemoAcc(() => Array.from(new Set(todos.map(a => a.marca))).sort(), [todos]);
-  const cats = window.ACCESORIO_CATEGORIES.categoria;
-  const disp = window.ACCESORIO_CATEGORIES.disponibilidad;
-
-  const filtered = useMemoAcc(() => {
-    return todos.filter(a => {
-      if (categoria !== 'all' && a.categoria !== categoria) return false;
-      if (avail !== 'all' && a.avail !== avail) return false;
-      if (marca !== 'all' && a.marca !== marca) return false;
-      if (precio !== 'all' && String(a.priceLvl) !== precio) return false;
-      if (query) {
-        const q = query.toLowerCase();
-        const hay = (a.nombre + ' ' + a.marca + ' ' + a.dcamRef + ' ' + accCatMeta(a.categoria).label).toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [query, categoria, avail, marca, precio, todos]);
-
-  const clearAll = () => { setQuery(''); setCategoria('all'); setAvail('all'); setMarca('all'); setPrecio('all'); };
-  const anyFilter = query || categoria !== 'all' || avail !== 'all' || marca !== 'all' || precio !== 'all';
-
-  const selStyle = {
-    background: P.bg, color: P.text, border: `1px solid ${P.border}`,
-    padding: '11px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14,
-    letterSpacing: '0.04em', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    flex: '1 1 160px', minWidth: 0,
-  };
-  const chip = (active) => ({
-    // Activo = fondo P.amber, que es el VERDE de marca #173A32, no un ambar:
-    // el negro encima daba 1.69:1. Crema sobre el verde: 10.83:1.
-    background: active ? P.amber : 'transparent',
-    color: active ? P.tintaSobreMarca : P.textDim,
-    border: `1px solid ${active ? P.amber : P.border}`,
-    padding: '10px 14px', cursor: 'pointer', minHeight: 44, boxSizing: 'border-box',
-    fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5,
-    letterSpacing: '0.08em', textTransform: 'uppercase', whiteSpace: 'nowrap',
-    display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: active ? 700 : 400,
-  });
+  const puesto = (a) => (
+    <window.PuestoPieza key={a.id}
+      rotulo={a.corto}
+      ariaLabel={a.corto + ' — ' + a.nombre}
+      foto={window.isRealImage(a.img) ? a.img : null}
+      silueta={window.accesorioPlaceholder(a)}
+      onClick={() => onOpenAccesorio(a.id)} />
+  );
 
   return (
-    <div style={{ paddingBottom: 90 }}>
-      {/* Encabezado + encuadre legal */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `20px ${padX}px 0`, boxSizing: 'border-box' }}>
-        <div style={{
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 32 : 26,
-          color: P.text, textTransform: 'uppercase', letterSpacing: '0.03em', lineHeight: 1.05,
-        }}>Accesorios DCAM</div>
-        <div style={{
-          marginTop: 12, background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra,
-          boxShadow: window.CLARO.sombra, padding: '11px 14px',
-          ...window.amxProsa({ fontSize: 16, color: P.textDim, lineHeight: 1.6 }),
-        }}>
-          Accesorios de adquisición legal a través de la <b style={{ color: P.text }}>DCAM</b> (nacional) y la <b style={{ color: P.text }}>OTCA</b> (Monterrey, catálogo propio).
-          Información con fines de transparencia; <b style={{ color: P.text }}>no los comercializamos</b>.
-          Cada precio cita su inventario fuente y la autoridad que lo emite.
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `16px ${padX}px 0`, boxSizing: 'border-box' }}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar accesorio, marca o referencia…"
-          style={{
-            width: '100%', boxSizing: 'border-box', background: P.bg, color: P.text,
-            border: `1px solid ${P.border}`, padding: '11px 14px', marginBottom: 12,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 17, letterSpacing: '0.03em',
-          }} />
-
-        {/* categorías (chips con swipe táctil, sin barra) */}
-        <div className="amx-hscroll" style={{
-          display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 8, marginBottom: 4,
-          WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity',
-        }}>
-          <button onClick={() => setCategoria('all')} style={chip(categoria === 'all')}>Todas</button>
-          {cats.map(c => (
-            <button key={c.id} onClick={() => setCategoria(c.id)} style={chip(categoria === c.id)}>
-              <span style={{ color: categoria === c.id ? '#000' : P.amber }}>{c.icon}</span>{c.label}
-            </button>
-          ))}
-        </div>
-
-        {/* selects: disponibilidad / marca / precio */}
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-          <select value={avail} onChange={(e) => setAvail(e.target.value)} style={selStyle}>
-            <option value="all">Toda disponibilidad</option>
-            {disp.map(d => <option key={d.id} value={d.id}>{d.label}</option>)}
-          </select>
-          <select value={marca} onChange={(e) => setMarca(e.target.value)} style={selStyle}>
-            <option value="all">Todas las marcas</option>
-            {marcas.map(m => <option key={m} value={m}>{m}</option>)}
-          </select>
-          <select value={precio} onChange={(e) => setPrecio(e.target.value)} style={selStyle}>
-            <option value="all">Todo nivel de precio</option>
-            <option value="1">$ · Económico</option>
-            <option value="2">$$ · Medio-bajo</option>
-            <option value="3">$$$ · Medio</option>
-            <option value="4">$$$$ · Alto</option>
-            <option value="5">$$$$$ · Premium</option>
-          </select>
-          {anyFilter &&
-            <button onClick={clearAll} style={{
-              background: 'transparent', color: P.redHi, border: `1px solid ${P.redHi}`,
-              padding: '11px 14px', minHeight: 44, boxSizing: 'border-box', cursor: 'pointer',
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 15, letterSpacing: '0.08em', textTransform: 'uppercase',
-            }}>✕ Limpiar</button>
-          }
-        </div>
-
-        {/* contador */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
-          letterSpacing: '0.12em', margin: '16px 0 10px', textTransform: 'uppercase',
-        }}>
-          <span>▸ {filtered.length} {filtered.length === 1 ? 'ACCESORIO' : 'ACCESORIOS'}</span>
-          <span style={{ color: P.textMuted }}>{todos.length} TOTAL</span>
-        </div>
-      </div>
-
-      {/* grid (agrupado por categoría cuando no hay categoría ni búsqueda activa) */}
-      <div style={{ maxWidth: 1280, margin: '0 auto', width: '100%', padding: `0 ${padX}px`, boxSizing: 'border-box' }}>
-        {filtered.length ? (
-          (categoria === 'all' && !query) ? (
-            cats.map(c => {
-              const list = filtered.filter(a => a.categoria === c.id);
-              if (!list.length) return null;
-              return (
-                <div key={c.id}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '24px 0 12px' }}>
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 21.5, color: P.amber, lineHeight: 1 }}>{c.icon}</span>
-                    <h2 style={{
-                      fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: P.text,
-                      textTransform: 'uppercase', letterSpacing: '0.04em', margin: 0, whiteSpace: 'nowrap',
-                    }}>{c.label}</h2>
-                    <span style={{ flex: 1, height: 1, background: P.border }} />
-                    <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.textMuted }}>{list.length}</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 14 }}>
-                    {list.map(a => <AccesorioCard key={a.id} acc={a} onClick={() => onOpenAccesorio(a.id)} />)}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: cols, gap: 14 }}>
-              {filtered.map(a => <AccesorioCard key={a.id} acc={a} onClick={() => onOpenAccesorio(a.id)} />)}
-            </div>
-          )
-        ) : (
-          <div style={{
-            border: `1px dashed ${P.border}`, padding: '40px 20px', textAlign: 'center',
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5, color: P.textMuted,
-          }}>
-            ◇ Sin resultados con estos filtros.
-            <button onClick={clearAll} style={{
-              display: 'block', margin: '12px auto 0', background: 'none', border: 'none',
-              color: P.amber, cursor: 'pointer', fontFamily: 'inherit', fontSize: 15.5, textDecoration: 'underline',
-            }}>Limpiar filtros</button>
-          </div>
-        )}
+    <div className="amx-vitrina-acc">
+      <window.ToldoLona>Accesorios</window.ToldoLona>
+      <window.SeparadoresFiltro etiqueta="Categorías de accesorios" opciones={opciones}
+        activo={activo} controla="vitrina-acc-panel" onCambiar={(id) => onCategoria && onCategoria(id)} />
+      <div id="vitrina-acc-panel" role="tabpanel" aria-labelledby={'separador-' + activo}>
+        {visibles.map((s) => (
+          <section key={s.id} className="amx-vitrina-acc-seccion" aria-labelledby={'vitrina-acc-' + s.id}>
+            <window.CintaDymo id={'vitrina-acc-' + s.id}>{s.label}</window.CintaDymo>
+            {s.tramos
+              ? s.tramos.map((t) => (
+                <section key={t.id} className="amx-vitrina-acc-tramo" aria-labelledby={'vitrina-acc-' + t.id}>
+                  <window.CintaDymo nivel={3} chica id={'vitrina-acc-' + t.id}>{t.label}</window.CintaDymo>
+                  <window.MesaPuestos items={t.piezas} porFila={porFila} renderPuesto={puesto} />
+                </section>
+              ))
+              : <window.MesaPuestos items={s.piezas} porFila={porFila} renderPuesto={puesto} />}
+          </section>
+        ))}
       </div>
     </div>
   );
@@ -342,337 +108,211 @@ function AccesoriosScreen({ initialFilter, onOpenAccesorio, onNav }) {
 window.AccesoriosScreen = AccesoriosScreen;
 
 // ════════════════════════════════════════════════════════════════
-// FICHA DE ACCESORIO — detalle + precio referencia DCAM + historial
+// FICHA DE ACCESORIO — el expediente (rediseño del 15-sep-2026)
+// Réplica de la ficha de arma (DESIGN.md §5.5 y §5.8): mismas primitivas y
+// mismas clases `amx-carpeta-*`, así que la rejilla, el tema oscuro y el móvil
+// son los del arma. Lo propio del accesorio: la pestaña con la categoría en
+// singular, el nombre corto de título, la silueta sola, el talón sin casilla
+// (no hay comparador de accesorios) y la hoja «Compatibilidad».
 // ════════════════════════════════════════════════════════════════
-function AccesorioFicha({ accesorioId, onOpenAccesorio, onOpenArma, onNav }) {
-  const P = window.PALETTE;
+
+// El rótulo de la pestaña del folder: la categoría en singular, como «Pistola»
+// en la ficha de arma. «Empuñaduras y culatas» es «Culata» porque su única
+// pieza lo es. Una categoría sin entrada cae en su rótulo tal cual.
+const ACC_SINGULAR = { cargadores: 'Cargador', opticas: 'Mira', refacciones: 'Refacción', empunaduras: 'Culata' };
+
+// La hoja «Compatibilidad»: los primeros 6 y el resto detrás de «Ver las N»,
+// ahí mismo (Saulo, 15-sep-2026). Vive fuera de AccesorioFicha a propósito: un
+// componente definido dentro de otro remonta su subárbol en cada render.
+// Los nombres son navegación interna: sin «↗», que en el sitio es «abre un PDF».
+const COMPAT_A_LA_VISTA = 6;
+function HojaCompatibilidad({ compat, onOpenArma }) {
+  const [todas, setTodas] = useStateAcc(false);
+  if (compat.caso === 'plataforma') {
+    return <p className="amx-oficio-texto">Sirve a: {compat.texto} (sin ficha en el Arsenal)</p>;
+  }
+  const visibles = todas ? compat.armas : compat.armas.slice(0, COMPAT_A_LA_VISTA);
+  return (
+    <React.Fragment>
+      <p className="amx-oficio-texto">
+        {compat.caso === 'regla' ? `Sirve a: ${compat.texto}. En el Arsenal:` : 'Sirve a:'}
+      </p>
+      <ul className="amx-oficio-lista amx-compat-lista">
+        {visibles.map((a) => (
+          <li key={a.id}>
+            <button type="button" className="amx-enlace-tinta" onClick={() => onOpenArma && onOpenArma(a.id)}>
+              {a.nombre}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {compat.armas.length > COMPAT_A_LA_VISTA &&
+        <button type="button" className="amx-registro-mas" aria-expanded={todas} onClick={() => setTodas(!todas)}>
+          Ver las {compat.armas.length}
+        </button>}
+    </React.Fragment>
+  );
+}
+
+function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportReview }) {
   const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
+  // Las opiniones llegan con la hidratación de /api/state, DESPUÉS del primer
+  // render: sin esta suscripción «Opiniones: …» se quedaba vacío.
+  const [, forzar] = useStateAcc(0);
+  React.useEffect(() => window.Store && window.Store.onChange(() => forzar((x) => x + 1)), []);
+  // La hoja abierta: la primera (Compatibilidad, o Legalidad si no hay) al
+  // llegar y al pasar de un accesorio a otro.
+  const [tab, setTab] = useStateAcc(0);
+  React.useEffect(() => { setTab(0); }, [accesorioId]);
+  const talon = window.useTalonFijo(accesorioId);
   const acc = window.getAccesorioById(accesorioId);
 
   if (!acc) {
     return (
-      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace', color: P.textMuted }}>
+      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace', color: window.PALETTE.textMuted }}>
         Accesorio no encontrado.
       </div>
     );
   }
 
-  const cat = accCatMeta(acc.categoria);
-  const availMeta = window.ACCESORIO_CATEGORIES.disponibilidad.find(d => d.id === acc.avail);
-  const priceHistory = window.getAccesorioPriceHistory(acc.id);
-  const existencias = window.getAccesorioExistencias(acc.id);
-  const armasComp = window.getArmasCompatibles(acc);
-  const manualById = (id) => window.getAccesorioManual(id);
-  const currentManual = manualById(acc.priceManualId) ||
-    (priceHistory.length ? manualById(priceHistory[priceHistory.length - 1].manualId) : null) ||
-    window.getAccesorioPrimaryManual();
-  const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
-  const curSigla = curAut ? curAut.sigla : 'DCAM';
-  const relacionados = (window.ACCESORIOS || []).filter(a => a.categoria === acc.categoria && a.id !== acc.id).slice(0, 6);
+  // Un solo corte, el del expediente: 1024px (ver ProductScreen).
+  const ancho = vp.width >= 1024;
+  const PAD = ancho ? 28 : 16;
+  const SEC = ancho ? 52 : 34;   // aire ENTRE secciones fuera del folder
 
-  const [imgError, setImgError] = useStateAcc(false);
+  const priceHistory = window.getAccesorioPriceHistory(acc.id);
+  const manualById = (id) => window.getAccesorioManual(id);
+  // Precio, fuente, «último precio conocido» y existencias por sucursal: la
+  // misma regla que el arma, en src/lib/cotejo.js.
+  const inv = window.amxInventarioAccesorio(acc, {
+    priceHistory, manuales: window.ACCESORIOS_MANUALES || [], autoridad: window.manualAutoridad,
+  });
+  const fechaPrecio = inv.manual ? window.amxFmtManualDate(inv.manual.fecha) : '';
+  const armas = window.getArmasCompatibles(acc);
+  const compat = window.amxCompatAccesorio(acc, armas);
+  const opin = window.Store ? window.Store.getOpiniones('accesorio', acc.id) : { up: 0, down: 0 };
+  const etOpin = window.amxOpinionLabel(opin.up, opin.down);
+  const disp = window.ACCESORIO_CATEGORIES.disponibilidad.find((d) => d.id === acc.avail);
+  const SELLOS = window.SELLOS_LEGALES || {};
+  const sello = SELLOS[acc.avail] || SELLOS.dcam || { texto: 'CIVIL', tono: 'civil' };
+  const cat = window.ACCESORIO_CATEGORIES.categoria.find((c) => c.id === acc.categoria);
+  const rotulo = ACC_SINGULAR[acc.categoria] || (cat ? cat.label : 'Accesorio');
+  // Las specs del inventario tal cual, y el origen si no viene ya en ellas.
+  const specs = acc.specs || [];
+  const filas = acc.pais && !specs.some(([k]) => k === 'Origen') ? specs.concat([['Origen', acc.pais]]) : specs;
+  const silueta = { forma: window.accesorioPlaceholder(acc), nombre: rotulo.toLowerCase() };
 
   return (
-    <div style={{ paddingBottom: 90, maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-      {/* HERO: imagen + cabecera */}
-      <div style={{
-        display: vp.isDesktop ? 'grid' : 'block',
-        gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : 'none', gap: 24,
-        padding: `20px ${padX}px 0`,
-      }}>
-        <div style={{
-          position: 'relative', background: `radial-gradient(circle at 50% 45%, ${P.bgElev} 0%, ${P.bg} 100%)`,
-          border: `1px solid ${P.border}`, minHeight: 240, aspectRatio: vp.isDesktop ? 'auto' : '4/3',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-        }}>
-          <window.TacticalCorners size={14} color={P.amber} thickness={2} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
-          {window.isRealImage(acc.img) && !imgError ? (
-            <img src={acc.img} alt={acc.nombre} onError={() => setImgError(true)}
-              style={{ maxWidth: '82%', maxHeight: '82%', objectFit: 'contain', position: 'relative', zIndex: 1 }} />
-          ) : (
-            <AccNoImage acc={acc} />
-          )}
-          <span style={{
-            position: 'absolute', top: 10, left: 10,
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
-            // Va sobre la PLACA fotográfica, clara en los dos temas: la tinta
-            // se fija a --tinta-placa (CLARO.tinta2 se aclara en oscuro).
-            background: 'rgba(250,249,245,0.92)', color: 'var(--tinta-placa)', padding: '3px 8px', borderRadius: 4, letterSpacing: '0.1em',
-            textTransform: 'uppercase', borderLeft: `2px solid ${P.amber}`,
-          }}>{cat.icon} {cat.label}</span>
-        </div>
+    <div style={{ paddingBottom: 90 }}>
+     <div ref={talon.fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
-        <div style={{ paddingTop: vp.isDesktop ? 4 : 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            {window.CountryFlag && <window.CountryFlag pais={acc.pais} height={14} />}
-            <span style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
-              letterSpacing: '0.16em', textTransform: 'uppercase',
-            }}>{acc.marca}{acc.pais ? ` · ${acc.pais}` : ''}</span>
-          </div>
-          <h1 style={{
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 30 : 25,
-            color: P.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.08, margin: '0 0 12px',
-          }}>{acc.nombre}</h1>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-            <window.AvailBadge avail={acc.avail} />
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: P.bgCard, border: `1px solid ${P.border}`, padding: '3px 9px',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
-              letterSpacing: '0.08em', textTransform: 'uppercase',
-            }}><span style={{ color: P.amber }}>{cat.icon}</span>{cat.label}</span>
-          </div>
-          {acc.descripcion &&
-            <p style={{
-              fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17.5, color: P.textDim,
-              lineHeight: 1.65, margin: '0 0 6px', textWrap: 'pretty',
-            }}>{acc.descripcion}</p>
-          }
-        </div>
-      </div>
+      {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
+      <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
+        {/* `amx-carpeta--accesorio`: para colgar de ella el CSS que no debe tocar al arma. */}
+        <article className="amx-carpeta amx-carpeta--accesorio" aria-labelledby="ficha-nombre">
+          <span className="amx-carpeta-rotulo">{rotulo}</span>
 
-      {/* CUERPO en columnas en escritorio */}
-      <div style={{
-        display: vp.isDesktop ? 'grid' : 'block',
-        gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : 'none', gap: 24,
-        padding: `20px ${padX}px 0`,
-      }}>
-        {/* Columna izquierda: specs + compatibilidad */}
-        <div>
-          {acc.specs && acc.specs.length > 0 &&
-            <React.Fragment>
-              <window.SectionHeader>Especificaciones</window.SectionHeader>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
-                {acc.specs.map(([k, v], i) => (
-                  <div key={i} style={{
-                    display: 'flex', justifyContent: 'space-between', gap: 12,
-                    padding: '9px 12px',
-                    borderBottom: i < acc.specs.length - 1 ? `1px solid ${P.border}` : 'none',
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
-                  }}>
-                    <span style={{ color: P.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{k}</span>
-                    <span style={{ color: P.text, fontWeight: 600, textAlign: 'right' }}>{v}</span>
-                  </div>
-                ))}
+          {/* Mismo orden de lectura que el arma; estilo.css lo reparte por
+              filas desde 1024px. */}
+          <div className="amx-carpeta-grid">
+            <header className="amx-carpeta-cab">
+              {/* El nombre corto de título y el completo debajo (Saulo, 15-sep-2026). */}
+              <h1 id="ficha-nombre" className="t-titulo">{acc.corto || acc.nombre}</h1>
+              {acc.corto && <p className="amx-carpeta-completo">{acc.nombre}</p>}
+              {acc.descripcion && <p className="amx-carpeta-desc">{acc.descripcion}</p>}
+            </header>
+
+            <div className="amx-carpeta-foto">
+              <div className="amx-copia">
+                <span className="amx-copia-clip" aria-hidden="true" />
+                <window.ArmaPolaroid arma={acc} pie="procedencia" silueta={silueta} />
+                <span className="amx-copia-sello">
+                  <window.SelloLegal key={acc.id} avail={acc.avail} etiqueta={disp ? disp.label : ''}
+                    className="amx-sello--estampa" />
+                </span>
               </div>
-            </React.Fragment>
-          }
-
-          {acc.compatibilidad && acc.compatibilidad.length > 0 &&
-            <React.Fragment>
-              <window.SectionHeader>Compatible con</window.SectionHeader>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-                {acc.compatibilidad.map((c, i) => (
-                  <span key={i} style={{
-                    background: P.bgCard, border: `1px solid ${P.border}`,
-                    padding: '6px 10px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
-                    color: P.text, letterSpacing: '0.06em',
-                  }}>{c}</span>
-                ))}
-              </div>
-            </React.Fragment>
-          }
-        </div>
-
-        {/* Columna derecha: PRECIO + HISTORIAL */}
-        <div>
-          <window.SectionHeader>Precio de Referencia</window.SectionHeader>
-          <div style={{
-            background: P.bgCard, border: `1px solid ${P.amber}`, padding: '14px',
-            marginBottom: 16, position: 'relative',
-          }}>
-            <window.TacticalCorners size={12} color={P.amber} thickness={2} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted,
-                letterSpacing: '0.18em', textTransform: 'uppercase',
-              }}>◆ Precio Actual (con IVA)</span>
-              {curAut &&
-                <span title={curAut.nombre} style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-                  letterSpacing: '0.12em', color: '#000', background: curAut.color,
-                  padding: '2px 7px', flexShrink: 0,
-                }}>{curAut.sigla}</span>}
             </div>
-            <div style={{
-              fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23,
-              color: P.amber, letterSpacing: '0.02em',
-            }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : acc.priceExact}</div>
-            <window.NotaErrata historial={priceHistory} />
-            {acc.dcamRef &&
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted,
-                marginTop: 4, lineHeight: 1.4,
-              }}>Ref. {curSigla}: {acc.dcamRef}</div>
-            }
-            {currentManual && currentManual.url &&
-              <a href={currentManual.url} target="_blank" rel="noopener" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9,
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
-                textDecoration: 'none', border: `1px solid ${P.amber}`, padding: '9px 12px',
-                minHeight: 40, boxSizing: 'border-box', letterSpacing: '0.04em',
-              }}>
-                <span aria-hidden="true">▦</span>
-                Ver inventario fuente · {accFmtDate(currentManual.fecha)}
-                <span aria-hidden="true">↗</span>
-              </a>
-            }
-            {(() => {
-              // Regla: SOLO cuenta el ÚLTIMO inventario de cada sucursal (DCAM y OTCA
-              // por separado). Si el accesorio no aparece en él (pero antes sí estuvo
-              // en la sucursal), se muestra AGOTADO.
-              const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'DCAM'))) || 'DCAM';
-              const allMan = (window.ACCESORIOS_MANUALES || []).slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
-              const latestOf = (s) => allMan.find((m) => autOf(m) === s) || null;
-              const everIn = (s) => priceHistory.some((h) => autOf(manualById(h.manualId)) === s);
-              const branches = [];
-              ['DCAM', 'OTCA'].forEach((s) => {
-                const man = latestOf(s); if (!man) return;
-                const rec = priceHistory.find((h) => h.manualId === man.id);
-                if (rec && rec.qty != null) branches.push({ sigla: s, qty: rec.qty, manual: man, agotado: false });
-                else if (everIn(s)) branches.push({ sigla: s, qty: null, manual: man, agotado: true });
-              });
-              if (!branches.length) return null;
-              return (
-                <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${P.border}` }}>
-                  {branches.map((b, bi) => (
-                    <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                        {b.agotado ? (
-                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: window.CLARO.alerta, letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
-                        ) : (
-                          <React.Fragment>
-                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: window.CLARO.ok }}>{Number(b.qty).toLocaleString('es-MX')}</span>
-                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>disponibles en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
-                          </React.Fragment>
-                        )}
-                      </div>
-                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
-                        {b.agotado ? 'No aparece en el último inventario: ' : 'De acuerdo a '}
-                        {b.manual && b.manual.url ? (
-                          <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: P.amber, textDecoration: 'none', borderBottom: `1px solid ${P.amber}` }}>▦ {b.manual.nombre} ↗</a>
-                        ) : (
-                          <span style={{ color: P.textMuted }}>{b.manual ? b.manual.nombre : 'inventario oficial ' + b.sigla}</span>
-                        )}
-                        {b.manual ? (b.agotado ? ' (' + accFmtDate(b.manual.fecha) + ').' : ', publicado el ' + accFmtDate(b.manual.fecha) + '.') : '.'}
-                      </div>
-                    </div>
-                  ))}
-                  <div style={window.amxProsa({ fontSize: 13, color: P.textMuted, marginTop: 7, lineHeight: 1.5 })}>
-                    ⚠ Dato <b style={{ color: P.textDim }}>histórico</b> por sucursal, no en tiempo real: la disponibilidad actual puede variar.
+
+            <div className="amx-carpeta-ficha">
+              <window.FichaTecnica arma={acc} filas={filas} />
+            </div>
+
+            <div className="amx-carpeta-talon">
+              <window.TalonComprobante talonRef={talon.talonRef}
+                precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
+                ultimoConocido={inv.ultimoConocido} historial={priceHistory} />
+              {etOpin.hay &&
+                <p className="amx-copia-opinion">Opiniones: <b>{etOpin.label}</b></p>}
+            </div>
+
+            <div className="amx-carpeta-almacen">
+              <window.TarjetaAlmacen filas={inv.sucursales} referencia={acc.dcamRef}
+                sigla={inv.sigla} nivelPrecio={acc.priceLvl} movil={!ancho} />
+            </div>
+
+            <div className="amx-carpeta-legal amx-separadores">
+              <window.FichaTabs activo={tab} onCambiar={setTab}>
+                {compat.caso !== 'nada' &&
+                  <window.FichaPanel label="Compatibilidad">
+                    <HojaCompatibilidad key={acc.id} compat={compat} onOpenArma={onOpenArma} />
+                  </window.FichaPanel>}
+                <window.FichaPanel label="Legalidad">
+                  <div className={'amx-oficio-banda amx-oficio-banda--' + sello.tono}>
+                    <span>Clasificación: {sello.texto}</span>
+                    {disp && <small>{disp.label}</small>}
                   </div>
-                </div>
-              );
-            })()}
-            <div style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim, marginTop: 9,
-            }}>Nivel: <window.PriceLevel lvl={acc.priceLvl} size={13} /></div>
+                  {disp && <p className="amx-oficio-texto">{disp.desc}</p>}
+                  <button type="button" className="amx-oficio-boton" onClick={() => onNav && onNav('legal')}>
+                    § Guía legal completa
+                  </button>
+                </window.FichaPanel>
+              </window.FichaTabs>
+            </div>
+
+            {priceHistory.length > 0 &&
+              <div className="amx-carpeta-historial">
+                <window.HistorialPrecios historial={priceHistory} manualById={manualById} movil={!ancho} />
+              </div>}
           </div>
-
-          {/* HISTORIAL DE PRECIOS */}
-          {priceHistory.length > 0 &&
-            <React.Fragment>
-              <window.SectionHeader>Historial de precios</window.SectionHeader>
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textDim,
-                letterSpacing: '0.04em', marginTop: -6, marginBottom: 10, lineHeight: 1.4,
-              }}>Según inventarios oficiales DCAM / OTCA</div>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
-                {priceHistory.slice().reverse().map((h, i) => {
-                  const man = manualById(h.manualId);
-                  const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
-                  return (
-                    <div key={i} style={{
-                      padding: '10px 12px',
-                      borderBottom: i < priceHistory.length - 1 ? `1px solid ${P.border}` : 'none',
-                      fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
-                      background: i === 0 ? 'rgba(221,213,196,0.06)' : 'transparent',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                          <span style={{
-                            color: i === 0 ? P.amber : P.textMuted, fontSize: 13, letterSpacing: '0.1em', flexShrink: 0,
-                          }}>{i === 0 ? '● ACTUAL' : '○'}</span>
-                          <span style={{ color: P.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
-                          {hAut &&
-                            <span title={hAut.nombre} style={{
-                              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-                              letterSpacing: '0.1em', color: '#000', background: hAut.color,
-                              padding: '1px 6px', flexShrink: 0,
-                            }}>{hAut.sigla}</span>}
-                        </div>
-                        <span style={{ color: P.textDim, fontSize: 14.5, flexShrink: 0 }}>{accFmtDate(h.date) || '—'}</span>
-                      </div>
-                      {man &&
-                        <div style={{
-                          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10,
-                          marginTop: 6, paddingLeft: 22,
-                        }}>
-                          <span style={{
-                            color: P.textMuted, fontSize: 13,
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                          }}>{man.nombre}</span>
-                          {man.url &&
-                            <a href={man.url} target="_blank" rel="noopener" style={{
-                              color: P.amber, fontSize: 13, textDecoration: 'none',
-                              borderBottom: `1px solid ${P.amber}`, flexShrink: 0, whiteSpace: 'nowrap',
-                            }}>▦ Ver PDF ↗</a>
-                          }
-                        </div>
-                      }
-                    </div>
-                  );
-                })}
-              </div>
-            </React.Fragment>
-          }
-
-          {/* Estatus legal */}
-          {availMeta &&
-            <React.Fragment>
-              <window.SectionHeader>Estatus Legal</window.SectionHeader>
-              <div style={{
-                background: P.bgCard, border: `1px solid ${window.amxColorAvail(availMeta.color)}`, boxShadow: window.CLARO.sombra,
-                padding: '12px 14px', marginBottom: 16,
-              }}>
-                <div style={{
-                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                  color: window.amxColorAvail(availMeta.color), textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
-                }}>{availMeta.label}</div>
-                <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
-                  {availMeta.desc}
-                </div>
-              </div>
-            </React.Fragment>
-          }
-        </div>
+        </article>
       </div>
 
-      {/* Armas compatibles en inventario */}
-      {armasComp.length > 0 &&
-        <div style={{ marginTop: 6 }}>
-          <window.CarouselSection
-            title={armasComp.length === 1 ? 'Arma compatible' : `Armas compatibles · ${armasComp.length}`}
-            items={armasComp}
-            renderItem={(a) => <window.ArmaCard arma={a} onClick={() => onOpenArma && onOpenArma(a.id)} />}
-          />
-        </div>
-      }
+      {/* ── ARMAS COMPATIBLES — todas, en expediente y sin ⇄ ─────────────── */}
+      {armas.length > 0 &&
+        <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-compatibles">
+          <window.CintaDymo id="ficha-compatibles">Armas compatibles</window.CintaDymo>
+          <div className="amx-hscroll amx-similares" style={{
+            display: ancho ? 'grid' : 'flex',
+            gridTemplateColumns: ancho ? 'repeat(4, 1fr)' : undefined,
+            gap: ancho ? 14 : 10,
+            overflowX: ancho ? 'visible' : 'auto',
+            margin: ancho ? 0 : `0 -${PAD}px`,
+            padding: ancho ? 0 : `0 ${PAD}px 4px`
+          }}>
+            {armas.map((a) =>
+              <div key={a.id} style={{ width: ancho ? 'auto' : 300, flexShrink: 0 }}>
+                <window.ArmaCard arma={a} onClick={() => onOpenArma && onOpenArma(a.id)} />
+              </div>)}
+          </div>
+        </section>}
 
-      {/* Relacionados */}
-      {relacionados.length > 0 &&
-        <div style={{ marginTop: 6 }}>
-          <window.CarouselSection
-            title="Accesorios relacionados"
-            items={relacionados}
-            renderItem={(a) => <AccesorioCard acc={a} onClick={() => onOpenAccesorio(a.id)} />}
-          />
+      {/* ── LA TARJETA DE COMENTARIOS ─────────────────────────────────── */}
+      <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-opiniones">
+        <window.CintaDymo id="ficha-opiniones">Opiniones</window.CintaDymo>
+        <div className="amx-comentarios-marco">
+          <window.OpinionBlock tipo="accesorio" entidadId={acc.id} entidadNombre={acc.nombre}
+            nombreTipo="accesorio" onNav={onNav} onReportReview={onReportReview} />
         </div>
-      }
-    </div>
+      </section>
+     </div>
+
+      {/* El talón fijo (móvil), sin casilla. Se oculta con la barra de
+          comparación, que ocupa el mismo hueco. */}
+      {!ancho && talon.mostrar && (compareIds || []).length === 0 &&
+        <window.TalonComprobante fijo
+          precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
+          ultimoConocido={inv.ultimoConocido} historial={priceHistory} />}
+      <window.ReportarError tipo="accesorio" titulo={acc.nombre} ruta={'/' + (window.amxSlugIndex().slugPorC[acc.id] || 'accesorios')} />    </div>
   );
 }
 window.AccesorioFicha = AccesorioFicha;

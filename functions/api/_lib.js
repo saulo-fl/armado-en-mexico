@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — utilidades compartidas de la API (Cloudflare Pages Functions)
 // Archivos con prefijo "_" NO se convierten en rutas: este módulo solo se importa.
 
@@ -24,6 +29,39 @@ export const APPEND_DOMAINS = ['visits', 'reviewsQueue', 'reports'];
 // es una tabla fila-por-reseña con COUNT, no subir el tope.
 export const RESENA_MIN = 100;
 export const RESENA_MAX = 1200;
+export const REPORT_MIN = 20;
+export const REPORT_MAX = 1200;
+
+const TIPOS_REPORTE = ['arma', 'accesorio', 'municion', 'campo', 'curso', 'otro'];
+const MOTIVOS_REPORTE = ['ilegal', 'irrespetuoso', 'fuera-de-tema', 'comercial', 'manipulacion', 'datos', 'otro'];
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function normalizeReport(item) {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) {
+    return { ok: false, error: 'reporte_invalido' };
+  }
+  const value = {
+    reviewId: String(item.reviewId || '').trim(),
+    tipo: String(item.tipo || '').trim(),
+    entidadId: String(item.entidadId == null ? '' : item.entidadId).trim(),
+    entidadNombre: String(item.entidadNombre || '').trim(),
+    reviewExcerpt: String(item.reviewExcerpt || '').trim(),
+    motivo: String(item.motivo || '').trim(),
+    detalle: String(item.detalle || '').trim(),
+    email: String(item.email || '').trim(),
+  };
+  const demasiadoLargo = value.reviewId.length > 80 || value.entidadId.length > 80
+    || value.entidadNombre.length > 120 || value.reviewExcerpt.length > 240
+    || value.email.length > 160;
+  if (demasiadoLargo) return { ok: false, error: 'campo_demasiado_largo' };
+  if (!TIPOS_REPORTE.includes(value.tipo)) return { ok: false, error: 'tipo_invalido' };
+  if (!MOTIVOS_REPORTE.includes(value.motivo)) return { ok: false, error: 'motivo_invalido' };
+  if (value.detalle.length < REPORT_MIN || value.detalle.length > REPORT_MAX) {
+    return { ok: false, error: 'detalle_invalido' };
+  }
+  if (value.email && !EMAIL.test(value.email)) return { ok: false, error: 'email_invalido' };
+  return { ok: true, value };
+}
 
 // Límite de tamaño del cuerpo (anti-abuso). 1 MB cubre de sobra cualquier dominio.
 export const MAX_BODY = 1_000_000;
@@ -82,7 +120,9 @@ export function mergeAppend(domain, current, item) {
   }
   if (domain === 'reports') {
     const arr = Array.isArray(current) ? current.slice() : [];
-    const clean = sanitizeItem(item);
+    const normalized = normalizeReport(item);
+    if (!normalized.ok) return arr;
+    const clean = normalized.value;
     clean.id = 'd_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
     clean.submittedAt = new Date().toISOString();
     clean.status = 'pending';

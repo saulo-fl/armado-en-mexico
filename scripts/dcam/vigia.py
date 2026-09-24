@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# Armado en México — Copyright (C) 2026 Saulo Flores León
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 """Vigía DCAM: detecta cambios en la página oficial de comercialización de armas
 de la Secretaría de la Defensa (gob.mx), archiva lo nuevo y avisa por Telegram.
 
@@ -312,7 +317,23 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
     exist = ", ".join(nombre_archivo(u).split("_", 1)[1] for u, d in actuales.items() if d["tipo"] == "existencias")
     n_img = sum(1 for d in actuales.values() if d["tipo"] == "imagen")
     msgs.append({"texto": f"✅ DCAM vigía · {fecha(ahora)} · {' · '.join(partes) or 'sin cambios'}"
-                          f" · existencias: {exist} · {n_img} imágenes" + _codigo_viejo()})
+                          f" · existencias: {exist} · {n_img} imágenes"})
+
+    # Señal para el conciliador: existencias nuevas/cambiadas con PDF ya en disco.
+    # Solo escribe la bandera; el .path unit la observa y dispara conciliar.sh.
+    exist_nuevas = [u for u in cambios["nuevos"] + cambios["cambiados"]
+                    if actuales[u]["tipo"] == "existencias" and u in archivos]
+    if exist_nuevas:
+        senal = dir_base / "pendiente-conciliar.json"
+        senal.write_text(json.dumps({
+            "fecha": fecha(ahora),
+            "pdfs": [str(archivos[u]) for u in exist_nuevas],
+            "shas": {actuales[u]["etiqueta"]: actuales[u]["sha256"] for u in exist_nuevas},
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    msgs[-1]["texto"] += " · señal escrita" if exist_nuevas else " · sin señal"
+    msgs[-1]["texto"] += _codigo_viejo()
+
     guardar_estado(ruta_estado, nuevo_estado)
     return 0, msgs
 

@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Contraste WCAG para "Armado en México".
 //
 //   node contraste.mjs                 → audita LOS DOS TEMAS del sitio
@@ -130,6 +135,9 @@ const TEXTO = [
   ['blanco sobre el rojo de relleno',  '--blanco', '--rojo', 4.5],
   ['placeholder sobre el papel',       '--placeholder', '--papel', 4.5],
   ['gris-2 (gráfico) sobre el papel',  '--gris-2', '--papel', 3],
+  ['tinta sobre la hoja de filtro',    '--tinta', '--hoja-filtro', 4.5],
+  ['tinta-2 sobre la hoja de filtro',  '--tinta-2', '--hoja-filtro', 4.5],
+  ['casilla y marca sobre la hoja',    '--hair-hi', '--hoja-filtro', 3],
 ];
 
 const MARCA = [
@@ -175,6 +183,10 @@ const PAPELERIA = [
   ['sello civil sobre la etiqueta',    '--sello-civil', '--etiqueta', 4.5],
   ['tinta sobre la placa de latón',    '--manila-tinta', '--laton', 4.5],
   ['letra sobre la cinta Dymo',        '--dymo-letra', '--dymo', 4.5],
+  ['rotulador (trazo) sobre el fichero','--rotulador', '--fichero', 3],
+  ['cifras de la tira sobre el oficio', '--sello-restr', '--oficio', 4.5],
+  ['tinta-2 de ficha sobre el oficio',  '--ficha-tinta-2', '--oficio', 4.5],
+  ['rótulo del toldo sobre la lona',    '--lona-crema', '--lona-verde', 4.5],
 ];
 
 // Las superficies NO se miden con el umbral de WCAG —dos fondos no son texto—

@@ -1,9 +1,18 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — App principal (router + estado + responsive)
 
 const { useState: useStateApp, useEffect: useEffectApp, useRef: useRefApp } = React;
 
 // ─── RUTEO POR URL ───────────────────────────────────────────────────────
 // Direcciones legibles y jerárquicas, pensadas para SEO/GEO:
+//   /arsenal                           inicio de la sección (el hub)
+//   /arsenal/catalogo                  el catálogo completo
+//   /arsenal/catalogo/dcam             catálogo filtrado por armería DCAM
+//   /arsenal/catalogo/otca             catálogo filtrado por armería OTCA
 //   /pistolas                          listado del tipo
 //   /pistolas/glock-19                 ficha del arma
 //   /cargadores                        listado de la categoría
@@ -16,6 +25,10 @@ const SCREEN_TO_PATH = {
   home: '', catalog: 'arsenal', accesorios: 'accesorios',
   calibres: 'calibres', campos: 'campos', experiencias: 'experiencias',
   compare: 'comparar', legal: 'legalidad', about: 'acerca',
+  entrevista: 'legalidad/puedo-comprar',
+  'legal-federal': 'legalidad/federal', 'legal-estatal': 'legalidad/estatal',
+  'legal-tramites': 'legalidad/tramites',
+  'legal-documentos': 'legalidad/documentos',
   faq: 'preguntas', menu: 'mas', traumaticas: 'traumaticas',
   soporte: 'soporte',
   municiones: 'municiones',
@@ -24,6 +37,11 @@ const PATH_TO_SCREEN = Object.keys(SCREEN_TO_PATH).reduce((m, s) => {
   if (SCREEN_TO_PATH[s]) m[SCREEN_TO_PATH[s]] = s;
   return m;
 }, {});
+// Requisitos y Permisos se fundieron en Trámites (22-sep-2026). Las dos direcciones
+// viejas siguen en enlaces y en el índice de los buscadores: el servidor las redirige
+// con `_redirects` (301) y aquí se resuelven por si llegan por dentro de la app.
+PATH_TO_SCREEN['legalidad/requisitos'] = 'legal-tramites';
+PATH_TO_SCREEN['legalidad/permisos'] = 'legal-tramites';
 
 // tipo de arma (dato) ↔ segmento de URL (plural, sin acentos)
 const TIPO_TO_PATH = {
@@ -49,7 +67,7 @@ function amxSlugIndex() {
   const key = DB.length + ':' + AC.length + ':' + MU.length;
   if (_slugIdx && _slugKey === key) return _slugIdx;
 
-  const idx = { aPorSlug: {}, slugPorA: {}, cPorSlug: {}, slugPorC: {}, mPorSlug: {}, slugPorM: {} };
+  const idx = { aPorSlug: {}, slugPorA: {}, cPorSlug: {}, slugPorC: {}, mPorSlug: {}, slugPorM: {}, nPorSlug: {}, slugNPorA: {} };
   // Desempate determinista: recorremos por id, y al repetirse un slug se le
   // añade -2, -3… Así la URL de una ficha no cambia al añadir otras.
   const unico = (mapa, base) => {
@@ -64,6 +82,12 @@ function amxSlugIndex() {
     const rama = TIPO_TO_PATH[a.tipo] || 'otras';
     const s = unico(idx.aPorSlug, rama + '/' + amxSlug(a.nombre));
     idx.aPorSlug[s] = a.id; idx.slugPorA[a.id] = s;
+  });
+  // Comparador: el slug del NOMBRE, sin la rama de tipo
+  // (/comparar/ruger-lcp-vs-ruger-lcp-max). Mismo desempate por id que las fichas.
+  porId(DB).forEach((a) => {
+    const s = unico(idx.nPorSlug, amxSlug(a.nombre));
+    idx.nPorSlug[s] = a.id; idx.slugNPorA[a.id] = s;
   });
   porId(AC).forEach((c) => {
     const s = unico(idx.cPorSlug, amxSlug(c.categoria || 'accesorios') + '/' + amxSlug(c.nombre));
@@ -82,25 +106,38 @@ function amxSlugIndex() {
 }
 window.amxSlugIndex = amxSlugIndex;
 
-function amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter) {
+function amxBuildPath(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds) {
   const idx = amxSlugIndex();
+  if (screen === 'compare') return window.amxRutaComparar(compareIds, idx.slugNPorA);
   if (screen === 'product') return idx.slugPorA[productId] || 'arsenal';
   if (screen === 'accesorio') return idx.slugPorC[accesorioId] || 'accesorios';
   if (screen === 'municion') return 'municiones/' + (idx.slugPorM[municionId] || '');
+  if (screen === 'calibre') return 'calibres/' + amxSlug(calibreId || '');
   // Listados por rama: /pistolas, /cargadores…
   if (screen === 'catalog' && catalogFilter && catalogFilter.mode === 'tipo' && TIPO_TO_PATH[catalogFilter.value]) {
     return TIPO_TO_PATH[catalogFilter.value];
+  }
+  // El arsenal se separa en base y catálogo: /arsenal es el hub (sin filtro)
+  // y el listado vive en /arsenal/catalogo. Cada armería tiene su filtro
+  // rápido: /arsenal/catalogo/dcam y /arsenal/catalogo/otca. Los demás
+  // filtros rápidos del hub (p. ej. «disponibles») caen al catálogo general.
+  if (screen === 'catalog') {
+    if (!catalogFilter) return 'arsenal';
+    if (catalogFilter.mode === 'sucursal' && (catalogFilter.value === 'DCAM' || catalogFilter.value === 'OTCA')) {
+      return 'arsenal/catalogo/' + catalogFilter.value.toLowerCase();
+    }
+    return 'arsenal/catalogo';
   }
   if (screen === 'accesorios' && catalogFilter && catalogFilter.categoria && catalogFilter.categoria !== 'all') {
     return amxSlug(catalogFilter.categoria);
   }
   return SCREEN_TO_PATH[screen] || '';
 }
-function amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter) {
-  return APP_BASE + amxBuildPath(screen, productId, accesorioId, municionId, catalogFilter);
+function amxBuildUrl(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds) {
+  return APP_BASE + amxBuildPath(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds);
 }
 
-const VACIO = { screen: 'home', productId: null, accesorioId: null, municionId: null, catalogFilter: null };
+const VACIO = { screen: 'home', productId: null, accesorioId: null, municionId: null, calibreId: null, catalogFilter: null, compareIds: [] };
 function amxParsePath(pathname) {
   let rel = pathname || '';
   if (APP_BASE !== '/' && rel.indexOf(APP_BASE) === 0) rel = rel.slice(APP_BASE.length);
@@ -116,9 +153,41 @@ function amxParsePath(pathname) {
   if (seg.length === 1 && seg[0] === 'cursos') {
     return Object.assign({}, VACIO, { screen: 'experiencias' });
   }
+  // Comparador con armas: /comparar/<slug>[-vs-<slug>]
+  if (seg[0] === SCREEN_TO_PATH.compare && seg[1]) {
+    return Object.assign({}, VACIO, { screen: 'compare', compareIds: window.amxParComparar(seg[1], idx.nPorSlug) });
+  }
+  // El catálogo del arsenal y sus filtros rápidos por armería. /arsenal solo
+  // (un segmento) es el hub y lo resuelve PATH_TO_SCREEN; aquí son las ramas:
+  //   /arsenal/catalogo            listado completo
+  //   /arsenal/catalogo/dcam|otca  listado con la armería ya filtrada
+  // Una sigla desconocida vuelve al listado completo, no a la portada.
+  if (seg[0] === 'arsenal' && seg[1] === 'catalogo') {
+    const SIGLA = { dcam: 'DCAM', otca: 'OTCA' }[seg[2]];
+    return Object.assign({}, VACIO, { screen: 'catalog', catalogFilter: SIGLA
+      ? { mode: 'sucursal', value: SIGLA }
+      : { mode: 'all' } });
+  }
+  // Las ramas de Legalidad: /legalidad/tramites, /legalidad/puedo-comprar…
+  // Van ANTES de la búsqueda de un solo segmento porque esa exige `seg.length === 1`
+  // y estas son de dos; y antes del fallback de accesorios, que si no se las tragaría.
+  // Una rama desconocida cae en el hub de Legalidad, nunca en la portada: quien llega
+  // con un enlace viejo aterriza en la sección que buscaba.
+  if (seg[0] === SCREEN_TO_PATH.legal && seg[1]) {
+    return Object.assign({}, VACIO, { screen: PATH_TO_SCREEN[seg[0] + '/' + seg[1]] || 'legal' });
+  }
   // Pantallas con nombre propio (/arsenal, /calibres…) y el listado de municiones
   if (seg.length === 1 && PATH_TO_SCREEN[seg[0]]) {
     return Object.assign({}, VACIO, { screen: PATH_TO_SCREEN[seg[0]] });
+  }
+  // Ficha de un calibre: /calibres/<slug>. El id lleva puntos y espacios
+  // («.30-06 Sprg»), así que la dirección guarda su slug y aquí se busca de
+  // vuelta. Un slug que no existe cae en la guía, no en la portada.
+  if (seg[0] === SCREEN_TO_PATH.calibres && seg[1]) {
+    const cal = (window.CALIBRES || []).find((c) => amxSlug(c.id) === seg[1]);
+    return cal
+      ? Object.assign({}, VACIO, { screen: 'calibre', calibreId: cal.id })
+      : Object.assign({}, VACIO, { screen: 'calibres' });
   }
   // Ficha de munición: /municiones/<slug>
   if (seg[0] === SCREEN_TO_PATH.municiones && seg[1]) {
@@ -165,23 +234,50 @@ function App() {
   const [productId, setProductId] = useStateApp(_init.productId);
   const [accesorioId, setAccesorioId] = useStateApp(_init.accesorioId);
   const [municionId, setMunicionId] = useStateApp(_init.municionId);
+  const [calibreId, setCalibreId] = useStateApp(_init.calibreId);
   const [catalogFilter, setCatalogFilter] = useStateApp(_init.catalogFilter);
-  const [compareIds, setCompareIds] = useStateApp([]);
-  const [pickerSlot, setPickerSlot] = useStateApp(null);
+  const [compareIds, setCompareIds] = useStateApp(_init.compareIds);
+  // El lado del comparador que se está eligiendo en la búsqueda ('a', 'b' o null).
+  const [buscarLado, setBuscarLado] = useStateApp(null);
   const [history, setHistory] = useStateApp([]);
   const skipPush = useRefApp(false);
 
-  // URL ↔ pantalla: empuja una nueva dirección al cambiar de pantalla
+  // Contexto de denuncia: solo en memoria, se borra al salir de /soporte
+  const [reportContext, setReportContext] = useStateApp(null);
+
+  const openReviewReport = (context) => {
+    setHistory((h) => [...h, { screen, productId, accesorioId, municionId, catalogFilter }]);
+    setReportContext(context);
+    setScreen('soporte');
+  };
+
   useEffectApp(() => {
+    if (screen !== 'soporte') setReportContext(null);
+  }, [screen]);
+
+  // URL ↔ pantalla: empuja una nueva dirección al cambiar de pantalla. Dentro del
+  // comparador, cambiar o quitar un arma REEMPLAZA la dirección en vez de apilar
+  // una por toque; y al llegar por un enlace con un slug que no existe, la
+  // normaliza sin dejar la mala en el historial.
+  const pantallaAnterior = useRefApp(_init.screen);
+  useEffectApp(() => {
+    // Lo mismo al cambiar de separador en la vitrina de accesorios (15-sep-2026):
+    // /accesorios ↔ /cargadores no apila una entrada del historial por pestaña.
+    const reemplazar = (screen === 'compare' || screen === 'accesorios') && pantallaAnterior.current === screen;
+    pantallaAnterior.current = screen;
     if (skipPush.current) { skipPush.current = false; return; }
     // Basta comparar la dirección que toca con la que hay. Al depender también
     // del filtro, /arsenal y /pistolas son direcciones distintas.
-    const url = amxBuildUrl(screen, productId, accesorioId, municionId, catalogFilter);
+    const url = amxBuildUrl(screen, productId, accesorioId, municionId, calibreId, catalogFilter, compareIds);
     if (window.location.pathname === url) return;
-    try { window.history.pushState({ screen, productId, accesorioId, municionId }, '', url); } catch (e) {}
-  }, [screen, productId, accesorioId, municionId, catalogFilter]);
+    try {
+      window.history[reemplazar ? 'replaceState' : 'pushState']({ screen, productId, accesorioId, municionId, calibreId }, '', url);
+    } catch (e) {}
+  }, [screen, productId, accesorioId, municionId, catalogFilter, compareIds, calibreId]);
 
   // Botón atrás/adelante del navegador → aplica la pantalla de la URL
+  const idsVivos = useRefApp(compareIds);   // para onPop, que se registra una sola vez
+  idsVivos.current = compareIds;
   useEffectApp(() => {
     const onPop = () => {
       const s = amxParsePath(window.location.pathname);
@@ -191,7 +287,23 @@ function App() {
       setProductId(s.productId);
       setAccesorioId(s.accesorioId);
       setMunicionId(s.municionId);
+      setCalibreId(s.calibreId);
       setCatalogFilter(s.catalogFilter);
+      setReportContext(null);
+      // En el comparador manda la selección EN MEMORIA, no la de la dirección:
+      // la entrada del historial guarda las armas de cuando se escribió, y al
+      // volver con «atrás» pisaba lo marcado después en otra ficha (se veía el
+      // comparador vacío). Se reescribe la dirección con las armas actuales aquí
+      // y no en el efecto de la URL: saltando de un comparador a otro (mantener
+      // pulsado «atrás») no cambia ningún estado y el efecto no correría; y por
+      // eso mismo skipPush vuelve a false, o se tragaría el siguiente pushState.
+      if (s.screen === 'compare') {
+        skipPush.current = false;
+        const url = amxBuildUrl('compare', null, null, null, null, null, idsVivos.current);
+        if (window.location.pathname !== url) {
+          try { window.history.replaceState(window.history.state, '', url); } catch (e) {}
+        }
+      }
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -220,10 +332,50 @@ function App() {
 
   const scrollRef = useRefApp(null);
 
+  // Auto-hide BottomNav: visible por defecto, se oculta al bajar, reaparece al subir
+  const [navVisible, setNavVisible] = useStateApp(true);
+  const lastScrollY = useRefApp(0);
+
   useEffectApp(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     window.scrollTo(0, 0);
+    setNavVisible(true);
+    lastScrollY.current = 0;
   }, [screen, productId]);
+
+  // Dirección de scroll → ocultar/mostrar BottomNav en móvil.
+  // Escuchamos en el scroll-body Y en window: según la geometría del
+  // contenido el scroll puede ocurrir en cualquiera de los dos.
+  useEffectApp(() => {
+    if (!vp.isMobile) return;
+    const el = scrollRef.current;
+    let ticking = false;
+    const getY = () => {
+      const ey = el ? el.scrollTop : 0;
+      const wy = window.scrollY || window.pageYOffset || 0;
+      return Math.max(ey, wy);
+    };
+    lastScrollY.current = getY();
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const y = getY();
+        const delta = y - lastScrollY.current;
+        lastScrollY.current = y;
+        if (delta > 8) setNavVisible(false);
+        else if (delta < -4) setNavVisible(true);
+        ticking = false;
+      });
+    };
+    const opts = { passive: true };
+    if (el) el.addEventListener('scroll', onScroll, opts);
+    window.addEventListener('scroll', onScroll, opts);
+    return () => {
+      if (el) el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [vp.isMobile]);
 
   const navigate = (target, filter) => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
@@ -240,14 +392,6 @@ function App() {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     setProductId(id);
     setScreen('product');
-    if (pickerSlot !== null) {
-      setCompareIds(ids => {
-        const next = [...ids];
-        next[pickerSlot] = id;
-        return next.filter(Boolean);
-      });
-      setPickerSlot(null);
-    }
   };
 
   const openAccesorio = (id) => {
@@ -260,6 +404,12 @@ function App() {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     setMunicionId(id);
     setScreen('municion');
+  };
+
+  const openCalibre = (id) => {
+    setHistory(h => [...h, { screen, productId, catalogFilter }]);
+    setCalibreId(id);
+    setScreen('calibre');
   };
 
   const goBack = () => {
@@ -301,28 +451,41 @@ function App() {
 
   const clearCompare = () => setCompareIds([]);
   const removeFromCompare = (id) => setCompareIds(ids => ids.filter(x => x !== id));
-  const openPickerForSlot = (slot) => {
-    setPickerSlot(slot);
-    setHistory(h => [...h, { screen, productId, catalogFilter }]);
-    setCatalogFilter({ mode: 'all' }); // mostrar el listado (no el hub) para elegir arma
-    setScreen('catalog');
-  };
+
+  // Elegir desde la búsqueda del comparador: el arma entra en SU lado ('a' la
+  // primera, 'b' la segunda) y sustituye a la que hubiera. El orden importa: la
+  // tira compara la segunda contra la primera y la URL lo escribe así.
+  const ponerEnComparacion = (lado, id) => setCompareIds((ids) => {
+    const next = ids.slice(0, 2);
+    const i = lado === 'b' ? 1 : 0;
+    if (i < next.length) next[i] = id; else next.push(id);
+    return next.filter((x, k) => next.indexOf(x) === k);
+  });
+
+  // Una búsqueda abierta no sobrevive a salir del comparador (atrás del navegador).
+  useEffectApp(() => { if (screen !== 'compare') setBuscarLado(null); }, [screen]);
 
   const titles = {
     home: '', catalog: 'Arsenal', product: 'Ficha',
     accesorios: 'Accesorios', accesorio: 'Ficha',
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
+    entrevista: '¿Puedo comprar un arma?',
+    'legal-federal': 'Federal', 'legal-estatal': 'Por estado', 'legal-tramites': 'Trámites',
+    'legal-documentos': 'Documentos legales',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
-    calibres: 'Calibres', campos: 'Campos de tiro', experiencias: 'Experiencias',
+    calibres: 'Calibres', calibre: 'Calibre', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas', 'entrevista', 'legal-federal', 'legal-estatal', 'legal-tramites', 'legal-documentos'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
-    legal: 'legal', menu: 'menu', about: 'about', faq: 'faq',
-    calibres: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
+    legal: 'legal', entrevista: 'legal',
+    'legal-federal': 'legal', 'legal-estatal': 'legal', 'legal-tramites': 'legal',
+    'legal-documentos': 'legal',
+    menu: 'menu', about: 'about', faq: 'faq',
+    calibres: 'menu', calibre: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
     soporte: 'menu',
     municiones: 'menu', municion: 'menu',
     accesorios: 'accesorios', accesorio: 'accesorios',
@@ -346,26 +509,41 @@ function App() {
       onOpenAccesorio={openAccesorio}
       onOpenMunicion={openMunicion}
       onNav={navigate}
+      onReportReview={openReviewReport}
       compareIds={compareIds}
       toggleCompare={toggleCompare} />;
   } else if (screen === 'compare') {
     content = <window.CompareScreen ids={compareIds}
       onOpenArma={openArma}
       onNav={navigate}
-      removeFromCompare={removeFromCompare}
-      openPickerForSlot={openPickerForSlot} />;
+      onPoner={ponerEnComparacion}
+      onQuitar={removeFromCompare}
+      buscarLado={buscarLado}
+      onBuscar={setBuscarLado} />;
   } else if (screen === 'legal') {
-    content = <window.LegalScreen onNav={navigate} />;
+    content = <window.LegalidadHub onNav={navigate} />;
+  } else if (screen === 'legal-federal') {
+    content = <window.LegalidadFederal onNav={navigate} />;
+  } else if (screen === 'legal-estatal') {
+    content = <window.LegalidadEstatal onNav={navigate} />;
+  } else if (screen === 'legal-tramites') {
+    content = <window.LegalidadTramites onNav={navigate} />;
+  } else if (screen === 'legal-documentos') {
+    content = <window.LegalidadDocumentos onNav={navigate} />;
+  } else if (screen === 'entrevista') {
+    content = <window.EntrevistaScreen onNav={navigate} />;
   } else if (screen === 'about') {
     content = <window.AboutScreen />;
   } else if (screen === 'faq') {
     content = <window.FAQScreen />;
   } else if (screen === 'soporte') {
-    content = <window.SoporteScreen onNav={navTab} />;
+    content = <window.SoporteScreen onNav={navTab} reportContext={reportContext} />;
   } else if (screen === 'menu') {
     content = <window.MenuScreen onNav={navigate} onTutorial={replayTutorial} />;
   } else if (screen === 'calibres') {
-    content = <window.CalibresScreen onOpenArma={openArma} onNav={navigate} />;
+    content = <window.CalibresScreen onNav={navigate} onAbrirCalibre={openCalibre} />;
+  } else if (screen === 'calibre') {
+    content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onNav={navigate} />;
   // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son
   // de relleno (ver data-extra.js). CamposScreen y CursosScreen siguen escritas
   // en screens-3.jsx — para reactivarlas basta con volver a montarlas aqui.
@@ -378,9 +556,10 @@ function App() {
   } else if (screen === 'traumaticas') {
     content = <window.TraumaticasScreen onNav={navigate} />;
   } else if (screen === 'accesorios') {
-    content = <window.AccesoriosScreen initialFilter={catalogFilter} onOpenAccesorio={openAccesorio} onNav={navigate} />;
+    content = <window.AccesoriosScreen initialFilter={catalogFilter} onOpenAccesorio={openAccesorio}
+      onCategoria={(id) => setCatalogFilter(id === 'all' ? null : { categoria: id })} />;
   } else if (screen === 'accesorio') {
-    content = <window.AccesorioFicha accesorioId={accesorioId} onOpenAccesorio={openAccesorio} onOpenArma={openArma} onNav={navigate} />;
+    content = <window.AccesorioFicha accesorioId={accesorioId} onOpenArma={openArma} onNav={navigate} onReportReview={openReviewReport} compareIds={compareIds} />;
   } else if (screen === 'municiones') {
     content = <window.MunicionesScreen initialFilter={catalogFilter} onOpenMunicion={openMunicion} onNav={navigate} />;
   } else if (screen === 'municion') {
@@ -405,21 +584,6 @@ function App() {
           back={isInternal}
           onBack={goBack}
           onHome={() => navTab('home')}
-          right={pickerSlot !== null ? (
-            <span style={{
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 13,
-              // Iba en PALETTE.amber, que es el VERDE de marca: sobre el header
-              // verde daba 1.68:1 y su borde 1.28:1 — invisible. Ahora que la
-              // barra no lleva titulo, esta insignia es medio contenido.
-              color: PALETTE.sobreMarca,
-              letterSpacing: '0.15em',
-              background: 'rgba(250,249,245,0.12)',
-              border: '1px solid rgba(250,249,245,.35)',
-              borderRadius: 4,
-              padding: '4px 7px',
-            }}>SLOT {pickerSlot === 0 ? 'A' : 'B'}</span>
-          ) : null}
         />
       ) : (
         <window.TopNav
@@ -429,37 +593,20 @@ function App() {
         />
       )}
 
-      {/* Picker mode banner on desktop */}
-      {!vp.isMobile && pickerSlot !== null && (
-        <div style={{
-          position: 'sticky', top: 64, zIndex: 40,
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca,
-          padding: '8px 28px',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 15.5, letterSpacing: '0.15em',
-          textTransform: 'uppercase',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <span>◆ MODO SELECCIÓN — Slot {pickerSlot === 0 ? 'A' : 'B'} · elige un arma para añadirla al comparador</span>
-          <button onClick={() => { window.cancelPicker && window.cancelPicker(); }} style={{
-            // Va DENTRO del banner verde, así que hereda su problema: negro sobre
-            // #173A32 da 1.69:1. En claro sobre el mismo verde, 11.81:1.
-            background: 'rgba(250,249,245,0.14)', color: PALETTE.bgCard,
-            border: '1px solid rgba(250,249,245,0.55)',
-            padding: '3px 8px', cursor: 'pointer',
-            fontFamily: 'inherit', fontSize: 14.5, letterSpacing: '0.1em',
-            textTransform: 'uppercase', fontWeight: 700,
-          }}>Cancelar</button>
-        </div>
-      )}
-
       {/* Scroll body */}
       <div ref={scrollRef} style={{
         flex: 1, minHeight: 0,
         overflowY: vp.isMobile ? 'auto' : 'visible',
+        overflowX: 'hidden',
         WebkitOverflowScrolling: 'touch',
+        maxWidth: '100vw',
       }}>
-        {content}
+        {/* El cortafuegos: si la pantalla revienta, se lleva solo este hueco.
+            Cabecera, navegación y pie siguen en pie. La llave es la pantalla
+            actual, para que al navegar el aviso se suelte. */}
+        <window.PantallaRota llave={screen} onNav={navTab}>
+          {content}
+        </window.PantallaRota>
         {/* PIE DE OFICIO — global, no solo del Home. Tres razones:
             (1) lo que lleva dentro son avisos de SITIO —divulgativo, no somos
                 gobierno, marcas de terceros—, no de pantalla;
@@ -475,6 +622,7 @@ function App() {
       {vp.isMobile && compareIds.length > 0 && screen !== 'compare' && (
         <window.CompareFloat ids={compareIds}
           onOpen={() => { setHistory(h => [...h, { screen, productId, catalogFilter }]); setScreen('compare'); }}
+          onElegir={() => { setHistory(h => [...h, { screen, productId, catalogFilter }]); setScreen('compare'); setBuscarLado('b'); }}
           onClear={clearCompare} />
       )}
 
@@ -491,7 +639,7 @@ function App() {
           zIndex: 50,
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
-          ⇄ Comparar · {compareIds.length}/2
+          Ver comparador · {compareIds.length} {compareIds.length === 1 ? 'arma' : 'armas'}
         </button>
       )}
 
@@ -500,7 +648,8 @@ function App() {
         <window.BottomNav
           current={currentNavId}
           onNav={navTab}
-          compareCount={compareIds.length} />
+          compareCount={compareIds.length}
+          visible={navVisible} />
       )}
 
       {/* ─── TUTORIAL DE BIENVENIDA (overlay) ─── */}

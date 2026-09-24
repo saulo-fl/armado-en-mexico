@@ -1,3 +1,12 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+//
+// LOS DATOS de este fichero —la selección, la estructura y los textos
+// divulgativos— se ofrecen ADEMÁS bajo CC BY-SA 4.0; los hechos que contiene
+// no son de nadie (art. 14 fr. X LFDA). Detalle: LICENSE-CONTENIDO.md.
+
 // Armado en México — ACCESORIOS DCAM
 // =============================================================================
 // Catálogo divulgativo de accesorios de armamento de adquisición legal a través
@@ -24,13 +33,49 @@
 // ── Inventarios (PDFs oficiales gob.mx) ──────────────────────────────────────
 window.ACCESORIOS_MANUALES = [
   {
+    id: 'man_acc_2026_09_22',
+    nombre: 'Existencias de accesorios DCAM · 22 de septiembre 2026',
+    autoridad: 'DCAM',
+    fecha: '2026-09-22',
+    url: 'inventarios/dcam-accesorios-2026-09-22.pdf',
+    fileName: 'dcam-accesorios-2026-09-22.pdf',
+    primary: true,
+  },
+  {
+    id: 'man_acc_2026_09_18',
+    nombre: 'Existencias de accesorios DCAM · 18 de septiembre 2026',
+    autoridad: 'DCAM',
+    fecha: '2026-09-18',
+    url: 'inventarios/dcam-accesorios-2026-09-18.pdf',
+    fileName: 'dcam-accesorios-2026-09-18.pdf',
+    primary: false,
+  },
+  {
+    id: 'man_acc_2026_09_15',
+    nombre: 'Existencias de accesorios DCAM · 15 de septiembre 2026',
+    autoridad: 'DCAM',
+    fecha: '2026-09-15',
+    url: 'inventarios/dcam-accesorios-2026-09-15.pdf',
+    fileName: 'dcam-accesorios-2026-09-15.pdf',
+    primary: false,
+  },
+  {
+    id: 'man_acc_2026_09_14',
+    nombre: 'Existencias de accesorios DCAM · 14 de septiembre 2026',
+    autoridad: 'DCAM',
+    fecha: '2026-09-14',
+    url: 'inventarios/dcam-accesorios-2026-09-14.pdf',
+    fileName: 'dcam-accesorios-2026-09-14.pdf',
+    primary: false,
+  },
+  {
     id: 'man_acc_2026_09_11',
     nombre: 'Existencias de accesorios DCAM · 11 de septiembre 2026',
     autoridad: 'DCAM',
     fecha: '2026-09-11',
     url: 'inventarios/dcam-accesorios-2026-09-11.pdf',
     fileName: 'dcam-accesorios-2026-09-11.pdf',
-    primary: true,
+    primary: false,
   },
   {
     id: 'man_acc_2026_07_06',
@@ -112,9 +157,8 @@ window.ACCESORIO_CATEGORIES = {
 };
 
 // ── Imagen de respaldo por categoría ─────────────────────────────────────────
-// Los 36 accesorios del catálogo están HOY sin fotografía propia, así que este
-// respaldo se ve en el 100 % de las fichas y tarjetas de accesorio: no es un
-// caso raro, es la vista por defecto.
+// El respaldo de todo accesorio sin fotografía propia (la foto va en ACC_FOTO,
+// más abajo).
 //
 // Antes construía aquí un SVG en `data:` URI con fondo #1A1A1A y acentos
 // #F5C518: colores del TEMA OSCURO que el sitio abandonó en agosto. Sobre el
@@ -346,6 +390,10 @@ window.ACCESORIOS = [
   { ...amx(134, "Cargador .380 ACP · CZ P-07 (15 cart.)", "Česká Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 666.10,
     "CARGADOR PARA PISTOLA CAL. 0.380\" MARCA CESKA ZBROJOVKA MOD. CZ P-07, CAP. 15 CARTS.", [], [["Calibre", ".380 ACP"], ["Capacidad", "15 cartuchos"], ["Plataforma", "CZ P-07"]],
     "Cargador de 15 cartuchos para pistola Česká Zbrojovka CZ P-07 en .380 ACP. Existencia y precio del inventario OTCA 26-sep-2025 (Monterrey)."), priceManualId: 'man_acc_2025_09_26' },
+  // ── ALTA del inventario DCAM 18-sep-2026 ──
+  { ...amx(135, "Cargador .22 LR · CZ P-07 Kadet (10 cart.)", "Česká Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 535.91,
+    "CARGADOR CALIBRE .22 LR, MARCA CESKA ZBROJOVKA PARA PISTOLA MODELO CZ P-07 KADET, CON CAPACIDAD DE 10 CARTUCHOS.", [], [["Calibre", ".22 LR"], ["Capacidad", "10 cartuchos"], ["Plataforma", "CZ P-07 Kadet"]],
+    "Cargador de 10 cartuchos para el kit de conversión .22 LR de la pistola Česká Zbrojovka CZ P-07 Kadet. Existencia y precio del inventario DCAM (18-sep-2026)."), priceManualId: 'man_acc_2026_09_18' },
 ];
 
 // ── COMPATIBILIDAD ACCESORIO ↔ ARMA (14-sep-2026) ────────────────────────────
@@ -392,10 +440,11 @@ const ACC_COMPAT = {
   128: { armas: [45] },                // Beretta PX4 9 mm, 20 cart.
   129: { armas: [2] },                 // Taurus PT 58 HC Plus
   130: { armas: [17] },                // Browning Buck Mark
-  131: { armas: [57, 227, 228, 229] }, // CZ 457/455/512 .22 LR: CZ-USA SKU 12004 sirve a toda la serie 457 en .22 LR (#161)
+  131: { armas: [57, 227, 228, 229, 235, 236, 237, 238, 239, 240, 241, 242, 243] }, // CZ 457/455/512 .22 LR: CZ-USA SKU 12004 sirve a toda la serie 457 en .22 LR (#161); la MDT Chassis usa los cargadores de fábrica según MDT (#180)
   132: { armas: [] },                  // Tanfoglio FT-9-FS: no hay ficha
   133: { armas: [] },                  // Galil ACE 21/22: la ACE 21N del catálogo usa STANAG
   134: { armas: [8] },                 // CZ P-07 .380
+  135: { armas: [217] },               // CZ P-07 Kadet .22 LR
   201: { tipos: ['carabina','rifle','escopeta'], riel: true }, // MEPRO MOR: óptica de riel Picatinny, solo armas con `riel` (data.js)
   202: { armas: [] },                  // MEPRO GLS: mira de lanzagranadas 40 mm; no hay ficha
   301: { armas: [100, 223] },          // Culata TSK para DT11/DT10
@@ -407,6 +456,130 @@ window.ACCESORIOS.forEach(a => {
   const nombres = (a.compat.armas || []).map(id => (window.DB.find(x => x.id === id) || {}).nombre).filter(Boolean);
   if (nombres.length) a.compatibilidad = nombres;
 });
+
+// ── Nombre de letrero (15-sep-2026) ──────────────────────────────────────────
+// Lo que va rotulado en el letrero de su puesto en la vitrina de /accesorios: la
+// plataforma a la que sirve, con marca si cabe, y el calibre solo para
+// desempatar. Máximo 2 renglones a 360 px. Lista propuesta a Saulo; el nombre
+// completo sigue en la ficha y en el aria-label del puesto. auditar.js exige uno
+// por accesorio y sin repetir: al dar de alta un accesorio, añádelo aquí.
+const ACC_CORTO = {
+  101: 'Nordic .22 LR',        102: 'Mossberg 702',        103: 'CZ 805 Bren',
+  104: 'Benelli MR1',          105: 'Grand Power CP380',   106: 'IWI Jericho',
+  107: 'IWI Masada',           108: 'Springfield XD-M',    109: 'Springfield Echelon',
+  110: 'SIG P320',             111: 'Tippmann M4-22',      112: 'Browning 1911-380',
+  113: 'CZ Shadow 2',          114: 'AMSAC 9mm',           115: '5.56 polímero',
+  116: 'C-MAG G36',            117: 'C-MAG AR-15',         118: 'Taurus TH380',
+  119: 'CZ P-09 .22',          120: 'Glock 17',            121: 'Glock 19',
+  122: 'Glock 22',             123: 'Beretta 92FS',        124: 'Beretta 92FS .22',
+  125: 'Browning 1911-22',     126: 'OPT VM G2 12 GA',     127: 'OPT VM G2 20 GA',
+  128: 'Beretta PX4',          129: 'Taurus PT58',         130: 'Browning Buck Mark',
+  131: 'CZ 457',               132: 'Tanfoglio FT-9',      133: 'IWI Galil ACE',
+  134: 'CZ P-07',              135: 'CZ P-07 Kadet',
+  201: 'Mepro MOR',            202: 'Mepro GLS',
+  301: 'Culata DT11',
+  401: 'Mossberg 500',         402: 'Clips Rhino .38',
+};
+window.ACCESORIOS.forEach(a => { a.corto = ACC_CORTO[a.id] || ''; });
+
+// ── Tramos de los cargadores (16-sep-2026) ───────────────────────────────────
+// Saulo: «los cargadores deben tener sub-separaciones ya que son muchos… agrupado
+// todo por tipo de arma + calibre». La vitrina parte la sección en tramos con su
+// cinta Dymo chica (docs/DESIGN.md §5.7). Tipos: Pistolas, Rifles (los fusiles van
+// aquí) y Escopetas; .223 Rem y 5.56 van separados, como dicen los inventarios.
+// Los dos que no traen calibre en el dato:
+//   106 IWI Jericho  → 9mm      dcam-accesorios-2026-09-11.pdf: «JERICHO II 9mm … CALIBRE 9X19 MM»
+//   104 Benelli MR1  → .223 Rem el único rifle MR1 del inventario, «RIFLE CAL.223" REM BENELLI MR1»
+//                               (dcam-existencias-2026-09-11.pdf); la línea del cargador no lo dice.
+// Al dar de alta un cargador, añade aquí su tramo: auditar.js falla si falta.
+const ACC_TRAMO_ARMAS = [['pistola', 'Pistolas'], ['rifle', 'Rifles'], ['escopeta', 'Escopetas']];
+const ACC_TRAMO_CALIBRES = ['.22 LR', '.380 ACP', '9mm', '.40 S&W', '.223 Rem', '5.56', '12 GA', '20 GA'];
+const ACC_TRAMO = {
+  101: ['rifle', '.22 LR'],      102: ['rifle', '.22 LR'],      103: ['rifle', '5.56'],
+  104: ['rifle', '.223 Rem'],    105: ['pistola', '.380 ACP'],  106: ['pistola', '9mm'],
+  107: ['pistola', '9mm'],       108: ['pistola', '9mm'],       109: ['pistola', '9mm'],
+  110: ['pistola', '9mm'],       111: ['rifle', '.22 LR'],      112: ['pistola', '.380 ACP'],
+  113: ['pistola', '.380 ACP'],  114: ['pistola', '9mm'],       115: ['rifle', '5.56'],
+  116: ['rifle', '5.56'],        117: ['rifle', '5.56'],        118: ['pistola', '.380 ACP'],
+  119: ['pistola', '.22 LR'],    120: ['pistola', '9mm'],       121: ['pistola', '9mm'],
+  122: ['pistola', '.40 S&W'],   123: ['pistola', '9mm'],       124: ['pistola', '.22 LR'],
+  125: ['pistola', '.22 LR'],    126: ['escopeta', '12 GA'],    127: ['escopeta', '20 GA'],
+  128: ['pistola', '9mm'],       129: ['pistola', '.380 ACP'],  130: ['pistola', '.22 LR'],
+  131: ['rifle', '.22 LR'],      132: ['pistola', '.380 ACP'],  133: ['rifle', '5.56'],
+  134: ['pistola', '.380 ACP'],
+  135: ['pistola', '.22 LR'],
+};
+window.ACCESORIOS.forEach((a) => {
+  const t = ACC_TRAMO[a.id];
+  if (t) { a.arma = t[0]; a.calibreTramo = t[1]; }
+});
+window.ACCESORIO_TRAMOS = { armas: ACC_TRAMO_ARMAS, calibres: ACC_TRAMO_CALIBRES };
+
+// Los tramos de una sección de cargadores (piezas ya ordenadas por nombre corto):
+// por tipo de arma y, dentro, por calibre, en el orden de arriba. Si alguna pieza
+// no tiene un tramo válido devuelve null —la sección se pinta entera, como antes—
+// para no perderla de la vitrina.
+const _accTramos = (piezas) => {
+  const valido = (a) => ACC_TRAMO_ARMAS.some(([id]) => id === a.arma) && ACC_TRAMO_CALIBRES.includes(a.calibreTramo);
+  if (!piezas.every(valido)) return null;
+  const tramos = [];
+  ACC_TRAMO_ARMAS.forEach(([arma, nombre]) => ACC_TRAMO_CALIBRES.forEach((cal) => {
+    const deTramo = piezas.filter((a) => a.arma === arma && a.calibreTramo === cal);
+    if (deTramo.length) {
+      tramos.push({ id: arma + '-' + cal.replace(/[^a-z0-9]/gi, '').toLowerCase(), label: nombre + ' · ' + cal, piezas: deTramo });
+    }
+  }));
+  return tramos;
+};
+
+// ── Foto de la pieza (15-sep-2026) ───────────────────────────────────────────
+// La pieza sola, recortada con alfa sobre lienzo 1:1, aprobada por Saulo en la hoja
+// de contactos. El bloque lo reescribe `accesorios.py aplicar` (skill fotos-producto)
+// con lo que hay en imagenes/accesorios/. Sin entrada, la vitrina y la ficha caen a
+// la silueta de su categoría.
+/* ↓ generado por accesorios.py · no editar a mano ↓ */
+const ACC_FOTO = {
+  104: 'imagenes/accesorios/104.webp?v=3c67d500',
+  106: 'imagenes/accesorios/106.webp?v=0638a236',
+  107: 'imagenes/accesorios/107.webp?v=b36d6d6d',
+  108: 'imagenes/accesorios/108.webp?v=7405378f',
+  109: 'imagenes/accesorios/109.webp?v=81aeb852',
+  111: 'imagenes/accesorios/111.webp?v=4aa5c1f1',
+  112: 'imagenes/accesorios/112.webp?v=6acdc49a',
+  116: 'imagenes/accesorios/116.webp?v=9f4eb61d',
+  117: 'imagenes/accesorios/117.webp?v=23a14219',
+  118: 'imagenes/accesorios/118.webp?v=9be4b000',
+  119: 'imagenes/accesorios/119.webp?v=d8adde0e',
+  120: 'imagenes/accesorios/120.webp?v=729b2552',
+  123: 'imagenes/accesorios/123.webp?v=c625952b',
+  125: 'imagenes/accesorios/125.webp?v=39a93a42',
+  128: 'imagenes/accesorios/128.webp?v=ec2888ff',
+  129: 'imagenes/accesorios/129.webp?v=30bd6adf',
+  130: 'imagenes/accesorios/130.webp?v=95cfa5ef',
+  131: 'imagenes/accesorios/131.webp?v=91ec2a41',
+  133: 'imagenes/accesorios/133.webp?v=98cf239a',
+  201: 'imagenes/accesorios/201.webp?v=4b9973e6',
+};
+/* ↑ fin generado por accesorios.py ↑ */
+window.ACCESORIOS.forEach(a => { if (ACC_FOTO[a.id]) a.img = ACC_FOTO[a.id]; });
+
+// ── La vitrina del catálogo (15-sep-2026) ────────────────────────────────────
+// Las secciones de /accesorios: solo categorías con piezas, en el orden de
+// ACCESORIO_CATEGORIES, y dentro de cada una por nombre corto. Si `categoria` no
+// es una sección con piezas ('all', vacía, desconocida) devuelve todas. Pura:
+// sin DOM ni React. Los cargadores llevan además sus tramos (_accTramos); las demás, tramos: null.
+// Prueba: scripts/vitrina.test.mjs.
+window.accesoriosVitrina = function (categoria, lista = window.ACCESORIOS, cats = window.ACCESORIO_CATEGORIES.categoria) {
+  const todas = cats
+    .map((c) => {
+      const piezas = lista.filter((a) => a.categoria === c.id)
+        .sort((x, y) => String(x.corto).localeCompare(String(y.corto), 'es'));
+      return { id: c.id, label: c.label, piezas, tramos: c.id === 'cargadores' ? _accTramos(piezas) : null };
+    })
+    .filter((s) => s.piezas.length);
+  const una = todas.filter((s) => s.id === categoria);
+  return una.length ? una : todas;
+};
 
 // ¿el accesorio es compatible con esta arma? (determinista, sin invención)
 window.accesorioFitsArma = function (acc, arma) {
@@ -449,51 +622,56 @@ const SEPd = '2025-09-26', OCTd = '2025-10-03', JUNd = '2026-06-16';
 const JUN18 = 'man_acc_2026_06_18', JUN18d = '2026-06-18';
 const JUL = 'man_acc_2026_07_06', JULd = '2026-07-06';
 const S11 = 'man_acc_2026_09_11', S11d = '2026-09-11';
+const S14 = 'man_acc_2026_09_14', S14d = '2026-09-14';
+const S15 = 'man_acc_2026_09_15', S15d = '2026-09-15';
+const S18 = 'man_acc_2026_09_18', S18d = '2026-09-18';
+const S22 = 'man_acc_2026_09_22', S22d = '2026-09-22';
 
 window.ACCESORIOS_PRICE_HISTORY = {
-  101: [_h(OCT, 665.4, OCTd, 18), _h(JUL, 608.16, JULd, 8), _h(S11, 590.63, S11d, 4)],
-  102: [_h(OCT, 332.7, OCTd, 46), _h(JUL, 304.08, JULd, 44), _h(S11, 295.32, S11d, 44)],
-  103: [_h(OCT, 138.62, OCTd, 20), _h(JUL, 126.70, JULd, 20), _h(S11, 123.05, S11d, 20)],
-  104: [_h(OCT, 841.81, OCTd, 39), _h(JUN, 1303.22, JUNd, 20), _h(JUN18, 761.73, JUN18d, 8), _h(JUL, 1304.78, JULd, 20)],
-  105: [_h(OCT, 362.63, OCTd, 8), _h(JUL, 324.75, JULd, 6), _h(S11, 320.50, S11d, 6)],
-  106: [_h(SEP, 555.08, SEPd, 18), _h(OCT, 554.5, OCTd, 5), _h(JUN18, 498.49, JUN18d, 10), _h(JUL, 506.80, JULd, 9), _h(S11, 492.19, S11d, 5)],
-  107: [_h(SEP, 555.08, SEPd, 17), _h(OCT, 554.5, OCTd, 51), _h(JUN18, 498.49, JUN18d, 13), _h(JUL, 506.80, JULd, 22), _h(S11, 492.19, S11d, 20)],
-  108: [_h(OCT, 554.5, OCTd, 37), _h(JUL, 506.80, JULd, 65), _h(S11, 492.19, S11d, 60)],
+  101: [_h(OCT, 665.4, OCTd, 18), _h(JUL, 608.16, JULd, 8), _h(S11, 590.63, S11d, 4), _h(S14, 590.58, S14d, 4), _h(S15, 596.04, S15d, 4), _h(S18, 598.11, S18d, 4), _h(S22, 599.27, S22d, 4)],
+  102: [_h(OCT, 332.7, OCTd, 46), _h(JUL, 304.08, JULd, 44), _h(S11, 295.32, S11d, 44), _h(S14, 295.29, S14d, 44), _h(S15, 298.02, S15d, 44), _h(S18, 299.06, S18d, 44), _h(S22, 299.63, S22d, 44)],
+  103: [_h(OCT, 138.62, OCTd, 20), _h(JUL, 126.70, JULd, 20), _h(S11, 123.05, S11d, 20), _h(S14, 123.04, S14d, 20), _h(S15, 124.18, S15d, 20), _h(S18, 124.61, S18d, 20), _h(S22, 124.85, S22d, 20)],
+  104: [_h(OCT, 841.81, OCTd, 39), _h(JUN, 1303.22, JUNd, 20), _h(JUN18, 761.73, JUN18d, 8), _h(JUL, 1304.78, JULd, 20), _h(S18, 743.69, S18d, 30), _h(S22, 745.35, S22d, 24)],
+  105: [_h(OCT, 362.63, OCTd, 8), _h(JUL, 324.75, JULd, 6), _h(S11, 320.50, S11d, 6), _h(S14, 319.48, S14d, 6), _h(S15, 321.02, S15d, 6), _h(S18, 320.36, S18d, 6), _h(S22, 321.07, S22d, 6)],
+  106: [_h(SEP, 555.08, SEPd, 18), _h(OCT, 554.5, OCTd, 5), _h(JUN18, 498.49, JUN18d, 10), _h(JUL, 506.80, JULd, 9), _h(S11, 492.19, S11d, 5), _h(S14, 492.15, S14d, 5), _h(S15, 496.7, S15d, 5), _h(S18, 498.43, S18d, 3), _h(S22, 499.39, S22d, 3)],
+  107: [_h(SEP, 555.08, SEPd, 17), _h(OCT, 554.5, OCTd, 51), _h(JUN18, 498.49, JUN18d, 13), _h(JUL, 506.80, JULd, 22), _h(S11, 492.19, S11d, 20), _h(S14, 492.15, S14d, 20), _h(S15, 496.7, S15d, 20), _h(S18, 498.43, S18d, 20), _h(S22, 499.39, S22d, 20)],
+  108: [_h(OCT, 554.5, OCTd, 37), _h(JUL, 506.80, JULd, 65), _h(S11, 492.19, S11d, 60), _h(S14, 492.15, S14d, 60), _h(S15, 496.7, S15d, 60), _h(S18, 498.43, S18d, 60), _h(S22, 499.39, S22d, 60)],
   109: [_h(OCT, 723.95, OCTd, 8), _h(JUL, 661.68, JULd, 1)],
   110: [_h(OCT, 621.04, OCTd, 5), _h(JUN18, 558.31, JUN18d, 6)],
-  111: [_h(SEP, 1054.65, SEPd, 8), _h(OCT, 1053.55, OCTd, 40), _h(JUN18, 947.12, JUN18d, 4), _h(S11, 935.17, S11d, 26)],
-  112: [_h(SEP, 701.44, SEPd, 5), _h(OCT, 693.12, OCTd, 42), _h(S11, 615.24, S11d, 19)],
+  111: [_h(SEP, 1054.65, SEPd, 8), _h(OCT, 1053.55, OCTd, 40), _h(JUN18, 947.12, JUN18d, 4), _h(S11, 935.17, S11d, 26), _h(S14, 935.09, S14d, 26), _h(S15, 943.74, S15d, 26), _h(S18, 947.01, S18d, 26), _h(S22, 948.84, S22d, 22)],
+  112: [_h(SEP, 701.44, SEPd, 5), _h(OCT, 693.12, OCTd, 42), _h(S11, 615.24, S11d, 19), _h(S14, 615.19, S14d, 19), _h(S15, 620.88, S15d, 19), _h(S18, 623.04, S18d, 19), _h(S22, 624.24, S22d, 19)],
   113: [_h(OCT, 543.41, OCTd, 70), _h(JUN, 488.85, JUNd, 1)],
-  114: [_h(OCT, 368.86, OCTd, 36), _h(JUN, 368.86, JUNd, 36), _h(JUL, 368.86, JULd, 36), _h(S11, 368.86, S11d, 36)],
-  115: [_h(OCT, 546.2, OCTd, 18), _h(JUN, 546.2, JUNd, 18), _h(JUL, 546.20, JULd, 18), _h(S11, 546.20, S11d, 18)],
-  116: [_h(OCT, 9426.46, OCTd, 5), _h(JUN, 8479.99, JUNd, 5), _h(JUL, 8615.57, JULd, 5), _h(S11, 8367.29, S11d, 5)],
-  117: [_h(OCT, 6931.22, OCTd, 2), _h(JUN, 6235.29, JUNd, 1), _h(JUL, 6334.98, JULd, 1), _h(S11, 6152.42, S11d, 1)],
-  201: [_h(OCT, 29111.11, OCTd, 11), _h(JUL, 26606.91, JULd, 11), _h(S11, 25840.17, S11d, 10)],
-  202: [_h(OCT, 24675.13, OCTd, 5), _h(JUL, 22552.52, JULd, 5), _h(S11, 21902.62, S11d, 5)],
-  301: [_h(OCT, 6475.47, OCTd, 1), _h(JUN, 5792.08, JUNd, 1), _h(JUL, 5799.04, JULd, 1), _h(S11, 5723.24, S11d, 1)],
-  401: [_h(OCT, 5045.93, OCTd, 10), _h(JUN, 4539.29, JUNd, 10), _h(JUL, 4611.86, JULd, 10), _h(S11, 4478.96, S11d, 10)],
-  402: [_h(OCT, 809.43, OCTd, 5), _h(JUN, 724.01, JUNd, 5), _h(JUL, 724.88, JULd, 5), _h(S11, 715.40, S11d, 5)],
+  114: [_h(OCT, 368.86, OCTd, 36), _h(JUN, 368.86, JUNd, 36), _h(JUL, 368.86, JULd, 36), _h(S11, 368.86, S11d, 36), _h(S14, 368.86, S14d, 36), _h(S15, 368.86, S15d, 36), _h(S18, 368.86, S18d, 36), _h(S22, 368.86, S22d, 36)],
+  115: [_h(OCT, 546.2, OCTd, 18), _h(JUN, 546.2, JUNd, 18), _h(JUL, 546.20, JULd, 18), _h(S11, 546.20, S11d, 18), _h(S14, 546.20, S14d, 18), _h(S15, 546.2, S15d, 18), _h(S18, 546.20, S18d, 18), _h(S22, 546.2, S22d, 18)],
+  116: [_h(OCT, 9426.46, OCTd, 5), _h(JUN, 8479.99, JUNd, 5), _h(JUL, 8615.57, JULd, 5), _h(S11, 8367.29, S11d, 5), _h(S14, 8366.56, S14d, 5), _h(S15, 8443.96, S15d, 5), _h(S18, 8473.29, S18d, 5), _h(S22, 8489.61, S22d, 5)],
+  117: [_h(OCT, 6931.22, OCTd, 2), _h(JUN, 6235.29, JUNd, 1), _h(JUL, 6334.98, JULd, 1), _h(S11, 6152.42, S11d, 1), _h(S14, 6151.88, S14d, 1), _h(S15, 6208.79, S15d, 1), _h(S18, 6230.36, S18d, 1), _h(S22, 6242.36, S22d, 1)],
+  201: [_h(OCT, 29111.11, OCTd, 11), _h(JUL, 26606.91, JULd, 11), _h(S11, 25840.17, S11d, 10), _h(S14, 25837.89, S14d, 10), _h(S15, 26076.92, S15d, 10), _h(S18, 26167.51, S18d, 10), _h(S22, 26217.91, S22d, 10)],
+  202: [_h(OCT, 24675.13, OCTd, 5), _h(JUL, 22552.52, JULd, 5), _h(S11, 21902.62, S11d, 5), _h(S14, 21900.69, S14d, 5), _h(S15, 22103.3, S15d, 5), _h(S18, 22180.08, S18d, 5), _h(S22, 22222.8, S22d, 5)],
+  301: [_h(OCT, 6475.47, OCTd, 1), _h(JUN, 5792.08, JUNd, 1), _h(JUL, 5799.04, JULd, 1), _h(S11, 5723.24, S11d, 1), _h(S14, 5705.00, S14d, 1), _h(S15, 5732.46, S15d, 1), _h(S18, 5720.71, S18d, 1), _h(S22, 5733.47, S22d, 1)],
+  401: [_h(OCT, 5045.93, OCTd, 10), _h(JUN, 4539.29, JUNd, 10), _h(JUL, 4611.86, JULd, 10), _h(S11, 4478.96, S11d, 10), _h(S14, 4478.57, S14d, 10), _h(S15, 4520.0, S15d, 10), _h(S18, 4535.70, S18d, 10), _h(S22, 4544.44, S22d, 10)],
+  402: [_h(OCT, 809.43, OCTd, 5), _h(JUN, 724.01, JUNd, 5), _h(JUL, 724.88, JULd, 5), _h(S11, 715.40, S11d, 5), _h(S14, 713.12, S14d, 5), _h(S15, 716.56, S15d, 5), _h(S18, 715.09, S18d, 5), _h(S22, 716.68, S22d, 5)],
   // Datos reales del inventario DCAM 3-oct-2025 (EXIST_ACCESORIOS). OTCA 26-sep pendiente de conciliar.
   118: [_h(SEP, 580.17, SEPd, 9), _h(JUN18, 521.02, JUN18d, 3)],
-  119: [_h(SEP, 233.13, SEPd, 10), _h(JUN, 209.51, JUNd, 23), _h(JUN18, 209.36, JUN18d, 13), _h(JUL, 212.86, JULd, 23), _h(S11, 206.72, S11d, 19)],
+  119: [_h(SEP, 233.13, SEPd, 10), _h(JUN, 209.51, JUNd, 23), _h(JUN18, 209.36, JUN18d, 13), _h(JUL, 212.86, JULd, 23), _h(S11, 206.72, S11d, 19), _h(S14, 206.70, S14d, 19), _h(S15, 208.62, S15d, 19), _h(S18, 209.34, S18d, 17), _h(S22, 209.74, S22d, 17)],
   // ── Nuevos accesorios DCAM 16-jun-2026 ──
-  120: [_h(JUN, 467.70, JUNd, 18), _h(JUL, 475.17, JULd, 14), _h(S11, 461.48, S11d, 2)],
-  121: [_h(JUN, 467.70, JUNd, 31), _h(JUL, 475.17, JULd, 29), _h(S11, 461.48, S11d, 20)],
-  122: [_h(JUN, 467.70, JUNd, 44), _h(JUL, 475.17, JULd, 42), _h(S11, 461.48, S11d, 40)],
-  123: [_h(JUN, 577.82, JUNd, 30), _h(JUL, 578.51, JULd, 30), _h(S11, 570.95, S11d, 30)],
+  120: [_h(JUN, 467.70, JUNd, 18), _h(JUL, 475.17, JULd, 14), _h(S11, 461.48, S11d, 2), _h(S14, 461.44, S14d, 2), _h(S15, 465.71, S15d, 2), _h(S18, 467.33, S18d, 32), _h(S22, 468.23, S22d, 32)],
+  121: [_h(JUN, 467.70, JUNd, 31), _h(JUL, 475.17, JULd, 29), _h(S11, 461.48, S11d, 20), _h(S14, 461.44, S14d, 20), _h(S15, 465.71, S15d, 20), _h(S18, 467.33, S18d, 48), _h(S22, 468.23, S22d, 46)],
+  122: [_h(JUN, 467.70, JUNd, 44), _h(JUL, 475.17, JULd, 42), _h(S11, 461.48, S11d, 40), _h(S14, 461.44, S14d, 40), _h(S15, 465.71, S15d, 40), _h(S18, 467.33, S18d, 40), _h(S22, 468.23, S22d, 40)],
+  123: [_h(JUN, 577.82, JUNd, 30), _h(JUL, 578.51, JULd, 30), _h(S11, 570.95, S11d, 30), _h(S14, 569.13, S14d, 30), _h(S15, 571.87, S15d, 30), _h(S18, 570.70, S18d, 30), _h(S22, 571.97, S22d, 30)],
   124: [_h(JUN, 530.09, JUNd, 2), _h(JUN18, 529.07, JUN18d, 10), _h(JUL, 530.73, JULd, 2)],
-  125: [_h(JUN, 623.53, JUNd, 29), _h(JUN18, 618.96, JUN18d, 1), _h(JUL, 633.50, JULd, 27), _h(S11, 615.24, S11d, 27)],
-  126: [_h(JUN, 977.69, JUNd, 20), _h(JUL, 993.32, JULd, 20), _h(S11, 964.70, S11d, 20)],
-  127: [_h(JUN, 977.69, JUNd, 6), _h(JUL, 993.32, JULd, 6), _h(S11, 964.70, S11d, 6)],
+  125: [_h(JUN, 623.53, JUNd, 29), _h(JUN18, 618.96, JUN18d, 1), _h(JUL, 633.50, JULd, 27), _h(S11, 615.24, S11d, 27), _h(S14, 615.19, S14d, 27), _h(S15, 620.88, S15d, 27), _h(S18, 623.04, S18d, 27), _h(S22, 624.24, S22d, 27)],
+  126: [_h(JUN, 977.69, JUNd, 20), _h(JUL, 993.32, JULd, 20), _h(S11, 964.70, S11d, 20), _h(S14, 964.61, S14d, 20), _h(S15, 973.54, S15d, 20), _h(S18, 976.92, S18d, 20), _h(S22, 978.8, S22d, 20)],
+  127: [_h(JUN, 977.69, JUNd, 6), _h(JUL, 993.32, JULd, 6), _h(S11, 964.70, S11d, 6), _h(S14, 964.61, S14d, 6), _h(S15, 973.54, S15d, 6), _h(S18, 976.92, S18d, 6), _h(S22, 978.8, S22d, 6)],
   128: [_h(JUN18, 619.95, JUN18d, 16)],
-  129: [_h(JUN18, 521.02, JUN18d, 12)],
-  130: [_h(JUN18, 623.11, JUN18d, 13), _h(JUL, 633.50, JULd, 29), _h(S11, 615.24, S11d, 19)],
-  131: [_h(JUN18, 1121.59, JUN18d, 16), _h(JUL, 1140.30, JULd, 37), _h(S11, 1107.44, S11d, 11)],
+  129: [_h(JUN18, 521.02, JUN18d, 12), _h(S18, 520.96, S18d, 30), _h(S22, 521.96, S22d, 28)],
+  130: [_h(JUN18, 623.11, JUN18d, 13), _h(JUL, 633.50, JULd, 29), _h(S11, 615.24, S11d, 19), _h(S14, 615.19, S14d, 19), _h(S15, 620.88, S15d, 19), _h(S18, 623.04, S18d, 19), _h(S22, 624.24, S22d, 19)],
+  131: [_h(JUN18, 1121.59, JUN18d, 16), _h(JUL, 1140.30, JULd, 37), _h(S11, 1107.44, S11d, 11), _h(S14, 1107.34, S14d, 11), _h(S15, 1117.58, S15d, 11), _h(S18, 1121.46, S18d, 20), _h(S22, 1123.62, S22d, 18)],
   // ── Nuevos accesorios DCAM 11-sep-2026 ──
-  132: [_h(S11, 2.56, S11d, 3, 2.56)], // errata DCAM ($2.56); sin precio anterior se publica el del PDF
-  133: [_h(S11, 664.46, S11d, 15)],
+  132: [_h(S11, 2.56, S11d, 3, 2.56), _h(S14, 2.56, S14d, 3, 2.56), _h(S15, 2.58, S15d, 3, 2.58), _h(S18, 2.59, S18d, 3, 2.59), _h(S22, 2.6, S22d, 3, 2.6)], // errata DCAM continua ($2.58); sin precio anterior se publica el del PDF
+  133: [_h(S11, 664.46, S11d, 15), _h(S14, 664.40, S14d, 15), _h(S15, 670.55, S15d, 15), _h(S18, 672.88, S18d, 15), _h(S22, 674.17, S22d, 15)],
   // ── Separado en la revisión del 13-sep-2026 (antes, registro OTCA de la 113) ──
   134: [_h(SEP, 666.1, SEPd, 35)],
+  135: [_h(S18, 535.91, S18d, 20), _h(S22, 536.94, S22d, 16)],
 };
 
 // ── Helpers (auto-contenidos; no tocan el store de armas) ────────────────────
@@ -533,8 +711,7 @@ window.getAccesorioExistencias = function (id) {
   return (last && last.qty != null) ? { qty: last.qty, date: last.date, manualId: last.manualId } : null;
 };
 
-// Los accesorios no traen foto todavía: se muestran con un aviso discreto
-// "sin imagen disponible por el momento" hasta cargar fotografías reales.
+// Sin foto real (no está en ACC_FOTO), `img` queda vacío y la vista usa la silueta.
 window.ACCESORIOS.forEach(a => { if (!window.isRealImage(a.img)) a.img = ''; });
 
 // Inventario fuente («Ver inventario fuente») = el del ÚLTIMO registro del historial.

@@ -1,0 +1,61 @@
+# La red que faltaba. El 19-sep-2026 el PR #242 se mergeó con las fichas de
+# arma, accesorio y munición en blanco: pasó la revisión y pasó Cloudflare
+# Pages —que solo compila—, y la suite que lo habría cazado no la corrió nadie,
+# porque hasta hoy `npm test` solo vivía como casilla en la plantilla de PR.
+name: Pruebas
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Empujar dos veces seguidas a la misma rama no deja dos tandas corriendo.
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # Babel hace falta de verdad aquí: el build:js compila los .jsx y es la
+      # mitad de la comprobación (el otro build, el del prerender, es Node puro).
+      - run: npm ci
+
+      - name: Pruebas
+        run: npm test
+
+      # Que compile y que el prerender saque sus páginas. Si el build se cae,
+      # lo que se publica es la versión anterior y nadie se entera.
+      - name: Build
+        run: npm run build
+
+      # La capa que de verdad habría parado el 19-sep: abre una página de cada
+      # forma de ruta en el Chrome del runner y falla si alguna tira un error.
+      # Lo que las pruebas no ven porque no ejecutan los componentes, aquí se ve.
+      - name: Smoke en el navegador
+        run: npm run smoke
+
+      # VA DESPUÉS DEL BUILD A PROPÓSITO: audita out/ (sitemap, canonical de cada
+      # página y enlaces internos), así que en `npm test` —que corre antes— se
+      # salta sola por falta de build. Aquí es donde de verdad comprueba algo.
+      # Cazó el canonical del hub de Legalidad apuntando a /legalidad/index,
+      # una URL que Pages sirve como 308: canonical roto, señal descartada.
+      - name: URLs canónicas y enlaces internos
+        run: node --test scripts/canonicos.test.mjs
+        env:
+          # Sin esto la suite se saltaría sola si el build no dejó out/, y un
+          # gate que se salta en silencio no es un gate.
+          CANONICOS_EXIGE_BUILD: '1'

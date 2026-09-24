@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Componentes UI compartidos
 // Estética: oscuro elegante con detalles tácticos (color palette dark/amber/military)
 
@@ -187,15 +192,19 @@ window.CUT_TR_SM = CUT_TR_SM;
 // ──────────────────────────────────────────────────────────────
 // USE VIEWPORT — hook responsivo
 // ──────────────────────────────────────────────────────────────
+// `isMobile` decide el armazón (cabecera y barra inferior de móvil) y corta en
+// 1024, como la ficha: por debajo, la barra superior no cabía y daba scroll
+// horizontal a todo el sitio (necesitaba 1150 px; 15-sep-2026). Las rejillas
+// siguen repartiéndose con `isTablet`/`isDesktop` y sus cortes de 720 y 900.
+function amxMedirViewport(w) {
+  return { width: w, isMobile: w < 1024, isTablet: w >= 720 && w < 900, isDesktop: w >= 900 };
+}
+
 function useViewport() {
-  const [vp, setVp] = React.useState(() => {
-    const w = typeof window !== 'undefined' ? window.innerWidth : 1024;
-    return { width: w, isMobile: w < 720, isTablet: w >= 720 && w < 900, isDesktop: w >= 900 };
-  });
+  const [vp, setVp] = React.useState(() => amxMedirViewport(typeof window !== 'undefined' ? window.innerWidth : 1024));
   React.useEffect(() => {
     function onR() {
-      const w = window.innerWidth;
-      setVp({ width: w, isMobile: w < 720, isTablet: w >= 720 && w < 900, isDesktop: w >= 900 });
+      setVp(amxMedirViewport(window.innerWidth));
     }
     window.addEventListener('resize', onR);
     return () => window.removeEventListener('resize', onR);
@@ -272,7 +281,7 @@ function LogoMarca({ size = 28, conTexto = false, src = null }) {
 window.LogoMarca = LogoMarca;
 
 // ──────────────────────────────────────────────────────────────
-// TOP NAV — barra superior para escritorio/tablet
+// TOP NAV — barra superior para escritorio (desde 1024 px)
 // ──────────────────────────────────────────────────────────────
 function TopNav({ current, onNav, compareCount, onSearch }) {
   const [moreOpen, setMoreOpen] = React.useState(false);
@@ -327,10 +336,10 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
                 onMouseLeave={() => setMoreOpen(false)}>
                 <button onClick={() => setMoreOpen(o => !o)} style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  padding: '8px 14px',
+                  padding: '8px 8px',
                   fontFamily: 'Archivo, sans-serif',
                   fontSize: 14, fontWeight: 600,
-                  letterSpacing: '0.12em', textTransform: 'uppercase',
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
                   color: (dActive || moreOpen) ? '#DDD5C4' : PALETTE.sobreMarcaDim,
                   borderBottom: dActive ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
                   whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5,
@@ -373,10 +382,12 @@ function TopNav({ current, onNav, compareCount, onSearch }) {
             <button key={it.id} onClick={() => onNav(it.id)} style={{
               background: 'none',
               border: 'none', cursor: 'pointer',
-              padding: '8px 14px',
+              // Compacta (antes 14 px y .12em): así los ocho botones caben
+              // desde 1009 px, por debajo del corte de 1024 donde empieza esta barra.
+              padding: '8px 8px',
               fontFamily: 'Archivo, sans-serif',
               fontSize: 14, fontWeight: 600,
-              letterSpacing: '0.12em', textTransform: 'uppercase',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
               color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
               borderBottom: active ? `2px solid ${'#DDD5C4'}` : '2px solid transparent',
               position: 'relative',
@@ -652,8 +663,8 @@ function AppHeader({ title, back, onBack, onHome, right }) {
       paddingTop: 'env(safe-area-inset-top)',
     }}>
       {/* Los dos lados pesan igual (flex:1 cada uno) para que la marca quede
-          centrada de verdad: antes se centraba en el espacio SOBRANTE, asi que
-          con la insignia SLOT presente se desplazaba a la izquierda. */}
+          centrada de verdad: antes se centraba en el espacio SOBRANTE, no en
+          el ancho total. */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
         {back && (
           <button onClick={onBack} aria-label="Volver" style={{
@@ -688,7 +699,7 @@ window.AppHeader = AppHeader;
 // ──────────────────────────────────────────────────────────────
 // BOTTOM NAV — navegación inferior
 // ──────────────────────────────────────────────────────────────
-function BottomNav({ current, onNav, compareCount }) {
+function BottomNav({ current, onNav, compareCount, visible = true }) {
   const navRef = React.useRef(null);
 
   // La barra fija de la ficha y CompareFloat se apoyan JUSTO encima de este nav.
@@ -737,28 +748,31 @@ function BottomNav({ current, onNav, compareCount }) {
   ];
   return (
     <div ref={navRef} style={{
-      position: 'sticky', bottom: 0, zIndex: 50,
+      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
       background: PALETTE.marca,
       borderTop: `1px solid ${'rgba(250,249,245,.14)'}`,
       display: 'flex',
       padding: '6px 4px 10px',
       paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+      transform: visible ? 'translateY(0)' : 'translateY(100%)',
+      transition: 'transform .28s ease',
     }}>
       {items.map(it => {
         const active = current === it.id;
         return (
           <button key={it.id} onClick={() => onNav(it.id)} style={{
-            flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+            flex: 1, minWidth: 0, background: 'none', border: 'none', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            padding: '8px 4px', gap: 4, minHeight: 48,
-            color: active ? '#DDD5C4' : PALETTE.sobreMarcaDim,
+            padding: '8px 2px', gap: 4, minHeight: 48,
+            color: active ? '#FAF9F5' : PALETTE.sobreMarcaDim,
             position: 'relative',
           }}>
             {active && (
               <span style={{
                 position: 'absolute', top: -6, left: '50%', transform: 'translateX(-50%)',
-                width: 18, height: 2, background: '#DDD5C4',
-                boxShadow: `0 0 6px ${'#DDD5C4'}`,
+                width: 24, height: 2.5, borderRadius: 1,
+                background: '#FAF9F5',
+                boxShadow: '0 0 8px rgba(250,249,245,.6)',
               }} />
             )}
             <span style={{ lineHeight: 1, position: 'relative' }}>
@@ -776,8 +790,10 @@ function BottomNav({ current, onNav, compareCount }) {
             </span>
             <span style={{
               fontFamily: 'Archivo, sans-serif',
-              fontSize: 12, fontWeight: active ? 600 : 500,
-              letterSpacing: '0.07em',
+              fontSize: 11, fontWeight: active ? 600 : 500,
+              letterSpacing: '0.06em',
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+              maxWidth: '100%',
             }}>{it.label}</span>
           </button>
         );
@@ -860,6 +876,7 @@ window.BottomNav = BottomNav;
 // cualquiera que no sea Saulo. O se publica el repo, o se quita esta constante.
 const AMX_REPO = 'https://github.com/saulo-fl/armado-en-mexico';
 const AMX_PERFIL = 'https://github.com/saulo-fl';
+const AMX_LICENCIA = AMX_REPO + '/blob/main/LICENSE';
 const AMX_TIENDA = 'https://armasmys.com/';
 
 // Hubo un corazón de matriz de puntos en la línea de crédito —el guiño al ♥ de
@@ -984,6 +1001,8 @@ function PieDeSitio({ onNav }) {
               }}>
               <IconoGitHub />GitHub
             </a>
+            <span aria-hidden="true" style={{ margin: '0 8px', color: PALETTE.sobreMarcaMuted }}>·</span>
+            <Externo a={AMX_LICENCIA} etiqueta="Licencia AGPL-3.0 de Armado en México (se abre en una pestaña nueva)">AGPL-3.0</Externo>
           </div>
 
           {/* ── AVISO ─ texto literal del que estaba al final del Home.
@@ -1091,18 +1110,24 @@ window.armaSinFoto = armaSinFoto;
 // fotografía —mismo marco, mismo faldón— con la silueta del tipo sobre el
 // papel. Un expediente incompleto es una cosa que existe; un hueco gris no.
 // ──────────────────────────────────────────────────────────────
-// `pie` decide qué se rotula en el faldón, y son tres cosas distintas porque el
-// tablero de correcciones (8-sep-2026) pide tres:
-//   'rotulo' — nombre y procedencia. La ficha, donde la copia va sola.
-//   'nombre' — solo el nombre. El destacado del Home: «Polaroid solo con foto y
-//              nombre de la pistola. Bandera, país, especificaciones, etc. van
-//              escritos del lado izquierdo en el folder».
-//   'sello'  — solo el sello de legalidad. La tarjeta, donde el nombre y los
-//              datos ya están mecanografiados en el folder de al lado.
+// `pie` decide qué se rotula en el faldón, y son cuatro cosas distintas porque
+// el tablero de correcciones (8-sep-2026) pide tres, y la ficha de accesorio
+// (15-sep-2026) suma la cuarta:
+//   'rotulo'      — nombre y procedencia. La ficha, donde la copia va sola.
+//   'nombre'      — solo el nombre. El destacado del Home: «Polaroid solo con
+//                    foto y nombre de la pistola. Bandera, país,
+//                    especificaciones, etc. van escritos del lado izquierdo en
+//                    el folder».
+//   'sello'       — solo el sello de legalidad. La tarjeta, donde el nombre y
+//                    los datos ya están mecanografiados en el folder de al lado.
+//   'procedencia' — solo bandera y marca · país, sin nombre. La ficha de
+//                    accesorio, que lleva el nombre en la cabecera del folder.
+//   'ninguno'     — sin faldón escrito. El comparador, donde el nombre ya va
+//                    en la cabecera de la ficha de fichero.
 // `selloSinFoto` (la ficha de arma, 13-sep-2026): sin fotografía, en vez de la
 // leyenda va el sello «FOTOGRAFÍA PENDIENTE» sobre la silueta. Por defecto no
 // cambia nada, porque las tarjetas y el destacado del Home usan la leyenda.
-function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
+function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false, silueta = null }) {
   // El fallback cubre los dos casos: el arma que nunca tuvo foto y el .webp
   // que existe en `data.js` pero no llega (404, red caída, formato no
   // soportado). En ambos se ve lo mismo, que es lo que hace que el `alt` y el
@@ -1111,6 +1136,15 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
   const sinFoto = falloCarga || armaSinFoto(arma);
   // `tipo` es un enum cerrado de data.js; el respaldo cubre un dato corrupto.
   const tipoSil = SILUETA_TIPOS.indexOf(arma.tipo) >= 0 ? arma.tipo : 'pistola';
+  // `silueta` (la ficha de accesorio, 15-sep-2026): la forma de su categoría y
+  // su nombre. Va SOLA, sin leyenda ni sello: «Silueta sola, como la vitrina»
+  // (Saulo). En cuanto el accesorio tenga `img`, la foto la sustituye sin más.
+  const forma = silueta ? silueta.forma : `imagenes/silueta-${tipoSil}.webp`;
+  const nombreSil = silueta ? silueta.nombre : tipoSil;
+  // 'procedencia': solo bandera y marca · país, sin nombre (la ficha de
+  // accesorio lleva el nombre en la cabecera del folder). Ni «—» ni vacíos.
+  const datos = (pie === 'procedencia' ? [arma.marca, arma.pais] : [arma.marca, arma.pais, arma.anio])
+    .filter((v) => v != null && v !== '' && v !== '—');
   return (
     <figure className="amx-polaroid">
       <div className="amx-polaroid-pozo">
@@ -1128,11 +1162,12 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
                 `dangerouslySetInnerHTML`. Saulo las descartó por feas; de paso
                 desaparece la única inyección de HTML de la app. */}
             <div className="amx-polaroid-silueta" role="img"
-              aria-label={'Silueta de ' + tipoSil + '. Sin fotografía en el expediente.'}
-              style={{ '--silueta-forma': `url(imagenes/silueta-${tipoSil}.webp)` }} />
-            {selloSinFoto
-              ? <span className="amx-sello amx-sello--pendiente" aria-hidden="true">Fotografía pendiente</span>
-              : <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>}
+              aria-label={'Silueta de ' + nombreSil + '. Sin fotografía en el expediente.'}
+              style={{ '--silueta-forma': `url(${forma})` }} />
+            {silueta ? null
+              : selloSinFoto
+                ? <span className="amx-sello amx-sello--pendiente" aria-hidden="true">Fotografía pendiente</span>
+                : <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>}
           </div>
         ) : (
           <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high"
@@ -1146,16 +1181,17 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false }) {
           La bandera es ahora lo único que dice la nacionalidad del arma: la
           franja tricolor que había bajo el título se retiró porque, siendo
           mexicana, hacía parecer mexicana un arma checa o italiana. */}
-      <figcaption className="amx-polaroid-pie">
-        {pie === 'sello'
-          ? <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} />
-          : <span className="amx-polaroid-nombre">{arma.nombre}</span>}
-        {pie === 'rotulo' &&
-          <span className="amx-polaroid-datos">
-            <CountryFlag pais={arma.pais} height={9} />
-            <span>{[arma.marca, arma.pais, arma.anio].filter(Boolean).join(' · ')}</span>
-          </span>}
-      </figcaption>
+      {pie !== 'ninguno' && (
+        <figcaption className="amx-polaroid-pie">
+          {pie === 'sello' && <SelloLegal avail={arma.avail} etiqueta={arma.availLabel} />}
+          {(pie === 'rotulo' || pie === 'nombre') && <span className="amx-polaroid-nombre">{arma.nombre}</span>}
+          {(pie === 'rotulo' || pie === 'procedencia') && datos.length > 0 &&
+            <span className="amx-polaroid-datos">
+              {arma.pais && <CountryFlag pais={arma.pais} height={9} />}
+              <span>{datos.join(' · ')}</span>
+            </span>}
+        </figcaption>
+      )}
     </figure>
   );
 }
@@ -1172,6 +1208,11 @@ window.ArmaPolaroid = ArmaPolaroid;
 // igual que en la copia y en los accesorios sin foto: el .webp aporta solo el
 // contorno y el color lo pone el CSS.
 //
+// `ilustracion` es la URL de la ilustración completa estilo Lotería mexicana
+// (carta-pistola.webp, carta-revolver.webp, etc.). Cuando se proporciona,
+// la carta se muestra como imagen completa y se ocultan el número y el nombre
+// que el componente renderiza por defecto.
+//
 // El número lo lee el lector de pantalla por el `aria-label` del botón, no
 // suelto: «31» a secas no dice de qué.
 // ──────────────────────────────────────────────────────────────
@@ -1181,18 +1222,22 @@ window.ArmaPolaroid = ArmaPolaroid;
 // petición y un repintado por carta para saber algo que ya sabemos aquí.
 const SILUETAS_LARGAS = /-(rifle|escopeta|carabina|optica|cargador|municion)\.webp/;
 
-function CartaLoteria({ nombre, cuenta, unidad = 'piezas', forma, onClick }) {
+function CartaLoteria({ nombre, cuenta, unidad = 'piezas', forma, ilustracion, onClick }) {
+  const esCartaCompleta = !!ilustracion;
   return (
     <button type="button" className="amx-loteria" onClick={onClick}
       aria-label={`${nombre} — ${cuenta} ${cuenta === 1 ? unidad.replace(/s$/, '') : unidad}`}>
-      <span className="amx-loteria-lam">
-        <span className="amx-loteria-num" aria-hidden="true">{cuenta}</span>
-        {forma &&
-          <span aria-hidden="true"
-            className={'amx-loteria-fig' + (SILUETAS_LARGAS.test(forma) ? ' amx-loteria-fig--largo' : '')}
-            style={{ '--silueta-forma': `url(${forma})` }} />}
-      </span>
-      <span className="amx-loteria-pie">{nombre}</span>
+      {esCartaCompleta
+        ? <img src={ilustracion} alt="" className="amx-loteria-carta-img" />
+        : <span className="amx-loteria-lam">
+            <span className="amx-loteria-num" aria-hidden="true">{cuenta}</span>
+            {forma &&
+              <span aria-hidden="true"
+                className={'amx-loteria-fig' + (SILUETAS_LARGAS.test(forma) ? ' amx-loteria-fig--largo' : '')}
+                style={{ '--silueta-forma': `url(${forma})` }} />}
+          </span>
+      }
+      {!esCartaCompleta && <span className="amx-loteria-pie">{nombre}</span>}
     </button>
   );
 }
@@ -1347,9 +1392,11 @@ window.ArmaDestacada = ArmaDestacada;
 // sacado del id sería el folio `AR-####` que Saulo retiró el 7-sep-2026 —un
 // código que no corresponde a ningún registro real—.
 // `mecanismo` entra aquí y ya no bajo el título: dicho una sola vez.
+// `filas` (la ficha de accesorio, 15-sep-2026): los renglones de las specs
+// del inventario tal cual. Sin ellas, los del arma, como siempre.
 // ──────────────────────────────────────────────────────────────
-function FichaTecnica({ arma }) {
-  const filas = [
+function FichaTecnica({ arma, filas }) {
+  const lista = (filas || [
     ['Calibre',   arma.calibre],
     ['Capacidad', arma.capacidad],
     ['Mecanismo', arma.mecanismo],
@@ -1357,17 +1404,18 @@ function FichaTecnica({ arma }) {
     ['Peso',      arma.peso],
     ['Origen',    arma.pais],
     ['Año',       arma.anio],
-  ].filter(([, v]) => v != null && v !== '');
+  ]).filter(([, v]) => v != null && v !== '');
+  const marca = arma.marca && arma.marca !== '—' ? arma.marca : '';
   return (
     <section className="amx-papel amx-fichero" style={{ '--giro-papel': '.35deg' }}
       aria-label={'Ficha técnica de ' + arma.nombre}>
       <div className="amx-fichero-carton">
         <div className="amx-fichero-cab">
           <h2 className="amx-papel-tit">Ficha técnica</h2>
-          <span>{arma.marca}</span>
+          {marca && <span>{marca}</span>}
         </div>
         <dl className="amx-fichero-lista">
-          {filas.map(([k, v]) => (
+          {lista.map(([k, v]) => (
             <div key={k} className="amx-fichero-fila">
               <dt>{k}</dt>
               <span className="amx-fichero-guia" aria-hidden="true" />
@@ -1538,7 +1586,7 @@ function CountryFlag({ pais, height = 14, style = {} }) {
   const aliases = {
     'Mexico': 'México',
     'Brazil': 'Brasil',
-    'EEUU': 'EE.UU.', 'Estados Unidos': 'EE.UU.', 'USA': 'EE.UU.',
+    'EEUU': 'EE.UU.', 'Estados Unidos': 'EE.UU.', 'USA': 'EE.UU.', 'EUA': 'EE.UU.',
     'Italy': 'Italia',
     'Spain': 'España',
     'República Checa': 'Rep. Checa', 'Czech Republic': 'Rep. Checa',
@@ -1633,40 +1681,15 @@ function MiniSpec({ icon, fallbackIcon, label, value }) {
 window.MiniSpec = MiniSpec;
 
 // ──────────────────────────────────────────────────────────────
-// FILTER CHIP — chip de filtro
-// ──────────────────────────────────────────────────────────────
-function FilterChip({ children, active, onClick, count }) {
-  return (
-    <button onClick={onClick} style={{
-      background: active ? PALETTE.amber : 'transparent',
-      color: active ? PALETTE.tintaSobreMarca : PALETTE.textDim,   // '#000' daba 1.69:1 sobre el verde
-      border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
-      padding: '10px 12px', minHeight: 44,
-      clipPath: CUT_TR_SM,
-      fontFamily: 'JetBrains Mono, monospace',
-      fontSize: 14.5, fontWeight: 600,
-      letterSpacing: '0.08em', textTransform: 'uppercase',
-      cursor: 'pointer',
-      whiteSpace: 'nowrap',
-      transition: 'all 0.15s',
-      display: 'inline-flex', alignItems: 'center', gap: 5,
-    }}>
-      {children}
-      {count != null && (
-        <span style={{
-          fontSize: 13, opacity: 0.7,
-        }}>· {count}</span>
-      )}
-    </button>
-  );
-}
-window.FilterChip = FilterChip;
-
-// ──────────────────────────────────────────────────────────────
 // COMPARE FLOATING BAR — barra flotante de comparación
 // ──────────────────────────────────────────────────────────────
-function CompareFloat({ ids, onOpen, onClear }) {
+function CompareFloat({ ids, onOpen, onElegir, onClear }) {
   if (!ids || !ids.length) return null;
+  const armas = ids.map((id) => window.findArma(id)).filter(Boolean);
+  if (!armas.length) return null;
+  // Con una: «Comparando la Ruger LCP · Elegir otra». Con dos, sus nombres y
+  // «Ver». El texto va entero en el DOM (lo lee el lector); solo se recorta a la vista.
+  const texto = armas.length === 1 ? 'Comparando la ' + armas[0].nombre : armas.map((x) => x.nombre).join(' y ');
   return (
     <div style={{
       // --amx-nav-h la publica BottomNav (ya incluye el safe-area). El +8 es
@@ -1681,25 +1704,19 @@ function CompareFloat({ ids, onOpen, onClear }) {
       zIndex: 60,
       animation: 'slideUp 0.25s ease',
     }}>
-      <span style={{
+      <span title={texto} style={{
         fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 14.5, color: PALETTE.amber,
-        letterSpacing: '0.1em', fontWeight: 700,
-      }}>⇄ {ids.length}/2</span>
-      <span style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 14.5, color: PALETTE.textDim, flex: 1,
-      }}>{ids.length === 1 ? 'Selecciona otra para comparar' : 'Listas para comparar'}</span>
-      {ids.length === 2 && (
-        <button onClick={onOpen} style={{
-          background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
-          padding: '5px 10px',
-          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
-          letterSpacing: '0.1em', textTransform: 'uppercase',
-          cursor: 'pointer',
-        }}>Ver</button>
-      )}
-      <button onClick={onClear} style={{
+        fontSize: 14.5, color: PALETTE.textDim, flex: 1, minWidth: 0,
+        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>{texto}</span>
+      <button onClick={armas.length === 1 ? onElegir : onOpen} style={{
+        background: PALETTE.amber, color: PALETTE.tintaSobreMarca, border: 'none',
+        padding: '5px 10px',
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 13,
+        letterSpacing: '0.1em', textTransform: 'uppercase',
+        cursor: 'pointer', flex: 'none',
+      }}>{armas.length === 1 ? 'Elegir otra' : 'Ver'}</button>
+      <button onClick={onClear} aria-label="Vaciar la comparación" style={{
         background: 'none', border: 'none', cursor: 'pointer',
         color: PALETTE.textDim, fontSize: 19, padding: 2,
       }}>✕</button>
@@ -1884,6 +1901,43 @@ function Disclosure({ title, eyebrow, defaultOpen = false, accent = PALETTE.ambe
   );
 }
 window.Disclosure = Disclosure;
+// ──────────────────────────────────────────────────────────────
+// FOLDER PREGUNTA — el cajón de expedientes de /preguntas
+// Cada pregunta es un folder manila que monta sobre el siguiente, y al abrirlo
+// sale de dentro la hoja de oficio con la respuesta: el cartón pregunta, el
+// papel responde. El tema va rotulado en la pestaña, que es lo que deja leer
+// la pila de un vistazo.
+//
+// Es <details> nativo —el navegador da aria-expanded, teclado y estado— pero
+// NO reusa `Disclosure`: aquel viste con PALETTE y lleva una barrita de
+// acento, y dentro de un papel solo entran los tokens de papelería (§5.5). Sin
+// estado en React: el +/− y el resto los pinta el CSS con [open].
+//
+// OJO: el <span> flex va DENTRO del <summary> y no en el <summary> mismo
+// (display:flex ahí se traga el marcador y rompe el click en Safari viejo).
+// ──────────────────────────────────────────────────────────────
+function FolderPregunta({ pregunta, tema, children }) {
+  return (
+    <details className="amx-faq-folder">
+      <summary>
+        {/* La pestaña rotulada va oculta al lector: clasifica lo que la
+            pregunta de al lado ya dice con todas sus letras. */}
+        {tema && <span className="amx-faq-tema" aria-hidden="true">{tema}</span>}
+        <span className="amx-faq-cab">
+          <span className="amx-faq-q">{pregunta}</span>
+        </span>
+      </summary>
+      <div className="amx-oficio">
+        <div className="amx-oficio-membrete" aria-hidden="true">
+          <span>Armado en México</span><span>{tema || 'Respuesta'}</span>
+        </div>
+        <p className="amx-oficio-texto">{children}</p>
+      </div>
+    </details>
+  );
+}
+window.FolderPregunta = FolderPregunta;
+
 
 // ──────────────────────────────────────────────────────────────
 // PRICE CHART — historial de precios en SVG inline, sin librerías
@@ -2098,47 +2152,211 @@ window.ThumbIcon = ThumbIcon;
 
 // Fecha de un inventario (AAAA-MM-DD) en es-MX: «06 jul 2026». Vivía en
 // screens-2.jsx; sube aquí porque la usan el talón, el kárdex y el historial.
-function amxFmtManualDate(f) {
+// `corta`: año a dos cifras («11 sep 26»), para tablas en ancho de teléfono.
+function amxFmtManualDate(f, corta) {
   if (!f) return '';
   const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
   if (isNaN(d)) return String(f);
-  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: corta ? '2-digit' : 'numeric' });
 }
 window.amxFmtManualDate = amxFmtManualDate;
 
 // ──────────────────────────────────────────────────────────────
 // CINTA DYMO — los títulos de sección fuera del folder
-// Cada letra lleva un salto de medio píxel, siempre el mismo para la misma
-// posición (nada aleatorio: el título no «tiembla» al re-renderizar). El
-// nombre accesible va entero en un span oculto; las letras sueltas se ocultan
-// al lector de pantalla, que si no las leería una por una.
+// Las letras van alineadas: Saulo retiró los saltos por letra el 16-sep-2026.
 // ──────────────────────────────────────────────────────────────
-const DYMO_SALTOS = [0, -0.6, 0.4, -0.2, 0.7, -0.4, 0.2, -0.7, 0.5];
-
-function CintaDymo({ children, nivel = 2, id }) {
-  const texto = String(children == null ? '' : children);
+// `chica`: la cinta de un tramo dentro de una sección (los cargadores de la
+// vitrina de accesorios, 16-sep-2026).
+function CintaDymo({ children, nivel = 2, id, chica = false }) {
   const Tag = 'h' + nivel;
-  let n = 0;
-  return (
-    <Tag className="amx-dymo" id={id}>
-      <span className="amx-sr">{texto}</span>
-      <span aria-hidden="true">
-        {texto.split(' ').map((palabra, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && ' '}
-            <span className="amx-dymo-palabra">
-              {Array.from(palabra).map((c) => {
-                const dy = DYMO_SALTOS[n++ % DYMO_SALTOS.length];
-                return <span key={n} className="amx-dymo-letra" style={{ '--dy': dy + 'px' }}>{c}</span>;
-              })}
-            </span>
-          </React.Fragment>
-        ))}
-      </span>
-    </Tag>
-  );
+  return <Tag className={'amx-dymo' + (chica ? ' amx-dymo--chica' : '')} id={id}>{children}</Tag>;
 }
 window.CintaDymo = CintaDymo;
+
+// ──────────────────────────────────────────────────────────────
+// ESCRITORIO DE PAPELES — documentos ganados en la entrevista
+// ──────────────────────────────────────────────────────────────
+const AMX_ENTREVISTA_ARTES = {
+  'pa-identificacion': 'ine.webp',
+  'pa-acta-nacimiento': 'acta-nacimiento.webp',
+  'pa-curp': 'curp.webp',
+  'pa-smn': 'cartilla-militar.webp',
+  'pa-ingresos': 'constancia-ingresos.webp',
+  'pa-antecedentes': 'antecedentes-no-penales.webp',
+  'pa-domicilio': 'comprobante-domicilio.webp',
+  'pa-medico': 'certificados-medicos.webp',
+  'pa-club': 'licencia-club-tiro.webp',
+  'pa-socio-activo': 'constancia-club-cinegetico.webp',
+  'pa-permiso-coleccion': 'permiso-coleccionista.webp',
+  'pa-residencia': 'tarjeta-residente.webp',
+};
+
+// EL ACOMODO (21-sep-2026): los documentos se ponen en orden de lectura —se
+// llena de izquierda a derecha y se baja de renglón—, en lugar de las diez
+// plazas dispersas que había antes, donde el último en llegar tomaba el centro
+// y empujaba al resto. Con pocos documentos aquello los amontonaba arriba y
+// dejaba media mesa vacía.
+//
+// La rejilla se calcula con el número de documentos y con el ancho de papel que
+// fija `amxMedidaMesa`, así que reparte el espacio en vez de repetir posiciones
+// dibujadas a mano: dos documentos ocupan la mesa igual de bien que diez. Sigue
+// siendo una función pura de la lista, como antes: recargar con los diez ya
+// ganados da exactamente la misma mesa que haberlos ganado uno a uno.
+//
+// `x`/`y` son la esquina superior izquierda en % de la mesa y `r` el giro en
+// grados. El giro es fijo por posición, nunca aleatorio: es lo que evita que
+// esto se lea como una cuadrícula de fotos.
+const AMX_GIRO_PAPEL = [-3, 2, -2, 3, -1, 2, -3, 1, 3, -2];
+const AMX_MESA_MARGEN = 4;          // % de mesa libre en cada borde
+const AMX_MESA_PROPORCION = 358 / 300;  // la que declara .amx-ent-pila
+
+function amxPlazasDocumentos(documentos) {
+  const porDocumento = {};
+  const n = documentos.length;
+  if (!n) return porDocumento;
+
+  const m = amxMedidaMesa(n);
+  // El alto del papel en % del alto de la MESA. No se toma de `amxMedidaMesa`
+  // porque aquel lo calcula contra `rel`, y el alto de la mesa dejó de salir de
+  // `rel`: .amx-ent-pila la fija en 358 / 300.
+  const alto = m.papel * (100 / 78) * AMX_MESA_PROPORCION;
+  const util = 100 - AMX_MESA_MARGEN * 2;
+  const caben = Math.max(1, Math.floor(util / m.papel));
+  const columnas = Math.min(caben, Math.ceil(Math.sqrt(n)));
+  const filas = Math.ceil(n / columnas);
+
+  // El paso reparte los papeles de borde a borde del área útil; la última fila,
+  // si viene incompleta, se centra con ese mismo paso para que no quede coja.
+  const paso = columnas > 1 ? (util - m.papel) / (columnas - 1) : 0;
+  const pasoY = filas > 1 ? Math.max(0, (util - alto) / (filas - 1)) : 0;
+
+  for (let i = 0; i < n; i++) {
+    const fila = Math.floor(i / columnas);
+    const columna = i % columnas;
+    const enEstaFila = Math.min(columnas, n - fila * columnas);
+    const anchoFila = (enEstaFila - 1) * paso + m.papel;
+    const x = (100 - anchoFila) / 2 + columna * paso;
+    const y = filas > 1 ? AMX_MESA_MARGEN + fila * pasoY : (100 - alto) / 2;
+    porDocumento[documentos[i]] = { x: x, y: y, r: AMX_GIRO_PAPEL[i % AMX_GIRO_PAPEL.length] };
+  }
+  return porDocumento;
+}
+window.amxPlazasDocumentos = amxPlazasDocumentos;
+
+// La mesa se ajusta a lo que hay encima, para que nunca se vea medio vacía:
+// pocos documentos, papeles grandes y mesa baja; muchos, papeles chicos y mesa
+// alta. Interpola entre anclajes en vez de saltar por rangos, así al entrar un
+// documento la mesa se reorganiza de un tirón con la transición que ya existe.
+//
+// El techo no es estético, es geométrico: las plazas llegan hasta x = 258 de
+// 358 (el 72 % de la mesa), así que un papel mucho más ancho se saldría por la
+// derecha. `min()` en el CSS lo contiene contra el borde, y los anclajes se
+// quedan por debajo para no tener que apoyarse en ese tope.
+// `rel` es el alto de la mesa en las unidades de las plazas (que se trazaron
+// sobre 358 × 280), no en píxeles: así la mesa es proporcional y funciona igual
+// en un teléfono que en un monitor. `papel` es su ancho en % de la mesa.
+const AMX_MESA_ANCLAJES = [
+  { n: 1, rel: 150, papel: 32 },
+  { n: 2, rel: 170, papel: 30 },
+  { n: 4, rel: 220, papel: 28 },
+  { n: 7, rel: 260, papel: 24 },
+  { n: 10, rel: 300, papel: 22 },
+];
+
+function amxMedidaMesa(n) {
+  const A = AMX_MESA_ANCLAJES;
+  const interpola = function (a, b, t) {
+    return { rel: a.rel + (b.rel - a.rel) * t, papel: a.papel + (b.papel - a.papel) * t };
+  };
+  let m = { rel: A[A.length - 1].rel, papel: A[A.length - 1].papel };
+  if (n <= A[0].n) m = { rel: A[0].rel, papel: A[0].papel };
+  else {
+    for (let i = 1; i < A.length; i++) {
+      if (n <= A[i].n) { m = interpola(A[i - 1], A[i], (n - A[i - 1].n) / (A[i].n - A[i - 1].n)); break; }
+    }
+  }
+  // El alto del papel en % de la mesa. El papel guarda la proporción 78 × 100,
+  // así que su alto sale de su ancho por 100/78, y se pasa a % del alto de la
+  // mesa multiplicando por 358/rel. Es lo que el CSS necesita para que `min()`
+  // pueda sujetarlo contra el borde de abajo en vez de dejarlo salirse.
+  m.altoPapel = m.papel * (100 / 78) * (358 / m.rel);
+  return m;
+}
+window.amxMedidaMesa = amxMedidaMesa;
+
+const PapelEntrevista = React.memo(function PapelEntrevista({ id, indice, plaza, visible }) {
+  const [fallo, setFallo] = React.useState(false);
+  const [revelado, setRevelado] = React.useState(false);
+  // Arranca en `false` aunque el papel ya esté visible, y no en `visible`: el
+  // escritorio no existe hasta que se contesta la primera pregunta, así que sus
+  // documentos NACEN visibles. Tomando `visible` como punto de partida no había
+  // paso de oculto a visible que detectar y los primeros documentos —los que
+  // más se miran— nunca se animaban: solo aparecían en su sitio.
+  const [prevVisible, setPrevVisible] = React.useState(false);
+  const requisitos = window.AMX_LEGAL && window.AMX_LEGAL.requisitos || [];
+  const requisito = requisitos.find(function (r) { return r.id === id; });
+  const nombre = requisito ? requisito.nombre : id;
+  const archivo = AMX_ENTREVISTA_ARTES[id];
+  // Los papeles que aún no se han ganado no tienen sitio: esperan en el centro
+  // con opacidad 0, y desde ahí los coloca su plaza cuando llega su turno.
+  const p = plaza || { x: 50, y: 50, r: 0 };
+  // Detectar cuando pasa de oculto a visible para disparar la animación
+  React.useEffect(function () {
+    if (!prevVisible && visible) {
+      setRevelado(true);
+    }
+    setPrevVisible(visible);
+  }, [visible, prevVisible]);
+  return (
+    <div className={'amx-ent-papel' + (revelado ? ' amx-ent-papel-revelado' : '')} style={{
+      // En % de LA MESA, no del papel: si fueran del papel, al agrandarlo las
+      // plazas se separarían con él y las de los bordes se saldrían.
+      '--amx-plaza-x': p.x + '%',
+      '--amx-plaza-y': p.y + '%',
+      '--amx-plaza-r': p.r + 'deg',
+      '--amx-papel-i': indice,
+      opacity: visible ? 1 : 0,
+      pointerEvents: visible ? 'auto' : 'none',
+    }}>
+      {!fallo && archivo ? (
+        <img src={'imagenes/entrevista/' + archivo} alt="" onError={function () { setFallo(true); }} />
+      ) : (
+        <div className="amx-ent-papel-fallback"><span>{nombre}</span></div>
+      )}
+    </div>
+  );
+}, function PapelEntrevistaAreEqual(prev, next) {
+  // Solo se re-renderiza si el documento, su plaza o su visibilidad cambiaron.
+  // Los componentes NUNCA se desmontan, así la transición CSS siempre funciona.
+  // La plaza es un objeto nuevo en cada cálculo, así que se comparan sus valores.
+  const a = prev.plaza, b = next.plaza;
+  const mismaPlaza = a === b || (!!a && !!b && a.x === b.x && a.y === b.y && a.r === b.r);
+  return prev.id === next.id && mismaPlaza && prev.visible === next.visible;
+});
+
+function EscritorioPapeles({ documentos = [] }) {
+  // Renderizar TODOS los documentos siempre en el DOM. Los que aún no se han
+  // ganado se muestran con opacity: 0 y pointer-events: none, así nunca se
+  // desmontan y la transición CSS siempre funciona.
+  const todosIds = Object.keys(AMX_ENTREVISTA_ARTES);
+  const plazas = amxPlazasDocumentos(documentos);
+  const medida = amxMedidaMesa(documentos.length);
+  return (
+    <div className="amx-ent-escritorio" aria-hidden="true">
+      <div className="amx-ent-pila" style={{
+        '--amx-mesa-rel': medida.rel.toFixed(1),
+        '--amx-ancho-papel': medida.papel.toFixed(2) + '%',
+        '--amx-alto-papel': medida.altoPapel.toFixed(2) + '%',
+      }}>
+        {todosIds.map(function (id, indice) {
+          const visible = documentos.indexOf(id) !== -1;
+          return <PapelEntrevista key={id} id={id} indice={indice} plaza={plazas[id] || null} visible={visible} />;
+        })}
+      </div>
+    </div>
+  );
+}
+window.EscritorioPapeles = EscritorioPapeles;
 
 // ──────────────────────────────────────────────────────────────
 // NOTA DE ERRATA — el precio que la DCAM publicó mal
@@ -2194,6 +2412,131 @@ function NotaErrata({ historial }) {
 window.NotaErrata = NotaErrata;
 
 // ──────────────────────────────────────────────────────────────
+// SEPARADORES de la hoja de oficio: Legalidad · Usos · Antecedentes.
+// Suben a ui.jsx (15-sep-2026) porque la ficha de accesorio también los usa.
+// Antes vivían en screens-2.jsx, «controlados desde fuera» porque el enlace
+// «§ Ver situación legal» de la copia tenía que poder abrir Legalidad; ese
+// enlace ya no existe, pero conservan el control externo. Conservan lo que ya
+// tenían: rol tablist, foco itinerante y flechas ←/→.
+// Se definen fuera de cualquier pantalla a propósito: un componente definido
+// dentro de otro remonta su subárbol en cada render (la trampa que documenta
+// fidelidad-diseno).
+// ──────────────────────────────────────────────────────────────
+function FichaPanel({ children }) { return <React.Fragment>{children}</React.Fragment>; }
+
+function FichaTabs({ children, activo, onCambiar }) {
+  const paneles = React.Children.toArray(children).filter(Boolean);
+  const refs = React.useRef([]);
+  if (!paneles.length) return null;
+  const act = Math.min(activo, paneles.length - 1);
+
+  function onKey(e) {
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const n = (act + d + paneles.length) % paneles.length;
+    onCambiar(n);
+    if (refs.current[n]) refs.current[n].focus();
+  }
+
+  return (
+    <div>
+      <div className="amx-separadores-pestanas" role="tablist" aria-label="Documentos del expediente" onKeyDown={onKey}>
+        {paneles.map((p, i) => (
+          <button
+            key={i}
+            type="button"
+            ref={(el) => { refs.current[i] = el; }}
+            role="tab"
+            id={'ficha-tab-' + i}
+            aria-selected={i === act}
+            aria-controls={'ficha-panel-' + i}
+            tabIndex={i === act ? 0 : -1}
+            className="amx-separador"
+            onClick={() => onCambiar(i)}>
+            {p.props.label}
+          </button>
+        ))}
+      </div>
+      {/* LAS TRES HOJAS SE PINTAN, apiladas en la misma celda, y solo se ve la
+          activa. Antes se pintaba solo la activa y el folder crecía o encogía al
+          cambiar de pestaña —«puede marear o ser incómodo», Saulo, 13-sep-2026—.
+          Así la pila mide siempre lo que la hoja más larga. Las de detrás van
+          con `visibility: hidden` (estilo.css), que las saca del lector de
+          pantalla y del orden del tabulador sin quitarles el alto. */}
+      <div className="amx-oficio-pila">
+        {paneles.map((p, i) => (
+          <div key={i} className="amx-oficio" role="tabpanel" id={'ficha-panel-' + i}
+            aria-labelledby={'ficha-tab-' + i} data-activo={i === act ? 'si' : 'no'}>
+            {/* Membrete genérico del sitio: sin escudo ni emblema oficial (§6b). */}
+            <div className="amx-oficio-membrete" aria-hidden="true">
+              <span>Armado en México</span><span>{p.props.label}</span>
+            </div>
+            {p}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+window.FichaTabs = FichaTabs;
+window.FichaPanel = FichaPanel;
+
+// ──────────────────────────────────────────────────────────────
+// TALÓN FIJO — cuándo se ve el talón de abajo en móvil
+// Sale de ProductScreen (15-sep-2026) porque la ficha de accesorio hace lo
+// mismo. `talonRef` va en el talón del folder y `fichaRef` en el contenedor de
+// la ficha; `mostrar` es true cuando ese talón ya salió por arriba y el pie del
+// sitio no asoma. `clave` (el id de la ficha) lo reinicia al cambiar de ficha.
+//
+// IntersectionObserver con la raíz implícita: recorta por los `overflow` de
+// los ancestros, así que funciona igual si hace scroll la página que si lo
+// hace el contenedor interno del shell móvil. Nada de escuchar el scroll.
+// El margen de arriba descuenta la barra superior (64px), que tapa lo que
+// pasa por debajo de ella.
+//
+// NO BASTA OBSERVAR EL TALÓN. En móvil va debajo de la ficha técnica, fuera
+// de la pantalla al cargar, y un salto de scroll lo lleva de «debajo» a
+// «encima» sin cruzar nunca la ventana: su estado no cambia y el observer no
+// dispara. Por eso se observan también las celdas del folder y las secciones
+// de la ficha, que cubren la página entera: cualquier salto cambia la
+// visibilidad de alguna, y en cada aviso se mide dónde quedó el talón.
+//
+// Se observa el pie del sitio por su CLASE y no un centinela ni la etiqueta:
+// un salto de scroll cruza un centinela sin que el observer dispare, y cada
+// opinión publicada lleva su propio <footer> antes que el del sitio (revisión
+// del PR #152).
+// ──────────────────────────────────────────────────────────────
+function useTalonFijo(clave) {
+  const [talonFuera, setTalonFuera] = React.useState(false);
+  const [pieVisible, setPieVisible] = React.useState(false);
+  const talonRef = React.useRef(null);
+  const fichaRef = React.useRef(null);
+
+  React.useEffect(() => {
+    setTalonFuera(false);
+    setPieVisible(false);
+    const el = talonRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const revisar = () => setTalonFuera(el.getBoundingClientRect().bottom < 64);
+    const io = new IntersectionObserver(revisar, { rootMargin: '-64px 0px 0px 0px' });
+    io.observe(el);
+    const ficha = fichaRef.current;
+    if (ficha) {
+      Array.from(ficha.children).forEach((c) => io.observe(c));
+      ficha.querySelectorAll('.amx-carpeta-grid > *').forEach((c) => io.observe(c));
+    }
+    const pie = document.querySelector('.amx-pie-sitio');
+    const ioPie = pie && new IntersectionObserver(([e]) => setPieVisible(e.isIntersecting));
+    if (ioPie) ioPie.observe(pie);
+    return () => { io.disconnect(); if (ioPie) ioPie.disconnect(); };
+  }, [clave]);
+
+  return { talonRef, fichaRef, mostrar: talonFuera && !pieVisible };
+}
+window.useTalonFijo = useTalonFijo;
+
+// ──────────────────────────────────────────────────────────────
 // TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
 // En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
 // casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
@@ -2207,6 +2550,8 @@ window.NotaErrata = NotaErrata;
 // conocido». El caso que lo motivó: la Galil ACE 21N, con precio OTCA del
 // 26-sep-2025 y la tarjeta de almacén en AGOTADO al inventario OTCA del
 // 18-jun-2026. Con los datos del 13-sep-2026 son 52 armas.
+// Sin `onComparar` no hay casilla: la ficha de accesorio no tiene comparador
+// (15-sep-2026).
 // ──────────────────────────────────────────────────────────────
 function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false, historial }) {
   return (
@@ -2230,10 +2575,12 @@ function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fi
             </dl>
           </React.Fragment>
         )}
-        <button type="button" className="amx-talon-casilla" aria-pressed={!!enComparacion} onClick={onComparar}>
-          <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
-          {enComparacion ? 'En comparación' : 'Comparar'}
-        </button>
+        {onComparar && (
+          <button type="button" className="amx-talon-casilla" aria-pressed={!!enComparacion} onClick={onComparar}>
+            <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
+            {enComparacion ? 'En comparación' : 'Comparar'}
+          </button>
+        )}
         {fijo && <NotaErrata historial={historial} />}
       </div>
     </div>
@@ -2246,8 +2593,10 @@ window.TalonComprobante = TalonComprobante;
 // `filas`: [{ sigla, qty, manual, agotado }], la misma lista que ya calculaba
 // la ficha. Absorbe lo que iba en «Detalle de la fuente»: la referencia del
 // inventario, el aviso de dato histórico y el nivel de precio.
+// En teléfono, como el registro de precios: fecha corta y la tabla se desliza
+// dentro del cartón si aún no cabe (con AGOTADO sobran ~70 px a 360).
 // ──────────────────────────────────────────────────────────────
-function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio }) {
+function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio, movil }) {
   const lvl = Math.max(0, Math.min(5, Number(nivelPrecio) || 0));
   return (
     <section className="amx-papel amx-kardex" style={{ '--giro-papel': '-.4deg' }} aria-labelledby="amx-kardex-tit">
@@ -2259,31 +2608,34 @@ function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio }) {
         {referencia &&
           <p className="amx-kardex-articulo"><span>Artículo · {sigla}</span>{referencia}</p>}
         {filas.length > 0 ? (
-          <table className="amx-kardex-tabla">
-            <thead>
-              <tr><th scope="col">Sucursal</th><th scope="col" className="num">Exist.</th><th scope="col">Inventario</th><th scope="col"><span className="amx-sr">Documento</span></th></tr>
-            </thead>
-            <tbody>
-              {filas.map((b, i) => {
-                const aut = window.manualAutoridad ? window.manualAutoridad(b.manual) : null;
-                return (
-                  <tr key={b.sigla + i}>
-                    <td className="amx-kardex-suc"><b>{b.sigla}</b>{aut && <small>{aut.nombre}</small>}</td>
-                    <td className="num">
-                      {b.agotado
-                        ? <span className="amx-sello amx-sello--restr">Agotado</span>
-                        : Number(b.qty).toLocaleString('es-MX')}
-                    </td>
-                    <td>{b.manual ? amxFmtManualDate(b.manual.fecha) : '—'}</td>
-                    <td>{b.manual && b.manual.url
-                      ? <a className="amx-kardex-pdf" href={b.manual.url} target="_blank" rel="noopener"
-                          aria-label={'PDF del inventario ' + b.sigla}>PDF ↗</a>
-                      : '—'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="amx-kardex-desliza" tabIndex={movil ? 0 : undefined}
+            role={movil ? 'region' : undefined} aria-label={movil ? 'Existencias por sucursal' : undefined}>
+            <table className="amx-kardex-tabla">
+              <thead>
+                <tr><th scope="col">Sucursal</th><th scope="col" className="num">Exist.</th><th scope="col">Inventario</th><th scope="col"><span className="amx-sr">Documento</span></th></tr>
+              </thead>
+              <tbody>
+                {filas.map((b, i) => {
+                  const aut = window.manualAutoridad ? window.manualAutoridad(b.manual) : null;
+                  return (
+                    <tr key={b.sigla + i}>
+                      <td className="amx-kardex-suc"><b>{b.sigla}</b>{aut && <small>{aut.nombre}</small>}</td>
+                      <td className="num">
+                        {b.agotado
+                          ? <span className="amx-sello amx-sello--restr">Agotado</span>
+                          : Number(b.qty).toLocaleString('es-MX')}
+                      </td>
+                      <td className="amx-kardex-fecha">{b.manual ? amxFmtManualDate(b.manual.fecha, movil) : '—'}</td>
+                      <td>{b.manual && b.manual.url
+                        ? <a className="amx-kardex-pdf" href={b.manual.url} target="_blank" rel="noopener"
+                            aria-label={'PDF del inventario ' + b.sigla}>PDF ↗</a>
+                        : '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
           <p className="amx-kardex-articulo">Existencias pendientes de conciliar con el inventario oficial.</p>
         )}
@@ -2303,7 +2655,7 @@ function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio }) {
 window.TarjetaAlmacen = TarjetaAlmacen;
 
 // ──────────────────────────────────────────────────────────────
-// HISTORIAL DE PRECIOS — papel milimétrico, registro y anexos grapados
+// HISTORIAL DE PRECIOS — papel milimétrico y registro con el PDF de cada inventario
 // Con dos fechas distintas o más: la gráfica y el registro (en escritorio a la
 // par; en móvil el registro se pliega). Con UNA sola fecha no hay tendencia que
 // dibujar: sale solo el registro, que antes directamente se ocultaba y dejaba
@@ -2314,11 +2666,13 @@ const TINTAS_MILIMETRICO = {
   eje: '#8FB2C4', fondo: '#F6F9F5', texto: '#171B19', texto2: '#4E5B63',
 };
 
-function HistorialPrecios({ historial, manualById, plegarRegistro }) {
+function HistorialPrecios({ historial, manualById, movil }) {
+  const [verTodo, setVerTodo] = React.useState(false);
   const hist = historial || [];
   const fechas = [];
   hist.forEach((h) => { if (fechas.indexOf(h.date) < 0) fechas.push(h.date); });
   const hayGrafica = fechas.length >= 2;
+  const plegado = hayGrafica && movil;
 
   // Variación de cada registro contra el anterior (el orden ya es cronológico).
   const filas = hist.map((h, i) => {
@@ -2327,42 +2681,59 @@ function HistorialPrecios({ historial, manualById, plegarRegistro }) {
     const v = amxPrecioNum(h.price);
     const prev = i > 0 ? amxPrecioNum(hist[i - 1].price) : null;
     const delta = (v != null && prev) ? ((v - prev) / prev) * 100 : null;
-    return { h: h, sigla: aut ? aut.sigla : '—', delta: delta, actual: i === hist.length - 1 };
+    return { h: h, sigla: aut ? aut.sigla : '—', url: man && man.url, delta: delta, actual: i === hist.length - 1 };
   }).reverse();
+
+  // Con el vigía de gob.mx entra un inventario tras otro: a la vista, solo los
+  // últimos; el resto detrás del botón. Plegado (móvil) ya va todo escondido.
+  const RECIENTES = 5;
+  const recortar = !plegado && filas.length > RECIENTES;
+  const visibles = recortar && !verTodo ? filas.slice(0, RECIENTES) : filas;
 
   const pIni = hist.length ? amxPrecioNum(hist[0].price) : null;
   const pFin = hist.length ? amxPrecioNum(hist[hist.length - 1].price) : null;
   const total = (hayGrafica && pIni && pFin != null) ? ((pFin - pIni) / pIni) * 100 : null;
   const fmtDelta = (d) => (d > 0 ? '▲ +' : d < 0 ? '▼ −' : '= ') + Math.abs(d).toFixed(1) + ' %';
 
-  // Los anexos: un PDF por inventario citado, del más reciente al más viejo.
-  const vistos = {};
-  const anexos = [];
-  hist.slice().reverse().forEach((h) => {
-    const man = manualById(h.manualId);
-    if (!man || !man.url || vistos[man.id]) return;
-    vistos[man.id] = true;
-    anexos.push(man);
-  });
-
+  // La fuente de cada fila abre el PDF de su inventario (antes eran hojas
+  // grapadas aparte, una por inventario, que no escalaban).
+  // En teléfono no cabe entera ni con la fecha corta (a 360 px sobran ~50 px):
+  // se desliza de lado dentro del papel, y con teclado se enfoca para deslizarla.
   const registro = (
-    <table className="amx-registro">
-      <thead>
-        <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
-      </thead>
-      <tbody>
-        {filas.map((f, i) => (
-          <tr key={i} className={f.actual ? 'es-actual' : undefined}>
-            <td>{amxFmtManualDate(f.h.date) || '—'}</td>
-            <td>{f.sigla}</td>
-            <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
-            <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
-              {f.delta == null ? '—' : fmtDelta(f.delta)}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div>
+      <div className="amx-registro-desliza" tabIndex={movil ? 0 : undefined}
+        role={movil ? 'region' : undefined} aria-label={movil ? 'Registro de precios' : undefined}>
+        <table className="amx-registro">
+          <thead>
+            <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
+          </thead>
+          <tbody>
+            {visibles.map((f, i) => {
+              const fecha = amxFmtManualDate(f.h.date) || '—';
+              return (
+                <tr key={i} className={f.actual ? 'es-actual' : undefined}>
+                  <td>{movil ? amxFmtManualDate(f.h.date, true) || '—' : fecha}</td>
+                  <td>
+                    {f.url
+                      ? <a href={f.url} target="_blank" rel="noopener"
+                          aria-label={'Inventario ' + f.sigla + ' del ' + fecha + ' (PDF, abre en otra pestaña)'}>{f.sigla} ↗</a>
+                      : f.sigla}
+                  </td>
+                  <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
+                  <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
+                    {f.delta == null ? '—' : fmtDelta(f.delta)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {recortar &&
+        <button type="button" className="amx-registro-mas" aria-expanded={verTodo} onClick={() => setVerTodo(!verTodo)}>
+          Ver todo el registro ({filas.length})
+        </button>}
+    </div>
   );
 
   return (
@@ -2375,7 +2746,7 @@ function HistorialPrecios({ historial, manualById, plegarRegistro }) {
           </div>
           <div className={'amx-historial-cuerpo' + (hayGrafica ? ' amx-historial-cuerpo--doble' : '')}>
             {hayGrafica && <PriceChart history={hist} height={170} tintas={TINTAS_MILIMETRICO} />}
-            {hayGrafica && plegarRegistro
+            {plegado
               ? <details className="amx-plegable"><summary>Ver el registro ({hist.length})</summary>{registro}</details>
               : registro}
           </div>
@@ -2386,23 +2757,6 @@ function HistorialPrecios({ historial, manualById, plegarRegistro }) {
             </p>}
         </div>
       </div>
-      {anexos.length > 0 &&
-        <ul className="amx-anexos" aria-label="Inventarios oficiales en PDF">
-          {anexos.map((m, i) => {
-            const aut = window.manualAutoridad ? window.manualAutoridad(m) : null;
-            return (
-              <li key={m.id} className="amx-anexo">
-                <span className="amx-grapa" aria-hidden="true" />
-                <a href={m.url} target="_blank" rel="noopener">
-                  <b>Anexo {i + 1}</b>
-                  Inventario {aut ? aut.sigla : ''}<br />
-                  {amxFmtManualDate(m.fecha)}<br />
-                  <u>Ver PDF ↗</u>
-                </a>
-              </li>
-            );
-          })}
-        </ul>}
     </section>
   );
 }
@@ -2455,3 +2809,975 @@ function RepisaArticulo({ foto, silueta, alt, etiqueta, ariaLabel, onClick }) {
   );
 }
 window.RepisaArticulo = RepisaArticulo;
+
+// ──────────────────────────────────────────────────────────────
+// GAFETE — la credencial de quien responde por el expediente
+// Funda de plástico con su ranura y la tarjeta dentro: logo, filete tricolor,
+// retrato circular, nombre y cargos. El formato lo eligió Saulo con una
+// referencia de gafete de oficina (17-sep-2026).
+//
+// SIN CORDÓN: lo llevaba dibujado en CSS y Saulo lo retiró el mismo día —dos
+// cintas planas no se leen como una cinta de verdad y delataban el dibujo. La
+// funda y su ranura bastan para que se reconozca el gafete. No reintroducir.
+//
+// NO lleva folio, número, vigencia ni firma —los campos que un gafete real
+// tendría ahí—: no hay ningún registro del que salgan, y un código que no
+// corresponde a nada es decoración que finge ser dato. Por eso la tarjeta
+// termina en los cargos y no en una tabla de campos vacíos.
+//
+// EL FILETE TRICOLOR: el `.tricolor` que se retiró el 8-sep-2026 (su lápida
+// está en estilo.css) desinformaba porque iba bajo armas checas o italianas.
+// Aquí la nacionalidad que afirma es cierta —el proyecto y la persona son
+// mexicanos— y §6b lista las líneas tricolor entre lo permitido. Son tres
+// franjas de color y nada más: ni escudo, ni águila, ni emblema. Y el gafete
+// es de un proyecto privado, con su propio logo: no imita una credencial
+// oficial de ninguna dependencia.
+// ──────────────────────────────────────────────────────────────
+function Gafete({ foto, nombre, cargos = [], marca = 'Armado en México', logo = 'imagenes/logo-armado-mx.webp' }) {
+  // Cubre los dos casos, igual que ArmaPolaroid: la foto que nunca existió y
+  // el .webp que está en el dato pero no llega.
+  const [falloCarga, setFalloCarga] = React.useState(false);
+  const sinFoto = falloCarga || !foto;
+  return (
+    <figure className="amx-gafete">
+      <div className="amx-gafete-funda">
+        <div className="amx-gafete-tarjeta">
+          <div className="amx-gafete-marca">
+            <img src={logo} alt="" />
+            <span>{marca}</span>
+          </div>
+          <span className="amx-gafete-filete" aria-hidden="true" />
+          <div className="amx-gafete-foto">
+            {sinFoto ?
+            <span className="amx-sello amx-sello--pendiente">Fotografía pendiente</span> :
+            <img src={foto} alt={nombre} decoding="async" onError={() => setFalloCarga(true)} />}
+          </div>
+          <figcaption className="amx-gafete-campos">
+            <span className="amx-gafete-nombre">{nombre}</span>
+            {cargos.map((c, i) => <span key={i} className="amx-gafete-cargo">{c}</span>)}
+          </figcaption>
+        </div>
+      </div>
+    </figure>);
+
+}
+window.Gafete = Gafete;
+
+// ══════════════════════════════════════════════════════════════
+// EL COMPARADOR — dos fichas de fichero lado a lado (14-sep-2026)
+// Decidido con Saulo sección por sección (docs/DESIGN.md §5.6). Qué se compara
+// y quién gana vive en src/lib/cotejo.js; aquí solo se pinta. La piel está en
+// estilo.css, bloque «EL COMPARADOR».
+// ══════════════════════════════════════════════════════════════
+
+// El valor que gana, circulado con rotulador rojo. El círculo es CSS; lo que
+// dice «ventaja» al lector de pantalla es el texto oculto.
+function CirculoVentaja({ children }) {
+  return <span className="amx-circulo">{children}<span className="amx-sr"> (ventaja)</span></span>;
+}
+
+// «18 jun 26» en la ficha estrecha del móvil; «18 jun 2026» en escritorio.
+function amxFechaCotejo(f, ancho) {
+  if (!f) return '';
+  const larga = amxFmtManualDate(f);
+  return ancho ? larga : larga.replace(/\d{2}(\d{2})$/, '$1');
+}
+
+// Una fila de la ficha: un dato con su etiqueta. Precio y existencias apilan
+// varias líneas en la MISMA fila, y la rejilla (subgrid) hace que la fila mida
+// lo que la más alta de las dos fichas: así lo de abajo sigue alineado.
+function CotejoFila({ f, lado, ancho }) {
+  const x = f[lado];
+  const etq = ancho ? f.etiqueta : f.corta;
+  const valor = (v) => (f.gana === lado ? <CirculoVentaja>{v}</CirculoVentaja> : v);
+  if (f.tipo === 'precio') {
+    return (
+      <div className="amx-cotejo-fila amx-cotejo-fila--pila">
+        <dt>{etq}</dt>
+        <dd>{valor(x.texto)}</dd>
+        <dd className="amx-cotejo-nota">{[x.sigla, amxFechaCotejo(x.fecha, ancho)].filter(Boolean).join(' · ')}</dd>
+        {x.ultimoConocido &&
+          <dd className="amx-cotejo-conocido"><span className="amx-sello amx-sello--restr">Último precio conocido</span></dd>}
+      </div>
+    );
+  }
+  if (f.tipo === 'existencias') {
+    return (
+      <div className="amx-cotejo-fila amx-cotejo-fila--pila">
+        <dt>{etq}</dt>
+        {f.siglas.length ? f.siglas.map((s) => {
+          const suc = x.sucursales.find((y) => y.sigla === s);
+          return (
+            <dd key={s} className="amx-cotejo-suc">
+              <span>{s}</span>
+              {!suc ? '—'
+                : suc.agotado ? <span className="amx-sello amx-sello--restr">Agotado</span>
+                : Number(suc.qty).toLocaleString('es-MX')}
+            </dd>
+          );
+        }) : <dd>Pendiente</dd>}
+      </div>
+    );
+  }
+  return <div className="amx-cotejo-fila"><dt>{etq}</dt><dd>{valor(x.texto)}</dd></div>;
+}
+
+// Los dos expedientes. Cada uno ocupa en la rejilla común las filas de: la
+// copia, la cabecera, cada dato (+ el separador de iguales) y las acciones; y las
+// hereda con `subgrid`. El `span` va inline porque sale de contar las filas.
+function CotejoFichas({ a, b, cotejo, ancho, onAbrir, onCambiar, onQuitar, onElegir }) {
+  const nFilas = cotejo.arriba.length + (cotejo.iguales.length ? 1 + cotejo.iguales.length : 0);
+  const pistasExp = { gridRow: 'span ' + (nFilas + 3) };
+  const pistasCarton = { gridRow: 'span ' + (nFilas + 1) };
+  return (
+    <div className="amx-cotejo">
+      {[['a', a], ['b', b]].map(([lado, arma]) => arma ? (
+        <article key={lado} className="amx-cotejo-exp" style={pistasExp} aria-labelledby={'cotejo-cab-' + lado}>
+          {/* El sello va FUERA del botón: dentro, su nombre («Uso civil — DCAM»)
+              quedaría tapado por el del botón y el lector no diría la categoría. */}
+          <div className="amx-cotejo-copia">
+            <div className="amx-cotejo-abrir" role="button" tabIndex={0}
+              aria-label={'Abrir la ficha de ' + arma.nombre}
+              onClick={() => onAbrir(arma.id)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAbrir(arma.id); } }}>
+              <ArmaPolaroid arma={arma} pie="ninguno" />
+              <span className="amx-grapa" aria-hidden="true" />
+            </div>
+            <span className="amx-cotejo-sello"><SelloLegal avail={arma.avail} etiqueta={arma.availLabel} /></span>
+          </div>
+          <div className="amx-cotejo-carton" style={pistasCarton}>
+            <h2 className="amx-cotejo-cab" id={'cotejo-cab-' + lado} tabIndex={-1}>{arma.nombre}</h2>
+            <dl className="amx-cotejo-lista">
+              {cotejo.arriba.map((f) => <CotejoFila key={f.clave} f={f} lado={lado} ancho={ancho} />)}
+            </dl>
+            {cotejo.iguales.length > 0 && <p className="amx-cotejo-sep">— iguales —</p>}
+            {cotejo.iguales.length > 0 &&
+              <dl className="amx-cotejo-lista">
+                {cotejo.iguales.map((f) => <CotejoFila key={f.clave} f={f} lado={lado} ancho={ancho} />)}
+              </dl>}
+          </div>
+          <p className="amx-cotejo-acciones">
+            <button type="button" onClick={() => onCambiar(lado)}>Cambiar</button>
+            <span aria-hidden="true">·</span>
+            {/* El botón desaparece (o pasa a ser el «Quitar» de la otra arma, y un
+                segundo Enter vaciaría la comparación): el foco va a la primera
+                cabecera. flushSync para que exista ya pintada. */}
+            <button type="button" onClick={() => {
+              ReactDOM.flushSync(() => onQuitar(arma.id));
+              const cab = document.getElementById('cotejo-cab-a');
+              if (cab) cab.focus();
+            }}>Quitar</button>
+          </p>
+        </article>
+      ) : (
+        <article key={lado} className="amx-cotejo-exp" style={pistasExp} aria-label="Ficha en blanco">
+          <span className="amx-cotejo-copia amx-cotejo-copia--vacia" aria-hidden="true" />
+          <div className="amx-cotejo-carton amx-cotejo-carton--blanco" style={pistasCarton}>
+            <button type="button" className="amx-cotejo-elegir" onClick={() => onElegir(lado)}>+ Elegir arma</button>
+          </div>
+          <span className="amx-cotejo-acciones" aria-hidden="true" />
+        </article>
+      ))}
+    </div>
+  );
+}
+window.CotejoFichas = CotejoFichas;
+
+// La tira de diferencias: la segunda arma frente a la primera, en cifras.
+function TiraCotejo({ tira }) {
+  return (
+    <p className="amx-cotejo-tira">
+      <b>{tira.nombreB}</b> frente a <b>{tira.nombreA}</b>:{' '}
+      <span className="amx-cotejo-tira-cifras">
+        {tira.partes.length
+          ? tira.partes.join(' · ') + (tira.avisoFechas ? ' · precios de fechas distintas' : '')
+          : 'Sin diferencias en capacidad, peso, longitud ni precio.'}
+      </span>
+    </p>
+  );
+}
+window.TiraCotejo = TiraCotejo;
+
+// Sin armas: una hoja que dice cómo empezar.
+function CotejoVacio({ onArsenal }) {
+  return (
+    <section className="amx-cotejo-vacio" aria-label="Comparador sin armas">
+      <p><b>Todavía no hay armas.</b></p>
+      <p>Marca «Comparar» en el talón de cualquier ficha para empezar.</p>
+      <button type="button" className="amx-cotejo-boton" onClick={onArsenal}>Ir al Arsenal</button>
+    </section>
+  );
+}
+window.CotejoVacio = CotejoVacio;
+
+// LA BÚSQUEDA — elegir un arma sin salir del comparador. `<dialog>` nativo con
+// showModal(): el foco, el Esc y el fondo inerte los pone el navegador. Sustituye
+// al «modo selección», que mandaba al Arsenal y dejaba al usuario en la ficha
+// del arma elegida en vez de devolverlo aquí.
+function BuscarArma({ abierta, titulo, excluir, onElegir, onCerrar }) {
+  const ref = React.useRef(null);
+  const origen = React.useRef(null);
+  const [consulta, setConsulta] = React.useState('');
+  React.useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (abierta && !d.open) {
+      origen.current = document.activeElement;
+      setConsulta('');
+      d.showModal();
+    } else if (!abierta && d.open) {
+      d.close();
+    }
+  }, [abierta]);
+  // Al cerrar (Cerrar, Esc o tras elegir), el foco vuelve a quien abrió la
+  // búsqueda si sigue en la página. La ficha en blanco desaparece al elegir:
+  // entonces va a la primera cabecera del comparador. El evento `close` llega en
+  // una tarea aparte, con el render de la elección ya hecho.
+  const alCerrar = () => {
+    onCerrar();
+    const o = origen.current;
+    const destino = o && document.contains(o) ? o : document.getElementById('cotejo-cab-a');
+    if (destino) destino.focus();
+  };
+  const resultados = abierta ? window.amxBuscarArmas(window.DB || [], consulta, excluir) : [];
+  return (
+    <dialog ref={ref} className="amx-busqueda" aria-labelledby="amx-busqueda-titulo" onClose={alCerrar}>
+      <div className="amx-busqueda-papel">
+        <h2 id="amx-busqueda-titulo" className="amx-busqueda-titulo">{titulo}</h2>
+        <label htmlFor="amx-busqueda-consulta" className="amx-sr">Buscar por nombre, marca o calibre</label>
+        <input id="amx-busqueda-consulta" className="amx-busqueda-campo" type="search" autoComplete="off"
+          value={consulta} onChange={(e) => setConsulta(e.target.value)} />
+        {resultados.length > 0
+          ? <ul className="amx-busqueda-lista">
+              {resultados.map((x) => (
+                <li key={x.id}>
+                  <button type="button" className="amx-busqueda-item" onClick={() => onElegir(x.id)}>
+                    <span>{x.nombre}</span><small>{x.calibre}</small>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          : <p className="amx-busqueda-nada">Ninguna arma coincide con «{consulta}».</p>}
+        <button type="button" className="amx-busqueda-cerrar" onClick={() => ref.current.close()}>Cerrar</button>
+      </div>
+    </dialog>
+  );
+}
+window.BuscarArma = BuscarArma;
+
+// ══════════════════════════════════════════════════════════════
+// LA VITRINA DE ACCESORIOS — el catálogo como puesto de tianguis (15-sep-2026)
+// Decidido con Saulo pregunta por pregunta (docs/DESIGN.md §5.7). El puesto
+// REUTILIZA las clases `.amx-puesto*` del puesto de munición del Home (letrero,
+// vara, luz, caja) sin tocarlo; la mesa, en cambio, va en la FILA para cruzarla
+// entera aunque falten puestos. La piel, en estilo.css, bloque del mismo nombre.
+// ══════════════════════════════════════════════════════════════
+
+// El toldo: lona rayada con el rótulo. Es el <h1> de la pantalla.
+function ToldoLona({ children }) {
+  return (
+    <div className="amx-toldo">
+      <h1 className="amx-toldo-rotulo">{children}</h1>
+    </div>
+  );
+}
+window.ToldoLona = ToldoLona;
+
+// Los separadores de fichero como filtro: las pestañas de la ficha de arma
+// (`.amx-separador`) sobre una tira de oficio. Patrón de pestañas, como
+// FichaTabs: ← → cambian y enfocan, y solo la activa entra en el tabulador.
+function SeparadoresFiltro({ etiqueta, opciones, activo, onCambiar, controla }) {
+  const refs = React.useRef({});
+  const act = Math.max(0, opciones.findIndex((o) => o.id === activo));
+  function onKey(e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (!d) return;
+    e.preventDefault();
+    const sig = opciones[(act + d + opciones.length) % opciones.length];
+    onCambiar(sig.id);
+    if (refs.current[sig.id]) refs.current[sig.id].focus();
+  }
+  return (
+    <div className="amx-separadores-filtro">
+      <div className="amx-separadores-pestanas" role="tablist" aria-label={etiqueta} onKeyDown={onKey}>
+        {opciones.map((o, i) => (
+          <button key={o.id} type="button" role="tab"
+            id={'separador-' + o.id}
+            ref={(el) => { refs.current[o.id] = el; }}
+            aria-selected={i === act}
+            aria-controls={controla}
+            tabIndex={i === act ? 0 : -1}
+            className="amx-separador"
+            onClick={() => onCambiar(o.id)}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+window.SeparadoresFiltro = SeparadoresFiltro;
+
+// La mesa: reparte los puestos en filas de `porFila`, cada una con su tabla a
+// todo el ancho aunque se quede corta (Saulo, 15-sep-2026).
+function MesaPuestos({ items, porFila, renderPuesto }) {
+  const filas = [];
+  for (let i = 0; i < items.length; i += porFila) filas.push(items.slice(i, i + porFila));
+  return (
+    <div className="amx-mesa">
+      {filas.map((fila, f) => (
+        <div key={f} className="amx-mesa-fila" style={{ '--por-fila': porFila }}>
+          {fila.map(renderPuesto)}
+        </div>
+      ))}
+    </div>
+  );
+}
+window.MesaPuestos = MesaPuestos;
+
+// Un puesto: letrero con SOLO el nombre corto, vara, luz y la pieza. Sin foto,
+// la silueta de su categoría, sola: sin sello «Foto pendiente» (Saulo). El
+// nombre completo va en el aria-label; foto y silueta no se anuncian.
+function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
+  const [fallo, setFallo] = React.useState(false);
+  const conFoto = foto && !fallo;
+  return (
+    <button type="button" className="amx-puesto amx-puesto--pieza" aria-label={ariaLabel} onClick={onClick}>
+      <span className="amx-puesto-letrero">
+        <span className="amx-puesto-rotulo">{rotulo}</span>
+      </span>
+      <span className="amx-puesto-palo" aria-hidden="true" />
+      <span className="amx-puesto-luz" aria-hidden="true" />
+      {conFoto
+        ? <img className="amx-puesto-caja" src={foto} alt="" loading="lazy" decoding="async" onError={() => setFallo(true)} />
+        : <span className="amx-puesto-silueta amx-silueta-acc" aria-hidden="true" style={{ '--silueta-forma': `url(${silueta})` }} />}
+    </button>
+  );
+}
+window.PuestoPieza = PuestoPieza;
+
+// ══════════════════════════════════════════════════════════════
+// EL HUB DEL ARSENAL — /arsenal (15-sep-2026, docs/DESIGN.md §5.9)
+// Las cuentas salen de src/lib/arsenal-hub.js; aquí solo se dibujan, con los
+// papeles de la ficha: la tarjeta de almacén, la hoja de oficio con los sellos
+// y la repisa de la vitrina con su etiqueta.
+// ══════════════════════════════════════════════════════════════
+
+// DISPONIBILIDAD: un renglón por sucursal y sin total (un arma puede estar en las
+// dos). No es <table>: un renglón entero no puede ser un botón dentro de una
+// tabla; las columnas las dibuja una rejilla con la piel del kárdex.
+function AlmacenSucursales({ filas, movil, onAbrir }) {
+  return (
+    <section className="amx-papel amx-kardex amx-almacen" style={{ '--giro-papel': '-.4deg' }} aria-labelledby="amx-almacen-tit">
+      <div className="amx-kardex-carton">
+        <div className="amx-kardex-cab">
+          <h3 className="amx-papel-tit" id="amx-almacen-tit">Tarjeta de almacén</h3>
+        </div>
+        <div className="amx-almacen-cols" aria-hidden="true">
+          <span>Sucursal</span><span className="num">Armas</span><span>Inventario</span>
+        </div>
+        <ul className="amx-almacen-lista">
+          {filas.map((f) => (
+            <li key={f.sigla}>
+              <button type="button" className="amx-almacen-renglon" onClick={() => onAbrir(f.sigla)}
+                aria-label={`${f.sigla}: ${f.armas} ${f.armas === 1 ? 'arma' : 'armas'} con existencia${f.fecha ? ', inventario del ' + amxFmtManualDate(f.fecha) : ''}`}>
+                <b>{f.sigla}</b>
+                <span className="num">{Number(f.armas).toLocaleString('es-MX')}</span>
+                <span className="amx-kardex-fecha">{f.fecha ? amxFmtManualDate(f.fecha, movil) : '—'}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="amx-kardex-nota">En existencia en el último inventario de su sucursal</p>
+      </div>
+    </section>
+  );
+}
+window.AlmacenSucursales = AlmacenSucursales;
+
+// CLASIFICACIÓN LEGAL: los sellos de la ficha estampados en una hoja de oficio.
+// Por debajo de 1024 px el sello dice la palabra corta (CIVIL…); por encima, la
+// etiqueta completa de los datos. Las dos van en el DOM y el CSS enseña una; el
+// nombre accesible es siempre la etiqueta completa con su cifra.
+function HojaClasificacion({ filas, onAbrir }) {
+  return (
+    <ul className="amx-oficio amx-clasif">
+      {filas.map((f) => {
+        const s = SELLOS[f.id] || SELLOS.dcam;
+        return (
+          <li key={f.id}>
+            <button type="button" className="amx-clasif-renglon" onClick={() => onAbrir(f.id)}
+              aria-label={`${f.label} — ${f.armas} ${f.armas === 1 ? 'arma' : 'armas'}`}
+              aria-describedby={'amx-clasif-desc-' + f.id}>
+              <span className={'amx-sello amx-sello--' + s.tono + ' amx-clasif-sello'} aria-hidden="true">
+                <span className="amx-clasif-corto">{s.texto}</span>
+                <span className="amx-clasif-largo">{f.label}</span>
+              </span>
+              <span className="amx-clasif-desc" id={'amx-clasif-desc-' + f.id}>{f.desc}</span>
+              <span className="amx-clasif-cifra">{Number(f.armas).toLocaleString('es-MX')}</span>
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+window.HojaClasificacion = HojaClasificacion;
+
+// CALIBRE: un solo mostrador de madera que se desliza de lado (la repisa de la
+// vitrina de la ficha, sin su marco). Cada cartucho de pie sobre la tabla a
+// escala real (`--escala` = largo ÷ el más largo), con su etiqueta de cartón
+// delante y la luz de los puestos detrás. Sin foto, la silueta de pie.
+function MostradorCalibres({ calibres, onAbrir }) {
+  return (
+    // La repisa va dentro de su mueble: sola, flotaba sobre el fondo de la
+    // página. El canto y la pared son los mismos de la vitrina de la ficha.
+    <div className="amx-anaquel amx-anaquel--mostrador">
+    <div className="amx-repisa-fila amx-mostrador" role="region" aria-label="Calibres" tabIndex={0}>
+      <ul className="amx-repisa-carril">
+        {calibres.map((c) => (
+          <li key={c.id} className="amx-articulo-celda amx-mostrador-celda">
+            <button type="button" className="amx-articulo" onClick={() => onAbrir(c.id)}
+              aria-label={`${c.label} — ${c.armas} ${c.armas === 1 ? 'arma' : 'armas'}`}>
+              <span className="amx-articulo-foto">
+                <span className="amx-puesto-luz" aria-hidden="true" />
+                <img src={c.foto || 'imagenes/cartuchos/silueta-vertical.webp'} alt="" loading="lazy"
+                  style={{ '--escala': c.escala }} />
+              </span>
+              <span className="amx-etiqueta">
+                <span className="amx-etiqueta-calibre">{c.label}</span>
+                <span className="amx-etiqueta-armas">{c.armas} {c.armas === 1 ? 'arma' : 'armas'}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+    </div>
+  );
+}
+window.MostradorCalibres = MostradorCalibres;
+
+// ──────────────────────────────────────────────────────────────
+// LOS FILTROS DE LOS CATÁLOGOS (16-sep-2026)
+// Decidido con Saulo pregunta por pregunta y con maqueta (docs/DESIGN.md §5.10).
+// Armas y municiones: una tira de chips que se desliza; el chip sin filtro es
+// una etiqueta de papel y con filtro, la cinta Dymo rotulada con el valor y su
+// ✕. Cada chip abre DEBAJO una hoja que empuja el catálogo: casillas de
+// formulario (una sola opción), la regla de precio o los renglones de «Más».
+// Las cuentas viven en src/lib/filtros.js; la piel, en estilo.css, bloque del
+// mismo nombre.
+// ──────────────────────────────────────────────────────────────
+
+// El rango de precio de un catálogo. Los límites salen de los precios que dejan
+// los DEMÁS filtros (`precios`, memoizado por la pantalla) y el rango vuelve a
+// los límites cuando estos cambian: la regla de siempre del catálogo.
+function useRangoPrecio(precios, paso, tope) {
+  const limites = React.useMemo(() => window.amxLimitesPrecio(precios, { paso, tope }), [precios, paso, tope]);
+  const [rango, setRango] = React.useState([limites.min, limites.max]);
+  const previo = React.useRef(limites);
+  const cambio = previo.current.min !== limites.min || previo.current.max !== limites.max;
+  if (cambio) {
+    previo.current = limites;
+    setRango([limites.min, limites.max]);
+  }
+  const lo = cambio ? limites.min : rango[0];
+  const hi = cambio ? limites.max : rango[1];
+  return {
+    limites, lo, hi, paso,
+    activo: lo > limites.min || hi < limites.max,
+    cambiar: (a, b) => setRango([a, b]),
+    reiniciar: () => setRango([limites.min, limites.max]),
+    deja: (p) => window.amxDentroDePrecio(p, lo, hi, limites),
+  };
+}
+window.useRangoPrecio = useRangoPrecio;
+
+// Las opciones de un filtro: casillas de formulario, «Todos» primero. Una sola
+// opción; la marcada lleva ✕ dentro de su casilla (lo pone el CSS).
+function CasillasFiltro({ filtro, valor, onElegir }) {
+  const opciones = [{ id: 'all', label: filtro.todos }].concat(filtro.opciones);
+  return (
+    <div className="amx-casillas" role="radiogroup" aria-label={filtro.label}>
+      {opciones.map((o) => (
+        <button key={o.id} type="button" role="radio" aria-checked={valor === o.id}
+          className="amx-casilla" onClick={() => onElegir(o.id)}>
+          <span className="amx-casilla-caja" aria-hidden="true" />
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+window.CasillasFiltro = CasillasFiltro;
+
+// La regla de precio: marcas con número, el riel con el tramo elegido en tinta y
+// dos cursores sobre <input type="range"> nativos (dedo y teclado). Arriba queda
+// el cursor bajo cuando ya pasó de la mitad, para que siempre se pueda agarrar.
+function ReglaPrecio({ uid, precio, formato }) {
+  const { limites, lo, hi, paso } = precio;
+  const { min, max } = limites;
+  const ancho = max - min || 1;
+  const pct = (v) => ((v - min) / ancho) * 100;
+  const dicho = (v) => '$' + Math.round(v).toLocaleString('es-MX');
+  return (
+    <div className="amx-regla" style={{ '--lo': pct(lo) + '%', '--hi': pct(hi) + '%' }}>
+      <div className="amx-regla-marcas" aria-hidden="true">
+        {window.amxMarcasRegla(min, max, paso).map((m) => {
+          const x = pct(m.valor);
+          return (
+            <React.Fragment key={m.valor}>
+              <span className={'amx-regla-marca' + (m.mayor ? ' amx-regla-marca--mayor' : '')} style={{ '--x': x + '%' }} />
+              {m.mayor && (
+                <span className={'amx-regla-num' + (x < 6 ? ' amx-regla-num--ini' : x > 94 ? ' amx-regla-num--fin' : '')}
+                  style={{ '--x': x + '%' }}>{window.amxNumeroMarca(m.valor, limites, formato)}</span>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+      <div className="amx-regla-riel" aria-hidden="true" />
+      <input type="range" className="amx-regla-cursor" id={uid + '-precio-lo'}
+        min={min} max={max} step={paso} value={lo} aria-label="Precio mínimo"
+        aria-valuetext={dicho(lo)}
+        style={{ '--z': lo - min > ancho / 2 ? 3 : 1 }}
+        onChange={(e) => precio.cambiar(Math.max(min, Math.min(Number(e.target.value), hi - paso)), hi)} />
+      <input type="range" className="amx-regla-cursor" id={uid + '-precio-hi'}
+        min={min} max={max} step={paso} value={hi} aria-label="Precio máximo"
+        aria-valuetext={dicho(hi) + (limites.conTope && hi >= max ? '+' : '')}
+        style={{ '--z': 2 }}
+        onChange={(e) => precio.cambiar(lo, Math.min(max, Math.max(Number(e.target.value), lo + paso)))} />
+    </div>
+  );
+}
+window.ReglaPrecio = ReglaPrecio;
+
+// La tira completa: chips, la hoja del chip abierto y el renglón del conteo.
+//   uid         prefijo de ids (la hoja, los cursores)
+//   orden       ids de los chips en orden; 'precio' y 'mas' son especiales
+//   mas         ids que van en los renglones de «Más»
+//   filtros     { id: { label, chip?, todos, opciones: [{ id, label, corto? }] } }
+//   valores     { id: valor | 'all' } · onCambiar(id, valor)
+//   precio      lo que devuelve useRangoPrecio · formato 'miles' | 'pesos' · tituloPrecio
+//   conteo      { n, nombres: [singular, plural] } · activos · hayTexto · onLimpiar
+function TiraFiltros({ uid, orden, mas = [], filtros, valores, onCambiar, precio, formato, tituloPrecio,
+  conteo, activos, hayTexto, onLimpiar }) {
+  const [abierto, setAbierto] = React.useState(null);
+  const [renglon, setRenglon] = React.useState(null);
+  const tiraRef = React.useRef(null);
+  const hojaRef = React.useRef(null);
+  const chipsRef = React.useRef({});
+  const focoRef = React.useRef(null);
+  const antesRef = React.useRef(null);
+  const entra = abierto !== null && antesRef.current !== abierto;
+  const idHoja = uid + '-hoja';
+
+  const rotulo = (f, v) => { const o = f.opciones.find((x) => x.id === v); return o ? (o.corto || o.label) : v; };
+  const alternar = (id) => { setAbierto(abierto === id ? null : id); setRenglon(null); };
+  const cerrar = () => { focoRef.current = abierto; setAbierto(null); setRenglon(null); };
+  const elegir = (id, v) => { onCambiar(id, v); focoRef.current = id; setAbierto(null); };
+  const quitar = (id) => {
+    if (id === 'precio') precio.reiniciar(); else onCambiar(id, 'all');
+    focoRef.current = id;
+    if (abierto === id) setAbierto(null);
+  };
+
+  // La muesca bajo su chip, la hoja alineada con él en escritorio y el degradado
+  // del borde de la tira. Escribe custom properties: deslizar no re-renderiza.
+  const colocar = React.useCallback(() => {
+    const tira = tiraRef.current;
+    if (!tira) return;
+    tira.parentElement.style.setProperty('--fade', tira.scrollLeft + tira.clientWidth >= tira.scrollWidth - 2 ? '0' : '1');
+    const hoja = hojaRef.current;
+    const chip = abierto && chipsRef.current[abierto];
+    if (!hoja || !chip) return;
+    hoja.style.setProperty('--hoja-x', '0px');
+    const hueco = hoja.parentElement;
+    const h = hueco.getBoundingClientRect();
+    const margen = parseFloat(getComputedStyle(hueco).paddingLeft) || 0;
+    const c = chip.getBoundingClientRect();
+    const ancho = hoja.offsetWidth;
+    const x = Math.max(0, Math.min(c.left - h.left - margen, h.width - 2 * margen - ancho));
+    hoja.style.setProperty('--hoja-x', x + 'px');
+    hoja.style.setProperty('--muesca', Math.max(18, Math.min(c.left + c.width / 2 - (h.left + margen + x), ancho - 18)) + 'px');
+  }, [abierto]);
+
+
+  React.useLayoutEffect(() => {
+    const tira = tiraRef.current;
+    const chip = abierto && chipsRef.current[abierto];
+    if (entra && tira && chip) {
+      const izq = chip.offsetLeft - 16;
+      const der = chip.offsetLeft + chip.offsetWidth + 16 - tira.clientWidth;
+      if (izq < tira.scrollLeft) tira.scrollLeft = izq;
+      else if (der > tira.scrollLeft) tira.scrollLeft = der;
+    }
+    antesRef.current = abierto;
+    colocar();
+    if (focoRef.current) {
+      const el = chipsRef.current[focoRef.current];
+      focoRef.current = null;
+      const boton = el && (el.tagName === 'BUTTON' ? el : el.querySelector('button'));
+      if (boton) boton.focus({ preventScroll: true });
+    }
+  });
+  React.useEffect(() => {
+    window.addEventListener('resize', colocar);
+    return () => window.removeEventListener('resize', colocar);
+  }, [colocar]);
+
+  const pintarChip = (id) => {
+    const ab = abierto === id;
+    const ref = (el) => { chipsRef.current[id] = el; };
+    const flecha = <span className="amx-chip-flecha" aria-hidden="true">{ab ? '▴' : '▾'}</span>;
+    const abre = { type: 'button', 'aria-expanded': ab, 'aria-controls': idHoja, onClick: () => alternar(id) };
+    if (id === 'mas') {
+      const n = mas.filter((m) => valores[m] !== 'all').length;
+      return (
+        <button key={id} ref={ref} className={'amx-chip' + (ab ? ' amx-chip--abierto' : '')} {...abre}>
+          Más{n > 0 && <span className="amx-chip-n">· {n}</span>}{flecha}
+        </button>
+      );
+    }
+    const f = id === 'precio' ? { label: 'Precio' } : filtros[id];
+    const activo = id === 'precio' ? precio.activo : valores[id] !== 'all';
+    if (!activo) {
+      return (
+        <button key={id} ref={ref} className={'amx-chip' + (ab ? ' amx-chip--abierto' : '')} {...abre}>
+          {f.chip || f.label}{flecha}
+        </button>
+      );
+    }
+    const valor = id === 'precio' ? window.amxRotuloRango(precio.lo, precio.hi, precio.limites, formato) : rotulo(f, valores[id]);
+    return (
+      <span key={id} ref={ref} className={'amx-chip-dymo' + (ab ? ' amx-chip-dymo--abierto' : '')}>
+        <button className="amx-chip-dymo-valor" aria-label={f.label + ': ' + valor + '. Cambiar'} {...abre}>
+          {valor}{flecha}
+        </button>
+        <button type="button" className="amx-chip-dymo-quitar" aria-label={'Quitar ' + f.label} onClick={() => quitar(id)}>✕</button>
+      </span>
+    );
+  };
+
+  let hoja = null;
+  if (abierto) {
+    let titulo;
+    let cuerpo;
+    if (abierto === 'precio') {
+      titulo = tituloPrecio;
+      cuerpo = (
+        <React.Fragment>
+          <output className="amx-regla-lectura" htmlFor={uid + '-precio-lo ' + uid + '-precio-hi'}>
+            {window.amxLecturaRango(precio.lo, precio.hi, precio.limites)}
+          </output>
+          <ReglaPrecio uid={uid} precio={precio} formato={formato} />
+        </React.Fragment>
+      );
+    } else if (abierto === 'mas') {
+      titulo = 'Más filtros';
+      cuerpo = (
+        <div className="amx-mas-renglones">
+          {mas.map((id) => {
+            const f = filtros[id];
+            const ab = renglon === id;
+            const act = valores[id] !== 'all';
+            return (
+              <div key={id} className="amx-mas-grupo">
+                <button type="button" ref={(el) => { chipsRef.current['r-' + id] = el; }}
+                  className={'amx-mas-renglon' + (act ? ' amx-mas-renglon--activo' : '')}
+                  aria-expanded={ab} onClick={() => setRenglon(ab ? null : id)}>
+                  <span className="amx-mas-nombre">{f.label}</span>
+                  <span className="amx-mas-puntos" aria-hidden="true" />
+                  <span className="amx-mas-valor">{act ? rotulo(f, valores[id]) : f.todos}</span>
+                  <span className="amx-chip-flecha" aria-hidden="true">{ab ? '▾' : '▸'}</span>
+                </button>
+                {ab && (
+                  <CasillasFiltro filtro={f} valor={valores[id]}
+                    onElegir={(v) => { onCambiar(id, v); focoRef.current = 'r-' + id; setRenglon(null); }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    } else {
+      titulo = filtros[abierto].label;
+      cuerpo = <CasillasFiltro filtro={filtros[abierto]} valor={valores[abierto]} onElegir={(v) => elegir(abierto, v)} />;
+    }
+    hoja = (
+      <div className="amx-filtros-hueco">
+        <div ref={hojaRef} id={idHoja} role="region" aria-label={titulo}
+          className={'amx-hoja-filtro' + (entra ? ' amx-hoja-filtro--entra' : '')}>
+          <div className="amx-hoja-filtro-cab">
+            <span className="amx-hoja-filtro-titulo">{titulo}</span>
+            <button type="button" className="amx-filtros-enlace" onClick={cerrar}>Cerrar</button>
+          </div>
+          {cuerpo}
+        </div>
+      </div>
+    );
+  }
+
+  const texto = window.amxTextoConteo(conteo.n, activos, conteo.nombres);
+  return (
+    <div className="amx-filtros"
+      onKeyDown={(e) => { if (e.key === 'Escape' && abierto) { e.stopPropagation(); cerrar(); } }}>
+      <div className="amx-filtros-envoltura">
+        <div ref={tiraRef} className="amx-filtros-tira" role="group" aria-label="Filtros" onScroll={colocar}>
+          {orden.map((id) => pintarChip(id))}
+        </div>
+      </div>
+      {hoja}
+      <div className="amx-filtros-conteo">
+        <p className="amx-filtros-conteo-texto" aria-live="polite">
+          <span aria-hidden="true">▸ </span><b>{texto.cifra}</b> {texto.resto}
+        </p>
+        {(activos > 0 || hayTexto) && (
+          <button type="button" className="amx-filtros-enlace"
+            onClick={() => { setAbierto(null); setRenglon(null); focoRef.current = orden[0]; onLimpiar(); }}>Limpiar</button>
+        )}
+      </div>
+    </div>
+  );
+}
+window.TiraFiltros = TiraFiltros;
+
+// ──────────────────────────────────────────────────────────────
+// REGLA COMPARATIVA — regla graduada que enseña dónde cae un
+// calibre dentro del rango de todos los demás
+// ──────────────────────────────────────────────────────────────
+function ReglaComparativa({ titulo, valor, min, max, unidad, fuente }) {
+  const pos = window.amxPosicionEnRango(valor, min, max);
+  const etiqueta = `${valor} ${unidad}. En esta guía el mínimo es ${min} y el máximo ${max}.`;
+  return (
+    <div className="amx-regla" style={{ '--pos': pos }}>
+      <div className="amx-regla-titulo">{titulo}</div>
+      <div className="amx-regla-pista" role="img" aria-label={etiqueta}>
+        <span className="amx-regla-cursor" />
+      </div>
+      <div className="amx-regla-pies">
+        <span>{min} {unidad}</span>
+        <b>{valor} {unidad}</b>
+        <span>{max} {unidad}</span>
+      </div>
+      {fuente ? <div className="amx-regla-fuente">{fuente.nombre} · {fuente.fecha}</div> : null}
+    </div>
+  );
+}
+window.ReglaComparativa = ReglaComparativa;
+
+// ──────────────────────────────────────────────────────────────
+// REGLA CARTUCHO — cartucho de pie sobre regla graduada en mm
+// ──────────────────────────────────────────────────────────────
+function ReglaCartucho({ calibre, escala, mmMax }) {
+  const foto = calibre.cartucho || 'imagenes/cartuchos/silueta-vertical.webp';
+  const paso = (10 / (mmMax || 84.8)) * 100;
+  return (
+    <div className="amx-reglacart" style={{ '--escala': escala, '--paso': paso + '%' }}>
+      <div className="amx-reglacart-pozo">
+        <img className="amx-reglacart-foto" src={foto} alt="" loading="lazy" />
+        <span className="amx-reglacart-regla" aria-hidden="true" />
+      </div>
+      <div className="amx-reglacart-pie">{calibre.mm} mm de largo</div>
+    </div>
+  );
+}
+window.ReglaCartucho = ReglaCartucho;
+// ══════════════════════════════════════════════════════════════
+// REPORTAR ERROR — enlace público a GitHub para correcciones factuales
+// Aparece al final de las fichas de arma, accesorio, munición, calibre,
+// Legalidad y FAQ. NO en Inicio, Arsenal, Comparador, Más, Acerca,
+// Tutorial ni Soporte.
+// ══════════════════════════════════════════════════════════════
+function ReportarError({ tipo, titulo, ruta }) {
+  const href = window.amxCorreccionUrl({ tipo, titulo, ruta });
+  return (
+    <aside className="amx-reportar-error" aria-label="Corregir información" style={{
+      marginTop: 24, padding: '16px 18px',
+      background: 'var(--oficio)', border: '1px solid var(--hair)',
+      borderRadius: 4, color: 'var(--oficio-tinta-2)'
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <strong style={{
+          fontFamily: 'Archivo, sans-serif', fontSize: 15,
+          color: 'var(--tinta)', fontWeight: 700
+        }}>¿Encontraste un dato incorrecto?</strong>
+        <span style={{
+          fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.55
+        }}>
+          La aportación se revisará con sus fuentes antes de modificar la enciclopedia.
+        </span>
+        <small style={{
+          fontFamily: 'var(--sans)', fontSize: 12.5, lineHeight: 1.5,
+          color: 'var(--tinta-dim)'
+        }}>
+          El formulario y lo que escribas serán públicos en GitHub. No incluyas datos personales.
+        </small>
+      </div>
+      <a href={href} target="_blank" rel="noopener noreferrer" style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        marginTop: 10, padding: '10px 14px', minHeight: 44,
+        fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
+        letterSpacing: '0.08em', textTransform: 'uppercase',
+        color: 'var(--manila-tinta)', textDecoration: 'underline',
+        textUnderlineOffset: '3px', cursor: 'pointer',
+        border: '1.5px solid var(--manila-tinta)', borderRadius: 3,
+        background: 'transparent', whiteSpace: 'nowrap'
+      }}>
+        Repórtalo <span aria-hidden="true" style={{ fontSize: 16 }}>↗</span>
+      </a>
+    </aside>
+  );
+}
+window.ReportarError = ReportarError;
+
+// ── PANTALLA ROTA — el cortafuegos ────────────────────────────────────────
+//
+// React no perdona: un error dentro de CUALQUIER componente durante el render
+// desmonta el árbol ENTERO y deja la página en blanco. Así se publicó el
+// 19-sep-2026 un `idx` mal puesto en la ficha de munición que tumbaba TODO el
+// sitio, no solo esa ficha.
+//
+// Esto no evita el fallo —para eso están las pruebas—, le pone un suelo: la
+// cabecera, la navegación y el pie siguen vivos y el visitante conserva salida.
+//
+// La `llave` es la mitad del asunto. Sin ella el boundary se queda pegado al
+// error para siempre y navegar a otra pantalla no lo suelta, que es tanto como
+// no tener red. Va cableado a la pantalla actual: cambiar de pantalla lo limpia.
+class PantallaRota extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+    this.reintentar = () => this.setState({ error: null });
+  }
+
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+
+  componentDidCatch(error, info) {
+    // La consola es el único sitio donde esto queda: no hay telemetría y no se
+    // va a montar por una pantalla rota. Si alguna vez la hay, el gancho es este.
+    console.error('[amx] pantalla rota:', error, info && info.componentStack);
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.llave !== this.props.llave && this.state.error) this.setState({ error: null });
+  }
+
+  render() {
+    if (!this.state.error) return this.props.children;
+    // Sin hooks (es una clase) y sin reaccionar al resize: una pantalla de
+    // error no necesita seguir al viewport, solo nacer con la medida correcta.
+    const vp = amxMedirViewport(typeof window !== 'undefined' ? window.innerWidth : 1024);
+    const ancho = vp.isDesktop;
+    const padX = ancho ? 28 : 16;
+    const alinea = vp.isMobile ? 'center' : 'left';
+    return (
+      <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}
+        role="alert">
+        <div style={{
+          fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: ancho ? 34 : 26,
+          color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.05,
+          textAlign: alinea,
+        }}>Esta sección no abrió</div>
+        <div style={{
+          fontFamily: 'JetBrains Mono, monospace', fontSize: 15, color: PALETTE.amber,
+          letterSpacing: '0.16em', textTransform: 'uppercase', marginTop: 8,
+          textAlign: alinea,
+        }}>Falla de consulta</div>
+
+        <div style={{
+          marginTop: 26, background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`,
+          boxShadow: window.CLARO && window.CLARO.sombra,
+          padding: ancho ? '34px 30px' : '26px 18px', textAlign: 'center',
+        }}>
+          <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 56, color: PALETTE.amber, opacity: 0.6, lineHeight: 1 }}
+            aria-hidden="true">!</div>
+          <div style={{
+            fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim,
+            lineHeight: 1.55, maxWidth: 560, margin: '16px auto 0',
+          }}>
+            El fallo es nuestro, no tuyo: el resto del sitio sigue funcionando.
+            Vuelve a intentarlo o entra por otra sección.
+          </div>
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, justifyContent: 'center', marginTop: 20 }}>
+            <button type="button" className="amx-calchip" onClick={this.reintentar}>Reintentar</button>
+            {this.props.onNav &&
+              <button type="button" className="amx-calchip" onClick={() => this.props.onNav('home')}>Ir al inicio</button>}
+          </div>
+
+          {/* El mensaje técnico, plegado: no le sirve al visitante, pero es lo
+              primero que se pide cuando alguien reporta que «no carga». */}
+          <details style={{ marginTop: 18, textAlign: 'left', maxWidth: 560, margin: '18px auto 0' }}>
+            <summary style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted,
+              letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer', textAlign: 'center',
+            }}>Detalle técnico</summary>
+            <pre style={{
+              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.textDim,
+              whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: '10px 0 0',
+            }}>{String(this.state.error && (this.state.error.stack || this.state.error.message || this.state.error))}</pre>
+          </details>
+        </div>
+      </div>
+    );
+  }
+}
+window.PantallaRota = PantallaRota;
+
+// ──────────────────────────────────────────────────────────────
+// CITA DE FUENTE — pie de cita normativa
+// ──────────────────────────────────────────────────────────────
+function CitaFuente({ fuente }) {
+  if (!fuente || !fuente.url) {
+    return fuente && fuente.titulo ? <p className="amx-cita">{fuente.titulo}</p> : null;
+  }
+  const titulo = fuente.titulo || '';
+  const fechaTexto = window.amxLegalFecha ? window.amxLegalFecha(fuente.fechaConsulta) : '';
+  const hayFecha = fechaTexto !== '';
+  const esPdf = fuente.pdf === true;
+  const enlace = fuente.archivoLocal ? '/' + fuente.archivoLocal : fuente.url;
+
+  return (
+    <p className="amx-cita">
+      Fuente:{' '}
+      <a
+        href={enlace}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={esPdf
+          ? titulo + ' (PDF, se abre en una pestaña nueva)'
+          : titulo + ' (se abre en una pestaña nueva)'}
+      >
+        {titulo}
+        {esPdf && <span aria-hidden="true"> ↗</span>}
+      </a>
+      {fuente.archivoLocal && <> · <a href={fuente.url} target="_blank" rel="noopener noreferrer">Fuente oficial</a></>}
+      {fuente.emisor && <> ({fuente.emisor})</>}
+      {hayFecha && <> · Consultado el {fechaTexto}</>}
+    </p>
+  );
+}
+window.CitaFuente = CitaFuente;
+
+// ──────────────────────────────────────────────────────────────
+// AVISO DE TRANSPARENCIA — bloque informativo
+// ──────────────────────────────────────────────────────────────
+function AvisoTransparencia({ aviso, id = 'aviso-transparencia' }) {
+  if (!aviso) return null;
+  return (
+    <section className="amx-aviso" aria-labelledby={id}>
+      <span className="amx-copia-clip" aria-hidden="true" />
+      <div className="amx-fichero-carton">
+        <div className="amx-fichero-cab">
+          <h2 id={id} className="amx-aviso-tit">{aviso.titulo}</h2>
+        </div>
+        {aviso.parrafos.map((t, i) => <p key={i} className="amx-aviso-texto">{t}</p>)}
+      </div>
+    </section>
+  );
+}
+window.AvisoTransparencia = AvisoTransparencia;

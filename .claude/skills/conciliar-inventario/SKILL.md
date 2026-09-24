@@ -125,6 +125,15 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
   lista; sin fichas, escribe en `amx()` la plataforma que nombra el PDF («Mossberg 500»),
   nunca un genérico («Pistola 9mm»). `auditar.js` falla si una lista apunta a un id de
   arma inexistente.
+- **(15-sep-2026) Nombre de letrero `corto`.** Al dar de alta un accesorio, añade su entrada
+  en `ACC_CORTO` (`data-accesorios.js`): lo que rotula el letrero de su puesto en la vitrina de
+  `/accesorios` — la plataforma a la que sirve, con marca si cabe, calibre solo para
+  desempatar, máximo 2 renglones a 360 px. `auditar.js` falla si falta o se repite.
+- **(16-sep-2026) Tramo de los cargadores.** Al dar de alta un cargador, añade su entrada en
+  `ACC_TRAMO` (`data-accesorios.js`): `[tipo de arma, calibre]` con los valores de
+  `ACC_TRAMO_ARMAS` y `ACC_TRAMO_CALIBRES` (un calibre nuevo se añade ahí, en su orden). Si el
+  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente junto a la tabla.
+  `auditar.js` falla si falta.
 
 ## 4) Verificar (obligatorio antes de commitear)
 Invoca el skill `verificar-app` o corre `scripts/auditar.js`:
@@ -285,3 +294,52 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   de grupo); esta skill sigue aplicando a esos PR y a lo que el bot no cubre (OTCA, altas por
   mano). El mapeo renglón del PDF ↔ ficha vive versionado en `scripts/dcam/mapeo-dcam.json`.
   Diseño completo: `scripts/dcam/DISENO.md`.
+- 2026-09-14 (#180, existencias «clase B»; Saulo aceptó las seis recomendaciones):
+  - **Jerarquía de fuentes para las specs de un alta: 1) fabricante, 2) Wikipedia, 3) SEDENA**
+    (la descripción del PDF). Solo se baja de nivel cuando el de arriba no publica el dato.
+    Si no lo da ninguna, `""` o año `null`. El país casi nunca lo publica el fabricante por
+    modelo; para CZ sale de Wikipedia («origin = Czech Republic»).
+  - **Variante (suma existencias; el precio sigue en la representativa):**
+    - **TS9, 2.º renglón (→ 23):** misma descripción; cambian «llave Allen» por «accesorios» y el
+      grabado D.C.A.M./S.D.N. Cuesta +27.5 %: parece otro lote, no otro modelo.
+    - **92A1 con 1 + 2 cargadores de 17 (→ 130):** es presentación. Su precio encadena al centavo
+      con la 92FS del 6-jul, pero la descripción cambió 15 → 17 cartuchos, así que dice 92A1 de
+      verdad. Manda la descripción.
+    - **Taurus 856 bitono inox/negro mate (→ 19):** mismo precio al centavo que el inox en los
+      5 inventarios. Las 856 que ya estaban separadas por acabado se quedan como están.
+  - **Modelo (ficha propia):** CZ P-09 F Nocturne (233): el PDF la nombra como modelo y CZ la
+    vende como serie. Winchester Xpert Thumbhole (234): culata de madera y +27 %; las XPR ya
+    separaban sintético y thumbhole, y Winchester la vende aparte. **El OTCA 18-jun de la 145
+    sumaba las dos (22 = 15 + 7):** si una ficha tiene specs que nombran dos versiones
+    («sintética/thumbhole»), sospecha que su registro OTCA mezcla renglones.
+  - CZ 457: Lux 235, Premium 236, Varmint 237, Varmint Synthetic 238, LRP Black 239 (agotada el
+    11-sep), MDT Chassis 240, Thumbhole 241, AT-ONE 242, Training Rifle XII 243.
+    - **La LH suma aunque en un inventario solo venga la LH** (Premium 16-jun; Varmint 16 y
+      18-jun). Ese registro es el de la LH, que cuesta lo mismo al centavo donde coinciden.
+    - **La MDT usa los cargadores de fábrica de CZ** (support.mdttac.com, «What magazine do I
+      need for a CZ 457»; WebFetch da 403, curl no). Entra en la lista del cargador 131.
+    - Riel de 25 MOA solo en LRP Black y MDT; las demás llevan cola de milano de 11 mm.
+  - **Winchester vende tres Xpert Thumbhole .22 LR** (Gray SR y Brown SR en EE. UU., otra en
+    winchester.eu). El PDF no distingue: el peso va en rango, y la longitud y el riel van vacíos
+    porque solo los publica una de las tres.
+  - **Trucos de fuente:** desde México, `czfirearms.com/en-us/…` redirige 302 al sitio global
+    (mismo JSON). Ese JSON trae las comillas escapadas (`\"productAttributes\"`), así que el grep
+    literal falla. Si la página EN viene vacía (`product: null`, AT-ONE), prueba `/es/` o `/de/`.
+    Los catálogos PDF de CZ (`katalogy.czub.cz/cz-katalog-20XX-en/…/publication.pdf`) fechan
+    lanzamientos y renombres.
+  - **Ningún renglón de oct-2025 ni del OTCA 26-sep encadena con estas altas.** Se comprobó
+    dividiendo el precio del 16-jun entre ×0.89960 (general) y ×0.89447 (grupo Beretta), con
+    ×1.00105 para OTCA: sus historiales empiezan en 2026.
+
+## Cuando te invoca el conciliador headless
+
+`infra/conciliar.sh` te llama con `openclaw agent`, sin humano delante. Contrato duro:
+
+- Trabaja sobre `origin/main` fresco, en la rama `auto/inventario-<FECHA>`.
+- `auditar.js` es puerta dura: si no da «✔✔ AUDITORÍA SIN HALLAZGOS», **no abras PR**.
+- Abre los **dos** Draft-PR con `gh pr create --draft`, uno `--base main` y otro `--base develop`.
+- Tu **última línea** de salida debe ser SOLO este JSON:
+  `{"ok":true,"prs":["url1","url2"]}` o `{"ok":false,"motivo":"..."}`.
+
+Si cambias cualquiera de esos cuatro puntos, `conciliar.sh` lo lee como fallo: avisa por Telegram
+y manda la señal a `.fallida` aunque los PR estén abiertos.

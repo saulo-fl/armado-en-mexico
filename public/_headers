@@ -42,6 +42,16 @@
   Cache-Control: public, max-age=0, must-revalidate
 /store.js
   Cache-Control: public, max-age=0, must-revalidate
+/soporte.js
+  Cache-Control: public, max-age=0, must-revalidate
+/cotejo.js
+  Cache-Control: public, max-age=0, must-revalidate
+/arsenal-hub.js
+  Cache-Control: public, max-age=0, must-revalidate
+/calibres.js
+  Cache-Control: public, max-age=0, must-revalidate
+/filtros.js
+  Cache-Control: public, max-age=0, must-revalidate
 /ui.js
   Cache-Control: public, max-age=0, must-revalidate
 /estilo.css
@@ -64,6 +74,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /data.js
   Cache-Control: public, max-age=0, must-revalidate
+/data-soporte.js
+  Cache-Control: public, max-age=0, must-revalidate
 /data-extra.js
   Cache-Control: public, max-age=0, must-revalidate
 /data-traumaticas.js
@@ -73,6 +85,20 @@
 /data-accesorios.js
   Cache-Control: public, max-age=0, must-revalidate
 /data-municiones.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-legal.js
+  Cache-Control: public, max-age=0, must-revalidate
+/data-entrevista.js
+  Cache-Control: public, max-age=0, must-revalidate
+/legal.js
+  Cache-Control: public, max-age=0, must-revalidate
+/entrevista.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-legalidad.js
+  Cache-Control: public, max-age=0, must-revalidate
+/screens-entrevista.js
+  Cache-Control: public, max-age=0, must-revalidate
+/mapa-tramite.js
   Cache-Control: public, max-age=0, must-revalidate
 
 # ── Assets inmutables bajo su nombre: caché larga ────────────────────────────

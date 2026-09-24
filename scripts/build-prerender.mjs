@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — prerender estático + sitemap + robots
 // ============================================================================
 // Emite un .html REAL por cada URL de la app, con su <title>, description,
@@ -17,9 +22,11 @@
 // Se ejecuta desde `npm run build`, después de Babel.
 // ============================================================================
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createContext, runInContext } from 'node:vm';
+import { renderSoporteHtml } from './prerender-soporte.mjs';
+import { renderLegalHtml, renderEntrevistaHtml } from './prerender-legal.mjs';
 
 const SITIO = 'https://armado.mx';
 const RAIZ = process.cwd();
@@ -37,12 +44,23 @@ mkdirSync(OUT, { recursive: true });
 const win = {};
 const ctx = createContext({ window: win, console });
 ctx.window = win;
-for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js',
-                 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
+for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
+                 'data-legal.js', 'data-entrevista.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
   runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
+runInContext(readFileSync(join(SRC, 'lib', 'legal.js'), 'utf8'), ctx, { filename: 'legal.js' });
+const LEGAL = win.AMX_LEGAL;
+if (!LEGAL || !LEGAL.requisitos || LEGAL.requisitos.length === 0) throw new Error('data-legal.js no cargó');
+const ENTREVISTA = win.AMX_ENTREVISTA;
+if (!ENTREVISTA || !ENTREVISTA.preguntas || !ENTREVISTA.preguntas.length) throw new Error('data-entrevista.js no cargó');
 const ARMAS = win.DB || [], ACCESORIOS = win.ACCESORIOS || [], MUNICIONES = win.MUNICIONES || [];
 if (!ARMAS.length) throw new Error('No se cargaron las armas: revisa data.js');
+
+// Verificar contenido de Soporte
+const SOPORTE = win.AMX_SOPORTE_CONTENT;
+if (!SOPORTE || !SOPORTE.normas || SOPORTE.normas.length !== 4) {
+  throw new Error('No se cargó el contenido completo de Soporte');
+}
 
 // ─── 1b. Fecha real de cada artículo, para el lastmod del sitemap ───────────
 // NO sale de git. Cloudflare Pages clona en superficial, así que
@@ -150,7 +168,7 @@ const migas = (items) => ({
   '@type': 'BreadcrumbList',
   itemListElement: items.map((it, i) => ({
     '@type': 'ListItem', position: i + 1, name: it.nombre,
-    ...(it.ruta ? { item: `${SITIO}/${it.ruta}`.replace(/\/$/, '/') } : {}),
+    ...(it.ruta ? { item: `${SITIO}/${it.ruta}` } : {}),
   })),
 });
 
@@ -338,6 +356,35 @@ ${notaErrata(histMun(m.id))}
   paginas.push({ ruta, enSitemap: true, fuente: 'mun', lastmod: fechaMun(m) });
 }
 
+// Ficha de cada calibre: /calibres/<slug>. Van SIN lastmod a propósito: no salen
+// de un inventario con fecha, como las armas, sino de una guía.
+for (const c of (win.CALIBRES || [])) {
+  const ruta = `calibres/${slug(c.id)}`;
+  const armas = ARMAS.filter((a) => a.calibre === c.id);
+  const resumen = `${c.id}: cartucho de ${String(c.clase).toLowerCase()} para ${String(c.uso).toLowerCase()}. ${c.desc || ''}`;
+  emitir(ruta, {
+    titulo: `${c.id} — calibre, balística y situación legal en México | Armado en México`,
+    desc: recorta(resumen, 155),
+    jsonld: { '@context': 'https://schema.org', '@graph': [
+      { '@type': 'Article', headline: `${c.id} — ficha del calibre`, description: recorta(resumen, 250), inLanguage: 'es-MX',
+        isPartOf: { '@type': 'WebSite', name: 'Armado en México', url: SITIO } },
+      migas([{ nombre: 'Inicio', ruta: '' }, { nombre: 'Calibres', ruta: 'calibres' }, { nombre: c.id }]),
+    ] },
+    cuerpo: `<article>
+<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/calibres">Calibres</a> › ${esc(c.id)}</nav>
+<h1>${esc(c.id)}</h1>
+<p>${esc(recorta(resumen, 400))}</p>
+${dl([['Clase', c.clase], ['Sistema', c.sistema], ['Uso típico', c.uso],
+      ['Largo del cartucho', c.mm ? `${c.mm} mm` : ''],
+      ['Velocidad', c.velocidad], ['Energía', c.energia], ['Retroceso', c.retroceso],
+      ['Situación legal', c.legalNota], ['Fundamento', c.legalArt],
+      ['Fuente de las cifras', c.fuente ? `${c.fuente.nombre} (${c.fuente.fecha})` : '']])}
+${armas.length ? `<h2>Armas del catálogo en ${esc(c.id)}</h2><ul>${armas.map((a) => `<li><a href="/${rutaArma.get(a.id)}">${esc(a.nombre)}</a></li>`).join('')}</ul>` : ''}
+</article>`,
+  });
+  paginas.push({ ruta, enSitemap: true, fuente: 'calibres' });
+}
+
 // 5d. Listados por rama (armas y accesorios) + municiones
 const listados = [
   ...Object.entries(TIPO_TO_PATH).map(([tipo, ruta]) => ({
@@ -353,21 +400,48 @@ const listados = [
   { ruta: 'municiones', nombre: 'Municiones', fuente: 'mun',
     items: MUNICIONES.map((m) => ({ nombre: m.nombre, ruta: rutaMun.get(m.id) })),
     intro: 'Cartuchos y munición del inventario oficial DCAM/OTCA, por calibre, marca y tipo de bala.' },
+  // El arsenal se separa en base y catálogo: /arsenal (el hub) va en FIJAS;
+  // el catálogo y los filtros rápidos por armería son listados de verdad —
+  // tienen contenido: un ItemList de fichas. La misma getArmaSucursales de
+  // data-precios.js decide qué arma sale en cada armería, como en la app.
+  { ruta: 'arsenal/catalogo', nombre: 'Arsenal', h1: 'Arsenal completo',
+    miga: { nombre: 'Arsenal', ruta: 'arsenal' },
+    titulo: 'Arsenal completo — armas legales en México | Armado en México',
+    fuente: 'armas',
+    items: ARMAS.map((a) => ({ nombre: a.nombre, ruta: rutaArma.get(a.id) })),
+    intro: 'El catálogo completo de armas de fuego de los inventarios oficiales DCAM y OTCA, con su calibre, características, precio de referencia y clasificación legal en México.' },
+  { ruta: 'arsenal/catalogo/dcam', nombre: 'Arsenal DCAM', h1: 'Arsenal DCAM',
+    miga: { nombre: 'Arsenal', ruta: 'arsenal' },
+    titulo: 'Arsenal DCAM — armas legales en México | Armado en México',
+    fuente: 'armas',
+    items: ARMAS.filter((a) => win.getArmaSucursales(a.id).dcam).map((a) => ({ nombre: a.nombre, ruta: rutaArma.get(a.id) })),
+    intro: 'Armas de fuego registradas en el inventario oficial de la DCAM (Campo Militar No. 1-D, Naucalpan, Edo. Méx.), con su calibre, características, precio de referencia y clasificación legal en México.' },
+  { ruta: 'arsenal/catalogo/otca', nombre: 'Arsenal OTCA', h1: 'Arsenal OTCA',
+    miga: { nombre: 'Arsenal', ruta: 'arsenal' },
+    titulo: 'Arsenal OTCA — armas legales en México | Armado en México',
+    fuente: 'armas',
+    items: ARMAS.filter((a) => win.getArmaSucursales(a.id).otca).map((a) => ({ nombre: a.nombre, ruta: rutaArma.get(a.id) })),
+    intro: 'Armas de fuego registradas en el inventario oficial de la OTCA (Monterrey, Nuevo León), con su calibre, características, precio de referencia y clasificación legal en México.' },
 ].filter((l) => l.items.length);
 
 for (const l of listados) {
+  // Las ramas del arsenal llevan `miga` (su padre, /arsenal), `h1` y `titulo`
+  // propios; los listados clásicos siguen usando los valores por defecto.
+  const migaPadre = l.miga ? ` › <a href="/${l.miga.ruta}">${esc(l.miga.nombre)}</a>` : '';
   emitir(l.ruta, {
-    titulo: `${l.nombre} legales en México — catálogo DCAM | Armado en México`,
+    titulo: l.titulo || `${l.nombre} legales en México — catálogo DCAM | Armado en México`,
     desc: recorta(l.intro, 155),
     jsonld: { '@context': 'https://schema.org', '@graph': [
       { '@type': 'ItemList', name: `${l.nombre} en México`, numberOfItems: l.items.length,
         itemListElement: l.items.map((it, i) => ({
           '@type': 'ListItem', position: i + 1, name: it.nombre, url: `${SITIO}/${it.ruta}` })) },
-      migas([{ nombre: 'Inicio', ruta: '' }, { nombre: l.nombre }]),
+      migas(l.miga
+        ? [{ nombre: 'Inicio', ruta: '' }, { nombre: l.miga.nombre, ruta: l.miga.ruta }, { nombre: l.nombre }]
+        : [{ nombre: 'Inicio', ruta: '' }, { nombre: l.nombre }]),
     ] },
     cuerpo: `<article>
-<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(l.nombre)}</nav>
-<h1>${esc(l.nombre)} legales en México</h1>
+<nav aria-label="Ruta"><a href="/">Inicio</a> ›${migaPadre} ${esc(l.nombre)}</nav>
+<h1>${esc(l.h1 || `${l.nombre} legales en México`)}</h1>
 <p>${esc(l.intro)}</p>
 <ul>${l.items.map((it) => `<li><a href="/${it.ruta}">${esc(it.nombre)}</a></li>`).join('')}</ul>
 </article>`,
@@ -378,16 +452,38 @@ for (const l of listados) {
 
 // 5e. Páginas fijas de la app
 const FIJAS = [
-  { ruta: 'arsenal', titulo: 'Arsenal completo — armas legales en México', enSitemap: true,
-    desc: 'Catálogo completo de armas de fuego del inventario oficial DCAM/SEDENA, con filtros por tipo, calibre, uso y disponibilidad.' },
+  // /arsenal es la BASE de la sección (el hub). El catálogo completo vive en
+  // /arsenal/catalogo y los filtros rápidos por armería en /arsenal/catalogo/dcam
+  // y /arsenal/catalogo/otca — los tres salen de `listados` arriba.
+  { ruta: 'arsenal', titulo: 'Arsenal — armas legales en México', enSitemap: true,
+    desc: 'La sección Arsenal: los tipos de armas, las armerías DCAM y OTCA, y el catálogo completo con filtros por tipo, calibre, uso, precio y disponibilidad.' },
   { ruta: 'calibres', titulo: 'Guía de calibres', enSitemap: true,
-    desc: 'Guía divulgativa de los calibres presentes en el catálogo DCAM: uso típico, velocidad, energía y retroceso.' },
+    desc: 'Los 30 calibres de la guía, de menor a mayor: qué son, qué tan fuerte pega cada uno, su balística y cuáles puede adquirir un civil en México.' },
   { ruta: 'legalidad', titulo: 'Tenencia legal de armas en México — requisitos y trámite SEDENA', enSitemap: true,
-    desc: 'Requisitos y pasos para la posesión legal de un arma de fuego en México conforme a la Ley Federal de Armas de Fuego y Explosivos.' },
+    desc: 'Los permisos, los papeles y la ley detrás de tener un arma legalmente en México, con la fuente y la fecha de cada afirmación.',
+    cuerpo: renderLegalHtml(LEGAL, 'hub', win) },
+  { ruta: 'legalidad/federal', titulo: 'Lo federal — qué arma puedes tener, qué papel llenas y cuánto cuesta', enSitemap: true,
+    desc: 'Constitución, Ley Federal de Armas de Fuego y Explosivos, reglamento, formatos y cuotas, ordenados por la pregunta que traes, con el artículo y la fuente de cada afirmación.',
+    cuerpo: renderLegalHtml(LEGAL, 'federal', win) },
+  { ruta: 'legalidad/estatal', titulo: 'Lo que cambia por estado — antecedentes penales y ventanilla', enSitemap: true,
+    desc: 'Las armas de fuego son competencia federal. Lo que sí cambia por estado: dónde sacas la constancia de antecedentes penales, si puedes enviar por correo y qué ventanilla te toca.',
+    cuerpo: renderLegalHtml(LEGAL, 'estatal', win) },
+  // Requisitos y Permisos se fundieron aquí (22-sep-2026). Las dos direcciones viejas
+  // las redirige public/_redirects con 301: no se prerenderizan y salen del sitemap.
+  { ruta: 'legalidad/tramites', titulo: 'Trámites de armas en México — permiso, compra, registro y portación', enSitemap: true,
+    desc: 'Los seis trámites ante la Secretaría de la Defensa Nacional en el orden en que se hacen: qué habilita cada uno, su checklist de requisitos y su cuota vigente. Posesión no es portación.',
+    cuerpo: renderLegalHtml(LEGAL, 'tramites', win) },
+  { ruta: 'legalidad/documentos', titulo: 'Documentos legales y fuentes oficiales en PDF', enSitemap: true,
+    desc: 'Constitución, leyes, reglamento, formatos y requisitos oficiales citados en Armado en México. PDF alojados aquí y enlaces a sus fuentes oficiales.',
+    cuerpo: renderLegalHtml(LEGAL, 'documentos', win) },
+  { ruta: 'legalidad/puedo-comprar', titulo: '¿Puedo comprar un arma? — entrevista sobre los requisitos', enSitemap: true,
+    desc: 'Quince preguntas sobre tu situación, ninguna con datos personales, para saber qué papeles te pide el formato DEFENSA-02-040 y cuál te falta.',
+    cuerpo: renderEntrevistaHtml(ENTREVISTA, LEGAL, win) },
   { ruta: 'traumaticas', titulo: 'Armas traumáticas — defensa menos letal sin permiso SEDENA', enSitemap: true,
     desc: 'Dispositivos de defensa menos letal accionados por CO₂: no son armas de fuego y no requieren permiso ante la SEDENA.' },
   { ruta: 'soporte', titulo: 'Soporte y normas de la comunidad', enSitemap: true,
-    desc: 'Qué se puede publicar en las reseñas, cómo denunciar contenido y cómo se modera. Catálogo divulgativo: aquí no se compran ni se venden armas.' },
+    desc: 'Qué se puede publicar en las reseñas, cómo denunciar contenido y cómo se modera. Catálogo divulgativo: aquí no se compran ni se venden armas.',
+    cuerpo: renderSoporteHtml(SOPORTE) },
   { ruta: 'preguntas', titulo: 'Preguntas frecuentes sobre armas legales en México', enSitemap: true,
     desc: 'Dudas habituales sobre licencias, calibres permitidos, portación y trámite ante la SEDENA.' },
   // CONGELADAS hasta el lanzamiento: la app sirve una pantalla «Próximamente».
@@ -411,13 +507,16 @@ const FIJAS = [
     desc: 'Índice de secciones de Armado en México.' },
 ];
 for (const p of FIJAS) {
+  // Si la entrada ya tiene `cuerpo` (ej. soporte con renderSoporteHtml),
+  // úsalo tal cual; de lo contrario, genera el HTML genérico.
+  const cuerpo = p.cuerpo || `<article>
+<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(p.titulo)}</nav>
+<h1>${esc(p.titulo)}</h1><p>${esc(p.desc)}</p></article>`;
   emitir(p.ruta, {
     titulo: `${p.titulo} | Armado en México`, desc: p.desc, noindex: p.noindex,
     jsonld: { '@context': 'https://schema.org',
       '@graph': [migas([{ nombre: 'Inicio', ruta: '' }, { nombre: p.titulo }])] },
-    cuerpo: `<article>
-<nav aria-label="Ruta"><a href="/">Inicio</a> › ${esc(p.titulo)}</nav>
-<h1>${esc(p.titulo)}</h1><p>${esc(p.desc)}</p></article>`,
+    cuerpo,
   });
   paginas.push({ ruta: p.ruta, enSitemap: p.enSitemap });
 }
@@ -431,8 +530,15 @@ for (const p of FIJAS) {
 // no salen de un data-*.js, así que siguen SIN lastmod.
 // La portada lleva la más reciente de todas: es lo que cambia cuando cambia algo.
 
+const pdfLegales = [...Object.values(LEGAL.fuentes), ...(LEGAL.documentosComplementarios || [])]
+  .filter((f) => f.archivoLocal).map((f) => {
+    if (!existsSync(join(PUB, f.archivoLocal))) {
+      throw new Error(`Falta el PDF legal: ${f.archivoLocal}`);
+    }
+    return { ruta: f.archivoLocal, enSitemap: true };
+  });
 const enSitemap = [{ ruta: '', enSitemap: true, lastmod: masReciente(paginas.map((p) => p.lastmod)) },
-  ...paginas].filter((p) => p.enSitemap);
+  ...paginas, ...pdfLegales].filter((p) => p.enSitemap);
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${enSitemap.map(({ ruta, lastmod }) => {

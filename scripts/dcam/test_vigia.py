@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# Armado en México — Copyright (C) 2026 Saulo Flores León
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 """Pruebas del vigía DCAM. Correr: python3 scripts/dcam/test_vigia.py"""
 import http.client
 import sys
@@ -271,6 +276,8 @@ def test_documento_cambiado_manda_inventario_cambiado():
         cambiado = [m for m in msgs if m["texto"].startswith("📦 Inventario cambiado DCAM:")]
         assert len(cambiado) == 1 and "archivo" in cambiado[0], msgs
         assert "cambiados: 1" in msgs[-1]["texto"], msgs[-1]["texto"]
+        assert (base / "pendiente-conciliar.json").exists(), "el vigia no dejo la senal"
+        assert "escrita" in msgs[-1]["texto"], msgs[-1]["texto"]
 
 
 def test_latido_avisa_codigo_viejo():

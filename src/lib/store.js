@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Store (persistencia en localStorage)
 // Mantiene catálogo, colas de moderación, contenido editable de páginas y auth admin.
 // Compartido entre app pública y admin via mismo origen + localStorage.
@@ -69,40 +74,19 @@
   const PRICE_HISTORY_SEED = window.AMX_PRICE_HISTORY_SEED || {};
 
   const DEFAULT_PAGES = {
-    legal: {
-      eyebrow: '§ LEGALIDAD · MX',
-      title: 'Tenencia legal de armas de fuego',
-      intro: 'Resumen de los requisitos y pasos para la posesión legal en México conforme a la Ley Federal de Armas de Fuego y Explosivos.',
-      requisitos: [
-        'Original del permiso extraordinario para la adquisición de arma de fuego, cartuchos y/o accesorios, vigente (DEFENSA-02-040, lo expide el Registro Federal de Armas de Fuego)',
-        'Original de una identificación oficial vigente (credencial para votar, pasaporte, cartilla del Servicio Militar Nacional o cédula profesional con fotografía)',
-        'Comprobante original del pago de la hoja de ayuda DEFENSA-02-062 (registro del arma), uno por cada arma',
-        'Copia simple de la Constancia de Situación Fiscal, solo si necesitas factura',
-      ],
-      pasos: [
-        { t: 'Registro en plataforma SEDENA', d: 'Crear cuenta en el portal oficial de Defensa Nacional y completar perfil con tus datos.' },
-        { t: 'Solicitud de permiso',          d: 'Pedir el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040), para protección de domicilio o parcela, actividades cinegéticas o tiro deportivo y caza, según el caso. Pago de derechos.' },
-        { t: 'Visita a la DCAM u OTCA',        d: 'La DCAM atiende en persona en el Campo Militar No. 1-D (Av. Industria Militar 1111, Col. Lomas de Tecamachalco, Naucalpan, Edo. Méx.): las personas físicas con permiso extraordinario entran sin cita, y se otorgan 80 turnos de 08:00 a 13:00, de lunes a viernes (las personas morales piden cita en facturas.dcam@defensa.gob.mx). A la OTCA, en Monterrey, N.L., agendar visita. Llevar documentación completa.' },
-        { t: 'Selección y compra',             d: 'Elegir arma del catálogo oficial. La adquisición civil solo puede hacerse por los canales oficiales: la DCAM o la OTCA.' },
-        { t: 'Registro federal del arma',      d: 'Toda arma adquirida queda registrada a tu nombre en el Registro Federal de Armas (RFA).' },
-      ],
-      whatsapp_phone: '525555555555',
-      whatsapp_msg: 'Hola, me interesa asesoría para trámite SEDENA',
-      whatsapp_pitch: 'El acompañamiento legal para el trámite SEDENA es prestado por un abogado externo especializado, en lo individual y bajo su propia cédula profesional. Armas M&S no es despacho jurídico y únicamente facilita el contacto con el profesional.',
-    },
     faq: [
-      { q: '¿Necesito permiso de la SEDENA para una arma traumática?', a: 'No. Las armas traumáticas (HDP 50, Secure 68P y HDX 68) son dispositivos menos letales accionados por gas CO₂; al no usar pólvora no son armas de fuego y, conforme al Artículo 13 de la LFAFE —que permite dispositivos de hasta 140 Joules de energía—, no requieren permiso ni registro ante la SEDENA. Puedes adquirirlas siendo mayor de edad.' },
-      { q: '¿Puedo adquirir una arma traumática directamente con ustedes?', a: 'Sí. Las armas traumáticas son los únicos tres modelos de armamento que comercializamos y puedes adquirirlas directamente en armasmys.com, sin trámite ante la SEDENA. Las armas de fuego del resto de la app se muestran solo con fines informativos y de transparencia.' },
-      { q: '¿Las armas traumáticas son legales en todo México?', a: 'Su posesión es legal para mayores de edad por estar muy por debajo del límite de 140 Joules del Artículo 13 de la LFAFE (desarrollan entre 13 y 40 Joules). No obstante, el Artículo 12 remite a los códigos penales de cada estado, por lo que las reglas de traslado pueden variar: algunos estados (como Morelos) reconocen la defensa personal como fin lícito y otros (como la CDMX) exigen acreditar un motivo lícito. Verifica la normativa local antes de trasladarla o usarla.' },
-      { q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México un arma de fuego solo puede adquirirse por los canales oficiales: la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), en el Campo Militar No. 1-D, en Naucalpan, Estado de México (Av. Industria Militar 1111, Col. Lomas de Tecamachalco), y la OTCA, en Monterrey, N.L. Son instituciones distintas: la DCAM no tiene sede en Monterrey.' },
-      { q: '¿Cuánto cuesta tramitar el permiso?', a: 'Las cuotas las fija la Ley Federal de Derechos y se actualizan cada 1 de enero. En 2026, el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040) cuesta $490 MXN, y el registro de cada arma (DEFENSA-02-062), $201 MXN. Se pagan en el banco con la hoja de ayuda e5cinco y no incluyen el precio del arma.' },
-      { q: '¿Qué calibres puedo tener como civil?', a: 'Para uso doméstico: pistolas .380 ACP máximo, revólveres .38 Special máximo, escopetas hasta calibre 12, rifles deportivos en calibres permitidos. El 9mm Parabellum requiere licencia de tiro/cacería en club registrado.' },
-      { q: '¿Puedo portar mi arma en la vía pública?', a: 'Por regla general NO. El permiso extraordinario de adquisición (DEFENSA-02-040) autoriza la posesión en tu domicilio, no la portación. La portación requiere licencia particular individual de portación (DEFENSA-02-025; muy restrictiva, casi nunca otorgada) o pertenecer a corporación de seguridad con licencia colectiva.' },
-      { q: '¿Por qué hay armas que solo puede tener el ejército?', a: 'La Ley Federal de Armas de Fuego clasifica como uso exclusivo de fuerzas armadas todos los fusiles automáticos, calibres militares de alto poder, explosivos, y subfusiles. Los civiles no pueden poseerlos bajo ninguna circunstancia.' },
-      { q: '¿Cuántas armas puedo tener registradas?', a: 'Según el Registro Federal de Armas, puedes poseer un arma corta para la protección de tu domicilio; inscrito en un club de caza y tiro, puedes poseer 9 armas largas de características deportivas y un arma corta calibre .22. Coleccionistas registrados pueden tener más con el permiso para coleccionista o museo de armas de fuego (DEFENSA-02-032).' },
-      { q: '¿Las balas se compran igual?', a: 'En la DCAM, los requisitos dependen del cartucho. Escopeta (12, 16 y 20 GA y .410): la hoja de manifestación de registro del arma y una identificación oficial vigente. Fuego anular (.22 LR y .22 Short): lo mismo, más el Volante de Adquisición de Cartuchos del mes, expedido por tu club, y la credencial vigente del club. Alto poder y fuego central (por ejemplo .223, 30-06, .308, .380 y .38 Special): el permiso extraordinario de adquisición vigente y una identificación oficial vigente. Los requisitos de la DCAM para personal militar incluyen además «Cartuchos para Uso Exclusivo de las Fuerzas Armadas: Calibre superior a 9 mm», que no figuran en los de personal civil. Con el permiso extraordinario, las cantidades autorizadas son hasta 1,000 cartuchos por persona para escopeta (12, 16, 20, 28 y .410), hasta 500 por persona para pistolas o rifles calibre .22 (salvo Magnum, Hornet o TCM) y hasta 200 por cada calibre registrado para las otras armas permitidas; se pueden volver a solicitar 1 año después de adquirir lo autorizado en el último permiso en protección a domicilio o parcela, 3 meses después en actividades cinegéticas y 1 mes después en tiro deportivo.' },
-      { q: '¿Qué pasa si me roban mi arma?', a: 'Debes reportarlo de inmediato al Ministerio Público y notificar a la SEDENA por el portal correspondiente. No reportar el robo puede acarrear responsabilidad legal si el arma es utilizada en un delito.' },
-      { q: '¿Cuál es la diferencia entre Licencia y Permiso?', a: 'Para comprar y tener un arma, una persona física tramita el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040) y registra cada arma (DEFENSA-02-062). Las licencias son para la portación: la licencia particular individual de portación (DEFENSA-02-025) y las colectivas, para cuerpos de seguridad pública (licencia oficial colectiva) y para empresas de seguridad privada (licencia particular colectiva de portación).' },
+      { tema: 'Traumáticas', q: '¿Necesito permiso de la SEDENA para una arma traumática?', a: 'No. Las armas traumáticas (HDP 50, Secure 68P y HDX 68) son dispositivos menos letales accionados por gas CO₂; al no usar pólvora no son armas de fuego y, conforme al Artículo 13 de la LFAFE —que permite dispositivos de hasta 140 Joules de energía—, no requieren permiso ni registro ante la SEDENA. Puedes adquirirlas siendo mayor de edad.' },
+      { tema: 'Traumáticas', q: '¿Puedo adquirir una arma traumática directamente con ustedes?', a: 'Sí. Las armas traumáticas son los únicos tres modelos de armamento que comercializamos y puedes adquirirlas directamente en armasmys.com, sin trámite ante la SEDENA. Las armas de fuego del resto de la app se muestran solo con fines informativos y de transparencia.' },
+      { tema: 'Traumáticas', q: '¿Las armas traumáticas son legales en todo México?', a: 'Su posesión es legal para mayores de edad por estar muy por debajo del límite de 140 Joules del Artículo 13 de la LFAFE (desarrollan entre 13 y 40 Joules). No obstante, el Artículo 12 remite a los códigos penales de cada estado, por lo que las reglas de traslado pueden variar: algunos estados (como Morelos) reconocen la defensa personal como fin lícito y otros (como la CDMX) exigen acreditar un motivo lícito. Verifica la normativa local antes de trasladarla o usarla.' },
+      { tema: 'Canales', q: '¿Puedo comprar un arma en cualquier tienda?', a: 'No. En México un arma de fuego solo puede adquirirse por los canales oficiales: la DCAM (Dirección de Comercialización de Armamento y Municiones de la SEDENA), en el Campo Militar No. 1-D, en Naucalpan, Estado de México (Av. Industria Militar 1111, Col. Lomas de Tecamachalco), y la OTCA, en Monterrey, N.L., que solo atiende al público que radica en Coahuila, Nuevo León, San Luis Potosí y Tamaulipas. Son instituciones distintas: la DCAM no tiene sede en Monterrey.' },
+      { tema: 'Costos', q: '¿Cuánto cuesta tramitar el permiso?', a: 'Las cuotas las fija la Ley Federal de Derechos y se actualizan cada 1 de enero. En 2026, el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040) cuesta $490 MXN, y el registro de cada arma (DEFENSA-02-062), $201 MXN. Se pagan en el banco con la hoja de ayuda e5cinco y no incluyen el precio del arma.' },
+      { tema: 'Calibres', q: '¿Qué calibres puedo tener como civil?', a: 'Para la protección del domicilio, el instructivo del permiso DEFENSA-02-040 fija como calibre máximo, en pistola, el .380 (sin las .38 Súper y .38 Comando ni las de 9 mm) y, en revólver, el .38 Especial (sin el .357 Magnum). La Ley Federal de Armas de Fuego y Explosivos, en las fracciones I y II de su art. 9o., exceptúa además en pistola los calibres .357, .22 Magnum, Hornet y TCM. Las escopetas (hasta calibre 12, con cañón de 635 mm o más) y los rifles de repetición o semiautomáticos no convertibles en automáticos, con las excepciones de calibre que fija la Ley, se autorizan a quienes practican tiro y cacería inscritos en un club o asociación acreditado ante la Secretaría de la Defensa Nacional (art. 10); los ejidatarios, comuneros y jornaleros del campo pueden poseer un rifle .22 o una escopeta (art. 9o.). La Ley Federal de Armas de Fuego y Explosivos reserva las pistolas 9 mm Parabellum al uso exclusivo de la Fuerza Armada Permanente (art. 11); para socios de clubes de tiro y cacería, las pistolas que menciona son las de calibre .22, las de .38 con fines de tiro olímpico o de competencia y las de .380 (art. 10).' },
+      { tema: 'Portación', q: '¿Puedo portar mi arma en la vía pública?', a: 'Por regla general NO. El permiso extraordinario de adquisición (DEFENSA-02-040) autoriza la posesión en tu domicilio, no la portación. La portación requiere licencia particular individual de portación (DEFENSA-02-025; muy restrictiva, casi nunca otorgada) o pertenecer a corporación de seguridad con licencia colectiva.' },
+      { tema: 'Exclusivo', q: '¿Por qué hay armas que solo puede tener el ejército?', a: 'La Ley Federal de Armas de Fuego clasifica como uso exclusivo de fuerzas armadas todos los fusiles automáticos, calibres militares de alto poder, explosivos, y subfusiles. Los civiles no pueden poseerlos bajo ninguna circunstancia.' },
+      { tema: 'Registro', q: '¿Cuántas armas puedo tener registradas?', a: 'Depende de la modalidad en que se registra cada arma. En protección de domicilio, que no exige pertenecer a un club, la Secretaría de la Defensa Nacional autoriza un arma corta: una pistola de calibre no superior al .380 o un revólver de calibre no superior al .38 Especial. A quien practica tiro y cacería inscrito en un club o asociación acreditado ante la Secretaría, la Ley Federal de Armas de Fuego y Explosivos faculta a la Secretaría a autorizarle hasta 10 armas, en la combinación que quiera de los tipos que enumera su artículo 10 y con los límites de calibre de ese artículo, y a determinar en cada caso la cantidad y el tipo (art. 19). Por actividad, el permiso extraordinario para transportarlas (DEFENSA-02-045) autoriza 10 armas en tiro y en competencia, y nueve armas largas y una corta calibre .22 en cacería. Según la pregunta frecuente 7 del Registro Federal de Armas, un trámite de compra queda «en anomalías» si en el sistema aparecen más de 10 armas registradas a nombre del solicitante; para continuarlo hay que pedir por escrito la actualización del registro, con copia de las bajas de las armas que ya no se poseen. Los ejidatarios, comuneros y jornaleros del campo pueden poseer un rifle .22 o una escopeta y, además, un arma corta en su domicilio. Coleccionistas registrados pueden tener más con el permiso para coleccionista o museo de armas de fuego (DEFENSA-02-032), que exige una relación de la colección con un mínimo de 6 armas registradas; cada arma nueva para la colección requiere autorización de la Secretaría (art. 22 de la Ley).' },
+      { tema: 'Municiones', q: '¿Las balas se compran igual?', a: 'En la DCAM, la tabla de requisitos para personal civil distingue por cartucho y modalidad. Cartucho para escopeta (12, 16 y 20 GA y .410), para protección a domicilio o parcela: la hoja de manifestación de registro del arma y una identificación oficial vigente. Cartucho de fuego anular (.22 LR y .22 Short), para actividades cinegéticas, tiro deportivo y caza: lo mismo, más el Volante de Adquisición de Cartuchos del mes, expedido por tu club, y la credencial vigente del club. Cartucho de alto poder y de fuego central (por ejemplo .223, 30-06, .308, .380 y .38 Special): el permiso extraordinario de adquisición vigente y una identificación oficial vigente. Los requisitos de la DCAM para personal militar incluyen además «Cartuchos para Uso Exclusivo de las Fuerzas Armadas: Calibre superior a 9 mm», que no figuran en los de personal civil. Con el permiso extraordinario, las cantidades autorizadas son hasta 1,000 cartuchos por persona para escopeta (12, 16, 20, 28 y .410), hasta 500 por persona para pistolas o rifles calibre .22 (salvo Magnum, Hornet o TCM) y hasta 200 por cada calibre registrado para las otras armas permitidas; se pueden volver a solicitar 1 año después de adquirir lo autorizado en el último permiso en protección a domicilio o parcela, 3 meses después en actividades cinegéticas y 1 mes después en tiro deportivo.' },
+      { tema: 'Robo', q: '¿Qué pasa si me roban mi arma?', a: 'Debes reportarlo de inmediato al Ministerio Público y presentarte en el módulo del Registro Federal de Armas de Fuego más cercano a tu domicilio con original y copia de tu identificación vigente con fotografía, comprobante de domicilio y CURP, la copia certificada del acta levantada ante el Ministerio Público (con los datos del arma tal como vienen en su manifestación) y la hoja rosa del registro, la credencial o la copia certificada. No reportar el robo puede acarrear responsabilidad legal si el arma es utilizada en un delito.' },
+      { tema: 'Términos', q: '¿Cuál es la diferencia entre Licencia y Permiso?', a: 'Para comprar y tener un arma, una persona física tramita el permiso extraordinario para la adquisición de armas de fuego, cartuchos y accesorios (DEFENSA-02-040) y registra cada arma (DEFENSA-02-062). Las licencias son para la portación: la licencia particular individual de portación (DEFENSA-02-025) y las colectivas, para cuerpos de seguridad pública (licencia oficial colectiva) y para empresas de seguridad privada (licencia particular colectiva de portación).' },
     ],
     about: {
       eyebrow: '◆ ACERCA DE',
@@ -422,21 +406,23 @@
     },
 
     // ─── DENUNCIAS DE CONTENIDO ────────────────────────────
-    addReport(rep) {
+    async addReport(rep) {
       const item = {
         reviewId: String(rep.reviewId || ''),
+        tipo: String(rep.tipo || 'otro'),
+        entidadId: String(rep.entidadId == null ? '' : rep.entidadId),
+        entidadNombre: String(rep.entidadNombre || ''),
+        reviewExcerpt: String(rep.reviewExcerpt || ''),
         motivo: String(rep.motivo || ''),
-        detalle: String(rep.detalle || '').slice(0, 1200),
+        detalle: String(rep.detalle || '').trim(),
         email: String(rep.email || '').trim(),
       };
-      const arr = read(K.reports, []);
-      arr.unshift(Object.assign({
-        id: 'd_' + Date.now(), submittedAt: new Date().toISOString(), status: 'pending',
-      }, item));
-      write(K.reports, arr.slice(0, 500));
-      Store._notify();
-      publicAppend('reports', item);
-      return true;
+      if (!REMOTE.enabled || typeof window.amxEnviarReporte !== 'function') {
+        return { ok: false, status: 0, error: 'sin_backend' };
+      }
+      const result = await window.amxEnviarReporte(REMOTE.base + '/append/reports', item, fetch);
+      if (result.ok) REMOTE.ok = true;
+      return result;
     },
     getReports() { return read(K.reports, []); },
     resolveReport(id) {

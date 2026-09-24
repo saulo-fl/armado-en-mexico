@@ -1,3 +1,8 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Pantallas principales
 // Home, Catalog (categorías), Category (lista filtrada), Product (ficha), Compare
 
@@ -147,6 +152,8 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
           a la izquierda y la copia a la derecha. El rótulo «ARMA DESTACADA» que
           iba suelto sobre el lienzo ahora es la pestaña del folder, que es
           donde se rotula un expediente. */}
+      {window.HomeEntrevistaBloque &&
+        <window.HomeEntrevistaBloque onNav={onNav} />}
       {destacadas.length > 0 &&
       <div style={{ ...containerMax, padding: `16px ${PAD}px 4px` }}>
         <div className="amx-dest-lista">
@@ -200,21 +207,23 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <button onClick={() => onNav('catalog')} style={window.estiloAccion(false)}>Ver Todas →</button>
         }>Categorías</SectionHeader>
 
-        {/* Cinco cartas de arma y detrás las de accesorio: el número de la carta es cuántas armas hay en la
-            categoría y el nombre va abajo, como en la baraja. Los ids de
-            `CATEGORIES.tipo` son exactamente los cinco de `SILUETA_TIPOS`, así
-            que la figura sale del asset que ya existe.
-            Las fotos de escena (`CATEGORY_HEROS`) no se pierden: siguen siendo
-            la portada de cada categoría en el hub del arsenal. */}
+        {/* Cinco cartas de arma con ilustración completa estilo Lotería mexicana
+            (carta-*.png) y detrás las de accesorio. Las ilustraciones reemplazan
+            la estructura de lámina + silueta + número + nombre por una sola imagen
+            que contiene todo el diseño. */}
         <div className="amx-loteria-mesa" style={{ marginBottom: 22 }}>
-          {window.CATEGORIES.tipo.map((c) => (
-            <window.CartaLoteria key={c.id}
-              nombre={c.label}
-              cuenta={window.DB.filter((a) => a.tipo === c.id).length}
-              unidad="armas"
-              forma={`imagenes/silueta-${c.id}.webp`}
-              onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
-          ))}
+          {window.CATEGORIES.tipo.map((c) => {
+            const cuenta = window.DB.filter((a) => a.tipo === c.id).length;
+            const ilustracion = `imagenes/carta-${c.id}.webp`;
+            return (
+              <window.CartaLoteria key={c.id}
+                nombre={c.label}
+                cuenta={cuenta}
+                unidad="armas"
+                ilustracion={ilustracion}
+                onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+            );
+          })}
           {/* 8.5 ▸ Las categorías de accesorio, en la misma mesa */}
           {window.HomeAccesoriosSection &&
             <window.HomeAccesoriosSection onNav={onNav} />
@@ -492,20 +501,18 @@ function promoBtnStyle() {
 
 // CATALOG — Catálogo principal con todos los filtros
 // ════════════════════════════════════════════════════════════════
+// Los filtros son la tira de chips de TiraFiltros (ui.jsx, docs/DESIGN.md
+// §5.10): aquí solo vive el estado de cada filtro y la regla de qué arma pasa.
 function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare }) {
-  const vp = window.useViewport();
-  const cols = vp.isDesktop ? 'repeat(3, 1fr)' : vp.isTablet ? 'repeat(2, 1fr)' : '1fr';
   const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
+  const buscadorRef = React.useRef(null);
   const [tipo, setTipo] = useState(initialFilter?.mode === 'tipo' ? initialFilter.value : 'all');
   const [avail, setAvail] = useState(initialFilter?.mode === 'avail' ? initialFilter.value : 'all');
-  const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : 'all');
+  const [sucursal, setSucursal] = useState(initialFilter?.mode === 'sucursal' ? initialFilter.value : (initialFilter?.sucursal || 'all'));
   const [calibre, setCalibre] = useState(initialFilter?.mode === 'calibre' ? initialFilter.value : 'all');
   const [uso, setUso] = useState(initialFilter?.mode === 'uso' ? initialFilter.value : 'all');
-  const [showAdv, setShowAdv] = useState(false);
   const [marca, setMarca] = useState('all');
   const [era, setEra] = useState('all');
-  const [precioLo, setPrecioLo] = useState(0);
-  const [precioHi, setPrecioHi] = useState(100000);
   const [mecanismo, setMecanismo] = useState('all');
   const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible' ? 'si' : 'all'); // 'all' | 'si' | 'no'
 
@@ -520,8 +527,9 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         if (sucursal === 'OTCA' && !s.otca) return false;
       }
       if (disponible !== 'all') {
-        const inStock = (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
-          (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id));
+        // Con una armería elegida, las existencias son las de ESA sucursal (Saulo,
+        // 15-sep-2026, docs/DESIGN.md §5.9). Con «Todas», las de cualquiera.
+        const inStock = window.amxTieneExistencia(a.id, sucursal);
         if (disponible === 'si' && !inStock) return false;
         if (disponible === 'no' && inStock) return false;
       }
@@ -548,249 +556,86 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
     });
   }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo]);
 
-  // Límites de precio DINÁMICOS según lo filtrado; tope en $100k (mostrado como "$100k+").
-  const PRICE_CAP = 100000, PRICE_STEP = 1000;
-  const priceBounds = useMemo(() => {
-    const ps = baseFiltered.map(parsePrice).filter((n) => n > 0);
-    if (!ps.length) return { min: 0, max: PRICE_CAP, capped: true };
-    let lo = Math.floor(Math.min(...ps) / PRICE_STEP) * PRICE_STEP;
-    let hi = Math.ceil(Math.max(...ps) / PRICE_STEP) * PRICE_STEP;
-    const capped = hi > PRICE_CAP;
-    if (capped) hi = PRICE_CAP;
-    if (lo > hi) lo = hi;
-    if (hi <= lo) hi = lo + PRICE_STEP;
-    return { min: lo, max: hi, capped: capped };
-  }, [baseFiltered]);
-
-  // Al cambiar los límites dinámicos, reajusta el rango del slider (evita rangos vacíos)
-  const _pbRef = React.useRef(null);
-  if (!_pbRef.current || _pbRef.current.min !== priceBounds.min || _pbRef.current.max !== priceBounds.max) {
-    _pbRef.current = { min: priceBounds.min, max: priceBounds.max };
-    if (precioLo !== priceBounds.min) setPrecioLo(priceBounds.min);
-    if (precioHi !== priceBounds.max) setPrecioHi(priceBounds.max);
-  }
-
-  // Si el tope ($100k) está al máximo, no hay límite superior (incluye todo lo de "$100k+")
-  const noUpper = priceBounds.capped && precioHi >= priceBounds.max;
-  const filtered = useMemo(() => {
-    return baseFiltered.filter((a) => {
-      const p = parsePrice(a);
-      if (p < precioLo) return false;
-      if (!noUpper && p > precioHi) return false;
-      return true;
-    });
-  }, [baseFiltered, precioLo, precioHi, noUpper]);
+  // Límites de precio DINÁMICOS según lo filtrado; paso $1,000 y tope $100,000 («$100,000+»).
+  const precios = useMemo(() => baseFiltered.map(parsePrice), [baseFiltered]);
+  const rango = window.useRangoPrecio(precios, 1000, 100000);
+  const filtered = useMemo(() => baseFiltered.filter((a) => rango.deja(parsePrice(a))),
+    [baseFiltered, rango.lo, rango.hi, rango.limites]);
 
   const marcas = useMemo(() => Array.from(new Set(window.DB.map((a) => a.marca))).sort(), []);
+  const filtros = useMemo(() => {
+    const de = (lista) => lista.map((c) => ({ id: c.id, label: c.label }));
+    return {
+      tipo: { label: 'Tipo de arma', chip: 'Tipo', todos: 'Todas', opciones: de(window.CATEGORIES.tipo) },
+      calibre: { label: 'Calibre', todos: 'Todos', opciones: de(window.CATEGORIES.calibre) },
+      sucursal: { label: 'Armería', todos: 'Todas', opciones: [
+        { id: 'DCAM', label: 'DCAM · Estado de México', corto: 'DCAM' },
+        { id: 'OTCA', label: 'OTCA · Nuevo León', corto: 'OTCA' }] },
+      disponible: { label: 'Disponibilidad', todos: 'Todas', opciones: [
+        { id: 'si', label: 'Con existencias' }, { id: 'no', label: 'Agotadas' }] },
+      uso: { label: 'Uso', todos: 'Cualquiera', opciones: de(window.CATEGORIES.uso) },
+      avail: { label: 'Clasificación legal', todos: 'Todas', opciones: de(window.CATEGORIES.disponibilidad) },
+      marca: { label: 'Marca', todos: 'Todas', opciones: marcas.map((m) => ({ id: m, label: m })) },
+      mecanismo: { label: 'Mecanismo', todos: 'Todos', opciones: [
+        { id: 'semi', label: 'Semi-auto' }, { id: 'cerrojo', label: 'Cerrojo' }, { id: 'bomba', label: 'Bombeo' },
+        { id: 'revolver', label: 'Revólver' }, { id: 'sobrepuesta', label: 'Sobrepuesta' }] },
+      era: { label: 'Era', todos: 'Cualquiera', opciones: [
+        { id: 'clasico', label: 'Clásico' }, { id: 'moderno', label: 'Moderno' }, { id: 'vanguardia', label: 'Vanguardia' }] },
+    };
+  }, [marcas]);
+  const valores = { tipo, calibre, sucursal, disponible, uso, avail, marca, mecanismo, era };
+  const setters = { tipo: setTipo, calibre: setCalibre, sucursal: setSucursal, disponible: setDisponible,
+    uso: setUso, avail: setAvail, marca: setMarca, mecanismo: setMecanismo, era: setEra };
 
+  // «Limpiar» borra filtros, rango y búsqueda; el ✕ del buscador, solo el texto.
   const clearAll = () => {
-    setTipo('all');setAvail('all');setSucursal('all');setCalibre('all');setUso('all');
-    setMarca('all');setEra('all');setPrecioLo(priceBounds.min);setPrecioHi(priceBounds.max);setMecanismo('all');setDisponible('all');
+    Object.values(setters).forEach((set) => set('all'));
+    rango.reiniciar();
     setQuery('');
   };
-
-  const activeCount = [tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo].filter((v) => v !== 'all').length + ((precioLo > priceBounds.min || precioHi < priceBounds.max) ? 1 : 0);
-
-  const innerMax = { maxWidth: 1400, margin: '0 auto', width: '100%' };
-  const padX = vp.isDesktop ? 28 : 14;
-  const stickyTop = vp.isMobile ? 50 : 64;
+  const activeCount = Object.values(valores).filter((v) => v !== 'all').length + (rango.activo ? 1 : 0);
 
   return (
-    <div>
-      {/* búsqueda */}
-      <div style={{
-        padding: `12px ${padX}px`,
-        background: PALETTE.bgElev,
-        borderBottom: `1px solid ${PALETTE.border}`,
-        position: 'sticky', top: stickyTop, zIndex: 30
-      }}>
-       <div style={innerMax}>
-        <div style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            background: PALETTE.bg,
-            border: `1px solid ${PALETTE.border}`,
-            padding: '8px 10px'
-          }}>
-          <span style={{ color: PALETTE.amber, fontSize: 17}}>⌕</span>
-          <input value={query} onChange={(e) => setQuery(e.target.value)}
-            placeholder="Nombre, marca, calibre, país..." style={{
-              flex: 1, background: 'none', border: 'none', outline: 'none',
-              color: PALETTE.text,
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 15.5}} />
-          {(query || activeCount > 0) &&
-            <button onClick={clearAll} style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: PALETTE.textMuted, fontSize: 17}}>✕</button>
-            }
-        </div>
-
-        {/* FILTROS PRINCIPALES — menús desplegables */}
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : '1fr 1fr',
-            gap: 8, marginTop: 10
-          }}>
-          <FilterSelect label="Tipo de arma" value={tipo} onChange={setTipo}
-            options={[{ value: 'all', label: 'Todas' }].concat(window.CATEGORIES.tipo.map((c) => ({ value: c.id, label: c.label })))} />
-          <FilterSelect label="Calibre" value={calibre} onChange={setCalibre}
-            options={[{ value: 'all', label: 'Todos' }].concat(window.CATEGORIES.calibre.map((c) => ({ value: c.id, label: c.label })))} />
-          <FilterSelect label="Armería" value={sucursal} onChange={setSucursal}
-            options={[{ value: 'all', label: 'Todas' }, { value: 'DCAM', label: 'DCAM · Ciudad de México' }, { value: 'OTCA', label: 'OTCA · Nuevo León' }]} />
-          <FilterSelect label="Disponibilidad" value={disponible} onChange={setDisponible}
-            options={[{ value: 'all', label: 'Todas' }, { value: 'si', label: 'Con existencias' }, { value: 'no', label: 'Agotadas' }]} />
-        </div>
-
-        {/* Rango de precio — barra de mínimo/máximo (estilo Amazon) */}
-        <div style={{ marginTop: 12 }}>
-          <PriceRange min={priceBounds.min} max={priceBounds.max} lo={precioLo} hi={precioHi} step={PRICE_STEP} capped={priceBounds.capped}
-            onChange={(lo, hi) => { setPrecioLo(lo); setPrecioHi(hi); }} />
-        </div>
-
-        {/* avanzados toggle */}
-        <button onClick={() => setShowAdv((s) => !s)} style={{
-            marginTop: 8,
-            background: 'none', border: `1px dashed ${PALETTE.border}`,
-            color: PALETTE.textDim,
-            padding: '4px 10px',
-            fontFamily: 'JetBrains Mono, monospace',
-            fontSize: 13, letterSpacing: '0.12em',
-            textTransform: 'uppercase', cursor: 'pointer',
-            width: '100%'
-          }}>
-          {showAdv ? '▲ Cerrar filtros avanzados' : '▼ Filtros avanzados'} {activeCount > 0 && `· ${activeCount} activos`}
-        </button>
-
-        {showAdv &&
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: vp.isDesktop ? 'repeat(4, 1fr)' : '1fr 1fr',
-            gap: 8, marginTop: 8
-          }}>
-            <FilterSelect label="Uso" value={uso} onChange={setUso}
-              options={[{ value: 'all', label: 'Cualquiera' }].concat(window.CATEGORIES.uso.map((u) => ({ value: u.id, label: u.label })))} />
-            <FilterSelect label="Clasificación legal" value={avail} onChange={setAvail}
-              options={[{ value: 'all', label: 'Todas' }].concat(window.CATEGORIES.disponibilidad.map((d) => ({ value: d.id, label: d.label })))} />
-            <FilterSelect label="Marca" value={marca} onChange={setMarca}
-              options={[{ value: 'all', label: 'Todas' }].concat(marcas.map((m) => ({ value: m, label: m })))} />
-            <FilterSelect label="Mecanismo" value={mecanismo} onChange={setMecanismo}
-              options={[{ value: 'all', label: 'Todos' }, { value: 'semi', label: 'Semi-auto' }, { value: 'cerrojo', label: 'Cerrojo' }, { value: 'bomba', label: 'Bombeo' }, { value: 'revolver', label: 'Revólver' }, { value: 'sobrepuesta', label: 'Sobrepuesta' }]} />
-            <FilterSelect label="Era" value={era} onChange={setEra}
-              options={[{ value: 'all', label: 'Cualquiera' }, { value: 'clasico', label: 'Clásico' }, { value: 'moderno', label: 'Moderno' }, { value: 'vanguardia', label: 'Vanguardia' }]} />
-          </div>
+    <div className="amx-catalogo">
+      {/* La banda verde, solo con el buscador. Sin sticky (§5.10): en móvil el
+          scroll lo lleva el cuerpo de app.jsx y `top: 50` bajaba la banda 50 px. */}
+      <div className="amx-banda-busqueda amx-sobre-verde">
+        <div className="amx-buscador">
+          <span className="amx-buscador-lupa" aria-hidden="true">⌕</span>
+          <input ref={buscadorRef} value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Nombre, marca, calibre, país..."
+            aria-label="Buscar armas, marcas, calibres" />
+          {query &&
+            <button type="button" className="amx-buscador-borrar"
+              onClick={() => { setQuery(''); buscadorRef.current && buscadorRef.current.focus(); }}
+              aria-label="Borrar la búsqueda">✕</button>
           }
-       </div>
+        </div>
       </div>
 
-      {/* contador */}
-      <div style={{
-        ...innerMax,
-        padding: `10px ${padX}px 6px`,
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 14.5, color: PALETTE.textDim,
-        letterSpacing: '0.1em',
-        display: 'flex', justifyContent: 'space-between'
-      }}>
-        <span>▸ {filtered.length} {filtered.length === 1 ? 'ARMA' : 'ARMAS'}</span>
-        <span style={{ color: PALETTE.textMuted }}>{window.DB.length} TOTAL</span>
-      </div>
+      <window.TiraFiltros uid="catalogo"
+        orden={['tipo', 'calibre', 'sucursal', 'disponible', 'precio', 'mas']}
+        mas={['uso', 'avail', 'marca', 'mecanismo', 'era']}
+        filtros={filtros} valores={valores} onCambiar={(id, v) => setters[id](v)}
+        precio={rango} formato="miles" tituloPrecio="Precio"
+        conteo={{ n: filtered.length, nombres: ['arma', 'armas'] }}
+        activos={activeCount} hayTexto={!!query} onLimpiar={clearAll} />
 
-      {/* grid */}
-      <div style={{
-        display: 'grid', gridTemplateColumns: cols, gap: vp.isDesktop ? 16 : 10,
-        padding: vp.isDesktop ? '6px 28px 90px' : '6px 14px 90px',
-        maxWidth: 1400, margin: '0 auto', width: '100%'
-      }}>
+      {/* Grid de armas — ya vintage (ArmaCard = expediente) */}
+      <div className="amx-catalogo-grid">
         {filtered.map((a) =>
-        <ArmaCard key={a.id} arma={a}
-        onClick={() => onOpenArma(a.id)}
-        onCompare={() => toggleCompare(a.id)}
-        inCompare={compareIds.includes(a.id)} />
-
+          <ArmaCard key={a.id} arma={a}
+            onClick={() => onOpenArma(a.id)}
+            onCompare={() => toggleCompare(a.id)}
+            inCompare={compareIds.includes(a.id)} />
         )}
-        {!filtered.length &&
-        <div style={{
-          gridColumn: '1/-1',
-          textAlign: 'center', padding: '40px 20px',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 15.5, color: PALETTE.textMuted
-        }}>
-            <div style={{ fontSize: 38.5, color: PALETTE.border, marginBottom: 10 }}>◯</div>
+        {!filtered.length && (
+          <div className="amx-catalogo-vacio">
+            <span aria-hidden="true">◯</span>
             Sin resultados.<br />Ajusta los filtros.
           </div>
-        }
-      </div>
-    </div>);
-
-}
-// Barra de rango de precio (doble manija, estilo Amazon): min–max
-function PriceRange({ min, max, lo, hi, step, capped, onChange }) {
-  const P = PALETTE;
-  const span = max > min ? max - min : 1;
-  const pct = (v) => ((Math.min(max, Math.max(min, v)) - min) / span) * 100;
-  const fmt = (v) => '$' + Math.round(v).toLocaleString('es-MX');
-  const hiLabel = (capped && hi >= max) ? (fmt(max) + '+') : fmt(hi);
-  const loPct = pct(lo), hiPct = pct(hi);
-  return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Rango de precio</span>
-        <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13.5, color: P.amber }}>{fmt(lo)} — {hiLabel}</span>
-      </div>
-      <div style={{ position: 'relative', height: 28 }}>
-        <div style={{ position: 'absolute', top: 12, left: 0, right: 0, height: 4, background: P.border }} />
-        <div style={{ position: 'absolute', top: 12, left: loPct + '%', width: (hiPct - loPct) + '%', height: 4, background: P.amber }} />
-        <input type="range" className="amx-price-range" min={min} max={max} step={step} value={lo} aria-label="Precio mínimo"
-          onChange={(e) => { const v = Math.min(Number(e.target.value), hi - step); onChange(Math.max(min, v), hi); }} />
-        <input type="range" className="amx-price-range" min={min} max={max} step={step} value={hi} aria-label="Precio máximo"
-          onChange={(e) => { const v = Math.max(Number(e.target.value), lo + step); onChange(lo, Math.min(max, v)); }} />
-      </div>
-    </div>
-  );
-}
-window.PriceRange = PriceRange;
-
-// Menú desplegable de filtro (select nativo estilizado, fácil de navegar en móvil)
-function FilterSelect({ label, value, onChange, options }) {
-  const active = value !== 'all';
-  return (
-    <label style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
-      <span style={{
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: PALETTE.textMuted,
-        letterSpacing: '0.14em', textTransform: 'uppercase',
-      }}>{label}</span>
-      <div style={{ position: 'relative' }}>
-        <select value={value} onChange={(e) => onChange(e.target.value)} style={{
-          width: '100%', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-          background: PALETTE.bg, color: active ? PALETTE.amber : PALETTE.text,
-          border: `1px solid ${active ? PALETTE.amber : PALETTE.border}`,
-          padding: '10px 28px 10px 10px', borderRadius: 0, cursor: 'pointer', outline: 'none',
-          fontFamily: 'JetBrains Mono, monospace', fontSize: 14, letterSpacing: '0.02em',
-        }}>
-          {options.map((o) => (
-            <option key={String(o.value)} value={o.value} style={{ background: PALETTE.bgElev, color: PALETTE.text }}>{o.label}</option>
-          ))}
-        </select>
-        <span aria-hidden="true" style={{
-          position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)',
-          pointerEvents: 'none', color: active ? PALETTE.amber : PALETTE.textMuted, fontSize: 12,
-        }}>▾</span>
-      </div>
-    </label>
-  );
-}
-window.FilterSelect = FilterSelect;
-function FilterRow({ label, children }) {
-  return (
-    <div style={{ marginBottom: 6 }}>
-      <div style={{
-        fontFamily: 'JetBrains Mono, monospace',
-        fontSize: 13, color: PALETTE.textMuted,
-        letterSpacing: '0.15em', textTransform: 'uppercase',
-        marginBottom: 4
-      }}>{label}</div>
-      <div style={{ display: 'flex', gap: 5, overflowX: 'auto', flexWrap: 'wrap' }}>
-        {children}
+        )}
       </div>
     </div>);
 
@@ -800,163 +645,171 @@ window.CatalogScreen = CatalogScreen;
 // ════════════════════════════════════════════════════════════════
 // ARSENAL HUB — al entrar al arsenal se elige una categoría (no lista plana)
 // ════════════════════════════════════════════════════════════════
-// Tarjeta con foto (fondo de imagen + overlay) para el hub del arsenal
-// `color` es el acento DECORATIVO de las esquinas. No sirve para el subtítulo:
-// su valor por defecto era P.amber (#173A32), el mismo verde del tinte, y el
-// subtítulo de DCAM —que no pasa color— quedaba invisible. Y el #4FAE5C que sí
-// pasa OTCA da 2.42:1 sobre el tinte: tampoco llegaba. El texto va siempre en la
-// pareja crema, y quien necesite otro tono lo pide por `subColor`, no por `color`.
-function ArsenalPhotoCard({ label, sub, img, color, subColor, onClick }) {
-  const P = PALETTE;
+// Polaroid reutilizable para secciones sin enlace de producto
+// (Armería, etc.). Reusa los estilos .amx-polaroid de estilo.css y solo
+// añade el onClick — la geometría (faldón, marco, giro) ya vive en CSS.
+function HubPolaroid({ img, label, sub, onClick, style: extraStyle, pozoStyle }) {
   const [err, setErr] = useState(false);
-  const showImg = img && !err;
-  const ac = color || P.amber;
   return (
-    <button onClick={onClick} style={{
-      background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, padding: 0, cursor: 'pointer',
-      textAlign: 'left', position: 'relative', overflow: 'hidden', display: 'block', width: '100%',
-      transition: 'border-color 0.18s',
-    }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = P.border; }}>
-      <div style={{ width: '100%', aspectRatio: '4 / 5', position: 'relative', overflow: 'hidden', background: `linear-gradient(135deg, ${P.bgElev} 0%, ${P.bg} 100%)` }}>
-        {showImg
-          ? <img src={img} alt={label} loading="lazy" onError={() => setErr(true)} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', filter: 'contrast(1.06) saturate(0.92) brightness(0.92)', display: 'block' }} />
-          : <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: P.borderHi, fontSize: 30 }}>▦</div>}
-        {/* 0.94 tapaba la foto entera. A 0.78 se ve la armería y el texto claro
-            de abajo sigue midiendo por encima de 4.5:1 (ver comentario del bloque). */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, rgba(23,58,50,0.05) 0%, rgba(23,58,50,0.42) 55%, rgba(23,58,50,0.78) 100%)`, pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', top: 6, left: 6, width: 10, height: 10, borderTop: `1.5px solid ${ac}`, borderLeft: `1.5px solid ${ac}`, opacity: 0.8 }} />
-        <div style={{ position: 'absolute', bottom: 6, right: 6, width: 10, height: 10, borderBottom: `1.5px solid ${ac}`, borderRight: `1.5px solid ${ac}`, opacity: 0.8 }} />
-        {/* Medido contra el peor fondo: foto blanca (tope 235 tras brightness .92)
-            bajo el tinte 0.78 → compone #46615B. #F3EFE4 da 5.86:1 y #DDD5C4 da
-            4.61:1. Fuera los textShadow negros: eran el parche del texto oscuro. */}
-        <div style={{ position: 'absolute', left: 10, right: 10, bottom: 10 }}>
-          <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 16, color: P.sobreMarca, textTransform: 'uppercase', letterSpacing: '0.05em', lineHeight: 1.05 }}>{label}</div>
-          {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: subColor || '#DDD5C4', marginTop: 3, letterSpacing: '0.08em' }}>{sub}</div>}
-          {/* Mismo caso: este aviso también cae bajo el tinte (el overlay se pinta
-              aunque no haya foto). P.textMuted #59605C daba ~1.1:1 ahí. */}
-          {!showImg && img && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#DDD5C4', marginTop: 2 }}>foto pendiente</div>}
-        </div>
+    <button className="amx-polaroid amx-polaroid--hub" onClick={onClick} style={extraStyle}>
+      <div className="amx-polaroid-pozo" style={pozoStyle}>
+        {img && !err ? (
+          <img src={img} alt={label} loading="lazy" onError={() => setErr(true)}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
+        ) : null}
+        {/* Velo verde — mismo tratamiento que las fotos de HOME */}
+        <div className="amx-polaroid-velo" />{
+          /* Silueta/placeholder si la foto no carga */
+          (err || !img) && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--hair-hi)', fontSize: 30 }}>▦</div>
+          )
+        }
+      </div>
+      <div className="amx-polaroid-pie">
+        {sub && <span className="amx-polaroid-datos">{sub}</span>}
+        <span className="amx-polaroid-nombre">{label}</span>
       </div>
     </button>
   );
 }
-window.ArsenalPhotoCard = ArsenalPhotoCard;
 
-function ArsenalHubScreen({ onNav }) {
+// ════════════════════════════════════════════════════════════════
+// ARSENAL HUB — Explorador por categorías
+// Misma estética que HOME: polaroids para fotos, lotería para cartas.
+// ════════════════════════════════════════════════════════════════
+
+// Giro fijo de cada polaroid de armería, distinto para que no se vean gemelas.
+const ARMERIA_GIROS = ['-2.5deg', '1.8deg'];
+
+// Fotos de los usos, en polaroid apaisada. De banco libre (licencia Pexels: uso
+// comercial, sin atribución obligatoria), elegidas por Saulo el 15-sep-2026 en hoja
+// de contactos. La fuente se anota aquí porque no está en ninguna otra parte:
+//   domicilio — Terrance Barksdale · pexels.com/photo/gun-with-ammunition-15264966/
+//   club      — Artem Zhukov · pexels.com/photo/a-person-aiming-with-a-gun-17314913/
+//   caza      — Arian Fernandez · pexels.com/photo/hunter-standing-in-open-field-with-rifle-29374213/
+const USO_FOTOS = {
+  domicilio: 'imagenes/usos/domicilio.webp',
+  club: 'imagenes/usos/club.webp',
+  caza: 'imagenes/usos/caza.webp',
+};
+
+function ArsenalHubScreen({ onNav = () => {} }) {
   const vp = window.useViewport();
-  const P = PALETTE;
   const DB = window.DB || [];
   const PAD = vp.isDesktop ? 28 : 16;
   const max = { maxWidth: 1100, margin: '0 auto', width: '100%' };
-  const HEROS = window.CATEGORY_HEROS || {};
 
+  // Las cuentas (src/lib/arsenal-hub.js y los datos). Militar / Táctico no sale en el hub.
   const tipoCount = (id) => DB.filter((a) => a.tipo === id).length;
-  const usoCount = (id) => DB.filter((a) => a.uses.includes(id)).length;
-  const availCount = (id) => DB.filter((a) => a.avail === id).length;
-  const dispCount = DB.filter((a) =>
-    (window.getArmaExistencias && window.getArmaExistencias(a.id) != null) ||
-    (window.getArmaExistenciasOTCA && window.getArmaExistenciasOTCA(a.id))).length;
-
-  const grid = (cols) => ({ display: 'grid', gridTemplateColumns: vp.isDesktop ? `repeat(${cols},1fr)` : '1fr 1fr', gap: 8, marginBottom: 4 });
-  const Hdr = ({ icon, children }) => (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.amber,
-      letterSpacing: '0.16em', textTransform: 'uppercase', fontWeight: 600, margin: '22px 0 8px',
-    }}>
-      <span>{icon} {children}</span>
-      <span aria-hidden="true" style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${P.border}, transparent)` }} />
-    </div>
-  );
-  // `borde`: hairline COMPLETO en el color de la categoria, no barra lateral
-  // (DESIGN.md §5.4). Por defecto, el hairline neutro de siempre.
-  const Card = ({ label, sub, count, color, borde, onClick }) => (
-    <button onClick={onClick} style={{
-      background: P.bgCard, border: `1px solid ${borde || P.border}`, boxShadow: window.CLARO.sombra,
-      padding: '12px 14px', cursor: 'pointer', textAlign: 'left', display: 'flex',
-      justifyContent: 'space-between', alignItems: 'center', gap: 10, width: '100%', transition: 'border-color 0.18s',
-    }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = P.amber; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = borde || P.border; }}>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{label}</div>
-        {sub && <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textMuted, marginTop: 2, lineHeight: 1.4 }}>{sub}</div>}
-      </div>
-      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 18, color: color || P.amber, flexShrink: 0 }}>{count}</div>
-    </button>
-  );
+  const usoCount = (id) => (id === 'militar' ? 0 : DB.filter((a) => a.uses.includes(id)).length);
+  const sucursales = window.amxArsenalSucursales(DB, window.AMX_MANUALES_SEED || []);
+  const legal = window.CATEGORIES.disponibilidad
+    .map((d) => ({ id: d.id, label: d.label, desc: d.desc, armas: DB.filter((a) => a.avail === d.id).length }))
+    .filter((d) => d.armas > 0);
+  const calibres = window.amxArsenalCalibres(DB, window.CATEGORIES.calibre, window.CALIBRES || []);
 
   return (
     <div style={{ ...max, padding: `8px ${PAD}px 90px` }}>
-      {/* Único encabezado de la pantalla: el header móvil ya no pinta título y
-          TopNav tampoco en escritorio. No se borra; en móvil se centra para que
-          ocupe el sitio del título que había en la barra. */}
-      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 22, color: P.text, textTransform: 'uppercase', letterSpacing: '0.04em', margin: '12px 0 2px', textAlign: vp.isMobile ? 'center' : 'left' }}>Arsenal</div>
-      <div style={window.amxProsa({ fontSize: 15, color: P.textDim, lineHeight: 1.5 })}>Explora {DB.length} armas por categoría. Elige un grupo para ver el listado.</div>
+      <h1 className="amx-arsenal-titulo">
+        <span>Arsenal</span>
+      </h1>
 
-      <Hdr icon="◆">Armería</Hdr>
-      <div style={grid(2)}>
-        {/* Fotos reales de las dos sedes (31-ago-2026). Son 680x382 y 680x510, y la
-            tarjeta es 4:5 con cover: el recorte efectivo queda en 305x382 y 408x510,
-            por debajo del minimo de 640x800 de PLACEHOLDERS.md. Se nota en pantalla
-            retina. Entran igual mientras el objetivo sea quitar placeholders; hay que
-            resustituirlas cuando haya foto vertical de cada sede. */}
-        <ArsenalPhotoCard label="DCAM" sub="Ciudad de México" img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })} />
-        <ArsenalPhotoCard label="OTCA" sub="Nuevo León" color="#4FAE5C" img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })} />
-      </div>
+      {/* ── ARMERÍA: dos polaroids con jittering ─────────────────────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Armería</window.CintaDymo>
+        <div className="amx-arsenal-armeria">
+          <HubPolaroid label="DCAM" sub="Campo Militar No. 1-D, Naucalpan"
+            img="imagenes/armeria-dcam.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'DCAM' })}
+            style={{ '--giro': ARMERIA_GIROS[0], width: '100%' }} />
+          <HubPolaroid label="OTCA" sub="Nuevo León"
+            img="imagenes/armeria-otca.webp" onClick={() => onNav('category', { mode: 'sucursal', value: 'OTCA' })}
+            style={{ '--giro': ARMERIA_GIROS[1], width: '100%' }} />
+        </div>
+      </section>
 
-      <Hdr icon="●">Disponibilidad</Hdr>
-      <div style={grid(1)}>
-        <Card label="Disponibles actualmente" sub="En existencia en el último inventario de su sucursal" color={window.CLARO.ok} count={dispCount} onClick={() => onNav('category', { mode: 'disponible', value: 'si' })} />
-      </div>
+      {/* ── DISPONIBILIDAD: la tarjeta de almacén, un renglón por sucursal ─ */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Disponibilidad</window.CintaDymo>
+        <window.AlmacenSucursales filas={sucursales} movil={vp.isMobile}
+          onAbrir={(sigla) => onNav('category', { mode: 'disponible', value: 'si', sucursal: sigla })} />
+      </section>
 
-      {/* Clasificación legal — venia del Home («Por disponibilidad legal»). Va
-          pegada a Disponibilidad porque las dos responden a lo mismo, «¿puedo
-          conseguirla?»: una por existencias, la otra por ley. Antes dos de las
-          tres categorias («Seguridad privada» y «Exclusivo del Ejército») colgaban
-          de Uso con este mismo mode:'avail'; se retiraron de alli para no dejar
-          dos puertas al mismo filtro, y Uso se queda solo con usos reales.
-          El color de la categoria (data.js) va en el hairline completo y en el
-          contador, como en el Home y como manda DESIGN.md §5.4. */}
-      <Hdr icon="§">Clasificación legal</Hdr>
-      <div style={{ ...grid(3), gridTemplateColumns: vp.isDesktop ? 'repeat(3,1fr)' : '1fr' }}>
-        {window.CATEGORIES.disponibilidad.map((d) => availCount(d.id)
-          ? <Card key={d.id} label={d.label} sub={d.desc}
-              color={window.amxColorAvail(d.color)} borde={window.amxColorAvail(d.color)}
-              count={availCount(d.id)} onClick={() => onNav('category', { mode: 'avail', value: d.id })} />
-          : null)}
-      </div>
+      {/* ── CLASIFICACIÓN LEGAL: los sellos sobre la hoja de oficio ────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Clasificación legal</window.CintaDymo>
+        <window.HojaClasificacion filas={legal}
+          onAbrir={(id) => onNav('category', { mode: 'avail', value: id })} />
+      </section>
 
-      <Hdr icon="◢">Tipo de arma</Hdr>
-      <div style={grid(5)}>
-        {window.CATEGORIES.tipo.map((c) => tipoCount(c.id)
-          ? <ArsenalPhotoCard key={c.id} label={c.label} img={HEROS[c.id]} onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
-          : null)}
-      </div>
+      {/* ── TIPO DE ARMA: lotería con ilustración completa + accesorios ──── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Tipo de arma</window.CintaDymo>
+        <div className="amx-arsenal-loteria-mesa">
+          {window.CATEGORIES.tipo.map((c) => {
+            const cuenta = tipoCount(c.id);
+            return cuenta
+              ? <window.CartaLoteria key={c.id} nombre={c.label} cuenta={cuenta} unidad="armas"
+                  ilustracion={`imagenes/carta-${c.id}.webp`}
+                  onClick={() => onNav('category', { mode: 'tipo', value: c.id })} />
+              : null;
+          })}
+          {/* Accesorios en la misma mesa */}
+          {window.HomeAccesoriosSection &&
+            <window.HomeAccesoriosSection onNav={onNav} />
+          }
+        </div>
+      </section>
 
-      <Hdr icon="☆">Uso</Hdr>
-      <div style={grid(3)}>
-        <Card label="Tiro deportivo" sub="Clubes y polígonos" count={usoCount('club')} onClick={() => onNav('category', { mode: 'uso', value: 'club' })} />
-        <Card label="Cacería" sub="Caza mayor y menor" count={usoCount('caza')} onClick={() => onNav('category', { mode: 'uso', value: 'caza' })} />
-        <Card label="Defensa del hogar" sub="Uso en domicilio" count={usoCount('domicilio')} onClick={() => onNav('category', { mode: 'uso', value: 'domicilio' })} />
-      </div>
+      {/* ── USO: polaroids apaisadas, solo con el nombre ───────────────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Uso</window.CintaDymo>
+        <ul className="amx-hub-usos">
+          {window.CATEGORIES.uso.filter((u) => usoCount(u.id)).map((u, i) => (
+            <li key={u.id}>
+              <button type="button" className="amx-polaroid amx-polaroid--apaisada amx-hub-uso"
+                style={{ '--giro': (window.GIROS_COPIA || [])[i % 5] }}
+                onClick={() => onNav('category', { mode: 'uso', value: u.id })}>
+                <span className="amx-polaroid-pozo">
+                  {USO_FOTOS[u.id] && <img src={USO_FOTOS[u.id]} alt="" loading="lazy" />}
+                  <span className="amx-polaroid-velo" />
+                </span>
+                <span className="amx-polaroid-pie">
+                  <span className="amx-polaroid-nombre">{u.label}</span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </section>
 
-      <Hdr icon="◈">Calibre</Hdr>
-      <div style={grid(4)}>
-        {window.CATEGORIES.calibre.map((c) => {
-          const n = DB.filter((a) => a.calibre === c.id).length;
-          return n ? <Card key={c.id} label={c.label} count={n} onClick={() => onNav('category', { mode: 'calibre', value: c.id })} /> : null;
-        })}
-      </div>
+      {/* ── CALIBRE: el mostrador que se desliza, cartuchos a escala ─────── */}
+      <section className="amx-hub-seccion">
+        <window.CintaDymo>Calibre</window.CintaDymo>
+        <window.MostradorCalibres calibres={calibres}
+          onAbrir={(id) => onNav('category', { mode: 'calibre', value: id })} />
+      </section>
 
-      <button onClick={() => onNav('category', { mode: 'all' })} style={{
-        marginTop: 18, background: 'none', border: `1px dashed ${P.border}`, color: P.textDim,
-        padding: '11px', fontFamily: 'JetBrains Mono, monospace', fontSize: 13, letterSpacing: '0.12em',
-        textTransform: 'uppercase', cursor: 'pointer', width: '100%',
-      }}>▤ Ver todas las armas ({DB.length})</button>
+      {/* ── VER TODO ───────────────────────────────────────────────── */}
+      <button className="amx-arsenal-ver-todo" onClick={() => onNav('category', { mode: 'all' })}>
+        ▤ Ver todas las armas ({DB.length})
+      </button>
     </div>
   );
 }
 window.ArsenalHubScreen = ArsenalHubScreen;
+
+// ════════════════════════════════════════════════════════════════
+// HOME — Bloque de entrevista en la portada
+// ════════════════════════════════════════════════════════════════
+function HomeEntrevistaBloque() {
+  const A = window.AMX_ENTREVISTA;
+  if (!A || !A.preguntas || !A.preguntas.length) return null;
+
+  return (
+    <section className="amx-hent" aria-labelledby="hent-tit">
+      <h2 id="hent-tit" className="amx-hent-tit">Contesta unas preguntas y conoce si cumples los requisitos</h2>
+      <window.EntrevistaCuerpo modoPortada />
+    </section>
+  );
+}
+window.HomeEntrevistaBloque = HomeEntrevistaBloque;

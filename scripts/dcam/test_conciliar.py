@@ -258,9 +258,13 @@ EXCEPCIONES_REPRODUCCION: dict[int, tuple[set, str]] = {
 
 def test_reproduccion_armas_6_jul_a_11_sep():
     base = "41137eb"  # main justo antes de mergear la conciliación del 11-sep (#158): datos del 6-jul
+    # El «después» va anclado al commit que aplicó esa conciliación (#159) y NO a los datos vivos:
+    # leerlos de RAÍZ hacía que el test se rompiera solo con cada inventario nuevo (el del 22-sep).
+    despues_commit = "c9ad794"
     with tempfile.TemporaryDirectory() as t:
         antes = _datos_en_commit(base, Path(t))
-    ahora = conciliar.leer_datos(conciliar.RAIZ)
+    with tempfile.TemporaryDirectory() as t:
+        despues = _datos_en_commit(despues_commit, Path(t))
     jul = conciliar.leer_inventario(INV / "dcam-existencias-2026-07-06.pdf")["catalogos"]["armas"]
     sep = conciliar.leer_inventario(INV / "dcam-existencias-2026-09-11.pdf")["catalogos"]["armas"]
     mapa, _amb = conciliar.construir_mapeo("armas", jul, antes["armas"], "man_dcam_2026_07_06")
@@ -268,7 +272,7 @@ def test_reproduccion_armas_6_jul_a_11_sep():
     conciliar.separar(cl)
     seguros = cl[0]["seguros"]
     assert len(seguros) >= 60, len(seguros)
-    por_id = {f["id"]: f for f in ahora["armas"]}
+    por_id = {f["id"]: f for f in despues["armas"]}
     fallos = []
     for s in seguros:
         actual = por_id.get(s["id"])  # una ficha fusionada o renumerada después también es fallo

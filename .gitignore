@@ -7,6 +7,10 @@ node_modules
 # (pages_build_output_dir en wrangler.toml) y lo regenera en cada deploy.
 /out/
 
+# Exportaciones de Penpot: ZIP binario de varios MB sin diff. Van como asset de
+# cada Release, no en la historia (docs/PENPOT.md).
+*.penpot
+
 # Temporal del resembrado de D1 (skill sincronizar-d1)
 /.d1-resembrado.sql
 

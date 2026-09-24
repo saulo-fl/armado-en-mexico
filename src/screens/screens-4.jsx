@@ -1,175 +1,111 @@
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 // Armado en México — Armas Traumáticas (defensa MENOS LETAL)
 // TraumaticasScreen (sección propia) · HomeTraumaBanner (destacado en Home)
 // ───────────────────────────────────────────────────────────────────────
 
-// ── Badge de stock
-function TraumaStock({ stock }) {
-  const ok = stock > 0;
-  // Tonos más brillantes + fondo casi opaco → buen contraste sobre la foto en panel blanco
-  const tone = ok ? '#5FC46B' : '#FF6F61';
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      fontFamily: 'JetBrains Mono, monospace', fontSize: 13, fontWeight: 700,
-      letterSpacing: '0.12em', textTransform: 'uppercase',
-      padding: '4px 9px',
-      color: tone,
-      border: `1px solid ${tone}`,
-      background: 'rgba(0,0,0,0.88)',
-      whiteSpace: 'nowrap',
-    }}>
-      <span style={{ width: 7, height: 7, borderRadius: '50%', background: tone, display: 'inline-block' }} />
-      {ok ? (stock <= 3 ? `Últimas ${stock} pzas` : 'Disponible') : 'Agotado'}
-    </span>
-  );
-}
-
-// ── Ficha de producto traumático
-function TraumaFicha({ p, vp }) {
+// ── Una partida de la cotización: un modelo con su ficha, su precio y su
+//    salida a la tienda. La piel vive en estilo.css (.amx-cotiz-*); aquí solo
+//    queda la estructura y lo que depende de los datos.
+function TraumaFicha({ p, indice = 1 }) {
   const url = window.traumaticaUrl(p.handle);
   const ok = p.stock > 0;
-  const photo = (
-    <div style={{
-      position: 'relative', flexShrink: 0,
-      width: vp.isDesktop ? '42%' : '100%',
-      aspectRatio: vp.isDesktop ? 'auto' : '4 / 3',
-      alignSelf: 'stretch',
-      background: '#FFFFFF',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      overflow: 'hidden',
-      borderRight: vp.isDesktop ? `1px solid ${PALETTE.border}` : 'none',
-      borderBottom: vp.isDesktop ? 'none' : `1px solid ${PALETTE.border}`,
-    }}>
-      <img src={p.img} alt={p.nombre} loading="lazy" style={{
-        width: '100%', height: '100%', objectFit: 'contain',
-        padding: vp.isDesktop ? 22 : 16, boxSizing: 'border-box', display: 'block',
-        mixBlendMode: 'multiply',
-      }} />
-      <div style={{ position: 'absolute', top: 12, left: 12 }}>
-        <TraumaStock stock={p.stock} />
-      </div>
-      <div style={{
-        position: 'absolute', bottom: 12, left: 12,
-        fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, fontWeight: 700,
-        letterSpacing: '0.14em', textTransform: 'uppercase',
-        // El texto era '#173A32' sobre background PALETTE.amber, que HOY es ese
-        // mismo #173A32: 1.00:1, la etiqueta no existía. Resto de cuando «amber»
-        // era ámbar. Sobre el verde de marca el texto va en sobreMarca (10.83:1).
-        color: PALETTE.tintaSobreMarca, background: PALETTE.amber, padding: '3px 8px',
-      }}>{p.tipo} · cal. {p.specs[0][1]}</div>
-    </div>
-  );
+  const existencia = ok ? (p.stock <= 3 ? `Últimas ${p.stock} pzas` : 'Disponible') : 'Agotado';
 
   return (
-    <div style={{
-      background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, borderTop: `2px solid ${PALETTE.amber}`,
-      display: 'flex', flexDirection: vp.isDesktop ? 'row' : 'column', alignItems: 'stretch',
-    }}>
-      {photo}
-      <div style={{ flex: 1, minWidth: 0, padding: vp.isDesktop ? '22px 24px' : '16px' }}>
-        {/* marca + modelo */}
-        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14, color: PALETTE.amber, letterSpacing: '0.16em', textTransform: 'uppercase' }}>{p.marca}</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap', marginTop: 4 }}>
-          <h3 style={{ margin: 0, fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 30 : 25, color: PALETTE.text, letterSpacing: '0.01em', lineHeight: 1 }}>{p.modelo}</h3>
-        </div>
-        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17, color: PALETTE.textDim, marginTop: 6 }}>{p.nombre}</div>
+    <div>
+      <div className="amx-cotiz-num" aria-hidden="true"></div>
+      <div className="amx-cotiz-partida">
+        <figure className="amx-polaroid">
+          <span className="amx-polaroid-pozo">
+            <img src={p.img} alt={p.nombre} loading="lazy" />
+          </span>
+          <dl className="amx-cotiz-specs amx-cotiz-specs--polaroid">
+            {p.specs.map(([k, v]) => (
+              <React.Fragment key={k}>
+                <div>
+                  <dt>{k}</dt>
+                  <dd>{v}</dd>
+                </div>
+              </React.Fragment>
+            ))}
+          </dl>
+        </figure>
 
-        {/* resumen */}
-        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 12 }}>{p.resumen}</div>
+        <div>
+          <div className="amx-cotiz-marca">{p.marca} · {p.tipo}</div>
+          <h3 className="amx-cotiz-modelo">{p.modelo}</h3>
+          <div className="amx-cotiz-nombre">{p.nombre}</div>
+          <p className="amx-cotiz-resumen">{p.resumen}</p>
 
-        {/* specs */}
-        <div style={{
-          display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(3, 1fr)' : 'repeat(2, 1fr)',
-          gap: '12px 18px', marginTop: 16, paddingTop: 14, borderTop: `1px solid ${PALETTE.border}`,
-        }}>
-          {p.specs.map(([k, v]) => (
-            <div key={k}>
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 3 }}>{k}</div>
-              <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 600, fontSize: 16, color: PALETTE.text }}>{v}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* munición compatible */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 16 }}>
-          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.textMuted, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Munición</span>
-          {p.municion.map((m) => (
-            <span key={m} style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.textDim,
-              border: `1px solid ${PALETTE.border}`, padding: '3px 9px', letterSpacing: '0.05em',
-            }}>{m}</span>
-          ))}
-        </div>
-
-        {/* destacados */}
-        <ul style={{ listStyle: 'none', margin: '16px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 7 }}>
-          {p.destacados.map((d) => (
-            <li key={d} style={{ display: 'flex', gap: 9, fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17, color: PALETTE.textDim, lineHeight: 1.5 }}>
-              <span style={{ color: PALETTE.amber, flexShrink: 0 }}>▸</span>{d}
-            </li>
-          ))}
-        </ul>
-
-        {/* precio + CTA */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
-          marginTop: 18, paddingTop: 16, borderTop: `1px solid ${PALETTE.border}`,
-        }}>
-          <div>
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: 28, color: PALETTE.amber, lineHeight: 1 }}>
-              ${p.precio.toLocaleString('es-MX')} <span style={{ fontSize: 17, color: PALETTE.textMuted, fontWeight: 600 }}>MXN</span>
-            </div>
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.textMuted, marginTop: 4 }}>Los tanques de CO₂ se adquieren por separado</div>
+          <div className="amx-cotiz-municion">
+            <span className="amx-cotiz-municion-tit">Munición</span>
+            {p.municion.map((m) => <span key={m}>{m}</span>)}
           </div>
-          <a href={url} target="_blank" rel="noopener noreferrer" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14,
-            letterSpacing: '0.06em', textTransform: 'uppercase', textDecoration: 'none',
-            padding: '13px 22px',
-            background: ok ? PALETTE.amber : 'transparent',
-            color: ok ? PALETTE.tintaSobreMarca : PALETTE.amber,
-            border: `1.5px solid ${PALETTE.amber}`,
-            transition: 'transform 200ms ease, filter 200ms ease',
-          }}
-            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.06)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.filter = 'none'; }}
-            onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.98)'; }}
-            onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}>
-            {ok ? 'Adquiérela en armasmys.com' : 'Disponible en armasmys.com'} →
-          </a>
+
+          <ul className="amx-cotiz-destacados">
+            {p.destacados.map((d) => <li key={d}>{d}</li>)}
+          </ul>
+
+          <div className="amx-cotiz-cierre">
+            <div>
+              <div className="amx-cotiz-precio">
+                ${p.precio.toLocaleString('es-MX')}<small>MXN</small>
+              </div>
+              <div className="amx-cotiz-nota">Los tanques de CO₂ se adquieren por separado</div>
+            </div>
+
+            <div className="amx-cotiz-estado">
+              <span className={ok ? '' : 'amx-cotiz-agotado'}>{existencia}</span>
+            </div>
+
+            <a href={url} target="_blank" rel="noopener noreferrer"
+              className={'amx-cotiz-accion' + (ok ? '' : ' amx-cotiz-accion--agotado')}>
+              Ver en armasmys.com ↗
+            </a>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── Sección de marco legal (reutiliza window.TRAUMATICAS_LEGAL)
-function TraumaLegal({ vp }) {
+// ── El marco legal, ya dentro del pie de la cotización: son sus condiciones.
+//    Se quitó `conManual`, que se calculaba y no se usaba en ningún sitio.
+function TraumaLegal() {
   const L = window.TRAUMATICAS_LEGAL || { puntos: [] };
-  const conManual = (window.TRAUMATICAS || []).find((p) => p.manual);
-  return (
-    <div style={{ marginTop: 28 }}>
-      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: PALETTE.amber, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: 8 }}>§ Marco legal · México</div>
-      <h3 style={{ margin: 0, fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 24 : 20, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em' }}>Por qué no requieren permiso</h3>
-      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 18, color: PALETTE.textDim, lineHeight: 1.6, marginTop: 10, marginBottom: 16, maxWidth: 720 }}>{L.resumen}</div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: vp.isDesktop ? 'repeat(2, 1fr)' : '1fr', gap: 12 }}>
+  return (
+    <React.Fragment>
+      <div className="amx-cotiz-pie-tit">Marco legal · México — por qué no requieren permiso</div>
+
+      <p className="amx-cotiz-resumen">{L.resumen}</p>
+
+      <div className="amx-cotiz-grid">
         {L.puntos.map((pt) => (
-          <div key={pt.tit} style={{ background: PALETTE.bgCard, border: `1px solid ${PALETTE.border}`, boxShadow: window.CLARO.sombra, padding: '14px 16px' }}>
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 14.5, color: PALETTE.text, marginBottom: 6 }}>{pt.tit}</div>
-            <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: PALETTE.textDim, lineHeight: 1.55 }}>{pt.desc}</div>
+          <div key={pt.tit} className="amx-oficio">
+            <div className="amx-oficio-membrete" aria-hidden="true">
+              <span>Armado en México</span><span>Marco legal</span>
+            </div>
+            <h3 className="amx-oficio-tit">{pt.tit}</h3>
+            <p className="amx-oficio-texto">{pt.desc}</p>
           </div>
         ))}
       </div>
 
-      <div style={{
-        marginTop: 16, padding: '12px 16px', background: 'rgba(168,58,42,0.08)',
-        border: `1px solid ${PALETTE.redHi}`,
-      }}>
-        <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: PALETTE.redHi, letterSpacing: '0.18em', textTransform: 'uppercase', fontWeight: 700, marginBottom: 6 }}>▲ Aviso</div>
-        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 15.5, color: PALETTE.textDim, lineHeight: 1.6 }}>{L.disclaimer}</div>
-      </div>
-    </div>
+      <section aria-labelledby="cotiz-aviso">
+        <span id="cotiz-aviso" className="amx-sello amx-sello--restr amx-sello--grande">AVISO</span>
+        <div className="amx-oficio">
+          <div className="amx-oficio-membrete" aria-hidden="true">
+            <span>Armado en México</span><span>Aviso</span>
+          </div>
+          <p className="amx-oficio-texto">{L.disclaimer}</p>
+        </div>
+      </section>
+    </React.Fragment>
   );
 }
 
@@ -180,47 +116,50 @@ window.TraumaLegal = TraumaLegal;
 // ═══════════════════════════════════════════════════════════════════════
 function TraumaticasScreen({ onNav }) {
   const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
   const productos = window.TRAUMATICAS || [];
 
   return (
-    <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 1100, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      {/* Encabezado. El header móvil ya no pinta el título de pantalla, así que
-          este es el ÚNICO. Centrado en móvil para que ocupe el sitio que dejó el
-          header; en escritorio (y tablet) sigue a la izquierda, donde TopNav
-          tampoco pinta título y la columna de lectura arranca al margen. */}
-      <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 800, fontSize: vp.isDesktop ? 36 : 27, color: PALETTE.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.04, marginBottom: 10, textAlign: vp.isMobile ? 'center' : 'left' }}>Armas Traumáticas</div>
-      <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 19, color: PALETTE.textDim, lineHeight: 1.6, maxWidth: 680, marginBottom: 14 }}>
-        Dispositivos de defensa <strong style={{ color: PALETTE.text }}>NO letal</strong> propulsados por CO₂, en calibre .50 y .68. Disparan munición de pimienta, goma o polvo inerte para detener una amenaza sin recurrir a fuerza letal. Puedes adquirirlos directamente en <strong style={{ color: PALETTE.amber }}>armasmys.com</strong>.
-      </div>
-
-      {/* CATEGORÍA APARTE — énfasis */}
-      <div style={{
-        display: 'flex', alignItems: 'flex-start', gap: 12,
-        background: 'rgba(221,213,196,0.07)', border: `1px solid ${PALETTE.amber}`,
-        padding: '14px 16px', marginBottom: 18,
-      }}>
-        <span style={{ color: PALETTE.amber, fontSize: 21.5, lineHeight: 1.2, flexShrink: 0 }}>◎</span>
-        <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17.5, color: PALETTE.textDim, lineHeight: 1.6 }}>
-          <strong style={{ color: PALETTE.text }}>Una categoría totalmente distinta del arsenal.</strong> Al no ser armas de fuego, no requieren permiso de la SEDENA y <strong style={{ color: PALETTE.text }}>puedes adquirirlas directamente con nosotros</strong>. Son los <strong style={{ color: PALETTE.amber }}>únicos tres modelos de armamento que comercializamos</strong>; todas las armas de fuego de esta app se muestran solo con fines informativos.
+    <div style={{ padding: `20px ${vp.isDesktop ? 28 : 16}px 90px`, width: '100%', boxSizing: 'border-box' }}>
+      <div className="amx-cotiz">
+        {/* El membrete y el folio son papelería ficticia (DESIGN.md §6b): no
+            imitan ningún folio de la SEDENA ni llevan iconografía oficial. */}
+        <div className="amx-cotiz-membrete">
+          <span>Cotización · Armas M&amp;S</span>
         </div>
-      </div>
 
-      {/* fichas */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        {productos.map((p) => <TraumaFicha key={p.id} p={p} vp={vp} />)}
-      </div>
+        <h2 className="amx-cotiz-tit">Armas traumáticas</h2>
+        <p className="amx-cotiz-entrada">
+          Dispositivos de defensa <strong>NO letal</strong> propulsados por CO₂, en calibre .50 y
+          .68. Disparan munición de pimienta, goma o polvo inerte para detener una amenaza sin
+          recurrir a fuerza letal. Puedes adquirirlos directamente en <strong>armasmys.com</strong>.
+        </p>
 
-      {/* MARCO LEGAL */}
-      <TraumaLegal vp={vp} />
+        <div className="amx-cotiz-partidas">
+          {productos.map((p, i) => <TraumaFicha key={p.id} p={p} indice={i + 1} />)}
+        </div>
 
-      {/* accesorios / nota cierre */}
-      <div style={{
-        marginTop: 24, padding: '14px 16px',
-        background: PALETTE.bgElev, border: `1px dashed ${PALETTE.border}`,
-        ...window.amxProsa({ fontSize: 16, color: PALETTE.textMuted, lineHeight: 1.6 }),
-      }}>
-        <span style={{ color: PALETTE.amber, fontWeight: 700 }}>◆ También en tienda:</span> cargadores, municiones cal. .50/.68 (goma, pimienta, polvo), tanques de CO₂ y fundas. Consulta el catálogo completo en armasmys.com.
+        {/* Las condiciones, al pie, como en una cotización de verdad: primero
+            qué se vende y después por qué es legal (decisión de Saulo,
+            18-sep-2026). Los textos son los mismos de antes, movidos. */}
+        <div className="amx-cotiz-pie">
+          <div className="amx-cotiz-pie-tit">Condiciones</div>
+          <div className="amx-cotiz-condiciones">
+            <div>
+              <b>Una categoría totalmente distinta del arsenal.</b>
+              Al no ser armas de fuego, no requieren permiso de la SEDENA y puedes adquirirlas
+              directamente con nosotros. Son los únicos tres modelos de armamento que
+              comercializamos; todas las armas de fuego de esta app se muestran solo con fines
+              informativos.
+            </div>
+            <div>
+              <b>También en tienda.</b>
+              Cargadores, municiones cal. .50/.68 (goma, pimienta, polvo), tanques de CO₂ y
+              fundas. Consulta el catálogo completo en armasmys.com.
+            </div>
+          </div>
+
+          <TraumaLegal />
+        </div>
       </div>
     </div>
   );

@@ -53,6 +53,12 @@ necesita ni resembrar D1 ni verificar armado.mx; `main` es producción y no est�
 hasta que D1 esté resembrado y las sondas den lo que deben. Mezclarlos era la vía por la
 que se daba por publicado algo que ningún visitante veía.
 
+**Agentes que no son Claude Code:** `.github/copilot-instructions.md` es el resumen
+operativo de una página que GitHub Copilot inyecta solo — comandos, invariantes que
+rompen el sitio y las prohibiciones de la §6b. Está pensado para modelos pequeños
+(Qwen y compañía), que no digieren este documento entero. **Si cambian los comandos, el
+stack o las prohibiciones, actualiza los dos.**
+
 **Regla:** cualquier cambio de datos o UI se **verifica con `auditar.js`** y respeta
 `fidelidad-diseno` antes de publicar. Al terminar algo no trivial, aplica
 `mejorar-tooling`.
@@ -99,7 +105,8 @@ configuración**; todo lo demás vive en su carpeta.
 
 ```
 raíz/         solo config: package.json · wrangler.toml · babel.config.json
-              .gitignore · CNAME · .nojekyll · README.md · AGENTS.md · CLAUDE.md
+              .gitignore · CNAME · .nojekyll · README.md · AGENTS.md · CLAUDE.md · LICENSE (AGPL-3.0-or-later)
+              LICENSE-CONTENIDO.md (CC BY-SA 4.0) · LICENSE-TERMINOS-ADICIONALES.md
 functions/    las Functions de Pages. Van en la RAÍZ, fuera de out/: es donde
               Cloudflare las descubre. No las muevas.
 public/       lo que se sirve tal cual → se copia entero a out/
@@ -109,12 +116,21 @@ src/          app.jsx · admin.jsx          (puntos de entrada)
   screens/    los 7 screens-*.jsx
   components/ ui.jsx
   data/       los 6 data-*.js
-  lib/        store.js · dev-viewport.js
+  lib/        store.js · arsenal-hub.js · cotejo.js · dev-viewport.js
   styles/     estilo.css
-scripts/      build-prerender.mjs · copiar-estaticos.mjs · sql/schema.sql
-docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md
+scripts/      build-prerender.mjs · copiar-estaticos.mjs · actualizar-readme.mjs
+              cotejo|vitrina|arsenal-hub|filtros|faq.test.mjs · dcam/ · sql/schema.sql
+              tokens-dtcg.mjs (+ tokens.test.mjs) · capturas-movil.mjs   ← Penpot
+docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md · PENPOT.md
+              penpot/tokens.json (generado desde estilo.css) · capturas/movil/ (360 px)
 out/          TODO lo generado. Gitignoreado. Es lo que publica Pages.
 ```
+
+**Penpot es espejo, no fuente (22-sep-2026).** El diseño vive en `estilo.css` / `ui.jsx` /
+`DESIGN.md`; el archivo «Wire Frame» de Penpot los consume por `docs/penpot/tokens.json`
+(`npm run tokens`, vigilado por `scripts/tokens.test.mjs`) y sirve para proponer lo nuevo,
+trabajar igual con cualquier agente y enseñar el sistema. Cómo conectar el MCP, el mapa
+del archivo, el ritual por sesión y las trampas de la Plugin API: `docs/PENPOT.md`.
 
 **Fuente estructurada, salida plana.** El build aplana: `src/styles/estilo.css`
 acaba en `out/estilo.css` y se sirve como `/estilo.css`. Se hizo así a propósito
@@ -127,7 +143,8 @@ siguieran valiendo. Al leer una ruta en este documento, fíjate en si habla del
 1. `build:static` — vacía `out/` y copia `public/` + los archivos que no se
    compilan. Va **primero** porque vacía: si fuera después, borraría lo demás.
 2. `build:js` — Babel compila los `.jsx` a `out/`, planos.
-3. `build:html` — el prerender emite las 321 páginas, `sitemap.xml` y `robots.txt`.
+3. `build:html` — el prerender emite un `.html` por URL, `sitemap.xml` y `robots.txt`.
+   Las cifras del día las imprime el propio build; no se copian aquí porque se pudren.
 
 ## Cómo se trabaja aquí
 
@@ -138,9 +155,12 @@ merges se hacen por la API y tu `origin/main` local se queda viejo).
 
 ```bash
 npm install                 # una vez
-npm run build               # estáticos + .jsx -> .js + prerender de las 321 páginas, todo en out/
+npm run build               # estáticos + .jsx -> .js + prerender, todo en out/
 npx serve out               # o cualquier servidor HTTP sobre out/: no carga desde file://
 node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
+npm test                     # las suites de node:test (scripts/*.test.mjs)
+npm run smoke                # abre out/ en un Chrome real: una página por forma de ruta
+node --test scripts/faq.test.mjs   # una sola suite
 ```
 
 Antes de publicar, la skill **`verificar-app`**. Al tocar UI, **`fidelidad-diseno`**.
@@ -252,7 +272,7 @@ Al conciliar un PDF nuevo, pon la cantidad de cada arma en el lado que correspon
 ## Prerender: un .html real por URL (`scripts/build-prerender.mjs`)
 
 `npm run build` son tres pasos (ver «Estructura del repo»): **`build:static`**, **`build:js`**
-(Babel) y **`build:html`** (`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 321 — con su
+(Babel) y **`build:html`** (`scripts/build-prerender.mjs`), que emite **un fichero HTML por cada URL** — 398 — con su
 `<title>`, `description`, `canonical`, Open Graph, JSON-LD y el contenido **en HTML
 crudo** dentro de `#app-root`.
 
@@ -269,7 +289,7 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
 - El script **falla ruidosamente** si `index.html` cambia de forma (busca el cálculo
   de `APP_BASE`, el `<base>`, el `<title>`, la `description` y `#app-root`). Si tocas
   esas líneas, actualiza las marcas del script — es a propósito: mejor romper el
-  build que publicar 321 páginas mal generadas.
+  build que publicar todas las páginas mal generadas.
 
 **Dos trampas ya resueltas — no las reintroduzcas:**
 
@@ -277,15 +297,16 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
    `index.html` lo crea por JS, y eso no basta: el *preload scanner* pide los
    `<script src="app.js">` **antes** de ejecutar ese inline, resolviéndolos contra
    `/pistolas/` → 18 peticiones 404 por visita. Con la etiqueta estática: 0.
-2. **NO añadas un `_redirects`** (hoy no existe, y es deliberado). Coexisten
-   `pistolas.html` (listado) y el directorio `pistolas/` (fichas); la documentación
-   de Cloudflare no define cuál gana en `/pistolas`, pero **empíricamente gana el
-   fichero**, que es justo lo que se quiere. Forzarlo con un rewrite
-   `/pistolas → /pistolas.html 200` provoca un **bucle infinito**: Pages redirige
-   todo `.html` a su versión sin extensión, así que el rewrite se persigue a sí
-   mismo. Ya ocurrió una vez. Y **nunca un catch-all `/*`**: en Pages los redirects
-   se siguen exista o no el asset, y se comería `sitemap.xml`, `robots.txt`,
-   `app.js` e `imagenes/`.
+2. **`public/_redirects` solo admite redirecciones 301 literales** (desde el
+   22-sep-2026 existe, con dos: las rutas viejas de Legalidad a `/legalidad/tramites`).
+   Nunca un rewrite `200` ni un comodín. Coexisten `pistolas.html` (listado) y el
+   directorio `pistolas/` (fichas); la documentación de Cloudflare no define cuál gana
+   en `/pistolas`, pero **empíricamente gana el fichero**, que es justo lo que se
+   quiere. Forzarlo con un rewrite `/pistolas → /pistolas.html 200` provoca un
+   **bucle infinito**: Pages redirige todo `.html` a su versión sin extensión, así
+   que el rewrite se persigue a sí mismo. Ya ocurrió una vez. Y **nunca un catch-all
+   `/*`**: en Pages los redirects se siguen exista o no el asset, y se comería
+   `sitemap.xml`, `robots.txt`, `app.js` e `imagenes/`.
 
 `sitemap.xml` y `robots.txt` salen del mismo script. El `lastmod` sale de la **fecha del
 inventario** del que viene cada artículo (los historiales de precio la traen, una por
@@ -305,6 +326,10 @@ Rutas legibles y jerárquicas, pensadas para SEO/GEO. Todo el ruteo vive en la
 cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParsePath`):
 
 ```
+/arsenal                                  base de la sección (el hub)
+/arsenal/catalogo                         el catálogo completo
+/arsenal/catalogo/dcam                    catálogo filtrado por armería DCAM (filtro rápido)
+/arsenal/catalogo/otca                    catálogo filtrado por armería OTCA (filtro rápido)
 /pistolas                                  listado del tipo (filtro aplicado)
 /pistolas/glock-19                         ficha del arma
   tipos: pistolas · revolveres · rifles · escopetas · carabinas
@@ -313,6 +338,7 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
   categorías: cargadores · opticas · refacciones · empunaduras
 /municiones                                listado (las municiones NO llevan sub-rama)
 /municiones/12-ga-rio-perdigon-7-5-28-gr   ficha de la munición
+/comparar/ruger-lcp-vs-ruger-lcp-max   comparador (slug del nombre, sin la rama de tipo; el orden es el de las armas)
 ```
 
 - **Los slugs se derivan de los datos, no se guardan.** Armas: `tipo/nombre`.
@@ -322,6 +348,10 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
   ascendente**, para que la URL de una ficha no cambie al añadir otras.
 - Si renombras un arma o cambias su tipo, **su URL cambia**. Es el precio de tener
   direcciones legibles; tenlo en cuenta si ya está indexada o compartida.
+- **Comparador:** los slugs son los del NOMBRE, sin la rama de tipo, y el orden de la
+  URL es el orden de las armas (la tira compara la segunda contra la primera).
+  Renombrar un arma rompe los enlaces de comparación ya compartidos. Estas URL **no
+  se prerenderizan** (noindex hasta la parte 2 del comparador).
 - El índice de slugs se memoiza y se reconstruye solo si cambia el tamaño de algún
   catálogo (p. ej. tras hidratar desde el backend).
 - `404.html` es lo que hace funcionar las rutas profundas: Cloudflare no encuentra el
@@ -516,3 +546,10 @@ sí pasan, que son los que importan para GEO). Ver `docs/SEO.md`. Y cambiar la c
 por defecto del admin (`armado2026`, en claro en `store.js`, que armado.mx sirve público
 aunque el repo sea privado):
 ya no es la única barrera —Access va delante— pero sigue ahí.
+
+## Convenciones de contribución
+
+- **Estilo:** conserva la sangría existente de dos espacios, punto y coma, comillas simples, `camelCase` para funciones y variables, y `UPPER_SNAKE_CASE` para constantes. Los comentarios y textos visibles van en español.
+- **Pruebas:** usa `node:test` y `node:assert/strict`; nombra los archivos `*.test.mjs`. Las pruebas del navegador viven en `scripts/` y las de Functions junto a sus helpers privados. Antes de abrir un PR corre `npm run build`, `npm test`, `npm run smoke`, `node --test functions/api/_lib.test.mjs` y la auditoría indicada arriba. El smoke no es opcional si tocaste un `.jsx`: ni las pruebas ni el build ejecutan los componentes, y es ahí donde se esconden los fallos que dejan la pantalla en blanco.
+- **Commits:** usa asuntos breves en español y enfocados en un solo cambio. El historial admite el formato convencional cuando ayuda, por ejemplo `fix: corregir menú móvil` o `feat(traumaticas): rediseñar cotización`.
+- **Pull requests:** explica el cambio visible, enumera la verificación ejecutada, enlaza el issue si existe y adjunta capturas antes/después para cambios de UI. Trabaja en una rama de tarea; nunca hagas push directo a `main` o `develop`. Los merges, despliegues de producción y escrituras remotas en D1 requieren aprobación explícita.

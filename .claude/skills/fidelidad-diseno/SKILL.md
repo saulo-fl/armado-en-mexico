@@ -48,7 +48,7 @@ a CSS, la skill `migrar-a-css`.
   con el acento de un selector de «facción»: el color salía bien en el primer paint y mal a
   partir del segundo render, y ninguna auditoría estática lo veía. Si vuelve a aparecer una
   asignación a `PALETTE.*` fuera de `ui.jsx`, es un bug.
-- Primitivas reutilizables (`ui.jsx`): `FilterChip`, `FilterSelect`, `PriceRange`,
+- Primitivas reutilizables (`ui.jsx`): `TiraFiltros`, `CasillasFiltro`, `ReglaPrecio`,
   `AvailBadge`, `PriceLevel`, `SectionHeader`, `ArmaCard`, `BottomNav`, `HCarousel`,
   `CountryFlag`, `LogoMarca`. Reúsalas; no reinventes estilos por pantalla.
   (`TacticalCorners` y `CUT_TR` siguen existiendo pero **ya no pintan**: eran el esqueleto
@@ -123,8 +123,8 @@ a CSS, la skill `migrar-a-css`.
 ## Decisiones de producto ya tomadas (respétalas)
 - El arsenal abre en un HUB por categorías (`ArsenalHubScreen`), no lista plana.
 - Encabezados del hub sin "Por": Armería, Disponibilidad, Tipo de arma, Uso, Calibre.
-- Filtros del listado = menús desplegables (`FilterSelect`) + barra de precio min/máx
-  dinámica con tope $100k ("$100k+"), NO chips flotantes.
+- Filtros del listado = tira de chips de papel/cinta Dymo con ✕, hoja que empuja con
+  casillas, regla de precio y «Más» (`TiraFiltros`, docs/DESIGN.md §5.10).
 - Las tarjetas de arma ya NO llevan etiqueta de tipo sobre la imagen (redundante).
 - El "precio actual" de la ficha se toma del último registro del historial.
 
@@ -209,6 +209,17 @@ Todo va dentro del **folder manila** (`.amx-carpeta`, la foto de la Home en 9-sl
   por cartucho. Lo usan la tarjeta y la ficha.
 
 ## Bitácora de aprendizajes (AÑADE lo que descubras)
+- 2026-09: **en este Chrome compartido del DevTools MCP, `resize_page` no baja de
+  ~500px reales** aunque se le pida menos (comprobado de nuevo en la tarea 6 del
+  comparador). Para anchos de móvil usa `emulate` con
+  `viewport: "<ancho>x844x3,mobile,touch"` y confirma `window.innerWidth`; para
+  escritorio, `viewport: "1440x900x1"`; oscuro con `colorScheme: "dark"`
+  (`"auto"` para volver).
+- 2026-09: **el `click` del MCP por `uid` puede aterrizar en la barra fija
+  «DEBUG» de `dev-viewport.js`** (abajo a la izquierda), que tapa el elemento de
+  verdad si coincide en pantalla. Si un click falla o toca lo que no debía,
+  `scrollIntoView()` el elemento y clicarlo por `evaluate_script` en vez de por
+  `uid`.
 - 2026-09: **un IntersectionObserver no dispara si el objetivo SALTA la ventana.** Un
   centinela al final de la ficha pasaba de «debajo» a «encima» con un salto de scroll
   (ir al final, un fling largo) sin cruzar nunca la ventana: su estado seguía siendo

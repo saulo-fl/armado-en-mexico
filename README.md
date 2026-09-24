@@ -5,10 +5,10 @@
 </div>
 
 <!-- cifras:inicio -->
-Catálogo actual: **231 armas · 39 accesorios · 91 municiones**,
-servidas como **383 páginas HTML prerenderizadas** para que los buscadores y los
+Catálogo actual: **253 armas · 40 accesorios · 102 municiones**,
+servidas como **455 páginas HTML prerenderizadas** para que los buscadores y los
 bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap declara
-**379 URLs**, 372 de ellas con la fecha real de su inventario (la última, 2026-09-11).
+**451 URLs**, 409 de ellas con la fecha real de su inventario (la última, 2026-09-22).
 
 <sub>Bloque generado por `npm run cifras` desde el propio build. No editar a mano.</sub>
 <!-- cifras:fin -->
@@ -67,8 +67,8 @@ El Arsenal no abre con una lista: abre con una página que reparte el catálogo 
 con la que llega cada quien. Todos los grupos abren el listado ya filtrado, y los que llevan
 contador dicen cuántas armas reúnen:
 
-- **Armería.** Las dos armerías cuyos inventarios oficiales concilia el sitio: la **DCAM**, en la
-  Ciudad de México, y la **OTCA**, en Nuevo León. Cada una publica su propio inventario, y al
+- **Armería.** Las dos armerías cuyos inventarios oficiales concilia el sitio: la **DCAM**, en el
+  Estado de México, y la **OTCA**, en Nuevo León. Cada una publica su propio inventario, y al
   elegir una aparecen las armas que han figurado en los de esa sede: sirve para saber qué ha
   ofrecido la que te queda cerca.
 - **Disponibilidad.** «Disponibles actualmente» junta las armas con existencias en el último
@@ -85,7 +85,7 @@ Todas esas entradas llevan al mismo listado —el de la segunda captura de arrib
 ya puesto y el resto a mano para seguir afinando:
 
 - **Buscador**: nombre, marca, calibre o país.
-- **Tipo de arma**, **Calibre**, **Armería** (DCAM · Ciudad de México u OTCA · Nuevo León) y
+- **Tipo de arma**, **Calibre**, **Armería** (DCAM · Estado de México u OTCA · Nuevo León) y
   **Disponibilidad** (con existencias o agotadas).
 - **Rango de precio**: una barra con mínimo y máximo. Sus límites se recalculan con los demás
   filtros para abarcar solo las armas que quedan, y con el tirador al tope entra también todo lo
@@ -176,11 +176,33 @@ Sirve para elegir el calibre antes que el arma: qué se usa para defensa, qué p
 caza, cuánto retroceso tiene y cuántas opciones hay en el catálogo. Las cifras son divulgativas y
 varían según marca y munición, y la guía lo advierte.
 
+### Legalidad
+
+Una sola página, con la entrevista arriba y cuatro folders desplegables, y **toda afirmación
+trae su fuente oficial y la fecha en que se consultó**: lo federal ordenado por la pregunta que
+traes —qué arma puedes tener, qué papel llenas, cuánto cuesta—, lo que de verdad cambia por
+estado, seis trámites ante la Defensa —cada uno con lo que habilita, su checklist y su cuota
+vigente— y los documentos oficiales en PDF. El permiso extraordinario ante el Registro Federal de Armas y la compra en la
+DCAM son **dos trámites que se confunden**: no son el mismo papeleo, y creer que sí es lo que
+hace que alguien llegue al mostrador sin expediente.
+
+Escrita sobre la Ley Federal de Armas de Fuego y Explosivos **reformada el 29 de mayo de 2025**,
+y con los escenarios que el formato distingue y casi nadie cuenta: asalariado, independiente,
+pensionado, ejidatario, comunero, jornalero, coleccionista, socio de club y militar.
+
+**«¿Puedo comprar un arma?»** es la entrevista: quince preguntas sobre tu situación —ninguna
+pide un dato personal, todas las respuestas son categorías— y al final dice qué papeles te
+tocan, cuál te falta y cómo se consigue. Cuando algo no procede lo dice sin rodeos y sin
+ofrecer un remedio que no existe. Y cuando reúnes todo, tampoco promete nada: la autorización
+la decide la autoridad, no un cuestionario.
+
+Lo que no está verificado **se declara** en vez de rellenarse: 14 de las 32 entidades todavía
+no tienen portal de antecedentes penales comprobado, y el selector lo dice junto a su nombre.
+
 ### Y además
 
 - **Municiones y accesorios** del inventario oficial, con marca, compatibilidad y precio.
-- **Tenencia legal** — requisitos y pasos del trámite ante la SEDENA conforme a la Ley Federal
-  de Armas de Fuego y Explosivos, y **preguntas frecuentes** sobre licencias y portación.
+- **Preguntas frecuentes** sobre licencias, calibres permitidos y portación.
 - **Armas traumáticas** — defensa menos letal por CO₂, que no son armas de fuego y no piden
   permiso; la duda más repetida del público.
 - **Prerender.** La app pinta con JavaScript, y hasta las 321 páginas el sitio era invisible
@@ -278,3 +300,47 @@ emblemas de ninguna institución. Es la gráfica de todos los días en México, 
 Los valores salen de [`src/styles/estilo.css`](src/styles/estilo.css) y el criterio, de
 [`docs/DESIGN.md`](docs/DESIGN.md). Los colores de los objetos no tienen variante oscura a
 propósito: una carta de lotería es amarilla con la luz encendida o apagada.
+
+## Licencia
+
+Armado en México es **software libre**: el código de este repositorio se publica bajo la
+[**GNU Affero General Public License v3 o posterior**](LICENSE) (`AGPL-3.0-or-later`).
+
+Puedes usarlo, estudiarlo, modificarlo, redistribuirlo y publicarlo en tu propio servidor.
+La condición es recíproca: **quien reciba tu versión —incluso a través de una red— tiene
+derecho a recibir también su código fuente**, bajo esta misma licencia. Por eso AGPL y no
+GPL: esta es una aplicación web, y la GPL no obliga a nada a quien monta un servicio cerrado
+sin distribuir binarios.
+
+A eso se añaden dos términos de la sección 7 de la propia licencia, detallados en
+[`LICENSE-TERMINOS-ADICIONALES.md`](LICENSE-TERMINOS-ADICIONALES.md):
+
+- **§7(c)** — una versión modificada debe marcarse como distinta y no puede presentarse como
+  «Armado en México» ni sugerir que la respalda Armas M&S.
+- **§7(e)** — la licencia no concede ningún derecho sobre las marcas, el logotipo ni la
+  identidad gráfica del proyecto. Las palabras CIVIL, SEGURIDAD y EXCLUSIVO **no** se
+  reservan: son categorías de la Ley Federal de Armas de Fuego, no marcas.
+
+Un fork es bienvenido; solo tiene que llamarse de otra manera.
+
+### El contenido, que no es código
+
+La AGPL licencia software. Aquí viven además un catálogo, unos PDF oficiales y 243 imágenes,
+y cada cosa tiene un dueño distinto. El mapa completo —con su base en la Ley Federal del
+Derecho de Autor— está en [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md). En resumen:
+
+| Qué | Quién lo tiene | Qué se concede |
+|---|---|---|
+| Compilación del catálogo (`src/data/`) | Saulo Flores León | **CC BY-SA 4.0** |
+| Los hechos: precios, existencias, calibres | Nadie (art. 14 fr. X LFDA) | No hay nada que conceder |
+| Inventarios DCAM y OTCA (`public/inventarios/`) | Fuera del derecho de autor (art. 14 fr. VIII) | Redistribuibles, sin exclusividad |
+| Fotos de producto y texturas (`public/imagenes/`) | Los fabricantes y terceros | **Nada** |
+| Fotos de uso (`public/imagenes/usos/`) | Sus autores (Pexels) | Licencia Pexels |
+| Logotipo, isotipo, retrato | Saulo Flores León | **Nada** — ver §7(e) |
+
+Los ficheros de `src/data/` siguen bajo AGPL como código —son JavaScript y llevan funciones
+dentro—; la concesión CC BY-SA corre en paralelo sobre el conjunto de datos, para quien
+quiera llevarse el catálogo a otro proyecto sin arrastrar la AGPL.
+
+Un fork que borre las fotos ajenas **sigue compilando y funcionando**: `window.isRealImage`
+vacía toda ruta que no exista y la interfaz dibuja su marcador.

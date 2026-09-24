@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+// Armado en México — Copyright (C) 2026 Saulo Flores León
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
+// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+
 /* Resiembra un dominio de D1 desde el código fuente.
  *
  *   node .claude/skills/sincronizar-d1/scripts/resembrar.js armas   [--aplicar]
