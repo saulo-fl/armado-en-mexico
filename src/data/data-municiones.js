@@ -517,4 +517,29 @@
   // Compatibilidad por calibre exacto (determinista, sin invención)
   window.getMunicionesParaArma = function (arma) { if (!arma) return []; return (window.MUNICIONES || []).filter(function (m) { return m.calibre === arma.calibre; }); };
   window.getArmasParaMunicion = function (mun) { if (!mun) return []; return (window.DB || []).filter(function (a) { return a.calibre === mun.calibre; }); };
+
+  // Vitrina de municiones: agrupa por calibre y ordena por nombre (marca + bala + grano).
+  // Misma firma que accesoriosVitrina para reutilizar el patrón en screens-municiones.jsx.
+  window.municionesVitrina = function (categoria, lista) {
+    lista = lista || window.MUNICIONES;
+    var cats = window.MUNICION_CATEGORIES.categoria;
+    var todas = cats
+      .map(function (c) {
+        var piezas = lista.filter(function (m) { return m.calibre === c.id; })
+          .sort(function (x, y) {
+            var a = (x.marca + ' ' + x.bala + ' ' + (x.grano || '')).toLowerCase();
+            var b = (y.marca + ' ' + y.bala + ' ' + (y.grano || '')).toLowerCase();
+            return a.localeCompare(b, 'es');
+          });
+        return { id: c.id, label: c.label, piezas: piezas };
+      })
+      .filter(function (s) { return s.piezas.length; });
+    var una = todas.filter(function (s) { return s.id === categoria; });
+    return una.length ? una : todas;
+  };
+
+  // Placeholder para municiones sin foto propia: silueta genérica de cartucho.
+  window.municionPlaceholder = function (mun) {
+    return 'imagenes/silueta-municion.webp';
+  };
 })();
