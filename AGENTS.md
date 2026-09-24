@@ -120,9 +120,17 @@ src/          app.jsx · admin.jsx          (puntos de entrada)
   styles/     estilo.css
 scripts/      build-prerender.mjs · copiar-estaticos.mjs · actualizar-readme.mjs
               cotejo|vitrina|arsenal-hub|filtros|faq.test.mjs · dcam/ · sql/schema.sql
-docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md
+              tokens-dtcg.mjs (+ tokens.test.mjs) · capturas-movil.mjs   ← Penpot
+docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md · PENPOT.md
+              penpot/tokens.json (generado desde estilo.css) · capturas/movil/ (360 px)
 out/          TODO lo generado. Gitignoreado. Es lo que publica Pages.
 ```
+
+**Penpot es espejo, no fuente (22-sep-2026).** El diseño vive en `estilo.css` / `ui.jsx` /
+`DESIGN.md`; el archivo «Wire Frame» de Penpot los consume por `docs/penpot/tokens.json`
+(`npm run tokens`, vigilado por `scripts/tokens.test.mjs`) y sirve para proponer lo nuevo,
+trabajar igual con cualquier agente y enseñar el sistema. Cómo conectar el MCP, el mapa
+del archivo, el ritual por sesión y las trampas de la Plugin API: `docs/PENPOT.md`.
 
 **Fuente estructurada, salida plana.** El build aplana: `src/styles/estilo.css`
 acaba en `out/estilo.css` y se sirve como `/estilo.css`. Se hizo así a propósito
@@ -285,15 +293,16 @@ Googlebot **no renderiza JS en respuestas 4xx**, y GPTBot/ClaudeBot/PerplexityBo
    `index.html` lo crea por JS, y eso no basta: el *preload scanner* pide los
    `<script src="app.js">` **antes** de ejecutar ese inline, resolviéndolos contra
    `/pistolas/` → 18 peticiones 404 por visita. Con la etiqueta estática: 0.
-2. **NO añadas un `_redirects`** (hoy no existe, y es deliberado). Coexisten
-   `pistolas.html` (listado) y el directorio `pistolas/` (fichas); la documentación
-   de Cloudflare no define cuál gana en `/pistolas`, pero **empíricamente gana el
-   fichero**, que es justo lo que se quiere. Forzarlo con un rewrite
-   `/pistolas → /pistolas.html 200` provoca un **bucle infinito**: Pages redirige
-   todo `.html` a su versión sin extensión, así que el rewrite se persigue a sí
-   mismo. Ya ocurrió una vez. Y **nunca un catch-all `/*`**: en Pages los redirects
-   se siguen exista o no el asset, y se comería `sitemap.xml`, `robots.txt`,
-   `app.js` e `imagenes/`.
+2. **`public/_redirects` solo admite redirecciones 301 literales** (desde el
+   22-sep-2026 existe, con dos: las rutas viejas de Legalidad a `/legalidad/tramites`).
+   Nunca un rewrite `200` ni un comodín. Coexisten `pistolas.html` (listado) y el
+   directorio `pistolas/` (fichas); la documentación de Cloudflare no define cuál gana
+   en `/pistolas`, pero **empíricamente gana el fichero**, que es justo lo que se
+   quiere. Forzarlo con un rewrite `/pistolas → /pistolas.html 200` provoca un
+   **bucle infinito**: Pages redirige todo `.html` a su versión sin extensión, así
+   que el rewrite se persigue a sí mismo. Ya ocurrió una vez. Y **nunca un catch-all
+   `/*`**: en Pages los redirects se siguen exista o no el asset, y se comería
+   `sitemap.xml`, `robots.txt`, `app.js` e `imagenes/`.
 
 `sitemap.xml` y `robots.txt` salen del mismo script. El `lastmod` sale de la **fecha del
 inventario** del que viene cada artículo (los historiales de precio la traen, una por

@@ -25,9 +25,10 @@ const SCREEN_TO_PATH = {
   home: '', catalog: 'arsenal', accesorios: 'accesorios',
   calibres: 'calibres', campos: 'campos', experiencias: 'experiencias',
   compare: 'comparar', legal: 'legalidad', about: 'acerca',
-  'legal-req': 'legalidad/requisitos', entrevista: 'legalidad/puedo-comprar',
+  entrevista: 'legalidad/puedo-comprar',
   'legal-federal': 'legalidad/federal', 'legal-estatal': 'legalidad/estatal',
-  'legal-permisos': 'legalidad/permisos',
+  'legal-tramites': 'legalidad/tramites',
+  'legal-documentos': 'legalidad/documentos',
   faq: 'preguntas', menu: 'mas', traumaticas: 'traumaticas',
   soporte: 'soporte',
   municiones: 'municiones',
@@ -36,6 +37,11 @@ const PATH_TO_SCREEN = Object.keys(SCREEN_TO_PATH).reduce((m, s) => {
   if (SCREEN_TO_PATH[s]) m[SCREEN_TO_PATH[s]] = s;
   return m;
 }, {});
+// Requisitos y Permisos se fundieron en Trámites (22-sep-2026). Las dos direcciones
+// viejas siguen en enlaces y en el índice de los buscadores: el servidor las redirige
+// con `_redirects` (301) y aquí se resuelven por si llegan por dentro de la app.
+PATH_TO_SCREEN['legalidad/requisitos'] = 'legal-tramites';
+PATH_TO_SCREEN['legalidad/permisos'] = 'legal-tramites';
 
 // tipo de arma (dato) ↔ segmento de URL (plural, sin acentos)
 const TIPO_TO_PATH = {
@@ -162,7 +168,7 @@ function amxParsePath(pathname) {
       ? { mode: 'sucursal', value: SIGLA }
       : { mode: 'all' } });
   }
-  // Las ramas de Legalidad: /legalidad/requisitos y /legalidad/puedo-comprar.
+  // Las ramas de Legalidad: /legalidad/tramites, /legalidad/puedo-comprar…
   // Van ANTES de la búsqueda de un solo segmento porque esa exige `seg.length === 1`
   // y estas son de dos; y antes del fallback de accesorios, que si no se las tragaría.
   // Una rama desconocida cae en el hub de Legalidad, nunca en la portada: quien llega
@@ -464,18 +470,20 @@ function App() {
     accesorios: 'Accesorios', accesorio: 'Ficha',
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
-    'legal-req': 'Requisitos', entrevista: '¿Puedo comprar un arma?',
-    'legal-federal': 'Marco federal', 'legal-estatal': 'Por estado', 'legal-permisos': 'Permisos',
+    entrevista: '¿Puedo comprar un arma?',
+    'legal-federal': 'Federal', 'legal-estatal': 'Por estado', 'legal-tramites': 'Trámites',
+    'legal-documentos': 'Documentos legales',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
     calibres: 'Calibres', calibre: 'Calibre', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
   };
 
-  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas', 'legal-req', 'entrevista', 'legal-federal', 'legal-estatal', 'legal-permisos'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
+  const isInternal = ['product', 'accesorio', 'municion', 'calibre', 'about', 'faq', 'soporte', 'calibres', 'campos', 'experiencias', 'traumaticas', 'entrevista', 'legal-federal', 'legal-estatal', 'legal-tramites', 'legal-documentos'].includes(screen) || ((screen === 'catalog' || screen === 'accesorios' || screen === 'municiones') && history.length > 0);
   const currentNavId = ({
     home: 'home', catalog: 'catalog', compare: 'compare',
-    legal: 'legal', 'legal-req': 'legal', entrevista: 'legal',
-    'legal-federal': 'legal', 'legal-estatal': 'legal', 'legal-permisos': 'legal',
+    legal: 'legal', entrevista: 'legal',
+    'legal-federal': 'legal', 'legal-estatal': 'legal', 'legal-tramites': 'legal',
+    'legal-documentos': 'legal',
     menu: 'menu', about: 'about', faq: 'faq',
     calibres: 'menu', calibre: 'menu', campos: 'menu', experiencias: 'menu', traumaticas: 'menu',
     soporte: 'menu',
@@ -514,14 +522,14 @@ function App() {
       onBuscar={setBuscarLado} />;
   } else if (screen === 'legal') {
     content = <window.LegalidadHub onNav={navigate} />;
-  } else if (screen === 'legal-req') {
-    content = <window.LegalidadRequisitos onNav={navigate} />;
   } else if (screen === 'legal-federal') {
     content = <window.LegalidadFederal onNav={navigate} />;
   } else if (screen === 'legal-estatal') {
     content = <window.LegalidadEstatal onNav={navigate} />;
-  } else if (screen === 'legal-permisos') {
-    content = <window.LegalidadPermisos onNav={navigate} />;
+  } else if (screen === 'legal-tramites') {
+    content = <window.LegalidadTramites onNav={navigate} />;
+  } else if (screen === 'legal-documentos') {
+    content = <window.LegalidadDocumentos onNav={navigate} />;
   } else if (screen === 'entrevista') {
     content = <window.EntrevistaScreen onNav={navigate} />;
   } else if (screen === 'about') {

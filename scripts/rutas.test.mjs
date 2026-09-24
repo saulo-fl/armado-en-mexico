@@ -121,6 +121,22 @@ test('la restauración del comparador pasa las armas en el parámetro de las arm
   }
 });
 
+// Requisitos y Permisos se fundieron en Trámites (22-sep-2026). Las dos direcciones viejas
+// estaban en el sitemap y en enlaces ajenos: el servidor las redirige con 301 (reglas
+// literales, nunca un comodín: AGENTS.md) y la app las resuelve por si llegan por dentro.
+test('las rutas viejas de Requisitos y Permisos llevan a Trámites, en el servidor y en la app', () => {
+  const src = readFileSync(new URL('../src/app.jsx', import.meta.url), 'utf8');
+  for (const vieja of ['legalidad/requisitos', 'legalidad/permisos']) {
+    assert.match(src, new RegExp("PATH_TO_SCREEN\\['" + vieja + "'\\] = 'legal-tramites'"), vieja + ' no se resuelve a Trámites en la app');
+  }
+  const redirects = readFileSync(new URL('../public/_redirects', import.meta.url), 'utf8');
+  const reglas = redirects.split('\n').filter((l) => l.trim() && !l.startsWith('#'));
+  assert.deepEqual(reglas.map((l) => l.split(/\s+/)), [
+    ['/legalidad/requisitos', '/legalidad/tramites', '301'],
+    ['/legalidad/permisos', '/legalidad/tramites', '301'],
+  ], 'solo las dos reglas literales; un comodín se comería sitemap.xml y app.js');
+});
+
 // Las rutas de Legalidad son de DOS segmentos. La búsqueda de PATH_TO_SCREEN exige
 // `seg.length === 1`, así que sin una rama propia una recarga directa sobre
 // /legalidad/requisitos se caía al fallback de accesorios y de ahí a la portada: la URL
@@ -147,7 +163,7 @@ test('las ramas de Legalidad se parsean, y una desconocida cae en el hub', () =>
 // navegador. Aquí se cuentan los cinco de una vez.
 test('cada pantalla nueva está dada de alta en los cinco sitios', () => {
   for (const [pantalla, ruta, titulo] of [
-    ['legal-req', 'legalidad/requisitos', 'Requisitos'],
+    ['legal-tramites', 'legalidad/tramites', 'Trámites'],
     ['entrevista', 'legalidad/puedo-comprar', '¿Puedo comprar un arma?'],
   ]) {
     assert.ok(src.includes("'" + ruta + "'"), pantalla + ': falta su ruta en SCREEN_TO_PATH');

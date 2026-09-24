@@ -1394,7 +1394,7 @@
    contiguos forman una mesa continua. Es lo que deja poner cuatro en fila en
    escritorio y dos por fila en móvil sin que se note el corte. */
 .amx-v2 {
-  --mesa-madera: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='140' preserveAspectRatio='none'> <rect width='600' height='112' fill='%23C09A72'/> <rect y='0' width='600' height='38' fill='%23C6A179'/> <rect y='74' width='600' height='38' fill='%23B8916A'/> <g stroke='%2394714E' stroke-width='1.6' fill='none' opacity='.75'><path d='M0 38H600'/><path d='M0 74H600'/></g> <g stroke='%23A8875F' fill='none' opacity='.4'> <path d='M0 14C120 10 200 19 300 14S520 9 600 14' stroke-width='1.3'/> <path d='M0 27C140 31 240 22 360 28S520 32 600 27' stroke-width='1'/> <path d='M0 52C110 47 210 58 320 52S500 46 600 52' stroke-width='1.4'/> <path d='M0 63C160 67 260 58 380 64S520 68 600 63' stroke-width='1'/> <path d='M0 88C130 83 230 94 340 88S510 82 600 88' stroke-width='1.3'/> <path d='M0 101C150 105 250 96 370 102S530 106 600 101' stroke-width='1'/> </g> <rect y='106' width='600' height='6' fill='%237E6042' opacity='.35'/> <rect y='112' width='600' height='28' fill='%237E6042'/> <rect y='112' width='600' height='2' fill='%2394714E' opacity='.6'/> </svg>");
+  --mesa-madera: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='140' preserveAspectRatio='none'> <rect width='600' height='112' fill='%23C09A72'/> <rect y='74' width='600' height='38' fill='%23B8916A'/> <g stroke='%2394714E' stroke-width='1.6' fill='none' opacity='.75'><path d='M0 38H600'/><path d='M0 74H600'/></g> <g stroke='%23A8875F' fill='none' opacity='.4'> <path d='M0 14C120 10 200 19 300 14S520 9 600 14' stroke-width='1.3'/> <path d='M0 27C140 31 240 22 360 28S520 32 600 27' stroke-width='1'/> <path d='M0 52C110 47 210 58 320 52S500 46 600 52' stroke-width='1.4'/> <path d='M0 63C160 67 260 58 380 64S520 68 600 63' stroke-width='1'/> <path d='M0 88C130 83 230 94 340 88S510 82 600 88' stroke-width='1.3'/> <path d='M0 101C150 105 250 96 370 102S530 106 600 101' stroke-width='1'/> </g> <rect y='106' width='600' height='6' fill='%237E6042' opacity='.35'/> <rect y='112' width='600' height='28' fill='%237E6042'/> <rect y='112' width='600' height='2' fill='%2394714E' opacity='.6'/> </svg>");
   --palo-veta: linear-gradient(90deg, #8A6B49 0%, var(--palo) 32%, #CDAA82 52%, var(--palo) 74%, #8A6B49 100%);
 }
 
@@ -6109,6 +6109,12 @@
   color: var(--ficha-tinta);
   margin: 8px 0 0;
 }
+/* El clip va a la ESQUINA, no al centro (hilo 9 de Penpot, 22-sep-2026): en su
+   sitio de origen —la copia de la ficha, donde pisa el canto de una foto— el
+   22 % cae en papel vacío; aquí caía justo sobre el rótulo AVISO DE
+   TRANSPARENCIA y se lo comía. Mismo anclaje que el aviso de la FAQ, que ya
+   estaba resuelto así. */
+.amx-v2 .amx-aviso .amx-copia-clip { top: -18px; right: 34px; left: auto; }
 
 /* ── LEGALIDAD, REQUISITOS Y LA ENTREVISTA ──────────────────────────── */
 
@@ -6182,38 +6188,213 @@
   color: var(--carton-tinta);
   margin-top: 4px;
 }
-.amx-v2 .amx-leg-huecos {
-  background: var(--oficio-2);
-  padding: 14px;
+/* Legalidad v2 (22-sep-2026). El bloque «Qué falta por verificar» se retiró del hub:
+   los huecos del corpus son de desarrollo (check-legal.mjs), no del público. En su
+   lugar va la llamada a la entrevista, arriba, porque es lo que resuelve la duda. */
+.amx-v2 .amx-leg-cta {
+  background: var(--oficio);
+  padding: 16px;
   margin: 22px 0;
   color: var(--ficha-tinta);
+  box-shadow: var(--sombra);
 }
-.amx-v2 .amx-leg-huecos p {
+.amx-v2 .amx-leg-cta h2 {
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .045em;
+  line-height: 1.1;
+  color: var(--ficha-tinta);
+  margin: 0 0 8px;
+}
+.amx-v2 .amx-leg-cta p {
   font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.6;
-  color: var(--ficha-tinta);
-  margin: 8px 0 0;
-}
-.amx-v2 .amx-leg-huecos h2 {
-  font-family: var(--mono);
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--manila-tinta);
-  margin: 0;
-}
-.amx-v2 .amx-leg-huecos ul {
-  padding-left: 18px;
-  margin-top: 10px;
-}
-.amx-v2 .amx-leg-huecos li {
-  font-family: var(--mono);
-  font-size: 13px;
   line-height: 1.55;
   color: var(--oficio-tinta-2);
-  margin-bottom: 8px;
+  margin: 0 0 14px;
 }
+.amx-v2 .amx-leg-cta .amx-boton-tinta { width: 100%; }
+/* El anillo de foco global va en --rojo-txt, variable de tema: sobre el oficio, en
+   oscuro, no llega a 3:1. Sobre papel, el anillo es de la tinta del papel. */
+.amx-v2 .amx-leg-cta :focus-visible { outline-color: var(--manila-tinta); }
+/* UNA SOLA PÁGINA (Saulo, 22-sep-2026): las cuatro secciones viven en el cajón de
+   folders de la FAQ, plegadas. El folder lleva, bajo el título, una línea de qué hay
+   dentro; el signo +/− lo pinta .amx-faq-cab::after y tiene que quedarse en la
+   primera línea, así que la descripción va en `order` posterior. */
+.amx-v2 .amx-leg-cajon { margin-top: var(--e5); }
+.amx-v2 .amx-leg-folder .amx-faq-cab { flex-wrap: wrap; row-gap: 2px; }
+.amx-v2 .amx-leg-folder .amx-faq-cab::after { order: 2; }
+.amx-v2 .amx-leg-folder-desc {
+  order: 3;
+  flex-basis: 100%;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--manila-tinta-2);
+}
+/* Dentro del folder, el cuerpo de la sección no hereda el ancho ni el margen de párrafo
+   del oficio, y la intro y la advertencia —que fuera van sobre el lienzo con tinta de
+   tema— aquí van sobre papel: tinta de papelería, igual en los dos temas. */
+.amx-v2 .amx-leg-folder .amx-oficio-texto { max-width: none; margin-bottom: 0; }
+.amx-v2 .amx-leg-cuerpo > .amx-leg-intro { margin-top: 0; }
+.amx-v2 .amx-leg-folder .amx-leg-intro { color: var(--ficha-tinta); }          /* 16.65:1 sobre el oficio */
+.amx-v2 .amx-leg-folder .amx-leg-advertencia { color: var(--oficio-tinta-2); } /* 7.47:1 */
+/* Los papeles que antes iban sobre el lienzo ahora van sobre el oficio: un punto más
+   gastados para que se vean como hojas encima, no como el mismo papel. */
+.amx-v2 .amx-leg-folder .amx-leg-ficha,
+.amx-v2 .amx-leg-folder .amx-leg-peldano,
+.amx-v2 .amx-leg-folder .amx-leg-estado { background: var(--oficio-2); }
+/* Lo federal, por pregunta ciudadana: cada pregunta es un desplegable; el rótulo
+   corto y la pregunta entera van en el <summary>, uno sobre otro. */
+.amx-v2 .amx-leg-grupo { margin-top: 26px; }
+.amx-v2 .amx-leg-plegable-corto { flex: 1; min-width: 0; }
+.amx-v2 .amx-leg-plegable-pregunta {
+  order: 3;
+  flex-basis: 100%;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-plegable > summary::after { order: 2; }
+.amx-v2 .amx-leg-plegable > .amx-leg-escalera,
+.amx-v2 .amx-leg-plegable > .amx-leg-ficha,
+.amx-v2 .amx-leg-plegable > .amx-leg-documentos,
+.amx-v2 .amx-leg-plegable > .amx-leg-advertencia { margin-top: 10px; }
+.amx-v2 .amx-leg-tramite .amx-leg-ficha { margin-top: 10px; }
+.amx-v2 .amx-leg-checklist-rotulo {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  margin: 14px 0 6px;
+}
+.amx-v2 .amx-leg-pregunta {
+  font-family: var(--sans);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--tinta);
+  margin: -8px 0 10px;
+}
+.amx-v2 .amx-leg-peldano-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--kardex-imp);
+  margin: 0 0 4px;
+}
+/* Trámites: paso, importe con su vigencia y la checklist plegada. */
+.amx-v2 .amx-leg-paso {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta-2);
+  margin: 0 0 6px;
+}
+.amx-v2 .amx-leg-paso .amx-leg-homoclave { margin: 0; color: var(--kardex-imp); }
+.amx-v2 .amx-leg-costo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 12px 0 0;
+}
+.amx-v2 .amx-leg-importe {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-concepto {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--oficio-tinta-2);
+}
+/* La vigencia es un dato, no una alarma: tinta secundaria del papel, no el rojo del sello. */
+.amx-v2 .amx-leg-vigencia-cuota {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-leg-solo-si {
+  display: inline-block;
+  margin-left: 6px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--kardex-imp);
+}
+/* Los plegables de Legalidad (preguntas, trámites, documentos y artículos) pintan su
+   signo como .amx-plegable: con display:flex el navegador quita el triángulo nativo y
+   no se sabría que se abren. Siempre con `>`: un plegable lleva otros dentro (los
+   artículos de cada norma), y con el combinador descendiente el `[open]` del padre
+   les pondría «−» a los hijos cerrados. */
+.amx-v2 .amx-leg-plegable { margin-top: 12px; }
+.amx-v2 .amx-leg-plegable > summary,
+.amx-v2 .amx-leg-arts > summary {
+  list-style: none;
+  justify-content: space-between;
+  column-gap: 12px;
+  row-gap: 2px;
+  flex-wrap: wrap;
+}
+.amx-v2 .amx-leg-plegable > summary::-webkit-details-marker,
+.amx-v2 .amx-leg-arts > summary::-webkit-details-marker { display: none; }
+.amx-v2 .amx-leg-plegable > summary::after,
+.amx-v2 .amx-leg-arts > summary::after { content: '+'; font-size: 18px; line-height: 1; }
+.amx-v2 .amx-leg-plegable[open] > summary::after,
+.amx-v2 .amx-leg-arts[open] > summary::after { content: '−'; }
+.amx-v2 .amx-leg-plegable > summary {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--manila-tinta);
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.amx-v2 .amx-leg-plegable > summary:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
+}
+/* Estatal: las entidades sin portal verificado se quedan en el selector, en gris. El
+   <select> va sobre papel (--ficha), así que la tinta también es de papelería. */
+.amx-v2 .amx-leg-opcion--sin-portal { color: var(--ficha-tinta-2); }
+.amx-v2 .amx-leg-sin-portal {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ficha-tinta-2);
+}
+/* En el dictamen, los avisos son notas de errata (hilo 8): sin viñeta, con el signo.
+   El dictamen vive sobre el oficio, así que el signo lleva rojo de papelería, no el
+   --alerta del tema (en oscuro no llegaría a 3:1 sobre papel claro). */
+.amx-v2 .amx-ent-avisos { list-style: none; padding-left: 0; }
+.amx-v2 .amx-ent-errata { color: var(--ficha-tinta); }
+.amx-v2 .amx-ent-errata .amx-errata-signo { color: var(--sello-restr); }
+/* El plegable que guarda esas erratas en el dictamen: es el mismo `.amx-leg-plegable`
+   de Legalidad —mismo papel, mismo +/−—, con el signo delante del rótulo para que se
+   note que ahí dentro hay una advertencia y no una nota de formato cualquiera. */
+.amx-v2 .amx-ent-notas { text-align: left; margin-bottom: 16px; }
+.amx-v2 .amx-ent-notas-rotulo { display: inline-flex; align-items: center; gap: 8px; }
+.amx-v2 .amx-ent-notas-rotulo .amx-errata-signo { color: var(--sello-restr); }
 .amx-v2 .amx-leg-hoja {
   background: var(--oficio);
   padding: 16px;
@@ -6227,10 +6408,35 @@
   color: var(--ficha-tinta);
   margin-top: 0;
 }
-.amx-v2 .amx-leg-dependencia {
+.amx-v2 .amx-leg-documentos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.amx-v2 .amx-leg-documentos li {
+  border-top: 1px solid var(--carton-filo);
+  padding: 12px 0;
+  line-height: 1.5;
+}
+.amx-v2 .amx-leg-documentos strong,
+.amx-v2 .amx-leg-documentos span {
+  display: block;
+}
+.amx-v2 .amx-leg-documentos span,
+.amx-v2 .amx-leg-documentos p {
   font-family: var(--mono);
   font-size: 13px;
   color: var(--ficha-tinta-2);
+}
+.amx-v2 .amx-leg-documentos a {
+  display: inline-block;
+  margin: 6px 16px 0 0;
+  color: var(--ficha-tinta);
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-leg-documentos a:focus-visible {
+  outline: 2px solid var(--ficha-tinta);
+  outline-offset: 2px;
 }
 .amx-v2 .amx-leg-habilita {
   font-family: var(--sans);
@@ -6507,16 +6713,29 @@
   color: var(--ficha-tinta);
   margin-bottom: 6px;
 }
+.amx-v2 .amx-ent-avisos li a {
+  color: var(--ficha-tinta);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.amx-v2 .amx-ent-avisos li a:hover {
+  color: var(--ficha-acento);
+}
 
 /* Bloque de portada */
 .amx-v2 .amx-hent {
-  background: var(--oficio);
-  padding: 18px;
+  position: relative;
+  background: linear-gradient(180deg, #E4DDCD 0%, var(--vitrina-fondo) 22%, #E9E3D6 100%);
+  border: 10px solid var(--mesa-canto);
+  border-bottom-width: 14px;
+  border-radius: 6px;
+  box-shadow: inset 0 10px 18px -12px rgba(23, 27, 25, .45), var(--sombra);
+  padding: 14px 12px 10px;
   margin: 16px auto;
   max-width: 900px;
   min-height: 260px;
   box-sizing: border-box;
-  color: var(--ficha-tinta);
+  color: var(--manila-tinta);
 }
 .amx-v2 .amx-hent-tit {
   font-family: var(--sans);
@@ -6686,10 +6905,18 @@
 }
 .amx-v2 button.amx-ent-opcion:focus-visible,
 .amx-v2 .amx-ent-regresar:focus-visible,
-.amx-v2 .amx-ent-guardar:focus-visible,
-.amx-v2 .amx-ent-dictamen:focus-visible {
+.amx-v2 .amx-ent-guardar:focus-visible {
   outline: 3px solid var(--manila-tinta);
   outline-offset: -3px;
+}
+/* EL DICTAMEN NO LLEVA ANILLO DE FOCO (hilo 12 de Penpot, 22-sep-2026). No es un
+   control: es el destino al que se manda el foco para que el lector de pantalla
+   lea el resultado, y a él no se llega con Tab (`tabindex="-1"`). Con el anillo
+   puesto, los 3px con `outline-offset: -3px` se pintaban POR DENTRO y cruzaban
+   el texto del dictamen —eso era el «margen negro» que corta las líneas—. */
+.amx-v2 .amx-ent-dictamen:focus,
+.amx-v2 .amx-ent-dictamen:focus-visible {
+  outline: none;
 }
 .amx-v2 .amx-ent-pregunta--entra {
   animation: amx-ent-pregunta-entra 220ms ease-out both;
@@ -6715,11 +6942,10 @@
   position: relative;
   /* La madera sangra a los lados, pero NO contra la pregunta: va encima de
      ella y el texto pegado al borde oscuro se lee mal. */
-  margin: 0 -16px 22px;
+  margin: 0 -12px 22px;
   padding: 12px 16px 16px;
   overflow: hidden;
   background: var(--mesa-madera) 0 0 / auto 100% repeat-x;
-  border-top: 6px solid var(--oficio-2);
   box-shadow: inset 0 8px 12px -8px rgba(23, 27, 25, .5);
 }
 /* La superficie de la mesa a escala, 358 × 280. Los papeles (78 × 100) se
@@ -7017,28 +7243,12 @@
   border-left: 3px solid var(--carton-filo);
   color: var(--ficha-tinta);
 }
-.amx-v2 .amx-leg-peldano h2 {
+.amx-v2 .amx-leg-peldano h3 {
   font-family: var(--sans);
   font-size: 17px;
   font-weight: 700;
   color: var(--ficha-tinta);
   margin: 0;
-}
-.amx-v2 .amx-leg-peldano-tit {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--ficha-tinta-2);
-  margin: 2px 0 8px;
-}
-.amx-v2 .amx-leg-hueco {
-  font-family: var(--mono);
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--oficio-tinta-2);
-  background: var(--oficio-2);
-  padding: 10px 12px;
-  margin-top: 8px;
-  border-left: 3px solid var(--sello-restr);
 }
 .amx-v2 .amx-leg-arts {
   margin-top: 10px;
@@ -7127,7 +7337,8 @@
   border-left: 3px solid var(--sello-civil);
   color: var(--ficha-tinta);
 }
-.amx-v2 .amx-leg-contraste h2 {
+.amx-v2 .amx-leg-contraste h2,
+.amx-v2 .amx-leg-contraste h3 {
   font-family: var(--sans);
   font-size: 18px;
   font-weight: 700;
@@ -7187,85 +7398,139 @@
 }
 
 /* ── MAPA DEL TRÁMITE ─────────────────────────────────────────────────────────
-   El SVG que genera Archify llega sin un solo color ni fuente literal: todo va
-   por estas 34 clases. Eso es lo que permite vestirlo con la papelería del
-   sitio y que siga al tema, en vez de traer su propia paleta.
+   Seis pasos y dos salidas, en dos orientaciones: la ancha la compila Archify y
+   la alta se dibuja a mano (Archify solo compone en horizontal). Las dos traen
+   el mismo marcado —`#node-<paso>`, `[data-edge-id]`, `.nodo-caja`— así que
+   todo lo de aquí abajo sirve para las dos.
 
+   Ni un color literal llega desde el SVG: cada pieza es un papel del archivero.
    Como todo lo que vive sobre papel (§5.5), aquí NO entra ninguna variable de
-   tema: solo tokens de papelería.
+   tema: solo tokens de papelería, iguales en claro y en oscuro.
    ────────────────────────────────────────────────────────────────────────── */
 .amx-v2 .amx-mapa {
   margin: 22px 0;
   padding: 0;
-  overflow-x: auto;          /* el diagrama es ancho; el resto de la página no scrollea */
+}
+.amx-v2 .amx-mapa-caja {
+  overflow-x: auto;          /* solo la versión ancha desborda; el resto no scrollea */
 }
 .amx-v2 .amx-mapa-svg {
   display: block;
   width: 100%;
-  min-width: 720px;          /* por debajo de esto los rótulos dejan de leerse */
   height: auto;
+}
+.amx-v2 .amx-mapa-ancho {
+  min-width: 680px;          /* por debajo de esto los rótulos dejan de leerse */
 }
 .amx-v2 .amx-mapa-pie {
   font-family: var(--mono);
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--tinta-2);
-  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ficha-tinta-2);
 }
 
-/* Superficies: el lienzo es papel, los carriles el papel alterno, las cajas
-   fichas de fichero. La máscara tapa la línea que pasa bajo una etiqueta, así
-   que tiene que ser del mismo color que el papel. */
-.amx-v2 .amx-mapa .c-grid           { fill: none; stroke: var(--carton-filo); }
-.amx-v2 .amx-mapa .c-lane           { fill: var(--oficio-2); }
-.amx-v2 .amx-mapa .c-mask           { fill: var(--oficio); }
-.amx-v2 .amx-mapa .c-frontend,
-.amx-v2 .amx-mapa .c-cloud          { fill: var(--ficha); }
-.amx-v2 .amx-mapa .c-backend,
-.amx-v2 .amx-mapa .c-messagebus     { fill: var(--oficio-2); }
-.amx-v2 .amx-mapa .c-database       { fill: var(--carton-alto); }
-.amx-v2 .amx-mapa .c-security,
-.amx-v2 .amx-mapa .c-security-group { fill: var(--ficha); }
+/* El papel de fondo y los dos recuadros que agrupan */
+.amx-v2 .amx-mapa .c-grid           { fill: none; stroke: var(--carton-filo); opacity: .35; }
+.amx-v2 .amx-mapa .c-lane           { fill: var(--oficio); stroke: var(--carton-filo); opacity: .75; }
+.amx-v2 .amx-mapa .c-security-group { fill: none; stroke: var(--sello-restr); opacity: .45; }
+.amx-v2 .amx-mapa .c-mask           { fill: var(--oficio); stroke: none; }
 
-/* Trazos: el filo del cartón para todo, y el sello rojo donde la norma cierra
-   una puerta —los antecedentes penales y lo que no autoriza el permiso—. */
-.amx-v2 .amx-mapa .s-frontend,
-.amx-v2 .amx-mapa .s-backend,
-.amx-v2 .amx-mapa .s-cloud,
-.amx-v2 .amx-mapa .s-database,
-.amx-v2 .amx-mapa .s-messagebus     { stroke: var(--carton-filo); }
-.amx-v2 .amx-mapa .s-security       { stroke: var(--sello-restr); }
+/* Cada paso es un papel distinto: carpeta, oficio, etiqueta, talón, kardex */
+.amx-v2 .amx-mapa .nodo-caja        { stroke-width: 1.4; }
+.amx-v2 .amx-mapa #node-requisitos .nodo-caja { fill: var(--carton-alto); stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa #node-solicitud  .nodo-caja { fill: var(--oficio);      stroke: var(--copia-filo); }
+.amx-v2 .amx-mapa #node-espera     .nodo-caja { fill: var(--etiqueta);    stroke: var(--carton-filo); }
+.amx-v2 .amx-mapa #node-resolucion .nodo-caja { fill: var(--talon);       stroke: var(--talon-filo); }
+.amx-v2 .amx-mapa #node-compra     .nodo-caja { fill: var(--kardex);      stroke: var(--kardex-linea); }
+.amx-v2 .amx-mapa #node-sin        .nodo-caja { fill: var(--talon);       stroke: var(--sello-restr); }
 
-/* Tinta. */
-.amx-v2 .amx-mapa .t-primary,
-.amx-v2 .amx-mapa .t-frontend,
-.amx-v2 .amx-mapa .t-backend,
-.amx-v2 .amx-mapa .t-database,
-.amx-v2 .amx-mapa .t-messagebus     { fill: var(--ficha-tinta); }
+/* Ningún papel queda perfectamente recto sobre la mesa. Más de medio grado y
+   las flechas se despegan de las cajas. */
+.amx-v2 .amx-mapa g[id^="node-"] { transform-box: fill-box; transform-origin: center; }
+.amx-v2 .amx-mapa #node-requisitos { transform: rotate(-.3deg); }
+.amx-v2 .amx-mapa #node-solicitud  { transform: rotate(.35deg); }
+.amx-v2 .amx-mapa #node-espera     { transform: rotate(-.4deg); }
+.amx-v2 .amx-mapa #node-resolucion { transform: rotate(.25deg); }
+.amx-v2 .amx-mapa #node-compra     { transform: rotate(-.35deg); }
+.amx-v2 .amx-mapa #node-sin        { transform: rotate(.4deg); }
+
+/* Tintas: lo mecanografiado, lo anotado y los dos sellos */
+.amx-v2 .amx-mapa .t-primary        { fill: var(--ficha-tinta); }
 .amx-v2 .amx-mapa .t-dim,
 .amx-v2 .amx-mapa .t-muted          { fill: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .t-backend        { fill: var(--sello-civil); }
 .amx-v2 .amx-mapa .t-security       { fill: var(--sello-restr); }
 
-/* Aristas: el camino principal en verde de sello, lo que corta en rojo, y lo
-   que es «otro trámite» punteado y en tinta secundaria. */
-/* Las aristas son <path> y <line>. El `fill: none` NO es decorativo: sin el, el
-   navegador rellena la curva de la arista con negro y se come el diagrama. */
+/* Flechas. El `fill: none` NO es decorativo: sin él el navegador rellena la
+   curva de negro y se come el diagrama. */
 .amx-v2 .amx-mapa .a-default,
 .amx-v2 .amx-mapa .a-emphasis,
 .amx-v2 .amx-mapa .a-security,
-.amx-v2 .amx-mapa .a-dashed,
-.amx-v2 .amx-mapa .semantic-sigil   { fill: none; }
-.amx-v2 .amx-mapa .a-default        { stroke: var(--carton-filo); }
-.amx-v2 .amx-mapa .a-emphasis       { stroke: var(--sello-civil); }
-.amx-v2 .amx-mapa .a-security       { stroke: var(--sello-restr); }
-.amx-v2 .amx-mapa .a-dashed         { stroke: var(--ficha-tinta-2); }
-.amx-v2 .amx-mapa .m-default        { fill: var(--carton-filo); }
+.amx-v2 .amx-mapa .semantic-sigil,
+.amx-v2 .amx-mapa .amx-mapa-trazo   { fill: none; }
+.amx-v2 .amx-mapa .a-default        { stroke: var(--ficha-tinta-2); opacity: .85; }
+.amx-v2 .amx-mapa .a-emphasis       { stroke: var(--sello-civil); opacity: .92; }
+.amx-v2 .amx-mapa .a-security       { stroke: var(--sello-restr); opacity: .75; stroke-dasharray: 5 4; }
+.amx-v2 .amx-mapa .m-default        { fill: var(--ficha-tinta-2); }
 .amx-v2 .amx-mapa .m-emphasis       { fill: var(--sello-civil); }
 .amx-v2 .amx-mapa .m-security       { fill: var(--sello-restr); }
-.amx-v2 .amx-mapa .m-dashed         { fill: var(--ficha-tinta-2); }
+.amx-v2 .amx-mapa .semantic-sigil   { stroke: var(--ficha-tinta-2); opacity: .5; }
+.amx-v2 .amx-mapa .sigil-fill       { fill: var(--ficha-tinta-2); stroke: none; }
 
-.amx-v2 .amx-mapa .semantic-sigil   { stroke: var(--ficha-tinta-2); }
-.amx-v2 .amx-mapa .sigil-fill       { fill: var(--ficha-tinta-2); }
+/* ── El recorrido ─────────────────────────────────────────────────────────
+   La cámara es un grupo que se escala y traslada; el fondo se queda fuera de
+   ella y por eso no viaja. Lo que aún no se ha recorrido espera en segundo
+   plano, no desaparece: el diagrama se lee entero sin tocar nada. */
+.amx-v2 .amx-mapa [data-camara] {
+  transition: transform 780ms cubic-bezier(.33, 0, .2, 1);
+  transform-origin: 0 0;
+}
+.amx-v2 .amx-mapa [data-estado]          { transition: opacity .42s ease; }
+.amx-v2 .amx-mapa [data-estado].apagado  { opacity: .42; }
+.amx-v2 .amx-mapa [data-estado].encendido{ opacity: 1; }
+.amx-v2 .amx-mapa [data-estado].oculto   { opacity: 0; }
+.amx-v2 .amx-mapa .amx-mapa-trazo {
+  stroke-linecap: round;
+  opacity: 0;
+  pointer-events: none;
+}
+.amx-v2 .amx-mapa .amx-mapa-trazo.corriendo { opacity: 1; }
+
+/* Los botones SÍ / NO, dentro de la carpeta de la pregunta */
+.amx-v2 .amx-mapa .amx-mapa-boton { cursor: pointer; }
+.amx-v2 .amx-mapa .amx-mapa-cuerpo { stroke-width: 1.5; transition: fill .2s ease; }
+.amx-v2 .amx-mapa .amx-mapa-boton text {
+  font-family: var(--mono);
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+.amx-v2 .amx-mapa .amx-mapa-si .amx-mapa-cuerpo { fill: var(--kardex); stroke: var(--sello-civil); }
+.amx-v2 .amx-mapa .amx-mapa-si text             { fill: var(--sello-civil); }
+.amx-v2 .amx-mapa .amx-mapa-no .amx-mapa-cuerpo { fill: var(--talon); stroke: var(--sello-restr); }
+.amx-v2 .amx-mapa .amx-mapa-no text             { fill: var(--sello-restr); }
+.amx-v2 .amx-mapa .amx-mapa-boton:hover .amx-mapa-cuerpo { fill: var(--oficio); }
+.amx-v2 .amx-mapa .amx-mapa-boton:focus-visible { outline: none; }
+.amx-v2 .amx-mapa .amx-mapa-boton:focus-visible .amx-mapa-cuerpo { stroke-width: 3; }
+.amx-v2 .amx-mapa .amx-mapa-boton[data-activo="true"] .amx-mapa-cuerpo { stroke-width: 2.6; }
+
+/* El brillo que da la vuelta al SÍ hasta que alguien lo usa. Es una llamada de
+   atención, no información: al primer clic se apaga y no vuelve. */
+.amx-v2 .amx-mapa .amx-mapa-brillo {
+  fill: none;
+  stroke: var(--loteria-lamina);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.amx-v2 .amx-mapa .amx-mapa-brillo.quieto { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .amx-v2 .amx-mapa [data-camara],
+  .amx-v2 .amx-mapa [data-estado] { transition: none; }
+  .amx-v2 .amx-mapa .amx-mapa-brillo { display: none; }
+}
 
 .amx-v2 .amx-ent-reiniciar {
   min-height: 44px;
