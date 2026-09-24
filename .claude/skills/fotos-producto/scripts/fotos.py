@@ -31,6 +31,7 @@ pelea. Si algún día hay wheel oficial para Blackwell, basta con cambiar los
 providers de la sesión de rembg.
 """
 import argparse, json, re, shutil, subprocess, sys, time, unicodedata
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
@@ -58,6 +59,31 @@ ANCHO = 1200
 CALIDAD = 80
 MARGEN = 0.02           # del lado mayor, alrededor del bbox del alfa
 
+
+def sin_foto_propia(ruta):
+    """La silueta NO es una foto del arma: es el placeholder de su tipo.
+
+    Desde el 8-sep-2026 `data.js` ya no deja `img` vacio — al cargar le pone
+    `imagenes/silueta-<tipo>.webp` a cada arma sin foto (data.js:1166), y
+    `catalogo()` lo lee con node, asi que aqui llega la silueta, no "".
+    Tratarla como foto rompia tres cosas a la vez, y las tres en silencio:
+
+      - `mejor_origen()` la aceptaba como origen. Las siluetas miden EXACTAMENTE
+        900 px de lado mayor, asi que `MIN_LADO` no las para (900 < 900 es False)
+        y el pipeline recortaba la silueta creyendo que era el arma.
+      - `aplicar()` veia una ruta que empieza por `imagenes/` y tomaba la rama de
+        sustitucion: `shutil.copy2` PISABA `public/imagenes/silueta-pistola.webp`,
+        el placeholder que comparten las 22 pistolas sin foto, y le ponia `?v=2`
+        a una sola arma.
+      - `verificar()` las contaba como "con alfa" (la silueta tiene alfa), asi
+        que decia 252 de 252 y tapaba las 122 armas sin foto.
+
+    Es el mismo predicado que `armaSinFoto` (ui.jsx) y `fixArmaImg` (store.js).
+    El aviso de data.js:1156 dice "los tres sitios"; con este, son cuatro.
+    """
+    ruta = str(ruta or "")
+    return not ruta.startswith("imagenes/") or "/silueta-" in ruta
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Catálogo: data.js es la ÚNICA fuente de verdad del tipo de arma. El correlativo
 # NNN del nombre de archivo NO es contiguo por tipo (042-060 son escopetas).
@@ -66,7 +92,8 @@ MARGEN = 0.02           # del lado mayor, alrededor del bbox del alfa
 def catalogo():
     js = ("global.window=global;require('./data.js');"
           "console.log(JSON.stringify((window.DB||[]).map(a=>"
-          "({id:a.id,nombre:a.nombre,marca:a.marca,tipo:a.tipo,calibre:a.calibre,img:a.img}))))")
+          "({id:a.id,nombre:a.nombre,marca:a.marca,tipo:a.tipo,calibre:a.calibre,"
+          "img:a.img,dcamRef:a.dcamRef}))))")
     # cwd=DATOS: data.js ya no vive en la raiz. encoding: ver catalogo() de cajas.py.
     out = subprocess.run(["node", "-e", js], cwd=DATOS, capture_output=True,
                          text=True, encoding="utf-8", check=True)
@@ -114,25 +141,37 @@ def _alfa_de_fabrica(alfa):
     return marco_libre > 0.90 and 0.02 < cuerpo < 0.92
 
 
+def _candidatos(arma):
+    """Los origenes posibles de un arma, con bandera de si son EXTERNOS al repo.
+
+    `externo` separa "hay una foto de fuera que puedo recortar" de "solo tengo el
+    WebP que ya sirvo": recortar el segundo es recomprimir un WebP, que es el
+    ultimo recurso y no el primero. `pendientes()` decide con esa bandera.
+    """
+    # Lo descargado de fuera, por id de arma
+    cands = [(p, True) for p in sorted(FUENTE.glob(f"{arma['id']}.*"))
+                              + sorted(FUENTE.glob(f"{arma['id']}_*"))]
+    ruta_repo = str(arma.get("img") or "")
+    if not sin_foto_propia(ruta_repo):
+        p = PUBLICO / ruta_repo.split("?")[0]
+        if p.exists():
+            cands.append((p, False))          # el WebP que ya se sirve
+        # el original sin comprimir, por su correlativo NNN
+        nnn = Path(ruta_repo).stem.split("_")[0]
+        cands += [(q, True) for q in sorted(ORIGINALES.glob(f"{nnn}_*"))]
+    return cands
+
+
 def mejor_origen(arma):
     """La copia de mayor resolución entre lo conseguido de fuera y lo que ya hay.
 
-    Las armas 112-192 no tienen foto ninguna: `img` viene vacio y `data.js` les
-    pone un placeholder SVG al cargar. Para esas, `fotos-fuente/<id>.*` es el
-    UNICO origen posible, asi que se mira siempre, tenga o no ruta en el repo.
+    Las armas sin foto propia no tienen origen en el repo — `data.js` les asigna
+    la silueta de su tipo al cargar, y `sin_foto_propia()` la descarta. Para esas,
+    `fotos-fuente/<id>.*` es el UNICO origen posible, asi que se mira siempre,
+    tenga o no ruta en el repo.
     """
-    # Lo descargado de fuera, por id de arma
-    cands = sorted(FUENTE.glob(f"{arma['id']}.*")) + sorted(FUENTE.glob(f"{arma['id']}_*"))
-    ruta_repo = str(arma.get("img") or "")
-    if ruta_repo.startswith("imagenes/"):
-        p = PUBLICO / ruta_repo.split("?")[0]
-        if p.exists():
-            cands.append(p)
-        # el original sin comprimir, por su correlativo NNN
-        nnn = Path(ruta_repo).stem.split("_")[0]
-        cands += sorted(ORIGINALES.glob(f"{nnn}_*"))
     elegida = elegida_px = None
-    for p in cands:
+    for p, _externo in _candidatos(arma):
         try:
             with Image.open(p) as im:
                 px = max(im.size)
@@ -367,44 +406,54 @@ def metricas(rgb_orig, alfa_orig, rgba_final, origen_px, peso_kb):
 
 
 def semaforo(m):
-    rojo, ambar = [], []
+    # `niveles` es metrica -> peor nivel que alcanzo, y es lo que pinta la hoja. Existe
+    # porque la hoja reimplementaba los nueve umbrales en JavaScript y ya divergieron
+    # una vez (31-ago-2026: pintaba halo>18 en rojo cuando aqui era ambar desde el
+    # 27-ago). Los umbrales viven SOLO aqui; alli solo se leen.
+    rojo, ambar, niveles = [], [], {}
+
+    def mal(clave, nivel, texto):
+        (rojo if nivel == "rojo" else ambar).append(texto)
+        if niveles.get(clave) != "rojo":
+            niveles[clave] = nivel
+
     # Apuntar a la izquierda AVISA, no bloquea (31-ago-2026, decision de Saulo).
     # Nunca se espeja — invertiria inscripciones y ventana de expulsion — pero hay
     # fabricantes que solo publican de ese lado: las seis Mendoza RM22 son foto
     # oficial 5906x1329 y las seis miran a la izquierda. Si el fabricante tiene
     # lateral derecha, se usa esa; si no, entra asi. Lo decide el humano.
-    if m["canon"] == "izquierda":             ambar.append("apunta a la izquierda: vale solo si el fabricante no publica lateral derecha")
-    if m["resolucion"] < MIN_LADO:            rojo.append(f"resolucion {m['resolucion']}px")
-    if m["llenado"] < 20:                     rojo.append(f"mascara rota: el arma llena el {m['llenado']}% de su bbox")
-    if m["alpha_pct"] > 92:                   rojo.append(f"no recorto nada ({m['alpha_pct']}%)")
-    if m["huecos_px"] == 0:                   rojo.append("sin huecos internos: mascara rellenada")
+    if m["canon"] == "izquierda":             mal("canon", "ambar", "apunta a la izquierda: vale solo si el fabricante no publica lateral derecha")
+    if m["resolucion"] < MIN_LADO:            mal("resolucion", "rojo", f"resolucion {m['resolucion']}px")
+    if m["llenado"] < 20:                     mal("llenado", "rojo", f"mascara rota: el arma llena el {m['llenado']}% de su bbox")
+    if m["alpha_pct"] > 92:                   mal("llenado", "rojo", f"no recorto nada ({m['alpha_pct']}%)")
+    if m["huecos_px"] == 0:                   mal("huecos", "rojo", "sin huecos internos: mascara rellenada")
     # El halo alto NO bloquea, avisa. Un objeto oscuro sobre fondo claro tiene un
     # borde antialias intrinsecamente mas claro que el objeto: es muestreo, no un
     # defecto. Medido: recortes impecables (Canik METE SFX, Beretta 80X) marcan
     # +68 y se ven perfectos. Solo un halo flagrante bloquea. El borde
     # ennegrecido si es un defecto real: sale de dividir por alfa muy baja.
-    if m["halo"] > 120:                       rojo.append(f"halo flagrante (+{m['halo']})")
-    elif m["halo"] > 18:                      ambar.append(f"halo claro (+{m['halo']}), revisar borde")
-    if m["halo"] < -25:                       rojo.append(f"borde ennegrecido ({m['halo']})")
-    if m["borde_recortado"] > 0.5:            rojo.append(f"arma cortada en el origen ({m['borde_recortado']}%)")
+    if m["halo"] > 120:                       mal("halo", "rojo", f"halo flagrante (+{m['halo']})")
+    elif m["halo"] > 18:                      mal("halo", "ambar", f"halo claro (+{m['halo']}), revisar borde")
+    if m["halo"] < -25:                       mal("halo", "rojo", f"borde ennegrecido ({m['halo']})")
+    if m["borde_recortado"] > 0.5:            mal("borde_recortado", "rojo", f"arma cortada en el origen ({m['borde_recortado']}%)")
     # Ya no hay rama "dejo fondo": la mordida esta acotada a 1 por construccion.
     # Ese modo lo cubre `alpha_pct > 92` / `llenado`. Si vuelve a aparecer una
     # mascara que se traga el fondo sin disparar ninguna de las dos, medir antes
     # de anadir un umbral nuevo.
     if m["mordida"] is not None and m["mordida"] < 0.93:
-        rojo.append(f"mordida {m['mordida']}: se comio parte")
-    if 0 < m["huecos_rel"] < 1.0:             ambar.append(f"huecos minimos ({m['huecos_rel']}% del arma)")
-    if m["dureza_borde"] < 0.8:               ambar.append(f"borde duro ({m['dureza_borde']})")
-    if m["dureza_borde"] > 6:                 ambar.append(f"borde lavado ({m['dureza_borde']})")
+        mal("mordida", "rojo", f"mordida {m['mordida']}: se comio parte")
+    if 0 < m["huecos_rel"] < 1.0:             mal("huecos", "ambar", f"huecos minimos ({m['huecos_rel']}% del arma)")
+    if m["dureza_borde"] < 0.8:               mal("dureza_borde", "ambar", f"borde duro ({m['dureza_borde']})")
+    if m["dureza_borde"] > 6:                 mal("dureza_borde", "ambar", f"borde lavado ({m['dureza_borde']})")
     # Sigma alto = fondo con textura, casi siempre una escena. Medido sobre las 28:
     # ninguna foto BUENA paso de 20.0, y por encima de 25 solo hay malas — dos con
     # una persona sosteniendo el arma (CZ 600 American 41.3, Retay Gordion 50.6),
     # que antes salian ambar y se colaban a la aprobacion. Por eso ahora bloquea.
-    if m["fondo_sigma"] > 25:                 rojo.append(f"foto de escena, no de producto (sigma {m['fondo_sigma']})")
-    elif m["fondo_sigma"] > 12:               ambar.append(f"fondo con textura (sigma {m['fondo_sigma']})")
-    if m["peso_kb"] > 140:                    ambar.append(f"pesa {m['peso_kb']} KB")
-    if m["luminancia_sujeto"] < 45:           ambar.append(f"arma muy oscura (L {m['luminancia_sujeto']})")
-    return ("rojo" if rojo else "ambar" if ambar else "verde"), rojo + ambar
+    if m["fondo_sigma"] > 25:                 mal("fondo_sigma", "rojo", f"foto de escena, no de producto (sigma {m['fondo_sigma']})")
+    elif m["fondo_sigma"] > 12:               mal("fondo_sigma", "ambar", f"fondo con textura (sigma {m['fondo_sigma']})")
+    if m["peso_kb"] > 140:                    mal("peso_kb", "ambar", f"pesa {m['peso_kb']} KB")
+    if m["luminancia_sujeto"] < 45:           mal("luminancia", "ambar", f"arma muy oscura (L {m['luminancia_sujeto']})")
+    return ("rojo" if rojo else "ambar" if ambar else "verde"), rojo + ambar, niveles
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -467,20 +516,34 @@ def preparar(args):
         final.save(dst, "WEBP", quality=args.calidad, method=6)
 
         m = metricas(rgb_orig, alfa, np.array(final), px, dst.stat().st_size / 1024)
-        color, notas = semaforo(m)
+        color, notas, niveles = semaforo(m)
         informe.append({**_ficha(arma), "estado": "PROCESADA", "origen": str(origen),
                         "origen_px": px, "archivo": dst.name,
                         "actual": arma.get("img", ""), "traia_alfa": alfa_previo is not None
                         and bool((alfa_previo < 250).any()),
                         "alfa_de_fabrica": de_fabrica,
-                        "metricas": m, "color": color, "notas": notas,
+                        "metricas": m, "color": color, "notas": notas, "niveles": niveles,
                         "segundos": round(time.time() - t0, 1)})
         print(f"{etq}: {color.upper()} {final.size[0]}x{final.size[1]} "
               f"{m['peso_kb']}KB {round(time.time()-t0,1)}s"
               + ("  [alfa de fabrica]" if de_fabrica else "")
               + (f"  <- {'; '.join(notas)}" if notas else ""))
 
-    (TRABAJO / "informe.json").write_text(json.dumps(informe, ensure_ascii=False, indent=1), "utf-8")
+    # El informe ACUMULA entre corridas, y la hoja muestra todo lo que hay en
+    # 3-final — igual que accesorios.py y cajas.py. Antes se reescribia entero, asi
+    # que la tanda anterior se perdia y habia que procesar las 253 de una sentada
+    # (a ~25 s por foto en CPU) para tener una sola hoja. Se conserva lo previo cuyo
+    # WebP siga vivo, y lo que no llego a producir archivo (RESUSTITUIR/SIN_ORIGEN)
+    # porque es justo la lista de lo que falta conseguir.
+    ruta_informe = TRABAJO / "informe.json"
+    previas = {}
+    if ruta_informe.exists():
+        previas = {r["id"]: r for r in json.loads(ruta_informe.read_text("utf-8"))}
+    previas.update({r["id"]: r for r in informe})
+    vivos = {q.name for q in (TRABAJO / "3-final").glob("*.webp")}
+    informe = [r for r in sorted(previas.values(), key=lambda r: r["id"])
+               if r.get("estado") != "PROCESADA" or r.get("archivo") in vivos]
+    ruta_informe.write_text(json.dumps(informe, ensure_ascii=False, indent=1), "utf-8")
     hoja(informe)
     n = lambda c: sum(1 for r in informe if r.get("color") == c)
     print(f"\nverde {n('verde')} · ambar {n('ambar')} · rojo {n('rojo')} · "
@@ -543,7 +606,7 @@ def aplicar(args):
             print(f"  #{i}: sin foto procesada, se salta")
             continue
         actual = str(r.get("actual") or "")
-        if not actual.startswith("imagenes/"):
+        if sin_foto_propia(actual):
             # Alta nueva: el arma no tenia foto (data.js le pone el placeholder SVG
             # al cargar, porque su `img` viene vacio). Se le da ruta propia y se
             # rellena el hueco `img` de su mk(), que es el 15o argumento.
@@ -616,10 +679,15 @@ def aplicar(args):
 
 def verificar(args):
     db = catalogo()
-    sin_alfa, faltan, ok = [], [], 0
+    sin_alfa, faltan, sin_foto, ok = [], [], [], 0
     for a in db:
         ruta = str(a.get("img") or "")
-        if not ruta.startswith("imagenes/"):
+        if sin_foto_propia(ruta):
+            # Su silueta de tipo, o sin ruta: el hueco que hay que llenar. Desde
+            # que data.js asigna la silueta (8-sep) esto ya no caia en el
+            # `continue`, entraba al conteo y sumaba a "con alfa" — la silueta
+            # tiene alfa. Resultado: "252 con alfa" y las 122 armas tapadas.
+            sin_foto.append((a["id"], a["tipo"], a["nombre"]))
             continue
         p = PUBLICO / ruta.split("?")[0]
         if not p.exists():
@@ -628,7 +696,8 @@ def verificar(args):
         with Image.open(p) as im:
             alfa = im.convert("RGBA").getchannel("A")
             (ok := ok + 1) if alfa.getextrema()[0] < 250 else sin_alfa.append((a["id"], a["tipo"], p.name))
-    print(f"con alfa: {ok} | sin alfa: {len(sin_alfa)} | rutas rotas: {len(faltan)}")
+    print(f"con alfa: {ok} | sin alfa: {len(sin_alfa)} | "
+          f"sin foto propia: {len(sin_foto)} | rutas rotas: {len(faltan)}")
     for id_, ruta in faltan:
         print(f"  ROTA  #{id_} {ruta}")
     if args.tipo:
@@ -636,7 +705,237 @@ def verificar(args):
         print(f"\nsin alfa en {args.tipo}: {len(del_tipo)}")
         for id_, _, n in del_tipo:
             print(f"  #{id_} {n}")
+        del_tipo = [x for x in sin_foto if x[1] == args.tipo]
+        print()
+        print(f"sin foto propia en {args.tipo}: {len(del_tipo)}")
+        for id_, _, n in del_tipo:
+            print(f"  #{id_} {n}")
     return 1 if faltan else 0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Subcomando: autocheck — fija con asserts lo que se rompio alguna vez en silencio.
+# Cada numero es el que justifico su umbral; si cambias uno, este check te lo dice.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Metricas de una foto impecable. Cada assert mueve UNA y comprueba su rama.
+_BASE = dict(canon="derecha", resolucion=1200, llenado=35.0, alpha_pct=30.0,
+             huecos_px=800, huecos_pct=2.0, huecos_rel=1.5, halo=5.0,
+             dureza_borde=2.0, borde_recortado=0.1, fondo_sigma=8.0, mordida=0.99,
+             peso_kb=90.0, luminancia_sujeto=70.0)
+
+
+def autocheck(args=None):
+    col = lambda **k: semaforo({**_BASE, **k})[0]
+
+    # sin_foto_propia: el bug del 22-sep. La silueta mide 900 px justos, asi que
+    # MIN_LADO no la paraba, y `aplicar` PISABA el placeholder compartido.
+    assert sin_foto_propia("imagenes/silueta-pistola.webp"), "la silueta no es foto"
+    assert sin_foto_propia("imagenes/silueta-escopeta.webp?v=3"), "ni con cache-buster"
+    assert sin_foto_propia(""), "sin ruta es sin foto"
+    assert sin_foto_propia(None), "None es sin foto"
+    assert sin_foto_propia("data:image/svg+xml;base64,AAA"), "el data-URI viejo, tambien"
+    assert not sin_foto_propia("imagenes/013_Beretta_80x_Cheetah.webp"), "esta SI es foto"
+    assert not sin_foto_propia("imagenes/Benelli_Vinci.webp?v=2"), "y esta tambien"
+
+    # semaforo: los umbrales, con el caso medido que fijo cada uno.
+    assert col() == "verde"
+    assert col(huecos_px=0) == "rojo", "mascara rellenada (las dos Retay, el Gordion)"
+    assert col(resolucion=899) == "rojo" and col(resolucion=900) == "verde", "MIN_LADO"
+    assert col(halo=68) == "ambar", "recortes impecables marcan +68 (Canik METE SFX)"
+    assert col(halo=130) == "rojo", "halo flagrante"
+    assert col(halo=-30) == "rojo", "borde ennegrecido: division por alfa baja"
+    assert col(fondo_sigma=20.0) == "ambar", "ninguna foto BUENA paso de 20.0"
+    assert col(fondo_sigma=41.3) == "rojo", "CZ 600 American: persona sosteniendo el arma"
+    assert col(mordida=0.92) == "rojo" and col(mordida=0.93) == "verde"
+    assert col(llenado=19.0) == "rojo" and col(alpha_pct=93.0) == "rojo"
+    assert col(borde_recortado=0.6) == "rojo", "arma cortada en el origen"
+    assert col(canon="izquierda") == "ambar", "avisa, no bloquea (las seis Mendoza RM22)"
+
+    # `niveles` es lo que pinta la hoja: si una regla no lo rellena, su badge sale
+    # verde y el humano aprueba un defecto sin verlo. Se comprueba por metrica.
+    niv = lambda **k: semaforo({**_BASE, **k})[2]
+    assert niv(halo=68)["halo"] == "ambar", "el nivel tiene que llegar a la hoja"
+    assert niv(halo=130)["halo"] == "rojo"
+    assert niv(fondo_sigma=41.3)["fondo_sigma"] == "rojo"
+    assert niv(huecos_px=0)["huecos"] == "rojo"
+    assert niv(alpha_pct=93.0)["llenado"] == "rojo", "alpha_pct pinta el badge de llenado"
+    assert niv(resolucion=899)["resolucion"] == "rojo"
+    assert niv(canon="izquierda")["canon"] == "ambar"
+    assert niv() == {}, "una foto impecable no pinta ningun badge de color"
+    # rojo gana sobre ambar en la misma metrica: halo<-25 y halo>18 comparten clave
+    assert niv(halo=-30)["halo"] == "rojo"
+
+    # LA HOJA NO PUEDE TENER UMBRALES. Los tuvo, en un espejo manual de estas mismas
+    # nueve reglas escrito en JavaScript, y divergio (31-ago-2026: pintaba halo>18 en
+    # rojo cuando aqui ya era ambar). Esto era un comentario pidiendo cuidado; ahora
+    # es un assert, que es lo unico que de verdad lo impide.
+    fuente = Path(__file__).read_text("utf-8")
+    # con el salto de linea delante: si no, la busqueda se encuentra a SI MISMA,
+    # porque esta linea contiene la cadena que busca y esta antes que la funcion.
+    cuerpo_hoja = fuente[fuente.index(chr(10) + "def hoja("):]
+    for prohibido in ("m.llenado <", "m.alpha_pct >", "m.huecos_px ===", "m.huecos_rel <",
+                      "m.halo >", "m.halo <", "m.dureza_borde <", "m.dureza_borde >",
+                      "m.fondo_sigma >", "m.mordida <", "m.canon ===", "m.resolucion <",
+                      "m.peso_kb >"):
+        assert prohibido not in cuerpo_hoja, (
+            f"la hoja volvio a comparar un umbral a mano ({prohibido!r}): "
+            "usa r.niveles, que lo resuelve semaforo()")
+    assert "r.niveles" in cuerpo_hoja, "la hoja tiene que leer los niveles de semaforo()"
+
+    print("autocheck: ok")
+    return 0
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Subcomando: pendientes — el censo. Que necesita cada arma, medido contra disco.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Que hay que hacer con cada arma. El orden es el de menor a mayor coste.
+ESTADOS = {
+    "LISTA":       "foto propia con alfa: nada que hacer",
+    "POR_PROCESAR": "sin foto, pero su origen ya esta en fotos-fuente: solo falta `preparar`",
+    "RECORTABLE":  "fondo opaco y hay original externo >=900: intenta `preparar`, sin buscar nada",
+    "RECOMPRIMIR": "fondo opaco y solo el WebP servido llega a 900: recomprimir es el ultimo recurso",
+    "RESUSTITUIR": "fondo opaco y ningun origen llega a 900: hace falta OTRA foto",
+    "SIN_FOTO":    "sin foto y sin origen: hace falta CONSEGUIR la foto",
+}
+NECESITAN_WEB = ("SIN_FOTO", "RESUSTITUIR")
+
+
+def _estado(arma):
+    """Clasifica un arma y devuelve (estado, px del mejor origen, ruta del mejor).
+
+    La distincion que importa: `externo` (fotos-fuente o el original sin comprimir
+    de la descarga DCAM) contra el WebP que ya se sirve. Recortar el externo es el
+    pipeline normal; recortar el servido es recomprimir un WebP ya comprimido.
+    """
+    ext = prop = 0
+    mejor = None
+    for q, externo in _candidatos(arma):
+        try:
+            with Image.open(q) as im:
+                px = max(im.size)
+        except Exception:
+            continue
+        if externo:
+            if px > ext:
+                ext, mejor = px, q
+        else:
+            prop = max(prop, px)
+    if sin_foto_propia(arma.get("img")):
+        return ("POR_PROCESAR" if ext >= MIN_LADO else "SIN_FOTO"), ext, mejor
+    servida = PUBLICO / str(arma["img"]).split("?")[0]
+    try:
+        with Image.open(servida) as im:
+            alfa = im.convert("RGBA").getchannel("A")
+        if alfa.getextrema()[0] < 250:
+            return "LISTA", max(ext, prop), mejor
+    except Exception:
+        pass
+    if ext >= MIN_LADO:
+        return "RECORTABLE", ext, mejor
+    if prop >= MIN_LADO:
+        return "RECOMPRIMIR", prop, servida
+    return "RESUSTITUIR", max(ext, prop), mejor
+
+
+def _veredictos():
+    """Lo que el pipeline YA dijo de cada arma, de `informe.json`.
+
+    El censo mide pixeles, y con pixeles no se puede saber si la foto es de escena,
+    si el arma esta cortada por el borde o si al recortarla se queda en 478 px. Eso
+    solo lo dice la inferencia. Medido el 22-sep: de 30 armas clasificadas como
+    RECORTABLE —origen externo de sobra— 22 salieron ROJAS, y ninguna por el recorte:
+    escenas con sigma de 41 a 70, una Breda cortada al 68 %, tres Retay que caian a
+    801 px. Sin leer esto, el censo las sigue llamando recortables y alguien las
+    reintenta. El veredicto del pipeline manda sobre la medida de pixeles.
+    """
+    ruta = TRABAJO / "informe.json"
+    if not ruta.exists():
+        return {}
+    try:
+        return {r["id"]: r for r in json.loads(ruta.read_text("utf-8"))}
+    except Exception:
+        return {}
+
+
+def rehacer_hoja(args=None):
+    """Rehace la hoja desde informe.json, sin volver a inferir ninguna mascara.
+
+    Hace falta cuando lo que cambia es la HOJA y no las fotos: un orden nuevo, un
+    badge nuevo, o —el caso que lo estreno— filas guardadas antes de que semaforo()
+    devolviera `niveles`. Reprocesar para eso cuesta 25 s por foto y no cambia un
+    solo pixel.
+    """
+    ruta = TRABAJO / "informe.json"
+    if not ruta.exists():
+        sys.exit(f"no hay informe todavia: {ruta}")
+    informe = json.loads(ruta.read_text("utf-8"))
+    hoja(informe)
+    ruta.write_text(json.dumps(informe, ensure_ascii=False, indent=1), "utf-8")
+    n = lambda c: sum(1 for r in informe if r.get("color") == c)
+    print(f"{len(informe)} filas · verde {n('verde')} · ambar {n('ambar')} · rojo {n('rojo')}")
+    print(f"hoja: {HOJA if 'HOJA' in globals() else TRABAJO / 'hoja-de-contactos.html'}")
+    return 0
+
+
+def pendientes(args):
+    """El censo, medido. Es el input del que busca fotos, y no sale de ningun doc.
+
+    `docs/PLACEHOLDERS.md` llevaba tres semanas diciendo «192 armas, 81 sin foto»
+    cuando ya eran 253 y 123: un documento con cifras caduca, este comando no.
+    """
+    db = catalogo()
+    vistos = _veredictos()
+    filas = []
+    for a in db:
+        est, px, mejor = _estado(a)
+        nota = ""
+        v = vistos.get(a["id"])
+        if v and est in ("RECORTABLE", "RECOMPRIMIR", "POR_PROCESAR"):
+            # ya se intento: si el pipeline la rechazo, no es recortable, hace falta OTRA foto
+            if v.get("color") == "rojo":
+                est, nota = "RESUSTITUIR", "el pipeline la rechazo: " + "; ".join(v.get("notas") or [])
+            elif v.get("estado") == "RESUSTITUIR":
+                est, nota = "RESUSTITUIR", "sin origen util: " + "; ".join(v.get("notas") or [])
+            elif v.get("color"):
+                nota = f"ya procesada, sale {v['color']}: pendiente de aprobar en la hoja"
+        filas.append({
+            "nota": nota,
+            "clase": "arma", "id": a["id"], "marca": a.get("marca") or "",
+            "marca_clave": _sin_tildes(a.get("marca") or "").lower().strip(),
+            "nombre": a["nombre"], "tipo": a.get("tipo") or "",
+            "calibre": a.get("calibre") or "", "dcamRef": a.get("dcamRef") or "",
+            "estado": est, "mejor_px": px,
+            "mejor_origen": mejor.name if mejor else "",
+        })
+    if args.estado:
+        filas = [f for f in filas if f["estado"] == args.estado]
+    elif args.web:
+        filas = [f for f in filas if f["estado"] in NECESITAN_WEB]
+
+    if args.ids:                       # para encadenar: preparar --solo $(... --ids)
+        print(",".join(str(f["id"]) for f in filas))
+        return 0
+    if args.json:
+        print(json.dumps(filas, ensure_ascii=False, indent=1))
+        return 0
+
+    cuenta = Counter(f["estado"] for f in filas)
+    print(f"{len(db)} armas en data.js")
+    for est in ESTADOS:
+        if cuenta.get(est):
+            print(f"  {cuenta[est]:>4}  {est:<12} {ESTADOS[est]}")
+    web = [f for f in filas if f["estado"] in NECESITAN_WEB]
+    if web:
+        print(f"{chr(10)}hace falta buscar en la web: {len(web)}")
+        # por marca NORMALIZADA: el catalogo trae «Ceska Zbrojovka» Y «Česká
+        # Zbrojovka» como marcas distintas, y sin unirlas el grupo de 27 se parte
+        # en 26 + 1 y alguien investiga czub.cz dos veces.
+        por_marca = Counter(f["marca_clave"] or "(sin marca)" for f in web)
+        print("  " + " | ".join(f"{m} {n}" for m, n in por_marca.most_common()))
+    return 0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -646,6 +945,14 @@ def verificar(args):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def hoja(informe):
+    # Una fila guardada antes de que semaforo() devolviera `niveles` no los trae, y
+    # sin ellos la hoja pinta TODOS los badges en verde: el humano aprobaria un rojo
+    # sin verlo. Se recalculan de sus metricas, que ya estan en el informe — mas
+    # barato que reinferir 25 s por foto, y mismo resultado porque los umbrales
+    # viven en un solo sitio.
+    for r in informe:
+        if r.get("estado") == "PROCESADA" and not r.get("niveles") and r.get("metricas"):
+            r["niveles"] = semaforo(r["metricas"])[2]
     # fondo y filtro copiados literalmente de screens-2.jsx:186-198
     HERO_BG = "radial-gradient(ellipse at 50% 50%, #2C2C2C 0%, #1A1A1A 100%)"
     HERO_FX = "grayscale(0.1) contrast(1.15) drop-shadow(0 8px 24px rgba(0,0,0,.6))"
@@ -714,19 +1021,23 @@ function pinta() {{
   document.getElementById('lista').innerHTML = D.map((r, i) => {{
     if (r.estado !== 'PROCESADA') return filaSimple(r, i);
     const m = r.metricas, e = est[r.id] || {{}};
+    // Los umbrales NO estan aqui: los pone semaforo() en fotos.py y llegan ya
+    // resueltos en r.niveles (metrica -> peor nivel). Antes esto era un espejo
+    // manual de las nueve reglas y divergio una vez (31-ago-2026: pintaba halo>18
+    // en rojo cuando semaforo() lo daba ambar desde el 27-ago). Si añades una
+    // metrica, dale su clave en `mal(...)` alli y leela aqui.
+    const N = r.niveles || {{}};
+    const b = (t, clave) => badge(t, N[clave] || 'verde');
     const mets = [
-      // OJO: estos umbrales son un ESPEJO de semaforo() en fotos.py. Si cambias
-      // uno alli, cambialo aqui. Ya divergieron una vez (31-ago-2026): la hoja
-      // pintaba halo>18 en rojo cuando semaforo() lo daba ambar desde el 27-ago.
-      badge(`llenado ${{m.llenado}}%`, m.llenado < 20 || m.alpha_pct > 92 ? 'rojo' : 'verde'),
-      badge(`huecos ${{m.huecos_rel}}%`, m.huecos_px === 0 ? 'rojo' : m.huecos_rel < 1.0 ? 'ambar' : 'verde'),
-      badge(`halo ${{m.halo}}`, m.halo > 120 || m.halo < -25 ? 'rojo' : m.halo > 18 ? 'ambar' : 'verde'),
-      badge(`borde ${{m.dureza_borde}}`, m.dureza_borde < 0.8 || m.dureza_borde > 6 ? 'ambar' : 'verde'),
-      badge(`fondo σ${{m.fondo_sigma}}`, m.fondo_sigma > 25 ? 'rojo' : m.fondo_sigma > 12 ? 'ambar' : 'verde'),
-      m.mordida !== null ? badge(`mordida ${{m.mordida}}`, m.mordida < 0.93 ? 'rojo' : 'verde') : '',
-      badge(`cañón ${{m.canon}}`, m.canon === 'izquierda' ? 'ambar' : 'verde'),
-      badge(`${{m.resolucion}}px`, m.resolucion < {MIN_LADO} ? 'rojo' : 'verde'),
-      badge(`${{m.peso_kb}}KB`, m.peso_kb > 140 ? 'ambar' : 'verde'),
+      b(`llenado ${{m.llenado}}%`, 'llenado'),
+      b(`huecos ${{m.huecos_rel}}%`, 'huecos'),
+      b(`halo ${{m.halo}}`, 'halo'),
+      b(`borde ${{m.dureza_borde}}`, 'dureza_borde'),
+      b(`fondo σ${{m.fondo_sigma}}`, 'fondo_sigma'),
+      m.mordida !== null ? b(`mordida ${{m.mordida}}`, 'mordida') : '',
+      b(`cañón ${{m.canon}}`, 'canon'),
+      b(`${{m.resolucion}}px`, 'resolucion'),
+      b(`${{m.peso_kb}}KB`, 'peso_kb'),
     ].join('');
     return `<div class="fila ${{e.estado||''}} ${{i===sel?'sel':''}}" id="f${{i}}" data-color="${{r.color}}">
       <div class="panel hero"><span class="tag">ACTUAL</span><img src="${{actualSrc(r)}}"></div>
@@ -813,6 +1124,13 @@ pinta();
 # ─────────────────────────────────────────────────────────────────────────────
 
 def main():
+    # stdout en UTF-8: la consola de Windows es cp1252 y no sabe escribir la C con
+    # hacek de «Ceska Zbrojovka». Es el mismo gotcha que reventó catalogo() con
+    # «Águila», del otro lado de la tuberia. Se arregla una vez, para todo.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     sub = ap.add_subparsers(dest="cmd", required=True)
 
@@ -831,6 +1149,19 @@ def main():
     p = sub.add_parser("verificar")
     p.add_argument("--tipo", help="detalla las sin alfa de este tipo")
     p.set_defaults(fn=verificar)
+
+    p = sub.add_parser("hoja")
+    p.set_defaults(fn=rehacer_hoja)
+
+    p = sub.add_parser("autocheck")
+    p.set_defaults(fn=autocheck)
+
+    p = sub.add_parser("pendientes")
+    p.add_argument("--json", action="store_true", help="el censo entero, para el buscador")
+    p.add_argument("--ids", action="store_true", help="solo los ids, en coma: para --solo")
+    p.add_argument("--estado", choices=sorted(ESTADOS), help="filtra por un estado")
+    p.add_argument("--web", action="store_true", help=f"solo los que necesitan web: {' y '.join(NECESITAN_WEB)}")
+    p.set_defaults(fn=pendientes)
 
     args = ap.parse_args()
     sys.exit(args.fn(args) or 0)
