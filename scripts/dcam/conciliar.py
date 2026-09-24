@@ -7,15 +7,20 @@ orquesta la publicación (publicar.py).
 """
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
+import tempfile
 from collections import Counter
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(RAIZ / ".claude" / "skills" / "conciliar-inventario" / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))   # vigia y publicar
 import fitz  # noqa: E402  (PyMuPDF, dependencia del parser)
 import parse_pdf  # noqa: E402
 
@@ -193,3 +198,190 @@ def leer_datos(raiz: Path) -> dict:
     out = subprocess.run(["node", str(RAIZ / "scripts" / "dcam" / "datos.js"), "leer", str(raiz)],
                          check=True, capture_output=True)
     return json.loads(out.stdout.decode("utf-8"))
+
+
+# ── Orquestación: semilla del mapa y corrida diaria ──────────────────────────
+
+DIR_BOT = Path(os.environ.get("DCAM_DIR", "/home/saulo/apps/dcam-bot"))
+TRABAJO = Path(os.environ.get("DCAM_TRABAJO", "/home/saulo/apps/dcam-bot/trabajo"))
+MAPA = "scripts/dcam/mapeo-dcam.json"
+MANUAL = {"armas": "man_dcam_{}", "municiones": "man_mun_dcam_{}", "accesorios": "man_acc_{}"}
+
+
+def _json(ruta: Path, defecto):
+    return json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else defecto
+
+
+def _guardar(ruta: Path, datos) -> None:
+    tmp = ruta.with_suffix(".tmp")
+    tmp.write_text(json.dumps(datos, ensure_ascii=False, indent=1), encoding="utf-8")
+    os.replace(tmp, ruta)
+
+
+def pendientes(dir_bot: Path, conc: dict) -> list:
+    """(sha256, pdf archivado) de las existencias del vigía que la conciliación no terminó."""
+    import vigia
+    estado = _json(dir_bot / "estado.json", {"documentos": {}})
+    salida = []
+    for url, d in estado.get("documentos", {}).items():
+        if d.get("tipo") != "existencias" or conc.get("procesados", {}).get(d["sha256"], {}).get("paso") == "hecho":
+            continue
+        rutas = sorted((dir_bot / "archivo").glob(f"*/{vigia.nombre_archivo(url)}"))
+        if rutas:
+            salida.append((d["sha256"], rutas[-1]))
+    return salida
+
+
+def semilla(pdfs, marcar=False, raiz=RAIZ, dir_bot=DIR_BOT):
+    datos = leer_datos(raiz)
+    mapa = _json(raiz / MAPA, {"pendientes": []})
+    conc = _json(dir_bot / "conciliacion.json", {"procesados": {}})
+    for ruta in pdfs:
+        inv = leer_inventario(ruta)
+        for cat, filas in inv["catalogos"].items():
+            manual = MANUAL[cat].format(inv["fecha"].replace("-", "_"))
+            m, amb = construir_mapeo(cat, filas, datos[cat], manual)
+            mapa.setdefault(cat, {})[inv["fecha"]] = {"manual": manual, "fichas": m}
+            # repetir la semilla de un inventario reemplaza sus ambiguos, no los duplica
+            mapa["pendientes"] = [p for p in mapa["pendientes"] if (p.get("catalogo"), p.get("fecha")) != (cat, inv["fecha"])]
+            mapa["pendientes"] += [dict(a, catalogo=cat, fecha=inv["fecha"]) for a in amb]
+            print(f"{cat} {inv['fecha']}: {len(m)} fichas mapeadas, {len(amb)} ambiguas")
+            for a in amb:
+                print(f"  ? #{a['id']} {a['nombre']} precio={a['precio']} existencia={a['existencia']} "
+                      f"motivo={a['motivo']} candidatos={a['candidatos']}")
+        if marcar:
+            conc["procesados"][hashlib.sha256(Path(ruta).read_bytes()).hexdigest()] = {"paso": "hecho", "semilla": True}
+    _guardar(raiz / MAPA, mapa)
+    if marcar:
+        _guardar(dir_bot / "conciliacion.json", conc)
+
+
+def _cuerpo_pr(cl: dict, fecha: str, ruta: Path) -> str:
+    filas = [f"Inventario DCAM de {cl['catalogo']} con fecha de corte {fecha} (`{ruta.name}`): cambios seguros que "
+             f"publica el bot. Lo dudoso ({len(cl['dudosos'])} casos) va en un PR de revisión aparte.", "",
+             "| id | ficha | anterior | nuevo | cambio | existencia |", "|---|---|---|---|---|---|"]
+    filas += [f"| {c['id']} | {c['nombre']} | ${c['anterior']:,.2f} | ${c['precio']:,.2f} | {c['pct']:+.2f} % | {c['existencia']} |"
+              for c in cl["seguros"]]
+    return "\n".join(filas)
+
+
+def _ensayar(ent, trabajo: Path, plan: dict) -> None:
+    """--seco: imprime el plan y el diff de `datos.js aplicar` en el clon de trabajo y lo deja como estaba."""
+    print(json.dumps(plan, ensure_ascii=False, indent=1))
+    if not plan["seguros"]:
+        return
+    with tempfile.TemporaryDirectory() as td:
+        ruta = Path(td) / "plan.json"
+        ruta.write_text(json.dumps(plan, ensure_ascii=False), encoding="utf-8")
+        try:
+            print(ent.sh(["node", "scripts/dcam/datos.js", "aplicar", str(ruta), str(trabajo)], cwd=str(trabajo))[1])
+            print(ent.sh(["git", "--no-pager", "diff", "--patch-with-stat"], cwd=str(trabajo))[1])
+        finally:
+            ent.sh(["git", "checkout", "-f", "--", "."], cwd=str(trabajo))
+            ent.sh(["git", "clean", "-fd"], cwd=str(trabajo))   # el PDF copiado a public/inventarios/
+
+
+def correr(seco=False, dir_bot=DIR_BOT, trabajo=TRABAJO, ent=None):
+    import publicar
+    ent = ent or publicar.Entorno.real(dir_bot, seco=seco)
+    ruta_conc = dir_bot / "conciliacion.json"
+    conc = _json(ruta_conc, {"procesados": {}})
+
+    def guardar_conc():
+        if not seco:   # un ensayo en seco no deja estado
+            _guardar(ruta_conc, conc)
+
+    for sha, ruta in pendientes(dir_bot, conc):
+        reg = conc["procesados"].setdefault(sha, {"paso": "leido", "catalogos": {}})
+        try:   # un inventario que revienta avisa y no tumba la corrida
+            inv = leer_inventario(ruta)
+            fecha = inv["fecha"]
+            c, out = publicar._git(ent, trabajo, "fetch", "--quiet", "origin", "main")
+            for orden in (["git", "checkout", "-f", "-B", "bot/lectura", "origin/main"], ["git", "clean", "-fd"]):
+                if not c:
+                    c, out = ent.sh(orden, cwd=str(trabajo))
+            if c:
+                ent.avisar(f"⚠️ DCAM conciliación detenida ({ruta.name}): no pude poner el clon de trabajo en origin/main: {out.strip()[-300:]}")
+                continue
+            datos = leer_datos(trabajo)
+            mapa = _json(trabajo / MAPA, {"pendientes": []})
+            if mapa.get("pendientes"):
+                ent.avisar(f"⚠️ DCAM conciliación detenida: el mapa tiene {len(mapa['pendientes'])} fichas ambiguas sin decidir")
+                continue
+            completo, clasif = True, []
+            for cat, filas in inv["catalogos"].items():
+                previas = sorted(f for f in mapa.get(cat, {}) if f < fecha)
+                if not previas:
+                    ent.avisar(f"⚠️ DCAM conciliación detenida ({cat} {fecha}): no hay inventario anterior en el mapa")
+                    completo = False
+                    continue
+                ant = mapa[cat][previas[-1]]
+                try:
+                    clasif.append(clasificar(cat, filas, ant["fichas"], datos[cat], ant["manual"]))
+                except Exception as e:
+                    ent.avisar(f"⚠️ DCAM conciliación detenida ({cat} {fecha}): {type(e).__name__}: {e}")
+                    completo = False
+            # % sin redondear de lo que CAMBIA, para los ajustes generales de otros catálogos con la misma fecha de
+            # corte; los del propio catálogo (un intento anterior, un PDF reemplazado) no cuentan dos veces
+            reg.update(fecha=fecha, pcts={cl["catalogo"]: [p for c in cl["candidatos"] if (p := _pct(c["precio"], c["anterior"])) != 0]
+                                          for cl in clasif})
+            separar(clasif, [p for r in conc["procesados"].values() if r.get("fecha") == fecha
+                             for otro, ps in r.get("pcts", {}).items() if otro not in inv["catalogos"] for p in ps])
+            for cl in clasif:
+                cat = cl["catalogo"]
+                fuera = [d for d in cl["dudosos"] if d["tipo"] == "precio_fuera_de_grupo"]
+                plan = {"catalogo": cat, "fecha": fecha, "pdf": str(ruta), "v": f"dcam{fecha.replace('-', '')}",
+                        "seguros": [{"id": c["id"], "precio": c["precio"], "existencia": c["existencia"]} for c in cl["seguros"]],
+                        "esperado_armas": len(datos["armas"]),
+                        "mapa": {"manual": MANUAL[cat].format(fecha.replace("-", "_")),
+                                 "fichas": {str(c["id"]): c["claves"] for c in cl["seguros"] + fuera}},
+                        "cuerpo_pr": _cuerpo_pr(cl, fecha, ruta)}
+                print(json.dumps({"catalogo": cat, "seguros": len(cl["seguros"]), "dudosos": len(cl["dudosos"])}, ensure_ascii=False), flush=True)
+                if seco:
+                    _ensayar(ent, trabajo, plan)
+                    continue
+                pub = reg["catalogos"].setdefault(cat, {})
+
+                def guardar(p, cat=cat):
+                    reg["catalogos"][cat] = p
+                    guardar_conc()
+
+                if plan["seguros"]:
+                    mapa.setdefault(cat, {})[fecha] = plan["mapa"]   # publicar_seguro lo escribe en su rama
+                    pub = publicar.publicar_seguro(ent, trabajo, pub, plan, guardar=guardar)
+                    guardar(pub)
+                    if pub.get("paso") != "hecho":
+                        completo = False   # bloqueado: ya avisó; lo dudoso sale después del merge de lo seguro
+                        continue
+                # "issue" también es final: claude -p no pudo y el caso ya llegó a Saulo como issue
+                if cl["dudosos"] and pub.get("dudoso", {}).get("paso") not in ("hecho", "issue"):
+                    pub = publicar.pr_revision(ent, trabajo, pub, {"catalogo": cat, "fecha": fecha, "pdf": str(ruta),
+                                                                  "dudosos": cl["dudosos"]})
+                    guardar(pub)
+                    completo = completo and pub.get("dudoso", {}).get("paso") in ("hecho", "issue")
+        except Exception as e:
+            ent.avisar(f"⚠️ DCAM conciliación detenida ({ruta.name}): {type(e).__name__}: {e}")
+            continue
+        if completo and not seco:
+            reg["paso"] = "hecho"
+        guardar_conc()
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description="Conciliación automática DCAM")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    s = sub.add_parser("semilla", help="construye el mapa de renglones con PDFs ya conciliados")
+    s.add_argument("pdfs", nargs="+")
+    s.add_argument("--marcar", action="store_true", help="registra esos PDFs como ya conciliados")
+    c = sub.add_parser("correr", help="concilia y publica los inventarios nuevos del vigía")
+    c.add_argument("--seco", action="store_true", help="imprime plan y diff; sin push, PR, merge, D1, claude ni Telegram")
+    a = ap.parse_args()
+    if a.cmd == "semilla":
+        semilla([Path(p) for p in a.pdfs], marcar=a.marcar)
+    else:
+        correr(seco=a.seco)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

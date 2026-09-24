@@ -209,6 +209,12 @@ def _leer_pagina(bajar, pagina: str, url: str, reintento_seg: float) -> dict:
     raise LecturaInvalida(motivo)
 
 
+def _codigo_viejo() -> str:
+    """Cola del latido si correr.sh no pudo actualizar el clon (DCAM_CODIGO_VIEJO = fecha del commit)."""
+    viejo = os.environ.get("DCAM_CODIGO_VIEJO")
+    return f" · ⚠️ corriendo con código de {viejo}" if viejo else ""
+
+
 _TITULOS = {
     "existencias": "📦 Inventario {verbo} DCAM: {etiqueta}",
     "requisitos": "📄 Requisitos · {verbo}: {etiqueta}",
@@ -269,6 +275,7 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
             msg += f" · no se pudieron bajar: {len(fallidos)}"
         if aviso_costos:
             msg += " · costos sin leer"
+        msg += _codigo_viejo()
         guardar_estado(ruta_estado, nuevo_estado)
         msgs = [{"texto": msg}]
         if aviso_costos:
@@ -305,7 +312,7 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
     exist = ", ".join(nombre_archivo(u).split("_", 1)[1] for u, d in actuales.items() if d["tipo"] == "existencias")
     n_img = sum(1 for d in actuales.values() if d["tipo"] == "imagen")
     msgs.append({"texto": f"✅ DCAM vigía · {fecha(ahora)} · {' · '.join(partes) or 'sin cambios'}"
-                          f" · existencias: {exist} · {n_img} imágenes"})
+                          f" · existencias: {exist} · {n_img} imágenes" + _codigo_viejo()})
     guardar_estado(ruta_estado, nuevo_estado)
     return 0, msgs
 
