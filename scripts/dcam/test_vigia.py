@@ -280,6 +280,25 @@ def test_documento_cambiado_manda_inventario_cambiado():
         assert "escrita" in msgs[-1]["texto"], msgs[-1]["texto"]
 
 
+def test_latido_avisa_codigo_viejo():
+    import os
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+        archivos = _archivos_de(COM)
+        vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+        os.environ["DCAM_CODIGO_VIEJO"] = "2026-09-14"
+        try:
+            _c, msgs = vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 15, 20), reintento_seg=0)
+            with tempfile.TemporaryDirectory() as otro:   # también en el mensaje de «estado inicial»
+                _c, inicial = vigia.correr(_bajador(paginas, archivos), Path(otro), datetime(2026, 9, 15, 20), reintento_seg=0)
+        finally:
+            del os.environ["DCAM_CODIGO_VIEJO"]
+        assert msgs[-1]["texto"].endswith("⚠️ corriendo con código de 2026-09-14"), msgs[-1]
+        assert "estado inicial" in inicial[-1]["texto"], inicial
+        assert inicial[-1]["texto"].endswith("⚠️ corriendo con código de 2026-09-14"), inicial[-1]
+
+
 if __name__ == "__main__":
     pruebas = [f for n, f in sorted(globals().items()) if n.startswith("test_")]
     for f in pruebas:

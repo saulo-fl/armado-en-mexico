@@ -17,5 +17,6 @@ ExecStartPre=-/usr/bin/flock -n /home/saulo/apps/dcam-bot/conciliar.lock /usr/bi
 ExecStartPre=-/usr/bin/flock -n /home/saulo/apps/dcam-bot/conciliar.lock /usr/bin/git -C /home/saulo/apps/dcam-bot/repo pull --ff-only origin main --quiet
 ExecStart=/usr/bin/python3 scripts/dcam/vigia.py
 Nice=10
-# Una corrida colgada no debe bloquear el disparo del timer del día siguiente.
-TimeoutStartSec=1h
+# Una corrida colgada no debe bloquear el disparo del timer del día siguiente;
+# 3 h cubren la espera del preview y de producción más claude -p en la revisión de lo dudoso.
+TimeoutStartSec=3h
