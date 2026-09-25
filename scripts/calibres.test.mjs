@@ -70,3 +70,42 @@ test('6 — amxFiltrarCalibres(GUIA, { avail: "dcam" }) devuelve 4 entradas y ni
     assert.notStrictEqual(c.avail, 'ejercito', `no debe haber calibre "ejercito" en el resultado`);
   }
 });
+
+// El bug que vigila (24-sep-2026): amxGuiaCalibres copiaba campo por campo y se
+// dejaba `cartucho`, `desc`, `uso`, `velocidad`, `energia`, `legalArt` y demás.
+// La guía y la ficha leen de ahí: salían con la silueta y los renglones vacíos
+// aunque data-extra.js tuviera el dato. Este fixture lleva los campos que la
+// ficha pinta; si alguien vuelve a enumerar campos, se cae.
+const GUIA_COMPLETA = GUIA.map((c, i) => Object.assign({}, c, {
+  uso: 'uso ' + i,
+  alias: ['alias ' + i],
+  velocidad: '330 m/s',
+  energia: '600 J',
+  retroceso: 'suave',
+  retrocesoNivel: 2,
+  legalArt: 'art. 9 fr. I',
+  legalNota: 'nota ' + i,
+  fuente: { nombre: 'C.I.P.', fecha: '2026-01-01' },
+  enCatalogo: true,
+  cartucho: 'imagenes/cartuchos/prueba-' + i + '.webp',
+  desc: 'descripción ' + i,
+}));
+
+test('7 — amxGuiaCalibres no pierde ningún campo del calibre de origen', () => {
+  const resultado = window.amxGuiaCalibres(GUIA_COMPLETA, DB);
+  for (const origen of GUIA_COMPLETA) {
+    const salida = resultado.find(c => c.id === origen.id);
+    assert.ok(salida, `${origen.id} debe estar en la guía`);
+    for (const campo of Object.keys(origen)) {
+      assert.deepStrictEqual(salida[campo], origen[campo],
+        `la guía perdió o cambió "${campo}" de ${origen.id}`);
+    }
+  }
+});
+
+test('8 — la foto del cartucho llega a la guía (la mesa y la ficha la leen de aquí)', () => {
+  const resultado = window.amxGuiaCalibres(GUIA_COMPLETA, DB);
+  const conFoto = resultado.filter(c => c.cartucho);
+  assert.strictEqual(conFoto.length, GUIA_COMPLETA.length,
+    `los ${GUIA_COMPLETA.length} calibres traen cartucho; llegaron ${conFoto.length}`);
+});
