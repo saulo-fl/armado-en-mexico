@@ -64,3 +64,17 @@ test('el carril de etiquetas comparte columnas y no mueve la mesa de Accesorios'
     /\.amx-mesa-fila(?![^,{]*--etiquetas)[^{]*\{[^}]*padding-bottom/,
     'la mesa base de Accesorios no debe reservar espacio de etiqueta');
 });
+
+test('Municiones sustituye el letrero por especificaciones y precio reales', () => {
+  const bloque = municiones.match(/function MunicionesScreen[\s\S]*?window\.MunicionesScreen = MunicionesScreen;/);
+  assert.ok(bloque, 'no encuentro MunicionesScreen');
+  const pantalla = bloque[0];
+  assert.match(pantalla, /rotulo=\{null\}/, 'el letrero amarillo sigue activo');
+  assert.match(pantalla, /renderEtiqueta=\{etiqueta\}/, 'la mesa no recibe la etiqueta');
+  assert.match(pantalla, /amx-etiqueta-marca[\s\S]*amx-etiqueta-nombre[\s\S]*amx-etiqueta-precio/,
+    'faltan niveles de información de la etiqueta');
+  assert.match(pantalla, /window\.SELLOS_LEGALES/, 'la condición legal no sale de la primitiva común');
+  assert.match(pantalla, /munUnidadPrecio\(m\)/, 'la unidad no respeta el caso por caja');
+  assert.match(pantalla, /String\(m\.priceExact\)\.replace\(' MXN', ''\)/,
+    'el precio no sale de priceExact');
+});
