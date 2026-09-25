@@ -179,11 +179,11 @@ window.DB = [
     "Pistola compacta argentina inspirada en la Walther PPK. Una de las opciones más económicas y confiables en .380 ACP para portar oculto."),
 
   mk(5, "Ruger LCP", "Ruger", "pistola", "EE.UU.", ".380 ACP", "6+1", "270g", "133mm", "Semi-auto, DAO subcompacta", 2008, "dcam", "9110.35", "PISTOLA CAL .380 RUGER LCP NEGRO",
-    "imagenes/005_Ruger_LCP.webp",
+    "imagenes/005_Ruger_LCP.webp?v=2",
     "Lightweight Compact Pistol. Con 270g es una de las pistolas más ligeras del mundo en su calibre. Diseñada para portación oculta de respaldo."),
 
   mk(6, "Ruger LCP Max", "Ruger", "pistola", "EE.UU.", ".380 ACP", "10+1", "297g", "137mm", "Semi-auto, DAO subcompacta", 2021, "dcam", "14875.83", "PISTOLA CAL .380 RUGER LCPMAX",
-    "imagenes/006_Ruger_LCP_Max.webp",
+    "imagenes/006_Ruger_LCP_Max.webp?v=2",
     "Evolución de la LCP con capacidad duplicada manteniendo dimensiones subcompactas. Excelente opción de defensa personal para portación discreta."),
 
   mk(7, "SIG Sauer P365", "SIG Sauer", "pistola", "EE.UU.", ".380 ACP", "10+1", "498g", "147mm", "Semi-auto, striker-fired micro", 2018, "dcam", "11421.02", "PISTOLA CAL .380 SIG SAUER P365 NIT",
@@ -256,7 +256,7 @@ window.DB = [
     "Acabado premium tungsteno del 856. Resistencia superior al desgaste y oxidación."),
 
   mk(22, "Ruger Wrangler", "Ruger", "revolver", "EE.UU.", ".22 LR", "6", "850g", "267mm", "Revólver SA single-action", 2019, "dcam", "22912.05", "REVOLVER CAL .22 RUGER",
-    "imagenes/021_Ruger_Wrangler.webp",
+    "imagenes/021_Ruger_Wrangler.webp?v=2",
     "Revólver de acción simple estilo western en .22 LR. Económico, divertido y educativo. Ideal para introducir nuevos tiradores al tiro deportivo."),
 
   // ═══════════════════════════════════════════════════════════
@@ -355,7 +355,7 @@ window.DB = [
     "Sistema de cañón rotativo único de Beretta. Calibre 9mm: restringido en México."),
 
   mk(46, "System Defence 9mm", "System Defence", "pistola", "Israel", "9mm Parabellum", "15+1", "780g", "188mm", "Semi-auto, striker-fired", 2020, "ejercito", "11236.25", "PISTOLA CAL 9mm SYSTEM DEFENCE",
-    "imagenes/092_System_Defence_9mm.webp",
+    "imagenes/092_System_Defence_9mm.webp?v=2",
     "Pistola israelí de servicio C9 FS, de tamaño completo con cañón de 122 mm. Calibre 9mm: restringido a Fuerzas Armadas."),
 
   // ═══════════════════════════════════════════════════════════
@@ -373,7 +373,7 @@ window.DB = [
   //  PISTOLA .38 SUPER — EXCLUSIVO EJÉRCITO
   // ═══════════════════════════════════════════════════════════
   mk(49, "Colt Government .38 Super", "Colt", "pistola", "EE.UU.", ".38 Super", "9+1", "1100g", "216mm", "Semi-auto, SA estilo 1911", 1929, "ejercito", "149816.61", "PISTOLA .38\" SUPER COLT GOVERNMENT",
-    "imagenes/095_Colt_Government_.38_Super.webp",
+    "imagenes/095_Colt_Government_.38_Super.webp?v=2",
     "1911 clásico en calibre .38 Super, históricamente popular en México. Acabado premium. Calibre .38 Super: restringido a Fuerzas Armadas."),
 
   // ═══════════════════════════════════════════════════════════
@@ -467,7 +467,7 @@ window.DB = [
   //  RIFLES MILITARES (5.56, 7.62) — EXCLUSIVO EJÉRCITO
   // ═══════════════════════════════════════════════════════════
   mk(69, "Ruger AR-556", "Ruger", "carabina", "EE.UU.", "5.56x45mm", "30", "3200g", "850mm", "Semi-auto, plataforma AR-15", 2015, "ejercito", "27982.95", "RIFLE CAL 5.56X45 MM RUGER M AR-556",
-    "imagenes/099_Ruger_AR-556.webp",
+    "imagenes/099_Ruger_AR-556.webp?v=2",
     "Carabina semi-automática AR-15. En México el 5.56x45mm es calibre exclusivo de las Fuerzas Armadas."),
 
   mk(70, "SIG MCX", "SIG Sauer", "carabina", "EE.UU.", "5.56x45mm", "30", "3300g", "830mm", "Semi-auto, pistón corto", 2015, "ejercito", "48596.81", "RIFLE 5.56X45 mm SIG SAUER M SIG MCX",
@@ -572,7 +572,7 @@ window.DB = [
     "Escopeta de bomba (corredera) turca Armsan P612 calibre 12 en acabado camuflaje («A.C.»; Armsan la catalogaba como P612 C), con cañón de 71 cm. Adquisición civil."),
 
   mk(93, "Browning Maxus", "Browning", "escopeta", "Bélgica/EE.UU.", "12 GA", "4+1", "3200g", "1270mm", "Semi-auto, gas-operada", 2009, "dcam", "38136.56", "ESCOPETA SEMI BROWNING MAXUS CAL 12",
-    "imagenes/050_Browning_Maxus.webp",
+    "imagenes/050_Browning_Maxus.webp?v=2",
     "Semi-automática gas-operada de Browning. Sistema Power Drive Gas para confiabilidad con todo tipo de munición."),
 
   mk(94, "Winchester SX4", "Winchester", "escopeta", "Italia", "12 GA", "4+1", "3200g", "1240mm", "Semi-auto, gas-operada", 2016, "dcam", "27447.62", "ESCOPETA SEMI WINCHESTER SX4 CAL 12",
@@ -596,7 +596,7 @@ window.DB = [
     "Edición de lujo del legendario semi-automático Benelli. Grabados artesanales. Pieza de colección."),
 
   mk(99, "Huglu Atrox cal 12 (Bomba)", "Huglu", "escopeta", "Turquía", "12 GA", "5+1", "3100g", "1140mm", "Acción de bomba (pump)", 2018, "dcam", "11465.96", "ESCOPETA BOMBA 12 HUGLU ATROX",
-    "imagenes/056_Huglu_Atrox_cal_12_Bomba.webp",
+    "imagenes/056_Huglu_Atrox_cal_12_Bomba.webp?v=2",
     "Escopeta de corredera (pump-action). Confiable, económica. Excelente para el campo. Como arma larga, se registra en cacería o tiro deportivo (con club), en colección (con permiso de colección) o a nombre de ejidatarios, comuneros y jornaleros del campo; no en protección de domicilio."),
 
   mk(100, "Beretta DT11 Sport", "Beretta", "escopeta", "Italia", "12 GA", "2", "3900g", "1280mm", "Superpuesta competición", 2012, "dcam", "170201.91", "ESCOPETA CAL 12 BERETTA DT11 SPORT",
@@ -604,19 +604,19 @@ window.DB = [
     "Superpuesta de competición top-tier. Estándar olímpico en trap y skeet. Pieza de tirador profesional."),
 
   mk(101, "Derya MR-S1", "Derya", "escopeta", "Turquía", "12 GA", "4+1", "3100g", "1240mm", "Semi-auto, sintética", 2020, "dcam", "43006.82", "ESCOPETA CAL 12 DERYA MR-S1 C 30\"",
-    "imagenes/058_Derya_MR-S1.webp",
+    "imagenes/058_Derya_MR-S1.webp?v=2",
     "Semi-automática turca con cañón 30\". Buen acabado y precio competitivo."),
 
   mk(102, "Derya MR-100 cal 12", "Derya", "escopeta", "Turquía", "12 GA", "4+1", "3000g", "1200mm", "Semi-auto inercial", 2018, "dcam", "23211.59", "ESCOPETA CAL 12 DERYA MR-100 C 28\"",
-    "imagenes/059_Derya_MR-100_cal_12.webp",
+    "imagenes/059_Derya_MR-100_cal_12.webp?v=2",
     "Semi-automática inercial de entrada de Derya. Buen valor para caza."),
 
   mk(103, "Derya AG410 cal .410", "Derya", "escopeta", "Turquía", ".410 Bore", "4+1", "2400g", "1130mm", "Semi-auto, ligera", 2020, "dcam", "13703.23", "ESCOPETA CAL 410 DERYA AG410 C 26\"",
-    "imagenes/060_Derya_AG410_cal_.410.webp",
+    "imagenes/060_Derya_AG410_cal_.410.webp?v=2",
     "Escopeta semi-automática calibre .410. Mínimo retroceso, ideal para iniciar tiradores jóvenes y caza menor."),
 
   mk(104, "Derya AG20 cal 20", "Derya", "escopeta", "Turquía", "20 GA", "4+1", "2700g", "1160mm", "Semi-auto, ligera", 2020, "dcam", "13843.05", "ESCOPETA CAL 20 DERYA AG20 C 26\"",
-    "imagenes/061_Derya_AG20_cal_20.webp",
+    "imagenes/061_Derya_AG20_cal_20.webp?v=2",
     "Versión cal 20 de la AG, ligera y precisa para perdiz y codorniz."),
 
   mk(105, "Derya CR-101 (Bomba)", "Derya", "escopeta", "Turquía", "12 GA", "5+1", "3000g", "1150mm", "Acción de bomba (pump)", 2019, "dcam", "13120.17", "ESCOPETA BOMBA 12 DERYA CR-101 C28\"",
@@ -688,7 +688,7 @@ window.DB = [
     "",
     "Pistola de Glock que combina la corredera compacta de la G19 con la empuñadura de tamaño completo de la G17, en acabado coyote. Derivada del concurso militar MHS de EE.UU."),
   mk(125, "Springfield Echelon", "Springfield Armory", "pistola", "EE.UU.", "9mm Parabellum", "17+1", "0.74 kg", "203 mm", "Semi-auto, striker", 2023, "ejercito", "11551.86", "PISTOLA SEMIAUTOMÁTICA CALIBRE 9 X 19 mm MARCA SPRINGFIELD ARMORY MODELO ECHELON",
-    "",
+    "imagenes/Springfield_Echelon.webp",
     "Pistola moderna de Springfield Armory con chasis de acero serializado (Central Operating Group) y sistema de miras de montaje directo. Plataforma full-size para servicio."),
   mk(126, "Taurus 82S", "Taurus", "revolver", "Brasil", ".38 Special", "6", "0.96 kg", "235 mm", "Revólver, doble acción", 2012, "dcam", "10017.94", "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 82S, CAÑÓN DE 4\" CALIBRE .38 SPL, 6 CARTUCHOS, ACERO INOXIDABLE",
     "imagenes/Taurus_82S.webp",
@@ -765,7 +765,7 @@ window.DB = [
     "imagenes/Winchester_XPR_6.5_Creedmoor.webp",
     "Rifle de cerrojo XPR en 6.5 Creedmoor, calibre de gran precisión a larga distancia para cacería y tiro. Adquisición civil."),
   mk(148, "Browning BAR MK4", "Browning", "rifle", "Bélgica/EE.UU.", ".308 Winchester", "4+1", "3.5 kg", "1070mm", "Semi-auto, pistón de gas", 2017, "dcam", "37454.15", "RIFLE SEMI BROWNING BAR MK4 CAL .308",
-    "",
+    "imagenes/Browning_BAR_MK4.webp",
     "Rifle de caza semiautomático de gran prestigio, suave y preciso en .308 Win. Calibre de cacería, adquisición civil."),
   mk(149, "Winchester SXR2 Pump", "Winchester", "rifle", "EE.UU.", ".308 Winchester", "3+1", "3.3 kg", "1050mm", "Acción de bomba (corredera)", 2018, "dcam", "28964.54", "RIFLE A BOMBA WINCHESTER SXR2 PUMP CAL .308",
     "imagenes/Winchester_SXR2_Pump.webp",
@@ -774,7 +774,7 @@ window.DB = [
     "imagenes/IWI_US_Z-15.webp",
     "Carabina AR-15 fabricada por IWI US en 5.56 OTAN, con riel y miras auxiliares. Uso restringido a fuerzas armadas."),
   mk(151, "Ruger 10/22", "Ruger", "rifle", "EE.UU.", ".22 LR", "10+1", "2.3 kg", "940mm", "Semi-auto, blowback", 1964, "dcam", "14439.90", "RIFLE RUGER 10/22 CAL .22",
-    "",
+    "imagenes/Ruger_10_22.webp",
     "El rifle semiautomático .22 más popular de la historia, fiable y personalizable, con cargador rotativo. Libre adquisición civil."),
   mk(152, "Weatherby Orion", "Weatherby", "escopeta", "EE.UU.", "12 GA", "2", "3.3 kg", "1170mm", "Sobrepuesta (acción quebrada)", 2018, "dcam", "33279.26", "ESC. SOB. WEATHERBY ORION CAL 12",
     "imagenes/Weatherby_Orion.webp?v=2",
@@ -798,10 +798,10 @@ window.DB = [
     "imagenes/Beretta_687_EELL_Diamond_Pigeon.webp",
     "Escopeta de lujo con grabado a buril hecho a mano y maderas selectas, pieza de colección y tiro fino. Adquisición civil."),
   mk(159, "Browning 825 Sporter", "Browning", "escopeta", "Bélgica/EE.UU.", "12 GA", "2", "3.6 kg", "1180mm", "Sobrepuesta (acción quebrada)", 2022, "dcam", "66268.93", "ESC. SOB. BROWNING 825 SPORTER",
-    "",
+    "imagenes/Browning_825_Sporter.webp",
     "Sobrepuesta deportiva con culata ajustable y maderas seleccionadas, sucesora de la 725. Adquisición civil."),
   mk(160, "Browning B525 Sporter", "Browning", "escopeta", "Bélgica/EE.UU.", "12 GA", "2", "3.5 kg", "1180mm", "Sobrepuesta (acción quebrada)", 2016, "dcam", "51218.54", "ESC. SOB. BROWNING B525 SPORTER",
-    "",
+    "imagenes/Browning_B525_Sporter.webp",
     "Clásica sobrepuesta Browning de báscula baja, muy apreciada para sporting y caza. Adquisición civil."),
   mk(161, "Winchester SXP", "Winchester", "escopeta", "Turquía", "12 GA", "4+1", "3.2 kg", "1232mm", "Acción de bomba (corredera)", 2009, "dcam", "14048.45", "ESC. A BOMBA WINCHESTER SXP",
     "imagenes/Winchester_SXP.webp",
@@ -868,11 +868,11 @@ window.DB = [
     "Rifle de cerrojo Winchester XPR con culata thumbhole laminada, calibre .30-06 Springfield. Versátil para caza mayor. Adquisición civil."),
 
   mk(178, "Huglu Renova", "Huglu", "escopeta", "Turquía", "12 GA", "4+1", "3.0 kg", "1230mm", "Semi-auto inercial", 2017, "dcam", "15996.42", "ESCOPETA SEMI CAL 12 HUGLU RENOVA VBN",
-    "",
+    "imagenes/Huglu_Renova.webp",
     "Escopeta semiautomática inercial turca Huglu Renova calibre 12, acabado VBN. Opción económica y confiable para caza y tiro deportivo. Adquisición civil."),
 
   mk(179, "Mendoza RM22-6000 Commander", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2850g", "1020mm", "Semi-auto, acabado camuflaje Commander", 2022, "dcam", "9760.66", "RIFLE 22 MENDOZA RM22-6000 CAMUFLAJE COMMANDER",
-    "",
+    "imagenes/Mendoza_RM22-6000_Commander.webp",
     "Rifle semiautomático mexicano Mendoza RM22-6000 en .22 LR con acabado camuflaje Commander y leyenda S.D.N. Ideal para iniciación, plinking y control de plaga. Adquisición civil."),
 
   // ── ALTAS del inventario DCAM 6-jul-2026 ─────────────────────────────────
@@ -907,10 +907,10 @@ window.DB = [
     "imagenes/Weatherby_307_Range_XP_.30-06.webp?v=2",
     "Rifle de cerrojo Modelo 307 Range XP 2.0 en .30-06 Sprg, cañón de 24 pulgadas con freno de boca. Adquisición civil."),
   mk(190, "System Defence SD-15 Combat", "System Defence", "carabina", "Israel", "5.56x45mm", "30", "3.0 kg", "700mm", "Semi-auto, plataforma AR-15", 2022, "ejercito", "20620.40", "FUSIL 5.56 SYSTEM DEFENSE SD-15/COMBAT",
-    "",
+    "imagenes/System_Defence_SD-15_Combat.webp",
     "Fusil de asalto SD-15/Combat con cañón de 7.5 pulgadas, culata retráctil de 6 posiciones y guardamanos M-LOK. Calibre 5.56: uso reservado a Fuerzas Armadas."),
   mk(191, "System Defence SD-15 Tactical", "System Defence", "carabina", "Israel", "5.56x45mm", "30", "3.1 kg", "780mm", "Semi-auto, plataforma AR-15", 2022, "ejercito", "25562.51", "FUSIL CAL 5.56 X 45mm SD-15TAC SYSTEM D",
-    "",
+    "imagenes/System_Defence_SD-15_Tactical.webp",
     "Fusil de asalto SD-15/Tactical con cañón de 11 pulgadas, culata retráctil de 6 posiciones y guardamanos M-LOK. Calibre 5.56: uso reservado a Fuerzas Armadas."),
   mk(192, "Taurus GX2", "Taurus", "pistola", "Brasil", "9mm Parabellum", "13+1", "560g", "165mm", "Semi-auto, striker-fired", 2024, "ejercito", "6427.13", "PIST.F.C.TAURUSGX2,CAL.9MM",
     "imagenes/Taurus_GX2.webp",
@@ -987,7 +987,7 @@ window.DB = [
     "imagenes/Armsan_A636.webp",
     "Escopeta semiautomática calibre .410 de la serie A600 de Armsan, con cañón de 66 cm, cinta ventilada y acabado madera. Retroceso suave para iniciación y caza menor. Adquisición civil."),
   mk(216, "Trejo 2GT", "Trejo", "pistola", "México", ".22 LR", "11", "800g", "190mm", "Semi-auto, acción simple", 2017, "dcam", "12369.47", "PISTOLA CAL. 22\" L.R. TREJO MOD. 2GT",
-    "",
+    "imagenes/Trejo_2GT.webp",
     "Pistola semiautomática mexicana de Armas Trejo en .22 LR, de acción simple, construida totalmente en acero con acabado pavón negro y cargadores de 11 cartuchos. Adquisición civil."),
   mk(217, "CZ P-07 Kadet", "Ceska Zbrojovka", "pistola", "Rep. Checa", ".22 LR", "10+1", "560g", "191mm", "Semi-auto, blowback, SA/DA", 2017, "dcam", "10736.86", "PIST.CAL .22 LR CESKA CZ P-07 KADET.",
     "",
@@ -1001,7 +1001,7 @@ window.DB = [
     "imagenes/013_Beretta_80x_Cheetah.webp?v=2",
     "Versión en acabado bronce de la Beretta 80X Cheetah en .380 ACP (9 corto), con un cargador de servicio y uno adicional de 13 cartuchos. Renacimiento moderno de la serie 80, fabricada en Italia. Adquisición civil."),
   mk(220, "System Defence C9 Compact", "System Defence", "pistola", "Israel", "9mm Parabellum", "15+1", "780g", "188mm", "Semi-auto, striker-fired", 2020, "ejercito", "10449.81", "PISTOLA CAL 9mm SYSTEM DEFENCE C102mm",
-    "",
+    "imagenes/System_Defence_C9_Compact.webp",
     "Versión compacta de la pistola C9 de System Defence en 9x19 mm, con cañón de 102 mm. Calibre 9mm: restringido a Fuerzas Armadas."),
   mk(221, "CZ BREN 2 (fusil automático)", "Ceska Zbrojovka", "carabina", "Rep. Checa", "5.56x45mm", "30", "2990g", "577–807mm", "Selectivo (semi/auto), pistón corto", 2015, "ejercito", "50313.41", "FUSIL 5.56x45 mm CESKA CZ BREN2 C11",
     "",
@@ -1019,7 +1019,7 @@ window.DB = [
     "imagenes/Winchester_SXP_Camo.webp",
     "Escopeta de corredera Winchester SXP calibre 12 en versión camo, con culata y guardamano sintéticos camuflados y cañón de 71 cm (28 pulgadas). Fabricada en Turquía para Winchester; su acción asistida por inercia permite un ciclo muy rápido. Adquisición civil."),
   mk(226, "Huglu Renova Camo", "Huglu", "escopeta", "Turquía", "12 GA", "4+1", "3.0 kg", "1230mm", "Semi-auto inercial", 2017, "dcam", "17758.26", "ESCOPETA SEMIAUT CAL12 HUGLU RENOV CAMO",
-    "",
+    "imagenes/Huglu_Renova_Camo.webp",
     "Escopeta semiautomática inercial turca Huglu Renova calibre 12 en versión camo, con culata y guardamano camuflados y cañón de 71 cm (28 pulgadas). Adquisición civil."),
 
   // ── ALTAS del issue #161 (decisiones de Saulo, 14-sep-2026) ──────────────
@@ -1133,13 +1133,13 @@ window.DB = [
     "imagenes/Breda_930i_Sporting_cal_12.webp",
     "Escopeta semiautomática de un cañón Breda 930i versión Sporting calibre 12, cañón de 71 cm (28\"), culata ajustable, culata y guardamano de madera, boquillas intercambiables. Adquisición civil."),
   mk(252, "Foldar Mobetta CCR", "Foldar Mobetta", "rifle", "", ".223 Wylde", "15/30", "", "", "Automático, cañón corto", 2024, "ejercito", "167045.52", "RIF.CAÑ.COR.CAL.223.W YLDE,.FOL.MOBETTA",
-    "",
+    "imagenes/Foldar_Mobetta_CCR.webp",
     "Rifle de cañón corto Foldar Mobetta 2024 modelo CCR, calibre .223 Wylde, automático, con dos cargadores (uno de 15 y uno de 30 municiones) y mochila. Calibre .223/5.56 restringido a Fuerzas Armadas."),
   mk(253, "Reximex TRX9", "Reximex", "pistola", "", "9mm Parabellum", "15+1", "", "", "Semi-auto", null, "ejercito", "9648.19", "PISTOLA CAL. 9MM REXIMEX MOD. TRX9",
     "",
     "Pistola semiautomática Reximex TRX9 calibre 9x19 mm, color negro, con tres cargadores de 15 cartuchos. Calibre 9mm restringido a Fuerzas Armadas."),
   mk(254, "Browning B5.25S Sporter", "Browning", "escopeta", "", "12 GA", "", "", "", "Sobrepuesta (acción quebrada)", null, "dcam", "45024.89", "ESC.S.2C,BROWNING.CAL.12.B5.25S.MAD.71CM",
-    "",
+    "imagenes/Browning_B5.25S_Sporter.webp",
     "Escopeta sobrepuesta de dos cañones Browning B5.25S, calibre 12 GA, madera. Ficha desprendida de la B5.25SL (#160) al agotarse esa variante representante en el inventario DCAM del 22-sep-2026 (regla de conciliación 13-sep-2026)."),
 ];
 
