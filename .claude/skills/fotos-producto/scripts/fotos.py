@@ -318,7 +318,36 @@ def orientacion(alfa):
     return hacia, round(ang, 1)
 
 
-def metricas(rgb_orig, alfa_orig, rgba_final, origen_px, peso_kb):
+def parche_de_fondo(rgba):
+    """Un hueco del arma —el guardamonte— que la mascara dejo RELLENO con el
+    fondo claro. Sobre el hero oscuro se ve como un parche blanco pegado al arma
+    (medido: la CZ P-10 S del 25-sep). El semaforo no lo veia: `huecos_px` cuenta
+    los huecos que SI quedaron, y basta con que sobreviva uno para no dar cero.
+
+    Lo que distingue el fondo colado del arma que de verdad es blanca —un
+    revolver de acero inoxidable, un grabado— es que el fondo es PLANO. Medido
+    sobre las 128 del 25-sep: CZ P-10 S 0.23 de desviacion dentro del parche;
+    Taurus 856 inox 2.75, Glock 25 con grabado blanco 1.58, Taurus PT58 cromado
+    3.80. Ninguna otra de las 128 llego a tener parche.
+
+    Devuelve el % del arma cubierto por ese parche, o 0.0 si tiene textura.
+    """
+    alfa, rgb = rgba[:, :, 3], rgba[:, :, :3].astype(np.float32)
+    claro = (alfa > 200) & (rgb.min(axis=2) > 235)
+    k = 9
+    ii = np.cumsum(np.cumsum(claro.astype(np.int32), 0), 1)
+    dens = (ii[k:, k:] - ii[:-k, k:] - ii[k:, :-k] + ii[:-k, :-k]) / (k * k)
+    nucleo = np.zeros_like(claro)
+    nucleo[k // 2:k // 2 + dens.shape[0], k // 2:k // 2 + dens.shape[1]] = dens > 0.97
+    if nucleo.sum() < 50:
+        return 0.0
+    lum = 0.299 * rgb[:, :, 0] + 0.587 * rgb[:, :, 1] + 0.114 * rgb[:, :, 2]
+    if float(lum[nucleo].std()) >= 1.0:      # tiene textura: es el arma, no el fondo
+        return 0.0
+    return round(100 * float(nucleo.sum()) / max(1, int((alfa > 128).sum())), 2)
+
+
+def metricas(rgb_orig, alfa_orig, rgba_final, origen_px, peso_kb, alfa_de_fabrica=False):
     alfa = rgba_final[:, :, 3]
     rgb = rgba_final[:, :, :3]
     lum = lambda px: (0.299 * px[:, 0] + 0.587 * px[:, 1] + 0.114 * px[:, 2])
@@ -396,6 +425,14 @@ def metricas(rgb_orig, alfa_orig, rgba_final, origen_px, peso_kb):
     else:
         m["mordida"] = None
 
+    m["parche_fondo"] = parche_de_fondo(rgba_final)
+    # Una foto que YA viene recortada de fabrica toca sus cuatro bordes por
+    # construccion y no tiene fondo que medir: sus pixeles de fuera son
+    # transparentes, no una escena. Aplicarle `borde_recortado` y `fondo_sigma`
+    # rechazaba en rojo las siete Breda del 25-sep, que son PNG de catalogo
+    # impecables. El semaforo lee esta bandera para saltarse esas dos.
+    m["alfa_de_fabrica"] = bool(alfa_de_fabrica)
+
     m["canon"], m["inclinacion"] = orientacion(alfa)
     m["aspecto"] = round(rgba_final.shape[1] / max(1, rgba_final.shape[0]), 2)
     m["resolucion"] = max(rgba_final.shape[:2])
@@ -435,7 +472,13 @@ def semaforo(m):
     if m["halo"] > 120:                       mal("halo", "rojo", f"halo flagrante (+{m['halo']})")
     elif m["halo"] > 18:                      mal("halo", "ambar", f"halo claro (+{m['halo']}), revisar borde")
     if m["halo"] < -25:                       mal("halo", "rojo", f"borde ennegrecido ({m['halo']})")
-    if m["borde_recortado"] > 0.5:            mal("borde_recortado", "rojo", f"arma cortada en el origen ({m['borde_recortado']}%)")
+    if not m.get("alfa_de_fabrica") and m["borde_recortado"] > 0.5:
+        mal("borde_recortado", "rojo", f"arma cortada en el origen ({m['borde_recortado']}%)")
+    # Un hueco relleno con el fondo: el semaforo no lo veia porque `huecos_px`
+    # solo exige que sobreviva UNO. Umbral medido sobre 128 fotos: la unica con
+    # parche plano de verdad marco 3.21%, y ninguna sana paso de 0.03%.
+    if m.get("parche_fondo", 0) > 0.3:
+        mal("parche_fondo", "rojo", f"hueco relleno con el fondo ({m['parche_fondo']}% del arma)")
     # Ya no hay rama "dejo fondo": la mordida esta acotada a 1 por construccion.
     # Ese modo lo cubre `alpha_pct > 92` / `llenado`. Si vuelve a aparecer una
     # mascara que se traga el fondo sin disparar ninguna de las dos, medir antes
@@ -449,7 +492,10 @@ def semaforo(m):
     # ninguna foto BUENA paso de 20.0, y por encima de 25 solo hay malas — dos con
     # una persona sosteniendo el arma (CZ 600 American 41.3, Retay Gordion 50.6),
     # que antes salian ambar y se colaban a la aprobacion. Por eso ahora bloquea.
-    if m["fondo_sigma"] > 25:                 mal("fondo_sigma", "rojo", f"foto de escena, no de producto (sigma {m['fondo_sigma']})")
+    # Con alfa de fabrica no hay fondo que medir: lo de fuera del arma es
+    # transparente y el RGB que queda ahi es basura del codificador.
+    if m.get("alfa_de_fabrica"):              pass
+    elif m["fondo_sigma"] > 25:               mal("fondo_sigma", "rojo", f"foto de escena, no de producto (sigma {m['fondo_sigma']})")
     elif m["fondo_sigma"] > 12:               mal("fondo_sigma", "ambar", f"fondo con textura (sigma {m['fondo_sigma']})")
     if m["peso_kb"] > 140:                    mal("peso_kb", "ambar", f"pesa {m['peso_kb']} KB")
     if m["luminancia_sujeto"] < 45:           mal("luminancia", "ambar", f"arma muy oscura (L {m['luminancia_sujeto']})")
@@ -493,7 +539,14 @@ def preparar(args):
 
         t0 = time.time()
         with Image.open(origen) as im:
-            im = ImageOps.exif_transpose(im)
+            # Un EXIF corrupto no puede tumbar la tanda entera: los PNG de Breda
+            # traen uno que Pillow no sabe leer (ValueError en fromhex) y se
+            # llevaron por delante 6 de 22 armas a medio lote. Sin EXIF legible
+            # no hay rotacion que aplicar, que es justo lo que hace este paso.
+            try:
+                im = ImageOps.exif_transpose(im)
+            except Exception as exc:                       # noqa: BLE001
+                print(f"      (EXIF ilegible en {origen.name}, sigo sin rotar: {exc})")
             plano = aplanar(im)
             rgb_orig = np.array(plano)
             alfa_previo = np.array(im.convert("RGBA"))[:, :, 3] if im.mode in ("RGBA", "LA", "P") else None
@@ -515,7 +568,8 @@ def preparar(args):
         dst = TRABAJO / "3-final" / f"{nombre}.webp"
         final.save(dst, "WEBP", quality=args.calidad, method=6)
 
-        m = metricas(rgb_orig, alfa, np.array(final), px, dst.stat().st_size / 1024)
+        m = metricas(rgb_orig, alfa, np.array(final), px, dst.stat().st_size / 1024,
+                     alfa_de_fabrica=de_fabrica)
         color, notas, niveles = semaforo(m)
         informe.append({**_ficha(arma), "estado": "PROCESADA", "origen": str(origen),
                         "origen_px": px, "archivo": dst.name,
@@ -722,7 +776,8 @@ def verificar(args):
 _BASE = dict(canon="derecha", resolucion=1200, llenado=35.0, alpha_pct=30.0,
              huecos_px=800, huecos_pct=2.0, huecos_rel=1.5, halo=5.0,
              dureza_borde=2.0, borde_recortado=0.1, fondo_sigma=8.0, mordida=0.99,
-             peso_kb=90.0, luminancia_sujeto=70.0)
+             peso_kb=90.0, luminancia_sujeto=70.0, parche_fondo=0.0,
+             alfa_de_fabrica=False)
 
 
 def autocheck(args=None):
@@ -750,6 +805,16 @@ def autocheck(args=None):
     assert col(mordida=0.92) == "rojo" and col(mordida=0.93) == "verde"
     assert col(llenado=19.0) == "rojo" and col(alpha_pct=93.0) == "rojo"
     assert col(borde_recortado=0.6) == "rojo", "arma cortada en el origen"
+    # 25-sep-2026: las siete Breda son PNG de catalogo con alfa de fabrica. Tocan
+    # sus cuatro bordes por construccion y no tienen fondo que medir, asi que esas
+    # dos reglas no les aplican; el semaforo las rechazaba en rojo a las siete.
+    assert col(borde_recortado=0.6, alfa_de_fabrica=True) == "verde",         "con alfa de fabrica, tocar el borde no es estar cortada"
+    assert col(fondo_sigma=41.3, alfa_de_fabrica=True) == "verde",         "con alfa de fabrica no hay fondo que medir"
+    # El hueco del guardamonte relleno con el fondo: la CZ P-10 S del 25-sep
+    # marco 3.21% y se colo como ambar, porque `huecos_px` solo exige que
+    # sobreviva UN hueco. Ninguna de las otras 127 de ese dia paso de 0.03%.
+    assert col(parche_fondo=3.21) == "rojo", "hueco relleno con el fondo"
+    assert col(parche_fondo=0.03) == "verde", "un parche minimo no bloquea"
     assert col(canon="izquierda") == "ambar", "avisa, no bloquea (las seis Mendoza RM22)"
 
     # `niveles` es lo que pinta la hoja: si una regla no lo rellena, su badge sale
