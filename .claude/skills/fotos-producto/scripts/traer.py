@@ -153,7 +153,15 @@ def manifiesto(ruta, carpeta=None):
             print(f"  {stem:10} FALLO  {r['url_imagen'][:70]}")
             continue
         r["archivo"], r["px"] = destino.name, f"{w}x{h}"
-        if min(w, h) < MIN_LADO:
+        # Se mide el lado MAYOR, no el menor. El recorte centra el arma en un
+        # lienzo cuadrado cuyo lado sale del mayor, y es ESE el que compara
+        # `fotos.py` contra MIN_LADO. Con el lado menor, un arma apaisada se
+        # descartaba por el alto de su encuadre: el 25-sep escondio las cinco
+        # Armsan (2000x650, salen a 1200), catorce de Huglu y System Defence, y
+        # tres CZ que llevaban el original en disco desde la manana. Aqui solo
+        # se filtra lo inservible; el juez de verdad es el semaforo, que mide el
+        # lienzo ya recortado.
+        if max(w, h) < MIN_LADO:
             r["estado"] = "RESUSTITUIR"
             r["nota"] = f"origen {w}x{h}, por debajo de {MIN_LADO}. " + (r.get("nota") or "")
         print(f"  {stem:10} {r['estado']:12} {w}x{h}  {destino.name}")
