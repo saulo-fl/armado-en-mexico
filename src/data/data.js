@@ -187,7 +187,7 @@ window.DB = [
     "Evolución de la LCP con capacidad duplicada manteniendo dimensiones subcompactas. Excelente opción de defensa personal para portación discreta."),
 
   mk(7, "SIG Sauer P365", "SIG Sauer", "pistola", "EE.UU.", ".380 ACP", "10+1", "498g", "147mm", "Semi-auto, striker-fired micro", 2018, "dcam", "11421.02", "PISTOLA CAL .380 SIG SAUER P365 NIT",
-    "imagenes/007_SIG_Sauer_P365.webp",
+    "imagenes/007_SIG_Sauer_P365.webp?v=2",
     "Revolucionó el segmento de subcompactas. Acabado nitrón resistente a la corrosión. Versión .380 disponible en México para civiles."),
 
   mk(8, "CZ P-07", "Ceska Zbrojovka", "pistola", "Rep. Checa", ".380 ACP", "15+1", "800g", "185mm", "Semi-auto, DA/SA con Omega trigger", 2012, "dcam", "11436", "PISTOLA CAL .380 CESKA CZ P-07",
@@ -237,7 +237,7 @@ window.DB = [
     "Pistola .22 LR de competición americana. Cañón fijo, gatillo de competencia. Una de las pistolas .22 más vendidas del mundo para tiro deportivo."),
 
   mk(18, "SIG Sauer P322", "SIG Sauer", "pistola", "EE.UU.", ".22 LR", "20+1", "478g", "188mm", "Semi-auto, blow-back", 2022, "dcam", "14443.75", "PISTOLA 22 LR SIG SAUER P322 NIT NEG",
-    "imagenes/017_SIG_Sauer_P322.webp",
+    "imagenes/017_SIG_Sauer_P322.webp?v=2",
     "Pistola .22 LR moderna de SIG con capacidad de 20 cartuchos. Acabado nitrón, óptica-ready. Excelente herramienta de entrenamiento y deporte."),
 
   // ═══════════════════════════════════════════════════════════
@@ -347,7 +347,7 @@ window.DB = [
     "Versión de competición de la P320. Cañón extendido, mira fibra óptica. Calibre 9mm: restringido."),
 
   mk(44, "SIG P320 Coyote", "SIG Sauer", "pistola", "EE.UU.", "9mm Parabellum", "17+1", "830g", "203mm", "Semi-auto, striker-fired", 2017, "ejercito", "17448.64", "PISTOLA 9MM COYOTE SIG SAUER P320",
-    "imagenes/090_SIG_P320_Coyote.webp",
+    "imagenes/090_SIG_P320_Coyote.webp?v=2",
     "Variante color coyote tan, similar a la M17 militar. Calibre 9mm: restringido a Fuerzas Armadas."),
 
   mk(45, "Beretta PX4 Storm 9mm", "Beretta", "pistola", "Italia", "9mm Parabellum", "17+1", "785g", "192mm", "Semi-auto, DA/SA cañón rotativo", 2004, "ejercito", "10549.59", "PISTOLA CAL 9 MM BERETTA M PX4",
@@ -479,7 +479,7 @@ window.DB = [
     "Línea de carabinas civiles AR-15 en EE.UU. En México, calibre 5.56: exclusivo de Fuerzas Armadas."),
 
   mk(72, "SIG 516", "SIG Sauer", "carabina", "EE.UU.", "5.56x45mm", "30", "3500g", "780mm", "Semi-auto, pistón corto", 2010, "ejercito", "40201.06", "RIFLE 5.56X45 SIG SAUER M SIG 516",
-    "imagenes/102_SIG_516.webp",
+    "imagenes/102_SIG_516.webp?v=2",
     "Sistema de pistón corto en plataforma AR. Mayor confiabilidad. Exclusivo de Fuerzas Armadas."),
 
   mk(73, "Rock River Arms LAR-15", "Rock River Arms", "carabina", "EE.UU.", "5.56x45mm", "30", "3000g", "730mm", "Semi-auto, AR-15 corto", 2012, "ejercito", "34957.21", "FUSIL 5.56X45 ROCK RIVER ARMS C 10.5\"",
@@ -487,11 +487,11 @@ window.DB = [
     "Versión corta tipo PDW para operaciones tácticas. Restringido a Fuerzas Armadas."),
 
   mk(74, "IWI Galil ACE 52", "IWI", "carabina", "Israel", "7.62x51mm", "20", "4000g", "950mm", "Semi-auto, basado en AK", 2010, "ejercito", "34957.21", "FUSIL CAL 7.62X51 mm GALIL IWI ACE 52",
-    "imagenes/104_IWI_Galil_ACE_52.webp",
+    "imagenes/104_IWI_Galil_ACE_52.webp?v=2",
     "Evolución moderna del Galil israelí en 7.62 OTAN. Robustez probada en combate. Exclusivo militar."),
 
   mk(75, "IWI Galil ACE 31", "IWI", "carabina", "Israel", "7.62x39mm", "30", "3500g", "780mm", "Semi-auto, basado en AK", 2014, "ejercito", "39023.46", "FUSIL 7.62X39 mm IWI M GALIL ACE 31",
-    "imagenes/105_IWI_Galil_ACE_31.webp",
+    "imagenes/105_IWI_Galil_ACE_31.webp?v=2",
     "Galil ACE en calibre del bloque oriental 7.62x39. Compatible con cargadores AK. Uso exclusivo militar."),
 
   mk(76, "IWI X95", "IWI", "carabina", "Israel", "5.56x45mm", "30", "3300g", "590mm", "Semi-auto, bullpup", 2009, "ejercito", "47966.28", "FUSIL 5.56X45 mm IWI MOD X95",
@@ -533,7 +533,7 @@ window.DB = [
     "Subametralladora israelí compacta. Exclusiva de Fuerzas Armadas."),
 
   mk(84, "IWI UZI Pro", "IWI", "carabina", "Israel", "9mm Parabellum", "20", "2300g", "470mm", "Subametralladora, blow-back compacta", 2010, "ejercito", "16634.92", "SUBAMETRALLADORA 9X19 I.W.I UZI PRO",
-    "imagenes/111_IWI_UZI_Pro.webp",
+    "imagenes/111_IWI_UZI_Pro.webp?v=2",
     "Versión moderna del histórico UZI. Compacta y confiable. Exclusiva militar."),
 
   // ═══════════════════════════════════════════════════════════
@@ -564,7 +564,7 @@ window.DB = [
     "Gama alta Senax DL de AYA. Bloques laterales grabados, madera selecta. Pieza de colección y exhibición."),
 
   mk(91, "Armsan P612 ASN", "Armsan", "escopeta", "Turquía", "12 GA", "5+1", "2900g", "1230mm", "Acción de bomba (corredera)", 2013, "dcam", "9620.22", "ESCOPETA CAL 12 ARMSAN P612 ASN",
-    "imagenes/048_Armsan_P612_ASN.webp",
+    "imagenes/048_Armsan_P612_ASN.webp?v=2",
     "Escopeta de bomba (corredera) turca Armsan P612 calibre 12, con culata y guardamano sintéticos negros («A.S.N.») y cañón de 71 cm. Económica y robusta para caza y tiro. Adquisición civil."),
 
   mk(92, "Armsan P612 AC", "Armsan", "escopeta", "Turquía", "12 GA", "5+1", "2900g", "1230mm", "Acción de bomba (corredera)", 2013, "dcam", "10906.65", "ESCOPETA CAL 12 ARMSAN P612 AC",
@@ -649,13 +649,13 @@ window.DB = [
 
   // ── ARMAS OTCA (Monterrey) — inventario 26-sep-2025, no presentes en el catálogo DCAM ──
   mk(112, "IWI Galil ACE 21N", "IWI", "carabina", "Israel", "5.56x45mm", "30+1", "3.3 kg", "845 mm", "Selectivo, pistón de gas", 2012, "ejercito", "36705.07", "FUSIL DE ASALTO CALIBRE 5.56 x 45 mm. (.223\") MARCA I.W.I. MODELO GALIL ACE 21N",
-    "",
+    "imagenes/IWI_Galil_ACE_21N.webp",
     "Versión compacta del fusil Galil ACE israelí en 5.56 OTAN, con cañón corto. Plataforma de pistón de gas robusta derivada del AK; de uso exclusivo de las Fuerzas Armadas."),
   mk(113, "CZ Scorpion EVO 3 A1", "Česká Zbrojovka", "carabina", "Rep. Checa", "9mm Parabellum", "20+1", "1.9 kg", "625 mm", "Blowback, selectivo", 2009, "ejercito", "28939.58", "SUBAMETRALLADORA AUTOMATICA CALIBRE 9X19 MM MARCA CESKA ZBROJOVKA MODELO CZ SCORPION EVO 3 A1",
     "imagenes/CZ_Scorpion_EVO_3_A1.webp",
     "Subfusil checo de 9 mm con armazón de polímero y disparo selectivo, sucesor del Škorpion. Cañón de 208 mm y culata plegable; uso exclusivo de las Fuerzas Armadas."),
   mk(114, "SIG MPX", "SIG Sauer", "carabina", "EE.UU.", "9mm Parabellum", "30+1", "2.7 kg", "660 mm", "Gas, cerrojo cerrado, selectivo", 2015, "ejercito", "48602.46", "SUBAMETRALLADORA CALIBRE 9 X 19 mm MARCA SIG SAUER MODELO SIG MPX, STANDARD",
-    "",
+    "imagenes/SIG_MPX.webp",
     "Subfusil de SIG Sauer con sistema de gas de pistón corto y cerrojo cerrado, inusual para un arma de 9 mm, lo que mejora seguridad y suavidad. Uso exclusivo de las Fuerzas Armadas."),
   mk(115, "Benelli Vinci", "Benelli", "escopeta", "Italia", "12 GA", "3+1", "3.0 kg", "1257 mm", "Semi-auto inercial", 2009, "dcam", "61127.13", "ESCOPETA SEMIAUTOMÁTICA CAL. 12 G.A. MARCA BENELLI MODELO VINCI, SUPERSPORT, CAÑÓN DE 28\", SISTEMA COMFORTECH",
     "imagenes/Benelli_Vinci.webp",
@@ -771,7 +771,7 @@ window.DB = [
     "imagenes/Winchester_SXR2_Pump.webp",
     "Rifle de cacería de acción de bomba en .308 Win, de ciclo rápido. Adquisición civil para caza."),
   mk(150, "IWI US Z-15", "IWI", "carabina", "EE.UU.", "5.56x45mm", "30+1", "3.0 kg", "830mm", "Semi-auto, directo de gas (AR-15)", 2021, "ejercito", "28714.85", "FUSIL CAL .5.56 IWI US Z-15",
-    "",
+    "imagenes/IWI_US_Z-15.webp",
     "Carabina AR-15 fabricada por IWI US en 5.56 OTAN, con riel y miras auxiliares. Uso restringido a fuerzas armadas."),
   mk(151, "Ruger 10/22", "Ruger", "rifle", "EE.UU.", ".22 LR", "10+1", "2.3 kg", "940mm", "Semi-auto, blowback", 1964, "dcam", "14439.90", "RIFLE RUGER 10/22 CAL .22",
     "",
@@ -972,19 +972,19 @@ window.DB = [
     "imagenes/CZ_600_American_.243.webp",
     "Rifle de cerrojo CZ 600 American en .243 Win, con culata de madera de estilo americano, cargador de 5 cartuchos y juego de anillos. Adquisición civil."),
   mk(211, "Armsan Phenoma", "Armsan", "escopeta", "Turquía", "12 GA", "5+1", "3.1 kg", "1230mm", "Semi-auto", 2015, "dcam", "15101.51", "ESCOPETA CAL. 12 ARMSAN PHENOMA A.S.N.",
-    "",
+    "imagenes/Armsan_Phenoma.webp",
     "Escopeta semiautomática calibre 12 de un cañón de 71 cm con cinta ventilada, en acabados madera negro, sintético negro y camuflaje. Fabricada en Turquía por Armsan Silah. Adquisición civil."),
   mk(212, "Armsan A612", "Armsan", "escopeta", "Turquía", "12 GA", "5+1", "3.0 kg", "1230mm", "Semi-auto, sistema de gas", 2015, "dcam", "13283.74", "ESCOPETA CAL. 12 ARMSAN P612 A.C.",
-    "",
+    "imagenes/Armsan_A612.webp",
     "Escopeta semiautomática calibre 12 de la serie A600 de Armsan, con cañón de 71 cm, cinta ventilada y acabado madera. Adquisición civil."),
   mk(213, "Armsan A620", "Armsan", "escopeta", "Turquía", "20 GA", "5+1", "2.8 kg", "1230mm", "Semi-auto, sistema de gas", 2015, "dcam", "13283.74", "ESCO.SEMI.CAL.20 ARMSAN A620.CA.71MM",
-    "",
+    "imagenes/Armsan_A620.webp",
     "Escopeta semiautomática calibre 20 de la serie A600 de Armsan, con cañón de 71 cm, cinta ventilada y acabado madera. Más ligera y de menor retroceso que la de calibre 12. Adquisición civil."),
   mk(214, "Armsan A616", "Armsan", "escopeta", "Turquía", "16 GA", "5+1", "2.9 kg", "1230mm", "Semi-auto, sistema de gas", 2018, "dcam", "14737.96", "ESCOPETA CAL. 16 ARMSAN P616 A.C.",
-    "",
+    "imagenes/Armsan_A616.webp",
     "Escopeta semiautomática calibre 16 —un calibre poco común en México— de la serie A600 de Armsan, con cañón de 71 cm, cinta ventilada y acabado madera. Adquisición civil."),
   mk(215, "Armsan A636", "Armsan", "escopeta", "Turquía", ".410 Bore", "5+1", "2.7 kg", "1180mm", "Semi-auto, sistema de gas", 2018, "dcam", "14542.2", "ESCO.SEM.A.U. CAL. ARM.A636 CAL. 410 A.C",
-    "",
+    "imagenes/Armsan_A636.webp",
     "Escopeta semiautomática calibre .410 de la serie A600 de Armsan, con cañón de 66 cm, cinta ventilada y acabado madera. Retroceso suave para iniciación y caza menor. Adquisición civil."),
   mk(216, "Trejo 2GT", "Trejo", "pistola", "México", ".22 LR", "11", "800g", "190mm", "Semi-auto, acción simple", 2017, "dcam", "12369.47", "PISTOLA CAL. 22\" L.R. TREJO MOD. 2GT",
     "",
