@@ -72,7 +72,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": false,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/32acp.webp",
     "desc": "Cartucho pequeño de las pistolas compactas de otra época, todavía frecuente en armas heredadas. Poca energía, retroceso mínimo y munición cada vez más difícil de conseguir."
   },
   {
@@ -172,7 +172,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": false,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/38sw.webp",
     "desc": "No confundir con el .38 Especial: es más corto, más débil y no son intercambiables. Vive en revólveres antiguos y su munición hoy es rara en México."
   },
   {
@@ -200,7 +200,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": false,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/45acp.webp",
     "desc": "El cartucho de la Colt 1911: bala pesada y lenta, que se siente como un empujón más que como un latigazo. Muy querido en el tiro deportivo, pero queda por encima del tope de calibre que la ley mexicana admite a un particular."
   },
   {
@@ -253,7 +253,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": false,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/22wmr.webp",
     "desc": "El fuego anular llevado más lejos: casi el doble de velocidad que el .22 LR conservando un retroceso mínimo. No son intercambiables: la recámara es distinta y el .22 LR no debe dispararse en un .22 Magnum."
   },
   {
@@ -304,7 +304,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": false,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/357mag.webp",
     "desc": "Un .38 Especial alargado y mucho más potente. Por eso un revólver .357 dispara los dos, pero uno de .38 Especial nunca debe disparar .357: no aguanta la presión. Retroceso y estruendo notables."
   },
   {
@@ -331,7 +331,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": false,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/57x28.webp",
     "desc": "Cartucho pequeño y rapidísimo que FN creó para la P90 y la Five-seveN. Se comporta más como un cartucho de rifle en miniatura que como uno de pistola: muy poco retroceso y trayectoria plana."
   },
   {
@@ -405,7 +405,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": true,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/223rem.webp",
     "desc": "Versión civil del 5.56×45 de la OTAN. Comparten medidas pero no presión ni recámara: un rifle marcado .223 no debe disparar munición militar 5.56, aunque el cartucho entre. Retroceso suave y trayectoria muy tensa."
   },
   {
@@ -481,7 +481,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": false,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/3030win.webp",
     "desc": "El cartucho del rifle de palanca, con más de un siglo encima y todavía de los más vistos en el campo mexicano. Alcance corto frente a los modernos, pero de sobra para el monte cerrado."
   },
   {
