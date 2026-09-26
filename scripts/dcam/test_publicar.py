@@ -34,7 +34,7 @@ class Falso(publicar.Entorno):
 
 PLAN = {"catalogo": "armas", "fecha": "2026-10-01", "pdf": "/x.pdf", "v": "dcam20261001",
         "seguros": [{"id": 1, "precio": 9641.23, "existencia": 4}], "esperado_armas": 225}
-VIVO = '<script src="data.js?v=dcam20261001"></script><script src="data-precios.js?v=dcam20261001"></script>'
+VIVO = '<script src="data-precios.js?v=dcam20261001"></script><script src="data.js?v=dcam20261001"></script>'
 PAGINAS = {publicar.alias_preview("bot/dcam-arm-20261001"): VIVO, "https://armado.mx/": VIVO,
            "https://armado.mx/api/state": '{"armas": [' + ",".join(['{"id": %d}' % i for i in range(225)]) + "]}",
            "https://armado.mx/data-precios.js?v=dcam20261001":
@@ -43,7 +43,7 @@ RESP = {"gh pr create --base main": (0, "https://github.com/saulo-fl/armado-en-m
         "gh pr create --base develop": (0, "https://github.com/saulo-fl/armado-en-mexico/pull/302\n"),
         "resembrar.js armas --aplicar": (0, "OK: D1 coincide con el codigo."),
         "resembrar.js armas": (0, "Difieren. Repite con --aplicar"),
-        "datos.js aplicar": (0, '{"archivos": ["src/data/data-precios.js", "src/data/data.js"]}')}
+        "datos.js aplicar": (0, '{"archivos": ["src/data/data-precios.js"]}')}
 
 
 def test_flujo_completo_hasta_hecho():

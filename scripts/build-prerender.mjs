@@ -44,8 +44,8 @@ mkdirSync(OUT, { recursive: true });
 const win = {};
 const ctx = createContext({ window: win, console });
 ctx.window = win;
-for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
-                 'data-legal.js', 'data-entrevista.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
+for (const f of ['data-precios.js', 'data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
+                 'data-legal.js', 'data-entrevista.js', 'data-accesorios.js', 'data-municiones.js']) {
   runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
 runInContext(readFileSync(join(SRC, 'lib', 'legal.js'), 'utf8'), ctx, { filename: 'legal.js' });
@@ -649,19 +649,3 @@ const conFecha = enSitemap.filter((p) => p.lastmod).length;
 const distintas = new Set(enSitemap.map((p) => p.lastmod).filter(Boolean)).size;
 console.log(`sitemap:   ${enSitemap.length} URLs · ${conFecha} con lastmod`
   + ` · ${distintas} fechas distintas (de los inventarios, no de git)`);
-
-// ─── 8b. cifras.json ────────────────────────────────────────────────────────
-// Las cifras del README las escribe QUIEN LAS CUENTA. `scripts/actualizar-readme.mjs`
-// las pinta y no cuenta nada: así no hay una segunda aritmética que se
-// desincronice en silencio, ni una CUARTA copia del truco de node:vm de §1
-// (ya está en resembrar.js y auditar.js).
-// No parsear el console.log de arriba: es prosa, se rompería al retocarla.
-writeFileSync(join(OUT, 'cifras.json'), JSON.stringify({
-  armas: ARMAS.length,
-  accesorios: ACCESORIOS.length,
-  municiones: MUNICIONES.length,
-  paginas: paginas.length,
-  urls: enSitemap.length,
-  conFecha,
-  inventario: masReciente(enSitemap.map((p) => p.lastmod)),
-}, null, 2) + '\n', 'utf8');

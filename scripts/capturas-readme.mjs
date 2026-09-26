@@ -145,7 +145,7 @@ const GLOCK = '/pistolas/glock-25';
 
 const TRABAJOS = {
   async portada() {
-    const [esc, mov] = await Promise.all([pantalla(GLOCK, ESCRITORIO), pantalla(GLOCK, MOVIL)]);
+    const [esc, mov] = await Promise.all([pantalla('/comparar/glock-25-vs-glock-28', ESCRITORIO), pantalla(GLOCK, MOVIL)]);
     const logo = dataUri(readFileSync(LOGO), 'webp');
     await montar('portada', 1600, 900, `
       <div class="folder" style="left:720px;top:120px;width:840px;height:720px"></div>
@@ -153,8 +153,8 @@ const TRABAJOS = {
         <img src="${logo}" style="width:120px;border-radius:22px;box-shadow:0 12px 30px -12px rgba(0,0,0,.5)">
         <h1 style="font:800 88px/.92 Archivo;font-stretch:75%;letter-spacing:-.01em;margin:34px 0 26px">ARMADO<br>EN MÉXICO</h1>
         <span class="dymo">ENCICLOPEDIA DE ARMAS LEGALES</span>
-        <p style="font:400 25px/1.45 Archivo;margin-top:30px;max-width:540px">Precio oficial, existencias por armería, clasificación legal y calibre de cada arma,
-          con el inventario DCAM u OTCA del que sale y su fecha.</p>
+        <p style="font:400 25px/1.45 Archivo;margin-top:30px;max-width:540px">Conoce tus derechos, los trámites necesarios, precios y disponibilidad de las armas
+          que ofrece la Secretaría de la Defensa a través de sus armerías DCAM y OTCA.</p>
         <p style="font:700 20px/1 'JetBrains Mono';margin-top:28px;color:#173A32">armado.mx</p>
       </div>
       <div class="laptop" style="left:680px;top:190px;width:820px"><div class="tapa"><img src="${dataUri(esc)}"></div><div class="base"></div></div>
