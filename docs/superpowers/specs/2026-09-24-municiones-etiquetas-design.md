@@ -72,4 +72,3 @@ Quedan fuera:
 6. El foco de teclado sigue siendo visible y activa la luz del producto.
 7. Pasan el test específico de mesa, el build, la auditoría de inventario, la
    auditoría de contraste y el smoke en Chrome.
-

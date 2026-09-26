@@ -4,7 +4,7 @@
 
 **Goal:** Sustituir en `/municiones` el letrero amarillo de cada producto por la etiqueta de cartón ya aprobada, con condición legal, especificaciones y precio por unidad.
 
-**Architecture:** `MesaPuestos` ganará un carril opcional de etiquetas alineado con las mismas columnas de cada mesa; sin ese prop conservará exactamente el DOM y la apariencia de Accesorios. `PuestoPieza` hará opcionales el letrero y la vara, mientras `MunicionesScreen` compondrá la etiqueta con las clases `.amx-etiqueta*` y los datos existentes, sin duplicar fuentes de precio o legalidad.
+**Architecture:** `MesaPuestos` ganará un carril opcional de etiquetas alineado con las mismas columnas de cada mesa; sin ese prop conservará el comportamiento y la apariencia de Accesorios, aunque la implementación incorpore un envoltorio interno neutro. `PuestoPieza` hará opcionales el letrero y la vara, mientras `MunicionesScreen` compondrá la etiqueta con las clases `.amx-etiqueta*` y los datos existentes, sin duplicar fuentes de precio o legalidad.
 
 **Tech Stack:** React 18 global con JSX clásico, Babel CLI, CSS plano, `node:test`, Puppeteer/Chrome para smoke.
 
@@ -397,4 +397,3 @@ Commit:
 ```powershell
 git add docs/DESIGN.md docs/superpowers/specs/2026-09-24-municiones-etiquetas-design.md docs/superpowers/plans/2026-09-24-municiones-etiquetas.md; git commit -m "docs: fijar etiquetas de la vitrina de municiones"
 ```
-
