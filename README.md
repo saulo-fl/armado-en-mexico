@@ -34,7 +34,7 @@ compran ni se venden armas.
 
 ## Ficha de arma
 
-<p align="center"><img src="docs/capturas/readme/ficha-arma.gif" alt="Recorrido por la ficha de la Glock 25: precio, existencias, ficha técnica, clasificación legal e historial de precios" width="720"></p>
+<p align="center"><img src="docs/capturas/readme/ficha-arma.gif" alt="Recorrido por la ficha de la Glock 25: precio, existencias, ficha técnica, clasificación legal e historial de precios" width="640"></p>
 
 Cada arma tiene su página, y toda va dentro de un folder manila, ordenada según las preguntas de
 quien la está considerando:
@@ -59,14 +59,14 @@ Más abajo esperan la **munición y los accesorios compatibles**, en una vitrina
 
 ## Ficha de munición y de accesorio
 
-![Ficha de la munición .380 ACP Federal en escritorio y en el teléfono](docs/capturas/readme/ficha-municion.webp)
+<p align="center"><img src="docs/capturas/readme/ficha-municion.gif" alt="Recorrido por la ficha de la munición .380 ACP Federal: precio por cartucho, historial, estatus legal, especificaciones y armas de su calibre" width="640"></p>
 
 Cada caja de munición del inventario oficial tiene su ficha: marca, calibre, tipo de bala y peso
 en granos, el **precio de referencia por cartucho** con la fuente de la que sale, las existencias
 por armería, su historial de precios y su estatus legal. Desde la ficha se salta a todas las armas
 de ese calibre.
 
-![Ficha del accesorio Meprolight MEPRO MOR en escritorio y en el teléfono](docs/capturas/readme/ficha-accesorio.webp)
+<p align="center"><img src="docs/capturas/readme/ficha-accesorio.gif" alt="Recorrido por la ficha de la mira Meprolight MEPRO MOR: precio, existencias, ficha técnica, armas compatibles e historial" width="640"></p>
 
 Los accesorios —cargadores, ópticas, empuñaduras y demás— siguen la misma lógica que las armas:
 foto con su sello de clasificación, ficha técnica, comprobante de precio y tarjeta de almacén.
@@ -74,7 +74,7 @@ Cada uno dice con qué armas es compatible, y cada arma lista los suyos.
 
 ## Comparación de armas
 
-![Comparador: Ruger LCP frente a Ruger LCP MAX](docs/capturas/readme/comparar.webp)
+<p align="center"><img src="docs/capturas/readme/comparar.gif" alt="Recorrido por el comparador Ruger LCP frente a LCP MAX: lo que las distingue, precio, existencias, lo que comparten y la diferencia en una línea" width="640"></p>
 
 Pone dos armas lado a lado y las lee fila por fila: **capacidad, peso, longitud, precio,
 existencias, año, calibre, mecanismo y origen**. Arriba van las filas que las distinguen, con la
@@ -101,7 +101,7 @@ comparador el 26 de septiembre de 2026. Cambian con cada inventario nuevo.</sub>
 
 ## Apartado legal
 
-![Legalidad: la entrevista, el mapa del trámite y los folders desplegables](docs/capturas/readme/legalidad.webp)
+<p align="center"><img src="docs/capturas/readme/legalidad.gif" alt="Recorrido por Legalidad: la entrevista, el mapa del trámite y los folders federal, por estado, trámites y fundamento legal" width="640"></p>
 
 Una sola página, con la entrevista arriba, el mapa del trámite y cuatro folders desplegables, y
 **toda afirmación trae su fuente oficial y la fecha en que se consultó**:
@@ -136,7 +136,7 @@ todo, tampoco promete nada: la autorización la decide la autoridad, no un cuest
 
 ## Guía de calibres
 
-![Guía de calibres: la vitrina de cartuchos a escala y la ficha del 9 mm Parabellum](docs/capturas/readme/calibres.webp)
+<p align="center"><img src="docs/capturas/readme/calibres.gif" alt="Recorrido por la Guía de calibres: los cartuchos a escala, las fichas y los fundamentos" width="640"></p>
 
 Treinta cartuchos: qué son, qué tan fuerte pega cada uno y cuáles puede comprar un civil en
 México. La vitrina los pone **a su tamaño real, de menor a mayor**, y un filtro separa los de uso
@@ -149,7 +149,7 @@ comercial corriente— y cada ficha dice de dónde salen.
 
 ## Arsenal por sucursal y por disponibilidad
 
-![Arsenal: las armerías DCAM y OTCA y la tarjeta de disponibilidad](docs/capturas/readme/arsenal.webp)
+<p align="center"><img src="docs/capturas/readme/arsenal.gif" alt="Recorrido por el Arsenal: por armería, disponibilidad por sucursal, clasificación legal, tipo de arma, uso y calibre" width="640"></p>
 
 El Arsenal no abre con una lista: abre repartiendo el catálogo según la pregunta con la que llega
 cada quien.
@@ -166,7 +166,7 @@ buscador, tipo, calibre, armería, disponibilidad, rango de precio, uso, marca, 
 
 ## Colaborar con reportes
 
-![El aviso «¿Encontraste un dato incorrecto?» al pie de cada ficha](docs/capturas/readme/reportes.webp)
+![El aviso «¿Encontraste un dato incorrecto?» al pie de la ficha de la Glock 25](docs/capturas/readme/reportes.webp)
 
 La enciclopedia se corrige con ayuda de quien la usa. Al pie de cada ficha de arma, munición,
 accesorio y calibre, y de las páginas de Legalidad y Preguntas frecuentes, está el aviso
