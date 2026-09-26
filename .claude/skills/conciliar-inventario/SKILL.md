@@ -337,3 +337,65 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
 
 Si cambias cualquiera de esos cuatro puntos, `conciliar.sh` lo lee como fallo: avisa por Telegram
 y manda la señal a `.fallida` aunque los PR estén abiertos.
+
+## Atribución de existencias (mapear-existencias.py)
+
+La atribución de stock por ficha NO es uniforme: 33 fichas suman variantes de varias
+maneras (lotes, acabados, cañones, presentaciones) y 62 de 152 fichas necesitan mapeo
+explícito. El método para resolverlo: **price chain + name similarity**.
+
+### Cómo funciona
+
+1. `referencia-armas.json` (y sus equivalentes para cartuchos y accesorios) contienen los
+   renglones del último PDF verificado, cada uno etiquetado con su `fichaId`. Es la piedra Rosetta.
+2. `mapear-existencias.py` empareja el PDF nuevo contra la referencia:
+   - Detecta los factores de precio (1-2 factores dominantes entre PDFs consecutivos).
+   - Para cada renglón del PDF nuevo, busca su equivalente en la referencia por
+     `precio_nuevo / precio_ref ≈ factor`, desempatando por similitud de nombre.
+   - Transfiere el `fichaId` y suma las cantidades.
+3. Los renglones sin match son altas nuevas (`sinFicha`). Las fichas sin renglón son
+   agotados (`sinPrecio`).
+
+### Uso desde el conciliador headless
+
+```bash
+VENV=/home/saulo/apps/dcam-bot/.venv/bin/python
+SCRIPTS=.claude/skills/conciliar-inventario/scripts
+
+# Armas
+$VENV $SCRIPTS/parse_pdf.py <armas.pdf> --json /tmp/armas.json
+$VENV $SCRIPTS/mapear-existencias.py /tmp/armas.json --verbose
+# → usa referencia-armas.json (default)
+
+# Cartuchos
+$VENV $SCRIPTS/parse_pdf.py <cartuchos.pdf> --json /tmp/carts.json
+$VENV $SCRIPTS/mapear-existencias.py /tmp/carts.json --ref $SCRIPTS/referencia-cartuchos.json --verbose
+
+# Accesorios
+$VENV $SCRIPTS/parse_pdf.py <accesorios.pdf> --json /tmp/accs.json
+$VENV $SCRIPTS/mapear-existencias.py /tmp/accs.json --ref $SCRIPTS/referencia-accesorios.json --verbose
+```
+
+El JSON de salida tiene `{existencias, factores, sinFicha, sinPrecio, totalPdf, totalMapped}`:
+- `existencias`: mapa `fichaId → qty` listo para el mapa de existencias de su tipo.
+- `sinFicha`: renglones del PDF que NO existen en la referencia → **dar de alta fichas nuevas**.
+  Pueden ser modelos nuevos O fichas que REGRESAN de agotadas; verificar contra el catálogo
+  completo antes de crear una ficha nueva.
+- `sinPrecio`: fichas de la referencia sin renglón en el nuevo PDF → **marcar como agotadas**.
+
+El mapa de `existencias` es la BASE pero NO es definitivo: las fichas en `sinFicha` pueden ser
+regresos que necesitan sumarse a una ficha existente, y las de `sinPrecio` pueden ser variantes
+que cambiaron de nombre. **Revisa ambas listas con criterio antes de aplicar.**
+
+### Actualizar la referencia (OBLIGATORIO tras conciliación exitosa)
+
+Después de commitear y antes de abrir los PR, regenera las 3 referencias:
+
+```bash
+$VENV $SCRIPTS/mapear-existencias.py /tmp/armas.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/carts.json --ref $SCRIPTS/referencia-cartuchos.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/accs.json --ref $SCRIPTS/referencia-accesorios.json --update-ref
+```
+
+Esto mantiene la cadena de factores fresca para la siguiente conciliación. **Incluye los
+archivos actualizados en el mismo commit.**
