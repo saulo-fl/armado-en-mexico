@@ -105,36 +105,45 @@ fotos dedicadas con persona/contexto.
 
 ---
 
-## 🔴 PRIORIDAD ALTA — fotos de arma (censo del 31-ago-2026)
+## 🔴 PRIORIDAD ALTA — fotos de arma
 
-Esta sección decía «ya cubierto, 111 fotos reales» y por eso el hueco pasó
-desapercibido: el catálogo tiene **192 armas**, no 111. Números medidos, no
-estimados (`fotos.py verificar` y el censo de `data.js`):
+> ### Aquí NO van las cifras. Las imprime el censo:
+> ```bash
+> uv run .claude/skills/fotos-producto/scripts/fotos.py pendientes
+> uv run .claude/skills/fotos-producto/scripts/fotos.py pendientes --web --json   # el input del buscador
+> ```
+> Este documento dijo «111 fotos reales, ya cubierto» cuando faltaban 81, y luego
+> «192 armas» cuando ya eran 253. **Dos veces mandó a trabajar con números falsos.**
+> Un documento con cifras caduca; el comando las mide contra `data.js` y contra el
+> disco cada vez que se corre. Si vienes a saber cuánto falta, córrelo.
+>
+> Lo que el censo distingue, y es lo que decide el trabajo: **`RECORTABLE`** se
+> arregla sin salir del disco (su original externo ya está aquí), mientras
+> **`SIN_FOTO`** y **`RESUSTITUIR`** hay que ir a buscarlas a la web.
 
-| Estado | Nº | Qué necesita |
-|---|---|---|
-| Con alfa, listas | 36 | nada |
-| Recorte hecho pero rechazado por contenido | 15 | **conseguir otra foto** |
-| Origen por debajo de 900 px | 59 | **conseguir otra foto** |
-| Sin foto ninguna (placeholder SVG rayado) | **81** | **conseguir foto** |
-| Pendiente de verificar el catálogo del fabricante | 1 | Armsan P612 (#91) |
-
-Las 15 rechazadas por contenido lo fueron por motivos que ninguna métrica ve y
+Lo que no caduca son los **motivos de rechazo**, que ninguna métrica ve y
 conviene tener presentes al buscar sustitutas: fotos de escena o con una persona
 sosteniendo el arma, tintes de color (la Ruger LCP salía azul y la CZ P-10 C
 dorada), el arma cortada por el borde del encuadre, un cargador suelto flotando
 al lado, y dos «Retay Masai Mara» que en realidad son la culata y el guardamanos
 sueltos, no el arma.
 
-Las 81 sin foto son los **ids 112-192**, las altas del inventario de OTCA
-Monterrey. Hoy la ficha les dibuja el marcador rayado `armaPlaceholder`. Por
-marca: Beretta 11, Benelli 10, Weatherby 10, Taurus 9, Winchester 7, Glock 4,
-Optimum Arms 4, IWI 3, Browning 3 — doce marcas cubren unas 65 de las 81, y
-todas publican foto de producto en su catálogo.
+El grueso de las que faltan son las altas del inventario de OTCA Monterrey. Hoy su
+ficha dibuja la **silueta de su tipo** (`imagenes/silueta-<tipo>.webp`, vía
+`armaPlaceholder` en `data.js`), no un marcador rayado: los SVG inline se retiraron
+el 8-sep-2026. `fotos.py pendientes` da el desglose por marca al día, y está muy
+concentrado — seis marcas cubren más de la mitad, así que conviene trabajar por
+marca y no por arma: el patrón de URL del sitio de un fabricante se descubre una
+vez y sirve para sus 30 piezas.
 
-**53 de esas 81 son arma larga** (33 escopetas, 20 rifles), que es el caso donde
-el semáforo estaba mal calibrado hasta el 31-ago (ver bitácora de la skill
-`fotos-producto`).
+**«No publica foto» no es lo mismo que «no publica foto grande».** Medido el
+22-sep: CZ —la marca con más huecos— publica su catálogo entero a 750×750, por
+debajo del mínimo de 900, y sus tres dominios (`czub.cz`, `cz-usa.com`,
+`czfirearms.com`) son el mismo sitio. Para esa marca el fabricante no es una vía, y
+descubrirlo cuesta una comprobación o treinta búsquedas inútiles.
+
+El arma larga es el caso donde el semáforo estaba mal calibrado hasta el 31-ago
+(ver la bitácora de la skill `fotos-producto`).
 
 Estándar: **lateral sobre lienzo 1:1 con alfa**, cañón a la derecha salvo que el
 fabricante solo publique del otro lado. Alto máx. en ficha: 240px escritorio /
@@ -155,20 +164,27 @@ opaco se lee como un error y hace falta el alfa.
 
 ## Resumen de lo que falta diseñar
 
-| # | Set | Cantidad | Aspecto | Resolución sugerida |
-|---|-----|----------|---------|---------------------|
-| 0 | **Fotos de arma que faltan** | **155** | 1:1 con alfa | ≥900 px de lado |
-| 1 | ~~Campos de tiro~~ **CONGELADO** | 6 | 16:9 | 1600×900 |
-| 2 | ~~Experiencias~~ **CONGELADO** | 6 | 16:9 | 1600×900 |
-| 3 | Categorías (tipo) | 5 | 4:5 | 1000×1250 |
-| 4 | Banner promo (opcional) | 1–3 | banner ancho | 2000×800 |
-| 5 | Accesorios | 36 | 1:1 con alfa | ≥900 px de lado |
+Las **cantidades** salen de los censos, no de esta tabla. Aquí solo el formato, que
+sí es estable:
 
-**El grueso del trabajo es el set 0**, y no es de diseño sino de **adquisición**: 81
-armas sin foto + 74 con foto inservible. El pipeline de recorte ya existe y está
-calibrado (skill `fotos-producto`); lo que no existe es nada que consiga las fotos.
-`fotos.py` solo procesa lo que ya está en disco — `mejor_origen()` mira en el repo y
-en `Catalogo de Armas/imagenes/`, y nada más.
+| # | Set | Aspecto | Resolución | Cuántas faltan |
+|---|-----|---------|------------|----------------|
+| 0 | **Fotos de arma** | 1:1 con alfa | ≥900 px de lado | `fotos.py pendientes` |
+| 1 | ~~Campos de tiro~~ **CONGELADO** | 16:9 | 1600×900 | — no producir |
+| 2 | ~~Experiencias~~ **CONGELADO** | 16:9 | 1600×900 | — no producir |
+| 3 | Categorías (tipo) | 4:5 | 1000×1250 | las 5 existen (`hero-<tipo>.webp`) |
+| 4 | Banner promo (opcional) | banner ancho | 2000×800 | opcional, vacío por defecto |
+| 5 | Accesorios | 1:1 con alfa | ≥900 px de lado | `accesorios.py verificar` |
+| 6 | Cajas de munición | recorte ajustado | ≥600 px | `cajas.py pendientes` |
+| 7 | Cartuchos por calibre | vertical con alfa | alto 500 px | campo `cartucho` de `window.CALIBRES` |
+
+**El grueso del trabajo es el set 0, y no es de diseño sino de adquisición.** El
+pipeline de recorte existe y está calibrado; lo que faltaba era conseguir las fotos.
+`fotos.py` solo procesa lo que hay en disco —`mejor_origen()` mira el repo,
+`fotos-fuente/` y `Catalogo de Armas/imagenes/`— y de encontrarlas se encarga el
+flujo de adquisición: `fotos.py pendientes --web --json` saca la lista, un
+orquestador busca por marca y escribe un manifiesto de procedencia, y
+`traer.py manifiesto <json>` lo baja entero y lo deja medido.
 
 Los 12 de campos y experiencias quedan fuera mientras esas secciones estén congeladas.
 

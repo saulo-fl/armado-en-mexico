@@ -548,6 +548,9 @@ const _accTramos = (piezas) => {
 // la silueta de su categoría.
 /* ↓ generado por accesorios.py · no editar a mano ↓ */
 const ACC_FOTO = {
+  101: 'imagenes/accesorios/101.webp?v=8db6cb96',
+  102: 'imagenes/accesorios/102.webp?v=230009c4',
+  103: 'imagenes/accesorios/103.webp?v=21ece5d3',
   104: 'imagenes/accesorios/104.webp?v=3c67d500',
   106: 'imagenes/accesorios/106.webp?v=0638a236',
   107: 'imagenes/accesorios/107.webp?v=b36d6d6d',
@@ -555,19 +558,27 @@ const ACC_FOTO = {
   109: 'imagenes/accesorios/109.webp?v=81aeb852',
   111: 'imagenes/accesorios/111.webp?v=4aa5c1f1',
   112: 'imagenes/accesorios/112.webp?v=6acdc49a',
+  115: 'imagenes/accesorios/115.webp?v=41823319',
   116: 'imagenes/accesorios/116.webp?v=9f4eb61d',
   117: 'imagenes/accesorios/117.webp?v=23a14219',
   118: 'imagenes/accesorios/118.webp?v=9be4b000',
   119: 'imagenes/accesorios/119.webp?v=d8adde0e',
   120: 'imagenes/accesorios/120.webp?v=729b2552',
+  121: 'imagenes/accesorios/121.webp?v=0b82ae28',
+  122: 'imagenes/accesorios/122.webp?v=43c8d903',
   123: 'imagenes/accesorios/123.webp?v=c625952b',
+  124: 'imagenes/accesorios/124.webp?v=c1f04d2c',
   125: 'imagenes/accesorios/125.webp?v=39a93a42',
   128: 'imagenes/accesorios/128.webp?v=ec2888ff',
   129: 'imagenes/accesorios/129.webp?v=30bd6adf',
   130: 'imagenes/accesorios/130.webp?v=95cfa5ef',
   131: 'imagenes/accesorios/131.webp?v=91ec2a41',
   133: 'imagenes/accesorios/133.webp?v=98cf239a',
+  135: 'imagenes/accesorios/135.webp?v=4bd1689a',
   201: 'imagenes/accesorios/201.webp?v=4b9973e6',
+  301: 'imagenes/accesorios/301.webp?v=a2b71673',
+  401: 'imagenes/accesorios/401.webp?v=252e45e6',
+  402: 'imagenes/accesorios/402.webp?v=754ce715',
 };
 /* ↑ fin generado por accesorios.py ↑ */
 window.ACCESORIOS.forEach(a => { if (ACC_FOTO[a.id]) a.img = ACC_FOTO[a.id]; });

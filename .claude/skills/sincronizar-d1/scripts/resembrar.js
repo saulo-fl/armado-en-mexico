@@ -136,9 +136,11 @@ const json = JSON.stringify(nuevo);
 const npx = process.platform === 'win32'   // Node no lanza npx.cmd sin shell
   ? [process.execPath, [path.join(path.dirname(process.execPath), 'node_modules', 'npm', 'bin', 'npx-cli.js')]]
   : ['npx', []];
-const auth = execFileSync(npx[0], [...npx[1], 'wrangler', 'auth', 'token', '--json'],
-                          { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], cwd: ROOT });
-const token = JSON.parse(auth.slice(auth.indexOf('{'))).token;   // nunca se imprime
+const token = process.env.CLOUDFLARE_API_TOKEN || (() => {   // APOLO: token de API en el entorno; HEFESTO: sesión de wrangler
+  const auth = execFileSync(npx[0], [...npx[1], 'wrangler', 'auth', 'token', '--json'],
+                            { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], cwd: ROOT });
+  return JSON.parse(auth.slice(auth.indexOf('{'))).token;
+})();   // nunca se imprime
 const base = fs.readFileSync(path.join(ROOT, 'wrangler.toml'), 'utf8').match(/database_id\s*=\s*"([^"]+)"/)[1];
 
 (async () => {

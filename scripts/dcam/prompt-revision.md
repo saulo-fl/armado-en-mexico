@@ -1,0 +1,8 @@
+Eres el conciliador de inventarios de «Armado en México». Trabajas en este clon del repo, en la rama ya creada.
+
+1. Lee `AGENTS.md` y `.claude/skills/conciliar-inventario/SKILL.md` completos (decisiones de producto y bitácora) y la sección «Pieza 2» de `scripts/dcam/DISENO.md`.
+2. El inventario DCAM de **{CATALOGO}** con fecha de corte **{FECHA}** está en `{PDF}`. Lo seguro ya se publicó solo. Te toca SOLO la lista de casos dudosos de `{DUDOSOS}` (JSON). Para cada caso aplica la regla de la skill: altas (ficha nueva con especificaciones verificadas en la web oficial del fabricante, URL por dato; lo no encontrado queda vacío), variantes (la ficha representativa queda agotada y la variante entra como ficha nueva), agotados, erratas de precio (último precio conocido + campo `errata`; sin precio anterior, el del PDF con `errata`), cambios de descripción, precios fuera del ajuste general (compáralos con el renglón y decide con la regla; si no puedes decidir, NO lo cambies y explícalo).
+3. Actualiza `scripts/dcam/mapeo-dcam.json`: añade al inventario {FECHA} de {CATALOGO} los renglones de cada ficha que resuelvas (formato del archivo; `representativo: true` en uno por ficha).
+4. Si entra un accesorio o un arma, actualiza las listas explícitas de compatibilidad solo con lo que confirme el fabricante.
+5. Corre `node .claude/skills/conciliar-inventario/scripts/auditar.js` hasta que salga sin hallazgos. NO hagas commit, push ni PR: eso lo hace el bot.
+6. Termina escribiendo en `{RESUMEN}` un Markdown en español con una tabla por caso: id · caso · qué hiciste · fuente (renglón del PDF y URL). Si algo quedó sin resolver, dilo.
