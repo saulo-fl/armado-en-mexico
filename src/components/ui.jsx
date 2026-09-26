@@ -2553,18 +2553,18 @@ window.useTalonFijo = useTalonFijo;
 // Sin `onComparar` no hay casilla: la ficha de accesorio no tiene comparador
 // (15-sep-2026).
 // ──────────────────────────────────────────────────────────────
-function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false, historial }) {
+function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false, historial, unidad }) {
   return (
     <div ref={talonRef} className={'amx-talon' + (fijo ? ' amx-talon--fijo' : '')}>
       <div className="amx-talon-papel">
         {fijo ? (
           <div className="amx-talon-resumen">
             <span className="amx-talon-mini">{ultimoConocido ? 'Último precio' : 'Precio'} {fuente}{fecha && <span className="amx-talon-mini-fecha"> · {fecha}</span>}</span>
-            <span className="amx-talon-cifra">{String(precio || '').replace(' MXN', '')}</span>
+            <span className="amx-talon-cifra">{String(precio || '').replace(' MXN', '')}{unidad && <small> / {unidad}</small>}</span>
           </div>
         ) : (
           <React.Fragment>
-            <div className="amx-talon-cab"><span>Comprobante de precio</span><span>Con IVA</span></div>
+            <div className="amx-talon-cab"><span>Comprobante de precio</span><span>{unidad ? `Por ${unidad} · con IVA` : 'Con IVA'}</span></div>
             <span className="amx-talon-cifra">{precio}</span>
             <NotaErrata historial={historial} />
             {ultimoConocido &&
@@ -2587,6 +2587,40 @@ function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fi
   );
 }
 window.TalonComprobante = TalonComprobante;
+
+// La hoja «Compatibilidad»: los primeros 6 y el resto detrás de «Ver las N»,
+// ahí mismo (Saulo, 15-sep-2026). Vive fuera de AccesorioFicha a propósito: un
+// componente definido dentro de otro remonta su subárbol en cada render.
+// Los nombres son navegación interna: sin «↗», que en el sitio es «abre un PDF».
+const COMPAT_A_LA_VISTA = 6;
+function HojaCompatibilidad({ compat, onOpenArma }) {
+  const [todas, setTodas] = React.useState(false);
+  if (compat.caso === 'plataforma') {
+    return <p className="amx-oficio-texto">Sirve a: {compat.texto} (sin ficha en el Arsenal)</p>;
+  }
+  const visibles = todas ? compat.armas : compat.armas.slice(0, COMPAT_A_LA_VISTA);
+  return (
+    <React.Fragment>
+      <p className="amx-oficio-texto">
+        {compat.caso === 'regla' ? `Sirve a: ${compat.texto}. En el Arsenal:` : 'Sirve a:'}
+      </p>
+      <ul className="amx-oficio-lista amx-compat-lista">
+        {visibles.map((a) => (
+          <li key={a.id}>
+            <button type="button" className="amx-enlace-tinta" onClick={() => onOpenArma && onOpenArma(a.id)}>
+              {a.nombre}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {compat.armas.length > COMPAT_A_LA_VISTA &&
+        <button type="button" className="amx-registro-mas" aria-expanded={todas} onClick={() => setTodas(!todas)}>
+          Ver las {compat.armas.length}
+        </button>}
+    </React.Fragment>
+  );
+}
+window.HojaCompatibilidad = HojaCompatibilidad;
 
 // ──────────────────────────────────────────────────────────────
 // TARJETA DE ALMACÉN — existencias por sucursal (kárdex)
