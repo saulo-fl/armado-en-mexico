@@ -225,7 +225,11 @@ la segunda = se perdieron las vars de Access. Ambos son 503 y ambos son silencio
 ## Conciliar inventarios y precios (tarea recurrente)
 
 Los precios oficiales se alimentan desde los **PDFs de existencias de la DCAM**.
-Toda la conciliación vive en **código versionado**, no en `localStorage`:
+Toda la conciliación vive en **código versionado**, no en `localStorage`. Desde el
+14-sep-2026 hay además un **bot que concilia y publica solo** lo que ya está catalogado y
+cambió de forma predecible (pieza 2 del bot DCAM): diseño completo en
+`scripts/dcam/DISENO.md`. Lo de abajo es el flujo manual/heredado, que sigue aplicando a lo
+que el bot manda a PR por dudoso:
 
 - Los PDFs van en la carpeta **`public/inventarios/`** con nombre `dcam-existencias-AAAA-MM-DD.pdf`.
   Desde el 11-sep-2026 la DCAM los publica por separado: armas → `dcam-existencias-`, cartuchos →

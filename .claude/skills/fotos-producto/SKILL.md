@@ -19,15 +19,50 @@ disco; conseguir las fotos no lo hace nadie todavía. Censo en `docs/PLACEHOLDER
 
 ## Uso
 
+**Empieza siempre por el censo.** Dice qué arma necesita qué, medido contra el disco,
+y separa lo que se arregla sin salir de aquí de lo que hay que ir a buscar a la web:
+
 ```bash
-uv run .claude/skills/fotos-producto/scripts/fotos.py preparar --tipo pistola
-# --solo manda sobre --tipo: una tanda puede cruzar tipos en UNA corrida, que es
-# lo que hay que hacer, porque informe.json se reescribe entero en cada llamada.
-uv run .claude/skills/fotos-producto/scripts/fotos.py preparar --solo 24,50,58,62,78
-uv run .claude/skills/fotos-producto/scripts/fotos.py aplicar --aprobar 13,33,11
-uv run .claude/skills/fotos-producto/scripts/fotos.py aplicar --decisiones decisiones.json
-uv run .claude/skills/fotos-producto/scripts/fotos.py verificar --tipo pistola
+R=.claude/skills/fotos-producto/scripts
+uv run $R/fotos.py pendientes                      # el resumen, y el desglose por marca
+uv run $R/fotos.py pendientes --estado RECORTABLE --ids   # para encadenar con --solo
+uv run $R/fotos.py pendientes --web --json         # las que hay que buscar: el input del buscador
 ```
+
+Los estados, de menor a mayor coste: `LISTA` · `POR_PROCESAR` (su origen ya está en
+`fotos-fuente/`, solo falta `preparar`) · `RECORTABLE` (**hay original externo ≥900:
+no hace falta buscar nada**) · `RECOMPRIMIR` (solo el WebP servido llega a 900;
+último recurso) · `RESUSTITUIR` y `SIN_FOTO` (**hace falta conseguir la foto**).
+
+```bash
+uv run $R/fotos.py preparar --tipo pistola
+# --solo manda sobre --tipo: una tanda puede cruzar tipos. Desde el 22-sep
+# informe.json ACUMULA entre corridas, así que ya no hace falta procesarlo todo de
+# una sentada para tener una sola hoja — pero SOLO UNA corrida a la vez: dos
+# procesos escribiendo el mismo informe corren carrera, y la inferencia es
+# CPU-bound, así que dos a la vez tampoco irían más rápido.
+uv run $R/fotos.py preparar --solo 24,50,58,62,78
+uv run $R/fotos.py aplicar --aprobar 13,33,11
+uv run $R/fotos.py aplicar --decisiones decisiones.json
+uv run $R/fotos.py verificar --tipo pistola
+uv run $R/fotos.py autocheck                       # los umbrales, fijados con asserts
+```
+
+**Conseguir las fotos** (lo que `fotos.py` no hace: solo procesa lo que hay en disco):
+
+```bash
+uv run $R/traer.py listar https://benelli.it/en/arma/vinci-black   # candidatas MEDIDAS, por área
+uv run $R/traer.py bajar 115 https://benelli.it/uploads/abc123.png
+# Un manifiesto entero, con su procedencia, en una sola llamada. Es la vía para una
+# tanda grande: rellena `archivo` y `px` con lo medido y degrada a RESUSTITUIR lo que
+# no llegue a 900. Formato: el de los procedencia-g*.json de accesorios.
+uv run $R/traer.py manifiesto ".../fotos-fuente/procedencia-2026-09-22.json"
+uv run $R/traer.py manifiesto ".../accesorios-fuente/proc.json" --carpeta ".../accesorios-fuente"
+```
+
+`traer.py listar` es además **el juez de si una marca es accesible**: mide cada
+candidata con Pillow, así que un «ninguna descargable» significa que esa marca va por
+Chrome o por otra fuente. No te fíes de un grep sobre el HTML (ver bitácora, 22-sep).
 
 `uv` monta un venv efímero con las dependencias declaradas en la cabecera PEP 723
 del propio `.py`: no toca los Python del sistema. La primera vez descarga el
@@ -304,6 +339,51 @@ imitando a Chrome (Meprolight, Chiappa, B&H, Beretta); falta decidir si esas fue
   decodifica en cp1252 en Windows: «Águila» reventaba `catalogo()`; (3) el alfa que
   traen los PNG de Águila incluye la nube de polvo del render, así que aquí se
   infiere siempre en vez de confiar en el alfa de fábrica.
+- **2026-09-22 — la silueta pasaba por foto del arma.** Desde el 8-sep `data.js` no
+  deja `img` vacío: al cargar asigna `imagenes/silueta-<tipo>.webp` a cada arma sin
+  foto. `fotos.py` lee el catálogo con node, así que recibía la silueta y la trataba
+  como foto porque solo preguntaba `startswith("imagenes/")`. Y **las ocho siluetas
+  miden exactamente 900 px de lado mayor**, o sea que `MIN_LADO` no las paraba
+  (`900 < 900` es False). Tres fallos silenciosos a la vez: `mejor_origen()` la
+  aceptaba como origen y habría recortado la silueta; `aplicar()` tomaba la rama de
+  sustitución y **`shutil.copy2` habría pisado el placeholder compartido de las 22
+  pistolas sin foto**; y `verificar()` las contaba como «con alfa» (la silueta tiene
+  alfa), diciendo «180 con alfa» y tapando 123 huecos. Ahora hay un predicado único,
+  `sin_foto_propia()`, en los tres sitios, y `autocheck` lo fija con asserts. Si
+  añades un cuarto sitio que mire rutas de imagen, úsalo; es el mismo criterio que
+  `armaSinFoto` (ui.jsx) y `fixArmaImg` (store.js).
+- **2026-09-22 — un 200 no prueba nada, y el tamaño del HTML tampoco.** Sondeando
+  19 dominios de fabricante salieron dos trampas distintas, las dos con código 200:
+  (1) **Beretta** sirve su portada normal pero una página de *producto* devuelve
+  200 con **954 bytes** de pantalla de Incapsula y cero imágenes; (2) **CZ**
+  (`czub.cz`, `cz-usa.com` y `czfirearms.com` son el MISMO Next.js) devuelve su HTML
+  de 374 017 bytes para **cualquier** ruta, incluida `/robots.txt` y cualquier URL de
+  imagen inventada — un `curl -o foto.jpg` deja un HTML con extensión `.jpg`.
+  **La única prueba de que una fuente sirve es que los bytes se abran como imagen.**
+  `traer.py listar` ya lo hace —mide cada candidata con Pillow— así que *es* el juez
+  de accesibilidad de una marca: si dice «ninguna descargable», esa marca va por
+  Chrome o por otra fuente. Un grep sobre el HTML miente.
+- **2026-09-22 — «no publica foto» y «no publica foto grande» son cosas distintas.**
+  CZ, la marca con más huecos del catálogo, publica todo a **750×750**: derivados
+  Strapi `medium_1080_nahled_*.jpg`, y el original y los demás derivados dan 404 (XML
+  de bucket, o sea 404 de verdad). Por debajo de los 900 de `MIN_LADO`, así que para
+  esa marca **el fabricante no es una vía** y hay que ir a Commons o a distribuidor.
+  Comprobar la resolución *en la receta de la marca* cuesta una medición; no hacerlo
+  cuesta treinta búsquedas inútiles.
+- **2026-09-22 — Wikimedia Commons, por API, da tamaño y licencia de una vez.**
+  `commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=<modelo>`
+  `&gsrnamespace=6&gsrlimit=5&prop=imageinfo&iiprop=url|size|extmetadata&format=json`
+  devuelve px y `LicenseShortName` por resultado, así que la decisión de licencia se
+  toma antes de bajar nada. Hay material bueno (CZ 457 Lux 3980×1417 **CC0**, CZ
+  Scorpion EVO 3 A1 3573×1754 CC0). **Pero la búsqueda devuelve basura con
+  facilidad**: «CZ 600 rifle» trajo informes militares del cuerpo de ingenieros.
+  Siempre hay que mirar la foto. Y si entra material CC BY o CC BY-SA, hay que darle
+  crédito: `LICENSE-CONTENIDO.md` §4 solo contempla fabricantes y Pexels.
+- **2026-09-22 — `dcamRef` es el dato que confirma la variante.** Trae la referencia
+  de fábrica con el acabado: «PISTOLA CAL .380 TAURUS TH380 **PAVON**», «MODELO 19X,
+  **COLOR COYOTE**». `catalogo()` ya lo devuelve. Es lo único que distingue la foto
+  correcta de la de otra variante del mismo modelo, que es un fallo que ninguna
+  métrica ve y que en la ficha es un error de dato.
 - **Pendiente**: censo de las 61 pistolas con el estándar lateral derecha, y
   adquisición para las que no cumplan. BiRefNet infiere a 1024², así que los
   panorámicos de rifle (1920×500) habrá que recortarlos antes de inferir.

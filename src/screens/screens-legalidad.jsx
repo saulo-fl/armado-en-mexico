@@ -365,7 +365,7 @@ const LEGALIDAD_SECCIONES = [
   { id: 'federal', tema: 'Federal', titulo: '¿Qué arma puedo tener y portar?', desc: 'Los niveles de legalidad: civil, seguridad privada y exclusivo del ejército.', Cuerpo: LegalidadFederalCuerpo },
   { id: 'estatal', tema: 'Por estado', titulo: '¿Dónde hago los papeles en mi estado?', desc: 'Antecedentes penales, armerías y correo, estado por estado.', Cuerpo: LegalidadEstatalCuerpo },
   { id: 'tramites', tema: 'Trámites', titulo: '¿Cómo saco mi permiso, paso a paso?', desc: 'Los seis trámites ante la Defensa: requisitos y costo.', Cuerpo: LegalidadTramitesCuerpo },
-  { id: 'documentos', tema: 'Documentos', titulo: 'Fundamento legal', desc: 'Leyes, reglamento y formatos en PDF, con su fuente.', Cuerpo: LegalidadDocumentosCuerpo },
+  { id: 'documentos', tema: 'Fundamento legal', titulo: 'Fundamento legal', desc: 'Leyes, reglamento y formatos en PDF, con su fuente.', Cuerpo: LegalidadDocumentosCuerpo },
 ];
 
 function LegalidadHub({ onNav, seccion }) {

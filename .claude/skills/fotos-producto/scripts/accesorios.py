@@ -102,7 +102,7 @@ def preparar(args):
         final.save(dst, "WEBP", quality=fotos.CALIDAD, method=6)
 
         m = fotos.metricas(rgb_orig, alfa, np.array(final), px, dst.stat().st_size / 1024)
-        color, notas = semaforo_accesorio(m)
+        color, notas, _niveles = semaforo_accesorio(m)
         if px < fotos.MIN_LADO:
             notas.insert(0, f"RESUSTITUIR: origen {px}px")
         filas.append({"stem": stem, "id": acc.get("id"), "nombre": acc.get("nombre", "¿?"),

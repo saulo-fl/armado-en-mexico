@@ -60,17 +60,15 @@
       } else {
         escala = amxEscalaCartucho(c.mm, mayor);
       }
-      resultado.push({
-        id: c.id,
-        clase: c.clase,
-        sistema: c.sistema,
-        mm: c.mm,
-        energiaJ: c.energiaJ,
-        velocidadMs: c.velocidadMs,
-        avail: c.avail,
+      // Se copia el calibre ENTERO y solo se añade lo calculado. Copiarlo campo
+      // por campo perdía `cartucho`, `desc`, `uso`, `alias`, `velocidad`,
+      // `energia`, `retroceso`, `legalArt`, `legalNota` y `fuente`: la guía y la
+      // ficha (que leen de aquí) salían vacías aunque el dato estuviera en
+      // data-extra.js. Cualquier campo nuevo del origen llega solo.
+      resultado.push(Object.assign({}, c, {
         armas: count,
         escala: escala
-      });
+      }));
     }
 
     resultado.sort(function (a, b) {

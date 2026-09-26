@@ -3128,7 +3128,11 @@ function MesaPuestos({ items, porFila, renderPuesto }) {
     <div className="amx-mesa">
       {filas.map((fila, f) => (
         <div key={f} className="amx-mesa-fila" style={{ '--por-fila': porFila }}>
-          {fila.map(renderPuesto)}
+          {fila.map((item, i) => (
+            <div key={i} className="amx-puesto-wrap">
+              {renderPuesto(item)}
+            </div>
+          ))}
         </div>
       ))}
     </div>
