@@ -31,7 +31,7 @@ try {
 // 2) cargar data-*.js en un shim de window
 const win = {};
 global.window = win;
-['data.js', 'data-extra.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']
+['data-precios.js', 'data.js', 'data-extra.js', 'data-accesorios.js', 'data-municiones.js']
   .forEach((f) => { try { eval(fs.readFileSync(path.join(ROOT, 'src/data', f), 'utf8')); } catch (e) { bad('carga ' + f + ': ' + e.message); } });
 const DB = win.DB || [];
 const H = win.AMX_PRICE_HISTORY_SEED || {};

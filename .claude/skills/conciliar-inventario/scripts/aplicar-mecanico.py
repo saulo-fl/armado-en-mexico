@@ -99,7 +99,7 @@ def node_extract(data_dir, expr):
 const fs = require('fs');
 const win = {{}};
 global.window = win;
-['data.js', 'data-extra.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']
+['data-precios.js', 'data.js', 'data-extra.js', 'data-accesorios.js', 'data-municiones.js']
   .forEach(f => {{
     try {{ eval(fs.readFileSync('{data_dir}/' + f, 'utf8')); }} catch(e) {{}}
   }});
@@ -211,25 +211,21 @@ def register_manual_accesorios(content, fecha, dry_run=False):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# 2) Update priceExact in mk() calls (data.js)
+# 2) Update AMX_ARMAS_PRECIOS map (data-precios.js) — replaces old mk() patching
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def update_price_exact(content, ficha_id, new_price):
-    """Actualiza el 13º arg (priceExact) de mk(ID, ...) en data.js.
+def rewrite_precios_map(content, precios_map):
+    """Reescribe window.AMX_ARMAS_PRECIOS = { ... }; con el nuevo mapa."""
+    pairs = sorted((int(k), float(v)) for k, v in precios_map.items())
+    pairs_str = ", ".join(f"{fid}: {price}" for fid, price in pairs)
+    new_line = f"window.AMX_ARMAS_PRECIOS = {{ {pairs_str} }};"
 
-    El 13º arg es un string numérico como "10072.67".
-    """
-    # Pattern: mk(ID, followed by 11 comma-separated args, then the price arg
-    # We find mk(ficha_id, and count commas to the 12th to reach priceExact
-    pattern = re.compile(
-        r'(mk\(' + str(ficha_id) + r',\s*'  # mk(ID,
-        r'(?:[^,]*,\s*){11})'               # 11 args (nombre..avail)
-        r'"[^"]*"'                           # 12th = priceExact (old value)
+    content = re.sub(
+        r'window\.AMX_ARMAS_PRECIOS\s*=\s*\{[^}]*\};',
+        new_line,
+        content
     )
-    new_price_str = f"{new_price:.2f}"
-    replacement = r'\g<1>"' + new_price_str + '"'
-    new_content, n = pattern.subn(replacement, content, count=1)
-    return new_content, n > 0
+    return content
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -403,116 +399,36 @@ def mark_agotadas_armas(existencias_map, sin_precio, sin_ficha_ids):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def process_armas(mapeo, fecha, manual_id, data_dir, dry_run):
-    """Process armas mapeo: prices, history, existencias."""
+    """Process armas mapeo: prices, history, existencias.
+
+    Prices are updated in AMX_ARMAS_PRECIOS (data-precios.js), NOT in data.js.
+    data.js reads prices from that map at runtime via window.AMX_ARMAS_PRECIOS.
+    """
     eprint("\n── ARMAS ──")
     existencias = mapeo.get("existencias", {})
     sin_precio = mapeo.get("sinPrecio", [])
     sin_ficha = mapeo.get("sinFicha", [])
 
-    # Load data files
+    # Load data-precios.js (the ONLY file we touch for price changes)
     precios_path = Path(data_dir) / "data-precios.js"
-    data_path = Path(data_dir) / "data.js"
     precios_content = read_file(precios_path)
-    data_content = read_file(data_path)
 
     # 1) Register manual
     precios_content, added = register_manual_armas(precios_content, fecha, manual_id, dry_run)
     if added:
         eprint(f"  + manual {manual_id} registrado")
 
-    # 2) For each fichaId in existencias: update priceExact and append history
-    # We need the price for each ficha. The mapeo existencias has {fichaId: qty}.
-    # The price comes from the mapeo's matched rows — we need to extract it.
-    # Actually, the mapeo from mapear-existencias.py gives existencias as {fichaId: qty}
-    # but not per-ficha prices. We need the price from the PDF rows.
-    # The mapeo's _matched field is stripped. We need to compute per-ficha price
-    # from the reference + factors.
-    #
-    # Actually, looking more carefully at the mapeo output:
-    # existencias = {fichaId: qty} — this is all we get for qty
-    # The PRICE per ficha comes from the new PDF row mapped to each ficha.
-    # Since the mapeo strips _matched, we need to reconstruct.
-    #
-    # For the pipeline, we should enhance the mapeo to include prices.
-    # But for now, we'll use Node.js to extract current prices and NOT update them
-    # if the mapeo doesn't carry prices.
-    #
-    # WAIT: Looking at the mapeo output more carefully, existencias is {fichaId: qty}
-    # and the per-ficha price isn't directly available. The price is in the PDF row
-    # that maps to each ficha. Since we're running after mapeo, we need to
-    # reconstruct from the parsed PDF + reference + factors.
-    #
-    # The SIMPLEST approach: use the parsed PDF JSON (same input as mapear-existencias)
-    # to get prices, running mapear-existencias internally with _matched to get
-    # the ficha→PDF-row→price mapping.
-    #
-    # But we don't have the parsed JSON here. The mapeo output should carry prices.
-    # Let's check if `existencias` is a dict of {fichaId: qty} or if it carries more.
-    #
-    # From the mapear-existencias.py code:
-    #   existencias[fid] += qty
-    # So it's just fichaId→qty.
-    #
-    # For prices, we'd need to re-parse. But the pipeline specification says
-    # the mapeo JSON is the input. Let's add price data to the mapeo output
-    # by checking what information we actually have.
-    #
-    # SOLUTION: the per-ficha price for the NEW PDF is the sum of
-    # (priceN * qty) / total_qty across all PDF rows mapped to that ficha.
-    # But actually each ficha maps to one or more PDF rows, and the price is
-    # the UNIT price from the PDF (priceN), which should be the same across
-    # all rows of the same ficha.
-    #
-    # For this version, we'll extract current prices from the JS files and
-    # use the factor to compute the new price. OR we can require that the
-    # mapeo be extended to include per-ficha prices.
-    #
-    # Actually, reviewing the task spec again: "For each fichaId in mapeo-armas.json
-    # `existencias`, find the ficha's mk(id, ...) call in data.js and update the
-    # 13th argument (priceExact) to the new price"
-    #
-    # This means the mapeo MUST carry per-ficha prices. Let me check if we can
-    # derive them. The mapeo is produced from parse_pdf → mapear-existencias.
-    # The mapear-existencias code maps PDF rows to fichas. Each PDF row has priceN.
-    # When multiple PDF rows map to the same ficha, the price should be the same
-    # (they're the same product listed multiple times with different descriptions).
-    #
-    # For now, let's require the mapeo to carry an extra "precios" field.
-    # But since we can't change the mapeo format in this PR, we'll use the
-    # parsed PDF to extract prices.
-    #
-    # PRAGMATIC APPROACH: Accept an optional --parsed-armas flag with the parsed JSON.
-    # If not provided, skip price updates (only do existencias/history with current prices).
-    #
-    # Actually, the simplest real approach: read the parsed JSON from the mapeo's
-    # source. But the pipeline knows where the parsed JSON is.
-    #
-    # Let me re-read the task spec: the mapeo has existencias and we should update
-    # prices. The per-ficha price IS available if we re-run mapeo internally.
-    # But that's wasteful.
-    #
-    # FINAL DECISION: For armas, the mapeo existencias gives qty per ficha.
-    # The price per ficha comes from the LAST history record (current price)
-    # adjusted by the factor. But the factor is in the mapeo!
-    # OR: we can extract current prices via Node and multiply by factor.
-    # But that's wrong — the new price IS the PDF price, not current * factor.
-    #
-    # OK let me take the most pragmatic approach: extend the mapeo to include
-    # per-ficha prices in a new field "precios": {fichaId: priceN}.
-    # This is a backwards-compatible addition to mapear-existencias.py.
-
+    # 2) Update prices in AMX_ARMAS_PRECIOS map and append history records
     prices = mapeo.get("precios", {})
-    factors = mapeo.get("factores", [1.0])
 
     prices_updated = 0
     history_added = 0
 
     if not prices:
-        eprint("  ⚠ mapeo sin campo 'precios' — no se actualizan precios en data.js")
+        eprint("  ⚠ mapeo sin campo 'precios' — no se actualizan precios")
         eprint("    (ejecuta mapear-existencias.py con versión actualizada)")
-        # Still update existencias and history with CURRENT prices from data.js
-        # Use Node to extract current prices
-        current = node_extract(data_dir, "Object.fromEntries(win.DB.map(w => [w.id, parseFloat(w.priceExact.replace(/[^\\\\d.]/g,''))]))")
+        # Still update history with CURRENT prices from AMX_ARMAS_PRECIOS
+        current = node_extract(data_dir, "win.AMX_ARMAS_PRECIOS || {}")
         if current:
             for fid_str, qty in existencias.items():
                 fid = int(fid_str)
@@ -523,18 +439,23 @@ def process_armas(mapeo, fecha, manual_id, data_dir, dry_run):
                     if added:
                         history_added += 1
     else:
+        # Build the new prices map: start from current, overlay new prices
+        current = node_extract(data_dir, "win.AMX_ARMAS_PRECIOS || {}")
+        precios_map = dict(current) if current else {}
+
         for fid_str, price_n in prices.items():
             fid = int(fid_str)
-            # Update priceExact in data.js
-            data_content, updated = update_price_exact(data_content, fid, price_n)
-            if updated:
-                prices_updated += 1
+            precios_map[str(fid)] = float(price_n)
+            prices_updated += 1
 
             # Append history record
             precios_content, added = append_arma_history(
-                precios_content, fid, manual_id, price_n, None, fecha)
+                precios_content, fid, manual_id, float(price_n), None, fecha)
             if added:
                 history_added += 1
+
+        # Rewrite AMX_ARMAS_PRECIOS map
+        precios_content = rewrite_precios_map(precios_content, precios_map)
 
     # 3) Mark agotadas
     agotadas = mark_agotadas_armas(existencias, sin_precio, sin_ficha)
@@ -542,9 +463,8 @@ def process_armas(mapeo, fecha, manual_id, data_dir, dry_run):
     # 4) Rewrite existencias
     precios_content = rewrite_existencias(precios_content, existencias)
 
-    # Write
+    # Write — only data-precios.js, never data.js for price changes
     write_file(precios_path, precios_content, dry_run)
-    write_file(data_path, data_content, dry_run)
 
     eprint(f"  precios actualizados: {prices_updated}")
     eprint(f"  historial añadido: {history_added}")

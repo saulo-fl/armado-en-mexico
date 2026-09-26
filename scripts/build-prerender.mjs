@@ -44,8 +44,8 @@ mkdirSync(OUT, { recursive: true });
 const win = {};
 const ctx = createContext({ window: win, console });
 ctx.window = win;
-for (const f of ['data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
-                 'data-legal.js', 'data-entrevista.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js']) {
+for (const f of ['data-precios.js', 'data.js', 'data-extra.js', 'data-traumaticas.js', 'data-soporte.js',
+                 'data-legal.js', 'data-entrevista.js', 'data-accesorios.js', 'data-municiones.js']) {
   runInContext(readFileSync(join(SRC, 'data', f), 'utf8'), ctx, { filename: f });
 }
 runInContext(readFileSync(join(SRC, 'lib', 'legal.js'), 'utf8'), ctx, { filename: 'legal.js' });

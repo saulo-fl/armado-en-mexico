@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 const RAIZ_REPO = path.resolve(__dirname, '..', '..');
-const DATA = ['data.js', 'data-extra.js', 'data-precios.js', 'data-accesorios.js', 'data-municiones.js'];
+const DATA = ['data-precios.js', 'data.js', 'data-extra.js', 'data-accesorios.js', 'data-municiones.js'];
 
 function cargar(raiz) {
   const win = {};
@@ -42,7 +42,7 @@ const CATALOGOS = {
   armas: {
     pdf: (f) => `dcam-existencias-${f}.pdf`, manual: (f) => `man_dcam_${guion(f)}`, etiqueta: 'armas',
     manuales: ['src/data/data-precios.js', 'AMX_MANUALES_SEED'], hist: ['src/data/data-precios.js', 'AMX_PRICE_HISTORY_SEED'],
-    ficha: ['src/data/data.js', 'mk', 12, (n) => `"${Number(n).toFixed(2)}"`], conQty: false, v: ['data.js', 'data-precios.js'],
+    ficha: null, preciosMap: 'AMX_ARMAS_PRECIOS', conQty: false, v: ['data.js', 'data-precios.js'],
   },
   accesorios: {
     pdf: (f) => `dcam-accesorios-${f}.pdf`, manual: (f) => `man_acc_${guion(f)}`, etiqueta: 'accesorios',
@@ -135,26 +135,52 @@ function aplicar(plan, raiz = RAIZ_REPO) {
   const h = leerArchivo(cat.hist[0]);
   const hist = asignacion(ast(cat.hist[0]), cat.hist[1]);
   const porId = new Map(hist.properties.map((p) => [Number(clave(p)), p.value]));
-  const f = leerArchivo(cat.ficha[0]);
-  const llamadas = new Map();
-  recorrer(ast(cat.ficha[0]), (n) => {
-    if (n.type === 'CallExpression' && n.callee.name === cat.ficha[1] && n.arguments[0] && n.arguments[0].type === 'NumericLiteral') {
-      const id = n.arguments[0].value;
-      if (llamadas.has(id)) throw new Error(`${cat.ficha[1]}(${id}, ...) aparece más de una vez en ${cat.ficha[0]}`);
-      llamadas.set(id, n);
-    }
-  });
+
+  // For armas, prices live in AMX_ARMAS_PRECIOS map; for others, in the ficha call
+  let llamadas = null;
+  let f = null;
+  let preciosMapNodo = null;
+  const preciosPorId = new Map();
+
+  if (cat.preciosMap) {
+    // Armas: update AMX_ARMAS_PRECIOS instead of mk() arg
+    preciosMapNodo = asignacion(ast('src/data/data-precios.js'), cat.preciosMap);
+    for (const p of preciosMapNodo.properties) preciosPorId.set(Number(clave(p)), p.value);
+  }
+  if (cat.ficha) {
+    f = leerArchivo(cat.ficha[0]);
+    llamadas = new Map();
+    recorrer(ast(cat.ficha[0]), (n) => {
+      if (n.type === 'CallExpression' && n.callee.name === cat.ficha[1] && n.arguments[0] && n.arguments[0].type === 'NumericLiteral') {
+        const id = n.arguments[0].value;
+        if (llamadas.has(id)) throw new Error(`${cat.ficha[1]}(${id}, ...) aparece más de una vez en ${cat.ficha[0]}`);
+        llamadas.set(id, n);
+      }
+    });
+  }
+
   let existencias = null;
   if (plan.catalogo === 'armas') existencias = asignacion(ast('src/data/data-precios.js'), 'AMX_ARMAS_EXISTENCIAS');
   for (const s of plan.seguros) {
     const precio = Math.round(s.precio * 100) / 100;   // una sola redondeada: mismo valor en historial y ficha
     const arr = porId.get(s.id);
-    const llamada = llamadas.get(s.id);
-    if (!arr || arr.type !== 'ArrayExpression' || !llamada) throw new Error(`ficha ${s.id} sin historial o sin ${cat.ficha[1]}(...) en ${plan.catalogo}`);
+    if (!arr || arr.type !== 'ArrayExpression') throw new Error(`ficha ${s.id} sin historial en ${plan.catalogo}`);
     const reg = `{ manualId: '${manualId}', price: '${pesos(precio)}', date: '${plan.fecha}'${cat.conQty ? `, qty: ${Number(s.existencia)}` : ''} }`;
     h.ed.push(alFinal(arr, arr.elements, reg));
-    const arg = llamada.arguments[cat.ficha[2]];
-    f.ed.push({ ini: arg.start, fin: arg.end, txt: cat.ficha[3](precio) });
+
+    if (cat.preciosMap) {
+      // Update price in AMX_ARMAS_PRECIOS map
+      const pNodo = preciosPorId.get(s.id);
+      if (pNodo) h.ed.push({ ini: pNodo.start, fin: pNodo.end, txt: String(precio) });
+      else h.ed.push(alFinal(preciosMapNodo, preciosMapNodo.properties, `${s.id}: ${precio}`));
+    } else if (llamadas) {
+      // Update price directly in the ficha call (accesorios, municiones)
+      const llamada = llamadas.get(s.id);
+      if (!llamada) throw new Error(`ficha ${s.id} sin ${cat.ficha[1]}(...) en ${plan.catalogo}`);
+      const arg = llamada.arguments[cat.ficha[2]];
+      f.ed.push({ ini: arg.start, fin: arg.end, txt: cat.ficha[3](precio) });
+    }
+
     if (existencias) {
       const p = existencias.properties.find((x) => Number(clave(x)) === s.id);
       if (p) h.ed.push({ ini: p.value.start, fin: p.value.end, txt: String(Number(s.existencia)) });
