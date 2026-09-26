@@ -4,33 +4,20 @@
   <p><a href="https://armado.mx"><strong>armado.mx</strong></a> · <a href="#ficha-de-arma">Qué hace</a> · <a href="#colaborar-con-reportes">Colaborar</a> · <a href="#licencia">Licencia</a></p>
 </div>
 
-## Acerca de
+## ¿Qué es Armado en México?
 
 ![La página Acerca de: la misión, el gafete del creador y la declaración de intenciones](docs/capturas/readme/acerca.webp)
 
-Armado en México nace de la opacidad. Las instituciones no dan información pública y actualizada
-sobre las armas que un ciudadano puede tener legalmente: desincentivan así el ejercicio de un
-derecho constitucional —el del artículo 10, a la posesión legal de armas para proteger el
-domicilio— y satanizan las armas en un país asolado desde hace más de veinte años por la
-violencia y el narcotráfico.
+Armado en México es un proyecto divulgativo de código abierto que busca dar transparencia y
+empoderar a los ciudadanos a través del conocimiento de la ley, los procesos administrativos, los
+requisitos y costos que se necesitan para hacer los trámites ante la Secretaría de la Defensa para
+ejercer el derecho constitucional de poseer armas en el domicilio para la protección del mismo.
 
-Frente a eso, transparencia. Cada arma se muestra con fines informativos, y cada precio se publica
-con el inventario oficial del que sale y su fecha, para que quien se lo plantee decida informado.
-
-No creemos que cualquiera deba tener un arma. Defendemos el derecho que tenemos como mexicanos y
-como personas a proteger nuestra vida, nuestra familia y nuestro hogar en un entorno donde la
-violencia y el crimen son el pan de cada día, y donde alguien puede irrumpir en tu casa sin que las
-autoridades respondan a tiempo.
-
-Abogamos por la tenencia responsable de armas: para el tiro deportivo, pero sobre todo para la
-capacitación y la protección del hogar.
-
-La página **Acerca de** del sitio lo cuenta en un expediente: la misión —divulgar de forma
-rigurosa la información técnica, histórica y legal de las armas disponibles para civiles en
-México—, quién está detrás y esta misma declaración. Es un catálogo **divulgativo**: aquí no se
-compran ni se venden armas.
-
-*Armado en México · ¡Protege lo que amas!*
+Armado en México no pertenece ni representa a ningún partido político o entidad gubernamental. No
+emitimos permisos, no comercializamos ni distribuimos ningún artículo de los presentados por la
+DCAM y OTCA; estas armerías son las únicas oficiales donde realizar su trámite. Somos ciudadanos
+que buscan democratizar estos procesos y combatir los estigmas sociales que satanizan a quienes
+buscan poder protegerse en el entorno de violencia e inseguridad que asola el país.
 
 ## Ficha de arma
 
@@ -82,22 +69,9 @@ mejor cifra rodeada en rojo; abajo, bajo «IGUALES», lo que comparten. Se llena
 de cualquier tarjeta o con la casilla **Comparar** de la ficha; si se añade una tercera arma sale
 la primera que entró, y cada comparación tiene su propia URL para compartirla.
 
-Sirve para decidir entre candidatas con datos y no con fotos. La captura enseña el caso típico: la
+Sirve para decidir entre candidatas con datos y no con fotos. El recorrido enseña el caso típico: la
 **Ruger LCP** y la **Ruger LCP MAX** parecen la misma pistola en dos versiones —misma marca,
-calibre, mecanismo y origen, las dos de uso civil—, pero fila por fila la diferencia salta:
-
-|  | Ruger LCP | Ruger LCP MAX | Diferencia |
-|---|---|---|---|
-| Capacidad | 6+1 | 10+1 | 4 cartuchos más en el cargador |
-| Peso | 270g | 297g | +27 g |
-| Longitud | 133mm | 137mm | +4 mm |
-| Año | 2008 | 2021 | 13 años después |
-| Precio | $9,110.35 MXN | $14,875.83 MXN | +$5,765.48, un 63 % más |
-
-Si esos cuatro cartuchos valen la diferencia lo decide cada quien, pero con los números delante.
-
-<sub>Precios de referencia del último inventario oficial de cada arma, tal como los mostraba el
-comparador el 26 de septiembre de 2026. Cambian con cada inventario nuevo.</sub>
+calibre, mecanismo y origen, las dos de uso civil—, pero fila por fila la diferencia salta.
 
 ## Apartado legal
 
