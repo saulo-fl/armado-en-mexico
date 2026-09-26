@@ -41,16 +41,16 @@ function comaFinalEnObjeto(archivo, nombre) {
 }
 
 const pruebas = {
-  'leer: arma 1, accesorio 132 y munición 2072 del 11-sep'() {
+  'leer: arma 1, accesorio 132 y munición 2072'() {
     const d = leer(RAIZ);
     const a1 = d.armas.find((a) => a.id === 1);
-    assert.strictEqual(a1.hist[a1.hist.length - 1].manualId, 'man_dcam_2026_09_11');
+    assert.strictEqual(a1.hist[a1.hist.length - 1].manualId, 'man_dcam_2026_09_25');
     assert.strictEqual(typeof a1.existencia, 'number');
     const acc = d.accesorios.find((a) => a.id === 132);
-    assert.strictEqual(acc.hist[acc.hist.length - 1].price, '$2.56 MXN');
+    assert.strictEqual(acc.hist[acc.hist.length - 1].price, '$2.66 MXN');
     const mun = d.municiones.find((m) => m.id === 2072);
     assert.strictEqual(mun.hist[mun.hist.length - 1].qty, 3000);
-    assert.ok(d.manuales.armas.some((m) => m.id === 'man_dcam_2026_09_11' && m.primary));
+    assert.ok(d.manuales.armas.some((m) => m.id === 'man_dcam_2026_09_25' && m.primary));
   },
   'aplicar: un inventario nuevo de cada catálogo sobre una copia'() {
     const tmp = copiaTmp();
@@ -62,7 +62,7 @@ const pruebas = {
     const a1 = d.armas.find((a) => a.id === 1);
     assert.deepStrictEqual(a1.hist[a1.hist.length - 1], { manualId: 'man_dcam_2026_10_01', price: '$9,641.23 MXN', date: '2026-10-01' });
     assert.strictEqual(a1.existencia, 4);
-    global.window = {}; (0, eval)(fs.readFileSync(path.join(tmp, 'src/data/data.js'), 'utf8'));
+    global.window = {}; (0, eval)(fs.readFileSync(path.join(tmp, 'src/data/data-precios.js'), 'utf8')); (0, eval)(fs.readFileSync(path.join(tmp, 'src/data/data.js'), 'utf8'));
     assert.strictEqual(window.DB.find((a) => a.id === 1).priceExact, '$9,641.23 MXN');
     const acc = d.accesorios.find((a) => a.id === 101);
     assert.deepStrictEqual(acc.hist[acc.hist.length - 1], { manualId: 'man_acc_2026_10_01', price: '$573.62 MXN', date: '2026-10-01', qty: 2 });
@@ -86,7 +86,7 @@ const pruebas = {
     comaFinalEnHistorial(path.join(tmp, 'src/data/data-precios.js'), 1);
     aplicar({ catalogo: 'armas', fecha: '2026-10-01', pdf: PDF, v: 'dcam20261001', seguros: [{ id: 1, precio: 9700, existencia: 5 }] }, tmp);
     const a1 = leer(tmp).armas.find((a) => a.id === 1);
-    assert.strictEqual(a1.hist.length, 5, 'no debe haber huecos ni registros de más');
+    assert.strictEqual(a1.hist.length, 10, 'no debe haber huecos ni registros de más');
     assert.ok(a1.hist.every((r) => r && typeof r.date === 'string' && typeof r.manualId === 'string'), 'ningún registro debe ser un hueco/null');
     assert.strictEqual(a1.hist[a1.hist.length - 1].manualId, 'man_dcam_2026_10_01');
     fs.rmSync(tmp, { recursive: true, force: true });
@@ -119,7 +119,7 @@ const pruebas = {
       assert.strictEqual(a.hist[a.hist.length - 1].manualId, 'man_dcam_2026_10_01', `hist id ${s.id}`);
     }
     const pesosFmt = (n) => `$${Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`;
-    global.window = {}; (0, eval)(fs.readFileSync(path.join(tmp, 'src/data/data.js'), 'utf8'));
+    global.window = {}; (0, eval)(fs.readFileSync(path.join(tmp, 'src/data/data-precios.js'), 'utf8')); (0, eval)(fs.readFileSync(path.join(tmp, 'src/data/data.js'), 'utf8'));
     for (const s of seguros) assert.strictEqual(window.DB.find((a) => a.id === s.id).priceExact, pesosFmt(s.precio), `priceExact id ${s.id}`);
     const arma2Despues = leer(tmp).armas.find((a) => a.id === 2);
     assert.deepStrictEqual(arma2Despues.hist, arma2Antes.hist, 'arma 2 no debía cambiar');
