@@ -255,9 +255,9 @@ window.HomeMunicionesSection = HomeMunicionesSection;
 // ════════════════════════════════════════════════════════════════
 // CATÁLOGO DE MUNICIONES — la vitrina (mismo patrón que AccesoriosScreen)
 // Toldo de lona, separadores de fichero por calibre y un puesto por cartucho
-// con SOLO su nombre corto (marca + bala + grano). Decidido con Saulo: la
-// sección de MUNICIONES debe tener la misma estética de mesa, fondo y letreros
-// que la pantalla de ACCESORIOS.
+// con su etiqueta de marca, condición legal, bala/grano y precio por unidad.
+// Decidido con Saulo: la sección de MUNICIONES comparte estética de mesa y
+// fondo con la pantalla de ACCESORIOS.
 // La categoría activa vive en la URL (app.jsx): aquí solo se lee y se avisa con
 // `onCategoria` al cambiar de separador.
 // ════════════════════════════════════════════════════════════════
@@ -271,15 +271,40 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onCategoria }) {
   const activo = secciones.some((s) => s.id === pedida) ? pedida : 'all';
   const visibles = window.municionesVitrina(activo);
   const opciones = [{ id: 'all', label: 'Todas' }].concat(secciones.map((s) => ({ id: s.id, label: s.label })));
+  const sellos = window.SELLOS_LEGALES || {};
+  const datosPuesto = (m) => {
+    const sello = sellos[m.avail] || sellos.dcam;
+    const detalle = [m.bala, m.grano].filter(Boolean).join(' · ');
+    const precio = m.priceExact ? String(m.priceExact).replace(' MXN', '') : '';
+    const unidad = munUnidadPrecio(m);
+    return { sello, detalle, precio, unidad };
+  };
 
-  const puesto = (m) => (
-    <window.PuestoPieza key={m.id}
-      rotulo={m.marca + ' · ' + m.bala + (m.grano ? ' · ' + m.grano : '')}
-      ariaLabel={m.marca + ' ' + m.bala + (m.grano ? ' ' + m.grano : '') + ' — ' + m.nombre}
-      foto={window.isRealImage(m.img) ? m.img : null}
-      silueta={window.municionPlaceholder(m)}
-      onClick={() => onOpenMunicion(m.id)} />
-  );
+  const puesto = (m) => {
+    const { sello, detalle, precio, unidad } = datosPuesto(m);
+    return (
+      <window.PuestoPieza key={m.id}
+        rotulo={null}
+        ariaLabel={[m.nombre, sello.texto, detalle, precio && (precio + ' por ' + unidad)].filter(Boolean).join(', ')}
+        foto={window.isRealImage(m.img) ? m.img : null}
+        silueta={window.municionPlaceholder(m)}
+        onClick={() => onOpenMunicion(m.id)} />
+    );
+  };
+
+  const etiqueta = (m) => {
+    const { sello, detalle, precio, unidad } = datosPuesto(m);
+    return (
+      <React.Fragment>
+        <span className="amx-etiqueta-marca">
+          <span>{m.marca}</span>
+          <i className={'es-' + sello.tono}>{sello.texto}</i>
+        </span>
+        <span className="amx-etiqueta-nombre">{detalle}</span>
+        {precio && <span className="amx-etiqueta-precio">{precio} <small>/ {unidad}</small></span>}
+      </React.Fragment>
+    );
+  };
 
   return (
     <div className="amx-vitrina-acc">
@@ -290,7 +315,8 @@ function MunicionesScreen({ initialFilter, onOpenMunicion, onCategoria }) {
         {visibles.map((s) => (
           <section key={s.id} className="amx-vitrina-acc-seccion" aria-labelledby={'vitrina-mun-' + s.id}>
             <window.CintaDymo id={'vitrina-mun-' + s.id}>{s.label}</window.CintaDymo>
-            <window.MesaPuestos items={s.piezas} porFila={porFila} renderPuesto={puesto} />
+            <window.MesaPuestos items={s.piezas} porFila={porFila}
+              renderPuesto={puesto} renderEtiqueta={etiqueta} />
           </section>
         ))}
       </div>

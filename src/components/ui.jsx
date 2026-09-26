@@ -3121,18 +3121,29 @@ window.SeparadoresFiltro = SeparadoresFiltro;
 
 // La mesa: reparte los puestos en filas de `porFila`, cada una con su tabla a
 // todo el ancho aunque se quede corta (Saulo, 15-sep-2026).
-function MesaPuestos({ items, porFila, renderPuesto }) {
+function MesaPuestos({ items, porFila, renderPuesto, renderEtiqueta }) {
   const filas = [];
   for (let i = 0; i < items.length; i += porFila) filas.push(items.slice(i, i + porFila));
   return (
     <div className="amx-mesa">
       {filas.map((fila, f) => (
-        <div key={f} className="amx-mesa-fila" style={{ '--por-fila': porFila }}>
-          {fila.map((item, i) => (
-            <div key={i} className="amx-puesto-wrap">
-              {renderPuesto(item)}
+        <div key={f} className={'amx-mesa-tramo' + (renderEtiqueta ? ' amx-mesa-tramo--etiquetas' : '')}>
+          <div className="amx-mesa-fila" style={{ '--por-fila': porFila }}>
+            {fila.map((item, i) => (
+              <div key={i} className="amx-puesto-wrap">
+                {renderPuesto(item)}
+              </div>
+            ))}
+          </div>
+          {renderEtiqueta &&
+            <div className="amx-mesa-etiquetas" style={{ '--por-fila': porFila }}>
+              {fila.map((item, i) => (
+                <div key={i} className="amx-mesa-etiqueta-celda">
+                  <span className="amx-etiqueta" aria-hidden="true">{renderEtiqueta(item)}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          }
         </div>
       ))}
     </div>
@@ -3140,7 +3151,7 @@ function MesaPuestos({ items, porFila, renderPuesto }) {
 }
 window.MesaPuestos = MesaPuestos;
 
-// Un puesto: letrero con SOLO el nombre corto, vara, luz y la pieza. Sin foto,
+// Un puesto: letrero con SOLO el nombre corto y vara opcionales, luz y la pieza. Sin foto,
 // la silueta de su categoría, sola: sin sello «Foto pendiente» (Saulo). El
 // nombre completo va en el aria-label; foto y silueta no se anuncian.
 function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
@@ -3148,10 +3159,12 @@ function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
   const conFoto = foto && !fallo;
   return (
     <button type="button" className="amx-puesto amx-puesto--pieza" aria-label={ariaLabel} onClick={onClick}>
-      <span className="amx-puesto-letrero">
-        <span className="amx-puesto-rotulo">{rotulo}</span>
-      </span>
-      <span className="amx-puesto-palo" aria-hidden="true" />
+      {rotulo && <React.Fragment>
+        <span className="amx-puesto-letrero">
+          <span className="amx-puesto-rotulo">{rotulo}</span>
+        </span>
+        <span className="amx-puesto-palo" aria-hidden="true" />
+      </React.Fragment>}
       <span className="amx-puesto-luz" aria-hidden="true" />
       {conFoto
         ? <img className="amx-puesto-caja" src={foto} alt="" loading="lazy" decoding="async" onError={() => setFallo(true)} />

@@ -24,6 +24,7 @@ node_modules
 # de agentes. Lo compartido va en .claude/settings.json.
 /.claude/settings.local.json
 /.claude/worktrees/
+/.worktrees/
 
 # Espejos para Codex de .claude/skills y .claude/agents: se regeneran en local
 # desde .claude/, que es la fuente. No se versionan copias.
