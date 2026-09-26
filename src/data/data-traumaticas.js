@@ -1,11 +1,11 @@
 // Armado en México — Copyright (C) 2026 Saulo Flores León
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+// (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 //
 // LOS DATOS de este fichero —la selección, la estructura y los textos
 // divulgativos— se ofrecen ADEMÁS bajo CC BY-SA 4.0; los hechos que contiene
-// no son de nadie (art. 14 fr. X LFDA). Detalle: LICENSE-CONTENIDO.md.
+// no son de nadie (art. 14 fr. X LFDA). Detalle: LICENCIA-CONTENIDO.md.
 
 // Armado en México — Armas Traumáticas (defensa MENOS LETAL)
 // CATEGORÍA APARTE del arsenal: NO son armas de fuego, NO requieren permiso SEDENA

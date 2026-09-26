@@ -1,7 +1,7 @@
 // Armado en México — Copyright (C) 2026 Saulo Flores León
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+// (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 // Legalidad v2 (22-sep-2026): las ocho decisiones de Saulo, tomadas en los hilos
 // de Penpot, están en docs/superpowers/specs/2026-09-22-legalidad-v2-design.md

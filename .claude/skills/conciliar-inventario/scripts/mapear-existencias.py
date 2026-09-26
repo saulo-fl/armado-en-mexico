@@ -2,7 +2,7 @@
 # Armado en México — Copyright (C) 2026 Saulo Flores León
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+# (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 """Mapea renglones de un PDF DCAM nuevo a fichas del catálogo para existencias.
 
@@ -181,6 +181,7 @@ def map_existencias(ref_path, new_items, verbose=False):
     # 3) Transferir fichaId de la referencia y sumar qty
     existencias = defaultdict(int)
     ficha_rows = defaultdict(list)  # fichaId → [new_rows]
+    ficha_prices = {}  # fichaId → priceN (precio unitario del PDF nuevo)
 
     for ni, ri, f_used in matched:
         fid = ref_rows[ri]["fichaId"]
@@ -189,6 +190,9 @@ def map_existencias(ref_path, new_items, verbose=False):
             if qty > 0:
                 existencias[fid] += qty
                 ficha_rows[fid].append(new_items[ni])
+            # Guardar precio unitario (el del primer row mapeado a esta ficha)
+            if fid not in ficha_prices:
+                ficha_prices[fid] = new_items[ni]["priceN"]
 
     # 4) Renglones sin emparejar en el nuevo PDF (posibles altas)
     sin_ficha = []
@@ -244,6 +248,7 @@ def map_existencias(ref_path, new_items, verbose=False):
 
     return {
         "existencias": dict(sorted(existencias.items())),
+        "precios": {k: round(v, 2) for k, v in sorted(ficha_prices.items())},
         "factores": [f_val for f_val, _ in factors[:2]],
         "sinFicha": sin_ficha,
         "sinPrecio": sin_precio,
