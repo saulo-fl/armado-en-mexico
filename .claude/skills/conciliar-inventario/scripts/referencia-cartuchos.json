@@ -1,0 +1,327 @@
+{
+  "pdfDate": "2026-09-22",
+  "pdfFile": "carts_25sep",
+  "totalRows": 40,
+  "rows": [
+    {
+      "idx": 1,
+      "name": "CARTUCHO CAL12 SAGA SPORTING 32GR M8",
+      "desc": "CARTUCHO CAL. 12 G.A., MARCA SAGA SPORTING 32, 32 GRAMOS, MUNICION 8, CODIGO SPORT32MX8.",
+      "priceN": 11.17,
+      "qty": 3000,
+      "fichaId": 2072
+    },
+    {
+      "idx": 2,
+      "name": "CART.CAL.12.GB.GB.EXPRESS.OJEO.34GR.P4",
+      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB EXPRESS OJEO, 34 GRAMOS, PERDIGON 4",
+      "priceN": 10.24,
+      "qty": 3000,
+      "fichaId": 2015
+    },
+    {
+      "idx": 3,
+      "name": "CART.CAL.12.RIO.GAME.LOAD-32.32GR.P6",
+      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 6",
+      "priceN": 10.01,
+      "qty": 1500,
+      "fichaId": 2061
+    },
+    {
+      "idx": 4,
+      "name": "CART. CAL. 12GA RIO GAME LOAD-32 32GR P4",
+      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 4",
+      "priceN": 10.01,
+      "qty": 3000,
+      "fichaId": null
+    },
+    {
+      "idx": 5,
+      "name": "CART. 0. 40\" S&W AGUILA 180 GN.",
+      "desc": "CARTUCHO CAL. 0.40\" S & W MARCA AGUILA DE 180 GR. F.M.J. COD. 1E402110",
+      "priceN": 8.96,
+      "qty": 13350,
+      "fichaId": 2019
+    },
+    {
+      "idx": 6,
+      "name": "CART. CAL. 40\" S&W AGUILA FMJ. 180GN.",
+      "desc": "CARTUCHO CALIBRE 0.40\" S&W MARCA AGUILA FULL METAL JACKET 180 GN. PUNTA REDONDA CODIGO: 1E402111.",
+      "priceN": 8.96,
+      "qty": 666,
+      "fichaId": 2004
+    },
+    {
+      "idx": 7,
+      "name": "CARTS. CAL. 12 EG DEL SUR SH 29 GR M.7.5",
+      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12, MARCA EG DEL SUR, SUBMARCA SPECIAL HUNTER 29 GRAMOS, MUNICIÓN 7.5.",
+      "priceN": 10.01,
+      "qty": 3000,
+      "fichaId": null
+    },
+    {
+      "idx": 8,
+      "name": "CART CAL. 12 EG DEL SUR TRAP 28 GR M. 8",
+      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA TRAP. 28 GRAMOS MUN. 8",
+      "priceN": 9.54,
+      "qty": 3000,
+      "fichaId": 2079
+    },
+    {
+      "idx": 9,
+      "name": "CART CAL.12 EG DEL SUR (SH) 32 GR M. 7.5",
+      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 32 GRAMOS, MUN. 7.5",
+      "priceN": 10.71,
+      "qty": 3000,
+      "fichaId": null
+    },
+    {
+      "idx": 10,
+      "name": "CART.CAL.243WIN100GR,B.T.",
+      "desc": "CARTUCHO CALIBRE 243 WIN 100 GR, BOAT TAIL SP, MARCA ÁGUILA.",
+      "priceN": 24.76,
+      "qty": 370,
+      "fichaId": 2021
+    },
+    {
+      "idx": 11,
+      "name": "CART. CAL. 30-30 WIN AGUILA 150GR RN",
+      "desc": "CARTUCHO CALIBRE 30-30 WIN 150 GR, ROUND NOSE, MARCA ÁGUILA",
+      "priceN": 22.72,
+      "qty": 1460,
+      "fichaId": 2024
+    },
+    {
+      "idx": 12,
+      "name": "CART. CAL 30-06 SPRG AGUILA 150GR SP",
+      "desc": "CARTUCHO CALIBRE 30-06 SPGR 150 GR, SOFT POINT, MARCA ÁGUILA",
+      "priceN": 24.76,
+      "qty": 1810,
+      "fichaId": 2051
+    },
+    {
+      "idx": 13,
+      "name": "CART.CAL.12.A.VEL.1330.M#7.5,36G",
+      "desc": "CARTUCHO MARCA AGUILA CAL. 12 ALTA VEL. 1330 M.#7.5, 36G",
+      "priceN": 11.26,
+      "qty": 5000,
+      "fichaId": 2075
+    },
+    {
+      "idx": 14,
+      "name": "CART.AGUILA.CAL12.TRP.AMER.1350M#7.5,24G",
+      "desc": "CARTUCHO MARCA ÁGUILA CAL. 12 TRAP AMERICANO 1350 M.#7.5, 24G.",
+      "priceN": 7.78,
+      "qty": 3000,
+      "fichaId": 2063
+    },
+    {
+      "idx": 15,
+      "name": "CAR.AGUI. CAL.12G SKEET 9,24G",
+      "desc": "CARTUCHO MARCA ÁGUILA CAL. 12 SKEET 1350 M.#9, 24G",
+      "priceN": 7.78,
+      "qty": 3500,
+      "fichaId": 2095
+    },
+    {
+      "idx": 16,
+      "name": "CARTUCHO 0.38\" SUPER CORBON 125 GR",
+      "desc": "CARTUCHO MARCA CORBON CALIBRE 38 SUPER +P DE 125 GR. JHP. EN PRESENTACIÓN EN CAJA CON 20 CARTUCHOS",
+      "priceN": 48.71,
+      "qty": 1842,
+      "fichaId": 2026
+    },
+    {
+      "idx": 17,
+      "name": "CART. CAL12 SAGA KING PIGEON CD 36GR M8",
+      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA, KING PIGEON CORTA DISTANCIA, 36 GRAMOS, MUNICIÓN 8.",
+      "priceN": 12.57,
+      "qty": 2675,
+      "fichaId": 2076
+    },
+    {
+      "idx": 18,
+      "name": "CART. CAL12 SAGA KING PIGEON CD 36GR M9",
+      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA, KING PIGEON CORTA DISTANCIA, 36 GRAMOS, MUNICIÓN 9.",
+      "priceN": 12.57,
+      "qty": 7300,
+      "fichaId": 2077
+    },
+    {
+      "idx": 19,
+      "name": "CART.CAL.20G.A.SAGAC.20-70 GOLD, 28GR,M6",
+      "desc": "CARTUCHO CAL. 20 G.A. MARCA SAGA C.20-70 GOLD, 28 GRAMOS, MUNICIÓN 6.",
+      "priceN": 10.24,
+      "qty": 3000,
+      "fichaId": 2078
+    },
+    {
+      "idx": 20,
+      "name": "CART.CAL.20G.A.SAGAC.20-70GOLD,28GR,M7.5",
+      "desc": "CARTUCHO CAL. 20 G.A. MARCA SAGA C.20-70 GOLD, 28 GRAMOS, MUNICIÓN 7.5.",
+      "priceN": 10.24,
+      "qty": 3000,
+      "fichaId": 2067
+    },
+    {
+      "idx": 21,
+      "name": "CART. CAL. 12 EXCOPESA T5 PICH 36GR M7.5",
+      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 T5 PICHON MUN. 7.5 36GR CATALOGO 150 - 75",
+      "priceN": 13.5,
+      "qty": 2900,
+      "fichaId": 2057
+    },
+    {
+      "idx": 22,
+      "name": "CAR.BULLET E.C.CL.12MUN6 34 GR.C.007-06",
+      "desc": "CARTUCHO MARCA BULLET ESPECIAL DE CAZA CAL. 12 MUN. 6 34 GR. CAT. 0070-06",
+      "priceN": 11.17,
+      "qty": 3000,
+      "fichaId": 2101
+    },
+    {
+      "idx": 23,
+      "name": "CAR.BULLETC.CAL.12MUN.7.5-32GR.CAT0100-7",
+      "desc": "CARTUCHO MARCA BULLET CAZA CAL. 12 MUN. 7.5 32 GR. CAT. 0100-75",
+      "priceN": 9.78,
+      "qty": 3000,
+      "fichaId": 2086
+    },
+    {
+      "idx": 24,
+      "name": "CART.BULLETT-4C.CAL.12MUN8 36GR.C0072-08",
+      "desc": "CARTUCHO MARCA BULLET T-4 CAZA CAL. 12 MUN. 8 36 GR. CAT. 0072-08",
+      "priceN": 11.64,
+      "qty": 2150,
+      "fichaId": 2087
+    },
+    {
+      "idx": 25,
+      "name": "CRT.BULLETT-5P1400F.CL12M.7.5-36,0078-75",
+      "desc": "CARTUCHO MARCA BULLET T-5 PICHON 1400 FPS CAL. 12 MUN. 7.5 36 GR. CAT. 0078-75",
+      "priceN": 13.5,
+      "qty": 2200,
+      "fichaId": 2088
+    },
+    {
+      "idx": 26,
+      "name": "CARTBULLETT-5P1400F.CL.12MN.8-36,0078-80",
+      "desc": "CARTUCHO MARCA BULLET T-5 PICHON 1400 FPS CAL. 12 MUN. 8 36 GR. CAT. 0078-80",
+      "priceN": 13.5,
+      "qty": 2250,
+      "fichaId": 2089
+    },
+    {
+      "idx": 27,
+      "name": "CART.CAL.270WIN130GRS.P.ÁGUILA",
+      "desc": "CARTUCHO CALIBRE 270 WIN 130 GR SOFT POINT MARCA ÁGUILA",
+      "priceN": 24.76,
+      "qty": 4450,
+      "fichaId": 2050
+    },
+    {
+      "idx": 28,
+      "name": "CART.CAL.30-30 WIN 150 GRS.P.ÁGUILA",
+      "desc": "CARTUCHO CALIBRE 30-30 WIN 150 GR SOFT POINT MARCA ÁGUILA",
+      "priceN": 22.72,
+      "qty": 20,
+      "fichaId": 2028
+    },
+    {
+      "idx": 29,
+      "name": "CART.CAL.30-06 SPRG 150 GR S.P.ÁGUILA",
+      "desc": "CARTUCHO CALIBRE 30-06 SPRG 150 GR SOFT POINT MARCA ÁGUILA",
+      "priceN": 24.76,
+      "qty": 300,
+      "fichaId": 2029
+    },
+    {
+      "idx": 30,
+      "name": "CARTS CAL. 30 CARABINA AGUILA FMJ 110 GR",
+      "desc": "CARTUCHO CAL. 30 CARABINA FULL METAL JACKET 110 GRANOS MARCA AGUILA",
+      "priceN": 28.16,
+      "qty": 1300,
+      "fichaId": 2030
+    },
+    {
+      "idx": 31,
+      "name": "CARTS CAL.308 WIN FIOCCHI DE 150 GRS.",
+      "desc": "CARTUCHO CAL. 0.308\" WIN. (7.62 X 51 MM.) MARCA FIOCCHI, F.M.J. DE 150 GR. COD. 308A",
+      "priceN": 13.92,
+      "qty": 11440,
+      "fichaId": 2033
+    },
+    {
+      "idx": 32,
+      "name": "CARTUCHO CAL. 5.56X45 mm PMC X-TAC 55 GR",
+      "desc": "CARTUCHO CALIBRE 5.56 X 45 mm MARCA PMC X-TC, 55 GRAINS, FULL METAL JACKET (FMJ-BT)",
+      "priceN": 10.64,
+      "qty": 6500,
+      "fichaId": 2034
+    },
+    {
+      "idx": 33,
+      "name": "CARTUCHO CAL7.62X51 mm PMC BALL M80 147G",
+      "desc": "CARTUCHO CALIBRE 7.62 X 51 mm MARCA PMC BALL M80 ESLABONADO, DE 147 GRS",
+      "priceN": 29.27,
+      "qty": 500,
+      "fichaId": 2092
+    },
+    {
+      "idx": 34,
+      "name": "CARTS CAL.5.56 X 45 mm AGUILA FMJ 62 GR",
+      "desc": "CARTUCHO CAL. 5.56 X 45 MM. MARCA AGUILA, F.M.J. DE 62 GRS. COD. 1E556110",
+      "priceN": 12.09,
+      "qty": 8700,
+      "fichaId": 2035
+    },
+    {
+      "idx": 35,
+      "name": "CARTS CAL.308\" W REMINGTON UMC FMJ 150GR",
+      "desc": "CARTUCHO CAL. 0.308\" WIN. MARCA REMINGTON, F.M.J. PUNTA SOLIDA DE 150 GR. COD. L308W4- 23715",
+      "priceN": 14.33,
+      "qty": 3150,
+      "fichaId": 2036
+    },
+    {
+      "idx": 36,
+      "name": "CARTUCHO CAL 22-250 REM AGUILA 60 GR",
+      "desc": "CARTUCHO CALIBRE 22-250 REM. MARCA AGUILA 60 GRS SOFT POINT",
+      "priceN": 23.33,
+      "qty": 14800,
+      "fichaId": 2042
+    },
+    {
+      "idx": 37,
+      "name": "CARTUCHO 0.300\" WIN MAG PARTIZAN 150 GR",
+      "desc": "CARTUCHO CALIBRE 0.300\" WIN. MAG. MARCA PARTIZAN PUNTA SUAVE DE 150 GR.. CODIGO PP3001.",
+      "priceN": 30.49,
+      "qty": 8520,
+      "fichaId": 2043
+    },
+    {
+      "idx": 38,
+      "name": "CARTS CAL.38\" SUP. AGUILA F.M.J. 130 GN",
+      "desc": "CARTUCHO CAL. 0.38\" SUPER MARCA AGUILA DE 130 GR. F.M.J. CODIGO 1E382112",
+      "priceN": 18.18,
+      "qty": 1240,
+      "fichaId": 2018
+    },
+    {
+      "idx": 39,
+      "name": "CARTS CAL.40\" S&W AGUILA FMJ P R 180GR",
+      "desc": "CARTUCHO CALIBRE 0.40\" S&W MARCA AGUILA FULL METAL JACKET 180 GN. PUNTA REDONDA CODIGO: 1E402111.",
+      "priceN": 8.96,
+      "qty": 7400,
+      "fichaId": 2103
+    },
+    {
+      "idx": 40,
+      "name": "CART.5.56 mm FEDERAL FMJ 62 GR XM855AF90",
+      "desc": "CARTUCHO CALIBRE 5.56 mm MARCA FEDERAL AMERICAN EAGLE F.M.J.. 62 GRS., CODIGO XM855AF90.",
+      "priceN": 11.05,
+      "qty": 35,
+      "fichaId": 2044
+    }
+  ]
+}
