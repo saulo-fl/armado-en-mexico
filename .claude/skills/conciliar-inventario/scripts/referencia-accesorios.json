@@ -1,13 +1,13 @@
 {
   "pdfDate": "2026-09-22",
-  "pdfFile": "1104617_ACCESORIOS_22_SEP._2026.pdf",
-  "totalRows": 34,
+  "pdfFile": "accs_25sep",
+  "totalRows": 33,
   "rows": [
     {
       "idx": 1,
       "name": "CARGADOR_P/RIFLE 22_CESKA_CZ457/5/512/10",
       "desc": "CARGADOR CALIBRE 22 LR, CON CAPACIDAD DE 10 CARTUCHOS PARA RIFLE MODELO CZ 457/5/512, MARCA CESKA ZBROJOVKA A.S.",
-      "priceN": 1123.62,
+      "priceN": 1151.17,
       "qty": 8,
       "fichaId": 131
     },
@@ -15,7 +15,7 @@
       "idx": 2,
       "name": "CARGADOR 22 LR NORDIC COMPONENTS C. 25 C",
       "desc": "",
-      "priceN": 599.27,
+      "priceN": 613.96,
       "qty": 4,
       "fichaId": 101
     },
@@ -23,15 +23,15 @@
       "idx": 3,
       "name": "CARGADOR CAL.22 LR MOSSBERG P/RIFLE 10CA",
       "desc": "CARGADOR PARA RIFLE CAL. 0.22\" L.R. MCA. MOSSBERG, CAP. DE 10 CARTUCHOS, COD. 95702",
-      "priceN": 299.63,
-      "qty": 44,
+      "priceN": 306.98,
+      "qty": 42,
       "fichaId": 102
     },
     {
       "idx": 4,
       "name": "CARG. P/RIFLE 5.56X45 CESKA CZ805 BA1/A2",
       "desc": "CARGADOR PARA RIFLE DE ASALTO CAL. 5.56 X 45 mm. MARCA CESKA ZBROJOVKA MOD. CZ 805 BREN A1/A2, CON CAPACIDAD DE 30 CARTUCHOS.",
-      "priceN": 124.85,
+      "priceN": 127.91,
       "qty": 20,
       "fichaId": 103
     },
@@ -39,39 +39,39 @@
       "idx": 5,
       "name": "CARG. P/RIFLE BENELLI MR1 CAP 5 CART",
       "desc": "CARGADOR PARA RIFLE MARCA BENELLI, MODELO (MR1), CON CAPACIDAD DE 5 CARTUCHOS. CÓDIGO: F0455900",
-      "priceN": 745.35,
-      "qty": 24,
-      "fichaId": 104
+      "priceN": 756.51,
+      "qty": 20,
+      "fichaId": null
     },
     {
       "idx": 6,
       "name": "CARGADOR CAL 380\" MOD. PT 58 HC PLUS 19C",
       "desc": "CARGADOR CALIBRE 0.380\", MARCA TAURUS, PARA PISTOLA MODELO PT 58 HC PLUS, CON CAPACIDAD DE 19 CARTUCHOS.",
-      "priceN": 521.96,
-      "qty": 28,
+      "priceN": 534.76,
+      "qty": 20,
       "fichaId": 129
     },
     {
       "idx": 7,
       "name": "CARGADOR 0.380\" TANFOGLIO FT-9-FS CAR SP",
       "desc": "CARGADOR PARA PISTOLA CAL. 0.380\" MARCA TANFOGLIO, MODELO FT-9-FS, CARRY Y SPORT, CON CAP. DE 18 CARTUCHOS.",
-      "priceN": 2.6,
-      "qty": 3,
+      "priceN": 2.66,
+      "qty": 1,
       "fichaId": 132
     },
     {
       "idx": 8,
       "name": "CARGADOR P/PIST. 0.380 GRAND POWER CP380",
       "desc": "",
-      "priceN": 321.07,
+      "priceN": 325.88,
       "qty": 6,
-      "fichaId": 105
+      "fichaId": null
     },
     {
       "idx": 9,
       "name": "CARGADOR PPISTOLA IWI M JERICHO II 9mm",
       "desc": "CARGADOR PARA PISTOLA MARCA IWI, PARA MODELO JERICHO PL, PSL, II, II M, CALIBRE 9X19 MM, CON CAPACIDAD PARA 17 CARTUCHOS C/U, CODIGO 006211755.",
-      "priceN": 499.39,
+      "priceN": 511.63,
       "qty": 3,
       "fichaId": 106
     },
@@ -79,7 +79,7 @@
       "idx": 10,
       "name": "CARGADOR PPISTOLA IWI M MASADA 9mm",
       "desc": "CARGADOR PARA PISTOLA MARCA IWI, PARA MODELO MASADA, CALIBRE 9X19 MM, CON CAPACIDAD PARA 17 CARTUCHOS C/U, CODIGO 006306000",
-      "priceN": 499.39,
+      "priceN": 511.63,
       "qty": 20,
       "fichaId": 107
     },
@@ -87,7 +87,7 @@
       "idx": 11,
       "name": "CARGADOR SPRINGFIELD CAL. 9 mm XD-M ELIT",
       "desc": "CARGADOR MARCA SPRINGFIELD ARMORY PARA PISTOLA XD-M ELITE CALIBRE 9 MM CON CAPACIDAD DE 22 CARTUCHOS (19+3)",
-      "priceN": 499.39,
+      "priceN": 511.63,
       "qty": 60,
       "fichaId": 108
     },
@@ -95,7 +95,7 @@
       "idx": 12,
       "name": "CARGADOR TIPPMANN 0.22\" L.R. 25 CART.",
       "desc": "CARGADOR PARA CARTUCHOS CALIBRE 22, MARCA TIPPMANN ARMS, MODELO S/N, VERSIÓN 25 CARTUCHOS, INCLUYE UN CARGADOR EN UNA BOLSA DE PLÁSTICO.",
-      "priceN": 948.84,
+      "priceN": 972.1,
       "qty": 22,
       "fichaId": 111
     },
@@ -103,15 +103,15 @@
       "idx": 13,
       "name": "MIRA REFLEX MEPROLIGHT MEPRO MOR.",
       "desc": "MIRA REFLEX CON APUNTADOR LASER ROJO E INFRAROJO, MARCA MEPROLIGHT, MODELO MEPRO MOR, CON ADAPTADOR PARA RIEL PICATINNY, CUBIERTA PROTECTORA, APOYADOR DE MEJILLA PARA FUSIL ACE, MANUAL Y ESTUCHE DE PLASTICO, CODIGO 0657703.",
-      "priceN": 26217.91,
-      "qty": 10,
+      "priceN": 26860.71,
+      "qty": 9,
       "fichaId": 201
     },
     {
       "idx": 14,
       "name": "MIRA REFLEX MEPROLIGHT MEPRO GLS",
       "desc": "MIRA REFLEX PARA LANZA-GRANADAS MARCA MEPROLIGHT, MODELO MEPRO GLS, CON ADAPTADOR PARA RIEL PICATINNY, CUBIERTA PROTECTORA, MANUAL Y ESTUCHE DE LONA, CODIGO 0623114.",
-      "priceN": 22222.8,
+      "priceN": 22767.65,
       "qty": 5,
       "fichaId": 202
     },
@@ -119,7 +119,7 @@
       "idx": 15,
       "name": "CARG. PIST. CAL. 40 GLOCK, MOD. 22, 16 C",
       "desc": "CARGADOR PARA PISTOLA, CALIBRE: .40 S&W, MARCA: GLOCK, PARA MODELO: 22, CON CAPACIDAD DE 16 CARTUCHOS CADA UNO, CÓDIGO: 8436.",
-      "priceN": 468.23,
+      "priceN": 479.71,
       "qty": 40,
       "fichaId": 122
     },
@@ -127,7 +127,7 @@
       "idx": 16,
       "name": "CARG. PIST. 9MM GLOCK, MOD. 17, 19CARTS",
       "desc": "CARGADOR PARA PISTOLA, CALIBRE: 9X19MM, MARCA: GLOCK, PARA MODELO: 17, CON CAPACIDAD DE 19 CARTUCHOS CADA UNO, CÓDIGO: 1105.",
-      "priceN": 468.23,
+      "priceN": 479.71,
       "qty": 32,
       "fichaId": 120
     },
@@ -135,7 +135,7 @@
       "idx": 17,
       "name": "CARG. PIST. 9MM GLOCK, MOD. 19, 17 CARTS",
       "desc": "CARGADOR PARA PISTOLA, CALIBRE: 9X19MM, MARCA: GLOCK, PARA MODELO: 19, CON CAPACIDAD DE 17 CARTUCHOS CADA UNO, CÓDIGO: 1112.",
-      "priceN": 468.23,
+      "priceN": 479.71,
       "qty": 46,
       "fichaId": 121
     },
@@ -143,15 +143,15 @@
       "idx": 18,
       "name": "CARGADOR BERETTA 92FS CAL.9MM 15 CART.",
       "desc": "CARGADOR PARA PISTOLA MARCA BERETTA MODELO 92FS CAL. 9x19MM CON CAPACIDAD DE 15 CARTUCHOS",
-      "priceN": 571.97,
-      "qty": 30,
-      "fichaId": 123
+      "priceN": 580.53,
+      "qty": 26,
+      "fichaId": null
     },
     {
       "idx": 19,
       "name": "CARGADOR P/FUSIL 5.56 P/ACE 21 y ACE 22",
       "desc": "CARGADOR PARA FUSIL DE ASALTO, MARCA IWI MODELO GALIL ACE 21 Y ACE 22 CALIBRE 5.56 X 45 mm. CON CAPACIDAD PARA 35 CARTUCHOS. CODIGO: 0037707100",
-      "priceN": 674.17,
+      "priceN": 690.7,
       "qty": 15,
       "fichaId": 133
     },
@@ -159,15 +159,15 @@
       "idx": 20,
       "name": "CARGADOR_P/RIFLE 22_CESKA_CZ457/5/512/10",
       "desc": "CARGADOR CALIBRE 22 LR, CON CAPACIDAD DE 10 CARTUCHOS PARA RIFLE MODELO CZ 457/5/512, MARCA CESKA ZBROJOVKA A.S.",
-      "priceN": 1123.62,
-      "qty": 10,
+      "priceN": 1151.17,
+      "qty": 8,
       "fichaId": 131
     },
     {
       "idx": 21,
       "name": "CAR.PIST.SEMIA.CAL..22\"L.R.BROWNINGBUCKM",
       "desc": "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA CALIBRE 0.22\" L.R., MARCA BROWNING, MODELO BUCKMARK, DE 10 CARTUCHOS DE CAPACIDAD.",
-      "priceN": 624.24,
+      "priceN": 639.54,
       "qty": 19,
       "fichaId": 130
     },
@@ -175,7 +175,7 @@
       "idx": 22,
       "name": "CARGADOR P/PIST. 380 BROWNING 1911-380",
       "desc": "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA CALIBRE 0.380\" ACP, MARCA BROWNING, MODELO1911-380, DE 8 CARTUCHOS DE CAPACIDAD.",
-      "priceN": 624.24,
+      "priceN": 639.54,
       "qty": 19,
       "fichaId": 112
     },
@@ -183,7 +183,7 @@
       "idx": 23,
       "name": "CARG.SEMIA.CAL.0.22\" L.R.BROWNING1911-22",
       "desc": "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA CALIBRE 0.22\" L.R., MARCA BROWNING, MODELO 1911- 22, DE 10CARTUCHOS DE CAPACIDAD.",
-      "priceN": 624.24,
+      "priceN": 639.54,
       "qty": 27,
       "fichaId": 125
     },
@@ -191,7 +191,7 @@
       "idx": 24,
       "name": "CARGADOR P/PISTOLA CAL. 0.22\" L.R. CZP09",
       "desc": "CARGADOR P/PISTOLA CAL. 0.22\" L.R. MARCA CESKA ZBROJOVKA MOD. CZ P-09, CAP. 10 CARTS.",
-      "priceN": 209.74,
+      "priceN": 214.89,
       "qty": 17,
       "fichaId": 119
     },
@@ -199,17 +199,17 @@
       "idx": 25,
       "name": "CARG.CAL..22 LR, MAR. CZ P-07 KADET",
       "desc": "CARGADOR CALIBRE .22 LR, MARCA CESKA ZBROJOVKA PARA PISTOLA MODELO CZ P-07 KADET, CON CAPACIDAD DE 10 CARTUCHOS.",
-      "priceN": 536.94,
-      "qty": 16,
+      "priceN": 550.11,
+      "qty": 3,
       "fichaId": 135
     },
     {
       "idx": 26,
       "name": "CULATA TSK PARA DT11 CODIGO E02352",
       "desc": "BERETTA BY TSK GRIP FOR DT11 AND DT10 RH, CULATA TIPO TSK PARA DT11, CÓDIGO E02352",
-      "priceN": 5733.47,
+      "priceN": 5819.31,
       "qty": 1,
-      "fichaId": 301
+      "fichaId": null
     },
     {
       "idx": 27,
@@ -223,7 +223,7 @@
       "idx": 28,
       "name": "CARGADOR.10CARTS.CALIBRE 12GA. OPT VM G2",
       "desc": "CARGADORES CON CAPACIDAD PARA 10 CARTUCHOS CALIBRE 12 GA. OPT VM G2",
-      "priceN": 978.8,
+      "priceN": 1002.8,
       "qty": 20,
       "fichaId": 126
     },
@@ -231,7 +231,7 @@
       "idx": 29,
       "name": "CARGADOR.10.CARTS.CAL. 20 GA.OPTVM G2",
       "desc": "CARGADORES CON CAPACIDAD PARA 10 CARTUCHOS CALIBRE 20 GA. OPT VM G2",
-      "priceN": 978.8,
+      "priceN": 1002.8,
       "qty": 6,
       "fichaId": 127
     },
@@ -247,15 +247,15 @@
       "idx": 31,
       "name": "CLIPS P/REVOLVER RHINO 0.38\" CHIAPPA",
       "desc": "CLIPS PARA REVOLVER RHINO MARCA CALIBRE 0.38\" SPL. MARCA CHIAPPA FIREARMS, (CAJA CON 10 PIEZAS)",
-      "priceN": 716.68,
+      "priceN": 727.41,
       "qty": 5,
-      "fichaId": 402
+      "fichaId": null
     },
     {
       "idx": 32,
       "name": "CAÑON ESCOPETA BOMBA MOD500 MOSSBERG 28",
       "desc": "",
-      "priceN": 4544.44,
+      "priceN": 4655.86,
       "qty": 10,
       "fichaId": 401
     },
@@ -263,17 +263,9 @@
       "idx": 33,
       "name": "SISTEMA C-MAG P/HK G36 MOD. MHGP06 -",
       "desc": "SISTEMA C-MAG PARA HK G36 MODELO MHGP06, CON CARGADOR C-MAG PARA G36 CAL. 5.56 X 45mm. CAPACIDAD DE 100 CARTUCHOS, CARGADOR RAPIDO PERSONAL, No. DE SERIE 100039",
-      "priceN": 8489.61,
+      "priceN": 8697.75,
       "qty": 5,
       "fichaId": 116
-    },
-    {
-      "idx": 34,
-      "name": "SISTEMA C-MAG P/COLT AR15/M4M16",
-      "desc": "SISTEMA C-MAG PARA COLT AR15/M4M16 MODELO MCMP06, CON CARGADOR C-MAG PARA COLT AR15/M4/M16/IAR CAL. 5.56 X 45mm. CAP. DE 100 CARTUCHOS, CARGADOR RAPIDO PERSONAL, No. DE SERIE 1107025",
-      "priceN": 6242.36,
-      "qty": 1,
-      "fichaId": 117
     }
   ]
 }
