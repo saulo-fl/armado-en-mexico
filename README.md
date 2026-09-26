@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://armado.mx"><img src="docs/capturas/readme/portada.webp" alt="Armado en México: la ficha de la Glock 25 en escritorio y en el teléfono"></a>
+  <a href="https://armado.mx"><img src="docs/capturas/readme/portada.webp" alt="Armado en México: la Glock 25 frente a la Glock 28 en el comparador de escritorio y la ficha de la Glock 25 en el teléfono"></a>
   <p><strong>Enciclopedia divulgativa de armas legales en México</strong><br>Inventario oficial DCAM y OTCA · por Armas M&amp;S</p>
   <p><a href="https://armado.mx"><strong>armado.mx</strong></a> · <a href="#ficha-de-arma">Qué hace</a> · <a href="#colaborar-con-reportes">Colaborar</a> · <a href="#licencia">Licencia</a></p>
 </div>
