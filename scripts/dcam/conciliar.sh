@@ -2,7 +2,7 @@
 # Armado en México — Copyright (C) 2026 Saulo Flores León
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+# (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 # Conciliador DCAM — disparado por dcam-conciliar.path cuando el vigía deja
 # pendiente-conciliar.json. Corre el mapeo de criterio en un subagente headless
 # de Quirón (openclaw agent) siguiendo la skill conciliar-inventario, que hace

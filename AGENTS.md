@@ -106,7 +106,7 @@ configuración**; todo lo demás vive en su carpeta.
 ```
 raíz/         solo config: package.json · wrangler.toml · babel.config.json
               .gitignore · CNAME · .nojekyll · README.md · AGENTS.md · CLAUDE.md · LICENSE (AGPL-3.0-or-later)
-              LICENSE-CONTENIDO.md (CC BY-SA 4.0) · LICENSE-TERMINOS-ADICIONALES.md
+              LICENCIA-CONTENIDO.md (CC BY-SA 4.0) · TERMINOS-ADICIONALES.md
 functions/    las Functions de Pages. Van en la RAÍZ, fuera de out/: es donde
               Cloudflare las descubre. No las muevas.
 public/       lo que se sirve tal cual → se copia entero a out/

@@ -3,7 +3,7 @@
 **Armado en México** — Copyright (C) 2026 Saulo Flores León
 
 El **código** de este repositorio está bajo AGPL-3.0-or-later ([`LICENSE`](LICENSE)) con
-los dos términos de [`LICENSE-TERMINOS-ADICIONALES.md`](LICENSE-TERMINOS-ADICIONALES.md).
+los dos términos de [`TERMINOS-ADICIONALES.md`](TERMINOS-ADICIONALES.md).
 Pero un repositorio no es solo código: aquí viven además un catálogo, unos PDF oficiales
 y 243 imágenes, y cada cosa tiene un dueño distinto. **Este documento dice, pieza por
 pieza, qué se concede y qué no.**
@@ -120,7 +120,7 @@ Si las conservas en tu fork, conserva también el crédito.
 
 El logotipo, el isotipo, los favicones y el retrato del autor (`saulo-flores.webp`)
 **no se licencian**. Es el mismo criterio del término §7(e) de
-[`LICENSE-TERMINOS-ADICIONALES.md`](LICENSE-TERMINOS-ADICIONALES.md), y en el caso del
+[`TERMINOS-ADICIONALES.md`](TERMINOS-ADICIONALES.md), y en el caso del
 retrato rige además el artículo 87 de la Ley Federal del Derecho de Autor.
 
 ---
@@ -146,7 +146,7 @@ haga pasar por la nuestra.
 **Armado en México** — Copyright (C) 2026 Saulo Flores León
 
 The **code** in this repository is under AGPL-3.0-or-later ([`LICENSE`](LICENSE)) with
-the two terms in [`LICENSE-TERMINOS-ADICIONALES.md`](LICENSE-TERMINOS-ADICIONALES.md).
+the two terms in [`TERMINOS-ADICIONALES.md`](TERMINOS-ADICIONALES.md).
 This document covers everything else. **In case of discrepancy, the Spanish version
 above prevails.**
 

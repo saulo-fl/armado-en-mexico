@@ -2,7 +2,7 @@
 # Armado en México — Copyright (C) 2026 Saulo Flores León
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+# (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 """Vigía DCAM: detecta cambios en la página oficial de comercialización de armas
 de la Secretaría de la Defensa (gob.mx), archiva lo nuevo y avisa por Telegram.

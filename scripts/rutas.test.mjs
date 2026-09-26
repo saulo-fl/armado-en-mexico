@@ -1,7 +1,7 @@
 // Armado en México — Copyright (C) 2026 Saulo Flores León
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-// (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+// (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 // El ruteo de src/app.jsx se escribe con funciones de MUCHOS PARÁMETROS POSICIONALES.
 // El 19-sep-2026 `calibreId` se insertó en la 5ª posición de la firma y los sitios de

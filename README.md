@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="public/imagenes/logo-armado-mx.webp" alt="Armado en México" width="220">
-  <p><strong>Enciclopedia divulgativa de armas legales en México</strong><br>Inventario oficial DCAM · SEDENA, por Armas M&amp;S</p>
-  <p><a href="https://armado.mx"><strong>armado.mx</strong></a></p>
+  <a href="https://armado.mx"><img src="docs/capturas/readme/portada.webp" alt="Armado en México: la ficha de la Glock 25 en escritorio y en el teléfono"></a>
+  <p><strong>Enciclopedia divulgativa de armas legales en México</strong><br>Inventario oficial DCAM y OTCA · por Armas M&amp;S</p>
+  <p><a href="https://armado.mx"><strong>armado.mx</strong></a> · <a href="#ficha-de-arma">Qué hace</a> · <a href="#colaborar-con-reportes">Colaborar</a> · <a href="#licencia">Licencia</a></p>
 </div>
 
 <!-- cifras:inicio -->
@@ -13,12 +13,9 @@ bots de IA —que no ejecutan JavaScript— vean el contenido real. El sitemap d
 <sub>Bloque generado por `npm run cifras` desde el propio build. No editar a mano.</sub>
 <!-- cifras:fin -->
 
-|  |  |
-|---|---|
-| <img src="docs/capturas/portada.webp" alt="Portada de armado.mx"><br>**Portada** — las armas destacadas en su expediente y los favoritos de Armas M&S | <img src="docs/capturas/arsenal.webp" alt="Arsenal con filtros"><br>**Arsenal** — filtros por tipo, calibre, uso y disponibilidad |
-| <img src="docs/capturas/ficha.webp" alt="Ficha de arma con historial de precio"><br>**Ficha de arma** — clasificación legal y precio DCAM con historial | <img src="docs/capturas/comparador.webp" alt="Comparador: Ruger LCP frente a Ruger LCP MAX"><br>**Comparador** — la Ruger LCP frente a la LCP MAX, fila por fila |
+## Acerca de
 
-## Declaración de intenciones
+![La página Acerca de: la misión, el gafete del creador y la declaración de intenciones](docs/capturas/readme/acerca.webp)
 
 Armado en México nace de la opacidad. Las instituciones no dan información pública y actualizada
 sobre las armas que un ciudadano puede tener legalmente: desincentivan así el ejercicio de un
@@ -37,115 +34,66 @@ autoridades respondan a tiempo.
 Abogamos por la tenencia responsable de armas: para el tiro deportivo, pero sobre todo para la
 capacitación y la protección del hogar.
 
+La página **Acerca de** del sitio lo cuenta en un expediente: la misión —divulgar de forma
+rigurosa la información técnica, histórica y legal de las armas disponibles para civiles en
+México—, quién está detrás y esta misma declaración. Es un catálogo **divulgativo**: aquí no se
+compran ni se venden armas.
+
 *Armado en México · ¡Protege lo que amas!*
 
-## Qué hace
+## Ficha de arma
 
-### Portada: Favoritos de Armas M&S y calibres
+<p align="center"><img src="docs/capturas/readme/ficha-arma.gif" alt="Recorrido por la ficha de la Glock 25: precio, existencias, ficha técnica, clasificación legal e historial de precios" width="720"></p>
 
-![Favoritos de Armas M&S en la portada](docs/capturas/favoritos.webp)
+Cada arma tiene su página, y toda va dentro de un folder manila, ordenada según las preguntas de
+quien la está considerando:
 
-**Favoritos de Armas M&S** es una selección del equipo de Armas M&S: armas que nos gustan y que
-creemos que vale la pena conocer. No es un ranking ni depende de las visitas —para eso está «Las
-más visitadas», justo debajo—: la elegimos a mano desde el panel de administración. Cada tarjeta
-abre la ficha del arma.
+- **Precio oficial con IVA.** El comprobante dice la cifra, la armería que la publicó y la fecha
+  de su inventario. Si el arma ya no aparece en el inventario más reciente, lleva el sello
+  **ÚLTIMO PRECIO CONOCIDO**. La casilla **Comparar** la manda al comparador.
+- **Existencias por armería.** La tarjeta de almacén da cuántas piezas marcó el último inventario
+  de la DCAM y el de la OTCA —o AGOTADO—, con la descripción literal del inventario y el enlace al
+  PDF oficial. Es un dato histórico, no un stock en tiempo real, y la ficha lo advierte.
+- **Calibre y ficha técnica.** Calibre, capacidad, mecanismo, longitud, peso, origen y año,
+  mecanografiados en una ficha de fichero.
+- **Clasificación legal.** El sello de la foto —CIVIL, SEGURIDAD o EXCLUSIVO— y la hoja de oficio
+  que explica qué permiso hace falta, dónde se consigue y un enlace a la guía legal. Sus
+  separadores guardan también los usos del arma y su historia.
+- **Historial de precios.** Cada inventario oficial en el que aparece el arma deja un punto en el
+  papel milimétrico; el registro lista cada inventario con su fecha, su armería, su precio y
+  cuánto cambió respecto al anterior.
 
-![Fila de calibres de la portada](docs/capturas/portada-calibres.webp)
+Más abajo esperan la **munición y los accesorios compatibles**, en una vitrina, la tarjeta de
+[recomendaciones](#sistema-de-recomendaciones) y las armas similares.
 
-**Calibres** es la puerta corta a la guía. Cada ficha resume un calibre: su sistema (Rimfire o
-Percusión central), su uso típico —«Defensa personal compacta», «Práctica, plinking y caza
-menor»— y cuántas armas del catálogo lo usan, con el cartucho dibujado a escala: su altura es
-proporcional a la longitud real del cartucho, con la misma escala en todas, así que se comparan
-de un vistazo. Sirven para orientarse antes de mirar armas: para qué es cada calibre y cuánta
-oferta tiene. Tocar una ficha, o «Ver guía →», abre la Guía de calibres.
+## Ficha de munición y de accesorio
 
-### Arsenal
+![Ficha de la munición .380 ACP Federal en escritorio y en el teléfono](docs/capturas/readme/ficha-municion.webp)
 
-![Primera página del Arsenal: las armerías DCAM y OTCA y la disponibilidad](docs/capturas/arsenal-inicio.webp)
+Cada caja de munición del inventario oficial tiene su ficha: marca, calibre, tipo de bala y peso
+en granos, el **precio de referencia por cartucho** con la fuente de la que sale, las existencias
+por armería, su historial de precios y su estatus legal. Desde la ficha se salta a todas las armas
+de ese calibre.
 
-El Arsenal no abre con una lista: abre con una página que reparte el catálogo según la pregunta
-con la que llega cada quien. Todos los grupos abren el listado ya filtrado, y los que llevan
-contador dicen cuántas armas reúnen:
+![Ficha del accesorio Meprolight MEPRO MOR en escritorio y en el teléfono](docs/capturas/readme/ficha-accesorio.webp)
 
-- **Armería.** Las dos armerías cuyos inventarios oficiales concilia el sitio: la **DCAM**, en el
-  Estado de México, y la **OTCA**, en Nuevo León. Cada una publica su propio inventario, y al
-  elegir una aparecen las armas que han figurado en los de esa sede: sirve para saber qué ha
-  ofrecido la que te queda cerca.
-- **Disponibilidad.** «Disponibles actualmente» junta las armas con existencias en el último
-  inventario de su armería. Es el atajo para empezar por lo que había en existencia; ese dato es
-  el del inventario, no un stock en tiempo real, y la ficha lo advierte.
-- **Clasificación legal.** Uso civil, Policía / Seguridad y Exclusivo Ejército, cada una con su
-  descripción y su contador.
-- **Tipo de arma, uso y calibre.** Pistolas, revólveres, rifles, escopetas y carabinas; tiro
-  deportivo, cacería y defensa del hogar; y un acceso por cada calibre que tiene armas en el
-  catálogo.
-- **Ver todas las armas**, al final, abre el listado completo.
+Los accesorios —cargadores, ópticas, empuñaduras y demás— siguen la misma lógica que las armas:
+foto con su sello de clasificación, ficha técnica, comprobante de precio y tarjeta de almacén.
+Cada uno dice con qué armas es compatible, y cada arma lista los suyos.
 
-Todas esas entradas llevan al mismo listado —el de la segunda captura de arriba—, con su filtro
-ya puesto y el resto a mano para seguir afinando:
+## Comparación de armas
 
-- **Buscador**: nombre, marca, calibre o país.
-- **Tipo de arma**, **Calibre**, **Armería** (DCAM · Estado de México u OTCA · Nuevo León) y
-  **Disponibilidad** (con existencias o agotadas).
-- **Rango de precio**: una barra con mínimo y máximo. Sus límites se recalculan con los demás
-  filtros para abarcar solo las armas que quedan, y con el tirador al tope entra también todo lo
-  que pasa de $100,000.
-- **Filtros avanzados**: uso, clasificación legal, marca, mecanismo (Semi-auto, Cerrojo, Bombeo,
-  Revólver o Sobrepuesta) y era (Clásico, antes de 1990; Moderno, de 1990 a 2014; Vanguardia, de
-  2015 en adelante).
+![Comparador: Ruger LCP frente a Ruger LCP MAX](docs/capturas/readme/comparar.webp)
 
-Sobre las tarjetas se lee cuántas armas quedan frente al total, y la ✕ del buscador quita todos
-los filtros de una vez. Cada tarjeta es un expediente con la marca, el nombre, el calibre, el
-nivel de precio (de $, menos de $10,000, a $$$$$, desde $100,000) y el precio de referencia, con
-el sello de su clasificación legal al pie de la foto. Su botón ⇄ la añade al comparador.
+Pone dos armas lado a lado y las lee fila por fila: **capacidad, peso, longitud, precio,
+existencias, año, calibre, mecanismo y origen**. Arriba van las filas que las distinguen, con la
+mejor cifra rodeada en rojo; abajo, bajo «IGUALES», lo que comparten. Se llena con el botón ⇄
+de cualquier tarjeta o con la casilla **Comparar** de la ficha; si se añade una tercera arma sale
+la primera que entró, y cada comparación tiene su propia URL para compartirla.
 
-### Ficha de arma
-
-Cada arma tiene su página (la tercera captura de arriba), ordenada según las preguntas de quien
-la está considerando:
-
-- **El expediente.** Todo va dentro de un folder manila abierto, con su tipo rotulado en la
-  pestaña. A la izquierda, la foto en una copia instantánea sujeta con un clip, con marca, país
-  —con su bandera— y año anotados al pie y el **sello de su clasificación legal** estampado encima;
-  a la derecha, la ficha técnica. Al abrir el folder se ven también el comprobante y la tarjeta de
-  almacén, y al bajar aparecen las hojas de legalidad y el historial.
-- **Ficha técnica**, mecanografiada en una ficha de fichero: calibre, capacidad, mecanismo,
-  longitud, peso, origen y año.
-- **Comprobante de precio**: la cifra con IVA, la armería que la publicó, la fecha de su inventario
-  y la casilla **Comparar**. Si el arma ya no aparece en el inventario más reciente de esa armería,
-  lleva el sello **ÚLTIMO PRECIO CONOCIDO**. En el teléfono vuelve a aparecer abajo en cuanto sale
-  de la pantalla.
-- **Tarjeta de almacén.** Las existencias por sede: cuántas piezas marcó el último inventario de la
-  DCAM y el de la OTCA, o AGOTADO si el arma ya no aparece en él, con la descripción literal con la
-  que figura en el inventario, el enlace a cada PDF y el aviso de que es un dato histórico.
-- **Historial de precios**, en papel milimétrico. Cada inventario oficial en el que aparece el arma
-  deja un punto: la gráfica enseña cómo se ha movido el precio y el registro lista cada inventario
-  con su fecha, su armería, su precio y cuánto cambió respecto al anterior. Los PDFs oficiales van
-  grapados al pie como anexos. Con un solo inventario sale solo su registro.
-- **Legalidad, Usos y Antecedentes**, en los separadores de una hoja de oficio: la clasificación
-  con dónde se consigue y un enlace a la guía legal, los usos del arma y su historia.
-- **Munición y accesorios compatibles**, en una vitrina: los cartuchos del inventario de su mismo
-  calibre y los accesorios que le corresponden, cada uno con su etiqueta de precio y su ficha.
-- **Para cerrar**, el video del modelo cuando lo hay; la tarjeta de «¿Recomiendas esta arma?», un
-  sí o no con reseña escrita que solo se publica después de moderarla, y armas similares del
-  mismo tipo.
-
-### Comparador
-
-Pone dos armas lado a lado y las lee fila por fila: **calibre, capacidad, peso, longitud, origen,
-año, mecanismo, precio de referencia y disponibilidad**. Se llena con el botón ⇄ de cualquier
-tarjeta o con **⇄ Comparar** en la ficha; COMPARAR, en la barra de navegación, lleva la cuenta, y
-si se añade una tercera arma sale la primera que entró. Cada lado tiene «Ver ficha →» y una ✕
-para quitarla, y un hueco libre deja elegir otra desde el listado.
-
-Sirve para decidir entre candidatas con datos y no con fotos. El calibre dice qué munición
-necesita; capacidad, peso y longitud, cuánto carga y cuánto abulta; el año separa diseños
-recientes de clásicos; el precio es el de referencia del inventario oficial, y la disponibilidad
-dice a quién se destina según su clasificación legal.
-
-La captura enseña el caso típico. La **Ruger LCP** y la **Ruger LCP MAX** parecen la misma pistola
-en dos versiones: misma marca, mismo calibre, mismo mecanismo, mismo origen y las dos de uso
-civil. Fila por fila, la diferencia salta:
+Sirve para decidir entre candidatas con datos y no con fotos. La captura enseña el caso típico: la
+**Ruger LCP** y la **Ruger LCP MAX** parecen la misma pistola en dos versiones —misma marca,
+calibre, mecanismo y origen, las dos de uso civil—, pero fila por fila la diferencia salta:
 
 |  | Ruger LCP | Ruger LCP MAX | Diferencia |
 |---|---|---|---|
@@ -155,192 +103,139 @@ civil. Fila por fila, la diferencia salta:
 | Año | 2008 | 2021 | 13 años después |
 | Precio | $9,110.35 MXN | $14,875.83 MXN | +$5,765.48, un 63 % más |
 
-La MAX es la evolución de la LCP: casi del mismo tamaño y peso, lleva cuatro cartuchos más y
-cuesta un 63 % más. Si esos cuatro cartuchos valen la diferencia lo decide cada quien, pero con
-los números delante: eso es lo que una foto no enseña y el comparador sí.
+Si esos cuatro cartuchos valen la diferencia lo decide cada quien, pero con los números delante.
 
 <sub>Precios de referencia del último inventario oficial de cada arma, tal como los mostraba el
-comparador el 11 de septiembre de 2026. Cambian con cada inventario nuevo.</sub>
+comparador el 26 de septiembre de 2026. Cambian con cada inventario nuevo.</sub>
 
-### Guía de calibres
+## Apartado legal
 
-![Guía de calibres](docs/capturas/calibres.webp)
+![Legalidad: la entrevista, el mapa del trámite y los folders desplegables](docs/capturas/readme/legalidad.webp)
 
-Una ficha por calibre, desde el menú MÁS o desde la portada. Cada una da su sistema y su uso
-típico, una descripción, la balística aproximada —velocidad y energía—, el retroceso y cuántas
-armas del catálogo lo usan; debajo, esas armas en una tira que se arrastra, y cada una abre su
-ficha. A un lado va el cartucho, con la misma escala en todas las fichas. Arriba, un filtro separa
-Rimfire de Percusión central.
+Una sola página, con la entrevista arriba, el mapa del trámite y cuatro folders desplegables, y
+**toda afirmación trae su fuente oficial y la fecha en que se consultó**:
 
-Sirve para elegir el calibre antes que el arma: qué se usa para defensa, qué para tiro deportivo o
-caza, cuánto retroceso tiene y cuántas opciones hay en el catálogo. Las cifras son divulgativas y
-varían según marca y munición, y la guía lo advierte.
+- **Federal**, ordenado por la pregunta que traes: qué arma puedes tener, qué papel llenas, cuánto
+  cuesta.
+- **Estatal**: lo que de verdad cambia por estado. Lo que no está verificado **se declara** en vez
+  de rellenarse: las entidades sin portal de antecedentes penales comprobado lo dicen junto a su
+  nombre.
+- **Trámites**: seis trámites ante la Defensa, cada uno con lo que habilita, su checklist y su
+  cuota vigente. El permiso extraordinario ante el Registro Federal de Armas y la compra en la DCAM
+  son **dos trámites que se confunden**, y creer que son el mismo es lo que hace que alguien llegue
+  al mostrador sin expediente.
+- **Documentos**: los formatos y leyes oficiales en PDF.
 
-### Legalidad
+Escrita sobre la Ley Federal de Armas de Fuego y Explosivos **reformada el 29 de mayo de 2025**.
 
-Una sola página, con la entrevista arriba y cuatro folders desplegables, y **toda afirmación
-trae su fuente oficial y la fecha en que se consultó**: lo federal ordenado por la pregunta que
-traes —qué arma puedes tener, qué papel llenas, cuánto cuesta—, lo que de verdad cambia por
-estado, seis trámites ante la Defensa —cada uno con lo que habilita, su checklist y su cuota
-vigente— y los documentos oficiales en PDF. El permiso extraordinario ante el Registro Federal de Armas y la compra en la
-DCAM son **dos trámites que se confunden**: no son el mismo papeleo, y creer que sí es lo que
-hace que alguien llegue al mostrador sin expediente.
+## Entrevista de documentos
 
-Escrita sobre la Ley Federal de Armas de Fuego y Explosivos **reformada el 29 de mayo de 2025**,
-y con los escenarios que el formato distingue y casi nadie cuenta: asalariado, independiente,
-pensionado, ejidatario, comunero, jornalero, coleccionista, socio de club y militar.
+<p align="center"><img src="docs/capturas/readme/entrevista.gif" alt="La entrevista «¿Puedo comprar un arma?» contestada de principio a fin: los documentos aparecen sobre la mesa hasta el dictamen" width="400"></p>
 
-**«¿Puedo comprar un arma?»** es la entrevista: quince preguntas sobre tu situación —ninguna
-pide un dato personal, todas las respuestas son categorías— y al final dice qué papeles te
-tocan, cuál te falta y cómo se consigue. Cuando algo no procede lo dice sin rodeos y sin
-ofrecer un remedio que no existe. Y cuando reúnes todo, tampoco promete nada: la autorización
-la decide la autoridad, no un cuestionario.
+**«¿Puedo comprar un arma?»** es un autodiagnóstico: preguntas sobre tu situación —ninguna pide
+un dato personal, todas las respuestas son categorías— y, con cada respuesta, el documento que te
+toca cae sobre la mesa: acta de nacimiento, CURP, identificación, cartilla, comprobante de
+ingresos, constancia de antecedentes, comprobante de domicilio, certificado médico-psicológico.
 
-Lo que no está verificado **se declara** en vez de rellenarse: 14 de las 32 entidades todavía
-no tienen portal de antecedentes penales comprobado, y el selector lo dice junto a su nombre.
+Distingue los escenarios que el formato distingue y casi nadie cuenta —asalariado, independiente,
+pensionado, ejidatario, comunero, jornalero, coleccionista, socio de club y militar— y al final da
+el dictamen con la lista de documentos que te corresponden, que se puede guardar como imagen.
+Cuando algo no procede lo dice sin rodeos y sin ofrecer un remedio que no existe. Y cuando reúnes
+todo, tampoco promete nada: la autorización la decide la autoridad, no un cuestionario.
 
-### Y además
+## Guía de calibres
 
-- **Municiones y accesorios** del inventario oficial, con marca, compatibilidad y precio.
-- **Preguntas frecuentes** sobre licencias, calibres permitidos y portación.
-- **Armas traumáticas** — defensa menos letal por CO₂, que no son armas de fuego y no piden
-  permiso; la duda más repetida del público.
-- **Prerender.** La app pinta con JavaScript, y hasta las 321 páginas el sitio era invisible
-  para quien no lo ejecuta: Googlebot no renderiza JS en respuestas 4xx y los crawlers de IA
-  (GPTBot, ClaudeBot, PerplexityBot) no lo ejecutan nunca. El build emite un `.html` real por
-  URL, con su `<title>`, canonical, Open Graph y JSON-LD. El porqué, con fuentes, en
-  [`docs/SEO.md`](docs/SEO.md).
+![Guía de calibres: la vitrina de cartuchos a escala y la ficha del 9 mm Parabellum](docs/capturas/readme/calibres.webp)
 
-Es un catálogo **divulgativo**: aquí no se compran ni se venden armas.
+Treinta cartuchos: qué son, qué tan fuerte pega cada uno y cuáles puede comprar un civil en
+México. La vitrina los pone **a su tamaño real, de menor a mayor**, y un filtro separa los de uso
+civil, por tipo de arma y Rimfire de percusión central. Cada calibre tiene su ficha: sistema, uso
+típico, velocidad y energía aproximadas, retroceso, su clasificación legal y cuántas armas del
+catálogo lo usan, con esas armas a un toque.
 
-## Cómo funciona
+Sirve para elegir el calibre antes que el arma. Las cifras son divulgativas —de una carga
+comercial corriente— y cada ficha dice de dónde salen.
 
-App estática de React **sin bundler**. Los archivos no son módulos ES: se comunican por
-`window.*` y el orden de los `<script>` importa. Babel solo precompila los `.jsx` a
-`.js`.
+## Arsenal por sucursal y por disponibilidad
 
-La fuente vive en `src/` y `public/`; el build la deja en `out/`, que es lo que se
-publica. **Las rutas servidas son planas**: `src/styles/estilo.css` acaba en
-`out/estilo.css` y se sirve como `/estilo.css`.
+![Arsenal: las armerías DCAM y OTCA y la tarjeta de disponibilidad](docs/capturas/readme/arsenal.webp)
 
-```
-public/       imagenes/ · inventarios/ · _headers · logo.png · manifest.webmanifest
-src/          app.jsx · admin.jsx
-  pages/      index.html · admin.html · 404.html
-  screens/    pantallas (home, catálogo, ficha, comparador, municiones…)
-  components/ ui.jsx
-  data/       catálogo y precios (data-*.js)
-  lib/        store.js (persistencia) · dev-viewport.js (barra DEBUG)
-  styles/     estilo.css
-scripts/      build-prerender.mjs · copiar-estaticos.mjs · actualizar-readme.mjs · sql/schema.sql
-functions/    Cloudflare Pages Functions (API)
-docs/         documentación técnica · capturas/
-out/          generado por el build — no se commitea
-```
+El Arsenal no abre con una lista: abre repartiendo el catálogo según la pregunta con la que llega
+cada quien.
 
-## Desarrollo local
+- **Por armería.** Las dos sedes cuyos inventarios oficiales concilia el sitio: la **DCAM**, en el
+  Campo Militar 1-D de Naucalpan, y la **OTCA**, en Nuevo León. Al elegir una aparecen las armas
+  que han figurado en sus inventarios: sirve para saber qué ha ofrecido la que te queda cerca.
+- **Por disponibilidad.** Una tarjeta de almacén cuenta cuántas armas tenía en existencia cada
+  sucursal en su último inventario, y lleva directo a ellas.
+- **Por clasificación legal, tipo de arma, uso y calibre**, cada entrada con su contador.
 
-```bash
-npm install
-npm run build     # build:static → build:js → build:html
-npx serve out
-```
+Todas llevan al mismo listado, con su filtro ya puesto y el resto a mano para seguir afinando:
+buscador, tipo, calibre, armería, disponibilidad, rango de precio, uso, marca, mecanismo y era.
 
-`npm run watch` recompila los `.jsx` al guardar.
+## Colaborar con reportes
 
-`npm run cifras` reescribe el bloque de cifras de este README a partir de
-`out/cifras.json`, que emite el prerender. **No va dentro de `build`** a propósito: un
-build no debe modificar ficheros fuente. En `main` lo corre solo
-[el workflow](.github/workflows/cifras-readme.yml) cuando cambian los datos.
+![El aviso «¿Encontraste un dato incorrecto?» al pie de cada ficha](docs/capturas/readme/reportes.webp)
 
-## Despliegue
+La enciclopedia se corrige con ayuda de quien la usa. Al pie de cada ficha de arma, munición,
+accesorio y calibre, y de las páginas de Legalidad y Preguntas frecuentes, está el aviso
+**¿Encontraste un dato incorrecto?** Su botón **Repórtalo** abre el
+[formulario público de corrección](https://github.com/saulo-fl/armado-en-mexico/issues/new?template=correccion.yml)
+en GitHub con la página, el tipo de contenido y el nombre de la ficha ya puestos. Pide:
 
-Lo sirve **Cloudflare Pages** desde `out/` (`pages_build_output_dir` en
-`wrangler.toml`), con build `npm ci && npm run build`. GitHub Pages sigue configurado
-pero solo redirige a armado.mx.
+1. La página exacta y el tipo de contenido.
+2. El dato actual, tal como aparece.
+3. La corrección propuesta y por qué.
+4. Las fuentes: DOF, Cámara de Diputados, DEFENSA, inventarios DCAM/OTCA, el fabricante o un
+   manual oficial.
 
-Los datos curados viven en `localStorage` por navegador y, cuando el backend está
-aprovisionado (**Pages Functions + D1**), se replican al servidor para que todos los
-visitantes vean lo mismo. La app funciona igual sin backend, en modo offline con seeds.
-Detalle en [`docs/BACKEND.md`](docs/BACKEND.md).
+Cada aportación se revisa con sus fuentes antes de tocar la web. El formulario es público: no
+incluyas datos personales. Si además quieres proponer el cambio en código, el proceso está en
+[`CONTRIBUTING.md`](CONTRIBUTING.md).
 
-## Documentación
+## Sistema de recomendaciones
 
-| Documento | Contenido |
-|---|---|
-| [`AGENTS.md`](AGENTS.md) | Guía completa: estructura, build, deploy, trampas ya pagadas |
-| [`docs/DESIGN.md`](docs/DESIGN.md) | Brief de diseño vigente y dirección de arte |
-| [`docs/BACKEND.md`](docs/BACKEND.md) | Backend D1, alta y sondas de verificación |
-| [`docs/SEO.md`](docs/SEO.md) | Por qué existe el prerender, con fuentes |
-| [`docs/PRODUCT.md`](docs/PRODUCT.md) | Alcance y decisiones de producto |
-| [`docs/PLACEHOLDERS.md`](docs/PLACEHOLDERS.md) | Secciones congeladas y cómo reactivarlas |
+![La tarjeta de comentarios «¿Recomiendas esta arma?» con el formulario abierto](docs/capturas/readme/recomendaciones.webp)
 
-## Identidad y paleta
+Sin estrellas: cada ficha pregunta **«¿Recomiendas esta arma?»** y se contesta con uno de dos
+sellos, **Sí la recomiendo** o **No la recomiendo**. Un voto sin reseña no existe: al elegir sello
+se abre el formulario, y la reseña pide al menos 100 caracteres, un nombre o apodo y un correo que
+nunca se publica.
 
-La identidad de Armado en México sale de donde sale su catálogo: del papeleo real de la DCAM.
-En el arsenal, cada arma es un expediente —folder manila, copia instantánea y un sello de tinta
-que la clasifica como CIVIL, SEGURIDAD o EXCLUSIVO—. Las categorías de la portada son cartas de
-lotería, y las municiones esperan en un puesto con letrero de mercado. Lo mexicano está en esas
-cosas que cualquiera reconoce, no en símbolos oficiales: el sitio no usa escudo, águila ni
-emblemas de ninguna institución. Es la gráfica de todos los días en México, tomada en serio.
+Nada sale al público sin moderación. Toda reseña entra en una cola privada, una persona del
+equipo decide si cumple las [normas](#soporte-y-normas) y, al aprobarla, el correo se borra. Con
+las aprobadas, la ficha resume el sentir de la comunidad —**Extremadamente positivas**,
+**Mayormente positivas**, **Variadas**, **Mayormente negativas**— y deja leer cada opinión. La
+misma tarjeta está en las fichas de munición y de accesorio.
 
-| Color | Token | Hex | Dónde |
-|---|---|---|---|
-| Verde de marca | `--marca` | `#173A32` | la banda superior y la navegación, igual en los dos temas |
-| Crema | `--crema` | `#F3EFE4` | la tinta clara sobre el verde |
-| Lienzo | `--lienzo` · `--d-lienzo` | `#E7EAE4` · `#1D1D1D` | el fondo, en tema claro y oscuro |
-| Tinta | `--negro` | `#171B19` | lo mecanografiado |
-| Folder manila | `--carton-alto` · `--carton-filo` | `#F6EACF` · `#D8C69B` | la pestaña y el canto; el cuerpo lo pone la foto de un folder real |
-| Copia instantánea | `--copia-carton` | `#F7F8F4` | el marco de la foto del arma |
-| Sello CIVIL | `--sello-civil` | `#2F6B33` | la tinta de las armas civiles |
-| Sello SEGURIDAD y EXCLUSIVO | `--sello-restr` | `#A3341F` | la tinta de las restringidas |
-| Lámina de lotería | `--loteria-lamina` | `#EFC01F` | las cartas de categoría de la portada |
-| Mesa del puesto | `--mesa-tabla` | `#C09A72` | la madera del puesto de municiones |
+## Soporte y normas
 
-Los valores salen de [`src/styles/estilo.css`](src/styles/estilo.css) y el criterio, de
-[`docs/DESIGN.md`](docs/DESIGN.md). Los colores de los objetos no tienen variante oscura a
-propósito: una carta de lotería es amarilla con la luz encendida o apagada.
+![Soporte: las normas de la comunidad](docs/capturas/readme/soporte.webp)
+
+La página de Soporte reúne las **normas de la comunidad**, que rigen las reseñas, las denuncias y
+las aportaciones:
+
+- **Aquí no se compra ni se vende.** Nada de ofrecer, pedir o intermediar armas, municiones o
+  accesorios, ni datos de contacto para cerrar una operación, ni instrucciones para alterar
+  matrículas o evadir trámites.
+- **Respeto y seguridad**: se debate el producto, no a las personas, y no se publican datos de
+  terceros.
+- **Experiencias útiles y pertinentes**: qué usaste, en qué contexto, qué funcionó y qué no. Una
+  reseña no se retira solo por ser desfavorable.
+- **Independencia**: fabricantes, tiendas, clubes y campos no reseñan lo que venden; sí pueden
+  corregir datos por el formulario público declarando su relación.
+- **Autenticidad**: nada de reseñas copiadas, pagadas o coordinadas.
+
+Explica también **cómo se modera** —cola privada, revisión humana, las opiniones negativas
+fundadas con el mismo trato que las positivas— y trae el formulario para **denunciar una reseña**,
+de forma anónima si se quiere.
 
 ## Licencia
 
-Armado en México es **software libre**: el código de este repositorio se publica bajo la
-[**GNU Affero General Public License v3 o posterior**](LICENSE) (`AGPL-3.0-or-later`).
+Armado en México es software libre y contenido abierto:
 
-Puedes usarlo, estudiarlo, modificarlo, redistribuirlo y publicarlo en tu propio servidor.
-La condición es recíproca: **quien reciba tu versión —incluso a través de una red— tiene
-derecho a recibir también su código fuente**, bajo esta misma licencia. Por eso AGPL y no
-GPL: esta es una aplicación web, y la GPL no obliga a nada a quien monta un servicio cerrado
-sin distribuir binarios.
-
-A eso se añaden dos términos de la sección 7 de la propia licencia, detallados en
-[`LICENSE-TERMINOS-ADICIONALES.md`](LICENSE-TERMINOS-ADICIONALES.md):
-
-- **§7(c)** — una versión modificada debe marcarse como distinta y no puede presentarse como
-  «Armado en México» ni sugerir que la respalda Armas M&S.
-- **§7(e)** — la licencia no concede ningún derecho sobre las marcas, el logotipo ni la
-  identidad gráfica del proyecto. Las palabras CIVIL, SEGURIDAD y EXCLUSIVO **no** se
-  reservan: son categorías de la Ley Federal de Armas de Fuego, no marcas.
-
-Un fork es bienvenido; solo tiene que llamarse de otra manera.
-
-### El contenido, que no es código
-
-La AGPL licencia software. Aquí viven además un catálogo, unos PDF oficiales y 243 imágenes,
-y cada cosa tiene un dueño distinto. El mapa completo —con su base en la Ley Federal del
-Derecho de Autor— está en [`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md). En resumen:
-
-| Qué | Quién lo tiene | Qué se concede |
-|---|---|---|
-| Compilación del catálogo (`src/data/`) | Saulo Flores León | **CC BY-SA 4.0** |
-| Los hechos: precios, existencias, calibres | Nadie (art. 14 fr. X LFDA) | No hay nada que conceder |
-| Inventarios DCAM y OTCA (`public/inventarios/`) | Fuera del derecho de autor (art. 14 fr. VIII) | Redistribuibles, sin exclusividad |
-| Fotos de producto y texturas (`public/imagenes/`) | Los fabricantes y terceros | **Nada** |
-| Fotos de uso (`public/imagenes/usos/`) | Sus autores (Pexels) | Licencia Pexels |
-| Logotipo, isotipo, retrato | Saulo Flores León | **Nada** — ver §7(e) |
-
-Los ficheros de `src/data/` siguen bajo AGPL como código —son JavaScript y llevan funciones
-dentro—; la concesión CC BY-SA corre en paralelo sobre el conjunto de datos, para quien
-quiera llevarse el catálogo a otro proyecto sin arrastrar la AGPL.
-
-Un fork que borre las fotos ajenas **sigue compilando y funcionando**: `window.isRealImage`
-vacía toda ruta que no exista y la interfaz dibuja su marcador.
+- El **código**, bajo la [**GNU Affero General Public License v3 o posterior**](LICENSE).
+- [**Términos adicionales**](TERMINOS-ADICIONALES.md) de la sección 7 de esa licencia: el
+  nombre, el logotipo y la identidad del proyecto.
+- [**Licencia de contenido**](LICENCIA-CONTENIDO.md): qué se concede sobre el catálogo, los
+  inventarios oficiales y las imágenes, pieza por pieza.

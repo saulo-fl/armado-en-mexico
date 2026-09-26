@@ -378,7 +378,7 @@ imitando a Chrome (Meprolight, Chiappa, B&H, Beretta); falta decidir si esas fue
   Scorpion EVO 3 A1 3573×1754 CC0). **Pero la búsqueda devuelve basura con
   facilidad**: «CZ 600 rifle» trajo informes militares del cuerpo de ingenieros.
   Siempre hay que mirar la foto. Y si entra material CC BY o CC BY-SA, hay que darle
-  crédito: `LICENSE-CONTENIDO.md` §4 solo contempla fabricantes y Pexels.
+  crédito: `LICENCIA-CONTENIDO.md` §4 solo contempla fabricantes y Pexels.
 - **2026-09-22 — `dcamRef` es el dato que confirma la variante.** Trae la referencia
   de fábrica con el acabado: «PISTOLA CAL .380 TAURUS TH380 **PAVON**», «MODELO 19X,
   **COLOR COYOTE**». `catalogo()` ya lo devuelve. Es lo único que distingue la foto
