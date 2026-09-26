@@ -65,6 +65,24 @@ test('el carril de etiquetas comparte columnas y no mueve la mesa de Accesorios'
     'la mesa base de Accesorios no debe reservar espacio de etiqueta');
 });
 
+test('la variante de Municiones centra la etiqueta y respeta el piso informativo de 12 px', () => {
+  assert.match(css,
+    /\.amx-mesa-etiquetas\s*\{[^}]*gap:\s*0;[^}]*padding:\s*0;/,
+    'un gap o padding en la rejilla desplaza la etiqueta respecto de su producto');
+  assert.match(css,
+    /\.amx-mesa-etiqueta-celda\s*\{[^}]*padding:\s*0 6px;/,
+    'la separación debe vivir dentro de cada columna para conservar su centro');
+  assert.match(css,
+    /\.amx-mesa-etiquetas \.amx-etiqueta\s*\{[^}]*font-size:\s*12px;/,
+    'el texto base de la etiqueta informativa no puede bajar de 12 px');
+  assert.match(css,
+    /\.amx-mesa-etiquetas \.amx-etiqueta-marca i\s*\{[^}]*font-size:\s*12px;/,
+    'la condición legal no puede bajar de 12 px');
+  assert.match(css,
+    /\.amx-mesa-etiquetas \.amx-etiqueta-precio small\s*\{[^}]*font-size:\s*12px;/,
+    'la unidad del precio no puede bajar de 12 px');
+});
+
 test('Municiones sustituye el letrero por especificaciones y precio reales', () => {
   const bloque = municiones.match(/function MunicionesScreen[\s\S]*?window\.MunicionesScreen = MunicionesScreen;/);
   assert.ok(bloque, 'no encuentro MunicionesScreen');

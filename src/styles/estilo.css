@@ -4154,12 +4154,14 @@
   z-index: 2;
   display: grid;
   grid-template-columns: repeat(var(--por-fila), minmax(0, 1fr));
-  gap: 12px;
-  padding: 0 12px;
+  gap: 0;
+  padding: 0;
   align-items: start;
 }
-.amx-v2 .amx-mesa-etiqueta-celda { min-width: 0; }
-.amx-v2 .amx-mesa-etiquetas .amx-etiqueta { margin-top: -4px; }
+.amx-v2 .amx-mesa-etiqueta-celda { min-width: 0; padding: 0 6px; }
+.amx-v2 .amx-mesa-etiquetas .amx-etiqueta { margin-top: -4px; font-size: 12px; }
+.amx-v2 .amx-mesa-etiquetas .amx-etiqueta-marca i { font-size: 12px; }
+.amx-v2 .amx-mesa-etiquetas .amx-etiqueta-precio small { font-size: 12px; }
 .amx-v2 .amx-mesa-tramo--etiquetas + .amx-mesa-tramo--etiquetas { margin-top: var(--e4); }
 .amx-v2 .amx-mesa-fila::after {
   content: '';

@@ -1196,6 +1196,12 @@ las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estil
 - **Tema oscuro:** lona, madera, letreros y fotos son objetos y no cambian; la silueta de respaldo sigue al tema
   porque se recorta contra el lienzo.
 - **Las fotos** (la pieza sola recortada con alfa) son una entrega aparte, con su propio spec.
+- **Variante de Municiones (24-sep-2026).** `/municiones` comparte toldo,
+  separadores, mueble y mesas con Accesorios, pero no sus letreros amarillos.
+  Cada caja conserva la luz del puesto y lleva debajo, sobre el frente de madera,
+  la misma etiqueta de cartón de la vitrina de una ficha de arma: marca + condición
+  legal, bala/grano y precio por `munUnidadPrecio`. Accesorios y los puestos de Home
+  conservan el letrero con vara.
 
 ### 5.8 La ficha de accesorio — el mismo expediente (15-sep-2026)
 
