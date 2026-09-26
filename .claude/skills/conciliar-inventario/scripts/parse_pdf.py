@@ -148,9 +148,17 @@ def formato(doc):
     return "OTCA" if "$" in doc[0].get_text() else "DCAM"
 
 
+def write_tsv(recs, dest):
+    """Escribe TSV limpio: idx, name, qty, priceN, desc (con cabecera)."""
+    with open(dest, "w", encoding="utf-8") as f:
+        f.write("idx\tname\tqty\tpriceN\tdesc\n")
+        for r in recs:
+            f.write(f"{r['idx']}\t{r['name']}\t{r['qty']}\t{r['priceN']:.2f}\t{r.get('desc','')}\n")
+
+
 def main():
     if len(sys.argv) < 2:
-        print("uso: parse_pdf.py <ruta.pdf> [--json salida.json]"); sys.exit(1)
+        print("uso: parse_pdf.py <ruta.pdf> [--json salida.json] [--tsv salida.tsv]"); sys.exit(1)
     path = sys.argv[1]
     doc = fitz.open(path)
     fmt = formato(doc)
@@ -158,11 +166,18 @@ def main():
     for i, r in enumerate(recs, 1):
         r["idx"] = i
     out = {"formato": fmt, "paginas": doc.page_count, "total": len(recs), "items": recs}
+    wrote = False
     if "--json" in sys.argv:
         dest = sys.argv[sys.argv.index("--json") + 1]
         json.dump(out, open(dest, "w", encoding="utf-8"), ensure_ascii=False, indent=0)
         print(f"[{fmt}] {len(recs)} renglones -> {dest}")
-    else:
+        wrote = True
+    if "--tsv" in sys.argv:
+        dest = sys.argv[sys.argv.index("--tsv") + 1]
+        write_tsv(recs, dest)
+        print(f"[{fmt}] {len(recs)} renglones -> {dest} (TSV)")
+        wrote = True
+    if not wrote:
         print(f"# formato={fmt} paginas={doc.page_count} renglones={len(recs)}")
         for r in recs:
             print(f"{r['idx']:3} | qty={r['qty']:>5} | ${r['priceN']:>12,.2f} | {r['name'][:60]}")
