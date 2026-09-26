@@ -10,7 +10,6 @@
     "build:js": "babel --extensions .jsx --out-dir out --out-file-extension .js src/app.jsx src/admin.jsx src/components src/screens",
     "build:html": "node scripts/build-prerender.mjs",
     "watch": "npm run build:js -- --watch",
-    "cifras": "node scripts/actualizar-readme.mjs",
     "smoke": "node scripts/smoke.mjs",
     "tokens": "node scripts/tokens-dtcg.mjs",
     "capturas": "node scripts/capturas-movil.mjs",
