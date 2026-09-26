@@ -58,8 +58,11 @@ async function abrir(ruta, vista) {
 }
 
 // Captura de la pantalla visible; `desde` baja hasta ese elemento antes.
-async function pantalla(ruta, vista, desde, margen = vista.isMobile ? 70 : 90) {
+// `resaltar`: ilumina ese elemento y atenúa el resto, como en los recorridos.
+async function pantalla(ruta, vista, desde, margen = vista.isMobile ? 70 : 90, resaltar) {
   const pagina = await abrir(ruta, vista);
+  if (resaltar) await pagina.addStyleTag({ content: `${resaltar} { position: relative; z-index: 50;
+    outline: 4px solid #A3341F; outline-offset: 6px; box-shadow: 0 0 0 6px #fff, 0 0 0 4000px rgba(23,27,25,.5); }` });
   if (desde) {
     await pagina.evaluate((sel, alto) => {
       const el = document.querySelector(sel);
@@ -131,25 +134,26 @@ async function lienzo(w, h, cuerpo, css = '') {
   return pagina;
 }
 
-async function montar(nombre, w, h, cuerpo) {
-  const pagina = await lienzo(w, h, cuerpo);
-  await pagina.screenshot({ path: OUT + nombre + '.webp', type: 'webp', quality: 82 });
+// `transparente`: sin lienzo, solo el mockup y su sombra sobre fondo transparente.
+async function montar(nombre, w, h, cuerpo, transparente = false) {
+  const pagina = await lienzo(w, h, cuerpo, transparente ? 'body { background: transparent; }' : '');
+  await pagina.screenshot({ path: OUT + nombre + '.webp', type: 'webp', quality: 82, omitBackground: transparente });
   await pagina.close();
   console.log(`✓ ${nombre}.webp`);
 }
 
-// Solo la laptop con la vista de escritorio, sobre un folder.
+// Ventana de navegador con la vista de escritorio.
 function ventana(png, url, estilo) {
   return `<div class="ventana" style="${estilo}"><div class="barra"><i></i><i></i><i></i><b>${url}</b></div><img src="${dataUri(png)}"></div>`;
 }
 function escritorio(png, url) {
-  return `<div class="folder" style="left:90px;top:110px;width:1420px;height:740px"></div>
-    ${ventana(png, url, 'left:210px;top:60px;width:1180px')}`;
+  return ventana(png, url, 'left:90px;top:40px;width:1180px');
 }
 
-function sola(png, ancho) {
-  return `<div class="folder" style="left:50px;top:70px;right:50px;bottom:40px"></div>
-    <div class="tarjeta" style="left:50%;top:50%;width:${ancho}px;transform:translate(-50%,-44%)"><img src="${dataUri(png)}"></div>`;
+// Un elemento suelto como tarjeta, a su tamaño real; el lienzo se ajusta a él.
+async function montarSola(nombre, png) {
+  const w = png.readUInt32BE(16), h = png.readUInt32BE(20);   // cabecera IHDR del PNG
+  await montar(nombre, w + 36 + 120, h + 36 + 140, `<div class="tarjeta" style="left:60px;top:50px;width:${w + 36}px"><img src="${dataUri(png)}"></div>`, true);
 }
 
 // ── El recorrido ────────────────────────────────────────────────────────────
@@ -265,16 +269,16 @@ const TRABAJOS = {
   },
 
   async soporte() {
-    await montar('soporte', 1600, 900, escritorio(await pantalla('/soporte', ESCRITORIO), 'armado.mx/soporte'));
+    await montar('soporte', 1360, 880, escritorio(await pantalla('/soporte', ESCRITORIO), 'armado.mx/soporte'), true);
   },
   async acerca() {
-    await montar('acerca', 1600, 900, escritorio(await pantalla('/acerca', ESCRITORIO), 'armado.mx/acerca'));
+    await montar('acerca', 1360, 880, escritorio(await pantalla('/acerca', ESCRITORIO), 'armado.mx/acerca'), true);
   },
   async reportes() {
-    await montar('reportes', 1600, 900, escritorio(await pantalla(GLOCK, ESCRITORIO, '.amx-reportar-error', 560), 'armado.mx/pistolas/glock-25'));
+    await montar('reportes', 1360, 880, escritorio(await pantalla(GLOCK, ESCRITORIO, '.amx-reportar-error', 560, '.amx-reportar-error'), 'armado.mx/pistolas/glock-25'), true);
   },
   async recomendaciones() {
-    await montar('recomendaciones', 1600, 900, sola(await elemento(GLOCK, ESCRITORIO, '.amx-comentarios', '.amx-sello-voto--si'), 1000));
+    await montarSola('recomendaciones', await elemento(GLOCK, ESCRITORIO, '.amx-comentarios', '.amx-sello-voto--si'));
   },
 
   'ficha-arma': () => recorrido('ficha-arma', GLOCK, { x: 170, y: 40, w: 1100, h: 1000 }, [
