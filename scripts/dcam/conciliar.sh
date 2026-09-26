@@ -88,11 +88,27 @@ verificar_en_github(){  # imprime las URLs de los PR de $RAMA, si los hay.
 PROMPT="Eres el conciliador headless de armado.mx. Concilia el inventario DCAM del ${FECHA} y abre Draft-PR a main Y develop.
 PDFs: ${PDFS}
 Sigue AL PIE la skill /home/saulo/apps/dcam-bot/repo/.claude/skills/conciliar-inventario/SKILL.md.
-Usa /home/saulo/apps/dcam-bot/.venv/bin/python para parse_pdf.py (PyMuPDF vive ahí).
+Usa /home/saulo/apps/dcam-bot/.venv/bin/python para parse_pdf.py y mapear-existencias.py (PyMuPDF vive ahí).
 Trabaja sobre origin/main fresco: git fetch origin && git checkout -B ${RAMA} origin/main.
-Mapeo por marca+modelo+calibre VERIFICADO (NO fuzzy). Usa el encadenado de precios como autochequeo.
+
+EXISTENCIAS — usa mapear-existencias.py (versionado en la skill, sección 'Atribución de existencias'):
+  1. Parsea cada PDF con parse_pdf.py --json
+  2. Mapea existencias con mapear-existencias.py --verbose (armas usa la ref por defecto; cartuchos y accesorios pasan --ref)
+  3. El JSON trae {existencias, sinFicha, sinPrecio}:
+     - existencias: mapa fichaId→qty BASE. Úsalo como punto de partida.
+     - sinFicha: renglones NUEVOS. Pueden ser altas O regresos de fichas agotadas — VERIFICA contra el catálogo completo antes de crear ficha nueva.
+     - sinPrecio: fichas sin renglón → candidatas a AGOTADAS.
+  4. Verifica factores (entre 0.95 y 1.05 normalmente).
+
+PRECIOS — el encadenado sigue igual: mapea por marca+modelo+calibre VERIFICADO (NO fuzzy).
+
 GATE DURO: corre node .claude/skills/conciliar-inventario/scripts/auditar.js. Si NO da '✔✔ AUDITORÍA SIN HALLAZGOS', ABORTA: no commitees, no abras PR.
 Erratas nuevas: LÍSTALAS en el cuerpo del PR, no las marques. Modelo nuevo sin specs: alta con '' y año null, no lo omitas.
+
+ACTUALIZAR REFERENCIAS: después de commitear y ANTES de abrir los PR:
+  python3 .claude/skills/conciliar-inventario/scripts/mapear-existencias.py /tmp/armas.json --update-ref
+  (Igual para cartuchos y accesorios con --ref.) Incluye las refs actualizadas en el commit.
+
 En éxito abre los DOS Draft-PR con gh pr create --draft (base main y base develop).
 SÉ PARCO EN TU SALIDA: no vuelques archivos completos, diffs largos ni logs crudos al chat — el CLI que te ejecuta aborta el parseo por encima de 20000 líneas y tu veredicto se pierde. Resume; el detalle va en el cuerpo del PR.
 Tu ÚLTIMA línea de salida debe ser SOLO este JSON, sin nada más:
