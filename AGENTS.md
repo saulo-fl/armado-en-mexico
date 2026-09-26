@@ -87,7 +87,8 @@ El perfil sale del `agent_type` que Claude Code pasa al hook. Un agente nuevo en
 `base` hasta que se le asigne perfil en `PERFILES`.
 
 **En GitHub**, el ruleset «Ramas permanentes» impide borrar o forzar `main` y `develop`
-(no exige PR: rompería el push del workflow de cifras). Debería impedir también que el
+(no exige PR; se decidió cuando el workflow de cifras del README empujaba a `main`,
+retirado el 26-sep-2026). Debería impedir también que el
 borrado automático al mergear `develop → main` se lleve `develop` — sin medir aún.
 
 **Sesiones que arrancan en la carpeta padre** (`Armado en Mexico\`, lo habitual): ahí no
@@ -118,7 +119,7 @@ src/          app.jsx · admin.jsx          (puntos de entrada)
   data/       los 6 data-*.js
   lib/        store.js · arsenal-hub.js · cotejo.js · dev-viewport.js
   styles/     estilo.css
-scripts/      build-prerender.mjs · copiar-estaticos.mjs · actualizar-readme.mjs
+scripts/      build-prerender.mjs · copiar-estaticos.mjs
               cotejo|vitrina|arsenal-hub|filtros|faq.test.mjs · dcam/ · sql/schema.sql
               tokens-dtcg.mjs (+ tokens.test.mjs) · capturas-movil.mjs   ← Penpot
 docs/         BACKEND.md · SEO.md · PRODUCT.md · DESIGN.md · PLACEHOLDERS.md · PENPOT.md
