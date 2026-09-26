@@ -2,7 +2,7 @@
 # Armado en México — Copyright (C) 2026 Saulo Flores León
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+# (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 #
 # Pipeline conciliador DCAM — pasos independientes con commits intermedios.
 # Reemplaza la invocación monolítica del agente: ahora solo se invoca para

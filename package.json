@@ -14,6 +14,7 @@
     "smoke": "node scripts/smoke.mjs",
     "tokens": "node scripts/tokens-dtcg.mjs",
     "capturas": "node scripts/capturas-movil.mjs",
+    "capturas:readme": "node scripts/capturas-readme.mjs",
     "test": "node --test scripts/cotejo.test.mjs scripts/vitrina.test.mjs scripts/arsenal-hub.test.mjs scripts/filtros.test.mjs scripts/faq.test.mjs scripts/soporte.test.mjs scripts/store-report.test.mjs scripts/github-contribution.test.mjs scripts/calibres.test.mjs scripts/rutas.test.mjs scripts/check-legal.test.mjs scripts/legalidad.test.mjs scripts/entrevista.test.mjs scripts/pantallas.test.mjs scripts/referencias.test.mjs scripts/mesa-style.test.mjs scripts/tokens.test.mjs scripts/mapa-tramite.test.mjs scripts/documentos-legales.test.mjs scripts/canonicos.test.mjs"
   },
   "devDependencies": {

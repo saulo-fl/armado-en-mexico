@@ -10,7 +10,7 @@ concede queda sujeto además a los dos términos siguientes.
 
 La AGPL licencia el **código**. El catálogo, los inventarios oficiales y las imágenes
 tienen cada uno su propio dueño y su propio régimen: eso va en
-[`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
+[`LICENCIA-CONTENIDO.md`](LICENCIA-CONTENIDO.md).
 
 > En caso de discrepancia entre las dos versiones de este documento, **prevalece
 > la versión en español**.
@@ -82,7 +82,7 @@ further subject to the two terms below.
 
 The AGPL licenses the **code**. The catalog, the official inventories and the images
 each have their own holder and their own regime: see
-[`LICENSE-CONTENIDO.md`](LICENSE-CONTENIDO.md).
+[`LICENCIA-CONTENIDO.md`](LICENCIA-CONTENIDO.md).
 
 > In case of discrepancy between the two language versions of this document, **the
 > Spanish version prevails**.

@@ -2,7 +2,7 @@
 # Armado en México — Copyright (C) 2026 Saulo Flores León
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Software libre bajo AGPL-3.0. Sujeto además a los términos adicionales
-# (§7 c, e) de LICENSE-TERMINOS-ADICIONALES.md, en la raíz del repositorio.
+# (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 """Autochequeo de parse_pdf.py contra PDFs ya versionados en public/inventarios/.
 Uso (desde la raiz del repo):  python3 .claude/skills/conciliar-inventario/scripts/test_parse_pdf.py
