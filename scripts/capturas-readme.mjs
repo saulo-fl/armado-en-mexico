@@ -96,13 +96,23 @@ body { width: var(--w); height: var(--h); overflow: hidden; font-family: Archivo
   box-shadow: 0 30px 60px -30px rgba(40,30,10,.45); }
 .folder::before { content: ''; position: absolute; left: 36px; top: -38px; width: 220px; height: 40px; background: #F6EACF;
   border: 1px solid #D8C69B; border-bottom: 0; border-radius: 10px 10px 0 0; }
+.ventana { position: absolute; background: #FBFBF8; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(23,27,25,.10), 0 50px 90px -30px rgba(23,27,25,.45), 0 18px 36px -18px rgba(23,27,25,.25); }
+.ventana .barra { height: 38px; display: flex; align-items: center; gap: 8px; padding: 0 16px; background: #F1F2EE; border-bottom: 1px solid rgba(23,27,25,.08); }
+.ventana .barra i { width: 11px; height: 11px; border-radius: 50%; background: #D5D8D2; }
+.ventana .barra b { margin: 0 auto; transform: translateX(-26px); font: 500 13px/1 'JetBrains Mono'; color: #5B625E;
+  background: #E4E7E1; padding: 6px 18px; border-radius: 8px; }
+.ventana img { display: block; width: 100%; }
+.escena { position: absolute; perspective: 2200px; }
+.escena > * { transform-style: preserve-3d; }
 .laptop { position: absolute; }
 .laptop .tapa { background: #171B19; border-radius: 18px 18px 6px 6px; padding: 16px 16px 20px; box-shadow: 0 40px 70px -25px rgba(0,0,0,.55); }
 .laptop .tapa img { display: block; width: 100%; border-radius: 3px; }
 .laptop .base { height: 18px; margin: 0 -60px; background: linear-gradient(#D4D7D1, #A9ADA6); border-radius: 0 0 22px 22px; position: relative; }
 .laptop .base::after { content: ''; position: absolute; left: 50%; top: 0; width: 140px; height: 7px; margin-left: -70px; background: #9A9E97; border-radius: 0 0 8px 8px; }
-.tel { position: absolute; background: #171B19; border-radius: 46px; padding: 12px; box-shadow: 0 40px 70px -20px rgba(0,0,0,.6), inset 0 0 0 2px #3A3F3C; }
-.tel img { display: block; width: 100%; border-radius: 35px; }
+.tel { position: absolute; background: #FBFBF8; border-radius: 40px; padding: 9px;
+  box-shadow: 0 0 0 1px rgba(23,27,25,.12), 0 50px 80px -28px rgba(23,27,25,.5), 0 16px 30px -16px rgba(23,27,25,.3); }
+.tel img { display: block; width: 100%; border-radius: 32px; }
 .dymo { display: inline-block; background: #1C1D1F; color: #F2F1EC; font: 800 20px/1 Archivo; font-stretch: 75%; letter-spacing: .28em;
   padding: 12px 18px 11px 20px; border-radius: 3px; box-shadow: 0 3px 0 rgba(0,0,0,.25); transform: rotate(-1.2deg); }
 .sello { position: absolute; border: 4px solid #2F6B33; color: #2F6B33; font: 800 34px/1 'JetBrains Mono'; letter-spacing: .2em;
@@ -128,16 +138,107 @@ async function montar(nombre, w, h, cuerpo) {
   console.log(`✓ ${nombre}.webp`);
 }
 
-// Laptop con la vista de escritorio y teléfono con la móvil, sobre un folder.
-function par(escritorio, movil) {
-  return `<div class="folder" style="left:60px;top:90px;width:1480px;height:760px"></div>
-    <div class="laptop" style="left:130px;top:70px;width:1120px"><div class="tapa"><img src="${dataUri(escritorio)}"></div><div class="base"></div></div>
-    <div class="tel" style="left:1230px;top:150px;width:300px"><img src="${dataUri(movil)}"></div>`;
+// Solo la laptop con la vista de escritorio, sobre un folder.
+function ventana(png, url, estilo) {
+  return `<div class="ventana" style="${estilo}"><div class="barra"><i></i><i></i><i></i><b>${url}</b></div><img src="${dataUri(png)}"></div>`;
+}
+function escritorio(png, url) {
+  return `<div class="folder" style="left:90px;top:110px;width:1420px;height:740px"></div>
+    ${ventana(png, url, 'left:210px;top:60px;width:1180px')}`;
 }
 
 function sola(png, ancho) {
   return `<div class="folder" style="left:50px;top:70px;right:50px;bottom:40px"></div>
     <div class="tarjeta" style="left:50%;top:50%;width:${ancho}px;transform:translate(-50%,-44%)"><img src="${dataUri(png)}"></div>`;
+}
+
+// ── El recorrido ────────────────────────────────────────────────────────────
+// La captura completa de una página y una cámara que se acerca a cada apartado,
+// lo ilumina y lo rotula. Cuadro a cuadro, sin transiciones CSS: así cada cuadro
+// es exacto y las pausas son un solo cuadro.
+//
+// Cada parada es [apartado, rótulo]. El apartado puede ser:
+//   '.selector'                                el primero que coincida
+//   { sel, texto, todos, indice, alto }         filtra por el texto con que empieza
+//                                              (regex), une todos o toma uno
+//   { titulo, hasta }                          de un rótulo de columna al siguiente
+async function recorrido(nombre, ruta, general, PARADAS) {
+  const pagina = await abrir(ruta, ESCRITORIO);
+  const rects = await pagina.evaluate((specs) => specs.map((spec) => {
+    if (typeof spec === 'string') spec = { sel: spec };
+    const caja = (r) => ({ x: r.left, y: r.top + scrollY, x2: r.right, y2: r.bottom + scrollY });
+    let c;
+    if (spec.titulo) {
+      const hoja = (t) => [...document.querySelectorAll('body *')].find((e) => !e.children.length && e.textContent.trim().toUpperCase() === t);
+      const col = caja(hoja(spec.titulo).parentElement.getBoundingClientRect());
+      const fin = spec.hasta ? caja(hoja(spec.hasta).parentElement.getBoundingClientRect()).y - 14
+        : caja(hoja(spec.titulo).parentElement.parentElement.getBoundingClientRect()).y2;
+      c = { ...col, y2: fin };
+    } else {
+      let els = [...document.querySelectorAll(spec.sel)];
+      if (spec.texto) els = els.filter((e) => new RegExp(spec.texto).test(e.innerText.trim().toUpperCase()));
+      if (spec.indice != null) els = [els[spec.indice]];
+      else if (!spec.todos) els = els.slice(0, 1);
+      if (!els.length || !els[0]) throw new Error('sin apartado: ' + JSON.stringify(spec));
+      c = els.map((e) => caja(e.getBoundingClientRect())).reduce((a, b) => ({
+        x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), x2: Math.max(a.x2, b.x2), y2: Math.max(a.y2, b.y2) }));
+    }
+    const h = Math.min(c.y2 - c.y, spec.alto || Infinity);
+    return { x: c.x, y: c.y, w: c.x2 - c.x, h };
+  }), PARADAS.map((p) => p[0]));
+  // Bajar la página entera antes de la captura: las fotos con carga diferida
+  // salen en blanco si nunca entraron en pantalla.
+  await pagina.evaluate(async () => {
+    for (let y = 0; y < document.documentElement.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 150)); }
+    window.scrollTo(0, 0);
+  });
+  await esperar(1200);
+  const completa = await pagina.screenshot({ type: 'png', fullPage: true });
+  await pagina.close();
+
+  const W = 960, H = 600;
+  const paradas = [[general, ''], ...rects.map((r, i) => [r, PARADAS[i][1]]), [general, '']];
+  const lz = await lienzo(W, H, `<div id="cam"><img src="${dataUri(completa)}"><div id="luz"></div></div><span id="rotulo" class="dymo"></span>`, `
+    #cam { position:absolute; left:0; top:0; transform-origin:0 0; }
+    #cam img { display:block; }
+    #luz { position:absolute; border:4px solid #A3341F; border-radius:6px; box-shadow:0 0 0 4000px rgba(23,27,25,.5); }
+    #rotulo { position:absolute; left:24px; top:22px; }`);
+
+  // Cámara que encuadra el rectángulo; con rótulo deja sitio arriba para la cinta.
+  const encuadre = (r, rotulado) => {
+    const pad = rotulado ? 36 : 0, arriba = rotulado ? 60 : 0;
+    const s = Math.min(W / (r.w + pad * 2), (H - arriba) / (r.h + pad * 2), 1.15);
+    return { s, tx: W / 2 - s * (r.x + r.w / 2), ty: (H + arriba) / 2 - s * (r.y + r.h / 2) };
+  };
+  const pintar = (c, luz, opacidad, texto) => {
+    document.getElementById('cam').style.transform = `translate(${c.tx}px,${c.ty}px) scale(${c.s})`;
+    Object.assign(document.getElementById('luz').style, { left: luz.x - 10 + 'px', top: luz.y - 10 + 'px',
+      width: luz.w + 20 + 'px', height: luz.h + 20 + 'px', opacity: opacidad });
+    const rot = document.getElementById('rotulo');
+    rot.style.opacity = texto ? 1 : 0;
+    rot.textContent = texto;
+  };
+  const mezcla = (a, b, t) => Object.fromEntries(Object.keys(a).map((k) => [k, a[k] + (b[k] - a[k]) * t]));
+  const suave = (t) => (t < .5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
+
+  await grabarCuadros(nombre, 640, async (cuadro) => {
+    let [antes, textoAntes] = paradas[0];
+    await lz.evaluate(pintar, encuadre(antes, false), antes, 0, '');
+    await cuadro(1.2);
+    for (const [r, texto] of paradas.slice(1)) {
+      const c0 = encuadre(antes, !!textoAntes), c1 = encuadre(r, !!texto);
+      const PASOS = 12;   // 1 s a 12 cuadros por segundo
+      for (let i = 1; i <= PASOS; i++) {
+        const t = suave(i / PASOS);
+        const opacidad = (textoAntes ? 1 - t : 0) + (texto ? t : 0);
+        await lz.evaluate(pintar, mezcla(c0, c1, t), mezcla(antes, r, t), Math.min(1, opacidad), i === PASOS ? texto : '');
+        await cuadro(1 / 12);
+      }
+      await cuadro(texto ? 2.4 : 1.6);
+      [antes, textoAntes] = [r, texto];
+    }
+  }, lz);
+  await lz.close();
 }
 
 // ── Las imágenes ────────────────────────────────────────────────────────────
@@ -148,7 +249,6 @@ const TRABAJOS = {
     const [esc, mov] = await Promise.all([pantalla('/comparar/glock-25-vs-glock-28', ESCRITORIO), pantalla(GLOCK, MOVIL)]);
     const logo = dataUri(readFileSync(LOGO), 'webp');
     await montar('portada', 1600, 900, `
-      <div class="folder" style="left:720px;top:120px;width:840px;height:720px"></div>
       <div style="position:absolute;left:80px;top:170px;width:580px">
         <img src="${logo}" style="width:120px;border-radius:22px;box-shadow:0 12px 30px -12px rgba(0,0,0,.5)">
         <h1 style="font:800 88px/.92 Archivo;font-stretch:75%;letter-spacing:-.01em;margin:34px 0 26px">ARMADO<br>EN MÉXICO</h1>
@@ -157,109 +257,76 @@ const TRABAJOS = {
           que ofrece la Secretaría de la Defensa a través de sus armerías DCAM y OTCA.</p>
         <p style="font:700 20px/1 'JetBrains Mono';margin-top:28px;color:#173A32">armado.mx</p>
       </div>
-      <div class="laptop" style="left:680px;top:190px;width:820px"><div class="tapa"><img src="${dataUri(esc)}"></div><div class="base"></div></div>
-      <div class="tel" style="left:1310px;top:300px;width:250px"><img src="${dataUri(mov)}"></div>
-      <div class="sello" style="left:1330px;top:120px">CIVIL</div>`);
+      <div class="escena" style="left:630px;top:0;width:940px;height:900px">
+        ${ventana(esc, 'armado.mx/comparar/glock-25-vs-glock-28', 'left:40px;top:170px;width:860px;transform:rotateY(-14deg) rotateX(5deg) rotateZ(1deg)')}
+        <div class="tel" style="left:690px;top:300px;width:230px;transform:rotateY(-14deg) rotateX(5deg) rotateZ(1deg)"><img src="${dataUri(mov)}"></div>
+      </div>
+      <div class="sello" style="left:1360px;top:95px">CIVIL</div>`);
   },
 
-  async 'ficha-municion'() {
-    const r = '/municiones/380-acp-federal-fmj-95-gr';
-    await montar('ficha-municion', 1600, 900, par(await pantalla(r, ESCRITORIO), await pantalla(r, MOVIL)));
-  },
-  async 'ficha-accesorio'() {
-    const r = '/opticas/mira-reflex-meprolight-mepro-mor';
-    await montar('ficha-accesorio', 1600, 900, par(await pantalla(r, ESCRITORIO), await pantalla(r, MOVIL)));
-  },
-  async comparar() {
-    const r = '/comparar/ruger-lcp-vs-ruger-lcp-max';
-    await montar('comparar', 1600, 900, par(await pantalla(r, ESCRITORIO), await pantalla(r, MOVIL)));
-  },
-  async legalidad() {
-    await montar('legalidad', 1600, 900, par(await pantalla('/legalidad', ESCRITORIO, '.amx-boton-tinta', 200), await pantalla('/legalidad', MOVIL, '.amx-boton-tinta', 200)));
-  },
-  async calibres() {
-    await montar('calibres', 1600, 900, par(await pantalla('/calibres', ESCRITORIO), await pantalla('/calibres/9mm-parabellum', MOVIL)));
-  },
-  async arsenal() {
-    await montar('arsenal', 1600, 900, par(await pantalla('/arsenal', ESCRITORIO), await pantalla('/arsenal', MOVIL)));
-  },
   async soporte() {
-    await montar('soporte', 1600, 900, par(await pantalla('/soporte', ESCRITORIO), await pantalla('/soporte', MOVIL)));
+    await montar('soporte', 1600, 900, escritorio(await pantalla('/soporte', ESCRITORIO), 'armado.mx/soporte'));
   },
   async acerca() {
-    await montar('acerca', 1600, 900, par(await pantalla('/acerca', ESCRITORIO), await pantalla('/acerca', MOVIL)));
+    await montar('acerca', 1600, 900, escritorio(await pantalla('/acerca', ESCRITORIO), 'armado.mx/acerca'));
   },
   async reportes() {
-    await montar('reportes', 1600, 620, sola(await elemento(GLOCK, MOVIL, '.amx-reportar-error'), 640));
+    await montar('reportes', 1600, 900, escritorio(await pantalla(GLOCK, ESCRITORIO, '.amx-reportar-error', 560), 'armado.mx/pistolas/glock-25'));
   },
   async recomendaciones() {
     await montar('recomendaciones', 1600, 900, sola(await elemento(GLOCK, ESCRITORIO, '.amx-comentarios', '.amx-sello-voto--si'), 1000));
   },
 
-  // El recorrido por la ficha: la captura completa de la Glock 25 y una cámara
-  // que se acerca a cada apartado, lo ilumina y lo rotula. Cuadro a cuadro, sin
-  // transiciones CSS: así cada cuadro es exacto y las pausas son un solo cuadro.
-  async 'ficha-arma'() {
-    const pagina = await abrir(GLOCK, ESCRITORIO);
-    const PARADAS = [
-      ['.amx-talon-papel', 'PRECIO OFICIAL CON IVA'],
-      ['.amx-kardex-carton', 'EXISTENCIAS POR ARMERÍA'],
-      ['.amx-fichero-carton', 'CALIBRE Y FICHA TÉCNICA'],
-      ['.amx-oficio', 'CLASIFICACIÓN LEGAL'],
-      ['.amx-milimetrico', 'HISTORIAL DE PRECIOS'],
-    ];
-    const rects = await pagina.evaluate((sels) => sels.map((s) => {
-      const r = document.querySelector(s).getBoundingClientRect();
-      return { x: r.x, y: r.y + scrollY, w: r.width, h: r.height };
-    }), PARADAS.map((p) => p[0]));
-    const completa = await pagina.screenshot({ type: 'png', fullPage: true });
-    await pagina.close();
-
-    const W = 960, H = 600;
-    const general = { x: 170, y: 40, w: 1100, h: 1000 };   // la primera vista del folder
-    const paradas = [[general, ''], ...rects.map((r, i) => [r, PARADAS[i][1]]), [general, '']];
-    const lz = await lienzo(W, H, `<div id="cam"><img src="${dataUri(completa)}"><div id="luz"></div></div><span id="rotulo" class="dymo"></span>`, `
-      #cam { position:absolute; left:0; top:0; transform-origin:0 0; }
-      #cam img { display:block; }
-      #luz { position:absolute; border:4px solid #A3341F; border-radius:6px; box-shadow:0 0 0 4000px rgba(23,27,25,.5); }
-      #rotulo { position:absolute; left:24px; top:22px; }`);
-
-    // Cámara que encuadra el rectángulo; con rótulo deja sitio arriba para la cinta.
-    const encuadre = (r, rotulado) => {
-      const pad = rotulado ? 36 : 0, arriba = rotulado ? 60 : 0;
-      const s = Math.min(W / (r.w + pad * 2), (H - arriba) / (r.h + pad * 2), 1.15);
-      return { s, tx: W / 2 - s * (r.x + r.w / 2), ty: (H + arriba) / 2 - s * (r.y + r.h / 2) };
-    };
-    const pintar = (c, luz, opacidad, texto) => {
-      document.getElementById('cam').style.transform = `translate(${c.tx}px,${c.ty}px) scale(${c.s})`;
-      Object.assign(document.getElementById('luz').style, { left: luz.x - 10 + 'px', top: luz.y - 10 + 'px',
-        width: luz.w + 20 + 'px', height: luz.h + 20 + 'px', opacity: opacidad });
-      const rot = document.getElementById('rotulo');
-      rot.style.opacity = texto ? 1 : 0;
-      rot.textContent = texto;
-    };
-    const mezcla = (a, b, t) => Object.fromEntries(Object.keys(a).map((k) => [k, a[k] + (b[k] - a[k]) * t]));
-    const suave = (t) => (t < .5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2);
-
-    await grabarCuadros('ficha-arma', 720, async (cuadro) => {
-      let [antes, textoAntes] = paradas[0];
-      await lz.evaluate(pintar, encuadre(antes, false), antes, 0, '');
-      await cuadro(1.2);
-      for (const [r, texto] of paradas.slice(1)) {
-        const c0 = encuadre(antes, !!textoAntes), c1 = encuadre(r, !!texto);
-        const PASOS = 16;   // 1.3 s a 12 cuadros por segundo
-        for (let i = 1; i <= PASOS; i++) {
-          const t = suave(i / PASOS);
-          const opacidad = (textoAntes ? 1 - t : 0) + (texto ? t : 0);
-          await lz.evaluate(pintar, mezcla(c0, c1, t), mezcla(antes, r, t), Math.min(1, opacidad), i === PASOS ? texto : '');
-          await cuadro(1 / 12);
-        }
-        await cuadro(texto ? 2.4 : 1.6);
-        [antes, textoAntes] = [r, texto];
-      }
-    }, lz);
-    await lz.close();
-  },
+  'ficha-arma': () => recorrido('ficha-arma', GLOCK, { x: 170, y: 40, w: 1100, h: 1000 }, [
+    ['.amx-talon-papel', 'PRECIO OFICIAL CON IVA'],
+    ['.amx-kardex-carton', 'EXISTENCIAS POR ARMERÍA'],
+    ['.amx-fichero-carton', 'CALIBRE Y FICHA TÉCNICA'],
+    ['.amx-oficio', 'CLASIFICACIÓN LEGAL'],
+    ['.amx-milimetrico', 'HISTORIAL DE PRECIOS'],
+  ]),
+  'ficha-municion': () => recorrido('ficha-municion', '/municiones/380-acp-federal-fmj-95-gr', { x: 150, y: 50, w: 1140, h: 1000 }, [
+    [{ titulo: 'PRECIO DE REFERENCIA', hasta: 'HISTORIAL DE PRECIOS' }, 'PRECIO POR CARTUCHO Y EXISTENCIAS'],
+    [{ titulo: 'HISTORIAL DE PRECIOS', hasta: 'ESTATUS LEGAL' }, 'HISTORIAL DE PRECIOS'],
+    [{ titulo: 'ESTATUS LEGAL' }, 'ESTATUS LEGAL'],
+    [{ titulo: 'ESPECIFICACIONES', hasta: 'COMPATIBLE CON' }, 'ESPECIFICACIONES'],
+    ['.amx-carousel', 'ARMAS DE SU CALIBRE'],
+  ]),
+  'ficha-accesorio': () => recorrido('ficha-accesorio', '/opticas/mira-reflex-meprolight-mepro-mor', { x: 140, y: 60, w: 1160, h: 1000 }, [
+    ['.amx-talon-papel', 'PRECIO OFICIAL CON IVA'],
+    ['.amx-kardex-carton', 'EXISTENCIAS POR ARMERÍA'],
+    ['.amx-fichero-carton', 'FICHA TÉCNICA'],
+    ['.amx-oficio', 'ARMAS COMPATIBLES'],
+    ['.amx-milimetrico', 'HISTORIAL DE PRECIOS'],
+  ]),
+  comparar: () => recorrido('comparar', '/comparar/ruger-lcp-vs-ruger-lcp-max', { x: 300, y: 60, w: 840, h: 1000 }, [
+    [{ sel: '.amx-cotejo-fila', texto: '^(CAPACIDAD|PESO|LONGITUD)', todos: true }, 'LO QUE LAS DISTINGUE'],
+    [{ sel: '.amx-cotejo-fila', texto: '^PRECIO', todos: true }, 'PRECIO OFICIAL'],
+    [{ sel: '.amx-cotejo-fila', texto: '^EXISTENCIAS', todos: true }, 'EXISTENCIAS POR ARMERÍA'],
+    [{ sel: '.amx-cotejo-sep, .amx-cotejo-fila', texto: '^(— IGUALES|CALIBRE|MECANISMO|ORIGEN)', todos: true }, 'LO QUE COMPARTEN'],
+    ['.amx-cotejo-tira', 'LA DIFERENCIA EN UNA LÍNEA'],
+  ]),
+  legalidad: () => recorrido('legalidad', '/legalidad', { x: 270, y: 60, w: 900, h: 1000 }, [
+    ['.amx-leg-cta', 'LA ENTREVISTA'],
+    ['.amx-mapa', 'EL MAPA DEL TRÁMITE'],
+    [{ sel: '.amx-faq-folder', indice: 0 }, 'FEDERAL'],
+    [{ sel: '.amx-faq-folder', indice: 1 }, 'POR ESTADO'],
+    ['.amx-leg-contraste', 'POSESIÓN NO ES PORTACIÓN'],
+    [{ sel: '.amx-faq-folder', indice: 2, alto: 620 }, 'LOS SEIS TRÁMITES'],
+    [{ sel: '.amx-faq-folder', indice: 3 }, 'FUNDAMENTO LEGAL EN PDF'],
+  ]),
+  calibres: () => recorrido('calibres', '/calibres', { x: 180, y: 70, w: 1080, h: 1000 }, [
+    [{ sel: '.amx-anaquel' }, 'CARTUCHOS A ESCALA REAL'],
+    [{ sel: '.amx-cal-rejilla', alto: 560 }, 'UNA FICHA POR CALIBRE'],
+    ['.amx-cal-lecciones', 'FUNDAMENTOS'],
+  ]),
+  arsenal: () => recorrido('arsenal', '/arsenal', { x: 180, y: 70, w: 1080, h: 1000 }, [
+    ['.amx-arsenal-armeria', 'POR ARMERÍA: DCAM Y OTCA'],
+    ['.amx-kardex-carton', 'DISPONIBILIDAD POR SUCURSAL'],
+    ['.amx-oficio', 'CLASIFICACIÓN LEGAL'],
+    [{ sel: '.amx-arsenal-loteria-mesa', alto: 600 }, 'TIPO DE ARMA'],
+    ['.amx-hub-usos', 'POR USO'],
+    ['.amx-anaquel', 'POR CALIBRE'],
+  ]),
 
   // La entrevista contestada con clics reales: se ven las preguntas avanzar y
   // los documentos caer sobre la mesa hasta el dictamen. Aquí manda el reloj del
@@ -306,7 +373,7 @@ function aGif(nombre, ancho, cuadros) {
     + `\nfile '${cuadros.at(-1)[0].replace(/\\/g, '/')}'\n`;   // concat ignora la duración del último
   writeFileSync(dir + 'lista.txt', lista);
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', dir + 'lista.txt', '-vf',
-    `fps=12,scale=${ancho}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`,
+    `fps=12,scale=${ancho}:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=64:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle`,
     OUT + nombre + '.gif']);
   rmSync(dir, { recursive: true });
   console.log(`✓ ${nombre}.gif  (${cuadros.length} cuadros)`);
