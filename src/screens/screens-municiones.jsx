@@ -456,22 +456,28 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
           </div>
         </section>}
 
-      {/* ── OTRAS MUNICIONES — el mismo calibre ─────────────────────────── */}
+      {/* ── OTRAS MUNICIONES — la vitrina del mismo calibre, como en la ficha de arma ── */}
       {relacionados.length > 0 &&
         <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-otras">
           <window.CintaDymo id="ficha-otras">Otras municiones</window.CintaDymo>
-          <div className="amx-hscroll amx-similares" style={{
-            display: ancho ? 'grid' : 'flex',
-            gridTemplateColumns: ancho ? 'repeat(4, 1fr)' : undefined,
-            gap: ancho ? 14 : 10,
-            overflowX: ancho ? 'visible' : 'auto',
-            margin: ancho ? 0 : `0 -${PAD}px`,
-            padding: ancho ? 0 : `0 ${PAD}px 4px`
-          }}>
-            {relacionados.map((m) =>
-              <div key={m.id} style={{ width: ancho ? 'auto' : 300, flexShrink: 0 }}>
-                <MunicionCard mun={m} onClick={() => onOpenMunicion(m.id)} />
-              </div>)}
+          <div className="amx-vitrina">
+            <window.Repisa rotulo={'Munición · ' + mun.calibre} items={relacionados} porFila={ancho ? 6 : 0}
+              renderArticulo={(m) => {
+                const foto = munFoto(m);
+                const s = SELLOS[m.avail] || sello;
+                const uni = munUnidadPrecio(m);
+                const precio = m.priceExact ? String(m.priceExact).replace(' MXN', '') : '';
+                return (
+                  <window.RepisaArticulo key={m.id} foto={foto.src} silueta="imagenes/silueta-municion.webp"
+                    ariaLabel={[m.nombre, s.texto, precio && (precio + ' por ' + uni)].filter(Boolean).join(', ')}
+                    onClick={() => onOpenMunicion && onOpenMunicion(m.id)}
+                    etiqueta={<React.Fragment>
+                      <span className="amx-etiqueta-marca"><span>{m.marca}</span><i className={'es-' + s.tono}>{s.texto}</i></span>
+                      <span className="amx-etiqueta-nombre">{[m.bala, m.grano].filter(Boolean).join(' · ')}</span>
+                      {precio && <span className="amx-etiqueta-precio">{precio} <small>/ {uni}</small></span>}
+                    </React.Fragment>} />
+                );
+              }} />
           </div>
         </section>}
 

@@ -1284,7 +1284,8 @@ Decidido con Saulo (rama `Opus-5/RED-ficha-municion`). Reglas en `src/lib/cotejo
 - **El talón dice la unidad:** «Por cartucho · con IVA», o «Por caja» (2046); en móvil, `/ cartucho`.
 - **Legalidad: solo el requisito de este cartucho** de la tabla de la DCAM (escopeta, anular .22,
   fuego central). Sin requisito: los de seguridad y el .17 HMR, hasta confirmarlo con la DCAM.
-- **Debajo del folder:** Armas compatibles (todas, sin ⇄), Otras municiones del calibre y Opiniones.
+- **Debajo del folder:** Armas compatibles (todas, sin ⇄), Otras municiones del calibre en la vitrina de la ficha de arma
+  (`Repisa` y etiqueta de cartón) y Opiniones.
 
 ---
 
