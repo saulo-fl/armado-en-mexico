@@ -121,6 +121,8 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
                     className="amx-sello--estampa" />
                 </span>
               </div>
+              {window.ARMAS_FOTO_ILUSTRATIVA.includes(arma.id) &&
+                <p className="amx-copia-nota">Foto ilustrativa, el acabado del arma puede variar</p>}
             </div>
 
             <div className="amx-carpeta-ficha">
