@@ -1755,7 +1755,7 @@
   .amx-v2 .amx-carpeta-historial { grid-area: historial; }
 }
 
-/* LA FICHA DE CALIBRE (28-sep-2026, DESIGN.md §5.12): el mismo folder sin talón
+/* LA FICHA DE CALIBRE (27-sep-2026, DESIGN.md §5.12): el mismo folder sin talón
    ni tarjeta de almacén. Desde 1024, copia | cabecera y ficha; debajo, hojas |
    milimétrico. Las escopetas no llevan milimétrico y sus hojas se quedan en su
    columna (Saulo). */

@@ -325,7 +325,7 @@ window.MunicionesScreen = MunicionesScreen;
 // ── LA VITRINA DE MUNICIÓN ────────────────────────────────────────────────
 // Repisa con etiquetas de cartón: 12 a la vista y el resto tras «Ver los N»
 // (Saulo, 26-sep-2026). La usan «Otras municiones» de esta ficha y «Municiones
-// de este calibre» de la ficha de calibre (28-sep-2026). Quien la usa le pone
+// de este calibre» de la ficha de calibre (27-sep-2026). Quien la usa le pone
 // `key` con su id, para que «Ver los N» se cierre al cambiar de ficha.
 function VitrinaMuniciones({ items, rotulo, ancho, onOpenMunicion }) {
   const [todas, setTodas] = useStateMun(false);

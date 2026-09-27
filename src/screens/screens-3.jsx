@@ -165,7 +165,7 @@ const CARTUCHO_HOME_MAXH = 120;
 // ═══════════════════════════════════════════════════════════════════════
 // FICHA DE UN CALIBRE — /calibres/<slug>
 // El mismo expediente que las fichas de arma, accesorio y munición (DESIGN.md
-// §5.12, decidido con Saulo el 28-sep-2026). Sin talón ni tarjeta de almacén:
+// §5.12, decidido con Saulo el 27-sep-2026). Sin talón ni tarjeta de almacén:
 // un calibre no tiene precio ni existencias propias. Debajo, sus municiones y
 // sus armas.
 // ═══════════════════════════════════════════════════════════════════════
@@ -227,7 +227,7 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
               <div className="amx-copia">
                 <span className="amx-copia-clip" aria-hidden="true" />
                 <window.ArmaPolaroid arma={copia} silueta={silueta} />
-                {/* Sin clasificación fijada, sin sello (Saulo, 28-sep-2026). */}
+                {/* Sin clasificación fijada, sin sello (Saulo, 27-sep-2026). */}
                 {sello &&
                   <span className="amx-copia-sello">
                     <window.SelloLegal key={cal.id} avail={cal.avail} etiqueta={cal.legalArt}

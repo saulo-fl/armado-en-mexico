@@ -1287,7 +1287,7 @@ Decidido con Saulo (rama `Opus-5/RED-ficha-municion`). Reglas en `src/lib/cotejo
 - **Debajo del folder:** Armas compatibles (todas, sin ⇄), Otras municiones del calibre en la vitrina de la ficha de arma
   (`Repisa` y etiqueta de cartón; 12 a la vista y «Ver los N» dentro del mueble) y Opiniones.
 
-### 5.12 La ficha de calibre — el mismo expediente (28-sep-2026)
+### 5.12 La ficha de calibre — el mismo expediente (27-sep-2026)
 
 Decidido con Saulo en cinco rondas (rama `Opus-5/RED-ficha-calibre`; spec en
 `docs/superpowers/specs/2026-09-28-ficha-calibre-design.md`). Pantalla en `CalibreScreen` (`screens-3.jsx`);

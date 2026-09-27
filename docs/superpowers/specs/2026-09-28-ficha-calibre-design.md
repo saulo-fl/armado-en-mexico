@@ -1,6 +1,6 @@
 # Ficha de calibre en el expediente — diseño
 
-**Fecha:** 28-sep-2026 · **Rama:** `Opus-5/RED-ficha-calibre` · **Decidido con Saulo en cinco rondas.**
+**Fecha:** 27-sep-2026 · **Rama:** `Opus-5/RED-ficha-calibre` · **Decidido con Saulo en cinco rondas.**
 
 La ficha de cada calibre (`/calibres/<slug>`, `CalibreScreen` en `src/screens/screens-3.jsx`) era una tarjeta
 blanca con tabla: la única ficha fuera del folder manila. Pasa al mismo expediente que las fichas de arma,

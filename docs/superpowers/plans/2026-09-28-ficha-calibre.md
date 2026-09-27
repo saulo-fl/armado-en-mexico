@@ -85,7 +85,7 @@ test('9 — amxMismoCalibre iguala «.308 Win» con «.308 Winchester» y nada m
 // ── LA VITRINA DE MUNICIÓN ────────────────────────────────────────────────
 // Repisa con etiquetas de cartón: 12 a la vista y el resto tras «Ver los N»
 // (Saulo, 26-sep-2026). La usan «Otras municiones» de esta ficha y «Municiones
-// de este calibre» de la ficha de calibre (28-sep-2026). Quien la usa le pone
+// de este calibre» de la ficha de calibre (27-sep-2026). Quien la usa le pone
 // `key` con su id, para que «Ver los N» se cierre al cambiar de ficha.
 function VitrinaMuniciones({ items, rotulo, ancho, onOpenMunicion }) {
   const [todas, setTodas] = useStateMun(false);
@@ -145,7 +145,7 @@ window.VitrinaMuniciones = VitrinaMuniciones;
 // ═══════════════════════════════════════════════════════════════════════
 // FICHA DE UN CALIBRE — /calibres/<slug>
 // El mismo expediente que las fichas de arma, accesorio y munición (DESIGN.md
-// §5.12, decidido con Saulo el 28-sep-2026). Sin talón ni tarjeta de almacén:
+// §5.12, decidido con Saulo el 27-sep-2026). Sin talón ni tarjeta de almacén:
 // un calibre no tiene precio ni existencias propias. Debajo, sus municiones y
 // sus armas.
 // ═══════════════════════════════════════════════════════════════════════
@@ -207,7 +207,7 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
               <div className="amx-copia">
                 <span className="amx-copia-clip" aria-hidden="true" />
                 <window.ArmaPolaroid arma={copia} silueta={silueta} />
-                {/* Sin clasificación fijada, sin sello (Saulo, 28-sep-2026). */}
+                {/* Sin clasificación fijada, sin sello (Saulo, 27-sep-2026). */}
                 {sello &&
                   <span className="amx-copia-sello">
                     <window.SelloLegal key={cal.id} avail={cal.avail} etiqueta={cal.legalArt}
@@ -314,7 +314,7 @@ window.CalibreScreen = CalibreScreen;
 
 ```css
 
-/* LA FICHA DE CALIBRE (28-sep-2026, DESIGN.md §5.12): el mismo folder sin talón
+/* LA FICHA DE CALIBRE (27-sep-2026, DESIGN.md §5.12): el mismo folder sin talón
    ni tarjeta de almacén. Desde 1024, copia | cabecera y ficha; debajo, hojas |
    milimétrico. Las escopetas no llevan milimétrico y sus hojas se quedan en su
    columna (Saulo). */
@@ -344,7 +344,7 @@ window.CalibreScreen = CalibreScreen;
 - [ ] Juez: `git grep -c -E 'amx-reglacart|amx-calficha-(cabeza|clase|id|uso|alias|sinsello|specs|nota|legal|armas)\b' -- src` → 0;
   el diff de CSS no añade ningún `#hex` ni `rgba(`; `npm run build`.
 
-### Task 5b: datos — aprobado por Saulo el 28-sep-2026
+### Task 5b: datos — aprobado por Saulo el 27-sep-2026
 
 - [ ] Contrato B7a (Qwen), `src/data/data-municiones.js:549`: `getArmasParaMunicion` compara con
   `window.amxMismoCalibre(a.calibre, mun.calibre)` en vez de `a.calibre === mun.calibre`. Arregla las 9 municiones
