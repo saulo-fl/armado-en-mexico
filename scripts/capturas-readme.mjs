@@ -328,11 +328,24 @@ const TRABAJOS = {
     [{ sel: '.amx-faq-folder', indice: 2, alto: 620 }, 'TRÁMITES Y COSTOS'],
     ['.amx-leg-fuentes', 'LAS FUENTES, AL PIE'],
   ]),
-  calibres: () => recorrido('calibres', '/calibres', { x: 180, y: 70, w: 1080, h: 1000 }, [
-    [{ sel: '.amx-anaquel' }, 'CARTUCHOS A ESCALA REAL'],
-    [{ sel: '.amx-cal-rejilla', alto: 560 }, 'UNA FICHA POR CALIBRE'],
-    ['.amx-cal-lecciones', 'FUNDAMENTOS'],
-  ]),
+  // El índice y después la ficha del .380 ACP (Saulo, 27-sep-2026): son dos páginas,
+  // así que se graban por separado y se unen en un solo GIF.
+  async calibres() {
+    await recorrido('calibres-indice', '/calibres', { x: 180, y: 70, w: 1080, h: 1000 }, [
+      [{ sel: '.amx-anaquel' }, 'CARTUCHOS A ESCALA REAL'],
+      [{ sel: '.amx-cal-rejilla', alto: 560 }, 'UNA FICHA POR CALIBRE'],
+      ['.amx-cal-lecciones', 'FUNDAMENTOS'],
+    ]);
+    await recorrido('calibres-ficha', '/calibres/380-acp', { x: 120, y: 60, w: 1200, h: 1000 }, [
+      ['.amx-carpeta-foto', 'CARTUCHO Y CLASIFICACIÓN'],
+      ['.amx-carpeta-ficha', 'FICHA TÉCNICA'],
+      ['.amx-carpeta-historial', 'TAMAÑO REAL JUNTO A UN BOLÍGRAFO'],
+      ['.amx-tamanos-otros', 'COMPARADO CON OTROS CALIBRES'],
+      ['.amx-carpeta-legal', 'ARMAS Y LEGALIDAD'],
+      ['section[aria-labelledby="ficha-municiones"]', 'MUNICIONES DE ESTE CALIBRE'],
+    ]);
+    unirGifs('calibres', ['calibres-indice', 'calibres-ficha']);
+  },
   arsenal: () => recorrido('arsenal', '/arsenal', { x: 180, y: 70, w: 1080, h: 1000 }, [
     ['.amx-arsenal-armeria', 'POR ARMERÍA: DCAM Y OTCA'],
     ['.amx-kardex-carton', 'DISPONIBILIDAD POR SUCURSAL'],
@@ -391,6 +404,16 @@ function aGif(nombre, ancho, cuadros) {
     OUT + nombre + '.gif']);
   rmSync(dir, { recursive: true });
   console.log(`✓ ${nombre}.gif  (${cuadros.length} cuadros)`);
+}
+
+// Une varios GIF del mismo tamaño en uno, con paleta común; borra las partes.
+function unirGifs(nombre, partes) {
+  const entradas = partes.flatMap((p) => ['-i', OUT + p + '.gif']);
+  const unir = partes.map((_, i) => `[${i}:v]`).join('') + `concat=n=${partes.length}:v=1:a=0,fps=12,split[a][b];`
+    + '[a]palettegen=max_colors=64:stats_mode=diff[p];[b][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle';
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', ...entradas, '-filter_complex', unir, OUT + nombre + '.gif']);
+  partes.forEach((p) => rmSync(OUT + p + '.gif'));
+  console.log(`✓ ${nombre}.gif  (${partes.join(' + ')})`);
 }
 
 // `guion(cuadro)` pinta y llama a cuadro(segundos) por cada cuadro que quiere.
