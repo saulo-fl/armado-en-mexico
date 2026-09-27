@@ -18,10 +18,10 @@ function munCatMeta(cal) {
 const MUN_CARTUCHO = {
   '.22 LR': '22lr.webp', '.380 ACP': '380acp.webp', '.38 Special': '38special.webp',
   '.38 Super': '38super.webp', '9mm Parabellum': '9mm.webp', '.40 S&W': '40sw.webp',
-  '12 GA': '12ga.webp', '20 GA': '20ga.webp', '.410 Bore': '410.webp',
+  '12 GA': '12ga.webp', '20 GA': '20ga.webp?v=20260926', '.410 Bore': '410.webp',
   '5.56x45mm': '556.webp', '7.62x39mm': '762x39.webp', '7.62x51mm': '762x51.webp',
   '.243 Win': '243win.webp', '.270 Win': '270win.webp', '.308 Win': '308win.webp',
-  '.30-06 Sprg': '3006.webp', '.300 Win Mag': '300wm.webp',
+  '.30-06 Sprg': '3006.webp', '.300 Win Mag': '300wm.webp?v=20260926',
 };
 // 19 calibres tienen fotografía real del cartucho. Los que no —11 municiones de
 // 71, en 7 calibres: .22-250, .17 HMR, .30-30, 28 GA, .30 Carbine, 9x18 Makarov

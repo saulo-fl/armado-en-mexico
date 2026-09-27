@@ -151,6 +151,11 @@ def _candidatos(arma):
     # Lo descargado de fuera, por id de arma
     cands = [(p, True) for p in sorted(FUENTE.glob(f"{arma['id']}.*"))
                               + sorted(FUENTE.glob(f"{arma['id']}_*"))]
+    # Lo que esta en fotos-fuente/ es una ELECCION (26-sep: Saulo eligio a mano la
+    # PT58 Plus y la CZ P-07 para sustituir fotos malas): gana aunque el WebP que
+    # ya se sirve sea mas grande. Sin esto, la foto mala de 1200 px ganaba siempre.
+    if cands:
+        return cands
     ruta_repo = str(arma.get("img") or "")
     if not sin_foto_propia(ruta_repo):
         p = PUBLICO / ruta_repo.split("?")[0]
@@ -531,8 +536,8 @@ def preparar(args):
             print(f"{etq}: SIN ORIGEN")
             informe.append({**_ficha(arma), "estado": "SIN_ORIGEN"})
             continue
-        if px < MIN_LADO:
-            print(f"{etq}: RESUSTITUIR ({px}px < {MIN_LADO})")
+        if px < args.min_lado:
+            print(f"{etq}: RESUSTITUIR ({px}px < {args.min_lado})")
             informe.append({**_ficha(arma), "estado": "RESUSTITUIR", "origen": origen.name,
                             "origen_px": px})
             continue
@@ -629,6 +634,14 @@ def _poner_img(datajs, arma_id, ruta):
     ini = next((n for n, l in enumerate(lineas) if re.search(rf"\bmk\(\s*{arma_id}\s*,", l)), None)
     if ini is None:
         return datajs, False
+    # Desde el 26-sep (0729c06) cada mk() va en UNA linea: img es el penultimo
+    # argumento, justo antes de la descripcion que cierra con `"),`. Sin esta rama
+    # las altas fallaban con "no encuentro el hueco" y la ficha seguia en silueta.
+    una = re.sub(r', ""(, "(?:[^"\\]|\\.)*"\),?\s*)$', lambda m: f', "{ruta}"' + m.group(1),
+                 lineas[ini], count=1)
+    if una != lineas[ini]:
+        lineas[ini] = una
+        return "\n".join(lineas), True
     for n in range(ini, min(ini + 8, len(lineas))):
         if n > ini and re.search(r"\bmk\(\s*\d+\s*,", lineas[n]):
             return datajs, False                      # nos salimos del arma
@@ -1204,6 +1217,9 @@ def main():
     p.add_argument("--solo", help="ids separados por coma")
     p.add_argument("--ancho", type=int, default=ANCHO)
     p.add_argument("--calidad", type=int, default=CALIDAD)
+    # Para fotos elegidas a mano por Saulo: entran por debajo de 900 sin escalarse
+    # hacia arriba (thumbnail solo reduce), y el semaforo las sigue marcando rojas.
+    p.add_argument("--min-lado", type=int, default=MIN_LADO)
     p.set_defaults(fn=preparar)
 
     p = sub.add_parser("aplicar")
