@@ -330,6 +330,27 @@ function App() {
   };
   const replayTutorial = () => setTutorialOpen(true);
 
+  // ─── Recorrido por el sitio (27-sep-2026) ───
+  // El paso 4 del aviso lo ofrece; «Hacer el recorrido» cierra el tutorial y
+  // abre esto. Navega por páginas de verdad con `irARuta`, que aplica una
+  // dirección igual que el botón atrás. El comparador de ejemplo (Glock 25 vs
+  // 28) solo vive mientras se está en él: en las demás paradas vuelve la
+  // selección que el visitante traía.
+  const [recorrido, setRecorrido] = useStateApp(false);
+  const idsAntes = useRefApp([]);
+  const abrirRecorrido = () => { closeTutorial(); idsAntes.current = compareIds; setRecorrido(true); };
+  const irARuta = (ruta) => {
+    const s = amxParsePath(ruta);
+    setHistory([]);
+    setScreen(s.screen);
+    setProductId(s.productId);
+    setAccesorioId(s.accesorioId);
+    setMunicionId(s.municionId);
+    setCalibreId(s.calibreId);
+    setCatalogFilter(s.catalogFilter);
+    setCompareIds(s.screen === 'compare' ? s.compareIds : idsAntes.current);
+  };
+
   const scrollRef = useRefApp(null);
 
   // Auto-hide BottomNav: visible por defecto, se oculta al bajar, reaparece al subir
@@ -649,12 +670,15 @@ function App() {
           current={currentNavId}
           onNav={navTab}
           compareCount={compareIds.length}
-          visible={navVisible} />
+          visible={navVisible || recorrido} />
       )}
 
       {/* ─── TUTORIAL DE BIENVENIDA (overlay) ─── */}
       {window.OnboardingTutorial && (
-        <window.OnboardingTutorial open={tutorialOpen} onClose={closeTutorial} />
+        <window.OnboardingTutorial open={tutorialOpen} onClose={closeTutorial} onRecorrido={abrirRecorrido} />
+      )}
+      {window.RecorridoSitio && recorrido && (
+        <window.RecorridoSitio irARuta={irARuta} onCerrar={() => setRecorrido(false)} />
       )}
     </div>
   );

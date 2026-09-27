@@ -137,7 +137,7 @@
   }
 
   // ── Componente principal ──────────────────────────────────────────
-  function OnboardingTutorial({ open, onClose }) {
+  function OnboardingTutorial({ open, onClose, onRecorrido }) {
     const vp = window.useViewport();
     const [idx, setIdx] = React.useState(0);
     const [tema, setTema] = React.useState(() => window.amxLeerTema());
@@ -447,6 +447,12 @@
             display: flex; align-items: center; justify-content: space-between; gap: 14px;
             max-width: 560px; margin: 0 auto;
           }
+          /* EL CIERRE DEL AVISO (27-sep-2026): dos sellos en vez de «Continuar».
+             El que abre el recorrido va arriba y en rojo; el otro, en la tinta
+             gris del pie, porque es la salida y no la invitación. */
+          .tut-dos { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+          .amx-v2 .tut-sello--tinta { color: var(--tinta-2); }
+          .amx-v2 .tut-dos .tut-sello { font-size: 13px; letter-spacing: .06em; padding: 9px 13px 10px; }
         `}</style>
 
         {/* ── Cuerpo: la hoja del expediente ── */}
@@ -547,9 +553,20 @@
             <button type="button" className="tut-atras" onClick={goBack} disabled={idx === 0}
               style={{ visibility: idx === 0 ? 'hidden' : 'visible' }}>‹ Atrás</button>
 
-            <button type="button" className="tut-btn" onClick={() => (last ? finish() : goNext())}>
-              <Sello giro={-3}>{last ? 'Continuar' : 'Siguiente ›'}</Sello>
-            </button>
+            {last && onRecorrido ? (
+              <div className="tut-dos">
+                <button type="button" className="tut-btn" onClick={onRecorrido}>
+                  <Sello giro={-3}>Hacer el recorrido</Sello>
+                </button>
+                <button type="button" className="tut-btn" onClick={finish}>
+                  <Sello tono="tinta" giro={2}>Explorar por mi cuenta</Sello>
+                </button>
+              </div>
+            ) : (
+              <button type="button" className="tut-btn" onClick={() => (last ? finish() : goNext())}>
+                <Sello giro={-3}>{last ? 'Continuar' : 'Siguiente ›'}</Sello>
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -557,4 +574,299 @@
   }
 
   window.OnboardingTutorial = OnboardingTutorial;
+
+  // ── EL RECORRIDO POR EL SITIO ─────────────────────────────────────────
+  // Se ofrece al cerrar el aviso (27-sep-2026, decidido con Saulo en cinco
+  // rondas; spec en docs/superpowers/specs/2026-09-27-tour-bienvenida-design.md).
+  // Doce paradas por páginas DE VERDAD: atenúa la página, rodea un apartado con
+  // el marco rojo de los GIF del README y deja una nota en papel de oficio con su
+  // cinta Dymo. `sel`: el apartado; si son varios, el marco abarca a todos. Los
+  // que miden más que la pantalla se encuadran solo en su primera parte.
+  // Si el apartado de una parada no aparece en 4 s, la parada se salta: el
+  // recorrido nunca deja a nadie atrapado. scripts/recorrido.test.mjs comprueba
+  // que cada ruta es una página del sitio y cada clase existe en el código.
+  const PARADAS = [
+    { ruta: '/arsenal', sel: ['.amx-arsenal-armeria', '.amx-kardex-carton'], cinta: 'Por armería',
+      nota: 'El catálogo se reparte por armería: la OTCA (Coahuila, Nuevo León, San Luis Potosí y Tamaulipas) y la DCAM (el resto del país). La tarjeta de almacén dice cuántas armas tenía cada sucursal en su último inventario.' },
+    { ruta: '/arsenal', sel: ['.amx-arsenal-loteria-mesa', '.amx-hub-usos', '.amx-anaquel'], cinta: 'Tipo, uso y calibre',
+      nota: 'También puedes entrar por tipo de arma, por uso o por calibre. Cada entrada lleva al listado con su filtro ya puesto.' },
+    { ruta: '/pistolas/glock-25', sel: ['.amx-talon-papel', '.amx-kardex-carton'], cinta: 'Precio y existencias',
+      nota: 'Cada arma tiene su ficha. El comprobante dice el precio oficial con IVA, la armería y la fecha del inventario; la tarjeta de almacén, cuántas piezas había en cada sucursal.' },
+    { ruta: '/pistolas/glock-25', sel: ['.amx-carpeta-legal'], cinta: 'Clasificación legal',
+      nota: 'El sello dice si es de uso civil, de seguridad o exclusivo, y la hoja explica qué permiso hace falta y dónde se tramita.' },
+    { ruta: '/pistolas/glock-25', sel: ['.amx-carpeta-historial'], cinta: 'Historial de precios',
+      nota: 'Cada inventario oficial deja un punto en el papel milimétrico: así ves cómo ha cambiado el precio.' },
+    { ruta: '/pistolas/glock-25', sel: ['.amx-comentarios'], cinta: 'Recomendaciones',
+      nota: '¿La recomiendas? Se contesta con un sello y una reseña de al menos 100 caracteres. Nada se publica sin que lo revise una persona.' },
+    { ruta: '/pistolas/glock-25', sel: ['.amx-reportar-error'], cinta: 'Reportar un error',
+      nota: 'Si ves un dato incorrecto, repórtalo: se abre un formulario público en GitHub con la ficha ya puesta. Cada corrección se revisa con sus fuentes.' },
+    { ruta: '/comparar/glock-25-vs-glock-28', sel: ['.amx-cotejo'], cinta: 'Comparador',
+      nota: 'Pon dos armas lado a lado. Arriba va lo que las distingue, con la mejor cifra rodeada en rojo. Se llena con la casilla «Comparar» de cada ficha.' },
+    { ruta: '/legalidad', sel: ['.amx-leg-cta'], cinta: 'La entrevista',
+      nota: '¿Puedo comprar un arma? Contesta unas preguntas (ninguna pide datos personales) y llévate la lista de documentos que te corresponden.' },
+    { ruta: '/legalidad', sel: ['.amx-mapa'], cinta: 'El mapa del trámite',
+      nota: 'El camino completo, del permiso a la compra en la armería, en un solo mapa.' },
+    { ruta: '/legalidad', sel: ['.amx-leg-cajon', '.amx-leg-fuentes'], cinta: 'Lo que dice la ley',
+      nota: 'Lo que permite la ley, lo que cambia en tu estado y los trámites con sus costos. Cada afirmación lleva su fuente oficial al pie.' },
+    { ruta: '/soporte', sel: ['.amx-soporte-seccion-normas'], cinta: 'Normas de la comunidad',
+      nota: 'Aquí no se compra ni se vende. Las normas rigen reseñas y reportes, y desde aquí puedes denunciar una reseña.' },
+  ];
+
+  // Dónde van el marco y la nota, en píxeles de la ventana. Pura, para poder
+  // probarla sin navegador.
+  //   r  el apartado: { top, bottom, left, right }
+  //   v  la ventana: { ancho, alto, arriba, abajo, movil } — `arriba` es lo que
+  //      tapa la barra de arriba; `abajo`, en móvil, lo que tapan la nota fija
+  //      y la barra de navegación
+  //   n  la nota: { ancho, alto }
+  // Devuelve { marco: { x, y, w, h }, nota: { x, y } | null, lado, flecha }.
+  // `lado` es dónde queda la nota respecto al marco (en móvil, 'movil': la nota
+  // no se mueve y el CSS la fija abajo) y `flecha`, a cuántos px de la esquina
+  // de la nota va la flecha que señala el marco.
+  function colocarNota(r, v, n) {
+    const H = 10, SEP = 16, M = 16;
+    const x = Math.max(r.left - H, 4), der = Math.min(r.right + H, v.ancho - 4);
+    const y = Math.max(r.top - H, v.arriba);
+    let bajo = Math.min(r.bottom + H, v.alto - v.abajo - M);
+    const marco = () => ({ x, y, w: der - x, h: Math.max(bajo - y, 0) });
+    if (v.movil) return { marco: marco(), nota: null, lado: 'movil', flecha: 0 };
+    // Al lado, si cabe: la nota a la altura del marco.
+    const cabeDer = v.ancho - der - SEP - M >= n.ancho;
+    if (cabeDer || x - SEP - M >= n.ancho) {
+      const ny = Math.max(v.arriba, Math.min(y, v.alto - M - n.alto));
+      return { marco: marco(), nota: { x: cabeDer ? der + SEP : x - SEP - n.ancho, y: ny },
+        lado: cabeDer ? 'derecha' : 'izquierda', flecha: Math.max(18, Math.min(y + 28 - ny, n.alto - 18)) };
+    }
+    const nx = Math.max(M, Math.min(x, v.ancho - M - n.ancho));
+    const flecha = Math.max(22, Math.min(x + 44 - nx, n.ancho - 22));
+    // Debajo, si cabe entera.
+    if (bajo + SEP + n.alto <= v.alto - M) return { marco: marco(), nota: { x: nx, y: bajo + SEP }, lado: 'abajo', flecha };
+    // Encima, si el apartado quedó abajo (el final de una página no sube más).
+    if (y - SEP - n.alto >= v.arriba) return { marco: marco(), nota: { x: nx, y: y - SEP - n.alto }, lado: 'arriba', flecha };
+    // Si no, debajo y el marco se recorta para dejarle sitio.
+    bajo = v.alto - M - n.alto - SEP;
+    return { marco: marco(), nota: { x: nx, y: bajo + SEP }, lado: 'abajo', flecha };
+  }
+
+  function RecorridoSitio({ irARuta, onCerrar }) {
+    const vp = window.useViewport();
+    const [paso, setPaso] = React.useState(0);   // 0-11 las paradas · 12 la hoja «Listo»
+    const [geo, setGeo] = React.useState(null);  // colocarNota(), o null mientras busca
+    const notaRef = React.useRef(null);
+    const sentido = React.useRef(1);             // hacia dónde se salta una parada sin apartado
+    const rutaAntes = React.useRef(null);
+    const touch = React.useRef({ x: 0, active: false });
+    const total = PARADAS.length;
+    const listo = paso >= total;
+    const p = PARADAS[paso];
+
+    const siguiente = () => { sentido.current = 1; setPaso((i) => Math.min(i + 1, total)); };
+    const atras = () => { sentido.current = -1; setPaso((i) => Math.max(i - 1, 0)); };
+
+    // La página no responde mientras dura: sin scroll de fondo. Atrás del
+    // navegador cierra (la app ya pinta la página anterior por su cuenta).
+    React.useEffect(() => {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('popstate', onCerrar);
+      return () => { document.body.style.overflow = prev; window.removeEventListener('popstate', onCerrar); };
+    }, []);
+    React.useEffect(() => { if (notaRef.current) notaRef.current.focus(); }, [listo]);
+
+    // Cada parada: ir a su página, esperar el apartado, llevarlo arriba y
+    // seguirlo. Se vuelve a medir cada 250 ms y al hacer scroll o cambiar el
+    // tamaño: lo que se hidrata después (D1, fotos) mueve la página.
+    React.useEffect(() => {
+      if (listo) { setGeo(null); return; }
+      const misma = rutaAntes.current === p.ruta;
+      rutaAntes.current = p.ruta;
+      irARuta(p.ruta);
+      setGeo(null);
+      const quieto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const arriba = vp.isMobile ? 58 : 72;
+      const t0 = Date.now();
+      let els = null, llevado = 0, raf = 0;
+      const llevar = (como) => {
+        els[0].style.scrollMarginTop = (arriba + 12) + 'px';
+        els[0].scrollIntoView({ block: 'start', behavior: como });
+        llevado = Date.now();
+      };
+      const medir = () => {
+        if (!els) return;
+        const rs = els.map((e) => e.getBoundingClientRect());
+        const r = { top: Math.min(...rs.map((b) => b.top)), bottom: Math.max(...rs.map((b) => b.bottom)),
+          left: Math.min(...rs.map((b) => b.left)), right: Math.max(...rs.map((b) => b.right)) };
+        const nota = notaRef.current;
+        const n = { ancho: nota ? nota.offsetWidth : 360, alto: nota ? nota.offsetHeight : 200 };
+        const alto = window.innerHeight;
+        const abajo = vp.isMobile && nota ? alto - nota.getBoundingClientRect().top : 0;
+        // Se movió la página por debajo (algo se hidrató encima): se vuelve a llevar.
+        if (Date.now() - llevado > 900 && (rs[0].top < arriba - 4 || rs[0].top > alto - abajo - 80)) llevar('auto');
+        const g = colocarNota(r, { ancho: document.documentElement.clientWidth, alto, arriba, abajo, movil: vp.isMobile }, n);
+        setGeo((antes) => (JSON.stringify(antes) === JSON.stringify(g) ? antes : g));
+      };
+      const alMover = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; medir(); }); };
+      const reloj = setInterval(() => {
+        if (els) return medir();
+        const hallados = p.sel.map((s) => document.querySelector(s)).filter(Boolean);
+        if (hallados.length) { els = hallados; llevar(misma && !quieto ? 'smooth' : 'auto'); medir(); }
+        else if (Date.now() - t0 > 4000) {
+          clearInterval(reloj);
+          setPaso((i) => (i + sentido.current < 0 ? i + 1 : i + sentido.current));
+        }
+      }, 250);
+      window.addEventListener('scroll', alMover, { capture: true, passive: true });
+      window.addEventListener('resize', alMover);
+      return () => {
+        clearInterval(reloj); cancelAnimationFrame(raf);
+        window.removeEventListener('scroll', alMover, { capture: true });
+        window.removeEventListener('resize', alMover);
+        if (els) els[0].style.scrollMarginTop = '';
+      };
+    }, [paso, vp.isMobile]);
+
+    // Teclado: ← → avanzan, Escape sale; el Tab no sale de la nota.
+    React.useEffect(() => {
+      const onKey = (e) => {
+        if (e.key === 'Escape') { e.preventDefault(); onCerrar(); }
+        else if (e.key === 'ArrowRight' && !listo) { e.preventDefault(); siguiente(); }
+        else if (e.key === 'ArrowLeft' && paso > 0) { e.preventDefault(); atras(); }
+        else if (e.key === 'Tab' && notaRef.current) {
+          const bs = notaRef.current.querySelectorAll('button:not([disabled])');
+          const a = document.activeElement, primero = bs[0], ultimo = bs[bs.length - 1];
+          const fuera = !notaRef.current.contains(a) || a === notaRef.current;
+          if (fuera || a === (e.shiftKey ? primero : ultimo)) { e.preventDefault(); (e.shiftKey ? ultimo : primero).focus(); }
+        }
+      };
+      window.addEventListener('keydown', onKey);
+      return () => window.removeEventListener('keydown', onKey);
+    }, [paso, listo]);
+
+    // Deslizar sobre cualquier punto: a la izquierda avanza, a la derecha vuelve.
+    const onTouchStart = (e) => { touch.current = { x: e.touches[0].clientX, active: true }; };
+    const onTouchEnd = (e) => {
+      if (!touch.current.active) return;
+      touch.current.active = false;
+      const dx = e.changedTouches[0].clientX - touch.current.x;
+      if (Math.abs(dx) < 45) return;
+      if (dx < 0) { if (!listo) siguiente(); } else if (paso > 0) atras();
+    };
+
+    const marco = !listo && geo && geo.marco;
+    const empezar = () => { irARuta('/'); onCerrar(); };
+    return (
+      <div className="rec-capa" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
+        style={{ background: marco ? 'transparent' : 'rgba(23, 27, 25, .5)' }}>
+        <style>{`
+          /* La capa se come los toques: la página de fondo no responde. */
+          .rec-capa { position: fixed; inset: 0; z-index: 1200; touch-action: none; }
+          /* EL MARCO — el de los GIF del README: filo rojo de sello y una sombra
+             enorme que atenúa todo lo demás. El anillo de papel entre los dos
+             separa el rojo del fondo atenuado en el tema oscuro. */
+          .rec-marco {
+            position: fixed; box-sizing: border-box; pointer-events: none;
+            border: 4px solid var(--sello-restr); border-radius: 6px;
+            box-shadow: 0 0 0 2px var(--oficio), 0 0 0 4000px rgba(23, 27, 25, .5);
+          }
+          /* LA NOTA — papel de oficio, que no sigue al tema (es un objeto). */
+          .rec-nota, .rec-hoja {
+            position: fixed; box-sizing: border-box;
+            background: var(--oficio); color: var(--carton-tinta); border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(23, 27, 25, .2), 0 12px 32px rgba(23, 27, 25, .35);
+          }
+          .rec-nota { width: 360px; padding: 12px 14px 6px; }
+          .rec-nota:focus, .rec-hoja:focus { outline: none; }
+          .rec-nota--movil {
+            left: 50%; transform: translateX(-50%); width: min(560px, calc(100% - 24px));
+            bottom: calc(var(--amx-nav-h, 8px) + 8px);
+          }
+          .rec-hoja {
+            left: 50%; top: 50%; transform: translate(-50%, -50%);
+            width: min(420px, calc(100% - 32px)); padding: 22px 18px 8px; text-align: center;
+          }
+          .rec-cabeza { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+          .amx-v2 .rec-nota .amx-dymo, .amx-v2 .rec-hoja .amx-dymo { margin: 0; }
+          .rec-salir, .rec-atras {
+            background: none; border: 0; cursor: pointer; min-height: 44px; padding: 10px 4px;
+            font-family: var(--sans); font-weight: 600; font-size: 13px;
+            letter-spacing: .12em; text-transform: uppercase; color: var(--oficio-tinta-2);
+          }
+          .rec-salir { margin: -10px -4px 0 0; }
+          .rec-atras:disabled { visibility: hidden; }
+          .rec-texto {
+            margin: 8px 0 2px; font-family: var(--sans); font-size: 15.5px; line-height: 1.5;
+            color: var(--carton-tinta); text-wrap: pretty;
+          }
+          .rec-hoja .rec-texto { margin-top: 14px; }
+          .rec-pie { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+          .rec-folio { font-family: var(--mono); font-size: 12.5px; letter-spacing: .08em; color: var(--oficio-tinta-2); }
+          /* El anillo de foco va en el botón: la máscara del sello se lo comería.
+             Sobre el papel, el rojo del sello (6.42:1): el del tema oscuro no llega. */
+          .rec-btn {
+            background: none; border: 0; padding: 4px; cursor: pointer;
+            min-height: 44px; display: inline-flex; align-items: center;
+          }
+          .amx-v2 .rec-btn .amx-sello {
+            font-size: 13px; letter-spacing: .1em; padding: 9px 13px 10px; border-width: 2.5px;
+            transform: rotate(-3deg);
+          }
+          .amx-v2 .rec-nota :focus-visible, .amx-v2 .rec-hoja :focus-visible { outline-color: var(--sello-restr); }
+          .amx-v2 .rec-aprobado { margin: 18px 0 12px; }
+          .amx-v2 .rec-aprobado .amx-sello {
+            font-size: 23px; padding: 8px 22px 10px; border-width: 3px; letter-spacing: .18em;
+            transform: rotate(-7deg);
+          }
+          /* LA FLECHA: una punta de papel en el canto que mira al marco. */
+          .rec-flecha { position: absolute; width: 14px; height: 14px; background: var(--oficio); transform: rotate(45deg); }
+          .rec-nota--derecha .rec-flecha   { left: -7px;   top: calc(var(--rec-flecha) - 7px); }
+          .rec-nota--izquierda .rec-flecha { right: -7px;  top: calc(var(--rec-flecha) - 7px); }
+          .rec-nota--abajo .rec-flecha     { top: -7px;    left: calc(var(--rec-flecha) - 7px); }
+          .rec-nota--arriba .rec-flecha    { bottom: -7px; left: calc(var(--rec-flecha) - 7px); }
+        `}</style>
+
+        {marco && (
+          <div className="rec-marco" aria-hidden="true"
+            style={{ left: marco.x, top: marco.y, width: marco.w, height: marco.h }} />
+        )}
+        <p className="amx-sr" aria-live="polite">
+          {listo ? 'Recorrido terminado' : `Parada ${paso + 1} de ${total}: ${p.cinta}`}
+        </p>
+
+        {listo ? (
+          <div ref={notaRef} className="rec-hoja" role="dialog" aria-modal="true" aria-labelledby="rec-cinta" tabIndex={-1}>
+            <window.CintaDymo nivel={2} id="rec-cinta">Listo</window.CintaDymo>
+            <p className="rec-texto">Ya conoces el sitio. Puedes repetir este recorrido desde Más → Ver tutorial.</p>
+            <div className="rec-aprobado"><span className="amx-sello amx-sello--civil">Aprobado</span></div>
+            <div className="rec-pie">
+              <button type="button" className="rec-atras" onClick={atras}>‹ Atrás</button>
+              <button type="button" className="rec-btn" onClick={empezar}>
+                <span className="amx-sello amx-sello--restr">Empezar</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div ref={notaRef} className={'rec-nota rec-nota--' + (geo ? geo.lado : 'movil')}
+            role="dialog" aria-modal="true" aria-labelledby="rec-cinta" tabIndex={-1}
+            style={geo && geo.nota ? { left: geo.nota.x, top: geo.nota.y } : undefined}>
+            {geo && geo.nota && <span className="rec-flecha" aria-hidden="true" style={{ '--rec-flecha': geo.flecha + 'px' }} />}
+            <div className="rec-cabeza">
+              <window.CintaDymo nivel={2} chica id="rec-cinta">{p.cinta}</window.CintaDymo>
+              <button type="button" className="rec-salir" onClick={onCerrar}>Salir</button>
+            </div>
+            <p className="rec-texto">{p.nota}</p>
+            <div className="rec-pie">
+              <button type="button" className="rec-atras" onClick={atras} disabled={paso === 0}>‹ Atrás</button>
+              <span className="rec-folio">{String(paso + 1).padStart(2, '0')} / {total}</span>
+              <button type="button" className="rec-btn" onClick={siguiente}>
+                <span className="amx-sello amx-sello--restr">Siguiente ›</span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+  RecorridoSitio.PARADAS = PARADAS;
+  RecorridoSitio.colocarNota = colocarNota;
+  window.RecorridoSitio = RecorridoSitio;
 })();
