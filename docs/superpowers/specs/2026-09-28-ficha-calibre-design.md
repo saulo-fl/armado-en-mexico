@@ -56,3 +56,6 @@ filas «Papel milimétrico» y «Escopetas» de la tabla de arriba.
 Respuestas: bolígrafo generado con IA y aprobado; carabina y rifle son una rama; el .22 LR se compara con 9mm
 Parabellum, .38 Special y .308 Winchester; el .22 WMR, solo con el .22 LR; la regla de energía se retira («no se
 entiende bien»); la fuente de las cifras pasa a un renglón al pie de la ficha técnica.
+
+**Ajuste (27-sep-2026, chat):** armas largas, pistolas y revólveres se comparan con **máximo 3** calibres de su
+rama: los que más armas tienen en el catálogo (`amxComparadosDe`), mostrados de menor a mayor.
