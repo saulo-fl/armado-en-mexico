@@ -51,6 +51,9 @@ const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^
 // ════════════════════════════════════════════════════════════════
 // HOME — Mobile-first · Header + Sliders + 3 Carruseles
 // ════════════════════════════════════════════════════════════════
+// Glock 28, CZ P-10 C, Glock 44, Glock 25, Beretta 80X Cheetah Bronce y Ruger 10/22 (Saulo, 27-sep-2026).
+const FAVORITOS_MS = [12, 9, 133, 11, 218, 151];
+
 function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const vp = window.useViewport();
   const [promoIdx, setPromoIdx] = useState(0);
@@ -97,8 +100,26 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   }, [promos.length]);
 
   // Tres listas curadas / dinámicas
-  const favoritos = useMemo(() => window.Store ? window.Store.getFavoriteArmas() : [], [cambios]);
+  // Favoritos de Armas M&S: siempre estas seis y en orden aleatorio (Saulo,
+  // 27-sep-2026). El orden se sortea UNA vez por visita (Fisher-Yates: todas las
+  // permutaciones igual de probables) y las fichas se leen del Store, para que
+  // lleguen con los datos de D1.
+  const [ordenFavoritos] = useState(() => {
+    const ids = FAVORITOS_MS.slice();
+    for (let i = ids.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [ids[i], ids[j]] = [ids[j], ids[i]];
+    }
+    return ids;
+  });
+  const favoritos = useMemo(() => {
+    const armas = window.Store ? window.Store.getArmas() : [];
+    return ordenFavoritos.map((id) => armas.find((a) => String(a.id) === String(id))).filter(Boolean);
+  }, [cambios, ordenFavoritos]);
   const masVisitadas = useMemo(() => window.Store ? window.Store.getTopPopular(10, 30) : [], [cambios]);
+  const masNuevas = useMemo(() => window.amxMasNuevas && window.Store
+    ? window.amxMasNuevas(window.Store.getArmas(), window.AMX_PRICE_HISTORY_SEED || {}, window.AMX_MANUALES_SEED || [], 10)
+    : [], [cambios]);
 
   const PAD = 16;
   const containerMax = { maxWidth: 1280, margin: '0 auto', width: '100%' };
@@ -186,6 +207,16 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         <VisitedCard arma={a} onClick={() => onOpenArma(a.id)} />
         } />
       
+
+      {/* 4 ▸ Carrusel: Las más nuevas — armas que nunca habían salido en un
+          inventario (Saulo, 27-sep-2026; regla en amxMasNuevas). Sin distintivo:
+          el título ya lo dice. */}
+      <CarouselSection
+        title="Las más nuevas"
+        items={masNuevas}
+        renderItem={(a) =>
+        <window.ArmaExpediente arma={a} onClick={() => onOpenArma(a.id)} />
+        } />
 
       {/* 5 ▸ Calibres · guía enciclopédica */}
       <CarouselSection
