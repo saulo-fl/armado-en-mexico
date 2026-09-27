@@ -55,13 +55,15 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const vp = window.useViewport();
   const [promoIdx, setPromoIdx] = useState(0);
   const [homeQuery, setHomeQuery] = useState('');
-  const [, forceRender] = useState(0);
+  // La dependencia de las listas es el CONTADOR, no el setter: el setter nunca cambia
+  // y las cuatro listas se quedaban con los datos del primer pintado (27-sep-2026).
+  const [cambios, forceRender] = useState(0);
   useEffect(() => window.Store && window.Store.onChange(() => forceRender((x) => x + 1)), []);
 
   // Promo slides (editables desde admin). Ya no se pintan en el inicio —el
   // mockup abre con buscador y arma destacada— pero el dato se conserva porque
   // el panel de admin sigue editándolo.
-  const promos = useMemo(() => window.Store ? window.Store.getPromos() : [], [forceRender]);
+  const promos = useMemo(() => window.Store ? window.Store.getPromos() : [], [cambios]);
 
   // Armas destacadas (DESIGN.md §5.1). La PRIMERA es fija en la CZ P-09 (id 31,
   // imagenes/077_CZ_P-09.webp): es la pieza que la portada del mockup enseña, y
@@ -87,7 +89,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
       if (!elegidas.includes(a)) elegidas.push(a);
     }
     return elegidas;
-  }, [forceRender]);
+  }, [cambios]);
   useEffect(() => {
     if (promos.length < 2) return;
     const t = setInterval(() => setPromoIdx((i) => (i + 1) % promos.length), 6500);
@@ -95,8 +97,8 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   }, [promos.length]);
 
   // Tres listas curadas / dinámicas
-  const favoritos = useMemo(() => window.Store ? window.Store.getFavoriteArmas() : [], [forceRender]);
-  const masVisitadas = useMemo(() => window.Store ? window.Store.getTopPopular(10, 30) : [], [forceRender]);
+  const favoritos = useMemo(() => window.Store ? window.Store.getFavoriteArmas() : [], [cambios]);
+  const masVisitadas = useMemo(() => window.Store ? window.Store.getTopPopular(10, 30) : [], [cambios]);
 
   const PAD = 16;
   const containerMax = { maxWidth: 1280, margin: '0 auto', width: '100%' };
