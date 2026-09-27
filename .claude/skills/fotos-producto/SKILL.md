@@ -258,10 +258,11 @@ la foto, basta `bajar` + `procesar` + `aplicar`:
   propósito**: bornaghi.it solo publica un PDF de catálogo, y las únicas fotos de
   caja que hay en tienda (armeriarossetti.it) llevan **el logo de la tienda
   encima**. Una marca ajena en la ficha no entra.
-- `bullet__12ga` (2), `partizan__300winmag`, `sb__9x18makarov`, `egdelsur__20ga` —
+- `bullet__12ga` (1), `partizan__300winmag`, `sb__9x18makarov`, `egdelsur__20ga` —
   el fabricante no publica foto de caja de ese calibre y no la encontré en tienda.
-  («Bullet» ni siquiera aparece como marca en el comercio español: puede ser un
-  nombre del inventario DCAM, no la marca real de la caja.)
+  («Bullet» es el nombre del DCAM para cartuchos J&G Excopesa: las 8 fichas cuyos
+  modelo, gramaje y perdigón cruzan con el catálogo J&G ya van como J&G Excopesa.
+  Queda la 2055, T-4 Caza con perdigón 9, que J&G no fabrica en T4.)
 - `__243win` y `__270win` (ids 2021 y 2022): el inventario los trae **sin marca**
   (`marca: '—'`). No hay caja posible mientras no se les asigne marca; si algún día
   se identifican, heredan la de su marca sin tocar una sola foto.
