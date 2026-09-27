@@ -91,6 +91,7 @@
   }
   /* ↓ generado por cajas.py · no editar a mano ↓ */
   window.MUNICION_CAJAS = {
+    '2055': 'imagenes/municiones/2055.webp?v=20260926',
     '2068': 'imagenes/municiones/2068.webp?v=20260926',
     '2100': 'imagenes/municiones/2100.webp?v=20260926',
     '__243win': 'imagenes/municiones/__243win.webp?v=20260925',
