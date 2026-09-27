@@ -163,6 +163,50 @@ const CARTUCHO_MAX_MM = 84.8;          // .30-06 / .270 / 7mm Rem / .300 WM
 const CARTUCHO_HOME_MAXH = 120;
 
 // ═══════════════════════════════════════════════════════════════════════
+// COMPARATIVA DE TAMAÑOS — el papel milimétrico de la ficha de calibre
+// Sustituye a la regla de energía (Saulo en Penpot, 27-sep-2026): el cartucho a
+// su tamaño real sobre un eje en milímetros, junto a un bolígrafo de 15 cm que
+// todo el mundo conoce. En escritorio se suman los calibres de su rama
+// (amxComparadosDe). `mmPx` son los píxeles de un milímetro. Las fotos vienen
+// recortadas al borde (margen < 2 %): su alto es el largo real del cartucho.
+// ═══════════════════════════════════════════════════════════════════════
+const BOLIGRAFO = { id: 'Bolígrafo', mm: 150, foto: 'imagenes/boligrafo-15cm.webp' };
+const MARCAS_MM = [0, 25, 50, 75, 100, 125, 150];
+
+function TablaTamanos({ cal, comparados, mmPx }) {
+  const pieza = (p, clase) => (
+    <figure key={p.id} className={'amx-tamanos-pieza' + (clase ? ' ' + clase : '')}>
+      <img src={p.foto} alt="" style={{ height: p.mm * mmPx }} loading="lazy" />
+      <figcaption><b>{p.id}</b>{p.mm} mm</figcaption>
+    </figure>
+  );
+  const describe = (c) => c.id + ', ' + c.mm + ' mm';
+  const etiqueta = 'Comparativa de tamaños: ' + describe(cal) + '; bolígrafo, 150 mm'
+    + (comparados.length ? '. Otros calibres de su rama: ' + comparados.map(describe).join('; ') : '') + '.';
+  return (
+    <div className="amx-tamanos" style={{ '--mm': mmPx + 'px' }} role="img" aria-label={etiqueta}>
+      <div className="amx-tamanos-titulo">Comparativa de tamaños</div>
+      <div className="amx-tamanos-lienzo">
+        <div className="amx-tamanos-eje" aria-hidden="true">
+          {MARCAS_MM.map((m) => <span key={m} style={{ bottom: m * mmPx }}>{m}</span>)}
+        </div>
+        <div className="amx-tamanos-fila">
+          {pieza({ id: cal.id, mm: cal.mm, foto: cal.cartucho }, 'es-ficha')}
+          {pieza(BOLIGRAFO)}
+          {comparados.length > 0 &&
+            <div className="amx-tamanos-otros">
+              <div className="amx-tamanos-otros-tit">Comparado con otros calibres</div>
+              <div className="amx-tamanos-otros-fila">
+                {comparados.map((c) => pieza({ id: c.id, mm: c.mm, foto: c.cartucho }))}
+              </div>
+            </div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 // FICHA DE UN CALIBRE — /calibres/<slug>
 // El mismo expediente que las fichas de arma, accesorio y munición (DESIGN.md
 // §5.12, decidido con Saulo el 27-sep-2026). Sin talón ni tarjeta de almacén:
@@ -176,7 +220,6 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
   React.useEffect(() => { setTab(0); }, [calibreId]);
   const guia = useMemo3(() => window.amxGuiaCalibres(window.CALIBRES || [], window.DB || []), []);
   const cal = guia.find((c) => c.id === calibreId);
-  const rango = useMemo3(() => window.amxRangoCalibres(guia), [guia]);
 
   // Un solo corte, el del expediente: 1024px (DESIGN.md §5.5).
   const ancho = vp.width >= 1024;
@@ -196,7 +239,7 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
   const visibles = armas.slice(0, 6);
   const municiones = (window.MUNICIONES || []).filter((m) => window.amxMismoCalibre(m.calibre, cal.id));
   const sello = (window.SELLOS_LEGALES || {})[cal.avail];
-  const conEnergia = typeof cal.energiaJ === 'number' && rango.energia.max > 0;
+  const comparados = ancho ? window.amxComparadosDe(cal, guia) : [];
   // La copia: la foto del cartucho y, al pie, su nombre y su largo (Saulo).
   const copia = { id: cal.id, nombre: cal.id, img: cal.cartucho, marca: cal.mm ? cal.mm + ' mm de largo' : '' };
   const silueta = { forma: 'imagenes/cartuchos/silueta-vertical.webp', nombre: 'cartucho' };
@@ -205,7 +248,7 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
     ['Energía', cal.energia],
     ['Retroceso', cal.retroceso],
     ['En el catálogo', armas.length === 0 ? 'No se vende en DCAM' : armas.length + (armas.length === 1 ? ' arma' : ' armas')],
-  ];
+  ].concat(cal.fuente ? [['Fuente', cal.fuente.nombre + ' · ' + cal.fuente.fecha]] : []);
 
   return (
     <div style={{ paddingBottom: 90 }}>
@@ -240,16 +283,13 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
               <window.FichaTecnica arma={{ nombre: cal.id }} filas={filas} />
             </div>
 
-            {/* En el móvil el milimétrico va antes que las hojas (Saulo). Las escopetas
-                no lo llevan: su energía no se compara con la de una bala. */}
-            {conEnergia &&
-              <div className="amx-carpeta-historial">
-                <div className="amx-milimetrico">
-                  <window.ReglaComparativa titulo="Energía frente a los otros 29"
-                    valor={cal.energiaJ} min={rango.energia.min} max={rango.energia.max}
-                    unidad="J" fuente={cal.fuente} />
-                </div>
-              </div>}
+            {/* La comparativa de tamaños (Saulo, 27-sep-2026), también en escopetas. En el
+                móvil va antes que las hojas; en escritorio ocupa la columna derecha. */}
+            <div className="amx-carpeta-historial">
+              <div className="amx-milimetrico">
+                <TablaTamanos cal={cal} comparados={comparados} mmPx={ancho ? 3 : 2} />
+              </div>
+            </div>
 
             <div className="amx-carpeta-legal amx-separadores">
               <window.FichaTabs activo={tab} onCambiar={setTab}>

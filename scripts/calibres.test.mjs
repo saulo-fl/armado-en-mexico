@@ -119,3 +119,34 @@ test('9 — amxMismoCalibre iguala «.308 Win» con «.308 Winchester» y nada m
   assert.equal(window.amxMismoCalibre('.300 Win Mag', '.300 Winchester'), false);
   assert.equal(window.amxMismoCalibre(undefined, undefined), false);
 });
+
+test('10 — amxComparadosDe: su rama (carabina con rifle), de menor a mayor; .22 LR y .22 WMR, fijos', () => {
+  const guia = [
+    { id: '.380 ACP', clase: 'Pistola', mm: 25 }, { id: '9mm Parabellum', clase: 'Pistola', mm: 29.7 },
+    { id: '.38 Special', clase: 'Revólver', mm: 39.6 }, { id: '.22 LR', clase: 'Rimfire', mm: 25.4 },
+    { id: '.22 WMR', clase: 'Rimfire', mm: 34.29 }, { id: '5.56x45mm', clase: 'Carabina', mm: 57.4 },
+    { id: '.308 Winchester', clase: 'Rifle', mm: 71.1 }, { id: '12 GA', clase: 'Escopeta', mm: 70 },
+    { id: '.410 Bore', clase: 'Escopeta', mm: 63.5 },
+  ];
+  const ids = (id) => window.amxComparadosDe(guia.find((c) => c.id === id), guia).map((c) => c.id);
+  assert.deepEqual(ids('.380 ACP'), ['9mm Parabellum']);
+  assert.deepEqual(ids('.308 Winchester'), ['5.56x45mm']);
+  assert.deepEqual(ids('5.56x45mm'), ['.308 Winchester']);
+  assert.deepEqual(ids('12 GA'), ['.410 Bore']);
+  assert.deepEqual(ids('.22 LR'), ['9mm Parabellum', '.38 Special', '.308 Winchester']);
+  assert.deepEqual(ids('.22 WMR'), ['.22 LR']);
+  assert.deepEqual(ids('.38 Special'), []);
+});
+
+test('11 — con los 30 calibres reales: los fijos existen y nadie se compara con otra rama', () => {
+  const extra = fileURLToPath(new URL('../src/data/data-extra.js', import.meta.url));
+  vm.runInThisContext(readFileSync(extra, 'utf8'), { filename: extra });
+  const guia = window.CALIBRES;
+  const rama = (c) => (c.clase === 'Carabina' ? 'Rifle' : c.clase);
+  assert.equal(window.amxComparadosDe(guia.find((c) => c.id === '.22 LR'), guia).length, 3, 'los tres fijos del .22 LR');
+  assert.equal(window.amxComparadosDe(guia.find((c) => c.id === '.22 WMR'), guia).length, 1, 'el .22 LR del .22 WMR');
+  for (const c of guia) {
+    if (c.clase === 'Rimfire') continue;
+    for (const o of window.amxComparadosDe(c, guia)) assert.equal(rama(o), rama(c), `${c.id} se compara con ${o.id}`);
+  }
+});

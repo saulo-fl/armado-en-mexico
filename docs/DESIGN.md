@@ -1299,14 +1299,17 @@ cruce de munición en `amxMismoCalibre` (`src/lib/calibres.js`, con prueba); pri
 - **La copia** es la foto del cartucho; al pie, su nombre y su largo («25 mm de largo»). Sello legal estampado;
   los calibres sin clasificación fijada (.357 Magnum, .45 ACP, 5.7x28mm) van **sin sello**. La regla del
   cartucho de la ficha anterior se retiró: la foto y el largo al pie la sustituyen.
-- **Ficha técnica:** Velocidad, Energía, Retroceso y En el catálogo.
-- **Papel milimétrico:** solo «Energía frente a los otros 29», con su fuente. Las escopetas (.410, 12, 16 y
-  20 GA) no lo llevan.
+- **Ficha técnica:** Velocidad, Energía, Retroceso, En el catálogo y, al pie, la fuente de las cifras.
+- **Papel milimétrico: comparativa de tamaños** (corrección de Saulo en Penpot, 27-sep-2026; sustituye a la regla
+  de energía, que no se entendía). Eje Y en milímetros; el cartucho a tamaño real y un bolígrafo de 15 cm
+  (`imagenes/boligrafo-15cm.webp`, generado sin marca). En escritorio suma «Comparado con otros calibres»: los de
+  su rama (carabina y rifle juntas); el .22 LR, con 9mm Parabellum, .38 Special y .308 Winchester; el .22 WMR, con
+  el .22 LR (`amxComparadosDe`). También en las escopetas.
 - **Hojas: Armas · Legalidad**, abre en Armas («Lo disparan:», 6 enlaces y «Ver las N»); sin armas, no hay hoja.
 - **Móvil:** cabecera → copia → ficha técnica → milimétrico → hojas. **Escritorio:** copia | cabecera y ficha;
-  debajo, hojas | milimétrico; en las escopetas las hojas se quedan en su columna.
+  debajo, hojas | milimétrico, que llena la columna derecha.
 - **Debajo del folder:** Municiones de este calibre (la vitrina de §5.11, compartida en `VitrinaMuniciones`)
-  → Armas que lo usan (polaroids, 6 y «Ver las N en el Arsenal») → «¿Encontraste un dato incorrecto?».
+  → Armas que lo usan (polaroids iguales y alineadas; 6 y «Ver las N en el Arsenal») → «¿Encontraste un dato incorrecto?».
 
 ---
 

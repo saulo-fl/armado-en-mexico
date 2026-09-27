@@ -116,8 +116,8 @@ Treinta cartuchos: qué son, qué tan fuerte pega cada uno y cuáles puede compr
 México. La vitrina los pone **a su tamaño real, de menor a mayor**, y un filtro separa los de uso
 civil, por tipo de arma y Rimfire de percusión central. Cada calibre tiene su ficha, en el mismo
 folder que las armas: sistema, uso típico, velocidad y energía aproximadas, retroceso, su
-clasificación legal, las armas del catálogo que lo usan y las municiones de ese calibre en el
-inventario oficial.
+clasificación legal, su tamaño real junto a un bolígrafo de 15 cm, las armas del catálogo que lo
+usan y las municiones de ese calibre en el inventario oficial.
 
 Sirve para elegir el calibre antes que el arma. Las cifras son divulgativas —de una carga
 comercial corriente— y cada ficha dice de dónde salen.

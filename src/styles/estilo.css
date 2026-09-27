@@ -1757,8 +1757,7 @@
 
 /* LA FICHA DE CALIBRE (27-sep-2026, DESIGN.md §5.12): el mismo folder sin talón
    ni tarjeta de almacén. Desde 1024, copia | cabecera y ficha; debajo, hojas |
-   milimétrico. Las escopetas no llevan milimétrico y sus hojas se quedan en su
-   columna (Saulo). */
+   milimétrico. Las hojas de las escopetas también se quedan en su columna (Saulo). */
 @media (min-width: 1024px) {
   .amx-v2 .amx-carpeta--calibre .amx-carpeta-grid {
     grid-template-areas:
@@ -1776,18 +1775,55 @@
 .amx-v2 .amx-carpeta-uso { margin-top: 6px; font-family: var(--mono); font-size: 13.5px; color: var(--manila-tinta); }
 .amx-v2 .amx-carpeta-alias { margin-top: 4px; font-size: 14px; color: var(--manila-tinta-2); }
 .amx-v2 .amx-carpeta-art { font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; color: var(--oficio-tinta-2); }
-/* La regla de energía, sobre el milimétrico: tintas del papel, que no siguen al
-   tema. Acotado a .amx-milimetrico porque .amx-regla la comparte el filtro de precio. */
-.amx-v2 .amx-milimetrico .amx-regla-titulo,
-.amx-v2 .amx-milimetrico .amx-regla-pies,
-.amx-v2 .amx-milimetrico .amx-regla-fuente { color: var(--milimetrico-tinta-2); }
-.amx-v2 .amx-milimetrico .amx-regla-pies b { color: var(--manila-tinta); }
-.amx-v2 .amx-milimetrico .amx-regla-pista {
-  background: repeating-linear-gradient(90deg, transparent, transparent 24%,
-    var(--milimetrico-linea) 24%, var(--milimetrico-linea) 25%);
+/* LA COMPARATIVA DE TAMAÑOS (Saulo en Penpot, 27-sep-2026): sustituye a la regla de
+   energía. El cartucho y un bolígrafo de 15 cm sobre un eje en milímetros: `--mm` son
+   los píxeles de un milímetro (2 en móvil, 3 en escritorio) y `--pie` el alto fijo de
+   los pies, para que todas las fotos se apoyen en el cero. En escritorio llena la
+   columna derecha. Tintas del milimétrico: el papel no sigue al tema. */
+.amx-v2 .amx-carpeta--calibre .amx-carpeta-historial { align-self: stretch; }
+.amx-v2 .amx-carpeta--calibre .amx-milimetrico { height: 100%; box-sizing: border-box; }
+.amx-v2 .amx-tamanos { --pie: 46px; }
+.amx-v2 .amx-tamanos-titulo {
+  margin-bottom: var(--e3);
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .14em; font-variant: small-caps;
+  color: var(--milimetrico-tinta-2);
 }
-.amx-v2 .amx-milimetrico .amx-regla-cursor { background: var(--sello-restr); }
-.amx-v2 .amx-milimetrico .amx-regla { height: auto; }
+.amx-v2 .amx-tamanos-lienzo { display: flex; align-items: flex-end; gap: 8px; }
+.amx-v2 .amx-tamanos-eje {
+  position: relative; flex: none; width: 28px;
+  height: calc(150 * var(--mm)); margin-bottom: var(--pie);
+  border-right: 1px solid var(--milimetrico-linea);
+  font-family: var(--mono); font-size: 11px; color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-tamanos-eje span { position: absolute; right: 5px; transform: translateY(50%); }
+.amx-v2 .amx-tamanos-fila {
+  flex: 1; min-width: 0; overflow-x: auto;
+  display: flex; align-items: flex-end; gap: 12px;
+  background-image: repeating-linear-gradient(to top, var(--milimetrico-linea) 0 1px, transparent 1px calc(25 * var(--mm)));
+  background-size: 100% calc(150 * var(--mm) + 1px);
+  background-position: left 0 bottom var(--pie);
+  background-repeat: no-repeat;
+}
+.amx-v2 .amx-tamanos-pieza { flex: none; margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 58px; }
+.amx-v2 .amx-tamanos-pieza img { display: block; width: auto; }
+.amx-v2 .amx-tamanos-pieza figcaption {
+  height: var(--pie); max-width: 76px; padding-top: 4px; box-sizing: border-box; text-align: center;
+  font-family: var(--mono); font-size: 11px; line-height: 1.25; color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-tamanos-pieza figcaption b { display: block; font-weight: 700; color: var(--manila-tinta); }
+.amx-v2 .amx-tamanos-otros {
+  flex: none; display: flex; flex-direction: column; gap: var(--e3);
+  padding-left: 12px; border-left: 1px dashed var(--milimetrico-linea);
+}
+.amx-v2 .amx-tamanos-otros-tit {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-tamanos-otros-fila { display: flex; align-items: flex-end; gap: 12px; }
+/* «Armas que lo usan»: todas las copias del mismo ancho y alto, alineadas; el giro de
+   siempre (-1.2°) queda dentro de los ±2° que admite Saulo (27-sep-2026). */
+.amx-v2 .amx-calficha-arma { width: 200px; align-self: stretch; }
+.amx-v2 .amx-calficha-arma .amx-polaroid { height: 100%; box-sizing: border-box; }
 
 .amx-v2 .amx-carpeta-cab h1 {
   margin: 0;
@@ -5794,30 +5830,11 @@
   color: var(--sello-civil);
 }
 
-/* ── Regla comparativa — regla graduada que enseña dónde cae un calibre ── */
+/* ── Resto de la regla comparativa de calibres (retirada el 27-sep-2026): `.amx-regla` y
+   `.amx-regla-cursor` también las usa el filtro de precio (ReglaPrecio), así que se quedan. ── */
 
 .amx-v2 .amx-regla {
   font-variant-numeric: tabular-nums;
-}
-.amx-v2 .amx-regla-titulo {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  font-variant-numeric: tabular-nums;
-  font-variant: small-caps;
-  letter-spacing: 0.14em;
-  color: var(--carton-tinta-2);
-  margin-bottom: 6px;
-}
-.amx-v2 .amx-regla-pista {
-  height: 22px;
-  position: relative;
-  background: repeating-linear-gradient(90deg,
-    transparent,
-    transparent 24%,
-    var(--hair) 24%,
-    var(--hair) 25%
-  );
-  border: 0;
 }
 .amx-v2 .amx-regla-cursor {
   position: absolute;
@@ -5826,25 +5843,6 @@
   width: 2px;
   height: 22px;
   background: var(--acento);
-}
-.amx-v2 .amx-regla-pies {
-  display: flex;
-  justify-content: space-between;
-  font-variant-numeric: tabular-nums;
-  font-size: 12px;
-  color: var(--carton-tinta-2);
-  margin-top: 4px;
-}
-.amx-v2 .amx-regla-pies b {
-  color: var(--tinta);
-}
-.amx-v2 .amx-regla-fuente {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  font-variant: small-caps;
-  letter-spacing: 0.14em;
-  color: var(--carton-tinta-2);
-  margin-top: 4px;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════

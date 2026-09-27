@@ -40,3 +40,19 @@ accesorio y munición (DESIGN.md §5.5, §5.8, §5.11). El índice `/calibres` n
 
 El índice `/calibres`, el GIF de calibres del README (recorre solo el índice), las 7 decisiones legales
 pendientes de la guía y el texto legal de cada calibre (salvo lo que Saulo apruebe aparte).
+
+## Correcciones de Saulo en Penpot (27-sep-2026)
+
+Página «11 Ficha de calibre» del archivo «Wire Frame», hilos #14-#17, y sus respuestas en el chat. Sustituyen a las
+filas «Papel milimétrico» y «Escopetas» de la tabla de arriba.
+
+| Hilo | Corrección |
+|---|---|
+| #14 | La regla de energía se sustituye por una **comparativa de tamaños**: eje Y en mm, el calibre y un bolígrafo de 15 cm. También en las escopetas. |
+| #15 | En escritorio llena la columna derecha y suma «Comparado con otros calibres», solo de su rama; el .22 LR, uno de cada rama. |
+| #16 | Polaroids de «Armas que lo usan» sin jitter: del mismo tamaño y alineadas; giro máximo ±2°. |
+| #17 | Escopetas: el de la ficha, el bolígrafo y luego las demás escopetas. |
+
+Respuestas: bolígrafo generado con IA y aprobado; carabina y rifle son una rama; el .22 LR se compara con 9mm
+Parabellum, .38 Special y .308 Winchester; el .22 WMR, solo con el .22 LR; la regla de energía se retira («no se
+entiende bien»); la fuente de las cifras pasa a un renglón al pie de la ficha técnica.

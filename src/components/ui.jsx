@@ -3592,29 +3592,6 @@ function TiraFiltros({ uid, orden, mas = [], filtros, valores, onCambiar, precio
 }
 window.TiraFiltros = TiraFiltros;
 
-// ──────────────────────────────────────────────────────────────
-// REGLA COMPARATIVA — regla graduada que enseña dónde cae un
-// calibre dentro del rango de todos los demás
-// ──────────────────────────────────────────────────────────────
-function ReglaComparativa({ titulo, valor, min, max, unidad, fuente }) {
-  const pos = window.amxPosicionEnRango(valor, min, max);
-  const etiqueta = `${valor} ${unidad}. En esta guía el mínimo es ${min} y el máximo ${max}.`;
-  return (
-    <div className="amx-regla" style={{ '--pos': pos }}>
-      <div className="amx-regla-titulo">{titulo}</div>
-      <div className="amx-regla-pista" role="img" aria-label={etiqueta}>
-        <span className="amx-regla-cursor" />
-      </div>
-      <div className="amx-regla-pies">
-        <span>{min} {unidad}</span>
-        <b>{valor} {unidad}</b>
-        <span>{max} {unidad}</span>
-      </div>
-      {fuente ? <div className="amx-regla-fuente">{fuente.nombre} · {fuente.fecha}</div> : null}
-    </div>
-  );
-}
-window.ReglaComparativa = ReglaComparativa;
 
 // ══════════════════════════════════════════════════════════════
 // REPORTAR ERROR — enlace público a GitHub para correcciones factuales
