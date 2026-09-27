@@ -91,6 +91,8 @@
   }
   /* ↓ generado por cajas.py · no editar a mano ↓ */
   window.MUNICION_CAJAS = {
+    '2068': 'imagenes/municiones/2068.webp?v=20260926',
+    '2100': 'imagenes/municiones/2100.webp?v=20260926',
     '__243win': 'imagenes/municiones/__243win.webp?v=20260925',
     '__270win': 'imagenes/municiones/__270win.webp?v=20260925',
     'aguila__12ga': 'imagenes/municiones/aguila__12ga.webp?v=20260925',
@@ -138,6 +140,7 @@
     'saga__20ga': 'imagenes/municiones/saga__20ga.webp?v=20260925',
     'sagasporting__12ga': 'imagenes/municiones/sagasporting__12ga.webp?v=20260925',
     'sb__9x18makarov': 'imagenes/municiones/sb__9x18makarov.webp?v=20260925',
+    'sprint__12ga': 'imagenes/municiones/sprint__12ga.webp?v=20260926',
     'sterling__12ga': 'imagenes/municiones/sterling__12ga.webp?v=20260925',
     'trust__12ga': 'imagenes/municiones/trust__12ga.webp?v=20260925',
   };

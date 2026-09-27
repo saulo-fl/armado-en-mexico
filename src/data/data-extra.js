@@ -429,7 +429,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": true,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/22250rem.webp",
     "desc": "De los cartuchos más veloces del catálogo: una bala muy ligera empujada por una carga grande. Diseñado para alimañas a larga distancia, con retroceso moderado para el alcance que da."
   },
   {
@@ -553,7 +553,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": true,
-    "cartucho": "imagenes/cartuchos/20ga.webp",
+    "cartucho": "imagenes/cartuchos/20ga.webp?v=20260926",
     "desc": "Más ligero que el calibre 12, con menor retroceso. Ideal para caza de ave y tiradores de menor complexión."
   },
   {
@@ -579,7 +579,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": true,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/16ga.webp",
     "desc": "El calibre intermedio de las escopetas, entre el 12 y el 20. Tuvo su época dorada en la cacería de ave; hoy es minoritario y su cartucho cuesta más de encontrar que el de 12 o 20."
   },
   {
@@ -653,7 +653,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": true,
-    "cartucho": null,
+    "cartucho": "imagenes/cartuchos/65creedmoor.webp",
     "desc": "El cartucho que popularizó el tiro de precisión moderno. Usa balas largas y esbeltas que conservan la energía y aguantan mejor el viento, con bastante menos retroceso que un magnum de alcance parecido."
   },
   {
@@ -773,7 +773,7 @@ window.CALIBRES = [
       "fecha": "2026-09"
     },
     "enCatalogo": true,
-    "cartucho": "imagenes/cartuchos/300wm.webp",
+    "cartucho": "imagenes/cartuchos/300wm.webp?v=20260926",
     "desc": "Magnum de gran potencia para piezas grandes y tiro extremo. Exige buen dominio por su retroceso pronunciado."
   }
 ];
