@@ -6361,6 +6361,8 @@
    artículos de cada norma), y con el combinador descendiente el `[open]` del padre
    les pondría «−» a los hijos cerrados. */
 .amx-v2 .amx-leg-plegable { margin-top: 12px; }
+/* Sin membrete, el primer desplegable arranca pegado al relleno del papel. */
+.amx-v2 .amx-leg-cuerpo > .amx-leg-plegable:first-child { margin-top: 0; }
 .amx-v2 .amx-leg-plegable > summary {
   list-style: none;
   justify-content: space-between;

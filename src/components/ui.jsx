@@ -1927,10 +1927,8 @@ function FolderPregunta({ pregunta, tema, children }) {
           <span className="amx-faq-q">{pregunta}</span>
         </span>
       </summary>
+      {/* Sin membrete (Saulo, 27-sep-2026): repetía la pestaña del folder. */}
       <div className="amx-oficio">
-        <div className="amx-oficio-membrete" aria-hidden="true">
-          <span>Armado en México</span><span>{tema || 'Respuesta'}</span>
-        </div>
         <p className="amx-oficio-texto">{children}</p>
       </div>
     </details>
