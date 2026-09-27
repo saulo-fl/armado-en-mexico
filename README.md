@@ -46,12 +46,12 @@ Más abajo esperan la **munición y los accesorios compatibles**, en una vitrina
 
 ## Ficha de munición y de accesorio
 
-<p align="center"><img src="docs/capturas/readme/ficha-municion.gif" alt="Recorrido por la ficha de la munición .380 ACP Federal: precio por cartucho, historial, estatus legal, especificaciones y armas de su calibre" width="640"></p>
+<p align="center"><img src="docs/capturas/readme/ficha-municion.gif" alt="Recorrido por la ficha de la munición .380 ACP Federal: precio por cartucho, existencias por armería, ficha técnica, requisito legal, historial de precios y armas compatibles" width="640"></p>
 
 Cada caja de munición del inventario oficial tiene su ficha: marca, calibre, tipo de bala y peso
 en granos, el **precio de referencia por cartucho** con la fuente de la que sale, las existencias
 por armería, su historial de precios y su estatus legal. Desde la ficha se salta a todas las armas
-de ese calibre.
+de ese calibre y, en la vitrina, a las demás municiones del mismo calibre.
 
 <p align="center"><img src="docs/capturas/readme/ficha-accesorio.gif" alt="Recorrido por la ficha de la mira Meprolight MEPRO MOR: precio, existencias, ficha técnica, armas compatibles e historial" width="640"></p>
 
@@ -75,21 +75,22 @@ calibre, mecanismo y origen, las dos de uso civil—, pero fila por fila la dife
 
 ## Apartado legal
 
-<p align="center"><img src="docs/capturas/readme/legalidad.gif" alt="Recorrido por Legalidad: la entrevista, el mapa del trámite y los folders federal, por estado, trámites y fundamento legal" width="640"></p>
+<p align="center"><img src="docs/capturas/readme/legalidad.gif" alt="Recorrido por Legalidad: la entrevista, el mapa del trámite, los folders «Lo que permite la ley», «En tu estado» y «Trámites y costos», y las fuentes al pie" width="640"></p>
 
-Una sola página, con la entrevista arriba, el mapa del trámite y cuatro folders desplegables, y
-**toda afirmación trae su fuente oficial y la fecha en que se consultó**:
+Una sola página en lenguaje llano, con la entrevista arriba, el mapa del trámite y tres folders
+desplegables. **Toda afirmación lleva su nota numerada**, y al pie van las fuentes oficiales con la
+fecha en que se consultaron:
 
-- **Federal**, ordenado por la pregunta que traes: qué arma puedes tener, qué papel llenas, cuánto
-  cuesta.
-- **Estatal**: lo que de verdad cambia por estado. Lo que no está verificado **se declara** en vez
-  de rellenarse: las entidades sin portal de antecedentes penales comprobado lo dicen junto a su
+- **Lo que permite la ley**: qué armas están permitidas, dónde pueden estar y cuándo es delito.
+- **En tu estado**: lo que de verdad cambia por estado. Lo que no está verificado **se declara** en
+  vez de rellenarse: las entidades sin portal de antecedentes penales comprobado lo dicen junto a su
   nombre.
-- **Trámites**: seis trámites ante la Defensa, cada uno con lo que habilita, su checklist y su
-  cuota vigente. El permiso extraordinario ante el Registro Federal de Armas y la compra en la DCAM
-  son **dos trámites que se confunden**, y creer que son el mismo es lo que hace que alguien llegue
-  al mostrador sin expediente.
-- **Documentos**: los formatos y leyes oficiales en PDF.
+- **Trámites y costos**: seis trámites ante la Defensa, cada uno con lo que habilita, su checklist y
+  su cuota vigente. El permiso extraordinario ante el Registro Federal de Armas y la compra en la
+  DCAM son **dos trámites que se confunden**, y creer que son el mismo es lo que hace que alguien
+  llegue al mostrador sin expediente.
+- **Fuentes**: las citadas, en el orden de sus notas, y plegados debajo los demás documentos
+  oficiales de consulta.
 
 Escrita sobre la Ley Federal de Armas de Fuego y Explosivos **reformada el 29 de mayo de 2025**.
 
