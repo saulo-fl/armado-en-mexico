@@ -103,6 +103,21 @@ script: el script solo lo marca en ámbar.
 5. **La GPU no se usa y no se pelea.** `onnxruntime-gpu` de PyPI no trae kernels
    `sm_120` y en la RTX 5070 (Blackwell) el proveedor CUDA **cae a CPU en
    silencio**; el `torch 2.5.1+cu121` tampoco sirve. ~25 s por foto en CPU.
+   **La que sí sirve es la RTX 3090 de APOLO** (26-sep: 0.4 s por foto, 104 armas en
+   ~5 min). Hay que descargar antes el modelo del router de llama.cpp
+   (`POST localhost:8090/models/unload`) y fijar `onnxruntime-gpu<1.23`: el 1.30 pide
+   CUDA 13 y, con las libs de CUDA 12, **cae a CPU en silencio** (rembg solo avisa con un
+   RuntimeWarning). Se corre el MISMO `.py` con una copia de `repo/<wt>` + `Catalogo de
+   Armas/` en la misma estructura, así `REPO`/`PROY` se resuelven solos:
+   ```bash
+   uv run --no-project --python 3.12 --with "rembg[gpu,cli]" --with "onnxruntime-gpu>=1.22,<1.23" \
+     --with pillow --with numpy --with nvidia-cudnn-cu12 --with nvidia-cublas-cu12 \
+     --with nvidia-cuda-runtime-cu12 --with nvidia-cufft-cu12 --with nvidia-curand-cu12 \
+     --with nvidia-cuda-nvrtc-cu12 python -c "import onnxruntime as o,runpy,sys,os; o.preload_dlls(); \
+     sys.argv=sys.argv[1:]; sys.path.insert(0,os.path.dirname(os.path.abspath(sys.argv[0]))); \
+     runpy.run_path(sys.argv[0],run_name='__main__')" fotos.py preparar --solo ...
+   ```
+   Comprueba que `session.inner_session.get_providers()` empiece por `CUDAExecutionProvider`.
 
 ## Al integrar: dos pasos que no son opcionales
 
@@ -258,10 +273,11 @@ la foto, basta `bajar` + `procesar` + `aplicar`:
   propósito**: bornaghi.it solo publica un PDF de catálogo, y las únicas fotos de
   caja que hay en tienda (armeriarossetti.it) llevan **el logo de la tienda
   encima**. Una marca ajena en la ficha no entra.
-- `bullet__12ga` (2), `partizan__300winmag`, `sb__9x18makarov`, `egdelsur__20ga` —
+- `bullet__12ga` (1), `partizan__300winmag`, `sb__9x18makarov`, `egdelsur__20ga` —
   el fabricante no publica foto de caja de ese calibre y no la encontré en tienda.
-  («Bullet» ni siquiera aparece como marca en el comercio español: puede ser un
-  nombre del inventario DCAM, no la marca real de la caja.)
+  («Bullet» es el nombre del DCAM para cartuchos J&G Excopesa: las 8 fichas cuyos
+  modelo, gramaje y perdigón cruzan con el catálogo J&G ya van como J&G Excopesa.
+  Queda la 2055, T-4 Caza con perdigón 9, que J&G no fabrica en T4.)
 - `__243win` y `__270win` (ids 2021 y 2022): el inventario los trae **sin marca**
   (`marca: '—'`). No hay caja posible mientras no se les asigne marca; si algún día
   se identifican, heredan la de su marca sin tocar una sola foto.
@@ -384,6 +400,13 @@ imitando a Chrome (Meprolight, Chiappa, B&H, Beretta); falta decidir si esas fue
   **COLOR COYOTE**». `catalogo()` ya lo devuelve. Es lo único que distingue la foto
   correcta de la de otra variante del mismo modelo, que es un fallo que ninguna
   métrica ve y que en la ficha es un error de dato.
+- **2026-09-26 — las altas nunca se escribían.** El refactor `0729c06` dejó cada `mk()`
+  en una sola línea y `_poner_img()` buscaba `"",` en su propia línea: todas las altas
+  salían «no encuentro el hueco». La tanda del 25-sep dejó ~78 WebP en `public/imagenes/`
+  sin que ninguna ficha los usara (seguían en silueta). Ya acepta los dos formatos. Tras
+  `aplicar`, verifica siempre que ninguna del lote siga con `silueta-`. Además, lo que
+  hay en `fotos-fuente/<id>.*` gana sobre el WebP servido aunque sea más chico (es una
+  elección), y `preparar --min-lado N` deja pasar fotos elegidas a mano bajo 900 px.
 - **Pendiente**: censo de las 61 pistolas con el estándar lateral derecha, y
   adquisición para las que no cumplan. BiRefNet infiere a 1024², así que los
   panorámicos de rifle (1920×500) habrá que recortarlos antes de inferir.

@@ -1196,6 +1196,12 @@ las piezas, en `ui.jsx`, bloque «LA VITRINA DE ACCESORIOS»; la piel, en `estil
 - **Tema oscuro:** lona, madera, letreros y fotos son objetos y no cambian; la silueta de respaldo sigue al tema
   porque se recorta contra el lienzo.
 - **Las fotos** (la pieza sola recortada con alfa) son una entrega aparte, con su propio spec.
+- **Variante de Municiones (24-sep-2026).** `/municiones` comparte toldo,
+  separadores, mueble y mesas con Accesorios, pero no sus letreros amarillos.
+  Cada caja conserva la luz del puesto y lleva debajo, sobre el frente de madera,
+  la misma etiqueta de cartón de la vitrina de una ficha de arma: marca + condición
+  legal, bala/grano y precio por `munUnidadPrecio`. Accesorios y los puestos de Home
+  conservan el letrero con vara.
 
 ### 5.8 La ficha de accesorio — el mismo expediente (15-sep-2026)
 
@@ -1266,6 +1272,20 @@ sus separadores (§5.7).
   guía; elegir cierra el renglón y deja la hoja abierta.
 - **Conteo y «Limpiar»** en un renglón bajo la tira («▸ 227 ARMAS · 1 FILTRO», sin total). «Limpiar» borra filtros,
   precio y búsqueda, y solo sale si hay algo puesto.
+
+### 5.11 La ficha de munición — el mismo expediente (26-sep-2026)
+
+Decidido con Saulo (rama `Opus-5/RED-ficha-municion`). Reglas en `src/lib/cotejo.js`
+(`amxInventarioMunicion`, `amxCompatMunicion`, `amxRequisitoMunicion`), con prueba; pantalla en
+`MunicionFicha` (`screens-municiones.jsx`); primitivas de §5.5.
+
+- **Réplica de la ficha de accesorio (§5.8)**, pestaña «Munición». Título: el nombre; debajo, la
+  descripción. La copia es la foto de la caja; si no carga, la silueta de munición.
+- **El talón dice la unidad:** «Por cartucho · con IVA», o «Por caja» (2046); en móvil, `/ cartucho`.
+- **Legalidad: solo el requisito de este cartucho** de la tabla de la DCAM (escopeta, anular .22,
+  fuego central). Sin requisito: los de seguridad y el .17 HMR, hasta confirmarlo con la DCAM.
+- **Debajo del folder:** Armas compatibles (todas, sin ⇄), Otras municiones del calibre en la vitrina de la ficha de arma
+  (`Repisa` y etiqueta de cartón; 12 a la vista y «Ver los N» dentro del mueble) y Opiniones.
 
 ---
 

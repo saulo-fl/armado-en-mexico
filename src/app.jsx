@@ -563,7 +563,7 @@ function App() {
   } else if (screen === 'municiones') {
     content = <window.MunicionesScreen initialFilter={catalogFilter} onOpenMunicion={openMunicion} onNav={navigate} />;
   } else if (screen === 'municion') {
-    content = <window.MunicionFicha municionId={municionId} onOpenMunicion={openMunicion} onOpenArma={openArma} />;
+    content = <window.MunicionFicha municionId={municionId} onOpenMunicion={openMunicion} onOpenArma={openArma} onNav={navigate} onReportReview={openReviewReport} compareIds={compareIds} />;
   }
 
   return (
