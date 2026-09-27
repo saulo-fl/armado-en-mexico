@@ -394,10 +394,8 @@ function LegalidadHub({ onNav, seccion }) {
                 <span className="amx-leg-folder-desc">{s.desc}</span>
               </span>
             </summary>
+            {/* Sin membrete (Saulo, 27-sep-2026): repetía la pestaña del folder. */}
             <div className="amx-oficio">
-              <div className="amx-oficio-membrete" aria-hidden="true">
-                <span>Armado en México</span><span>{s.tema}</span>
-              </div>
               <div className="amx-oficio-texto">
                 <s.Cuerpo C={C} refs={refs} />
               </div>
