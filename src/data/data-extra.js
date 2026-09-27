@@ -193,7 +193,7 @@ window.CALIBRES = [
     "retrocesoNivel": 3,
     "avail": null,
     "legalArt": "art. 9o fr. I LFAFE",
-    "legalNota": "HUECO MARCADO. Respaldado: supera el tope de .380 del instructivo DEFENSA-02-040, así que no procede para la protección del domicilio. No hay armas .45 en el catálogo ni texto en el repo que fije su clasificación, y no se inventa. Saulo decide el sello.",
+    "legalNota": "Clasificación pendiente. Supera el tope de .380 del instructivo DEFENSA-02-040, así que no procede para la protección del domicilio. No hay armas .45 en el catálogo.",
     "revisar": true,
     "fuente": {
       "nombre": "C.I.P. TDCC (L6) · Winchester USA 230 gr FMJ",
@@ -218,7 +218,7 @@ window.CALIBRES = [
     "retrocesoNivel": 3,
     "avail": "ejercito",
     "legalArt": "art. 9o fr. I LFAFE",
-    "legalNota": "El instructivo del permiso DEFENSA-02-040 lo excluye por su nombre del permiso de protección al domicilio (sin las .38 Súper y .38 Comando). En el catálogo figura como uso exclusivo. REVISAR: es el calibre de competencia más arraigado en México y el art. 10 sí admite pistolas .38 con fines de tiro olímpico o de competencia para socios de club.",
+    "legalNota": "El instructivo del permiso DEFENSA-02-040 lo excluye por su nombre del permiso de protección al domicilio (sin las .38 Súper y .38 Comando). En el catálogo figura como uso exclusivo. Aun así, es el calibre de competencia más arraigado en México y el art. 10 sí admite pistolas .38 con fines de tiro olímpico o de competencia para socios de club.",
     "revisar": true,
     "fuente": {
       "nombre": "Cifras divulgativas del catálogo",
@@ -246,7 +246,7 @@ window.CALIBRES = [
     "retrocesoNivel": 1,
     "avail": "dcam",
     "legalArt": "art. 10 LFAFE",
-    "legalNota": "Fuego anular, pero no es el .22 LR: la DCAM lo excluye de la cuota de 500 cartuchos de los .22 (salvo Magnum, Hornet o TCM) y el texto del art. 9o lo menciona entre los calibres exceptuados en pistola. REVISAR: la guía no debería afirmar que se adquiere como un .22 corriente.",
+    "legalNota": "Fuego anular, pero no es el .22 LR: la DCAM lo excluye de la cuota de 500 cartuchos de los .22 (salvo Magnum, Hornet o TCM) y el texto del art. 9o lo menciona entre los calibres exceptuados en pistola.",
     "revisar": true,
     "fuente": {
       "nombre": "C.I.P. TDCC (L6) · CCI Maxi-Mag 40 gr, en rifle",
@@ -297,7 +297,7 @@ window.CALIBRES = [
     "retrocesoNivel": 5,
     "avail": null,
     "legalArt": "art. 9o fr. II LFAFE",
-    "legalNota": "HUECO MARCADO, no rellenar sin decisión de Saulo. Lo único respaldado: el instructivo del permiso DEFENSA-02-040 lo excluye expresamente del revólver de protección al domicilio (sin el .357 Magnum). No hay en el repo texto que diga a quién SÍ corresponde, y no hay armas en .357 en el catálogo, así que no se puede derivar. Sin decisión, esta ficha no lleva sello.",
+    "legalNota": "Clasificación pendiente. El instructivo del permiso DEFENSA-02-040 lo excluye expresamente del revólver de protección al domicilio. No hay armas en .357 en el catálogo.",
     "revisar": true,
     "fuente": {
       "nombre": "C.I.P. TDCC (L6) · Federal Hydra-Shok 158 gr, cañón 4\"",
@@ -324,7 +324,7 @@ window.CALIBRES = [
     "retrocesoNivel": 1,
     "avail": null,
     "legalArt": "art. 9o fr. I LFAFE",
-    "legalNota": "HUECO MARCADO. Respaldado: supera el tope de .380 del instructivo DEFENSA-02-040. Cartucho moderno de la FN Five-seveN y el P90, asociado a cuerpos armados; sin texto en el repo que lo clasifique, no se afirma más.",
+    "legalNota": "Clasificación pendiente. Supera el tope de .380 del instructivo DEFENSA-02-040. Cartucho moderno de la FN Five-seveN y el P90, asociado a cuerpos armados.",
     "revisar": true,
     "fuente": {
       "nombre": "C.I.P. TDCC (L6) · FN SS197SR 40 gr, pistola Five-seveN",

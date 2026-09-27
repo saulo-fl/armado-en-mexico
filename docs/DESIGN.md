@@ -1287,6 +1287,30 @@ Decidido con Saulo (rama `Opus-5/RED-ficha-municion`). Reglas en `src/lib/cotejo
 - **Debajo del folder:** Armas compatibles (todas, sin ⇄), Otras municiones del calibre en la vitrina de la ficha de arma
   (`Repisa` y etiqueta de cartón; 12 a la vista y «Ver los N» dentro del mueble) y Opiniones.
 
+### 5.12 La ficha de calibre — el mismo expediente (27-sep-2026)
+
+Decidido con Saulo en cinco rondas (rama `Opus-5/RED-ficha-calibre`; spec en
+`docs/superpowers/specs/2026-09-28-ficha-calibre-design.md`). Pantalla en `CalibreScreen` (`screens-3.jsx`);
+cruce de munición en `amxMismoCalibre` (`src/lib/calibres.js`, con prueba); primitivas de §5.5.
+
+- **Réplica de la ficha de munición (§5.11) sin talón ni tarjeta de almacén:** un calibre no tiene precio ni
+  existencias propias, y no se inventan. Pestaña «Calibre» en las 30.
+- **Cabecera:** clase · sistema, el nombre, el uso, «También se le llama…» y la descripción.
+- **La copia** es la foto del cartucho; al pie, su nombre y su largo («25 mm de largo»). Sello legal estampado;
+  los calibres sin clasificación fijada (.357 Magnum, .45 ACP, 5.7x28mm) van **sin sello**. La regla del
+  cartucho de la ficha anterior se retiró: la foto y el largo al pie la sustituyen.
+- **Ficha técnica:** Velocidad, Energía, Retroceso, En el catálogo y, al pie, la fuente de las cifras.
+- **Papel milimétrico: comparativa de tamaños** (corrección de Saulo en Penpot, 27-sep-2026; sustituye a la regla
+  de energía, que no se entendía). Eje Y en milímetros; el cartucho a tamaño real y un bolígrafo de 15 cm
+  (`imagenes/boligrafo-15cm.webp`, generado sin marca). En escritorio suma «Comparado con otros calibres»: hasta 3
+  de su rama, los de más armas en el catálogo (carabina y rifle juntas); el .22 LR, con 9mm Parabellum, .38
+  Special y .308 Winchester; el .22 WMR, con el .22 LR (`amxComparadosDe`). También en las escopetas.
+- **Hojas: Armas · Legalidad**, abre en Armas («Lo disparan:», 6 enlaces y «Ver las N»); sin armas, no hay hoja.
+- **Móvil:** cabecera → copia → ficha técnica → milimétrico → hojas. **Escritorio:** copia | cabecera y ficha;
+  debajo, hojas | milimétrico, que llena la columna derecha.
+- **Debajo del folder:** Municiones de este calibre (la vitrina de §5.11, compartida en `VitrinaMuniciones`)
+  → Armas que lo usan (polaroids iguales y alineadas; 6 y «Ver las N en el Arsenal») → «¿Encontraste un dato incorrecto?».
+
 ---
 
 ## 6. Prohibiciones explícitas
