@@ -216,6 +216,7 @@
   --milimetrico-tinta-2: #4E5B63; /* 6.59:1 */
   /* La hoja de oficio (Legalidad · Usos · Antecedentes) y los anexos. */
   --oficio:         #FBFAF5;
+  --nota-azul:      #0645AD;   /* la nota [n] de Legalidad: azul de enlace, fijo porque va sobre papel (8.2:1 / 6.5:1) */
   --oficio-2:       #E7E1D1;   /* el separador de atrás, un papel más gastado */
   --oficio-tinta-2: #5A5142;   /*  7.47:1 sobre el oficio · 5.98:1 sobre el separador */
   --sello-azul:     #3F4A7A;   /* tinta de sello de goma para lo que NO es legal:
@@ -6413,7 +6414,8 @@
 }
 /* La nota [n], como en Wikipedia: chica, pegada al texto, con área de toque decente. */
 .amx-v2 .amx-leg-nota { font-size: .72em; line-height: 0; margin-left: 1px; }
-.amx-v2 .amx-leg-nota a { color: inherit; text-decoration: underline; padding: 2px 1px; }
+.amx-v2 .amx-leg-nota a { color: var(--nota-azul); text-decoration: none; padding: 2px 1px; }
+.amx-v2 .amx-leg-nota a:focus-visible { outline: 2px solid var(--nota-azul); outline-offset: 1px; }
 /* Las Fuentes del pie van sobre el lienzo, no sobre papel: tinta del tema. */
 .amx-v2 .amx-leg-fuentes { margin-top: var(--e5); color: var(--tinta); }
 .amx-v2 .amx-leg-fuentes h2 {
