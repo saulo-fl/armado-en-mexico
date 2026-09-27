@@ -1133,6 +1133,25 @@
     gap: var(--e3);
     max-width: 100%;
     overflow: hidden;
+    /* 27-sep-2026 (Saulo: «textos que salen del folder»): con `overflow: hidden` el
+       aspect-ratio no cedía ante el contenido y se cortaban hasta 131 px de datos a
+       360. Ahora el folder crece con lo que lleva y la foto va como 9-slice, igual que
+       la ficha (§5.5): la pestaña no se tuerce al crecer. */
+    --manila-escala: .36;
+    aspect-ratio: auto;
+    isolation: isolate;
+    background: none;
+    padding: calc(120px * var(--manila-escala) + var(--e3)) 5% calc(60px * var(--manila-escala) + var(--e3)) 6%;
+  }
+  .amx-v2 .amx-dest-folder::before {
+    content: '';
+    position: absolute; inset: 0; z-index: -1;
+    border-style: solid; border-width: 0;
+    border-image-source: url(imagenes/folder-manila.webp);
+    border-image-slice: 140 60 70 370 fill;
+    border-image-width:
+      calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+      calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
   }
   .amx-v2 .amx-dest-specs { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: 13px; }
   .amx-v2 .amx-dest-specs dt { font-size: 11.5px; }
@@ -1782,7 +1801,7 @@
    columna derecha. Tintas del milimétrico: el papel no sigue al tema. */
 .amx-v2 .amx-carpeta--calibre .amx-carpeta-historial { align-self: stretch; }
 .amx-v2 .amx-carpeta--calibre .amx-milimetrico { height: 100%; box-sizing: border-box; }
-.amx-v2 .amx-tamanos { --pie: 46px; }
+.amx-v2 .amx-tamanos { --pie: 34px; }
 .amx-v2 .amx-tamanos-titulo {
   margin-bottom: var(--e3);
   font-family: var(--mono); font-size: 12.5px; letter-spacing: .14em; font-variant: small-caps;
@@ -1807,10 +1826,12 @@
 .amx-v2 .amx-tamanos-pieza { flex: none; margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 58px; }
 .amx-v2 .amx-tamanos-pieza img { display: block; width: auto; }
 .amx-v2 .amx-tamanos-pieza figcaption {
-  height: var(--pie); max-width: 76px; padding-top: 4px; box-sizing: border-box; text-align: center;
+  height: var(--pie); padding-top: 4px; box-sizing: border-box; text-align: center;
   font-family: var(--mono); font-size: 11px; line-height: 1.25; color: var(--milimetrico-tinta-2);
 }
-.amx-v2 .amx-tamanos-pieza figcaption b { display: block; font-weight: 700; color: var(--manila-tinta); }
+/* El nombre en UNA línea (Saulo, 27-sep-2026: «textos no alineados»): así los mm de
+   todas las piezas quedan en el mismo renglón. */
+.amx-v2 .amx-tamanos-pieza figcaption b { display: block; white-space: nowrap; font-weight: 700; color: var(--manila-tinta); }
 .amx-v2 .amx-tamanos-otros {
   flex: none; display: flex; flex-direction: column; gap: var(--e3);
   padding-left: 12px; border-left: 1px dashed var(--milimetrico-linea);
