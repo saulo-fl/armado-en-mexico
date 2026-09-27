@@ -113,6 +113,36 @@
     return { caso: 'nada', armas: [], texto: '' };
   }
 
+  // ── MUNICIÓN — la ficha del 26-sep-2026 ──────────────────────────────────
+  // Inventario: la misma regla que el accesorio (las existencias DCAM salen del
+  // registro del último inventario DCAM); o = { priceHistory, manuales, autoridad }.
+  const amxInventarioMunicion = amxInventarioAccesorio;
+
+  // Hoja «Compatibilidad»: las armas del Arsenal con su calibre; sin ninguna, el calibre.
+  function amxCompatMunicion(mun, armas) {
+    const lista = armas || [];
+    if (lista.length) return { caso: 'fichas', armas: lista, texto: '' };
+    const cal = texto(mun && mun.calibre).trim();
+    if (cal) return { caso: 'plataforma', armas: [], texto: 'armas calibre ' + cal };
+    return { caso: 'nada', armas: [], texto: '' };
+  }
+
+  // Hoja «Legalidad»: SOLO el requisito de este cartucho, de la tabla de la DCAM
+  // (Saulo, 26-sep-2026). Sin requisito: los de seguridad (no son de venta civil)
+  // y el .17 HMR, anular pero fuera de la tabla, hasta confirmarlo con la DCAM.
+  function amxRequisitoMunicion(mun) {
+    if (!mun || mun.avail === 'seguridad') return null;
+    const cal = texto(mun.calibre).trim();
+    if (/^\.17 HMR$/i.test(cal)) return null;
+    const id = ' y una identificación oficial vigente.';
+    if (mun.tipo === 'escopeta') return 'Para comprarlo, la hoja de manifestación de registro del arma' + id;
+    if (/^\.22 (LR|Short)$/i.test(cal)) {
+      return 'Para comprarlo, la hoja de manifestación de registro del arma, el Volante de Adquisición de ' +
+        'Cartuchos del mes, la credencial vigente del club' + id;
+    }
+    return 'Para comprarlo, el permiso extraordinario de adquisición vigente' + id;
+  }
+
   // ── NÚMEROS COMPARABLES ───────────────────────────────────────────────────
   // Solo un valor único y exacto compite por la ventaja. Formatos medidos sobre
   // las 231 armas del 14-sep-2026: capacidad `N` o `N+N`; peso `Ng` o `N kg`;
@@ -282,6 +312,9 @@
   window.amxInventarioDe = amxInventarioDe;
   window.amxInventarioAccesorio = amxInventarioAccesorio;
   window.amxCompatAccesorio = amxCompatAccesorio;
+  window.amxInventarioMunicion = amxInventarioMunicion;
+  window.amxCompatMunicion = amxCompatMunicion;
+  window.amxRequisitoMunicion = amxRequisitoMunicion;
   window.amxCotejoNum = amxCotejoNum;
   window.amxCotejar = amxCotejar;
   window.amxTiraCotejo = amxTiraCotejo;

@@ -10,12 +10,6 @@
 
 const { useState: useStateMun, useMemo: useMemoMun } = React;
 
-function munFmtDate(f) {
-  if (!f) return '';
-  const d = new Date(String(f).length === 10 ? f + 'T12:00:00' : f);
-  if (isNaN(d)) return String(f);
-  return d.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
-}
 function munCatMeta(cal) {
   return (window.MUNICION_CATEGORIES.categoria.find(c => c.id === cal)) || { label: cal, icon: '◉' };
 }
@@ -328,307 +322,187 @@ window.MunicionesScreen = MunicionesScreen;
 // ════════════════════════════════════════════════════════════════
 // FICHA DE MUNICIÓN — detalle + precio referencia + historial + armas compatibles
 // ════════════════════════════════════════════════════════════════
-function MunicionFicha({ municionId, onOpenMunicion, onOpenArma }) {
-  const P = window.PALETTE;
+function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReportReview, compareIds }) {
   const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
+  // Las opiniones llegan con la hidratación de /api/state, después del primer render.
+  const [, forzar] = useStateMun(0);
+  React.useEffect(() => window.Store && window.Store.onChange(() => forzar((x) => x + 1)), []);
+  // La hoja abierta vuelve a la primera al pasar de una munición a otra.
+  const [tab, setTab] = useStateMun(0);
+  // «Otras municiones»: 12 a la vista y el resto tras «Ver los N» (Saulo, 26-sep-2026).
+  const [todasOtras, setTodasOtras] = useStateMun(false);
+  React.useEffect(() => { setTab(0); setTodasOtras(false); }, [municionId]);
+  const talon = window.useTalonFijo(municionId);
   const mun = window.getMunicionById(municionId);
 
   if (!mun) {
     return (
-      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace', color: P.textMuted }}>
+      <div style={{ padding: '60px 20px', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace', color: window.PALETTE.textMuted }}>
         Munición no encontrada.
       </div>
     );
   }
 
-  const foto = munFoto(mun);
-  const availMeta = window.MUNICION_CATEGORIES.disponibilidad.find(d => d.id === mun.avail);
-  const priceHistory = window.getMunicionPriceHistory(mun.id);
-  const existencias = window.getMunicionExistencias(mun.id);
-  const armasComp = window.getArmasParaMunicion(mun);
-  const manualById = (id) => window.getMunicionManual(id);
-  const currentManual = manualById(mun.priceManualId) ||
-    (priceHistory.length ? manualById(priceHistory[priceHistory.length - 1].manualId) : null) ||
-    window.getMunicionPrimaryManual();
-  const curAut = window.manualAutoridad ? window.manualAutoridad(currentManual) : null;
-  const curSigla = curAut ? curAut.sigla : 'OTCA';
-  const relacionados = (window.MUNICIONES || []).filter(m => m.calibre === mun.calibre && m.id !== mun.id).slice(0, 6);
+  // Un solo corte, el del expediente: 1024px (DESIGN.md §5.5).
+  const ancho = vp.width >= 1024;
+  const PAD = ancho ? 28 : 16;
+  const SEC = ancho ? 52 : 34;
 
-  const [imgError, setImgError] = useStateMun(false);
+  const priceHistory = window.getMunicionPriceHistory(mun.id);
+  const manualById = (id) => window.getMunicionManual(id);
+  const inv = window.amxInventarioMunicion(mun, {
+    priceHistory, manuales: window.MUNICIONES_MANUALES || [], autoridad: window.manualAutoridad,
+  });
+  const fechaPrecio = inv.manual ? window.amxFmtManualDate(inv.manual.fecha) : '';
+  const unidad = munUnidadPrecio(mun);
+  const armas = window.getArmasParaMunicion(mun);
+  const compat = window.amxCompatMunicion(mun, armas);
+  const requisito = window.amxRequisitoMunicion(mun);
+  const relacionados = (window.MUNICIONES || []).filter((m) => m.calibre === mun.calibre && m.id !== mun.id);
+  const opin = window.Store ? window.Store.getOpiniones('municion', mun.id) : { up: 0, down: 0 };
+  const etOpin = window.amxOpinionLabel(opin.up, opin.down);
+  const disp = window.MUNICION_CATEGORIES.disponibilidad.find((d) => d.id === mun.avail);
+  const SELLOS = window.SELLOS_LEGALES || {};
+  const sello = SELLOS[mun.avail] || SELLOS.dcam || { texto: 'CIVIL', tono: 'civil' };
+  const specs = mun.specs || [];
+  const filas = mun.pais && !specs.some(([k]) => k === 'Origen') ? specs.concat([['Origen', mun.pais]]) : specs;
+  // Si la caja no carga, la silueta de munición, nunca la de un arma.
+  const silueta = { forma: 'imagenes/silueta-municion.webp', nombre: 'munición' };
 
   return (
-    <div style={{ paddingBottom: 90, maxWidth: 1100, margin: '0 auto', width: '100%' }}>
-      <div style={{
-        display: vp.isDesktop ? 'grid' : 'block',
-        gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : 'none', gap: 24,
-        padding: `20px ${padX}px 0`,
-      }}>
-        <div style={{
-          position: 'relative', background: `radial-gradient(circle at 50% 45%, ${P.bgElev} 0%, ${P.bg} 100%)`,
-          border: `1px solid ${P.border}`, minHeight: 240, aspectRatio: vp.isDesktop ? 'auto' : '4/3',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-        }}>
-          <window.TacticalCorners size={14} color={P.amber} thickness={2} />
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: `repeating-linear-gradient(0deg, transparent 0 3px, rgba(221,213,196,0.03) 3px 4px)` }} />
-          {foto.src && !imgError
-            ? <img src={foto.src} alt={foto.caja ? `Caja de ${mun.marca} ${mun.calibre}` : mun.calibre}
-                onError={() => setImgError(true)}
-                style={{
-                  maxHeight: foto.caja ? '74%' : '78%', maxWidth: foto.caja ? '84%' : '46%',
-                  objectFit: 'contain', position: 'relative', zIndex: 1,
-                }} />
-            : <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 60, color: P.amber, opacity: 0.85, position: 'relative', zIndex: 1 }}>◉</span>}
-          <span style={{
-            position: 'absolute', top: 10, left: 10,
-            // Badge de calibre en la ficha: fondo P.amber = verde de marca #173A32,
-            // con negro encima daba 1.69:1. Crema: 10.83:1.
-            fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.tintaSobreMarca,
-            background: P.amber, padding: '3px 7px', letterSpacing: '0.08em', fontWeight: 700,
-          }}>{mun.calibre}</span>
-        </div>
+    <div style={{ paddingBottom: 90 }}>
+     <div ref={talon.fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
-        <div style={{ paddingTop: vp.isDesktop ? 4 : 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-            {window.CountryFlag && <window.CountryFlag pais={mun.pais} height={14} />}
-            <span style={{
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
-              letterSpacing: '0.16em', textTransform: 'uppercase',
-            }}>{mun.marca}{mun.pais ? ` · ${mun.pais}` : ''}</span>
-          </div>
-          <h1 style={{
-            fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: vp.isDesktop ? 30 : 25,
-            color: P.text, textTransform: 'uppercase', letterSpacing: '0.02em', lineHeight: 1.08, margin: '0 0 12px',
-          }}>{mun.nombre}</h1>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
-            <window.AvailBadge avail={mun.avail} />
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: P.bgCard, border: `1px solid ${P.border}`, padding: '3px 9px',
-              fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim,
-              letterSpacing: '0.08em', textTransform: 'uppercase',
-            }}><span style={{ color: P.amber }}>◉</span>{mun.calibre}</span>
-          </div>
-          {mun.descripcion &&
-            <p style={{
-              fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 17.5, color: P.textDim,
-              lineHeight: 1.65, margin: '0 0 6px', textWrap: 'pretty',
-            }}>{mun.descripcion}</p>
-          }
-        </div>
-      </div>
+      {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
+      <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
+        <article className="amx-carpeta amx-carpeta--municion" aria-labelledby="ficha-nombre">
+          <span className="amx-carpeta-rotulo">Munición</span>
+          <div className="amx-carpeta-grid">
+            <header className="amx-carpeta-cab">
+              <h1 id="ficha-nombre" className="t-titulo">{mun.nombre}</h1>
+              {mun.descripcion && <p className="amx-carpeta-desc">{mun.descripcion}</p>}
+            </header>
 
-      <div style={{
-        display: vp.isDesktop ? 'grid' : 'block',
-        gridTemplateColumns: vp.isDesktop ? '1fr 1fr' : 'none', gap: 24,
-        padding: `20px ${padX}px 0`,
-      }}>
-        <div>
-          {mun.specs && mun.specs.length > 0 &&
-            <React.Fragment>
-              <window.SectionHeader>Especificaciones</window.SectionHeader>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
-                {mun.specs.map(([k, v], i) => (
-                  <div key={i} style={{
-                    display: 'flex', justifyContent: 'space-between', gap: 12, padding: '9px 12px',
-                    borderBottom: i < mun.specs.length - 1 ? `1px solid ${P.border}` : 'none',
-                    fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
-                  }}>
-                    <span style={{ color: P.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{k}</span>
-                    <span style={{ color: P.text, fontWeight: 600, textAlign: 'right' }}>{v}</span>
-                  </div>
-                ))}
+            <div className="amx-carpeta-foto">
+              <div className="amx-copia">
+                <span className="amx-copia-clip" aria-hidden="true" />
+                <window.ArmaPolaroid arma={mun} pie="procedencia" silueta={silueta} />
+                <span className="amx-copia-sello">
+                  <window.SelloLegal key={mun.id} avail={mun.avail} etiqueta={disp ? disp.label : ''}
+                    className="amx-sello--estampa" />
+                </span>
               </div>
-            </React.Fragment>
-          }
-          {mun.compatibilidad && mun.compatibilidad.length > 0 &&
-            <React.Fragment>
-              <window.SectionHeader>Compatible con</window.SectionHeader>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-                {mun.compatibilidad.map((c, i) => (
-                  <span key={i} style={{
-                    background: P.bgCard, border: `1px solid ${P.border}`,
-                    padding: '6px 10px', fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5,
-                    color: P.text, letterSpacing: '0.06em',
-                  }}>{c}</span>
-                ))}
-              </div>
-            </React.Fragment>
-          }
-        </div>
-
-        <div>
-          <window.SectionHeader>Precio de Referencia</window.SectionHeader>
-          <div style={{ background: P.bgCard, border: `1px solid ${P.amber}`, padding: '14px', marginBottom: 16, position: 'relative' }}>
-            <window.TacticalCorners size={12} color={P.amber} thickness={2} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted,
-                letterSpacing: '0.18em', textTransform: 'uppercase',
-              }}>◆ Precio por {munUnidadPrecio(mun)} (con IVA)</span>
-              {curAut &&
-                <span title={curAut.nombre} style={{
-                  fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-                  letterSpacing: '0.12em', color: '#000', background: curAut.color, padding: '2px 7px', flexShrink: 0,
-                }}>{curAut.sigla}</span>}
             </div>
-            <div style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 23, color: P.amber, letterSpacing: '0.02em' }}>{priceHistory.length ? priceHistory[priceHistory.length - 1].price : mun.priceExact}</div>
-            <window.NotaErrata historial={priceHistory} />
-            {mun.dcamRef &&
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textMuted, marginTop: 4, lineHeight: 1.4 }}>Ref. {curSigla}: {mun.dcamRef}</div>
-            }
-            {currentManual && currentManual.url &&
-              <a href={currentManual.url} target="_blank" rel="noopener" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 9,
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.amber,
-                textDecoration: 'none', border: `1px solid ${P.amber}`, padding: '9px 12px',
-                minHeight: 40, boxSizing: 'border-box', letterSpacing: '0.04em',
-              }}>
-                <span aria-hidden="true">▦</span>
-                Ver inventario fuente · {munFmtDate(currentManual.fecha)}
-                <span aria-hidden="true">↗</span>
-              </a>
-            }
-            {(() => {
-              // Regla: SOLO cuenta el ÚLTIMO inventario de cada sucursal (DCAM y OTCA
-              // por separado). Si el cartucho no aparece en él (pero antes sí estuvo
-              // en la sucursal), se muestra AGOTADO.
-              const autOf = (m) => (m && (m.autoridad || (window.manualAutoridad ? window.manualAutoridad(m).sigla : 'OTCA'))) || 'OTCA';
-              const allMan = (window.MUNICIONES_MANUALES || []).slice().sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
-              const latestOf = (s) => allMan.find((m) => autOf(m) === s) || null;
-              const everIn = (s) => priceHistory.some((h) => autOf(manualById(h.manualId)) === s);
-              const branches = [];
-              ['DCAM', 'OTCA'].forEach((s) => {
-                const man = latestOf(s); if (!man) return;
-                const rec = priceHistory.find((h) => h.manualId === man.id);
-                if (rec && rec.qty != null) branches.push({ sigla: s, qty: rec.qty, manual: man, agotado: false });
-                else if (everIn(s)) branches.push({ sigla: s, qty: null, manual: man, agotado: true });
-              });
-              if (!branches.length) return null;
-              return (
-                <div style={{ marginTop: 11, paddingTop: 11, borderTop: `1px solid ${P.border}` }}>
-                  {branches.map((b, bi) => (
-                    <div key={b.sigla + bi} style={{ marginTop: bi === 0 ? 0 : 9 }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
-                        {b.agotado ? (
-                          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, fontWeight: 700, color: window.CLARO.alerta, letterSpacing: '0.06em' }}>AGOTADO en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
-                        ) : (
-                          <React.Fragment>
-                            <span style={{ fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 19, color: window.CLARO.ok }}>{Number(b.qty).toLocaleString('es-MX')}</span>
-                            <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 14.5, color: P.text, letterSpacing: '0.06em' }}>cartuchos en <b style={{ letterSpacing: '0.08em' }}>{b.sigla}</b></span>
-                          </React.Fragment>
-                        )}
-                      </div>
-                      <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12.5, color: P.textDim, marginTop: 5, lineHeight: 1.55 }}>
-                        {b.agotado ? 'No aparece en el último inventario: ' : 'De acuerdo a '}
-                        {b.manual && b.manual.url ? (
-                          <a href={b.manual.url} target="_blank" rel="noopener" style={{ color: P.amber, textDecoration: 'none', borderBottom: `1px solid ${P.amber}` }}>▦ {b.manual.nombre} ↗</a>
-                        ) : (
-                          <span style={{ color: P.textMuted }}>{b.manual ? b.manual.nombre : 'inventario oficial ' + b.sigla}</span>
-                        )}
-                        {b.manual ? (b.agotado ? ' (' + munFmtDate(b.manual.fecha) + ').' : ', publicado el ' + munFmtDate(b.manual.fecha) + '.') : '.'}
-                      </div>
-                    </div>
-                  ))}
-                  <div style={window.amxProsa({ fontSize: 13, color: P.textMuted, marginTop: 4, lineHeight: 1.5 })}>
-                    ⚠ Dato <b style={{ color: P.textDim }}>histórico</b> por sucursal, no en tiempo real: la disponibilidad actual puede variar.
+
+            <div className="amx-carpeta-ficha">
+              <window.FichaTecnica arma={mun} filas={filas} />
+            </div>
+
+            <div className="amx-carpeta-talon">
+              <window.TalonComprobante talonRef={talon.talonRef} unidad={unidad}
+                precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
+                ultimoConocido={inv.ultimoConocido} historial={priceHistory} />
+              {etOpin.hay &&
+                <p className="amx-copia-opinion">Opiniones: <b>{etOpin.label}</b></p>}
+            </div>
+
+            <div className="amx-carpeta-almacen">
+              <window.TarjetaAlmacen filas={inv.sucursales} referencia={mun.dcamRef}
+                sigla={inv.sigla} nivelPrecio={mun.priceLvl} movil={!ancho} />
+            </div>
+
+            <div className="amx-carpeta-legal amx-separadores">
+              <window.FichaTabs activo={tab} onCambiar={setTab}>
+                {compat.caso !== 'nada' &&
+                  <window.FichaPanel label="Compatibilidad">
+                    <window.HojaCompatibilidad key={mun.id} compat={compat} onOpenArma={onOpenArma} />
+                  </window.FichaPanel>}
+                <window.FichaPanel label="Legalidad">
+                  <div className={'amx-oficio-banda amx-oficio-banda--' + sello.tono}>
+                    <span>Clasificación: {sello.texto}</span>
+                    {disp && <small>{disp.label}</small>}
                   </div>
-                </div>
-              );
-            })()}
-            <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 13, color: P.textDim, marginTop: 9 }}>Nivel: <window.PriceLevel lvl={mun.priceLvl} size={13} /></div>
+                  {disp && <p className="amx-oficio-texto">{disp.desc}</p>}
+                  {requisito && <p className="amx-oficio-texto">{requisito}</p>}
+                  <button type="button" className="amx-oficio-boton" onClick={() => onNav && onNav('legal')}>
+                    § Guía legal completa
+                  </button>
+                </window.FichaPanel>
+              </window.FichaTabs>
+            </div>
+
+            {priceHistory.length > 0 &&
+              <div className="amx-carpeta-historial">
+                <window.HistorialPrecios historial={priceHistory} manualById={manualById} movil={!ancho} />
+              </div>}
           </div>
-
-          {priceHistory.length > 0 &&
-            <React.Fragment>
-              <window.SectionHeader>Historial de precios</window.SectionHeader>
-              <div style={{
-                fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.textDim,
-                letterSpacing: '0.04em', marginTop: -6, marginBottom: 10, lineHeight: 1.4,
-              }}>Según inventarios oficiales DCAM / OTCA</div>
-              <div style={{ background: P.bgCard, border: `1px solid ${P.border}`, boxShadow: window.CLARO.sombra, marginBottom: 16 }}>
-                {priceHistory.slice().reverse().map((h, i) => {
-                  const man = manualById(h.manualId);
-                  const hAut = window.manualAutoridad ? window.manualAutoridad(man) : null;
-                  return (
-                    <div key={i} style={{
-                      padding: '10px 12px',
-                      borderBottom: i < priceHistory.length - 1 ? `1px solid ${P.border}` : 'none',
-                      fontFamily: 'JetBrains Mono, monospace', fontSize: 15.5,
-                      background: i === 0 ? 'rgba(221,213,196,0.06)' : 'transparent',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                          <span style={{ color: i === 0 ? P.amber : P.textMuted, fontSize: 13, letterSpacing: '0.1em', flexShrink: 0 }}>{i === 0 ? '● ACTUAL' : '○'}</span>
-                          <span style={{ color: P.text, fontWeight: i === 0 ? 700 : 500 }}>{h.price}</span>
-                          {hAut &&
-                            <span title={hAut.nombre} style={{
-                              fontFamily: 'JetBrains Mono, monospace', fontSize: 12, fontWeight: 700,
-                              letterSpacing: '0.1em', color: '#000', background: hAut.color, padding: '1px 6px', flexShrink: 0,
-                            }}>{hAut.sigla}</span>}
-                        </div>
-                        <span style={{ color: P.textDim, fontSize: 14.5, flexShrink: 0 }}>{munFmtDate(h.date) || '—'}</span>
-                      </div>
-                      {man &&
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginTop: 6, paddingLeft: 22 }}>
-                          <span style={{ color: P.textMuted, fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{man.nombre}</span>
-                          {man.url &&
-                            <a href={man.url} target="_blank" rel="noopener" style={{
-                              color: P.amber, fontSize: 13, textDecoration: 'none',
-                              borderBottom: `1px solid ${P.amber}`, flexShrink: 0, whiteSpace: 'nowrap',
-                            }}>▦ Ver PDF ↗</a>
-                          }
-                        </div>
-                      }
-                    </div>
-                  );
-                })}
-              </div>
-            </React.Fragment>
-          }
-
-          {availMeta &&
-            <React.Fragment>
-              <window.SectionHeader>Estatus Legal</window.SectionHeader>
-              <div style={{
-                background: P.bgCard, border: `1px solid ${window.amxColorAvail(availMeta.color)}`, boxShadow: window.CLARO.sombra,
-                padding: '12px 14px', marginBottom: 16,
-              }}>
-                <div style={{
-                  fontFamily: 'Archivo, sans-serif', fontWeight: 700, fontSize: 15,
-                  color: window.amxColorAvail(availMeta.color), textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6,
-                }}>{availMeta.label}</div>
-                <div style={{ fontFamily: 'Archivo, system-ui, sans-serif', fontSize: 16, color: P.textDim, lineHeight: 1.6 }}>
-                  {availMeta.desc} Para personal civil, la tabla de requisitos de la DCAM pide: cartucho para escopeta, para protección a domicilio o parcela, la hoja de manifestación de registro del arma; cartucho de fuego anular (.22 LR y .22 Short), para actividades cinegéticas, tiro deportivo y caza, esa hoja, el Volante de Adquisición de Cartuchos del mes y la credencial vigente del club; cartucho de alto poder y de fuego central, el permiso extraordinario de adquisición vigente. En todos los casos, una identificación oficial vigente.
-                </div>
-              </div>
-            </React.Fragment>
-          }
-        </div>
+        </article>
       </div>
 
-      {/* Armas compatibles en inventario */}
-      {armasComp.length > 0 &&
-        <div style={{ marginTop: 6 }}>
-          <window.CarouselSection
-            title={armasComp.length === 1 ? 'Arma compatible' : `Armas compatibles · ${armasComp.length}`}
-            items={armasComp}
-            renderItem={(a) => <window.ArmaCard arma={a} onClick={() => onOpenArma && onOpenArma(a.id)} />}
-          />
-        </div>
-      }
+      {/* ── ARMAS COMPATIBLES — todas, en expediente y sin ⇄ ─────────────── */}
+      {armas.length > 0 &&
+        <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-compatibles">
+          <window.CintaDymo id="ficha-compatibles">Armas compatibles</window.CintaDymo>
+          <div className="amx-hscroll amx-similares" style={{
+            display: ancho ? 'grid' : 'flex',
+            gridTemplateColumns: ancho ? 'repeat(4, 1fr)' : undefined,
+            gap: ancho ? 14 : 10,
+            overflowX: ancho ? 'visible' : 'auto',
+            margin: ancho ? 0 : `0 -${PAD}px`,
+            padding: ancho ? 0 : `0 ${PAD}px 4px`
+          }}>
+            {armas.map((a) =>
+              <div key={a.id} style={{ width: ancho ? 'auto' : 300, flexShrink: 0 }}>
+                <window.ArmaCard arma={a} onClick={() => onOpenArma && onOpenArma(a.id)} />
+              </div>)}
+          </div>
+        </section>}
 
-      {/* Mismo calibre */}
+      {/* ── OTRAS MUNICIONES — la vitrina del mismo calibre, como en la ficha de arma ── */}
       {relacionados.length > 0 &&
-        <div style={{ marginTop: 6 }}>
-          <window.CarouselSection
-            title="Otras municiones"
-            items={relacionados}
-            renderItem={(m) => <MunicionCard mun={m} onClick={() => onOpenMunicion(m.id)} />}
-          />
-        </div>
-      }
+        <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-otras">
+          <window.CintaDymo id="ficha-otras">Otras municiones</window.CintaDymo>
+          <div className="amx-vitrina">
+            <window.Repisa rotulo={'Munición · ' + mun.calibre} items={todasOtras ? relacionados : relacionados.slice(0, 12)} porFila={ancho ? 6 : 0}
+              renderArticulo={(m) => {
+                const foto = munFoto(m);
+                const s = SELLOS[m.avail] || sello;
+                const uni = munUnidadPrecio(m);
+                const precio = m.priceExact ? String(m.priceExact).replace(' MXN', '') : '';
+                return (
+                  <window.RepisaArticulo key={m.id} foto={foto.src} silueta="imagenes/silueta-municion.webp"
+                    ariaLabel={[m.nombre, s.texto, precio && (precio + ' por ' + uni)].filter(Boolean).join(', ')}
+                    onClick={() => onOpenMunicion && onOpenMunicion(m.id)}
+                    etiqueta={<React.Fragment>
+                      <span className="amx-etiqueta-marca"><span>{m.marca}</span><i className={'es-' + s.tono}>{s.texto}</i></span>
+                      <span className="amx-etiqueta-nombre">{[m.bala, m.grano].filter(Boolean).join(' · ')}</span>
+                      {precio && <span className="amx-etiqueta-precio">{precio} <small>/ {uni}</small></span>}
+                    </React.Fragment>} />
+                );
+              }} />
+            {relacionados.length > 12 &&
+              <button type="button" className="amx-registro-mas" aria-expanded={todasOtras}
+                onClick={() => setTodasOtras(!todasOtras)}>
+                Ver los {relacionados.length}
+              </button>}
+          </div>
+        </section>}
 
+      {/* ── LA TARJETA DE COMENTARIOS ─────────────────────────────────── */}
+      <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-opiniones">
+        <window.CintaDymo id="ficha-opiniones">Opiniones</window.CintaDymo>
+        <div className="amx-comentarios-marco">
+          <window.OpinionBlock tipo="municion" entidadId={mun.id} entidadNombre={mun.nombre}
+            nombreTipo="munición" onNav={onNav} onReportReview={onReportReview} />
+        </div>
+      </section>
+     </div>
+
+      {/* Talón fijo (móvil), sin casilla; cede el hueco a la barra de comparación. */}
+      {!ancho && talon.mostrar && (compareIds || []).length === 0 &&
+        <window.TalonComprobante fijo unidad={unidad}
+          precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
+          ultimoConocido={inv.ultimoConocido} historial={priceHistory} />}
       <window.ReportarError tipo="municion" titulo={mun.nombre} ruta={'/municiones/' + (window.amxSlugIndex().slugPorM[mun.id] || '')} />
     </div>
   );

@@ -259,3 +259,50 @@ test('compatibilidad: los cuatro casos de la hoja', () => {
   assert.deepEqual(C({ compat: {}, compatibilidad: [' '] }, []),
     { caso: 'nada', armas: [], texto: '' });
 });
+
+// ── MUNICIÓN (ficha del 26-sep-2026) ─────────────────────────────────────
+test('requisito: escopeta pide la hoja de registro', () => {
+  const r = amxRequisitoMunicion({ tipo: 'escopeta', calibre: '12 GA', avail: 'dcam' });
+  assert.match(r, /hoja de manifestación de registro del arma/);
+  assert.match(r, /identificación oficial vigente\.$/);
+  assert.doesNotMatch(r, /permiso extraordinario|Volante/);
+});
+test('requisito: .22 LR pide hoja, Volante y credencial', () => {
+  const r = amxRequisitoMunicion({ tipo: 'rifle', calibre: '.22 LR', avail: 'dcam' });
+  assert.match(r, /Volante de Adquisición de Cartuchos del mes/);
+  assert.match(r, /credencial vigente del club/);
+});
+test('requisito: fuego central pide permiso extraordinario', () => {
+  const r = amxRequisitoMunicion({ tipo: 'pistola', calibre: '.380 ACP', avail: 'dcam' });
+  assert.match(r, /permiso extraordinario de adquisición vigente/);
+});
+test('requisito: .17 HMR y seguridad no llevan requisito', () => {
+  assert.equal(amxRequisitoMunicion({ tipo: 'rifle', calibre: '.17 HMR', avail: 'dcam' }), null);
+  assert.equal(amxRequisitoMunicion({ tipo: 'rifle', calibre: '7.62x51mm', avail: 'seguridad' }), null);
+  assert.equal(amxRequisitoMunicion(null), null);
+});
+test('compat munición: con fichas, lista; sin fichas, el calibre', () => {
+  const armas = [{ id: 1, nombre: 'Glock 25' }];
+  assert.deepEqual(amxCompatMunicion({ calibre: '.380 ACP' }, armas), { caso: 'fichas', armas, texto: '' });
+  assert.deepEqual(amxCompatMunicion({ calibre: '.17 HMR' }, []),
+    { caso: 'plataforma', armas: [], texto: 'armas calibre .17 HMR' });
+  assert.equal(amxCompatMunicion({}, []).caso, 'nada');
+});
+test('inventario munición: solo OTCA no inventa fila DCAM (2005)', () => {
+  const manuales = [
+    { id: 'man_mun_dcam_2026_09_25', fecha: '2026-09-25', autoridad: 'DCAM' },
+    { id: 'man_mun_otca_2026_06_18', fecha: '2026-06-18', autoridad: 'OTCA' },
+    { id: 'man_otca_2025_09_26', fecha: '2025-09-26', autoridad: 'OTCA' },
+  ];
+  const priceHistory = [
+    { manualId: 'man_otca_2025_09_26', price: '$8.88 MXN', date: '2025-09-26', qty: 17950 },
+    { manualId: 'man_mun_otca_2026_06_18', price: '$7.97 MXN', date: '2026-06-18', qty: 19350 },
+  ];
+  const inv = amxInventarioMunicion(
+    { id: 2005, priceExact: '$7.97 MXN', priceManualId: 'man_mun_otca_2026_06_18' },
+    { priceHistory, manuales, autoridad: AUTORIDAD });
+  assert.equal(inv.precio, '$7.97 MXN');
+  assert.equal(inv.sigla, 'OTCA');
+  assert.equal(inv.ultimoConocido, false);
+  assert.deepEqual(inv.sucursales.map((s) => [s.sigla, s.qty, s.agotado]), [['OTCA', 19350, false]]);
+});

@@ -121,39 +121,6 @@ window.AccesoriosScreen = AccesoriosScreen;
 // pieza lo es. Una categoría sin entrada cae en su rótulo tal cual.
 const ACC_SINGULAR = { cargadores: 'Cargador', opticas: 'Mira', refacciones: 'Refacción', empunaduras: 'Culata' };
 
-// La hoja «Compatibilidad»: los primeros 6 y el resto detrás de «Ver las N»,
-// ahí mismo (Saulo, 15-sep-2026). Vive fuera de AccesorioFicha a propósito: un
-// componente definido dentro de otro remonta su subárbol en cada render.
-// Los nombres son navegación interna: sin «↗», que en el sitio es «abre un PDF».
-const COMPAT_A_LA_VISTA = 6;
-function HojaCompatibilidad({ compat, onOpenArma }) {
-  const [todas, setTodas] = useStateAcc(false);
-  if (compat.caso === 'plataforma') {
-    return <p className="amx-oficio-texto">Sirve a: {compat.texto} (sin ficha en el Arsenal)</p>;
-  }
-  const visibles = todas ? compat.armas : compat.armas.slice(0, COMPAT_A_LA_VISTA);
-  return (
-    <React.Fragment>
-      <p className="amx-oficio-texto">
-        {compat.caso === 'regla' ? `Sirve a: ${compat.texto}. En el Arsenal:` : 'Sirve a:'}
-      </p>
-      <ul className="amx-oficio-lista amx-compat-lista">
-        {visibles.map((a) => (
-          <li key={a.id}>
-            <button type="button" className="amx-enlace-tinta" onClick={() => onOpenArma && onOpenArma(a.id)}>
-              {a.nombre}
-            </button>
-          </li>
-        ))}
-      </ul>
-      {compat.armas.length > COMPAT_A_LA_VISTA &&
-        <button type="button" className="amx-registro-mas" aria-expanded={todas} onClick={() => setTodas(!todas)}>
-          Ver las {compat.armas.length}
-        </button>}
-    </React.Fragment>
-  );
-}
-
 function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportReview }) {
   const vp = window.useViewport();
   // Las opiniones llegan con la hidratación de /api/state, DESPUÉS del primer
@@ -254,7 +221,7 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportRe
               <window.FichaTabs activo={tab} onCambiar={setTab}>
                 {compat.caso !== 'nada' &&
                   <window.FichaPanel label="Compatibilidad">
-                    <HojaCompatibilidad key={acc.id} compat={compat} onOpenArma={onOpenArma} />
+                    <window.HojaCompatibilidad key={acc.id} compat={compat} onOpenArma={onOpenArma} />
                   </window.FichaPanel>}
                 <window.FichaPanel label="Legalidad">
                   <div className={'amx-oficio-banda amx-oficio-banda--' + sello.tono}>
