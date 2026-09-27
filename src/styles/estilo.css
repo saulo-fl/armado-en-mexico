@@ -216,6 +216,7 @@
   --milimetrico-tinta-2: #4E5B63; /* 6.59:1 */
   /* La hoja de oficio (Legalidad · Usos · Antecedentes) y los anexos. */
   --oficio:         #FBFAF5;
+  --nota-azul:      #0645AD;   /* la nota [n] de Legalidad: azul de enlace, fijo porque va sobre papel (8.2:1 / 6.5:1) */
   --oficio-2:       #E7E1D1;   /* el separador de atrás, un papel más gastado */
   --oficio-tinta-2: #5A5142;   /*  7.47:1 sobre el oficio · 5.98:1 sobre el separador */
   --sello-azul:     #3F4A7A;   /* tinta de sello de goma para lo que NO es legal:
@@ -1132,6 +1133,25 @@
     gap: var(--e3);
     max-width: 100%;
     overflow: hidden;
+    /* 27-sep-2026 (Saulo: «textos que salen del folder»): con `overflow: hidden` el
+       aspect-ratio no cedía ante el contenido y se cortaban hasta 131 px de datos a
+       360. Ahora el folder crece con lo que lleva y la foto va como 9-slice, igual que
+       la ficha (§5.5): la pestaña no se tuerce al crecer. */
+    --manila-escala: .36;
+    aspect-ratio: auto;
+    isolation: isolate;
+    background: none;
+    padding: calc(120px * var(--manila-escala) + var(--e3)) 5% calc(60px * var(--manila-escala) + var(--e3)) 6%;
+  }
+  .amx-v2 .amx-dest-folder::before {
+    content: '';
+    position: absolute; inset: 0; z-index: -1;
+    border-style: solid; border-width: 0;
+    border-image-source: url(imagenes/folder-manila.webp);
+    border-image-slice: 140 60 70 370 fill;
+    border-image-width:
+      calc(140px * var(--manila-escala)) calc(60px * var(--manila-escala))
+      calc(70px * var(--manila-escala)) calc(370px * var(--manila-escala));
   }
   .amx-v2 .amx-dest-specs { grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: 13px; }
   .amx-v2 .amx-dest-specs dt { font-size: 11.5px; }
@@ -1753,6 +1773,78 @@
   .amx-v2 .amx-carpeta-legal     { grid-area: legal; }
   .amx-v2 .amx-carpeta-historial { grid-area: historial; }
 }
+
+/* LA FICHA DE CALIBRE (27-sep-2026, DESIGN.md §5.12): el mismo folder sin talón
+   ni tarjeta de almacén. Desde 1024, copia | cabecera y ficha; debajo, hojas |
+   milimétrico. Las hojas de las escopetas también se quedan en su columna (Saulo). */
+@media (min-width: 1024px) {
+  .amx-v2 .amx-carpeta--calibre .amx-carpeta-grid {
+    grid-template-areas:
+      "foto   cab"
+      "foto   ficha"
+      "legal  historial";
+    grid-template-rows: auto 1fr auto;
+  }
+}
+.amx-v2 .amx-carpeta-clase {
+  margin-bottom: 6px;
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-carpeta-uso { margin-top: 6px; font-family: var(--mono); font-size: 13.5px; color: var(--manila-tinta); }
+.amx-v2 .amx-carpeta-alias { margin-top: 4px; font-size: 14px; color: var(--manila-tinta-2); }
+.amx-v2 .amx-carpeta-art { font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; color: var(--oficio-tinta-2); }
+/* LA COMPARATIVA DE TAMAÑOS (Saulo en Penpot, 27-sep-2026): sustituye a la regla de
+   energía. El cartucho y un bolígrafo de 15 cm sobre un eje en milímetros: `--mm` son
+   los píxeles de un milímetro (2 en móvil, 3 en escritorio) y `--pie` el alto fijo de
+   los pies, para que todas las fotos se apoyen en el cero. En escritorio llena la
+   columna derecha. Tintas del milimétrico: el papel no sigue al tema. */
+.amx-v2 .amx-carpeta--calibre .amx-carpeta-historial { align-self: stretch; }
+.amx-v2 .amx-carpeta--calibre .amx-milimetrico { height: 100%; box-sizing: border-box; }
+.amx-v2 .amx-tamanos { --pie: 34px; }
+.amx-v2 .amx-tamanos-titulo {
+  margin-bottom: var(--e3);
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .14em; font-variant: small-caps;
+  color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-tamanos-lienzo { display: flex; align-items: flex-end; gap: 8px; }
+.amx-v2 .amx-tamanos-eje {
+  position: relative; flex: none; width: 28px;
+  height: calc(150 * var(--mm)); margin-bottom: var(--pie);
+  border-right: 1px solid var(--milimetrico-linea);
+  font-family: var(--mono); font-size: 11px; color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-tamanos-eje span { position: absolute; right: 5px; transform: translateY(50%); }
+.amx-v2 .amx-tamanos-fila {
+  flex: 1; min-width: 0; overflow-x: auto;
+  display: flex; align-items: flex-end; gap: 12px;
+  background-image: repeating-linear-gradient(to top, var(--milimetrico-linea) 0 1px, transparent 1px calc(25 * var(--mm)));
+  background-size: 100% calc(150 * var(--mm) + 1px);
+  background-position: left 0 bottom var(--pie);
+  background-repeat: no-repeat;
+}
+.amx-v2 .amx-tamanos-pieza { flex: none; margin: 0; display: flex; flex-direction: column; align-items: center; min-width: 58px; }
+.amx-v2 .amx-tamanos-pieza img { display: block; width: auto; }
+.amx-v2 .amx-tamanos-pieza figcaption {
+  height: var(--pie); padding-top: 4px; box-sizing: border-box; text-align: center;
+  font-family: var(--mono); font-size: 11px; line-height: 1.25; color: var(--milimetrico-tinta-2);
+}
+/* El nombre en UNA línea (Saulo, 27-sep-2026: «textos no alineados»): así los mm de
+   todas las piezas quedan en el mismo renglón. */
+.amx-v2 .amx-tamanos-pieza figcaption b { display: block; white-space: nowrap; font-weight: 700; color: var(--manila-tinta); }
+.amx-v2 .amx-tamanos-otros {
+  flex: none; display: flex; flex-direction: column; gap: var(--e3);
+  padding-left: 12px; border-left: 1px dashed var(--milimetrico-linea);
+}
+.amx-v2 .amx-tamanos-otros-tit {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-tamanos-otros-fila { display: flex; align-items: flex-end; gap: 12px; }
+/* «Armas que lo usan»: todas las copias del mismo ancho y alto, alineadas; el giro de
+   siempre (-1.2°) queda dentro de los ±2° que admite Saulo (27-sep-2026). */
+.amx-v2 .amx-calficha-arma { width: 200px; align-self: stretch; }
+.amx-v2 .amx-calficha-arma .amx-polaroid { height: 100%; box-sizing: border-box; }
 
 .amx-v2 .amx-carpeta-cab h1 {
   margin: 0;
@@ -5759,30 +5851,11 @@
   color: var(--sello-civil);
 }
 
-/* ── Regla comparativa — regla graduada que enseña dónde cae un calibre ── */
+/* ── Resto de la regla comparativa de calibres (retirada el 27-sep-2026): `.amx-regla` y
+   `.amx-regla-cursor` también las usa el filtro de precio (ReglaPrecio), así que se quedan. ── */
 
 .amx-v2 .amx-regla {
   font-variant-numeric: tabular-nums;
-}
-.amx-v2 .amx-regla-titulo {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  font-variant-numeric: tabular-nums;
-  font-variant: small-caps;
-  letter-spacing: 0.14em;
-  color: var(--carton-tinta-2);
-  margin-bottom: 6px;
-}
-.amx-v2 .amx-regla-pista {
-  height: 22px;
-  position: relative;
-  background: repeating-linear-gradient(90deg,
-    transparent,
-    transparent 24%,
-    var(--hair) 24%,
-    var(--hair) 25%
-  );
-  border: 0;
 }
 .amx-v2 .amx-regla-cursor {
   position: absolute;
@@ -5791,59 +5864,6 @@
   width: 2px;
   height: 22px;
   background: var(--acento);
-}
-.amx-v2 .amx-regla-pies {
-  display: flex;
-  justify-content: space-between;
-  font-variant-numeric: tabular-nums;
-  font-size: 12px;
-  color: var(--carton-tinta-2);
-  margin-top: 4px;
-}
-.amx-v2 .amx-regla-pies b {
-  color: var(--tinta);
-}
-.amx-v2 .amx-regla-fuente {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  font-variant: small-caps;
-  letter-spacing: 0.14em;
-  color: var(--carton-tinta-2);
-  margin-top: 4px;
-}
-
-/* ── Regla cartucho — cartucho de pie sobre regla graduada en mm ───────── */
-.amx-v2 .amx-reglacart {
-  --alto-cart: 240px;
-}
-@media (max-width: 1023px) {
-  .amx-v2 .amx-reglacart {
-    --alto-cart: 180px;
-  }
-}
-.amx-v2 .amx-reglacart-pozo {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  height: var(--alto-cart);
-}
-.amx-v2 .amx-reglacart-foto {
-  height: calc(var(--alto-cart) * var(--escala));
-  width: auto;
-  display: block;
-}
-.amx-v2 .amx-reglacart-regla {
-  width: 30px;
-  height: 100%;
-  background: repeating-linear-gradient(to top, var(--hair) 0 1px, transparent 1px var(--paso));
-}
-.amx-v2 .amx-reglacart-pie {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  font-variant-numeric: tabular-nums;
-  color: var(--carton-tinta-2);
-  margin-top: 6px;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -5928,108 +5948,6 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 18px;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   FICHA DE CALIBRE — pantalla /calibres/<slug>
-
-   La ficha es una hoja de papel con sombra, no una caja con borde: en este
-   sistema las cosas se separan por superficie y sombra, nunca por una línea
-   de 1px.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-.amx-v2 .amx-calficha {
-  background: var(--papel);
-  box-shadow: var(--sombra);
-  padding: 20px;
-}
-@media (min-width: 1024px) {
-  .amx-v2 .amx-calficha { padding: 28px; }
-}
-
-.amx-v2 .amx-calficha-cabeza {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.amx-v2 .amx-calficha-clase {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  color: var(--tinta-2);
-}
-
-.amx-v2 .amx-calficha-id {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 28px;
-  color: var(--tinta);
-  margin: 2px 0 4px;
-  line-height: 1.05;
-}
-@media (min-width: 1024px) {
-  .amx-v2 .amx-calficha-id { font-size: 38px; }
-}
-
-.amx-v2 .amx-calficha-uso {
-  font-family: var(--mono);
-  font-size: 14px;
-  color: var(--acento);
-}
-
-.amx-v2 .amx-calficha-alias {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--tinta-2);
-  margin-top: 6px;
-}
-
-.amx-v2 .amx-calficha-sinsello {
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--tinta-2);
-}
-
-.amx-v2 .amx-calficha-specs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 4px 16px;
-  margin: 18px 0;
-}
-
-.amx-v2 .amx-calficha-nota {
-  margin-top: 14px;
-}
-
-.amx-v2 .amx-calficha-legal {
-  background: var(--lienzo);
-  padding: 16px;
-  margin-top: 20px;
-}
-
-.amx-v2 .amx-calficha-legal-tit {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  color: var(--tinta-2);
-  margin-bottom: 8px;
-}
-
-.amx-v2 .amx-calficha-legal-art {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--tinta-2);
-  margin: 10px 0 12px;
-}
-
-.amx-v2 .amx-calficha-armas {
-  margin-top: 24px;
 }
 
 .amx-v2 .amx-calficha-arma {
@@ -6245,6 +6163,9 @@
    dentro; el signo +/− lo pinta .amx-faq-cab::after y tiene que quedarse en la
    primera línea, así que la descripción va en `order` posterior. */
 .amx-v2 .amx-leg-cajon { margin-top: var(--e5); }
+/* Las pestañas de Legalidad son frases («Lo que permite la ley»): en el teléfono la
+   pestaña mide ~93 px, así que van en dos renglones en vez de cortarse. */
+.amx-v2 .amx-leg-folder .amx-faq-tema { white-space: normal; line-height: 1.15; text-align: center; letter-spacing: .04em; }
 .amx-v2 .amx-leg-folder .amx-faq-cab { flex-wrap: wrap; row-gap: 2px; }
 .amx-v2 .amx-leg-folder .amx-faq-cab::after { order: 2; }
 .amx-v2 .amx-leg-folder-desc {
@@ -6265,7 +6186,6 @@
 /* Los papeles que antes iban sobre el lienzo ahora van sobre el oficio: un punto más
    gastados para que se vean como hojas encima, no como el mismo papel. */
 .amx-v2 .amx-leg-folder .amx-leg-ficha,
-.amx-v2 .amx-leg-folder .amx-leg-peldano,
 .amx-v2 .amx-leg-folder .amx-leg-estado { background: var(--oficio-2); }
 /* Lo federal, por pregunta ciudadana: cada pregunta es un desplegable; el rótulo
    corto y la pregunta entera van en el <summary>, uno sobre otro. */
@@ -6283,9 +6203,7 @@
   color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-plegable > summary::after { order: 2; }
-.amx-v2 .amx-leg-plegable > .amx-leg-escalera,
 .amx-v2 .amx-leg-plegable > .amx-leg-ficha,
-.amx-v2 .amx-leg-plegable > .amx-leg-documentos,
 .amx-v2 .amx-leg-plegable > .amx-leg-advertencia { margin-top: 10px; }
 .amx-v2 .amx-leg-tramite .amx-leg-ficha { margin-top: 10px; }
 .amx-v2 .amx-leg-checklist-rotulo {
@@ -6304,14 +6222,7 @@
   color: var(--tinta);
   margin: -8px 0 10px;
 }
-.amx-v2 .amx-leg-peldano-num {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--kardex-imp);
-  margin: 0 0 4px;
-}
+
 /* Trámites: paso, importe con su vigencia y la checklist plegada. */
 .amx-v2 .amx-leg-paso {
   display: flex;
@@ -6367,20 +6278,18 @@
    artículos de cada norma), y con el combinador descendiente el `[open]` del padre
    les pondría «−» a los hijos cerrados. */
 .amx-v2 .amx-leg-plegable { margin-top: 12px; }
-.amx-v2 .amx-leg-plegable > summary,
-.amx-v2 .amx-leg-arts > summary {
+/* Sin membrete, el primer desplegable arranca pegado al relleno del papel. */
+.amx-v2 .amx-leg-cuerpo > .amx-leg-plegable:first-child { margin-top: 0; }
+.amx-v2 .amx-leg-plegable > summary {
   list-style: none;
   justify-content: space-between;
   column-gap: 12px;
   row-gap: 2px;
   flex-wrap: wrap;
 }
-.amx-v2 .amx-leg-plegable > summary::-webkit-details-marker,
-.amx-v2 .amx-leg-arts > summary::-webkit-details-marker { display: none; }
-.amx-v2 .amx-leg-plegable > summary::after,
-.amx-v2 .amx-leg-arts > summary::after { content: '+'; font-size: 18px; line-height: 1; }
-.amx-v2 .amx-leg-plegable[open] > summary::after,
-.amx-v2 .amx-leg-arts[open] > summary::after { content: '−'; }
+.amx-v2 .amx-leg-plegable > summary::-webkit-details-marker { display: none; }
+.amx-v2 .amx-leg-plegable > summary::after { content: '+'; font-size: 18px; line-height: 1; }
+.amx-v2 .amx-leg-plegable[open] > summary::after { content: '−'; }
 .amx-v2 .amx-leg-plegable > summary {
   font-family: var(--mono);
   font-size: 13px;
@@ -6396,6 +6305,62 @@
   outline: 2px solid var(--ficha-tinta);
   outline-offset: 2px;
 }
+/* Lenguaje llano (26-sep-2026): la pregunta sola en el rótulo, en letra de lectura, y
+   su respuesta debajo. Van sobre el oficio: tinta de papelería, igual en los dos temas. */
+.amx-v2 .amx-leg-plegable-sola {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-respuesta {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 6px 0 14px;
+}
+.amx-v2 .amx-leg-oficial {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--oficio-tinta-2);
+  margin: 0 0 8px;
+}
+/* La nota [n], como en Wikipedia: chica, pegada al texto, con área de toque decente. */
+.amx-v2 .amx-leg-nota { font-size: .72em; line-height: 0; margin-left: 1px; }
+.amx-v2 .amx-leg-nota a { color: var(--nota-azul); text-decoration: none; padding: 2px 1px; }
+.amx-v2 .amx-leg-nota a:focus-visible { outline: 2px solid var(--nota-azul); outline-offset: 1px; }
+/* Las Fuentes del pie van sobre el lienzo, no sobre papel: tinta del tema. */
+.amx-v2 .amx-leg-fuentes { margin-top: var(--e5); color: var(--tinta); }
+.amx-v2 .amx-leg-fuentes h2 {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--tinta-2);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 6px;
+}
+.amx-v2 .amx-leg-fuentes ol,
+.amx-v2 .amx-leg-fuentes ul { padding-left: 1.8em; margin: 10px 0 0; }
+.amx-v2 .amx-leg-fuentes li {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+.amx-v2 .amx-leg-fuentes li:focus { outline: 2px solid var(--tinta); outline-offset: 2px; }
+.amx-v2 .amx-leg-fuentes a { color: inherit; margin-left: 6px; }
+.amx-v2 .amx-leg-emisor { color: var(--tinta-2); }
+.amx-v2 .amx-leg-fuentes .amx-leg-plegable > summary { color: var(--tinta-2); }
+.amx-v2 .amx-leg-fuentes .amx-leg-plegable-sola { color: var(--tinta); font-size: 14px; }
+.amx-v2 .amx-leg-fuentes .amx-leg-plegable > summary:focus-visible { outline-color: var(--tinta); }
 /* Estatal: las entidades sin portal verificado se quedan en el selector, en gris. El
    <select> va sobre papel (--ficha), así que la tinta también es de papelería. */
 .amx-v2 .amx-leg-opcion--sin-portal { color: var(--ficha-tinta-2); }
@@ -6429,42 +6394,13 @@
   color: var(--ficha-tinta);
   margin-top: 0;
 }
-.amx-v2 .amx-leg-documentos {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.amx-v2 .amx-leg-documentos li {
-  border-top: 1px solid var(--carton-filo);
-  padding: 12px 0;
-  line-height: 1.5;
-}
-.amx-v2 .amx-leg-documentos strong,
-.amx-v2 .amx-leg-documentos span {
-  display: block;
-}
-.amx-v2 .amx-leg-documentos span,
-.amx-v2 .amx-leg-documentos p {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--ficha-tinta-2);
-}
-.amx-v2 .amx-leg-documentos a {
-  display: inline-block;
-  margin: 6px 16px 0 0;
-  color: var(--ficha-tinta);
-  text-underline-offset: 2px;
-}
-.amx-v2 .amx-leg-documentos a:focus-visible {
-  outline: 2px solid var(--ficha-tinta);
-  outline-offset: 2px;
-}
-.amx-v2 .amx-leg-habilita {
-  font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ficha-tinta);
-}
+
+
+
+
+
+
+
 .amx-v2 .amx-leg-checklist {
   list-style: none;
   padding: 0;
@@ -7249,46 +7185,16 @@
     transform: none;
   }
 }
-
-/* ── FEDERAL, ESTATAL Y PERMISOS ────────────────────────────────────── */
-
-.amx-v2 .amx-leg-escalera {
+/* ── FEDERAL {
   list-style: none;
   padding: 0;
   margin: 18px 0;
 }
-.amx-v2 .amx-leg-peldano {
-  background: var(--oficio);
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  border-left: 3px solid var(--carton-filo);
-  color: var(--ficha-tinta);
-}
-.amx-v2 .amx-leg-peldano h3 {
-  font-family: var(--sans);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--ficha-tinta);
-  margin: 0;
-}
-.amx-v2 .amx-leg-arts {
-  margin-top: 10px;
-}
-.amx-v2 .amx-leg-arts summary {
-  font-family: var(--mono);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--manila-tinta);
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-.amx-v2 .amx-leg-arts summary:focus-visible {
-  outline: 2px solid var(--ficha-tinta);
-  outline-offset: 2px;
-}
+
+
+
+
+
 .amx-v2 .amx-leg-selector {
   display: block;
   margin: 18px 0;
@@ -7351,28 +7257,9 @@
   outline: 2px solid var(--ficha-tinta);
   outline-offset: 2px;
 }
-.amx-v2 .amx-leg-contraste {
-  background: var(--ficha);
-  padding: 16px;
-  margin: 18px 0;
-  border-left: 3px solid var(--sello-civil);
-  color: var(--ficha-tinta);
-}
-.amx-v2 .amx-leg-contraste h2,
-.amx-v2 .amx-leg-contraste h3 {
-  font-family: var(--sans);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ficha-tinta);
-  margin: 0 0 8px;
-}
-.amx-v2 .amx-leg-contraste p {
-  font-family: var(--sans);
-  font-size: 15.5px;
-  line-height: 1.6;
-  color: var(--ficha-tinta);
-  margin: 0;
-}
+
+
+
 .amx-v2 .amx-leg-ficha {
   background: var(--oficio);
   padding: 16px;

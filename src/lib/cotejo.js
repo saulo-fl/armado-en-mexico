@@ -308,6 +308,41 @@
     return 'comparar' + (slugs.length ? '/' + slugs.join('-vs-') : '');
   }
 
+  /**
+   * «Las más nuevas» de la portada (Saulo, 27-sep-2026): armas que nunca habían salido
+   * en un inventario anterior. La base es el PRIMER inventario de cada armería (OTCA
+   * 26-sep-2025, DCAM 3-oct-2025): lo que ya estaba ahí no es nuevo, solo no estaba
+   * registrado. El debut de un arma es su primera aparición en cualquier inventario,
+   * aunque después se agote o salga del catálogo. Un arma sin historial no tiene fecha
+   * y no entra. Devuelve las n de debut más reciente; si debutaron el mismo día, por nombre.
+   * @param {Array} armas — el catálogo ({ id, nombre }).
+   * @param {Object} historial — armaId → [{ manualId, date }] (AMX_PRICE_HISTORY_SEED).
+   * @param {Array} manuales — inventarios ({ id, fecha, autoridad }) (AMX_MANUALES_SEED).
+   * @param {number} n
+   * @returns {Array} armas del catálogo.
+   */
+  function amxMasNuevas(armas, historial, manuales, n) {
+    var primero = {};   // autoridad → inventario más antiguo
+    (manuales || []).forEach(function (m) {
+      var a = m.autoridad || '?';
+      if (!primero[a] || m.fecha < primero[a].fecha) primero[a] = m;
+    });
+    var base = {};
+    Object.keys(primero).forEach(function (a) { base[primero[a].id] = true; });
+    var nuevas = [];
+    (armas || []).forEach(function (arma) {
+      var h = (historial && historial[arma.id]) || [];
+      if (!h.length || h.some(function (r) { return base[r.manualId]; })) return;
+      var debut = h.reduce(function (min, r) { return r.date < min ? r.date : min; }, h[0].date);
+      nuevas.push({ arma: arma, debut: debut });
+    });
+    nuevas.sort(function (x, y) {
+      if (x.debut !== y.debut) return x.debut < y.debut ? 1 : -1;
+      return String(x.arma.nombre).localeCompare(String(y.arma.nombre), 'es');
+    });
+    return nuevas.slice(0, n).map(function (x) { return x.arma; });
+  }
+
   window.amxInventarioArma = amxInventarioArma;
   window.amxInventarioDe = amxInventarioDe;
   window.amxInventarioAccesorio = amxInventarioAccesorio;
@@ -321,4 +356,5 @@
   window.amxBuscarArmas = amxBuscarArmas;
   window.amxParComparar = amxParComparar;
   window.amxRutaComparar = amxRutaComparar;
+  window.amxMasNuevas = amxMasNuevas;
 })();

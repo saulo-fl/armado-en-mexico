@@ -546,7 +546,7 @@
   window.getMunicionExistencias = function (id) { var h = window.getMunicionPriceHistory(id); var last = h[h.length - 1]; return (last && last.qty != null) ? { qty: last.qty, date: last.date, manualId: last.manualId } : null; };
   // Compatibilidad por calibre exacto (determinista, sin invención)
   window.getMunicionesParaArma = function (arma) { if (!arma) return []; return (window.MUNICIONES || []).filter(function (m) { return m.calibre === arma.calibre; }); };
-  window.getArmasParaMunicion = function (mun) { if (!mun) return []; return (window.DB || []).filter(function (a) { return a.calibre === mun.calibre; }); };
+  window.getArmasParaMunicion = function (mun) { if (!mun) return []; return (window.DB || []).filter(function (a) { return window.amxMismoCalibre(a.calibre, mun.calibre); }); };
 
   // Vitrina de municiones: agrupa por calibre y ordena por nombre (marca + bala + grano).
   // Misma firma que accesoriosVitrina para reutilizar el patrón en screens-municiones.jsx.

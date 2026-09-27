@@ -171,37 +171,48 @@
     return resultado;
   }
 
-  /**
-   * Lo federal se lee por la pregunta que trae la persona, no por la jerarquía de las
-   * normas (decisión de Saulo, 22-sep-2026, hilo 3 de Penpot): primero qué puede tener,
-   * luego qué papel llena, luego cuánto cuesta. La jerarquía se ve dentro de cada grupo,
-   * porque el orden de los ids respeta el rango. Una norma que no esté en esta tabla no
-   * se publica en esa pantalla: hoy es el caso del Acuerdo de simplificación de 2026,
-   * del que no hay texto confirmado.
-   */
-  var AMX_PREGUNTAS_FEDERAL = [
-    { id: 'tener', corto: 'Qué puedo tener', pregunta: '¿Qué arma puedo tener y dónde?',
-      normas: ['constitucion', 'lfafe'] },
-    { id: 'papel', corto: 'Qué papel lleno', pregunta: '¿Qué papel lleno y con qué documentos?',
-      normas: ['reglamento', 'acuerdo-medico', 'formato-02040', 'requisitos-dcam'] },
-    { id: 'costo', corto: 'Cuánto cuesta', pregunta: '¿Cuánto cuesta cada trámite?',
-      normas: ['lfd', 'costos-2026'] },
-  ];
+  // Una nota al pie dentro de un texto del corpus: {{id-de-fuente}}.
+  var AMX_CITA = /{{([a-z0-9-]+)}}/g;
 
-  function amxNormasPorPregunta(corpus) {
-    var normas = corpus.normas || [];
-    var grupos = [];
-    for (var i = 0; i < AMX_PREGUNTAS_FEDERAL.length; i++) {
-      var g = AMX_PREGUNTAS_FEDERAL[i];
-      var lista = [];
-      for (var j = 0; j < g.normas.length; j++) {
-        for (var k = 0; k < normas.length; k++) {
-          if (normas[k].id === g.normas[j]) { lista.push(normas[k]); break; }
-        }
-      }
-      if (lista.length) grupos.push({ id: g.id, corto: g.corto, pregunta: g.pregunta, normas: lista });
-    }
-    return grupos;
+  /**
+   * Parte un texto de `explicado` en trozos: { texto } para lo que se lee y { fuente }
+   * para cada nota al pie. La pantalla y el prerender pintan los mismos trozos.
+   */
+  function amxPartirCitas(texto) {
+    var trozos = [];
+    var desde = 0;
+    String(texto || '').replace(AMX_CITA, function (m, id, pos) {
+      if (pos > desde) trozos.push({ texto: texto.slice(desde, pos) });
+      trozos.push({ fuente: id });
+      desde = pos + m.length;
+      return m;
+    });
+    if (desde < String(texto || '').length) trozos.push({ texto: texto.slice(desde) });
+    return trozos;
+  }
+
+  /**
+   * Las fuentes que cita la página, en el orden en que aparecen por primera vez: la
+   * posición + 1 es el número de la nota [n] y el de su entrada en la lista del pie,
+   * como en Wikipedia. Sigue el orden de la página: las respuestas de lo que permite la
+   * ley, la línea de los estados y sus fichas, la entrada de trámites y cada trámite
+   * (su fuente y luego la de cada requisito publicado).
+   */
+  function amxReferencias(corpus) {
+    var fuentes = corpus.fuentes || {};
+    var orden = [];
+    function anota(id) { if (id && fuentes[id] && orden.indexOf(id) < 0) orden.push(id); }
+    function delTexto(t) { amxPartirCitas(t).forEach(function (x) { anota(x.fuente); }); }
+    var ex = corpus.explicado || {};
+    (ex.ley || []).forEach(function (p) { delTexto(p.texto); });
+    delTexto(ex.estado);
+    (corpus.entidades || []).forEach(function (e) { anota(e.ventanillaFuente); anota(e.envioFuente); });
+    delTexto(ex.tramites);
+    (corpus.tramites || []).forEach(function (t) {
+      if (!t.revisar) anota(t.fuente);
+      amxRequisitosDe(corpus, t.id, {}).forEach(function (r) { if (!r.revisar) anota(r.fuente); });
+    });
+    return orden;
   }
 
   /**
@@ -274,7 +285,8 @@
   window.amxRequisitosDe = amxRequisitosDe;
   window.amxLegalEntidad = amxLegalEntidad;
   window.amxLegalFecha = amxLegalFecha;
-  window.amxNormasPorPregunta = amxNormasPorPregunta;
+  window.amxPartirCitas = amxPartirCitas;
+  window.amxReferencias = amxReferencias;
   window.amxVigenciaCuota = amxVigenciaCuota;
   window.amxImporte = amxImporte;
   window.amxRotuloEscenarios = amxRotuloEscenarios;

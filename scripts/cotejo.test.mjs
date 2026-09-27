@@ -306,3 +306,23 @@ test('inventario munición: solo OTCA no inventa fila DCAM (2005)', () => {
   assert.equal(inv.ultimoConocido, false);
   assert.deepEqual(inv.sucursales.map((s) => [s.sigla, s.qty, s.agotado]), [['OTCA', 19350, false]]);
 });
+
+test('amxMasNuevas: la base es el primer inventario de cada armería; las n de debut más reciente, empates por nombre', () => {
+  const manuales = [
+    { id: 'o1', fecha: '2025-09-26', autoridad: 'OTCA' }, { id: 'd1', fecha: '2025-10-03', autoridad: 'DCAM' },
+    { id: 'd2', fecha: '2026-06-16', autoridad: 'DCAM' }, { id: 'o2', fecha: '2026-06-18', autoridad: 'OTCA' },
+    { id: 'd3', fecha: '2026-09-25', autoridad: 'DCAM' },
+  ];
+  const armas = [1, 2, 3, 4, 5, 6, 7].map((id) => ({ id, nombre: 'Arma ' + 'GFEDCBA'[id - 1] }));
+  const historial = {
+    1: [{ manualId: 'o1', date: '2025-09-26' }, { manualId: 'd3', date: '2026-09-25' }],   // base OTCA
+    2: [{ manualId: 'd1', date: '2025-10-03' }],                                           // base DCAM
+    3: [{ manualId: 'd2', date: '2026-06-16' }],                                           // nueva de jun-16
+    4: [{ manualId: 'd3', date: '2026-09-25' }],                                           // nueva de sep-25
+    5: [{ manualId: 'd3', date: '2026-09-25' }, { manualId: 'o2', date: '2026-06-18' }],   // nueva de jun-18, desordenada
+    6: [{ manualId: 'd3', date: '2026-09-25' }],                                           // nueva de sep-25, empata con la 4
+  };                                                                                       // la 7 no tiene historial
+  const ids = (n) => window.amxMasNuevas(armas, historial, manuales, n).map((a) => a.id);
+  assert.deepEqual(ids(10), [6, 4, 5, 3], 'sep-25 (Arma B antes que Arma D), jun-18, jun-16; sin base ni sin historial');
+  assert.deepEqual(ids(2), [6, 4]);
+});

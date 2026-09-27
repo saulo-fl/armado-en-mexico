@@ -16,6 +16,43 @@
   }
 
   /**
+   * ¿Es el mismo calibre? El inventario de munición abrevia «.308 Win» donde la
+   * guía y el catálogo de armas dicen «.308 Winchester» (igual .243 y .270).
+   * ponytail: solo iguala el sufijo « Winchester»; otra abreviatura, aquí y en su prueba.
+   * @param {string} a
+   * @param {string} b
+   * @returns {boolean}
+   */
+  function amxMismoCalibre(a, b) {
+    if (a == null || b == null) return false;
+    var corto = function (s) { return String(s).replace(/ Winchester$/, ' Win'); };
+    return corto(a) === corto(b);
+  }
+
+  /**
+   * Calibres con los que se compara uno en su ficha (Saulo, 27-sep-2026): hasta 3 de
+   * su misma rama —carabina y rifle son una sola, la de armas largas—, los que más
+   * armas tienen en el catálogo; se muestran de menor a mayor. El .22 LR, que es de
+   * pistola, revólver y rifle, se compara con el más común de cada una; el .22 WMR,
+   * solo con el .22 LR.
+   * ponytail: las excepciones son una tabla fija; un calibre anular nuevo va aquí.
+   * @param {Object} cal — calibre de la guía ({ id, clase, mm, armas }).
+   * @param {Array} guia — la guía completa (amxGuiaCalibres: trae `armas`).
+   * @returns {Array} hasta 3 calibres de la guía, sin el propio.
+   */
+  function amxComparadosDe(cal, guia) {
+    var FIJOS = { '.22 LR': ['9mm Parabellum', '.38 Special', '.308 Winchester'], '.22 WMR': ['.22 LR'] };
+    var rama = function (clase) { return clase === 'Carabina' ? 'Rifle' : clase; };
+    var porId = function (a, b) { return a.id < b.id ? -1 : a.id > b.id ? 1 : 0; };
+    var lista = FIJOS[cal.id]
+      ? guia.filter(function (c) { return FIJOS[cal.id].indexOf(c.id) >= 0; })
+      : guia.filter(function (c) { return c.id !== cal.id && rama(c.clase) === rama(cal.clase); })
+        .sort(function (a, b) { return (b.armas || 0) - (a.armas || 0) || porId(a, b); })
+        .slice(0, 3);
+    return lista.slice().sort(function (a, b) { return (a.mm || 0) - (b.mm || 0) || porId(a, b); });
+  }
+
+  /**
    * Enriched y ordena la guía de calibres.
    * A cada calibre le agrega:
    *   - armas: cuántas entradas de db tienen a.calibre === c.id
@@ -164,4 +201,6 @@
   window.amxPosicionEnRango = amxPosicionEnRango;
   window.amxCalibrePorSlug = amxCalibrePorSlug;
   window.amxFiltrarCalibres = amxFiltrarCalibres;
+  window.amxMismoCalibre = amxMismoCalibre;
+  window.amxComparadosDe = amxComparadosDe;
 })();

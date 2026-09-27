@@ -471,8 +471,8 @@ function App() {
     municiones: 'Municiones', municion: 'Ficha',
     compare: 'Comparador', legal: 'Legalidad',
     entrevista: '¿Puedo comprar un arma?',
-    'legal-federal': 'Federal', 'legal-estatal': 'Por estado', 'legal-tramites': 'Trámites',
-    'legal-documentos': 'Documentos legales',
+    'legal-federal': 'Lo que permite la ley', 'legal-estatal': 'En tu estado', 'legal-tramites': 'Trámites y costos',
+    'legal-documentos': 'Fuentes',
     about: 'Acerca', faq: 'FAQ', menu: 'Más', soporte: 'Soporte',
     calibres: 'Calibres', calibre: 'Calibre', campos: 'Campos de tiro', experiencias: 'Experiencias',
     traumaticas: 'Armas traumáticas',
@@ -543,7 +543,7 @@ function App() {
   } else if (screen === 'calibres') {
     content = <window.CalibresScreen onNav={navigate} onAbrirCalibre={openCalibre} />;
   } else if (screen === 'calibre') {
-    content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onNav={navigate} />;
+    content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onOpenMunicion={openMunicion} onNav={navigate} />;
   // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son
   // de relleno (ver data-extra.js). CamposScreen y CursosScreen siguen escritas
   // en screens-3.jsx — para reactivarlas basta con volver a montarlas aqui.

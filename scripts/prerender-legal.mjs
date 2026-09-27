@@ -11,44 +11,59 @@ const esc = (s) => String(s == null ? '' : s)
   .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 const lista = (items) => `<ul>${items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>`;
 
-/**
- * Genera el HTML de una cita de fuente según el molde:
- *   Fuente: <a href="…">TITULO</a> · Consultado el 19-SEP-2026
- * El «↗» y el «(PDF, » solo si fuente.pdf === true.
- */
-function fuenteCita(fuente) {
-  if (!fuente) return '';
-  var titulo = esc(fuente.titulo);
-  var html = 'Fuente: ';
-  if (fuente.url) {
-    var label = titulo;
-    var aria = titulo + ' (se abre en una pestaña nueva)';
-    if (fuente.pdf) {
-      label += ' <span aria-hidden="true">↗</span>';
-      aria = '(PDF, se abre en una pestaña nueva)';
-    }
-    html += '<a href="' + esc(fuente.archivoLocal ? '/' + fuente.archivoLocal : fuente.url) + '" target="_blank" rel="noopener noreferrer" aria-label="' + aria + '">' + label + '</a>';
-    if (fuente.archivoLocal) html += ' · <a href="' + esc(fuente.url) + '" target="_blank" rel="noopener noreferrer">Fuente oficial</a>';
-  } else {
-    html += titulo;
-  }
-  if (fuente.fechaConsulta) {
-    var fecha = '';
-    if (helpers && helpers.amxLegalFecha) {
-      fecha = helpers.amxLegalFecha(fuente.fechaConsulta);
-    }
-    if (!fecha) fecha = esc(fuente.fechaConsulta);
-    html += ' · Consultado el ' + fecha;
-  }
-  return html;
+// La nota [n] de una fuente, enlazada a su entrada en la lista del pie.
+function nota(id, refs) {
+  var n = refs.indexOf(id) + 1;
+  return n ? '<sup class="amx-leg-nota"><a href="#fuente-' + n + '" aria-label="Fuente ' + n + '">[' + n + ']</a></sup>' : '';
+}
+
+// Un texto de `explicado` con sus {{id}} cambiados por notas.
+function citado(texto, refs) {
+  return helpers.amxPartirCitas(texto).map(function(x) {
+    return x.fuente ? nota(x.fuente, refs) : esc(x.texto);
+  }).join('');
+}
+
+function enlacesFuente(f) {
+  var a = function(href, texto) {
+    return ' <a href="' + esc(href) + '" target="_blank" rel="noopener noreferrer" aria-label="' +
+      esc(texto + ': ' + f.titulo + ' (se abre en una pestaña nueva)') + '">' + texto + '</a>';
+  };
+  return (f.archivoLocal ? a('/' + f.archivoLocal, 'PDF en armado.mx') : '') +
+    (f.url ? a(f.url, 'Fuente oficial') : '') +
+    (f.urlAlterna ? a(f.urlAlterna, 'Texto en el DOF') : '');
+}
+
+// Las Fuentes del pie: las citadas, numeradas por orden de aparición, y el resto de
+// documentos de consulta. Lo que no tiene enlace verificado no se publica.
+function fuentesHtml(corpus, refs) {
+  var fuentes = corpus.fuentes || {};
+  var fecha = function(f) { return f.fechaConsulta ? helpers.amxLegalFecha(f.fechaConsulta) : ''; };
+  var citadas = refs.map(function(id, i) {
+    var f = fuentes[id];
+    return '<li id="fuente-' + (i + 1) + '">' + esc(f.titulo) +
+      (f.emisor ? ' · ' + esc(f.emisor) : '') + enlacesFuente(f) +
+      (fecha(f) ? ' · Consultado el ' + fecha(f) : '') + '</li>';
+  }).join('');
+  var otras = Object.keys(fuentes)
+    .filter(function(id) { return refs.indexOf(id) < 0 && fuentes[id].url; })
+    .map(function(id) { return fuentes[id]; })
+    .concat(corpus.documentosComplementarios || []);
+  return '<section class="amx-leg-fuentes" id="leg-documentos" aria-labelledby="leg-fuentes">' +
+    '<h2 id="leg-fuentes">Fuentes</h2><ol>' + citadas + '</ol>' +
+    (otras.length ? '<details class="amx-leg-plegable amx-leg-mas-fuentes"><summary>Más documentos de consulta · ' + otras.length + '</summary><ul>' +
+      otras.map(function(f) {
+        return '<li>' + esc(f.titulo) + (f.emisor ? ' · ' + esc(f.emisor) : '') + enlacesFuente(f) + '</li>';
+      }).join('') + '</ul></details>' : '') +
+    '</section>';
 }
 
 /**
  * Genera el HTML de un requisito individual.
  * `r` es un requisito tal como viene del corpus (sin expandir variantes).
  */
-function requisitoHtml(r, corpus, helpers) {
-  var html = '<span class="amx-leg-req-nombre">' + esc(r.nombre) + '</span>';
+function requisitoHtml(r, corpus, helpers, refs) {
+  var html = '<span class="amx-leg-req-nombre">' + esc(r.nombre) + nota(r.fuente, refs) + '</span>';
   var soloSi = helpers && helpers.amxRotuloEscenarios ? helpers.amxRotuloEscenarios(corpus, r.escenarios) : '';
   if (soloSi) html += ' <span class="amx-leg-solo-si">' + esc(soloSi) + '</span>';
   if (r.original) html += ' <span class="amx-leg-sello">ORIGINAL</span>';
@@ -73,8 +88,6 @@ function requisitoHtml(r, corpus, helpers) {
     html += '</dl>';
   }
 
-  var cita = fuenteCita(r.fuente && corpus.fuentes ? corpus.fuentes[r.fuente] : null);
-  if (cita) html += cita;
   return html;
 }
 
@@ -82,7 +95,7 @@ function requisitoHtml(r, corpus, helpers) {
  * La checklist de un trámite: sus requisitos ordenados y sin los que están en
  * revisión. Devuelve { n, html } o null si no hay ninguno.
  */
-function requisitosLista(corpus, tramite) {
+function requisitosLista(corpus, tramite, refs) {
   if (tramite.revisar) return null;
 
   // La MISMA lista que pinta la pantalla (amxRequisitosDe en modo catálogo), sin los
@@ -92,7 +105,7 @@ function requisitosLista(corpus, tramite) {
 
   if (!filtrados.length) return null;
   var itemsHtml = filtrados.map(function(r) {
-    return '<li>' + requisitoHtml(r, corpus, helpers) + '</li>';
+    return '<li>' + requisitoHtml(r, corpus, helpers, refs) + '</li>';
   }).join('');
   return { n: filtrados.length, html: '<ol class="amx-leg-checklist">' + itemsHtml + '</ol>' };
 }
@@ -104,6 +117,8 @@ let helpers = null;
 
 export function renderLegalHtml(corpus, seccion, h) {
   helpers = h;
+  var refs = h.amxReferencias(corpus);
+  var ex = corpus.explicado;
 
   // Legalidad v2 (22-sep-2026): la entrevista va primero, los huecos del corpus no se
   // publican (son de desarrollo) y Requisitos y Permisos se fundieron en Trámites.
@@ -115,93 +130,40 @@ export function renderLegalHtml(corpus, seccion, h) {
       '<section aria-labelledby="aviso"><h2 id="aviso">' + esc(corpus.avisoTransparencia.titulo) + '</h2>' +
       corpus.avisoTransparencia.parrafos.map(function(p) { return '<p>' + esc(p) + '</p>'; }).join('') +
       '</section>' +
-      '<p class="amx-leg-intro">Los niveles de legalidad de las armas en México se dividen en tres categorías: civil, seguridad privada y exclusivo del ejército. Cada nivel tiene requisitos y restricciones específicas que se detallan en los apartados siguientes.</p>' +
-      '<p class="amx-leg-intro">Además, actividades como la caza, el tiro deportivo y la coleccionista tienen regulaciones propias que se describen en los apartados de trámites y documentación.</p>' +
       '<p>' + esc(corpus.advertencia) + '</p>' +
       '<p>Actualizado el <time datetime="' + esc(corpus.actualizado) + '">' + h.amxLegalFecha(corpus.actualizado) + '</time></p>' +
       '<section aria-labelledby="entrevista"><h2 id="entrevista">¿Puedo comprar un arma?</h2>' +
       '<p>Contesta unas preguntas sobre tu situación —ninguna pide un dato personal— y llévate el dictamen con los documentos que te corresponden. ' +
       '<a href="/legalidad/puedo-comprar">Empezar la entrevista</a></p></section>' +
       '<nav aria-label="Secciones"><ul>' +
-      '<li><a href="/legalidad/federal">¿Qué arma puedo tener y portar?</a>: qué arma puedes tener, qué papel llenas y cuánto cuesta; la Constitución, la ley reformada en 2025, el reglamento, los formatos y las cuotas.</li>' +
-      '<li><a href="/legalidad/estatal">¿Dónde hago los papeles en mi estado?</a>: dónde sacas la constancia de antecedentes penales, en qué armería compras y si puedes mandar la solicitud por correo.</li>' +
-      '<li><a href="/legalidad/tramites">¿Cómo saco mi permiso, paso a paso?</a>: seis trámites ante la Defensa, con lo que habilita cada uno, su checklist y su cuota vigente.</li>' +
-      '<li><a href="/legalidad/documentos">¿Dónde están la ley y los formatos?</a>: textos oficiales y PDF de consulta alojados en Armado en México.</li>' +
+      '<li><a href="/legalidad/federal">¿Qué arma puedo tener y puedo sacarla de casa?</a>: qué armas están permitidas, dónde pueden estar y cuándo es delito.</li>' +
+      '<li><a href="/legalidad/estatal">¿Qué cambia según el estado donde vivo?</a>: dónde sacas tu constancia de antecedentes y a qué tienda te toca ir.</li>' +
+      '<li><a href="/legalidad/tramites">¿Qué trámites hago y cuánto cuestan?</a>: los seis trámites ante la Defensa, con su lista de documentos.</li>' +
+      '<li><a href="/legalidad/documentos">Fuentes</a>: las leyes, el reglamento y los formatos de donde sale cada respuesta, con sus PDF.</li>' +
       '</ul></nav>' +
       '<nav aria-label="Más"><a href="/preguntas">Preguntas frecuentes</a> · <a href="/soporte">Soporte</a></nav>' +
       '</article>';
   }
 
   if (seccion === 'documentos') {
-    var fuentes = Object.values(corpus.fuentes || {});
-    var locales = fuentes.filter(function(f) { return f.archivoLocal; })
-      .concat(corpus.documentosComplementarios || []);
-    var web = fuentes.filter(function(f) { return f.url && !f.archivoLocal; });
-    var pendientes = fuentes.filter(function(f) { return !f.url; });
-    function grupo(titulo, items) {
-      return '<section class="amx-leg-hoja"><h2>' + esc(titulo) + '</h2><ul class="amx-leg-documentos">' +
-        items.map(function(f) {
-          return '<li><strong>' + esc(f.titulo) + '</strong>' +
-            (f.emisor ? '<span>' + esc(f.emisor) + '</span>' : '') +
-            (f.archivoLocal ? '<a href="/' + esc(f.archivoLocal) + '">Abrir PDF en armado.mx</a>' : '') +
-            (f.url ? '<a href="' + esc(f.url) + '">Fuente oficial</a>' : '') +
-            (f.urlAlterna ? '<a href="' + esc(f.urlAlterna) + '">Texto oficial en DOF</a>' : '') +
-            (!f.url ? '<span>Texto oficial pendiente de verificar</span>' : '') +
-            (f.nota && !f.revisar ? '<p>' + esc(f.nota) + '</p>' : '') + '</li>';
-        }).join('') + '</ul></section>';
-    }
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Documentos</nav>' +
-      '<h1>Documentos legales</h1>' +
-      '<p class="amx-leg-intro">Consulta los textos oficiales que sustentan esta guía. Las copias PDF se alojan aquí para facilitar su lectura; el enlace a la autoridad permite comprobar la versión vigente.</p>' +
-      grupo('PDF disponibles en armado.mx', locales) +
-      grupo('Fuentes oficiales en páginas web o PDF externo', web) +
-      grupo('Textos pendientes de verificar', pendientes) +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Fuentes</nav>' +
+      '<h1>Fuentes de la sección de Legalidad</h1>' +
+      '<p class="amx-leg-intro">Las leyes, el reglamento y los formatos de donde sale cada respuesta de <a href="/legalidad">Legalidad</a>, con enlace a la autoridad y copia en PDF cuando la hay.</p>' +
+      fuentesHtml(corpus, refs).replace('<h2 id="leg-fuentes">Fuentes</h2>', '<h2 id="leg-fuentes">Fuentes citadas</h2>') +
       '</article>';
   }
 
   if (seccion === 'federal') {
-    // Por pregunta ciudadana (hilo 3): la tabla vive en lib/legal.js, junto a la pantalla.
-    // Los artículos van como resumen + cita (hilo 4); el hueco de una norma en revisión
-    // no se publica (hilo 2): solo su título y su nota de vigencia.
-    var grupos = h.amxNormasPorPregunta(corpus);
-    var num = 0;
-    var gruposHtml = grupos.map(function(g) {
-      var peldanos = g.normas.map(function(n) {
-        num += 1;
-        var arts = (n.articulos || []).map(function(artId) {
-          var art = (corpus.articulos || []).find(function(a) { return a.id === artId; });
-          if (!art || art.revisar) return '';
-          return '<div><strong>' + esc(art.rotulo) + '</strong>' +
-            (art.titulo ? '<p>' + esc(art.titulo) + '</p>' : '') +
-            (art.resumen ? '<p>' + esc(art.resumen) + '</p>' : '') +
-            fuenteCita(corpus.fuentes ? corpus.fuentes[art.fuente] : null) +
-            '</div>';
-        }).filter(Boolean);
-        return '<li class="amx-leg-peldano">' +
-          '<p class="amx-leg-peldano-num">' + String(num).padStart(2, '0') + ' · ' + esc(n.rotulo) + '</p>' +
-          '<h3>' + esc(n.titulo || n.rotulo) + '</h3>' +
-          (!n.revisar && n.resumen ? '<p class="amx-leg-habilita">' + esc(n.resumen) + '</p>' : '') +
-          (!n.revisar && n.notaVigencia ? '<p class="amx-leg-vigencia">' + esc(n.notaVigencia) + '</p>' : '') +
-          (n.revisar ? '<p class="amx-leg-vigencia">En verificación: su contenido se publica cuando se confirme contra la fuente oficial.</p>' : '') +
-          (n.fuente ? fuenteCita(corpus.fuentes ? corpus.fuentes[n.fuente] : null) : '') +
-          (arts.length ? '<details class="amx-leg-arts"><summary>' + (arts.length === 1 ? '1 artículo' : arts.length + ' artículos') + ' · resumen y cita</summary><div>' + arts.join('') + '</div></details>' : '') +
-          '</li>';
-      }).join('');
-      return '<section class="amx-leg-grupo" aria-labelledby="leg-grupo-' + esc(g.id) + '">' +
-        '<h2 id="leg-grupo-' + esc(g.id) + '">' + esc(g.corto) + '</h2>' +
-        '<p class="amx-leg-pregunta">' + esc(g.pregunta) + '</p>' +
-        '<ol class="amx-leg-escalera">' + peldanos + '</ol></section>';
-    }).join('');
-
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › ¿Qué arma puedo tener y portar?</nav>' +
-      '<h1>¿Qué arma puedo tener y portar?</h1>' +
-      '<p class="amx-leg-intro">Las armas de fuego en México son competencia exclusiva del ' +
-      'Congreso de la Unión: ningún estado ni municipio puede crear permisos, licencias ni ' +
-      'registros de armas de fuego. Las normas van ordenadas por la pregunta que traes; la ' +
-      'jerarquía —de la Constitución al formato de ventanilla— se ve dentro de cada grupo.</p>' +
-      gruposHtml +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Lo que permite la ley</nav>' +
+      '<h1>¿Qué arma puedo tener y puedo sacarla de casa?</h1>' +
+      ex.ley.map(function(p) {
+        return '<section class="amx-leg-grupo" aria-labelledby="leg-ley-' + esc(p.id) + '">' +
+          '<h2 id="leg-ley-' + esc(p.id) + '">' + esc(p.pregunta) + '</h2>' +
+          '<p class="amx-leg-respuesta">' + citado(p.texto, refs) + '</p></section>';
+      }).join('') +
+      fuentesHtml(corpus, refs) +
       '</article>';
   }
 
@@ -225,10 +187,10 @@ export function renderLegalHtml(corpus, seccion, h) {
         '<dt>Constancia de antecedentes penales</dt><dd>' + antHtml + '</dd>' +
         '<dt>Dónde compras</dt><dd>' +
         (e.ventanilla === 'otca' ? 'OTCA, en Monterrey' : 'DCAM, en Naucalpan') +
-        ', ' + esc(e.ventanillaFundamento) + '</dd>' +
+        ', ' + esc(e.ventanillaFundamento) + nota(e.ventanillaFuente, refs) + '</dd>' +
         '<dt>Envío por correo certificado</dt><dd>' +
         (e.envioPorCorreo ? 'Sí se puede' : 'No se puede desde aquí') +
-        ', ' + esc(e.envioFundamento) +
+        ', ' + esc(e.envioFundamento) + nota(e.envioFuente, refs) +
         (e.envioNota ? '<p>' + esc(e.envioNota) + '</p>' : '') + '</dd>' +
         '<dt>Traslado de traumáticas</dt><dd>' +
         (e.traumaticas && !e.traumaticas.revisar
@@ -239,10 +201,10 @@ export function renderLegalHtml(corpus, seccion, h) {
     }).join('');
 
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › ¿Dónde hago los papeles en mi estado?</nav>' +
-      '<h1>¿Dónde hago los papeles en mi estado?</h1>' +
-      '<p class="amx-leg-advertencia">' + esc(corpus.noHayEstatal) + '</p>' +
-      fichas +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › En tu estado</nav>' +
+      '<h1>¿Qué cambia según el estado donde vivo?</h1>' +
+      '<p class="amx-leg-intro">' + citado(ex.estado, refs) + '</p>' +
+      fichas + fuentesHtml(corpus, refs) +
       '</article>';
   }
 
@@ -252,7 +214,7 @@ export function renderLegalHtml(corpus, seccion, h) {
       var filas = '';
       if (t.dependencia) filas += '<dt>Dependencia</dt><dd>' + esc(t.dependencia) + '</dd>';
       if (t.sede) filas += '<dt>Sede</dt><dd>' + esc(t.sede) + '</dd>';
-      if (t.habilita) filas += '<dt>Qué habilita</dt><dd>' + esc(t.habilita) + '</dd>';
+      if (t.habilita) filas += '<dt>Qué habilita</dt><dd>' + esc(t.habilita) + (!t.revisar ? nota(t.fuente, refs) : '') + '</dd>';
       if (t.noHabilita) filas += '<dt>Qué NO habilita</dt><dd class="amx-leg-no-habilita">' + esc(t.noHabilita) + '</dd>';
       var costo = '';
       if (t.costo) {
@@ -264,39 +226,25 @@ export function renderLegalHtml(corpus, seccion, h) {
       }
       // La checklist va plegada en un <details>, la del primer paso abierta: es lo
       // mismo que hace la pantalla, y un bot lee el contenido esté abierto o no.
-      var reqs = requisitosLista(corpus, t);
+      var reqs = requisitosLista(corpus, t, refs);
       var checklist = reqs
         ? '<details class="amx-leg-plegable"' + (i === 0 ? ' open' : '') + '><summary>' + reqs.n + ' requisitos · checklist</summary>' + reqs.html + '</details>'
         : '';
       return '<article class="amx-leg-ficha">' +
-        '<p class="amx-leg-paso"><span class="amx-leg-homoclave">' + esc(t.homoclave || 'Compra en la DCAM') + '</span></p>' +
-        '<h2>' + esc(t.nombre) + '</h2>' +
+        '<p class="amx-leg-paso"><span class="amx-leg-homoclave">' + esc(t.homoclave || 'DCAM') + '</span></p>' +
+        '<h2>' + esc((t.llano || t.nombre) + (t.costo && helpers.amxImporte ? ' · ' + helpers.amxImporte(t.costo.monto) : '')) + '</h2>' +
+        '<p class="amx-leg-oficial">Nombre oficial: ' + esc(t.nombre) + '</p>' +
         (t.notaHomoclave ? '<p class="amx-leg-vigencia">' + esc(t.notaHomoclave) + '</p>' : '') +
         '<dl>' + filas + '</dl>' + costo + checklist +
-        (!t.revisar && t.fuente ? fuenteCita(corpus.fuentes ? corpus.fuentes[t.fuente] : null) : '') +
         '</article>';
     }).join('');
 
     return '<article class="amx-leg amx-v2">' +
-      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Trámites</nav>' +
-      '<h1>Trámites</h1>' +
-      '<p class="amx-leg-intro">Seis trámites ante la Secretaría de la Defensa Nacional: el permiso extraordinario ' +
-      'de adquisición, la compra en la DCAM y el registro del arma; y aparte la licencia de portación, el permiso ' +
-      'de colección y el de transporte. Cada uno con lo que habilita, su checklist de requisitos y su cuota vigente. ' +
-      'El permiso y la compra son dos trámites distintos: creer que son el mismo papeleo es lo que hace que ' +
-      'alguien llegue al mostrador sin expediente.</p>' +
+      '<nav aria-label="Ruta"><a href="/">Inicio</a> › <a href="/legalidad">Legalidad</a> › Trámites y costos</nav>' +
+      '<h1>¿Qué trámites hago y cuánto cuestan?</h1>' +
+      '<p class="amx-leg-intro">' + citado(ex.tramites, refs) + '</p>' +
       '<p class="amx-leg-advertencia">' + esc(corpus.advertencia) + '</p>' +
-      '<section class="amx-leg-contraste">' +
-      '<h2>Posesión no es portación</h2>' +
-      '<p>Tener un permiso de adquisición te autoriza a comprar el arma y a tenerla en el ' +
-      'domicilio que declaraste ante la Secretaría de la Defensa Nacional. Pero sacar esa arma ' +
-      'de tu casa para llevarla en la vía pública es otra cosa completamente distinta: eso se ' +
-      'llama portación, y requiere una licencia individual de portación (DEFENSA-02-025), que ' +
-      'es un trámite separado, más costoso, y cuya concesión no está garantizada aunque cumplas ' +
-      'todos los requisitos. Esta es la confusión más frecuente entre las personas que tramitan ' +
-      'su primer permiso.</p>' +
-      '</section>' +
-      fichasTramite +
+      fichasTramite + fuentesHtml(corpus, refs) +
       '</article>';
   }
 

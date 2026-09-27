@@ -322,6 +322,43 @@ window.MunicionesScreen = MunicionesScreen;
 // ════════════════════════════════════════════════════════════════
 // FICHA DE MUNICIÓN — detalle + precio referencia + historial + armas compatibles
 // ════════════════════════════════════════════════════════════════
+// ── LA VITRINA DE MUNICIÓN ────────────────────────────────────────────────
+// Repisa con etiquetas de cartón: 12 a la vista y el resto tras «Ver los N»
+// (Saulo, 26-sep-2026). La usan «Otras municiones» de esta ficha y «Municiones
+// de este calibre» de la ficha de calibre (27-sep-2026). Quien la usa le pone
+// `key` con su id, para que «Ver los N» se cierre al cambiar de ficha.
+function VitrinaMuniciones({ items, rotulo, ancho, onOpenMunicion }) {
+  const [todas, setTodas] = useStateMun(false);
+  const SELLOS = window.SELLOS_LEGALES || {};
+  return (
+    <div className="amx-vitrina">
+      <window.Repisa rotulo={rotulo} items={todas ? items : items.slice(0, 12)} porFila={ancho ? 6 : 0}
+        renderArticulo={(m) => {
+          const foto = munFoto(m);
+          const s = SELLOS[m.avail] || SELLOS.dcam;
+          const uni = munUnidadPrecio(m);
+          const precio = m.priceExact ? String(m.priceExact).replace(' MXN', '') : '';
+          return (
+            <window.RepisaArticulo key={m.id} foto={foto.src} silueta="imagenes/silueta-municion.webp"
+              ariaLabel={[m.nombre, s.texto, precio && (precio + ' por ' + uni)].filter(Boolean).join(', ')}
+              onClick={() => onOpenMunicion && onOpenMunicion(m.id)}
+              etiqueta={<React.Fragment>
+                <span className="amx-etiqueta-marca"><span>{m.marca}</span><i className={'es-' + s.tono}>{s.texto}</i></span>
+                <span className="amx-etiqueta-nombre">{[m.bala, m.grano].filter(Boolean).join(' · ')}</span>
+                {precio && <span className="amx-etiqueta-precio">{precio} <small>/ {uni}</small></span>}
+              </React.Fragment>} />
+          );
+        }} />
+      {items.length > 12 &&
+        <button type="button" className="amx-registro-mas" aria-expanded={todas}
+          onClick={() => setTodas(!todas)}>
+          Ver los {items.length}
+        </button>}
+    </div>
+  );
+}
+window.VitrinaMuniciones = VitrinaMuniciones;
+
 function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReportReview, compareIds }) {
   const vp = window.useViewport();
   // Las opiniones llegan con la hidratación de /api/state, después del primer render.
@@ -329,9 +366,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
   React.useEffect(() => window.Store && window.Store.onChange(() => forzar((x) => x + 1)), []);
   // La hoja abierta vuelve a la primera al pasar de una munición a otra.
   const [tab, setTab] = useStateMun(0);
-  // «Otras municiones»: 12 a la vista y el resto tras «Ver los N» (Saulo, 26-sep-2026).
-  const [todasOtras, setTodasOtras] = useStateMun(false);
-  React.useEffect(() => { setTab(0); setTodasOtras(false); }, [municionId]);
+  React.useEffect(() => { setTab(0); }, [municionId]);
   const talon = window.useTalonFijo(municionId);
   const mun = window.getMunicionById(municionId);
 
@@ -462,30 +497,8 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
       {relacionados.length > 0 &&
         <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-otras">
           <window.CintaDymo id="ficha-otras">Otras municiones</window.CintaDymo>
-          <div className="amx-vitrina">
-            <window.Repisa rotulo={'Munición · ' + mun.calibre} items={todasOtras ? relacionados : relacionados.slice(0, 12)} porFila={ancho ? 6 : 0}
-              renderArticulo={(m) => {
-                const foto = munFoto(m);
-                const s = SELLOS[m.avail] || sello;
-                const uni = munUnidadPrecio(m);
-                const precio = m.priceExact ? String(m.priceExact).replace(' MXN', '') : '';
-                return (
-                  <window.RepisaArticulo key={m.id} foto={foto.src} silueta="imagenes/silueta-municion.webp"
-                    ariaLabel={[m.nombre, s.texto, precio && (precio + ' por ' + uni)].filter(Boolean).join(', ')}
-                    onClick={() => onOpenMunicion && onOpenMunicion(m.id)}
-                    etiqueta={<React.Fragment>
-                      <span className="amx-etiqueta-marca"><span>{m.marca}</span><i className={'es-' + s.tono}>{s.texto}</i></span>
-                      <span className="amx-etiqueta-nombre">{[m.bala, m.grano].filter(Boolean).join(' · ')}</span>
-                      {precio && <span className="amx-etiqueta-precio">{precio} <small>/ {uni}</small></span>}
-                    </React.Fragment>} />
-                );
-              }} />
-            {relacionados.length > 12 &&
-              <button type="button" className="amx-registro-mas" aria-expanded={todasOtras}
-                onClick={() => setTodasOtras(!todasOtras)}>
-                Ver los {relacionados.length}
-              </button>}
-          </div>
+          <window.VitrinaMuniciones key={mun.id} items={relacionados} rotulo={'Munición · ' + mun.calibre}
+            ancho={ancho} onOpenMunicion={onOpenMunicion} />
         </section>}
 
       {/* ── LA TARJETA DE COMENTARIOS ─────────────────────────────────── */}
