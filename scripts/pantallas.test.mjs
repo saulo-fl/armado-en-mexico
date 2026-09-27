@@ -474,3 +474,12 @@ test('ninguna lista memorizada depende del setter de un estado (el setter nunca 
     }
   }
 });
+
+test('los Favoritos de Armas M&S existen en el catálogo (si un id cambia, la fila se encoge sin avisar)', () => {
+  const src = readFileSync(raiz('src/screens/screens-1.jsx'), 'utf8');
+  const ids = JSON.parse(src.match(/const FAVORITOS_MS = (\[[^\]]*\])/)[1]);
+  const ctx = {}; ctx.window = ctx; vm.createContext(ctx);
+  vm.runInContext(readFileSync(raiz('src/data/data.js'), 'utf8'), ctx);
+  assert.equal(ids.length, 6, 'son seis favoritos');
+  for (const id of ids) assert.ok(ctx.DB.some((a) => a.id === id), 'no existe en data.js el arma ' + id);
+});
