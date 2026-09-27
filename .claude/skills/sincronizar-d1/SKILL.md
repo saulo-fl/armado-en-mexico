@@ -84,3 +84,8 @@ recargar y contar `window.DB.length`. La API puede estar bien y el cliente no.
   contra `/api/state`. Salieron 62 armas con `img: ""` en D1 que en el código ya
   llevan `imagenes/silueta-*.webp`, más las 3 fotos; ningún otro campo. Sin ese
   cruce no se sabe si resembrar pisa ediciones hechas desde el admin.
+- **2026-09-26 — casi borra todos los precios.** Desde `0729c06` el precio de las armas
+  vive en `AMX_ARMAS_PRECIOS` (`data-precios.js`) y `resembrar.js` solo cargaba `data.js`:
+  el dry-run marcaba «difieren» sin avisar de que las 260 irían con `priceExact: ''`. Ya
+  carga `data-precios.js` antes, como el navegador. Antes de `--aplicar`, compara campo a
+  campo contra `GET /api/state`: los tamaños del resumen no delatan un campo vaciado.
