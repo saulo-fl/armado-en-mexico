@@ -43,6 +43,10 @@ if (!['armas', 'pages'].includes(dominio)) {
 function desdeElCodigo(dom) {
   if (dom === 'armas') {
     global.window = global;
+    // Desde 0729c06 (26-sep-2026) mk() lee el precio de AMX_ARMAS_PRECIOS, que vive
+    // en data-precios.js y el navegador carga ANTES que data.js. Sin esto el
+    // resembrado dejaba las 260 armas con priceExact '' en producción.
+    require(path.join(ROOT, 'src/data/data-precios.js'));
     require(path.join(ROOT, 'src/data/data.js'));
     return (global.DB || []).map((a) => {
       const c = Object.assign({}, a);
