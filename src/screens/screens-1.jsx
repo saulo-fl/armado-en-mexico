@@ -51,8 +51,9 @@ const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^
 // ════════════════════════════════════════════════════════════════
 // HOME — Mobile-first · Header + Sliders + 3 Carruseles
 // ════════════════════════════════════════════════════════════════
-// Glock 28, CZ P-10 C, Glock 44, Glock 25, Beretta 80X Cheetah Bronce y Ruger 10/22 (Saulo, 27-sep-2026).
-const FAVORITOS_MS = [12, 9, 133, 11, 218, 151];
+// Glock 28, CZ P-10 C, Glock 44, Glock 25, Beretta 80X Cheetah Bronce, Ruger 10/22,
+// Benelli MR1, CZ P-07 y Taurus PT59 (Saulo, 27-sep-2026).
+const FAVORITOS_MS = [12, 9, 133, 11, 218, 151, 143, 8, 3];
 
 function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const vp = window.useViewport();
@@ -100,7 +101,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   }, [promos.length]);
 
   // Tres listas curadas / dinámicas
-  // Favoritos de Armas M&S: siempre estas seis y en orden aleatorio (Saulo,
+  // Favoritos de Armas M&S: siempre estas nueve y en orden aleatorio (Saulo,
   // 27-sep-2026). El orden se sortea UNA vez por visita (Fisher-Yates: todas las
   // permutaciones igual de probables) y las fichas se leen del Store, para que
   // lleguen con los datos de D1.
