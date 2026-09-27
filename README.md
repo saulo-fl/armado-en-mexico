@@ -111,7 +111,7 @@ todo, tampoco promete nada: la autorización la decide la autoridad, no un cuest
 
 ## Guía de calibres
 
-<p align="center"><img src="docs/capturas/readme/calibres.gif" alt="Recorrido por la Guía de calibres: los cartuchos a escala, las fichas y los fundamentos" width="640"></p>
+<p align="center"><img src="docs/capturas/readme/calibres.gif" alt="Recorrido por la Guía de calibres: los cartuchos a escala, las fichas, los fundamentos y la ficha del .380 ACP con su tamaño real junto a un bolígrafo y los calibres con los que se compara" width="640"></p>
 
 Treinta cartuchos: qué son, qué tan fuerte pega cada uno y cuáles puede comprar un civil en
 México. La vitrina los pone **a su tamaño real, de menor a mayor**, y un filtro separa los de uso
