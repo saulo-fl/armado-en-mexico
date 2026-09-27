@@ -206,27 +206,22 @@ test('amxLegalHuecos tambien encuentra los huecos anidados', function () {
   assert.equal(variante.id, 'r1/extranjero', 'la variante se identifica por requisito y escenario');
 });
 
-// Legalidad v2 (22-sep-2026): lo federal se lee por pregunta ciudadana. La tabla vive en
-// legal.js; esta prueba fija que cada id resuelve contra el corpus real, que ninguna norma
-// sale dos veces y que la norma sin texto confirmado se queda fuera mientras esté en
-// revisión.
-test('amxNormasPorPregunta agrupa el corpus real en tres preguntas sin repetir normas', function () {
-  var corpusReal = {};
-  var ctx = { window: corpusReal };
-  vm.runInNewContext(readFileSync(fileURLToPath(new URL('../src/data/data-legal.js', import.meta.url)), 'utf8'), ctx);
-  var C = corpusReal.AMX_LEGAL;
-  var grupos = amxNormasPorPregunta(C);
-  assert.equal(grupos.length, 3);
-  var ids = [];
-  grupos.forEach(function (g) {
-    assert.ok(g.corto && g.pregunta, 'cada grupo lleva rótulo corto y pregunta entera');
-    assert.ok(g.normas.length > 0, g.id + ' se quedó sin normas');
-    g.normas.forEach(function (n) { ids.push(n.id); });
-  });
-  assert.equal(new Set(ids).size, ids.length, 'una norma no puede salir en dos preguntas');
-  assert.ok(ids.indexOf('constitucion') === 0, 'la Constitución abre la primera pregunta');
-  var simpl = C.normas.find(function (n) { return n.id === 'acuerdo-simplificacion'; });
-  if (simpl && simpl.revisar) assert.equal(ids.indexOf('acuerdo-simplificacion'), -1, 'sin texto confirmado no se publica');
+// Las notas al pie: {{id}} se parte en trozos de texto y de fuente, y la numeración
+// sigue el orden en que la página cita cada fuente por primera vez, sin repetir.
+test('amxPartirCitas separa el texto de sus notas, en orden', function () {
+  assert.deepEqual(amxPartirCitas('Uno {{a}}. Dos {{b}}{{a}}'),
+    [{ texto: 'Uno ' }, { fuente: 'a' }, { texto: '. Dos ' }, { fuente: 'b' }, { fuente: 'a' }]);
+  assert.deepEqual(amxPartirCitas('sin notas'), [{ texto: 'sin notas' }]);
+  assert.deepEqual(amxPartirCitas(undefined), []);
+});
+
+test('amxReferencias numera por primera aparición y descarta ids inexistentes', function () {
+  var corpus = {
+    fuentes: { a: {}, b: {}, c: {} },
+    explicado: { ley: [{ texto: 'x {{b}} y {{a}}' }, { texto: '{{b}} {{nada}}' }], estado: '{{c}}', tramites: '' },
+    tramites: [], requisitos: [], escenarios: [],
+  };
+  assert.deepEqual(amxReferencias(corpus), ['b', 'a', 'c']);
 });
 
 test('amxVigenciaCuota dice solo el año de la cuota (lo único que el corpus respalda), y calla sin año', function () {

@@ -4,93 +4,59 @@
 // (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 // Legalidad v2 (22-sep-2026): las ocho decisiones de Saulo, tomadas en los hilos
-// de Penpot, están en docs/superpowers/specs/2026-09-22-legalidad-v2-design.md
-// (llega con el PR #278, rama fable/penpot). Y una novena, del mismo día, al ver
-// la primera versión: TODO EN UNA SOLA PÁGINA, con desplegables, en vez de mandar
-// a la persona a otra pantalla. Las cuatro secciones viven dentro del hub como
-// folders del cajón (el mismo de la FAQ); las rutas /legalidad/federal, /estatal,
-// /tramites y /documentos siguen existiendo —están indexadas y enlazadas— y lo que
-// hacen es abrir el hub con ese folder desplegado.
+// de Penpot, están en docs/superpowers/specs/2026-09-22-legalidad-v2-design.md.
+// Y una novena, del mismo día: TODO EN UNA SOLA PÁGINA, con desplegables. Las
+// secciones viven dentro del hub como folders del cajón (el mismo de la FAQ); las
+// rutas /legalidad/federal, /estatal, /tramites y /documentos siguen existiendo
+// —están indexadas y enlazadas— y abren el hub en su sitio.
 //
-// En corto: la entrevista arriba; los huecos del corpus NO se publican (son de
-// desarrollo: `amxLegalHuecos` los sigue contando para check-legal.mjs); lo
-// federal se ordena por pregunta ciudadana; Requisitos y Permisos se funden en
-// Trámites; y la vigencia de cada cuota va junto al importe.
+// Lenguaje llano (26-sep-2026, aprobado por Saulo): la página RESPONDE las preguntas
+// en vez de enseñar fichas de normas, y las fuentes van al pie, numeradas como en
+// Wikipedia. El texto vive en `AMX_LEGAL.explicado`; cada {{id}} es una nota [n].
 
 /* ----------------------------------------------------------------__ */
-/*  Lo federal — por pregunta ciudadana (hilo 3)                      */
+/*  Notas al pie                                                      */
 /* ----------------------------------------------------------------__ */
 
-// Un peldaño de la escalera. Va fuera de la pantalla a propósito: un componente
-// definido dentro de otro remonta su subárbol en cada render (fidelidad-diseno).
-// Los artículos van como resumen llano + cita (hilo 4); el literal se abre desde
-// la cita. Una norma con `revisar` enseña su título y su fuente, que son hechos, y
-// una línea neutra; ni su resumen ni su nota de vigencia, que son afirmaciones sin
-// verificar, ni la nota interna del hueco (hilo 2).
-function LegalidadPeldano({ n, norma, C }) {
-  const arts = (norma.articulos || [])
-    .map((id) => C.articulos.find((a) => a.id === id))
-    .filter((a) => a && !a.revisar);
+// La nota [n] lleva a su entrada en Fuentes. El salto se hace a mano: el enrutador
+// escucha popstate y un enlace #fuente-n lo dispara. El href queda para quien abre
+// el enlace en otra pestaña.
+function LegalidadNota({ id, refs }) {
+  const n = refs.indexOf(id) + 1;
+  if (!n) return null;
+  const ir = (e) => {
+    const destino = document.getElementById('fuente-' + n);
+    if (!destino) return;
+    e.preventDefault();
+    destino.scrollIntoView({ block: 'center' });
+    destino.focus({ preventScroll: true });
+  };
   return (
-    <li className="amx-leg-peldano">
-      <p className="amx-leg-peldano-num">{String(n).padStart(2, '0')} · {norma.rotulo}</p>
-      <h3>{norma.titulo || norma.rotulo}</h3>
-      {!norma.revisar && norma.resumen && <p className="amx-leg-habilita">{norma.resumen}</p>}
-      {!norma.revisar && norma.notaVigencia && <p className="amx-leg-vigencia">{norma.notaVigencia}</p>}
-      {norma.revisar && (
-        <p className="amx-leg-vigencia">En verificación: su contenido se publica cuando se confirme contra la fuente oficial.</p>
-      )}
-      {norma.fuente && <window.CitaFuente fuente={window.amxLegalFuente(C, norma.fuente)} />}
-      {arts.length > 0 && (
-        <details className="amx-leg-arts">
-          <summary>{(arts.length === 1 ? '1 artículo' : arts.length + ' artículos') + ' · resumen y cita'}</summary>
-          <div>
-            {arts.map((art) => (
-              <div key={art.id}>
-                <strong>{art.rotulo}</strong>
-                {art.titulo && <p>{art.titulo}</p>}
-                {art.resumen && <p>{art.resumen}</p>}
-                <window.CitaFuente fuente={window.amxLegalFuente(C, art.fuente)} />
-              </div>
-            ))}
-          </div>
-        </details>
-      )}
-    </li>
+    <sup className="amx-leg-nota">
+      <a href={'#fuente-' + n} onClick={ir} aria-label={'Fuente ' + n}>[{n}]</a>
+    </sup>
   );
 }
 
-// Tres preguntas, cada una plegada: abrir una enseña sus normas numeradas.
-function LegalidadFederalCuerpo({ C }) {
-  const grupos = window.amxNormasPorPregunta(C);
-  let n = 0;
+function LegalidadCitado({ texto, refs }) {
+  return window.amxPartirCitas(texto).map((x, i) => (x.fuente
+    ? <LegalidadNota key={i} id={x.fuente} refs={refs} />
+    : <React.Fragment key={i}>{x.texto}</React.Fragment>));
+}
+
+/* ----------------------------------------------------------------__ */
+/*  Lo que permite la ley — cada pregunta, respondida                 */
+/* ----------------------------------------------------------------__ */
+
+function LegalidadLeyCuerpo({ C, refs }) {
   return (
     <div className="amx-leg-cuerpo">
-        <p className="amx-leg-intro">
-          Los niveles de legalidad de las armas en México se dividen en tres categorías:
-          civil, seguridad privada y exclusivo del ejército. Cada nivel tiene requisitos
-          y restricciones específicas que se detallan en los apartados siguientes.
-        </p>
-        <p className="amx-leg-intro">
-          Además, actividades como la caza, el tiro deportivo y la coleccionista tienen
-          regulaciones propias que se describen en los apartados de trámites y
-          documentación.
-        </p>
-      {grupos.map((g) => {
-        const desde = n;
-        n += g.normas.length;
-        return (
-          <details key={g.id} className="amx-leg-plegable" id={'leg-grupo-' + g.id}>
-            <summary>
-              <span className="amx-leg-plegable-corto">{g.corto}</span>
-              <span className="amx-leg-plegable-pregunta">{g.pregunta}</span>
-            </summary>
-            <ol className="amx-leg-escalera">
-              {g.normas.map((norma, i) => <LegalidadPeldano key={norma.id} n={desde + i + 1} norma={norma} C={C} />)}
-            </ol>
-          </details>
-        );
-      })}
+      {C.explicado.ley.map((p) => (
+        <details key={p.id} className="amx-leg-plegable" id={'leg-ley-' + p.id}>
+          <summary><span className="amx-leg-plegable-sola">{p.pregunta}</span></summary>
+          <p className="amx-leg-respuesta"><LegalidadCitado texto={p.texto} refs={refs} /></p>
+        </details>
+      ))}
     </div>
   );
 }
@@ -99,18 +65,14 @@ function LegalidadFederalCuerpo({ C }) {
 /*  Lo que cambia por estado                                          */
 /* ----------------------------------------------------------------__ */
 
-function LegalidadEstatalCuerpo({ C }) {
+function LegalidadEstatalCuerpo({ C, refs }) {
   const [sel, setSel] = React.useState('');
   const ent = C.entidades.find((e) => e.id === sel);
   const sinPortal = (e) => !!(e.antecedentes && e.antecedentes.revisar);
 
   return (
     <div className="amx-leg-cuerpo">
-        <p className="amx-leg-intro">
-          En cada estado la obtención de armas se regula por la ley federal, pero los
-          trámites de antecedentes penales, armerías y envío por correo certificado
-          varían. A continuación se muestra la información específica por estado.
-        </p>
+      <p className="amx-leg-intro"><LegalidadCitado texto={C.explicado.estado} refs={refs} /></p>
       <label className="amx-leg-selector">
         <span>Elige tu estado</span>
         {/* Las entidades sin portal verificado se quedan en el selector, en gris y con
@@ -157,11 +119,13 @@ function LegalidadEstatalCuerpo({ C }) {
               ? 'OTCA, en Monterrey'
               : 'DCAM, en Naucalpan'}
             , {ent.ventanillaFundamento}
+            <LegalidadNota id={ent.ventanillaFuente} refs={refs} />
           </dd>
           <dt>Envío por correo certificado</dt>
           <dd>
             {ent.envioPorCorreo ? 'Sí se puede' : 'No se puede desde aquí'}
             , {ent.envioFundamento}
+            <LegalidadNota id={ent.envioFuente} refs={refs} />
             {ent.envioNota && <p>{ent.envioNota}</p>}
           </dd>
           <dt>Traslado de traumáticas</dt>
@@ -172,10 +136,6 @@ function LegalidadEstatalCuerpo({ C }) {
           </dd>
         </dl>
       )}
-      <details className="amx-leg-plegable">
-        <summary><span className="amx-leg-plegable-corto">Por qué no hay ley estatal</span></summary>
-        <p className="amx-leg-advertencia">{C.noHayEstatal}</p>
-      </details>
     </div>
   );
 }
@@ -184,11 +144,11 @@ function LegalidadEstatalCuerpo({ C }) {
 /*  Trámites — Requisitos y Permisos, fundidos (hilo 6)               */
 /* ----------------------------------------------------------------__ */
 
-function LegalidadRequisito({ r, C }) {
+function LegalidadRequisito({ r, C, refs }) {
   return (
     <li>
       <span className="amx-leg-casilla" aria-hidden="true">☐</span>
-      <span className="amx-leg-req-nombre">{r.nombre}</span>
+      <span className="amx-leg-req-nombre">{r.nombre}<LegalidadNota id={r.fuente} refs={refs} /></span>
       {window.amxRotuloEscenarios(C, r.escenarios) && (
         <span className="amx-leg-solo-si">{window.amxRotuloEscenarios(C, r.escenarios)}</span>
       )}
@@ -214,26 +174,29 @@ function LegalidadRequisito({ r, C }) {
           ))}
         </dl>
       )}
-      <window.CitaFuente fuente={window.amxLegalFuente(C, r.fuente)} />
     </li>
   );
 }
 
-// Un trámite plegado: en el rótulo, homoclave y nombre; dentro, qué habilita, cuánto
-// cuesta y de qué año es la cuota (hilo 7) y su checklist. Los seis van en el orden
-// del corpus, que no es una cronología: la compra en la DCAM ya deja el arma
+// Un trámite plegado: en el rótulo, su nombre llano y su cuota; la clave oficial va
+// en chico. Dentro, el nombre oficial (el que se pide en ventanilla), qué habilita,
+// cuánto cuesta y de qué año es la cuota (hilo 7) y su checklist. Los seis van en el
+// orden del corpus, que no es una cronología: la compra en la DCAM ya deja el arma
 // registrada, y portación, colección y transporte son trámites aparte.
-function LegalidadTramite({ t, C, abierto }) {
+function LegalidadTramite({ t, C, refs, abierto }) {
   // Un requisito o una variante en revisión es un hueco interno (hilo 2): no se pinta.
   const requisitos = window.amxRequisitosDe(C, t.id, {}).filter((r) => !r.revisar);
   const vigencia = window.amxVigenciaCuota(t.costo);
   return (
     <details className="amx-leg-plegable amx-leg-tramite" open={abierto} id={'leg-tramite-' + t.id}>
       <summary>
-        <span className="amx-leg-plegable-corto">{t.homoclave || 'Compra en la DCAM'}</span>
-        <span className="amx-leg-plegable-pregunta">{t.nombre}</span>
+        <span className="amx-leg-plegable-corto">{t.homoclave || 'DCAM'}</span>
+        <span className="amx-leg-plegable-pregunta">
+          {(t.llano || t.nombre) + (t.costo ? ' · ' + window.amxImporte(t.costo.monto) : '')}
+        </span>
       </summary>
       <article className="amx-leg-ficha">
+        <p className="amx-leg-oficial">Nombre oficial: {t.nombre}</p>
         {t.notaHomoclave && <p className="amx-leg-vigencia">{t.notaHomoclave}</p>}
         <dl>
           {t.dependencia && (
@@ -251,7 +214,7 @@ function LegalidadTramite({ t, C, abierto }) {
           {t.habilita && (
             <>
               <dt>Qué habilita</dt>
-              <dd>{t.habilita}</dd>
+              <dd>{t.habilita}{!t.revisar && <LegalidadNota id={t.fuente} refs={refs} />}</dd>
             </>
           )}
           {t.noHabilita && (
@@ -272,104 +235,101 @@ function LegalidadTramite({ t, C, abierto }) {
           <section className="amx-leg-checklist-seccion" aria-label={'Checklist de ' + t.nombre}>
             <p className="amx-leg-checklist-rotulo">{requisitos.length + ' requisitos · checklist'}</p>
             <ol className="amx-leg-checklist">
-              {requisitos.map((r) => <LegalidadRequisito key={r.id} r={r} C={C} />)}
+              {requisitos.map((r) => <LegalidadRequisito key={r.id} r={r} C={C} refs={refs} />)}
             </ol>
           </section>
-        )}
-        {!t.revisar && t.fuente && (
-          <window.CitaFuente fuente={window.amxLegalFuente(C, t.fuente)} />
         )}
       </article>
     </details>
   );
 }
 
-function LegalidadTramitesCuerpo({ C }) {
-  const tramites = C.tramites;
+function LegalidadTramitesCuerpo({ C, refs }) {
   return (
     <div className="amx-leg-cuerpo">
-        <p className="amx-leg-intro">
-          Los trámites ante la Secretaría de la Defensa Nacional incluyen la compra del arma,
-          el permiso de portación, el permiso de colección y el permiso de transporte.
-          Cada trámite tiene requisitos, costos y plazos específicos que se describen a
-          continuación.
-        </p>
-      <p className="amx-leg-advertencia">{C.advertencia}</p>
-      <section className="amx-leg-contraste">
-        <h3>Posesión no es portación</h3>
-        <p>
-          Tener un permiso de adquisición te autoriza a comprar el arma y a tenerla en
-          el domicilio que declaraste ante la Secretaría de la Defensa Nacional. Pero
-          sacar esa arma de tu casa para llevarla en la vía pública es otra cosa
-          completamente distinta: eso se llama portación, y requiere una licencia
-          individual de portación (DEFENSA-02-025), que es un trámite separado, más
-          costoso, y cuya concesión no está garantizada aunque cumplas todos los
-          requisitos. Esta es la confusión más frecuente entre las personas que
-          tramitan su primer permiso.
-        </p>
-      </section>
-      {tramites.map((t) => <LegalidadTramite key={t.id} t={t} C={C} abierto={false} />)}
+      <p className="amx-leg-intro"><LegalidadCitado texto={C.explicado.tramites} refs={refs} /></p>
+      {C.tramites.map((t) => <LegalidadTramite key={t.id} t={t} C={C} refs={refs} abierto={false} />)}
     </div>
   );
 }
 
 /* ----------------------------------------------------------------__ */
-/*  Documentos legales                                                */
+/*  Fuentes — al pie, numeradas                                       */
 /* ----------------------------------------------------------------__ */
 
-function LegalidadDocumentosCuerpo({ C }) {
-  const fuentes = Object.values(C.fuentes);
-  const locales = fuentes.filter((f) => f.archivoLocal).concat(C.documentosComplementarios || []);
-  const web = fuentes.filter((f) => f.url && !f.archivoLocal);
-  const pendientes = fuentes.filter((f) => !f.url);
+function LegalidadEnlacesFuente({ f }) {
+  const a = (href, texto) => (
+    <> <a href={href} target="_blank" rel="noopener noreferrer"
+      aria-label={texto + ': ' + f.titulo + ' (se abre en una pestaña nueva)'}>{texto}</a></>
+  );
+  return (
+    <>
+      {f.archivoLocal && a('/' + f.archivoLocal, 'PDF en armado.mx')}
+      {f.url && a(f.url, 'Fuente oficial')}
+      {f.urlAlterna && a(f.urlAlterna, 'Texto en el DOF')}
+    </>
+  );
+}
 
-  function grupo(titulo, items) {
-    if (!items.length) return null;
-    return <details className="amx-leg-plegable" key={titulo}>
-      <summary><span className="amx-leg-plegable-corto">{titulo + ' · ' + items.length}</span></summary>
-      <ul className="amx-leg-documentos">
-        {items.map((f) => <li key={f.archivoLocal || f.url || f.titulo}>
-          <strong>{f.titulo}</strong>
-          {f.emisor && <span>{f.emisor}</span>}
-          {f.archivoLocal && <a href={'/' + f.archivoLocal} target="_blank" rel="noopener noreferrer">Abrir PDF en armado.mx</a>}
-          {f.url && <a href={f.url} target="_blank" rel="noopener noreferrer">Fuente oficial</a>}
-          {f.urlAlterna && <a href={f.urlAlterna} target="_blank" rel="noopener noreferrer">Texto oficial en DOF</a>}
-          {!f.url && <span>Texto oficial pendiente de verificar</span>}
-          {f.nota && !f.revisar && <p>{f.nota}</p>}
-        </li>)}
-      </ul>
-    </details>;
-  }
-
-  return <div className="amx-leg-cuerpo">
-    <p className="amx-leg-intro">Fundamento legal. Los textos oficiales que sustentan esta guía se presentan a continuación, con enlaces a las fuentes y copias PDF cuando están disponibles.</p>
-    {grupo('PDF en armado.mx', locales)}
-    {grupo('Fuentes oficiales en la web', web)}
-    {grupo('Pendientes de verificar', pendientes)}
-  </div>;
+// Lo que antes era la carpeta «Fundamento legal»: las fuentes citadas, en el orden de
+// sus notas, y debajo, plegado, el resto de documentos de consulta. Lo que no tiene
+// enlace verificado no se publica (hilo 2).
+function LegalidadFuentes({ C, refs, pieRef }) {
+  const citadas = refs.map((id) => C.fuentes[id]);
+  const otras = Object.keys(C.fuentes)
+    .filter((id) => refs.indexOf(id) < 0 && C.fuentes[id].url)
+    .map((id) => C.fuentes[id])
+    .concat(C.documentosComplementarios || []);
+  const fecha = (f) => (f.fechaConsulta ? window.amxLegalFecha(f.fechaConsulta) : '');
+  return (
+    <section className="amx-leg-fuentes" id="leg-documentos" aria-labelledby="leg-fuentes" ref={pieRef}>
+      <h2 id="leg-fuentes">Fuentes</h2>
+      <ol>
+        {citadas.map((f, i) => (
+          <li key={i} id={'fuente-' + (i + 1)} tabIndex={-1}>
+            {f.titulo}{f.emisor && <span className="amx-leg-emisor"> · {f.emisor}</span>}
+            <LegalidadEnlacesFuente f={f} />
+            {fecha(f) && <span className="amx-leg-emisor"> · Consultado el {fecha(f)}</span>}
+          </li>
+        ))}
+      </ol>
+      {otras.length > 0 && (
+        <details className="amx-leg-plegable amx-leg-mas-fuentes">
+          <summary><span className="amx-leg-plegable-sola">{'Más documentos de consulta · ' + otras.length}</span></summary>
+          <ul>
+            {otras.map((f) => (
+              <li key={f.archivoLocal || f.url || f.titulo}>
+                {f.titulo}{f.emisor && <span className="amx-leg-emisor"> · {f.emisor}</span>}
+                <LegalidadEnlacesFuente f={f} />
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </section>
+  );
 }
 
 /* ----------------------------------------------------------------__ */
 /*  LegalidadHub — la única página                                    */
 /* ----------------------------------------------------------------__ */
 
-// Las cuatro secciones del cajón. El `id` es el de la ruta (/legalidad/<id>) y el de
-// la pantalla del router ('legal-<id>'): una ruta profunda abre el hub con ese folder
-// desplegado. Las descripciones no pueden contradecir al corpus: no hay normativa
-// estatal de armas (`noHayEstatal`), lo que cambia por estado es dónde se hacen
-// algunos papeles.
-// Los títulos son LA PREGUNTA que resuelve cada folder (hilo 11 de Penpot, 22-sep-2026):
-// «Lo federal» y «Documentos oficiales» no dicen de qué trata el apartado ni a quien
-// conoce el material. Esto es una plataforma educativa: el rótulo enseña, no evoca.
+// Las tres secciones del cajón. El `id` es el de la ruta (/legalidad/<id>) y el de la
+// pantalla del router ('legal-<id>'): una ruta profunda abre el hub con ese folder
+// desplegado. La cuarta ruta, /legalidad/documentos, lleva a las Fuentes del pie.
+// Pestaña y título en lenguaje llano (26-sep-2026): el título es la pregunta que
+// resuelve el folder (hilo 11) y la pestaña dice de qué trata, sin jerga legal. Las
+// descripciones no pueden contradecir al corpus: no hay normativa estatal de armas
+// (`noHayEstatal`), lo que cambia por estado es dónde se hacen algunos papeles.
 const LEGALIDAD_SECCIONES = [
-  { id: 'federal', tema: 'Federal', titulo: '¿Qué arma puedo tener y portar?', desc: 'Los niveles de legalidad: civil, seguridad privada y exclusivo del ejército.', Cuerpo: LegalidadFederalCuerpo },
-  { id: 'estatal', tema: 'Por estado', titulo: '¿Dónde hago los papeles en mi estado?', desc: 'Antecedentes penales, armerías y correo, estado por estado.', Cuerpo: LegalidadEstatalCuerpo },
-  { id: 'tramites', tema: 'Trámites', titulo: '¿Cómo saco mi permiso, paso a paso?', desc: 'Los seis trámites ante la Defensa: requisitos y costo.', Cuerpo: LegalidadTramitesCuerpo },
-  { id: 'documentos', tema: 'Fundamento legal', titulo: 'Fundamento legal', desc: 'Leyes, reglamento y formatos en PDF, con su fuente.', Cuerpo: LegalidadDocumentosCuerpo },
+  { id: 'federal', tema: 'Lo que permite la ley', titulo: '¿Qué arma puedo tener y puedo sacarla de casa?', desc: 'Qué armas están permitidas, dónde pueden estar y cuándo es delito.', Cuerpo: LegalidadLeyCuerpo },
+  { id: 'estatal', tema: 'En tu estado', titulo: '¿Qué cambia según el estado donde vivo?', desc: 'Dónde sacas tu constancia de antecedentes y a qué tienda te toca ir.', Cuerpo: LegalidadEstatalCuerpo },
+  { id: 'tramites', tema: 'Trámites y costos', titulo: '¿Qué trámites hago y cuánto cuestan?', desc: 'Los seis trámites ante la Defensa, con su lista de documentos.', Cuerpo: LegalidadTramitesCuerpo },
 ];
 
 function LegalidadHub({ onNav, seccion }) {
   const C = window.AMX_LEGAL;
+  const refs = window.amxReferencias(C);
   const abiertoRef = React.useRef(null);
 
   // Una ruta profunda (/legalidad/tramites) aterriza con su folder abierto, a la vista y
@@ -379,7 +339,7 @@ function LegalidadHub({ onNav, seccion }) {
   React.useEffect(() => {
     if (!seccion || !abiertoRef.current) return undefined;
     const folder = abiertoRef.current;
-    folder.open = true;
+    if ('open' in folder) folder.open = true;
     const suave = !window.matchMedia || !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const id = requestAnimationFrame(() => {
       folder.scrollIntoView({ behavior: suave ? 'smooth' : 'auto', block: 'start' });
@@ -412,7 +372,7 @@ function LegalidadHub({ onNav, seccion }) {
 
       {window.MapaTramite && <window.MapaTramite />}
 
-      {/* EL CAJÓN: las cuatro secciones como folders apilados, plegados. Nada manda a
+      {/* EL CAJÓN: las tres secciones como folders apilados, plegados. Nada manda a
           otra página (decisión de Saulo, 22-sep-2026). */}
       <div className="amx-faq-cajon amx-leg-cajon">
         {LEGALIDAD_SECCIONES.map((s) => (
@@ -420,7 +380,7 @@ function LegalidadHub({ onNav, seccion }) {
             key={s.id}
             id={'leg-' + s.id}
             className="amx-faq-folder amx-leg-folder"
-            /* Los cuatro folders nacen ABIERTOS (decisión de Saulo, 22-sep-2026): esto es
+            /* Los folders nacen ABIERTOS (decisión de Saulo, 22-sep-2026): esto es
                material de consulta, y un cajón cerrado esconde de qué trata la página. Lo
                que nace plegado son los documentos de dentro —cada `<details>` del cuerpo—,
                que es donde de verdad hay texto largo. */
@@ -439,12 +399,14 @@ function LegalidadHub({ onNav, seccion }) {
                 <span>Armado en México</span><span>{s.tema}</span>
               </div>
               <div className="amx-oficio-texto">
-                <s.Cuerpo C={C} />
+                <s.Cuerpo C={C} refs={refs} />
               </div>
             </div>
           </details>
         ))}
       </div>
+
+      <LegalidadFuentes C={C} refs={refs} pieRef={seccion === 'documentos' ? abiertoRef : undefined} />
 
       {/* La fecha cierra la hoja, no la abre (hilo 10 de Penpot, 22-sep-2026): arriba
           repetía la cinta que ya dice LEGALIDAD y empujaba la entrada real de la página. */}

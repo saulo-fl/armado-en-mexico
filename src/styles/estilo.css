@@ -6245,6 +6245,9 @@
    dentro; el signo +/− lo pinta .amx-faq-cab::after y tiene que quedarse en la
    primera línea, así que la descripción va en `order` posterior. */
 .amx-v2 .amx-leg-cajon { margin-top: var(--e5); }
+/* Las pestañas de Legalidad son frases («Lo que permite la ley»): en el teléfono la
+   pestaña mide ~93 px, así que van en dos renglones en vez de cortarse. */
+.amx-v2 .amx-leg-folder .amx-faq-tema { white-space: normal; line-height: 1.15; text-align: center; letter-spacing: .04em; }
 .amx-v2 .amx-leg-folder .amx-faq-cab { flex-wrap: wrap; row-gap: 2px; }
 .amx-v2 .amx-leg-folder .amx-faq-cab::after { order: 2; }
 .amx-v2 .amx-leg-folder-desc {
@@ -6265,7 +6268,6 @@
 /* Los papeles que antes iban sobre el lienzo ahora van sobre el oficio: un punto más
    gastados para que se vean como hojas encima, no como el mismo papel. */
 .amx-v2 .amx-leg-folder .amx-leg-ficha,
-.amx-v2 .amx-leg-folder .amx-leg-peldano,
 .amx-v2 .amx-leg-folder .amx-leg-estado { background: var(--oficio-2); }
 /* Lo federal, por pregunta ciudadana: cada pregunta es un desplegable; el rótulo
    corto y la pregunta entera van en el <summary>, uno sobre otro. */
@@ -6283,9 +6285,7 @@
   color: var(--ficha-tinta);
 }
 .amx-v2 .amx-leg-plegable > summary::after { order: 2; }
-.amx-v2 .amx-leg-plegable > .amx-leg-escalera,
 .amx-v2 .amx-leg-plegable > .amx-leg-ficha,
-.amx-v2 .amx-leg-plegable > .amx-leg-documentos,
 .amx-v2 .amx-leg-plegable > .amx-leg-advertencia { margin-top: 10px; }
 .amx-v2 .amx-leg-tramite .amx-leg-ficha { margin-top: 10px; }
 .amx-v2 .amx-leg-checklist-rotulo {
@@ -6304,14 +6304,7 @@
   color: var(--tinta);
   margin: -8px 0 10px;
 }
-.amx-v2 .amx-leg-peldano-num {
-  font-family: var(--mono);
-  font-size: 12px;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--kardex-imp);
-  margin: 0 0 4px;
-}
+
 /* Trámites: paso, importe con su vigencia y la checklist plegada. */
 .amx-v2 .amx-leg-paso {
   display: flex;
@@ -6367,20 +6360,16 @@
    artículos de cada norma), y con el combinador descendiente el `[open]` del padre
    les pondría «−» a los hijos cerrados. */
 .amx-v2 .amx-leg-plegable { margin-top: 12px; }
-.amx-v2 .amx-leg-plegable > summary,
-.amx-v2 .amx-leg-arts > summary {
+.amx-v2 .amx-leg-plegable > summary {
   list-style: none;
   justify-content: space-between;
   column-gap: 12px;
   row-gap: 2px;
   flex-wrap: wrap;
 }
-.amx-v2 .amx-leg-plegable > summary::-webkit-details-marker,
-.amx-v2 .amx-leg-arts > summary::-webkit-details-marker { display: none; }
-.amx-v2 .amx-leg-plegable > summary::after,
-.amx-v2 .amx-leg-arts > summary::after { content: '+'; font-size: 18px; line-height: 1; }
-.amx-v2 .amx-leg-plegable[open] > summary::after,
-.amx-v2 .amx-leg-arts[open] > summary::after { content: '−'; }
+.amx-v2 .amx-leg-plegable > summary::-webkit-details-marker { display: none; }
+.amx-v2 .amx-leg-plegable > summary::after { content: '+'; font-size: 18px; line-height: 1; }
+.amx-v2 .amx-leg-plegable[open] > summary::after { content: '−'; }
 .amx-v2 .amx-leg-plegable > summary {
   font-family: var(--mono);
   font-size: 13px;
@@ -6396,6 +6385,61 @@
   outline: 2px solid var(--ficha-tinta);
   outline-offset: 2px;
 }
+/* Lenguaje llano (26-sep-2026): la pregunta sola en el rótulo, en letra de lectura, y
+   su respuesta debajo. Van sobre el oficio: tinta de papelería, igual en los dos temas. */
+.amx-v2 .amx-leg-plegable-sola {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ficha-tinta);
+}
+.amx-v2 .amx-leg-respuesta {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ficha-tinta);
+  margin: 6px 0 14px;
+}
+.amx-v2 .amx-leg-oficial {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--oficio-tinta-2);
+  margin: 0 0 8px;
+}
+/* La nota [n], como en Wikipedia: chica, pegada al texto, con área de toque decente. */
+.amx-v2 .amx-leg-nota { font-size: .72em; line-height: 0; margin-left: 1px; }
+.amx-v2 .amx-leg-nota a { color: inherit; text-decoration: underline; padding: 2px 1px; }
+/* Las Fuentes del pie van sobre el lienzo, no sobre papel: tinta del tema. */
+.amx-v2 .amx-leg-fuentes { margin-top: var(--e5); color: var(--tinta); }
+.amx-v2 .amx-leg-fuentes h2 {
+  font-family: var(--mono);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--tinta-2);
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 6px;
+}
+.amx-v2 .amx-leg-fuentes ol,
+.amx-v2 .amx-leg-fuentes ul { padding-left: 1.8em; margin: 10px 0 0; }
+.amx-v2 .amx-leg-fuentes li {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+.amx-v2 .amx-leg-fuentes li:focus { outline: 2px solid var(--tinta); outline-offset: 2px; }
+.amx-v2 .amx-leg-fuentes a { color: inherit; margin-left: 6px; }
+.amx-v2 .amx-leg-emisor { color: var(--tinta-2); }
+.amx-v2 .amx-leg-fuentes .amx-leg-plegable > summary { color: var(--tinta-2); }
+.amx-v2 .amx-leg-fuentes .amx-leg-plegable-sola { color: var(--tinta); font-size: 14px; }
+.amx-v2 .amx-leg-fuentes .amx-leg-plegable > summary:focus-visible { outline-color: var(--tinta); }
 /* Estatal: las entidades sin portal verificado se quedan en el selector, en gris. El
    <select> va sobre papel (--ficha), así que la tinta también es de papelería. */
 .amx-v2 .amx-leg-opcion--sin-portal { color: var(--ficha-tinta-2); }
@@ -6429,42 +6473,13 @@
   color: var(--ficha-tinta);
   margin-top: 0;
 }
-.amx-v2 .amx-leg-documentos {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.amx-v2 .amx-leg-documentos li {
-  border-top: 1px solid var(--carton-filo);
-  padding: 12px 0;
-  line-height: 1.5;
-}
-.amx-v2 .amx-leg-documentos strong,
-.amx-v2 .amx-leg-documentos span {
-  display: block;
-}
-.amx-v2 .amx-leg-documentos span,
-.amx-v2 .amx-leg-documentos p {
-  font-family: var(--mono);
-  font-size: 13px;
-  color: var(--ficha-tinta-2);
-}
-.amx-v2 .amx-leg-documentos a {
-  display: inline-block;
-  margin: 6px 16px 0 0;
-  color: var(--ficha-tinta);
-  text-underline-offset: 2px;
-}
-.amx-v2 .amx-leg-documentos a:focus-visible {
-  outline: 2px solid var(--ficha-tinta);
-  outline-offset: 2px;
-}
-.amx-v2 .amx-leg-habilita {
-  font-family: var(--sans);
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--ficha-tinta);
-}
+
+
+
+
+
+
+
 .amx-v2 .amx-leg-checklist {
   list-style: none;
   padding: 0;
@@ -7249,46 +7264,16 @@
     transform: none;
   }
 }
-
-/* ── FEDERAL, ESTATAL Y PERMISOS ────────────────────────────────────── */
-
-.amx-v2 .amx-leg-escalera {
+/* ── FEDERAL {
   list-style: none;
   padding: 0;
   margin: 18px 0;
 }
-.amx-v2 .amx-leg-peldano {
-  background: var(--oficio);
-  padding: 14px 16px;
-  margin-bottom: 10px;
-  border-left: 3px solid var(--carton-filo);
-  color: var(--ficha-tinta);
-}
-.amx-v2 .amx-leg-peldano h3 {
-  font-family: var(--sans);
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--ficha-tinta);
-  margin: 0;
-}
-.amx-v2 .amx-leg-arts {
-  margin-top: 10px;
-}
-.amx-v2 .amx-leg-arts summary {
-  font-family: var(--mono);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--manila-tinta);
-  cursor: pointer;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-}
-.amx-v2 .amx-leg-arts summary:focus-visible {
-  outline: 2px solid var(--ficha-tinta);
-  outline-offset: 2px;
-}
+
+
+
+
+
 .amx-v2 .amx-leg-selector {
   display: block;
   margin: 18px 0;
@@ -7351,28 +7336,9 @@
   outline: 2px solid var(--ficha-tinta);
   outline-offset: 2px;
 }
-.amx-v2 .amx-leg-contraste {
-  background: var(--ficha);
-  padding: 16px;
-  margin: 18px 0;
-  border-left: 3px solid var(--sello-civil);
-  color: var(--ficha-tinta);
-}
-.amx-v2 .amx-leg-contraste h2,
-.amx-v2 .amx-leg-contraste h3 {
-  font-family: var(--sans);
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--ficha-tinta);
-  margin: 0 0 8px;
-}
-.amx-v2 .amx-leg-contraste p {
-  font-family: var(--sans);
-  font-size: 15.5px;
-  line-height: 1.6;
-  color: var(--ficha-tinta);
-  margin: 0;
-}
+
+
+
 .amx-v2 .amx-leg-ficha {
   background: var(--oficio);
   padding: 16px;

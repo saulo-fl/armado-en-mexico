@@ -163,7 +163,7 @@ test('las ramas de Legalidad se parsean, y una desconocida cae en el hub', () =>
 // navegador. Aquí se cuentan los cinco de una vez.
 test('cada pantalla nueva está dada de alta en los cinco sitios', () => {
   for (const [pantalla, ruta, titulo] of [
-    ['legal-tramites', 'legalidad/tramites', 'Trámites'],
+    ['legal-tramites', 'legalidad/tramites', 'Trámites y costos'],
     ['entrevista', 'legalidad/puedo-comprar', '¿Puedo comprar un arma?'],
   ]) {
     assert.ok(src.includes("'" + ruta + "'"), pantalla + ': falta su ruta en SCREEN_TO_PATH');

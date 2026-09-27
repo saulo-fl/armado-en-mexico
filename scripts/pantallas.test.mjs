@@ -101,19 +101,22 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
   for (const h of huecos) {
     if (h.nota) assert.ok(!t2.includes(h.nota.slice(0, 40)), 'la nota interna del hueco ' + h.tabla + '/' + h.id + ' sale en pantalla');
   }
-  // UNA SOLA PÁGINA (22-sep-2026): las cuatro secciones están dentro del hub, plegadas,
-  // y nada manda a otra pantalla. Lo que antes vivía en /legalidad/federal, /estatal,
-  // /tramites y /documentos tiene que estar aquí.
-  assert.match(t2, /Qué arma puedo tener y dónde/, 'lo federal no está en el hub');
+  // UNA SOLA PÁGINA (22-sep-2026): todo está dentro del hub, plegado, y nada manda a
+  // otra pantalla. Lo que antes vivía en /legalidad/federal, /estatal, /tramites y
+  // /documentos tiene que estar aquí. No se buscan los ROTULOS de los folders: un test
+  // atado al rótulo vigila el rótulo, no que el contenido esté.
+  const C = win.AMX_LEGAL;
+  for (const p of C.explicado.ley) assert.ok(t2.includes(p.pregunta), 'falta la pregunta «' + p.pregunta + '»');
   assert.match(t2, /Elige tu estado/, 'lo estatal no está en el hub');
-  assert.match(t2, /Posesión no es portación/, 'los trámites no están en el hub');
-  // No se busca el ROTULO del folder: desde el hilo 11 de Penpot los cuatro se titulan
-  // con la pregunta que resuelven, y un test atado al rótulo vigila el rótulo, no que el
-  // contenido esté aquí. Esta frase es del cuerpo de Documentos.
-  assert.match(t2, /Los textos oficiales que sustentan esta guía/, 'los documentos no están en el hub');
-  // Cuatro folders exactos y trece plegables dentro (3 preguntas + 1 «por qué no hay ley
-  // estatal» + 6 trámites + 3 grupos de documentos); un solo botón, el de la entrevista
-  // (el arnés no carga ui.jsx, así que ReportarError no cuenta).
+  assert.match(t2, /Para tener un arma en casa haces dos cosas/, 'los trámites no están en el hub');
+  assert.match(t2, /Fuentes/, 'las Fuentes del pie no están en el hub');
+  // Lenguaje llano (26-sep-2026): nada de fichas de normas ni de «01 · Constitución».
+  assert.doesNotMatch(t2, /\b0\d · /, 'volvieron los peldaños numerados');
+  assert.doesNotMatch(t2, /resumen y cita/, 'volvieron las fichas de artículos');
+  assert.doesNotMatch(t2, /\{\{/, 'una nota al pie salió cruda, sin convertir');
+  // Tres folders exactos y doce plegables dentro (5 preguntas + 6 trámites) más el de
+  // «Más documentos» en Fuentes; un solo botón, el de la entrevista (el arnés no carga
+  // ui.jsx, así que ReportarError no cuenta).
   const conClase = (nodo, clase, n = { v: 0 }) => {
     if (!nodo || typeof nodo !== 'object') return n.v;
     if (Array.isArray(nodo)) { nodo.forEach((x) => conClase(x, clase, n)); return n.v; }
@@ -122,8 +125,12 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
     (nodo.hijos || []).forEach((x) => conClase(x, clase, n));
     return n.v;
   };
-  assert.equal(conClase(arbol, 'amx-leg-folder'), 4, 'el cajón lleva exactamente cuatro folders');
-  assert.equal(conClase(arbol, 'amx-leg-plegable'), 13, 'dentro de los folders van trece plegables');
+  assert.equal(conClase(arbol, 'amx-leg-folder'), 3, 'el cajón lleva exactamente tres folders');
+  assert.equal(conClase(arbol, 'amx-leg-plegable'), 12, 'van doce plegables');
+  // Cada nota [n] tiene su entrada en Fuentes, y ninguna entrada sobra.
+  const refs = win.amxReferencias(C);
+  assert.ok(refs.length >= 5, 'la página cita muy pocas fuentes: ' + refs.length);
+  assert.equal(conClase(arbol, 'amx-leg-nota') > 0, true, 'no salió ninguna nota al pie');
   assert.equal(contar(arbol, 'button'), 1, 'el único botón del hub es el de la entrevista');
 });
 
@@ -143,7 +150,8 @@ test('LegalidadTramites separa PERMISO de COMPRA, que es el error que corrige', 
   // Y lo que antes vivía en Permisos: los seis trámites, cada uno con su paso, su
   // importe y la vigencia de la cuota junto a él (hilos 6 y 7).
   for (const tr of C.tramites) assert.ok(t2.includes(tr.nombre), 'falta el trámite ' + tr.id);
-  assert.match(t2, /Posesión no es portación/);
+  // Posesión no es portación: la entrada llana lo dice antes de los seis trámites.
+  assert.match(t2, /Todo lo demás \(licencia para llevarla contigo/);
   assert.match(t2, /Cuota vigente 2026/, 'la vigencia de la cuota no sale junto al importe');
   assert.match(t2, /\$15,804\.77/, 'el importe va con separador de miles');
   assert.doesNotMatch(t2, /Paso \d+ de \d+/, 'el orden del corpus no es una cronología: nada de «Paso N de M»');
@@ -167,26 +175,53 @@ test('el checklist de cada trámite cuenta lo mismo en pantalla y en el prerende
   assert.deepEqual(cuenta(t2), cuenta(html));
 });
 
-test('LegalidadFederal va por pregunta ciudadana y no publica el hueco de una norma', (t) => {
+test('Lo que permite la ley responde cada pregunta en llano, sin publicar huecos', (t) => {
   if (!win.LegalidadFederal) return t.skip('pantalla aún no escrita');
   const t2 = texto(win.LegalidadFederal({ onNav: () => {} }));
   const C = win.AMX_LEGAL;
-  assert.match(t2, /Qué arma puedo tener y dónde/);
-  assert.match(t2, /Qué papel lleno/);
-  assert.match(t2, /Cuánto cuesta cada trámite/);
-  assert.doesNotMatch(t2, /Pendiente de verificar/, 'el hueco de una norma es interno (hilo 2)');
-  // Una norma en revisión no publica su resumen ni su nota de vigencia (afirmaciones sin
-  // verificar), pero sí su fuente y una línea neutra.
+  assert.ok(C.explicado.ley.length === 5, 'son cinco preguntas');
+  for (const p of C.explicado.ley) {
+    const plano = win.amxPartirCitas(p.texto)[0].texto;
+    assert.ok(t2.replace(/\s+/g, ' ').includes(plano.slice(0, 60)), 'no se pinta la respuesta a «' + p.pregunta + '»');
+  }
+  // Una norma en revisión no publica su resumen ni su nota de vigencia.
   for (const n of C.normas.filter((x) => x.revisar)) {
     if (n.resumen) assert.ok(!t2.includes(n.resumen.slice(0, 40)), 'la norma en revisión «' + n.id + '» publica su resumen');
     if (n.notaVigencia) assert.ok(!t2.includes(n.notaVigencia.slice(0, 40)), 'la norma en revisión «' + n.id + '» publica su nota de vigencia');
   }
-  assert.match(t2, /En verificación/);
-  // La norma sin texto confirmado no se publica hasta verificarse.
   const simpl = C.normas.find((n) => n.id === 'acuerdo-simplificacion');
   if (simpl && simpl.revisar) assert.ok(!t2.includes(simpl.titulo), 'el Acuerdo de simplificación no debe publicarse sin texto');
-  // Los artículos, como resumen + cita (hilo 4).
-  assert.match(t2, /artículos · resumen y cita/);
+});
+
+// Cada {{id}} de los textos llanos apunta a una fuente que existe, con enlace, y que no
+// está en revisión: una nota que no lleva a ningún lado es una afirmación sin fuente.
+test('cada nota al pie de los textos llanos lleva a una fuente publicable', () => {
+  const C = win.AMX_LEGAL;
+  const textos = C.explicado.ley.map((p) => p.texto).concat([C.explicado.estado, C.explicado.tramites]);
+  for (const tx of textos) {
+    const ids = win.amxPartirCitas(tx).filter((x) => x.fuente).map((x) => x.fuente);
+    assert.ok(ids.length > 0, 'un texto llano sin ninguna fuente: ' + tx.slice(0, 50));
+    for (const id of ids) {
+      const f = C.fuentes[id];
+      assert.ok(f, 'la nota {{' + id + '}} no existe en fuentes');
+      assert.ok(f.url, 'la fuente ' + id + ' no tiene enlace');
+      assert.ok(!f.revisar, 'la fuente ' + id + ' está en revisión');
+    }
+  }
+});
+
+// La pantalla y el prerender numeran igual: la nota [n] de un bot es la misma que ve
+// una persona, y cada una tiene su entrada en la lista.
+test('las notas y las Fuentes numeran igual en pantalla y en el prerender', () => {
+  const refs = win.amxReferencias(win.AMX_LEGAL);
+  for (const seccion of ['federal', 'estatal', 'tramites', 'documentos']) {
+    const html = renderLegalHtml(win.AMX_LEGAL, seccion, helpers);
+    assert.equal((html.match(/<li id="fuente-\d+"/g) || []).length, refs.length, seccion + ': la lista de Fuentes no trae todas las citadas');
+    for (const m of html.matchAll(/href="#fuente-(\d+)"/g)) {
+      assert.ok(Number(m[1]) >= 1 && Number(m[1]) <= refs.length, seccion + ': nota [' + m[1] + '] sin entrada');
+    }
+    assert.doesNotMatch(html, /\{\{/, seccion + ': una nota salió cruda');
+  }
 });
 
 test('LegalidadEstatal deja en el selector a las entidades sin portal, en gris y avisando', (t) => {
@@ -319,7 +354,7 @@ import { renderLegalHtml } from './prerender-legal.mjs';
 const helpers = {
   amxLegalFuente: win.amxLegalFuente, amxLegalHuecos: win.amxLegalHuecos,
   amxRequisitosDe: win.amxRequisitosDe, amxLegalFecha: win.amxLegalFecha,
-  amxNormasPorPregunta: win.amxNormasPorPregunta, amxVigenciaCuota: win.amxVigenciaCuota,
+  amxPartirCitas: win.amxPartirCitas, amxReferencias: win.amxReferencias, amxVigenciaCuota: win.amxVigenciaCuota,
   amxImporte: win.amxImporte, amxRotuloEscenarios: win.amxRotuloEscenarios,
 };
 
@@ -385,9 +420,10 @@ test('cada sección del cajón tiene su ruta profunda en el router', () => {
   const bloque = src.match(/const LEGALIDAD_SECCIONES = \[[\s\S]*?\n\];/);
   assert.ok(bloque, 'no encuentro LEGALIDAD_SECCIONES');
   const ids = [...bloque[0].matchAll(/\bid:\s*'([^']+)'/g)].map((m) => m[1]);
-  assert.deepEqual(ids, ['federal', 'estatal', 'tramites', 'documentos']);
+  assert.deepEqual(ids, ['federal', 'estatal', 'tramites']);
   const mapa = app.match(/const SCREEN_TO_PATH = \{[\s\S]*?\n\};/)[0];
-  for (const id of ids) {
+  // /legalidad/documentos ya no es folder: lleva a las Fuentes del pie.
+  for (const id of ids.concat('documentos')) {
     assert.match(mapa, new RegExp("'legal-" + id + "':\\s*'legalidad/" + id + "'"), 'legal-' + id + ' no tiene ruta en SCREEN_TO_PATH');
     assert.match(app, new RegExp("screen === 'legal-" + id + "'"), 'legal-' + id + ' no se monta en el router');
     assert.match(src, new RegExp('seccion="' + id + '"'), 'la ruta profunda de ' + id + ' no abre su folder');
