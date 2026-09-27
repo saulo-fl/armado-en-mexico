@@ -312,11 +312,10 @@ const TRABAJOS = {
   legalidad: () => recorrido('legalidad', '/legalidad', { x: 270, y: 60, w: 900, h: 1000 }, [
     ['.amx-leg-cta', 'LA ENTREVISTA'],
     ['.amx-mapa', 'EL MAPA DEL TRÁMITE'],
-    [{ sel: '.amx-faq-folder', indice: 0 }, 'FEDERAL'],
-    [{ sel: '.amx-faq-folder', indice: 1 }, 'POR ESTADO'],
-    ['.amx-leg-contraste', 'POSESIÓN NO ES PORTACIÓN'],
-    [{ sel: '.amx-faq-folder', indice: 2, alto: 620 }, 'LOS SEIS TRÁMITES'],
-    [{ sel: '.amx-faq-folder', indice: 3 }, 'FUNDAMENTO LEGAL EN PDF'],
+    [{ sel: '.amx-faq-folder', indice: 0 }, 'LO QUE PERMITE LA LEY'],
+    [{ sel: '.amx-faq-folder', indice: 1 }, 'EN TU ESTADO'],
+    [{ sel: '.amx-faq-folder', indice: 2, alto: 620 }, 'TRÁMITES Y COSTOS'],
+    ['.amx-leg-fuentes', 'LAS FUENTES, AL PIE'],
   ]),
   calibres: () => recorrido('calibres', '/calibres', { x: 180, y: 70, w: 1080, h: 1000 }, [
     [{ sel: '.amx-anaquel' }, 'CARTUCHOS A ESCALA REAL'],

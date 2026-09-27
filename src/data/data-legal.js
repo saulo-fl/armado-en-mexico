@@ -42,6 +42,27 @@
       ],
     },
     noHayEstatal: 'No existe normativa estatal de armas de fuego. El artículo 10 de la Constitución reserva a la ley federal los casos, condiciones, requisitos y lugares en que se puede autorizar la portación, y la Ley Federal de Armas de Fuego y Explosivos deja su aplicación en manos de la Presidencia, de la Secretaría de la Defensa Nacional y de las demás autoridades federales: a los estados, municipios y alcaldías solo les corresponde la intervención que esa misma ley y su reglamento les señalan. Por eso ningún congreso local puede crear permisos, licencias ni registros de armas de fuego, y cuando lo intenta la norma se invalida: en marzo de 2025 el Pleno de la Suprema Corte, por unanimidad, tumbó el artículo 46 de la Ley del Sistema Estatal de Seguridad Ciudadana de Baja California por extender los efectos de una licencia oficial colectiva fuera de la función de seguridad. Lo que sí cambia de un estado a otro son los documentos locales que el trámite federal te pide: la constancia de antecedentes penales, que debe expedirla la autoridad de la entidad donde resides y cuyo portal, costo y tiempo de entrega varían en cada estado; la constancia domiciliaria o de posesión de la primera autoridad administrativa municipal; el certificado de ejidatario o comunero del Comisariado Ejidal; y el certificado de modo honesto de vivir que pide el Reglamento para la licencia de portación. Además, cada estado define en su código penal qué objetos que no son armas de fuego cuentan como armas prohibidas, y regula a las empresas de seguridad privada que operan solo dentro de su territorio; el arma, en cambio, sigue siendo siempre federal.',
+    // Legalidad en lenguaje llano (26-sep-2026, aprobado por Saulo en el chat): la
+    // página RESPONDE las preguntas en lugar de enseñar fichas de normas. Cada {{id}} es
+    // una nota al pie: la pantalla y el prerender la cambian por [n], enlazado a la lista
+    // de Fuentes del final (numerada por orden de aparición, como Wikipedia). El id tiene
+    // que existir en `fuentes`; lo vigila scripts/legalidad.test.mjs.
+    explicado: {
+      ley: [
+        { id: 'que-armas', pregunta: '¿Qué armas puede tener una persona común?',
+          texto: 'Puedes tener un arma en tu casa para defenderte {{cpeum}}. Pero no cualquiera: a los civiles solo se les permiten pistolas de calibre .380 o menor y revólveres de hasta .38 Especial. Las 9 mm, las .38 Súper, las .357, los rifles .223 y las armas automáticas son del Ejército y nunca se autorizan a un civil. Si practicas tiro o caza en un club registrado, puedes tener además rifles y escopetas deportivas, hasta diez armas. Desde 2025 también están prohibidas las armas impresas en 3D, las hechizas y las réplicas {{lfafe}}.' },
+        { id: 'donde', pregunta: '¿Dónde puede estar el arma?',
+          texto: 'Solo en el domicilio que declaraste ante la Defensa, y cada persona declara uno solo {{lfafe}}. Si la compras en la DCAM, sale ya registrada {{dcam}}. Para tener más de dos armas en la misma casa tienes que justificarlo {{reglamento-lfafe}}. Tener más de cinco sin permiso especial ya es delito, con cárcel de uno a siete años {{lfafe}}.' },
+        { id: 'portar', pregunta: '¿Puedo llevarla conmigo fuera de casa?',
+          texto: 'No, salvo que tengas licencia de portación. Sin ella, llevarla en la calle o en el coche es delito: de tres a ocho años de cárcel {{lfafe}}. La licencia es un trámite aparte, cuesta $6,359 y se renueva cada año; la Defensa la da solo si considera que la necesitas, así que cumplir los requisitos no garantiza que te la den {{lfd}}. Para ir al club de tiro o de caza basta un permiso de transportación, siempre con el arma descargada {{reglamento-lfafe}}.' },
+        { id: 'comprar', pregunta: '¿Dónde se compra?',
+          texto: 'Solo en la tienda de la Defensa: la DCAM, en Naucalpan, o la OTCA, en Monterrey, si vives en Coahuila, Nuevo León, San Luis Potosí o Tamaulipas {{dcam}}. La venta por internet está prohibida. Comprarle a un particular solo es legal con permiso; si compras un arma sin poder demostrar de dónde salió, la pena es de seis a diez años de cárcel {{lfafe}}.' },
+        { id: 'cartuchos', pregunta: '¿Cuántas balas puedo comprar?',
+          texto: 'Solo del calibre de las armas que tienes registradas. Por persona: hasta 200 cartuchos para pistola o revólver, 500 de .22 y 1,000 de escopeta. Para defensa de tu casa compras una vez al año; para caza, cada tres meses; para tiro deportivo, cada mes {{lfafe}}.' },
+      ],
+      estado: 'Las leyes de armas son las mismas en todo el país y ningún estado puede dar permisos propios {{cpeum}}{{scjn-cc-505-2023}}. Lo que cambia es dónde sacas tu constancia de antecedentes penales, a qué tienda te toca ir y si puedes mandar papeles por correo.',
+      tramites: 'Para tener un arma en casa haces dos cosas: pides el permiso de compra ($490) y vas a la DCAM a comprarla, donde pagas además $201 de registro por cada arma y sale ya registrada {{costos-e5cinco}}{{dcam}}. Todo lo demás (licencia para llevarla contigo, permiso para ir al club, colección) son trámites aparte.',
+    },
     portada: {
       eyebrow: 'LEGALIDAD',
       title: 'Información normativa',
@@ -876,6 +897,7 @@
     tramites: [
       {
         id: 'permiso-adquisicion',
+        llano: 'Permiso para comprar',
         clase: 'permiso',
         homoclave: 'DEFENSA-02-040',
         notaHomoclave: 'El trámite está registrado en gob.mx como DEFENSA-02-040 y así se nombra en todo el sitio, porque la dependencia se renombró. El PDF impreso todavía lleva en algunas hojas la clave anterior, SEDENA-02-040, y su anexo de constancia domiciliaria sigue publicándose como «SEDENA-02-040-Const. Dom.»: son el mismo trámite y el mismo formato.',
@@ -961,6 +983,7 @@
       },
       {
         id: 'compra-dcam',
+        llano: 'Comprar el arma en la DCAM',
         clase: 'compra',
         nombre: 'Compra del arma en la Dirección de Comercialización de Armamento y Municiones (DCAM)',
         dependencia: 'Secretaría de la Defensa Nacional — Dirección General de Industria Militar, Dirección de Comercialización de Armamento y Municiones',
@@ -1016,6 +1039,7 @@
       },
       {
         id: 'registro-arma',
+        llano: 'Registrar un arma',
         clase: 'registro',
         homoclave: 'DEFENSA-02-062',
         nombre: 'Registro de un arma de fuego en sus diferentes modalidades',
@@ -1067,6 +1091,7 @@
       },
       {
         id: 'licencia-portacion',
+        llano: 'Licencia para llevarla contigo',
         clase: 'licencia',
         homoclave: 'DEFENSA-02-025',
         nombre: 'Expedición de una licencia particular individual de portación de arma de fuego para personas físicas',
@@ -1130,6 +1155,7 @@
       },
       {
         id: 'permiso-coleccion',
+        llano: 'Permiso de colección',
         clase: 'permiso',
         homoclave: 'DEFENSA-02-032',
         nombre: 'Permiso para poseer colección de armas de fuego (coleccionista o museo)',
@@ -1173,6 +1199,7 @@
       },
       {
         id: 'permiso-transporte',
+        llano: 'Permiso para llevarla al club o de caza',
         clase: 'permiso',
         homoclave: 'DEFENSA-02-045',
         nombre: 'Permiso extraordinario para la transportación de armas de fuego con fines de caza, tiro y/o competencia nacional',
