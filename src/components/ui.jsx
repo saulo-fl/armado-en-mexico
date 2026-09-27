@@ -3652,7 +3652,7 @@ function ReportarError({ tipo, titulo, ruta }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         <strong style={{
           fontFamily: 'Archivo, sans-serif', fontSize: 15,
-          color: 'var(--tinta)', fontWeight: 700
+          color: 'var(--manila-tinta)', fontWeight: 700
         }}>¿Encontraste un dato incorrecto?</strong>
         <span style={{
           fontFamily: 'var(--sans)', fontSize: 14, lineHeight: 1.55
@@ -3661,7 +3661,7 @@ function ReportarError({ tipo, titulo, ruta }) {
         </span>
         <small style={{
           fontFamily: 'var(--sans)', fontSize: 12.5, lineHeight: 1.5,
-          color: 'var(--tinta-dim)'
+          color: 'var(--oficio-tinta-2)'
         }}>
           El formulario y lo que escribas serán públicos en GitHub. No incluyas datos personales.
         </small>

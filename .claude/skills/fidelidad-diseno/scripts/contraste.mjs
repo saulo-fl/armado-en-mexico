@@ -173,6 +173,7 @@ const PAPELERIA = [
   ['sello civil sobre el milimétrico', '--sello-civil', '--milimetrico', 4.5],
   ['sello restr. sobre el milimétrico','--sello-restr', '--milimetrico', 4.5],
   ['tinta-2 sobre el oficio',          '--oficio-tinta-2', '--oficio', 4.5],
+  ['título del reporte sobre el oficio', '--manila-tinta', '--oficio', 4.5],
   ['tinta-2 sobre el separador',       '--oficio-tinta-2', '--oficio-2', 4.5],
   ['oficio sobre la banda civil',      '--oficio', '--sello-civil', 4.5],
   ['oficio sobre la banda restr.',     '--oficio', '--sello-restr', 4.5],
