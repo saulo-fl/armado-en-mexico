@@ -53,6 +53,7 @@ async function abrir(ruta, vista) {
     localStorage.removeItem('amx_entrevista_v1');
   });
   await pagina.goto(RAIZ + ruta, { waitUntil: 'networkidle2', timeout: 45000 });
+  await pagina.addStyleTag({ content: '#__amx_devbar, #__amx_devstage { display: none !important; }' });
   await esperar(1500);   // hidratación desde D1 y fuentes
   return pagina;
 }
@@ -166,8 +167,9 @@ async function montarSola(nombre, png) {
 //   { sel, texto, todos, indice, alto }         filtra por el texto con que empieza
 //                                              (regex), une todos o toma uno
 //   { titulo, hasta }                          de un rótulo de columna al siguiente
-async function recorrido(nombre, ruta, general, PARADAS) {
+async function recorrido(nombre, ruta, general, PARADAS, preparar) {
   const pagina = await abrir(ruta, ESCRITORIO);
+  if (preparar) await preparar(pagina);
   const rects = await pagina.evaluate((specs) => specs.map((spec) => {
     if (typeof spec === 'string') spec = { sel: spec };
     const caja = (r) => ({ x: r.left, y: r.top + scrollY, x2: r.right, y2: r.bottom + scrollY });
@@ -288,13 +290,22 @@ const TRABAJOS = {
     ['.amx-oficio', 'CLASIFICACIÓN LEGAL'],
     ['.amx-milimetrico', 'HISTORIAL DE PRECIOS'],
   ]),
-  'ficha-municion': () => recorrido('ficha-municion', '/municiones/380-acp-federal-fmj-95-gr', { x: 150, y: 50, w: 1140, h: 1000 }, [
-    [{ titulo: 'PRECIO DE REFERENCIA', hasta: 'HISTORIAL DE PRECIOS' }, 'PRECIO POR CARTUCHO Y EXISTENCIAS'],
-    [{ titulo: 'HISTORIAL DE PRECIOS', hasta: 'ESTATUS LEGAL' }, 'HISTORIAL DE PRECIOS'],
-    [{ titulo: 'ESTATUS LEGAL' }, 'ESTATUS LEGAL'],
-    [{ titulo: 'ESPECIFICACIONES', hasta: 'COMPATIBLE CON' }, 'ESPECIFICACIONES'],
-    ['.amx-carousel', 'ARMAS DE SU CALIBRE'],
-  ]),
+  'ficha-municion': () => recorrido('ficha-municion', '/municiones/380-acp-federal-fmj-95-gr', { x: 140, y: 60, w: 1160, h: 1000 }, [
+    ['.amx-talon-papel', 'PRECIO POR CARTUCHO'],
+    ['.amx-kardex-carton', 'EXISTENCIAS POR ARMERÍA'],
+    ['.amx-fichero-carton', 'FICHA TÉCNICA'],
+    ['.amx-oficio[data-activo="si"]', 'REQUISITO LEGAL'],
+    ['.amx-milimetrico', 'HISTORIAL DE PRECIOS'],
+    ['.amx-similares', 'ARMAS COMPATIBLES'],
+  ], async (pagina) => {
+    await pagina.evaluate(() => {
+      const pestana = [...document.querySelectorAll('[role="tab"]')]
+        .find((el) => el.textContent.trim() === 'Legalidad');
+      if (!pestana) throw new Error('sin pestaña Legalidad');
+      pestana.click();
+    });
+    await esperar(100);
+  }),
   'ficha-accesorio': () => recorrido('ficha-accesorio', '/opticas/mira-reflex-meprolight-mepro-mor', { x: 140, y: 60, w: 1160, h: 1000 }, [
     ['.amx-talon-papel', 'PRECIO OFICIAL CON IVA'],
     ['.amx-kardex-carton', 'EXISTENCIAS POR ARMERÍA'],
