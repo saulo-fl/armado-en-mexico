@@ -13,7 +13,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { transformSync } from '@babel/core';
 
@@ -459,5 +459,18 @@ test('la entrevista enseña NOMBRES de documento, no ids, y su título de verdad
     assert.ok(req, 'el guion cita un documento que el corpus no tiene: ' + id);
     assert.ok(t2.includes(req.nombre), 'la carpeta no muestra el nombre de «' + id + '»');
     assert.ok(!t2.includes(id), 'la carpeta enseña el id crudo «' + id + '» en vez del nombre');
+  }
+});
+
+test('ninguna lista memorizada depende del setter de un estado (el setter nunca cambia y la lista se congela)', () => {
+  // 27-sep-2026: la portada memorizaba sus cuatro listas con [forceRender] —el setter— y
+  // un visitante nuevo veía los datos del primer pintado, no los de D1.
+  const dir = raiz('src/screens/');
+  for (const f of readdirSync(dir).filter((n) => n.endsWith('.jsx'))) {
+    const src = readFileSync(dir + f, 'utf8');
+    for (const [, setter] of src.matchAll(/const \[\w*, (\w+)\] = (?:React\.)?use\w*\(/g)) {
+      const enDependencias = new RegExp('\\[[^\\]\\[]*\\b' + setter + '\\b[^\\]\\[]*\\]\\);');
+      assert.ok(!enDependencias.test(src), f + ': una lista de dependencias usa el setter «' + setter + '»');
+    }
   }
 });
