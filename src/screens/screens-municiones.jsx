@@ -329,7 +329,9 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
   React.useEffect(() => window.Store && window.Store.onChange(() => forzar((x) => x + 1)), []);
   // La hoja abierta vuelve a la primera al pasar de una munición a otra.
   const [tab, setTab] = useStateMun(0);
-  React.useEffect(() => { setTab(0); }, [municionId]);
+  // «Otras municiones»: 12 a la vista y el resto tras «Ver los N» (Saulo, 26-sep-2026).
+  const [todasOtras, setTodasOtras] = useStateMun(false);
+  React.useEffect(() => { setTab(0); setTodasOtras(false); }, [municionId]);
   const talon = window.useTalonFijo(municionId);
   const mun = window.getMunicionById(municionId);
 
@@ -461,7 +463,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
         <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-otras">
           <window.CintaDymo id="ficha-otras">Otras municiones</window.CintaDymo>
           <div className="amx-vitrina">
-            <window.Repisa rotulo={'Munición · ' + mun.calibre} items={relacionados} porFila={ancho ? 6 : 0}
+            <window.Repisa rotulo={'Munición · ' + mun.calibre} items={todasOtras ? relacionados : relacionados.slice(0, 12)} porFila={ancho ? 6 : 0}
               renderArticulo={(m) => {
                 const foto = munFoto(m);
                 const s = SELLOS[m.avail] || sello;
@@ -478,6 +480,11 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
                     </React.Fragment>} />
                 );
               }} />
+            {relacionados.length > 12 &&
+              <button type="button" className="amx-registro-mas" aria-expanded={todasOtras}
+                onClick={() => setTodasOtras(!todasOtras)}>
+                Ver los {relacionados.length}
+              </button>}
           </div>
         </section>}
 
