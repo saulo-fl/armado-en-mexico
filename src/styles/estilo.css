@@ -1868,6 +1868,13 @@
   color: var(--manila-tinta-2);
 }
 .amx-v2 .amx-copia-opinion b { color: var(--manila-tinta); }
+.amx-v2 .amx-copia-nota {
+  margin: var(--e3) 0 0;
+  text-align: center;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--manila-tinta);
+}
 
 /* ── EL TALÓN DE COMPROBANTE — papel autocopiante rosa ─────────────────────
    El borde de abajo va PICADO, como un talón arrancado de su block. El picado

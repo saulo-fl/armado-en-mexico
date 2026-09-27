@@ -680,6 +680,12 @@ const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 70, 71, 72, 74, 75, 76, 77, 
   239, 240]; // CZ 457 LRP Black y MDT Chassis: «Picatinny mounting rail with 25 MOA inclination» (czfirearms.com, #180)
 window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 
+// `fotoIlustrativa`: la foto es del modelo pero no del acabado que dice el registro
+// (camuflaje, madera o color distintos). La ficha lo avisa bajo la foto. Es un sitio
+// divulgativo, no una tienda: la comunidad irá afinando estas fotos (Saulo, 26-sep-2026).
+// Va por id y no como campo del arma: D1 pisa window.DB al hidratar y el campo se perdería.
+window.ARMAS_FOTO_ILUSTRATIVA = [42, 51, 52, 53, 126, 179, 180, 181, 196, 197];
+
 // helper de búsqueda usado por screens / admin
 window.findArma = function(id) {
   if (id == null) return null;
