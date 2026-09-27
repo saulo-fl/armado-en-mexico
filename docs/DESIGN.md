@@ -1273,6 +1273,19 @@ sus separadores (§5.7).
 - **Conteo y «Limpiar»** en un renglón bajo la tira («▸ 227 ARMAS · 1 FILTRO», sin total). «Limpiar» borra filtros,
   precio y búsqueda, y solo sale si hay algo puesto.
 
+### 5.11 La ficha de munición — el mismo expediente (26-sep-2026)
+
+Decidido con Saulo (rama `Opus-5/RED-ficha-municion`). Reglas en `src/lib/cotejo.js`
+(`amxInventarioMunicion`, `amxCompatMunicion`, `amxRequisitoMunicion`), con prueba; pantalla en
+`MunicionFicha` (`screens-municiones.jsx`); primitivas de §5.5.
+
+- **Réplica de la ficha de accesorio (§5.8)**, pestaña «Munición». Título: el nombre; debajo, la
+  descripción. La copia es la foto de la caja; si no carga, la silueta de munición.
+- **El talón dice la unidad:** «Por cartucho · con IVA», o «Por caja» (2046); en móvil, `/ cartucho`.
+- **Legalidad: solo el requisito de este cartucho** de la tabla de la DCAM (escopeta, anular .22,
+  fuego central). Sin requisito: los de seguridad y el .17 HMR, hasta confirmarlo con la DCAM.
+- **Debajo del folder:** Armas compatibles (todas, sin ⇄), Otras municiones del calibre y Opiniones.
+
 ---
 
 ## 6. Prohibiciones explícitas
