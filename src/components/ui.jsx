@@ -2591,7 +2591,7 @@ window.TalonComprobante = TalonComprobante;
 // componente definido dentro de otro remonta su subárbol en cada render.
 // Los nombres son navegación interna: sin «↗», que en el sitio es «abre un PDF».
 const COMPAT_A_LA_VISTA = 6;
-function HojaCompatibilidad({ compat, onOpenArma }) {
+function HojaCompatibilidad({ compat, onOpenArma, rotulo = 'Sirve a:' }) {
   const [todas, setTodas] = React.useState(false);
   if (compat.caso === 'plataforma') {
     return <p className="amx-oficio-texto">Sirve a: {compat.texto} (sin ficha en el Arsenal)</p>;
@@ -2600,7 +2600,7 @@ function HojaCompatibilidad({ compat, onOpenArma }) {
   return (
     <React.Fragment>
       <p className="amx-oficio-texto">
-        {compat.caso === 'regla' ? `Sirve a: ${compat.texto}. En el Arsenal:` : 'Sirve a:'}
+        {compat.caso === 'regla' ? `Sirve a: ${compat.texto}. En el Arsenal:` : rotulo}
       </p>
       <ul className="amx-oficio-lista amx-compat-lista">
         {visibles.map((a) => (
@@ -3616,23 +3616,6 @@ function ReglaComparativa({ titulo, valor, min, max, unidad, fuente }) {
 }
 window.ReglaComparativa = ReglaComparativa;
 
-// ──────────────────────────────────────────────────────────────
-// REGLA CARTUCHO — cartucho de pie sobre regla graduada en mm
-// ──────────────────────────────────────────────────────────────
-function ReglaCartucho({ calibre, escala, mmMax }) {
-  const foto = calibre.cartucho || 'imagenes/cartuchos/silueta-vertical.webp';
-  const paso = (10 / (mmMax || 84.8)) * 100;
-  return (
-    <div className="amx-reglacart" style={{ '--escala': escala, '--paso': paso + '%' }}>
-      <div className="amx-reglacart-pozo">
-        <img className="amx-reglacart-foto" src={foto} alt="" loading="lazy" />
-        <span className="amx-reglacart-regla" aria-hidden="true" />
-      </div>
-      <div className="amx-reglacart-pie">{calibre.mm} mm de largo</div>
-    </div>
-  );
-}
-window.ReglaCartucho = ReglaCartucho;
 // ══════════════════════════════════════════════════════════════
 // REPORTAR ERROR — enlace público a GitHub para correcciones factuales
 // Aparece al final de las fichas de arma, accesorio, munición, calibre,

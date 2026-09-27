@@ -109,3 +109,13 @@ test('8 — la foto del cartucho llega a la guía (la mesa y la ficha la leen de
   assert.strictEqual(conFoto.length, GUIA_COMPLETA.length,
     `los ${GUIA_COMPLETA.length} calibres traen cartucho; llegaron ${conFoto.length}`);
 });
+
+test('9 — amxMismoCalibre iguala «.308 Win» con «.308 Winchester» y nada más', () => {
+  assert.equal(window.amxMismoCalibre('.308 Win', '.308 Winchester'), true);
+  assert.equal(window.amxMismoCalibre('.243 Winchester', '.243 Win'), true);
+  assert.equal(window.amxMismoCalibre('.300 Win Mag', '.300 Win Mag'), true);
+  assert.equal(window.amxMismoCalibre('.30-30 Win', '.30-30 Win'), true);
+  assert.equal(window.amxMismoCalibre('.308 Win', '.30-06 Sprg'), false);
+  assert.equal(window.amxMismoCalibre('.300 Win Mag', '.300 Winchester'), false);
+  assert.equal(window.amxMismoCalibre(undefined, undefined), false);
+});

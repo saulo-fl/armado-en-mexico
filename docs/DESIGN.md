@@ -1287,6 +1287,27 @@ Decidido con Saulo (rama `Opus-5/RED-ficha-municion`). Reglas en `src/lib/cotejo
 - **Debajo del folder:** Armas compatibles (todas, sin ⇄), Otras municiones del calibre en la vitrina de la ficha de arma
   (`Repisa` y etiqueta de cartón; 12 a la vista y «Ver los N» dentro del mueble) y Opiniones.
 
+### 5.12 La ficha de calibre — el mismo expediente (28-sep-2026)
+
+Decidido con Saulo en cinco rondas (rama `Opus-5/RED-ficha-calibre`; spec en
+`docs/superpowers/specs/2026-09-28-ficha-calibre-design.md`). Pantalla en `CalibreScreen` (`screens-3.jsx`);
+cruce de munición en `amxMismoCalibre` (`src/lib/calibres.js`, con prueba); primitivas de §5.5.
+
+- **Réplica de la ficha de munición (§5.11) sin talón ni tarjeta de almacén:** un calibre no tiene precio ni
+  existencias propias, y no se inventan. Pestaña «Calibre» en las 30.
+- **Cabecera:** clase · sistema, el nombre, el uso, «También se le llama…» y la descripción.
+- **La copia** es la foto del cartucho; al pie, su nombre y su largo («25 mm de largo»). Sello legal estampado;
+  los calibres sin clasificación fijada (.357 Magnum, .45 ACP, 5.7x28mm) van **sin sello**. La regla del
+  cartucho de la ficha anterior se retiró: la foto y el largo al pie la sustituyen.
+- **Ficha técnica:** Velocidad, Energía, Retroceso y En el catálogo.
+- **Papel milimétrico:** solo «Energía frente a los otros 29», con su fuente. Las escopetas (.410, 12, 16 y
+  20 GA) no lo llevan.
+- **Hojas: Armas · Legalidad**, abre en Armas («Lo disparan:», 6 enlaces y «Ver las N»); sin armas, no hay hoja.
+- **Móvil:** cabecera → copia → ficha técnica → milimétrico → hojas. **Escritorio:** copia | cabecera y ficha;
+  debajo, hojas | milimétrico; en las escopetas las hojas se quedan en su columna.
+- **Debajo del folder:** Municiones de este calibre (la vitrina de §5.11, compartida en `VitrinaMuniciones`)
+  → Armas que lo usan (polaroids, 6 y «Ver las N en el Arsenal») → «¿Encontraste un dato incorrecto?».
+
 ---
 
 ## 6. Prohibiciones explícitas

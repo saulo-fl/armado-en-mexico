@@ -16,6 +16,20 @@
   }
 
   /**
+   * ¿Es el mismo calibre? El inventario de munición abrevia «.308 Win» donde la
+   * guía y el catálogo de armas dicen «.308 Winchester» (igual .243 y .270).
+   * ponytail: solo iguala el sufijo « Winchester»; otra abreviatura, aquí y en su prueba.
+   * @param {string} a
+   * @param {string} b
+   * @returns {boolean}
+   */
+  function amxMismoCalibre(a, b) {
+    if (a == null || b == null) return false;
+    var corto = function (s) { return String(s).replace(/ Winchester$/, ' Win'); };
+    return corto(a) === corto(b);
+  }
+
+  /**
    * Enriched y ordena la guía de calibres.
    * A cada calibre le agrega:
    *   - armas: cuántas entradas de db tienen a.calibre === c.id
@@ -164,4 +178,5 @@
   window.amxPosicionEnRango = amxPosicionEnRango;
   window.amxCalibrePorSlug = amxCalibrePorSlug;
   window.amxFiltrarCalibres = amxFiltrarCalibres;
+  window.amxMismoCalibre = amxMismoCalibre;
 })();

@@ -543,7 +543,7 @@ function App() {
   } else if (screen === 'calibres') {
     content = <window.CalibresScreen onNav={navigate} onAbrirCalibre={openCalibre} />;
   } else if (screen === 'calibre') {
-    content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onNav={navigate} />;
+    content = <window.CalibreScreen calibreId={calibreId} onOpenArma={openArma} onOpenMunicion={openMunicion} onNav={navigate} />;
   // Campos y Experiencias estan CONGELADAS hasta el lanzamiento: sus datos son
   // de relleno (ver data-extra.js). CamposScreen y CursosScreen siguen escritas
   // en screens-3.jsx — para reactivarlas basta con volver a montarlas aqui.

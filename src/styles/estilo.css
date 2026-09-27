@@ -1755,6 +1755,40 @@
   .amx-v2 .amx-carpeta-historial { grid-area: historial; }
 }
 
+/* LA FICHA DE CALIBRE (28-sep-2026, DESIGN.md §5.12): el mismo folder sin talón
+   ni tarjeta de almacén. Desde 1024, copia | cabecera y ficha; debajo, hojas |
+   milimétrico. Las escopetas no llevan milimétrico y sus hojas se quedan en su
+   columna (Saulo). */
+@media (min-width: 1024px) {
+  .amx-v2 .amx-carpeta--calibre .amx-carpeta-grid {
+    grid-template-areas:
+      "foto   cab"
+      "foto   ficha"
+      "legal  historial";
+    grid-template-rows: auto 1fr auto;
+  }
+}
+.amx-v2 .amx-carpeta-clase {
+  margin-bottom: 6px;
+  font-family: var(--mono); font-size: 12.5px; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--manila-tinta-2);
+}
+.amx-v2 .amx-carpeta-uso { margin-top: 6px; font-family: var(--mono); font-size: 13.5px; color: var(--manila-tinta); }
+.amx-v2 .amx-carpeta-alias { margin-top: 4px; font-size: 14px; color: var(--manila-tinta-2); }
+.amx-v2 .amx-carpeta-art { font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; color: var(--oficio-tinta-2); }
+/* La regla de energía, sobre el milimétrico: tintas del papel, que no siguen al
+   tema. Acotado a .amx-milimetrico porque .amx-regla la comparte el filtro de precio. */
+.amx-v2 .amx-milimetrico .amx-regla-titulo,
+.amx-v2 .amx-milimetrico .amx-regla-pies,
+.amx-v2 .amx-milimetrico .amx-regla-fuente { color: var(--milimetrico-tinta-2); }
+.amx-v2 .amx-milimetrico .amx-regla-pies b { color: var(--manila-tinta); }
+.amx-v2 .amx-milimetrico .amx-regla-pista {
+  background: repeating-linear-gradient(90deg, transparent, transparent 24%,
+    var(--milimetrico-linea) 24%, var(--milimetrico-linea) 25%);
+}
+.amx-v2 .amx-milimetrico .amx-regla-cursor { background: var(--sello-restr); }
+.amx-v2 .amx-milimetrico .amx-regla { height: auto; }
+
 .amx-v2 .amx-carpeta-cab h1 {
   margin: 0;
   font-size: 27px;
@@ -5813,40 +5847,6 @@
   margin-top: 4px;
 }
 
-/* ── Regla cartucho — cartucho de pie sobre regla graduada en mm ───────── */
-.amx-v2 .amx-reglacart {
-  --alto-cart: 240px;
-}
-@media (max-width: 1023px) {
-  .amx-v2 .amx-reglacart {
-    --alto-cart: 180px;
-  }
-}
-.amx-v2 .amx-reglacart-pozo {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-  height: var(--alto-cart);
-}
-.amx-v2 .amx-reglacart-foto {
-  height: calc(var(--alto-cart) * var(--escala));
-  width: auto;
-  display: block;
-}
-.amx-v2 .amx-reglacart-regla {
-  width: 30px;
-  height: 100%;
-  background: repeating-linear-gradient(to top, var(--hair) 0 1px, transparent 1px var(--paso));
-}
-.amx-v2 .amx-reglacart-pie {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  font-variant-numeric: tabular-nums;
-  color: var(--carton-tinta-2);
-  margin-top: 6px;
-}
-
 /* ══════════════════════════════════════════════════════════════════════════
    GUÍA DE CALIBRES — pantalla /calibres
 
@@ -5929,108 +5929,6 @@
   flex-direction: column;
   gap: 10px;
   margin-top: 18px;
-}
-
-/* ══════════════════════════════════════════════════════════════════════════
-   FICHA DE CALIBRE — pantalla /calibres/<slug>
-
-   La ficha es una hoja de papel con sombra, no una caja con borde: en este
-   sistema las cosas se separan por superficie y sombra, nunca por una línea
-   de 1px.
-   ══════════════════════════════════════════════════════════════════════════ */
-
-.amx-v2 .amx-calficha {
-  background: var(--papel);
-  box-shadow: var(--sombra);
-  padding: 20px;
-}
-@media (min-width: 1024px) {
-  .amx-v2 .amx-calficha { padding: 28px; }
-}
-
-.amx-v2 .amx-calficha-cabeza {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 14px;
-}
-
-.amx-v2 .amx-calficha-clase {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  color: var(--tinta-2);
-}
-
-.amx-v2 .amx-calficha-id {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 28px;
-  color: var(--tinta);
-  margin: 2px 0 4px;
-  line-height: 1.05;
-}
-@media (min-width: 1024px) {
-  .amx-v2 .amx-calficha-id { font-size: 38px; }
-}
-
-.amx-v2 .amx-calficha-uso {
-  font-family: var(--mono);
-  font-size: 14px;
-  color: var(--acento);
-}
-
-.amx-v2 .amx-calficha-alias {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--tinta-2);
-  margin-top: 6px;
-}
-
-.amx-v2 .amx-calficha-sinsello {
-  font-family: var(--mono);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  color: var(--tinta-2);
-}
-
-.amx-v2 .amx-calficha-specs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 4px 16px;
-  margin: 18px 0;
-}
-
-.amx-v2 .amx-calficha-nota {
-  margin-top: 14px;
-}
-
-.amx-v2 .amx-calficha-legal {
-  background: var(--lienzo);
-  padding: 16px;
-  margin-top: 20px;
-}
-
-.amx-v2 .amx-calficha-legal-tit {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  text-transform: uppercase;
-  letter-spacing: .14em;
-  color: var(--tinta-2);
-  margin-bottom: 8px;
-}
-
-.amx-v2 .amx-calficha-legal-art {
-  font-family: var(--mono);
-  font-size: 12.5px;
-  color: var(--tinta-2);
-  margin: 10px 0 12px;
-}
-
-.amx-v2 .amx-calficha-armas {
-  margin-top: 24px;
 }
 
 .amx-v2 .amx-calficha-arma {

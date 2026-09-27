@@ -164,21 +164,28 @@ const CARTUCHO_HOME_MAXH = 120;
 
 // ═══════════════════════════════════════════════════════════════════════
 // FICHA DE UN CALIBRE — /calibres/<slug>
-// El expediente de un cartucho: su tamaño real sobre la regla, sus cifras
-// situadas entre las de los otros 29, lo que la ley mexicana dice de él y las
-// armas del catálogo que lo usan.
+// El mismo expediente que las fichas de arma, accesorio y munición (DESIGN.md
+// §5.12, decidido con Saulo el 28-sep-2026). Sin talón ni tarjeta de almacén:
+// un calibre no tiene precio ni existencias propias. Debajo, sus municiones y
+// sus armas.
 // ═══════════════════════════════════════════════════════════════════════
-function CalibreScreen({ calibreId, onOpenArma, onNav }) {
+function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
   const vp = window.useViewport();
-  const padX = vp.isDesktop ? 28 : 16;
+  // La hoja abierta vuelve a la primera al pasar de un calibre a otro.
+  const [tab, setTab] = useState3(0);
+  React.useEffect(() => { setTab(0); }, [calibreId]);
   const guia = useMemo3(() => window.amxGuiaCalibres(window.CALIBRES || [], window.DB || []), []);
   const cal = guia.find((c) => c.id === calibreId);
   const rango = useMemo3(() => window.amxRangoCalibres(guia), [guia]);
-  const mmMax = useMemo3(() => guia.reduce((m, c) => Math.max(m, c.mm || 0), 0), [guia]);
+
+  // Un solo corte, el del expediente: 1024px (DESIGN.md §5.5).
+  const ancho = vp.width >= 1024;
+  const PAD = ancho ? 28 : 16;
+  const SEC = ancho ? 52 : 34;
 
   if (!cal) {
     return (
-      <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 720, margin: '0 auto' }}>
+      <div style={{ padding: `20px ${PAD}px 90px`, maxWidth: 720, margin: '0 auto' }}>
         <p style={window.amxProsa({})}>Ese calibre no está en la guía.</p>
         <button type="button" className="amx-calchip" onClick={() => onNav && onNav('calibres')}>Ver los 30 calibres</button>
       </div>
@@ -187,80 +194,119 @@ function CalibreScreen({ calibreId, onOpenArma, onNav }) {
 
   const armas = armasPorCalibre(cal.id);
   const visibles = armas.slice(0, 6);
+  const municiones = (window.MUNICIONES || []).filter((m) => window.amxMismoCalibre(m.calibre, cal.id));
   const sello = (window.SELLOS_LEGALES || {})[cal.avail];
+  const conEnergia = typeof cal.energiaJ === 'number' && rango.energia.max > 0;
+  // La copia: la foto del cartucho y, al pie, su nombre y su largo (Saulo).
+  const copia = { id: cal.id, nombre: cal.id, img: cal.cartucho, marca: cal.mm ? cal.mm + ' mm de largo' : '' };
+  const silueta = { forma: 'imagenes/cartuchos/silueta-vertical.webp', nombre: 'cartucho' };
+  const filas = [
+    ['Velocidad', cal.velocidad],
+    ['Energía', cal.energia],
+    ['Retroceso', cal.retroceso],
+    ['En el catálogo', armas.length === 0 ? 'No se vende en DCAM' : armas.length + (armas.length === 1 ? ' arma' : ' armas')],
+  ];
 
   return (
-    <div style={{ padding: `20px ${padX}px 90px`, maxWidth: 900, margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
-      <div className="amx-calficha">
-        <div className="amx-calficha-cabeza">
-          <div>
-            <div className="amx-calficha-clase">{cal.clase} · {cal.sistema}</div>
-            <h1 className="amx-calficha-id">{cal.id}</h1>
-            <div className="amx-calficha-uso">{cal.uso}</div>
-            {cal.alias && cal.alias.length > 0
-              ? <div className="amx-calficha-alias">También se le llama {cal.alias.join(', ')}</div>
-              : null}
+    <div style={{ paddingBottom: 90 }}>
+     <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+      <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
+        <article className="amx-carpeta amx-carpeta--calibre" aria-labelledby="ficha-nombre">
+          <span className="amx-carpeta-rotulo">Calibre</span>
+          <div className="amx-carpeta-grid">
+            <header className="amx-carpeta-cab">
+              <div className="amx-carpeta-clase">{cal.clase} · {cal.sistema}</div>
+              <h1 id="ficha-nombre" className="t-titulo">{cal.id}</h1>
+              <div className="amx-carpeta-uso">{cal.uso}</div>
+              {cal.alias && cal.alias.length > 0 &&
+                <div className="amx-carpeta-alias">También se le llama {cal.alias.join(', ')}</div>}
+              {cal.desc && <p className="amx-carpeta-desc">{cal.desc}</p>}
+            </header>
+
+            <div className="amx-carpeta-foto">
+              <div className="amx-copia">
+                <span className="amx-copia-clip" aria-hidden="true" />
+                <window.ArmaPolaroid arma={copia} silueta={silueta} />
+                {/* Sin clasificación fijada, sin sello (Saulo, 28-sep-2026). */}
+                {sello &&
+                  <span className="amx-copia-sello">
+                    <window.SelloLegal key={cal.id} avail={cal.avail} etiqueta={cal.legalArt}
+                      className="amx-sello--estampa" />
+                  </span>}
+              </div>
+            </div>
+
+            <div className="amx-carpeta-ficha">
+              <window.FichaTecnica arma={{ nombre: cal.id }} filas={filas} />
+            </div>
+
+            {/* En el móvil el milimétrico va antes que las hojas (Saulo). Las escopetas
+                no lo llevan: su energía no se compara con la de una bala. */}
+            {conEnergia &&
+              <div className="amx-carpeta-historial">
+                <div className="amx-milimetrico">
+                  <window.ReglaComparativa titulo="Energía frente a los otros 29"
+                    valor={cal.energiaJ} min={rango.energia.min} max={rango.energia.max}
+                    unidad="J" fuente={cal.fuente} />
+                </div>
+              </div>}
+
+            <div className="amx-carpeta-legal amx-separadores">
+              <window.FichaTabs activo={tab} onCambiar={setTab}>
+                {armas.length > 0 &&
+                  <window.FichaPanel label="Armas">
+                    <window.HojaCompatibilidad key={cal.id} compat={{ caso: 'fichas', armas: armas, texto: '' }}
+                      onOpenArma={onOpenArma} rotulo="Lo disparan:" />
+                  </window.FichaPanel>}
+                <window.FichaPanel label="Legalidad">
+                  {sello &&
+                    <div className={'amx-oficio-banda amx-oficio-banda--' + sello.tono}>
+                      <span>Clasificación: {sello.texto}</span>
+                    </div>}
+                  <p className="amx-oficio-texto">{cal.legalNota}</p>
+                  <p className="amx-oficio-texto amx-carpeta-art">{cal.legalArt}</p>
+                  <button type="button" className="amx-oficio-boton" onClick={() => onNav && onNav('legal')}>
+                    § Guía legal completa
+                  </button>
+                </window.FichaPanel>
+              </window.FichaTabs>
+            </div>
           </div>
-          {sello
-            ? <window.SelloLegal avail={cal.avail} etiqueta={cal.legalArt} grande />
-            : <span className="amx-calficha-sinsello">Clasificación pendiente</span>}
-        </div>
-
-        <p style={window.amxProsa({ marginTop: 14 })}>{cal.desc}</p>
-
-        <window.ReglaCartucho calibre={cal} escala={cal.escala} mmMax={mmMax} />
-
-        <div className="amx-calficha-specs">
-          <window.SpecRow label="Velocidad" value={cal.velocidad} />
-          <window.SpecRow label="Energía" value={cal.energia} />
-          <window.SpecRow label="Retroceso" value={cal.retroceso} />
-          <window.SpecRow label="En el catálogo" value={armas.length === 0 ? 'No se vende en DCAM' : armas.length + (armas.length === 1 ? ' arma' : ' armas')} />
-        </div>
-
-        {typeof cal.energiaJ === 'number' && rango.energia.max > 0
-          ? <window.ReglaComparativa titulo="Energía frente a los otros 29"
-              valor={cal.energiaJ} min={rango.energia.min} max={rango.energia.max}
-              unidad="J" fuente={cal.fuente} />
-          : <p className="amx-calficha-nota" style={window.amxProsa({})}>
-              La energía de una escopeta no se compara con la de una bala única: depende
-              de la carga de perdigón y va repartida en cientos de municiones.
-            </p>}
-
-        <div className="amx-calficha-legal">
-          <div className="amx-calficha-legal-tit">Qué dice la ley mexicana</div>
-          <p style={window.amxProsa({})}>{cal.legalNota}</p>
-          <div className="amx-calficha-legal-art">{cal.legalArt}</div>
-          <button type="button" className="amx-calchip" onClick={() => onNav && onNav('legal')}>
-            Ver la pantalla de Legalidad
-          </button>
-        </div>
-
-        {visibles.length > 0 ? (
-          <div className="amx-calficha-armas">
-            <window.CintaDymo chica>Armas que lo usan</window.CintaDymo>
-            <DragScroll style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
-              {/* ArmaPolaroid no recibe onClick: el clic va en el botón que la envuelve. */}
-              {visibles.map((a) => (
-                <button key={a.id} type="button" className="amx-calficha-arma"
-                  onClick={() => onOpenArma && onOpenArma(a.id)} aria-label={a.nombre}>
-                  <window.ArmaPolaroid arma={a} />
-                </button>
-              ))}
-            </DragScroll>
-            {armas.length > visibles.length ? (
-              <button type="button" className="amx-calchip"
-                onClick={() => onNav && onNav('category', { mode: 'calibre', value: cal.id })}>
-                Ver las {armas.length} en el Arsenal
-              </button>
-            ) : null}
-          </div>
-        ) : null}
+        </article>
       </div>
 
-      {/* Viene del rediseño de soporte (#242): ahora que cada calibre tiene su
-          propia dirección, la corrección apunta a la ficha y no a un ancla. */}
-      <window.ReportarError tipo="calibre" titulo={cal.id}
-        ruta={'/calibres/' + window.amxSlug(cal.id)} />
+      {municiones.length > 0 &&
+        <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-municiones">
+          <window.CintaDymo id="ficha-municiones">Municiones de este calibre</window.CintaDymo>
+          <window.VitrinaMuniciones key={cal.id} items={municiones} rotulo={'Munición · ' + cal.id}
+            ancho={ancho} onOpenMunicion={onOpenMunicion} />
+        </section>}
+
+      {visibles.length > 0 &&
+        <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-armas">
+          <window.CintaDymo id="ficha-armas">Armas que lo usan</window.CintaDymo>
+          <DragScroll style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+            {/* ArmaPolaroid no recibe onClick: el clic va en el botón que la envuelve. */}
+            {visibles.map((a) => (
+              <button key={a.id} type="button" className="amx-calficha-arma"
+                onClick={() => onOpenArma && onOpenArma(a.id)} aria-label={a.nombre}>
+                <window.ArmaPolaroid arma={a} />
+              </button>
+            ))}
+          </DragScroll>
+          {armas.length > visibles.length &&
+            <button type="button" className="amx-calchip"
+              onClick={() => onNav && onNav('category', { mode: 'calibre', value: cal.id })}>
+              Ver las {armas.length} en el Arsenal
+            </button>}
+        </section>}
+
+      {/* Viene del rediseño de soporte (#242): la corrección apunta a la ficha. */}
+      <div style={{ padding: `${SEC}px ${PAD}px 0` }}>
+        <window.ReportarError tipo="calibre" titulo={cal.id}
+          ruta={'/calibres/' + window.amxSlug(cal.id)} />
+      </div>
+     </div>
     </div>
   );
 }
