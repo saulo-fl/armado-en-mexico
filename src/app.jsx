@@ -582,7 +582,8 @@ function App() {
   } else if (screen === 'accesorio') {
     content = <window.AccesorioFicha accesorioId={accesorioId} onOpenArma={openArma} onNav={navigate} onReportReview={openReviewReport} compareIds={compareIds} />;
   } else if (screen === 'municiones') {
-    content = <window.MunicionesScreen initialFilter={catalogFilter} onOpenMunicion={openMunicion} onNav={navigate} />;
+    content = <window.MunicionesScreen initialFilter={catalogFilter} onOpenMunicion={openMunicion} onNav={navigate}
+      onCategoria={(id) => setCatalogFilter(id === 'all' ? null : { categoria: id })} />;
   } else if (screen === 'municion') {
     content = <window.MunicionFicha municionId={municionId} onOpenMunicion={openMunicion} onOpenArma={openArma} onNav={navigate} onReportReview={openReviewReport} compareIds={compareIds} />;
   }
