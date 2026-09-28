@@ -3403,7 +3403,7 @@ function ReglaPrecio({ uid, precio, formato }) {
       <input type="range" className="amx-regla-cursor" id={uid + '-precio-lo'}
         min={min} max={max} step={paso} value={lo} aria-label="Precio mínimo"
         aria-valuetext={dicho(lo)}
-        style={{ '--z': lo - min > ancho / 2 ? 3 : 1 }}
+        style={{ '--z': 3 }}
         onChange={(e) => precio.cambiar(Math.max(min, Math.min(Number(e.target.value), hi - paso)), hi)} />
       <input type="range" className="amx-regla-cursor" id={uid + '-precio-hi'}
         min={min} max={max} step={paso} value={hi} aria-label="Precio máximo"
