@@ -3135,6 +3135,15 @@
   color: var(--oficio-tinta-2);
 }
 .amx-v2 .amx-renglon-ayuda.es-ok { color: var(--sello-civil); }
+/* El desplegable sin la flecha del sistema: un triángulo en la tinta del papel
+   (#5A5142 = --oficio-tinta-2; un data: URI no lee variables). */
+.amx-v2 select.amx-renglon {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 28px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M0 0h12L6 8z' fill='%235A5142'/%3E%3C/svg%3E") no-repeat right 6px center / 11px 7px;
+  cursor: pointer;
+}
 .amx-v2 .amx-renglones-2 { display: grid; grid-template-columns: minmax(0, 1fr); column-gap: var(--e4); }
 @media (min-width: 720px) { .amx-v2 .amx-renglones-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .amx-v2 .amx-comentarios-pie {
@@ -4446,7 +4455,14 @@
   --alto-foto: 150px;
   margin: 0;
   padding: 0 0 8px;
+  /* Sin barra (Saulo, 27-sep-2026): la fila se desliza con el dedo, el trackpad o
+     arrastrando con el ratón (useArrastreHorizontal). Lo que dice que sigue es el
+     calibre que asoma cortado en el borde. */
+  scrollbar-width: none;
+  cursor: grab;
 }
+.amx-v2 .amx-mostrador::-webkit-scrollbar { display: none; }
+.amx-v2 .amx-mostrador.es-arrastre { cursor: grabbing; user-select: none; }
 /* En móvil la mesa llega al borde derecho de la pantalla: asoma el siguiente
    calibre y se lee que la mesa sigue (a 390 px cabían tres justos y nada invitaba
    a deslizar). */
@@ -4745,7 +4761,7 @@
   font-variant-numeric: tabular-nums;
   color: var(--tinta);
 }
-.amx-v2 .amx-regla { position: relative; height: 62px; }
+.amx-v2 .amx-regla { position: relative; height: 62px; font-variant-numeric: tabular-nums; }
 .amx-v2 .amx-regla-marcas,
 .amx-v2 .amx-regla-riel { position: absolute; left: 11px; right: 11px; }
 .amx-v2 .amx-regla-marcas { top: 0; height: 34px; }
@@ -5849,21 +5865,6 @@
   content: "▸";
   flex-shrink: 0;
   color: var(--sello-civil);
-}
-
-/* ── Resto de la regla comparativa de calibres (retirada el 27-sep-2026): `.amx-regla` y
-   `.amx-regla-cursor` también las usa el filtro de precio (ReglaPrecio), así que se quedan. ── */
-
-.amx-v2 .amx-regla {
-  font-variant-numeric: tabular-nums;
-}
-.amx-v2 .amx-regla-cursor {
-  position: absolute;
-  top: 0;
-  left: calc(var(--pos) * 100%);
-  width: 2px;
-  height: 22px;
-  background: var(--acento);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -7199,30 +7200,38 @@
   display: block;
   margin: 18px 0;
 }
-.amx-v2 .amx-leg-selector span {
-  display: block;
-  font-family: var(--mono);
-  font-size: 13px;
-  text-transform: uppercase;
-  letter-spacing: .12em;
-  color: var(--manila-tinta);
-  margin-bottom: 6px;
-}
-.amx-v2 .amx-leg-selector select {
-  display: block;
-  min-height: 44px;
-  width: 100%;
-  max-width: 420px;
-  padding: 0 10px;
-  font-family: var(--sans);
-  font-size: 15.5px;
-  background: var(--ficha);
-  color: var(--ficha-tinta);
-  border: 1px solid var(--carton-filo);
-}
-.amx-v2 .amx-leg-selector select:focus-visible {
+/* El selector es un renglón del formato (el mismo de Soporte): etiqueta mecanografiada
+   y la línea azul del fichero, sobre el papel del oficio. */
+.amx-v2 .amx-leg-selector .amx-renglon { max-width: 420px; min-height: 44px; }
+.amx-v2 .amx-leg-selector .amx-renglon:focus-visible {
   outline: 2px solid var(--ficha-tinta);
   outline-offset: 2px;
+}
+/* El mapa: la república impresa en la hoja, en tinta de papelería (igual en los dos
+   temas). El estado elegido se enciende con la luz de los puestos del Arsenal. */
+.amx-v2 .amx-leg-mapa {
+  display: block;
+  width: 100%;
+  max-width: 620px;
+  height: auto;
+  margin: 8px 0 4px;
+  overflow: visible;
+}
+.amx-v2 .amx-leg-mapa-estado {
+  fill: var(--oficio-2);
+  stroke: var(--oficio-tinta-2);
+  stroke-width: .8px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+  transition: fill .2s ease;
+}
+.amx-v2 .amx-leg-mapa-estado:hover { fill: var(--carton-filo); }
+.amx-v2 .amx-leg-mapa-estado.es-elegido {
+  fill: #F2C14E;
+  stroke: var(--ficha-tinta);
+  stroke-width: 1.6px;
+  filter: drop-shadow(0 0 6px var(--puesto-luz));
 }
 .amx-v2 .amx-leg-estado {
   background: var(--oficio);

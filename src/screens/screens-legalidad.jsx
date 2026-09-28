@@ -65,6 +65,29 @@ function LegalidadLeyCuerpo({ C, refs }) {
 /*  Lo que cambia por estado                                          */
 /* ----------------------------------------------------------------__ */
 
+// El mapa de la república: cada estado es un <use> que apunta a su silueta en
+// imagenes/mapa-mexico.svg (Natural Earth, dominio público; lo genera
+// scripts/mapa-mexico.mjs). Así el mapa solo se descarga cuando se abre esta
+// sección y queda en caché. Un clic en un estado lo elige, igual que el selector;
+// el selector sigue siendo el control de teclado y de lector de pantalla. El
+// elegido se pinta al final para que su borde no quede bajo el de sus vecinos.
+function LegalidadMapa({ entidades, sel, onElegir }) {
+  const elegido = entidades.find((e) => e.id === sel);
+  const orden = elegido ? entidades.filter((e) => e !== elegido).concat(elegido) : entidades;
+  return (
+    <svg className="amx-leg-mapa" viewBox="0 0 1000 678" role="img"
+      aria-label={elegido ? `Mapa de México con ${elegido.nombre} resaltado` : 'Mapa de México'}>
+      {orden.map((e) => (
+        <use key={e.id} href={'imagenes/mapa-mexico.svg#' + e.id}
+          className={'amx-leg-mapa-estado' + (e === elegido ? ' es-elegido' : '')}
+          onClick={() => onElegir(e.id)}>
+          <title>{e.nombre}</title>
+        </use>
+      ))}
+    </svg>
+  );
+}
+
 function LegalidadEstatalCuerpo({ C, refs }) {
   const [sel, setSel] = React.useState('');
   const ent = C.entidades.find((e) => e.id === sel);
@@ -74,11 +97,11 @@ function LegalidadEstatalCuerpo({ C, refs }) {
     <div className="amx-leg-cuerpo">
       <p className="amx-leg-intro"><LegalidadCitado texto={C.explicado.estado} refs={refs} /></p>
       <label className="amx-leg-selector">
-        <span>Elige tu estado</span>
+        <span className="amx-renglon-etq">Elige tu estado</span>
         {/* Las entidades sin portal verificado se quedan en el selector, en gris y con
             su aviso (hilo 5): es transparencia, y cada URL que se verifique las saca de
             ahí sin tocar código. */}
-        <select value={sel} onChange={(e) => setSel(e.target.value)}>
+        <select className="amx-renglon" value={sel} onChange={(e) => setSel(e.target.value)}>
           <option value="">Selecciona…</option>
           {C.entidades.map((e) => (
             <option key={e.id} value={e.id} className={sinPortal(e) ? 'amx-leg-opcion--sin-portal' : undefined}>
@@ -87,6 +110,7 @@ function LegalidadEstatalCuerpo({ C, refs }) {
           ))}
         </select>
       </label>
+      <LegalidadMapa entidades={C.entidades} sel={sel} onElegir={setSel} />
       {ent && (
         <dl className="amx-leg-estado">
           <dt>Constancia de antecedentes penales</dt>
