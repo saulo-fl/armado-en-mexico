@@ -4761,7 +4761,7 @@
   font-variant-numeric: tabular-nums;
   color: var(--tinta);
 }
-.amx-v2 .amx-regla { position: relative; height: 62px; }
+.amx-v2 .amx-regla { position: relative; height: 62px; font-variant-numeric: tabular-nums; }
 .amx-v2 .amx-regla-marcas,
 .amx-v2 .amx-regla-riel { position: absolute; left: 11px; right: 11px; }
 .amx-v2 .amx-regla-marcas { top: 0; height: 34px; }
@@ -5865,21 +5865,6 @@
   content: "▸";
   flex-shrink: 0;
   color: var(--sello-civil);
-}
-
-/* ── Resto de la regla comparativa de calibres (retirada el 27-sep-2026): `.amx-regla` y
-   `.amx-regla-cursor` también las usa el filtro de precio (ReglaPrecio), así que se quedan. ── */
-
-.amx-v2 .amx-regla {
-  font-variant-numeric: tabular-nums;
-}
-.amx-v2 .amx-regla-cursor {
-  position: absolute;
-  top: 0;
-  left: calc(var(--pos) * 100%);
-  width: 2px;
-  height: 22px;
-  background: var(--acento);
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
