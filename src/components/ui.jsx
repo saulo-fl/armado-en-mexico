@@ -1727,12 +1727,70 @@ window.CompareFloat = CompareFloat;
 
 
 // ──────────────────────────────────────────────────────────────
+// ARRASTRE CON RATÓN — una fila que se desliza de lado. El táctil ya tiene su
+// scroll nativo con inercia; esto le da lo mismo al ratón de escritorio. Si hubo
+// arrastre, se come el clic que lo termina para no abrir lo que quedó debajo.
+// `alSoltar(el)` asienta la fila al terminar un arrastre; sin él, vuelve el imán
+// del CSS.
+// ──────────────────────────────────────────────────────────────
+function useArrastreHorizontal(ref, alSoltar) {
+  const drag = React.useRef({ down: false, moved: false, startX: 0, startScroll: 0 });
+  const [arrastrando, setArrastrando] = React.useState(false);
+  const fin = () => {
+    if (!drag.current.down) return;
+    const el = ref.current;
+    drag.current.down = false;
+    setArrastrando(false);
+    if (!el) return;
+    if (drag.current.moved && alSoltar) alSoltar(el);
+    else el.style.scrollSnapType = '';
+  };
+  const manejadores = {
+    onPointerDown: (e) => {
+      if (e.pointerType !== 'mouse') return; // táctil: scroll nativo con momentum
+      const el = ref.current;
+      if (!el) return;
+      drag.current = { down: true, moved: false, startX: e.clientX, startScroll: el.scrollLeft };
+      el.style.scrollSnapType = 'none';
+    },
+    onPointerMove: (e) => {
+      if (!drag.current.down) return;
+      const el = ref.current;
+      if (!el) return;
+      const dx = e.clientX - drag.current.startX;
+      if (Math.abs(dx) > 6 && !drag.current.moved) {
+        drag.current.moved = true;
+        setArrastrando(true);
+      }
+      el.scrollLeft = drag.current.startScroll - dx;
+    },
+    onPointerUp: fin,
+    onPointerCancel: fin,
+    onPointerLeave: fin,
+    onClickCapture: (e) => {
+      if (drag.current.moved) {
+        e.preventDefault();
+        e.stopPropagation();
+        drag.current.moved = false;
+      }
+    },
+    onDragStart: (e) => e.preventDefault(),
+  };
+  return { arrastrando, manejadores };
+}
+
+// ──────────────────────────────────────────────────────────────
 // HORIZONTAL CAROUSEL — carrusel moderno: swipe táctil + arrastre con mouse + snap + flechas
 // ──────────────────────────────────────────────────────────────
 function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, emptyText }) {
   const scrollerRef = React.useRef(null);
-  const drag = React.useRef({ down: false, moved: false, startX: 0, startScroll: 0 });
-  const [dragging, setDragging] = React.useState(false);
+  const step = itemWidth + gap;
+  // asentar en la tarjeta más cercana y reactivar el snap
+  const { arrastrando: dragging, manejadores } = useArrastreHorizontal(scrollerRef, (el) => {
+    const target = Math.max(0, Math.round(el.scrollLeft / step) * step);
+    el.scrollTo({ left: target, behavior: 'smooth' });
+    setTimeout(() => { el.style.scrollSnapType = ''; }, 360);
+  });
 
   if (!items || !items.length) {
     return emptyText ? (
@@ -1749,62 +1807,12 @@ function HCarousel({ items, renderItem, itemWidth = 175, gap = 12, padX = 16, em
     ) : null;
   }
 
-  const step = itemWidth + gap;
-
-  const onPointerDown = (e) => {
-    if (e.pointerType !== 'mouse') return; // táctil: scroll nativo con momentum
-    const el = scrollerRef.current;
-    if (!el) return;
-    drag.current = { down: true, moved: false, startX: e.clientX, startScroll: el.scrollLeft };
-    el.style.scrollSnapType = 'none';
-  };
-  const onPointerMove = (e) => {
-    if (!drag.current.down) return;
-    const el = scrollerRef.current;
-    if (!el) return;
-    const dx = e.clientX - drag.current.startX;
-    if (Math.abs(dx) > 6 && !drag.current.moved) {
-      drag.current.moved = true;
-      setDragging(true);
-    }
-    el.scrollLeft = drag.current.startScroll - dx;
-  };
-  const endDrag = () => {
-    if (!drag.current.down) return;
-    const el = scrollerRef.current;
-    drag.current.down = false;
-    setDragging(false);
-    if (el) {
-      if (drag.current.moved) {
-        // asentar en la tarjeta más cercana y reactivar el snap
-        const target = Math.max(0, Math.round(el.scrollLeft / step) * step);
-        el.scrollTo({ left: target, behavior: 'smooth' });
-        setTimeout(() => { el.style.scrollSnapType = ''; }, 360);
-      } else {
-        el.style.scrollSnapType = '';
-      }
-    }
-  };
-  const onClickCapture = (e) => {
-    if (drag.current.moved) {
-      e.preventDefault();
-      e.stopPropagation();
-      drag.current.moved = false;
-    }
-  };
-
   return (
     <div style={{ position: 'relative' }} className="amx-carousel">
       <div
         ref={scrollerRef}
         className="amx-hscroll"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={endDrag}
-        onPointerCancel={endDrag}
-        onPointerLeave={endDrag}
-        onClickCapture={onClickCapture}
-        onDragStart={(e) => e.preventDefault()}
+        {...manejadores}
         style={{
           display: 'flex', gap, overflowX: 'auto', overflowY: 'hidden',
           scrollSnapType: 'x mandatory',
@@ -3279,11 +3287,16 @@ window.HojaClasificacion = HojaClasificacion;
 // escala real (`--escala` = largo ÷ el más largo), con su etiqueta de cartón
 // delante y la luz de los puestos detrás. Sin foto, la silueta de pie.
 function MostradorCalibres({ calibres, onAbrir }) {
+  // Sin barra de scroll (Saulo, 27-sep-2026): se desliza con el dedo, con el
+  // trackpad o arrastrando con el ratón; con teclado, las flechas.
+  const fila = React.useRef(null);
+  const { arrastrando, manejadores } = useArrastreHorizontal(fila);
   return (
     // La repisa va dentro de su mueble: sola, flotaba sobre el fondo de la
     // página. El canto y la pared son los mismos de la vitrina de la ficha.
     <div className="amx-anaquel amx-anaquel--mostrador">
-    <div className="amx-repisa-fila amx-mostrador" role="region" aria-label="Calibres" tabIndex={0}>
+    <div ref={fila} className={'amx-repisa-fila amx-mostrador' + (arrastrando ? ' es-arrastre' : '')}
+      role="region" aria-label="Calibres" tabIndex={0} {...manejadores}>
       <ul className="amx-repisa-carril">
         {calibres.map((c) => (
           <li key={c.id} className="amx-articulo-celda amx-mostrador-celda">
