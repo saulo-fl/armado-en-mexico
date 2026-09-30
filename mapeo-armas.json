@@ -1,0 +1,693 @@
+{
+  "existencias": {
+    "1": 7,
+    "2": 24,
+    "7": 18,
+    "8": 26,
+    "9": 29,
+    "10": 33,
+    "11": 7,
+    "15": 2,
+    "19": 26,
+    "20": 11,
+    "21": 13,
+    "23": 13,
+    "24": 15,
+    "25": 15,
+    "26": 10,
+    "27": 27,
+    "29": 2,
+    "30": 1,
+    "31": 18,
+    "36": 27,
+    "37": 7,
+    "38": 13,
+    "40": 13,
+    "41": 41,
+    "43": 16,
+    "44": 5,
+    "45": 6,
+    "46": 4,
+    "47": 8,
+    "48": 6,
+    "49": 6,
+    "57": 9,
+    "58": 3,
+    "59": 2,
+    "60": 6,
+    "67": 6,
+    "68": 10,
+    "69": 1,
+    "73": 2,
+    "74": 5,
+    "76": 4,
+    "79": 3,
+    "83": 1,
+    "85": 5,
+    "91": 11,
+    "92": 6,
+    "99": 14,
+    "102": 3,
+    "103": 3,
+    "112": 4,
+    "113": 1,
+    "124": 36,
+    "125": 4,
+    "126": 42,
+    "128": 1,
+    "132": 24,
+    "133": 51,
+    "134": 19,
+    "136": 16,
+    "137": 15,
+    "138": 14,
+    "139": 10,
+    "140": 2,
+    "141": 1,
+    "142": 6,
+    "143": 5,
+    "145": 3,
+    "147": 1,
+    "148": 4,
+    "149": 9,
+    "150": 6,
+    "152": 2,
+    "165": 4,
+    "166": 8,
+    "167": 1,
+    "168": 1,
+    "178": 7,
+    "180": 1,
+    "181": 6,
+    "182": 6,
+    "184": 2,
+    "191": 1,
+    "192": 16,
+    "196": 1,
+    "197": 7,
+    "199": 2,
+    "200": 7,
+    "201": 9,
+    "202": 1,
+    "204": 4,
+    "205": 7,
+    "207": 5,
+    "208": 4,
+    "209": 3,
+    "211": 17,
+    "212": 9,
+    "214": 2,
+    "215": 2,
+    "216": 16,
+    "217": 51,
+    "220": 13,
+    "221": 15,
+    "226": 6,
+    "227": 6,
+    "228": 1,
+    "229": 5,
+    "230": 1,
+    "232": 2,
+    "233": 15,
+    "234": 2,
+    "235": 5,
+    "236": 17,
+    "237": 12,
+    "238": 8,
+    "241": 10,
+    "242": 2,
+    "243": 4,
+    "244": 8,
+    "252": 2,
+    "253": 1
+  },
+  "precios": {
+    "1": 10435.91,
+    "2": 10244.47,
+    "7": 11832.89,
+    "8": 11848.41,
+    "9": 12132.98,
+    "10": 33604.98,
+    "11": 11253.4,
+    "15": 18648.29,
+    "19": 10002.13,
+    "20": 9625.46,
+    "21": 11132.12,
+    "23": 11677.67,
+    "24": 8806.11,
+    "25": 9877.12,
+    "26": 7564.35,
+    "27": 11263.75,
+    "29": 11770.8,
+    "30": 11770.8,
+    "31": 12391.67,
+    "36": 10661.7,
+    "37": 11486.23,
+    "38": 11486.23,
+    "40": 11253.4,
+    "41": 15470.19,
+    "43": 28825.88,
+    "44": 18077.88,
+    "45": 10827.22,
+    "46": 11641.45,
+    "47": 11253.4,
+    "48": 11121.44,
+    "49": 155219.31,
+    "57": 13426.47,
+    "58": 19557.63,
+    "59": 23075.94,
+    "60": 19359.55,
+    "67": 20695.91,
+    "68": 20695.91,
+    "69": 28992.07,
+    "73": 36217.84,
+    "74": 36217.84,
+    "76": 49696.05,
+    "79": 43978.8,
+    "83": 37976.99,
+    "85": 5443.03,
+    "91": 9967.15,
+    "92": 11299.97,
+    "99": 13038.42,
+    "102": 24048.65,
+    "103": 14197.39,
+    "112": 38028.73,
+    "113": 29983.2,
+    "124": 13840.39,
+    "125": 11968.44,
+    "126": 10379.2,
+    "128": 103479.54,
+    "132": 11253.4,
+    "133": 8019.66,
+    "134": 19359.55,
+    "136": 13534.03,
+    "137": 8650.89,
+    "138": 7253.92,
+    "139": 12143.32,
+    "140": 9478.73,
+    "141": 13565.96,
+    "142": 9828.28,
+    "143": 22661.14,
+    "145": 13328.16,
+    "147": 20695.91,
+    "148": 38804.83,
+    "149": 30009.07,
+    "150": 29750.37,
+    "152": 34479.38,
+    "165": 18253.79,
+    "166": 20281.99,
+    "167": 23179.42,
+    "168": 13617.91,
+    "178": 16573.28,
+    "180": 14828.59,
+    "181": 9688.01,
+    "182": 15418.45,
+    "184": 15418.45,
+    "191": 26484.35,
+    "192": 6658.91,
+    "196": 20595.26,
+    "197": 20595.26,
+    "199": 17417.71,
+    "200": 18594.58,
+    "201": 19712.61,
+    "202": 19557.63,
+    "204": 26180.32,
+    "205": 26852.94,
+    "207": 26956.42,
+    "208": 26956.42,
+    "209": 23075.94,
+    "211": 17326.61,
+    "212": 13762.78,
+    "214": 15269.44,
+    "215": 15066.62,
+    "216": 12369.47,
+    "217": 11124.05,
+    "220": 10826.65,
+    "221": 52127.82,
+    "226": 18398.66,
+    "227": 20075.03,
+    "228": 23981.38,
+    "229": 14849.31,
+    "230": 23127.68,
+    "232": 24048.65,
+    "233": 12650.37,
+    "234": 16949.95,
+    "235": 17022.38,
+    "236": 20825.26,
+    "237": 15935.85,
+    "238": 13995.61,
+    "241": 19505.89,
+    "242": 23257.03,
+    "243": 13193.64,
+    "244": 20006.83,
+    "252": 173069.53,
+    "253": 9996.12
+  },
+  "factores": [
+    1.011268,
+    1.850759
+  ],
+  "sinFicha": [
+    {
+      "idx": 1,
+      "name": "ECOPETA CAL20 YUXTAPUESTA AYA N1DELUXE",
+      "priceN": 648691.96,
+      "qty": 1,
+      "desc": ""
+    },
+    {
+      "idx": 2,
+      "name": "ESCOPETA CAL12 YUXTAPUESTA AYA CENTENARY",
+      "priceN": 391721.91,
+      "qty": 2,
+      "desc": ""
+    },
+    {
+      "idx": 3,
+      "name": "ESCOP CAL12 SOBRE AYA SENACLASSIC32 GS",
+      "priceN": 405638.43,
+      "qty": 1,
+      "desc": ""
+    },
+    {
+      "idx": 4,
+      "name": "ESCOPETA CAL12 SOBRE AYA SENABLA32 CH/IN",
+      "priceN": 415671.26,
+      "qty": 1,
+      "desc": ""
+    },
+    {
+      "idx": 5,
+      "name": "ESCOP CAL12 SOBRE AYA SENABLACK32 CH/FI",
+      "priceN": 415671.26,
+      "qty": 1,
+      "desc": ""
+    },
+    {
+      "idx": 6,
+      "name": "ESCOP CAL12 SOBRE AYA SENAXDL C32",
+      "priceN": 660107.62,
+      "qty": 1,
+      "desc": "ESCOPETA SOBREPUESTA CALIBRE 12 MARCA AYA MODELO SENATOR XDL, BÁSCULA DE ACERO FORJADO, PIEZAS INTERIORES LIJADAS A MANO"
+    },
+    {
+      "idx": 14,
+      "name": "RIFLE CAL.300 WIN BENELLI ARGO-E CONFORT",
+      "priceN": 27774.18,
+      "qty": 1,
+      "desc": ""
+    },
+    {
+      "idx": 17,
+      "name": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
+      "priceN": 29657.18,
+      "qty": 1,
+      "desc": "PISTOLA DE CAÑÓN LARGO SEMIAUTOMÁTICA CALIBRE .380 ACP MARCA GRAND POWER – MODELO STRIBOG SP380 A2 VERSIÓN CON CAÑÓN DE "
+    },
+    {
+      "idx": 18,
+      "name": "PISTOLA 380 ACP G. P., MOD. STRIBOG SP",
+      "priceN": 35259.09,
+      "qty": 4,
+      "desc": "PISTOLA DE CAÑÓN LARGO SEMIAUTOMÁTICA CALIBRE .380 ACP MARCA GRAND POWER – MODELO STRIBOG SP380 A2 VERSIÓN CON CAÑÓN DE "
+    },
+    {
+      "idx": 27,
+      "name": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
+      "priceN": 26161.87,
+      "qty": 1,
+      "desc": "PISTOLA DE CAÑON LARGO SEMIAUTOMÁTICA CALIBRE 0.380\" ACP MARCA GRAND POWER MODELO STRIBOG SP380 A2, VERSIÓN CON CAÑÓN DE"
+    },
+    {
+      "idx": 32,
+      "name": "ESC.SOB.MAR.BETA.MOD.687SIL.PIG.V.12.28\"",
+      "priceN": 79350.61,
+      "qty": 1,
+      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO 687 SILVER PIGEON V. CAL. 12 GA, CAÑÓN DE 28” , INCLUYE: MANUAL DIGITAL QR, SE"
+    },
+    {
+      "idx": 33,
+      "name": "ESCOPETA 12 BERETTA DT11 BLACK EDITION S",
+      "priceN": 217986.15,
+      "qty": 2,
+      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO DT11 (BLACK DLC PRO) TIPO SKEET, CULATA TIPO TSK, CAL. 12 GA, CAÑÓN DE 30\", IN"
+    },
+    {
+      "idx": 34,
+      "name": "ESCOPETA SOB 12 BERETTA DT11 BLACKTRAP",
+      "priceN": 217986.15,
+      "qty": 1,
+      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO DT11 (BLACK DLC PRO), TIPO TRAP, CULATA TIPO TSK, CAL. 12 GA, CAÑÓN DE 30\", IN"
+    },
+    {
+      "idx": 35,
+      "name": "ESC.SOB.MAR.BER.MO.ULTRALEGGERO.12GA28\"",
+      "priceN": 51547.0,
+      "qty": 4,
+      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO ULTRALEGGERO, CAL. 12 GA, CAÑÓN DE 28\", INCLUYE: MANUAL DIGITAL QR, SET DE CHO"
+    },
+    {
+      "idx": 36,
+      "name": "ES.SOB.MAR.BER.MOD.687EELLDIAMONDPIGE12G",
+      "priceN": 167557.18,
+      "qty": 1,
+      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO 687 EELL DIAMOND PIGEON, TIPO SPORTING, CAL. 12 GA, CAÑÓN DE 28\", INCLUYE: MAN"
+    },
+    {
+      "idx": 41,
+      "name": "ESC.SEMI.MOD.AST.CAL.12.CAÑ.71CM.28\"",
+      "priceN": 25596.97,
+      "qty": 1,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ASTRO, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO DE MADERA, CA"
+    },
+    {
+      "idx": 42,
+      "name": "ESC.SEMI.MOD.AST.CAMO.CAL.12.71CM.28\"",
+      "priceN": 26038.3,
+      "qty": 1,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ASTRO, VERSION BASCULA CAMO, CULATA Y GUARDAMANO SINTETICOS CAM"
+    },
+    {
+      "idx": 43,
+      "name": "ESC.SEMI.MOD.AST.CAL.20.71CM.28\"",
+      "priceN": 25596.97,
+      "qty": 1,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ASTRO, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO DE MADERA, CA"
+    },
+    {
+      "idx": 44,
+      "name": "ESC.SEM.MOD.B12iT4.CAL.12.71CM28\"",
+      "priceN": 34570.62,
+      "qty": 4,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO B12iT4, VERSION BASCULA GRIS, CULATA Y GUARDAMANO SINTETICOS, C"
+    },
+    {
+      "idx": 45,
+      "name": "ESC.SEM.MOD.B12iT4.CAL.12.71CM28\"",
+      "priceN": 31628.44,
+      "qty": 5,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO B12iT4, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO SINTETICOS, "
+    },
+    {
+      "idx": 46,
+      "name": "ESC.SEM.MOD.B12iS.CAL.12.71CM28\"",
+      "priceN": 34423.51,
+      "qty": 5,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO B12iS, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO DE MADERA, CA"
+    },
+    {
+      "idx": 47,
+      "name": "ESC.SEM.MOD.ECHO.CAL.12.71CM.28\"",
+      "priceN": 33393.75,
+      "qty": 6,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ECHO, VERSION BASCULA NIQUELADA, CULATA Y GUARDAMANO DE MADERA,"
+    },
+    {
+      "idx": 48,
+      "name": "ESC.SEM.MOD.TITANO.CAL.12.71CM28\"",
+      "priceN": 40896.31,
+      "qty": 3,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO TITANO, VERSION BASCULA GRABADA, CULATA Y GUARDAMANO DE MADERA,"
+    },
+    {
+      "idx": 49,
+      "name": "ESC.SEM.MOD.930i.CAL.12.71CM.28\"",
+      "priceN": 44132.71,
+      "qty": 4,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO 930i, VERSION SPORTING CULATA AJUSTABLE, CULATA Y GUARDAMANO DE"
+    },
+    {
+      "idx": 68,
+      "name": "ESCOP.SEMI.CAL.12GA.BENELLI.M4,CAÑÓN14\"",
+      "priceN": 36188.82,
+      "qty": 5,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA, CAL. 12GA MARCA BENELLI, MODELO M4, CAÑÓN DE 14\", INCLUYE: KIT DE LIMPIEZA, ACCESORIOS, MANUAL "
+    },
+    {
+      "idx": 84,
+      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 LIN/WO",
+      "priceN": 24361.25,
+      "qty": 6,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA WOOD, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO"
+    },
+    {
+      "idx": 85,
+      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 ELI/WO",
+      "priceN": 25950.03,
+      "qty": 1,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA ELITE WOOD, CAÑÓN DE 28” . INCLUYE MANUAL DE U"
+    },
+    {
+      "idx": 86,
+      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 LIN/SP",
+      "priceN": 24802.58,
+      "qty": 5,
+      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA SPORTING, CAÑÓN DE 30” . INCLUYE MANUAL DE USU"
+    },
+    {
+      "idx": 91,
+      "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/STE",
+      "priceN": 30657.52,
+      "qty": 4,
+      "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA STEEL, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHO"
+    },
+    {
+      "idx": 92,
+      "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/ALL",
+      "priceN": 33805.65,
+      "qty": 6,
+      "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA ALLOY, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHO"
+    },
+    {
+      "idx": 93,
+      "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/SEL",
+      "priceN": 40072.5,
+      "qty": 5,
+      "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA SELECT, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CH"
+    },
+    {
+      "idx": 94,
+      "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/SPOR",
+      "priceN": 44662.3,
+      "qty": 4,
+      "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA SPORTING ADJUSTABLE, CAÑÓN DE 28” . INCLUYE MANUAL D"
+    },
+    {
+      "idx": 103,
+      "name": "FUSIL 7.62X39 mm IWI M GALIL ACE 31 C8.5",
+      "priceN": 0.0,
+      "qty": 5,
+      "desc": "FUSIL DE ASALTO, MARCA IWI, MODELO GALIL ACE 31 CON CAÑÓN DE 8.5” , CAL. 7.62X39 MM, SEMIAUTOMÁTICO-AUTOMÁTICO, INCLUYE:"
+    },
+    {
+      "idx": 114,
+      "name": "ESCOPETA CAESAR GUERINI 12 GA SUMMIT BLA",
+      "priceN": 90972.22,
+      "qty": 2,
+      "desc": "ESCOPETA SOBREPUESTA DE DOS CAÑONES, MARCA CAESAR GUERINI, MODELO SUMMIT BLACK ASCENT, CALIBRE 12, CAÑONES DE 30 PULGADA"
+    },
+    {
+      "idx": 115,
+      "name": "ESCOPETA CAESAR GUERINI 12GA INVICTUS I",
+      "priceN": 123159.68,
+      "qty": 3,
+      "desc": "ESCOPETA SOBREPUESTA DE DOS CAÑONES, MARCA CAESAR GUERINI, MODELO INVICTUS I ASCENT SPORTING, CALIBRE 12, CAÑONES DE 32 "
+    },
+    {
+      "idx": 116,
+      "name": "ESCOPETA CAESAR GUERINI 12GA INVICTUSIII",
+      "priceN": 144667.02,
+      "qty": 2,
+      "desc": "ESCOPETA SOBREPUESTA DE DOS CAÑONES, MARCA CAESAR GUERINI, MODELO INVICTUS III ASCENT SPORTING, CALIBRE 12, CAÑONES DE 3"
+    }
+  ],
+  "sinPrecio": [
+    {
+      "fichaId": 87,
+      "refName": "ECOPETA CAL20 YUXTAPUESTA AYA N1DELUXE",
+      "refPrice": 641521.18
+    },
+    {
+      "fichaId": 86,
+      "refName": "ESCOPETA CAL12 YUXTAPUESTA AYA CENTENARY",
+      "refPrice": 387391.73
+    },
+    {
+      "fichaId": 89,
+      "refName": "ESCOP CAL12 SOBRE AYA SENACLASSIC32 GS",
+      "refPrice": 401154.41
+    },
+    {
+      "fichaId": 169,
+      "refName": "ESCOPETA CAL12 SOBRE AYA SENABLA32 CH/IN",
+      "refPrice": 411076.34
+    },
+    {
+      "fichaId": 169,
+      "refName": "ESCOP CAL12 SOBRE AYA SENABLACK32 CH/FI",
+      "refPrice": 411076.34
+    },
+    {
+      "fichaId": 90,
+      "refName": "ESCOP CAL12 SOBRE AYA SENAXDL C32",
+      "refPrice": 652810.64
+    },
+    {
+      "fichaId": 144,
+      "refName": "RIFLE CAL.300 WIN BENELLI ARGO-E CONFORT",
+      "refPrice": 27467.16
+    },
+    {
+      "fichaId": 129,
+      "refName": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
+      "refPrice": 29329.34
+    },
+    {
+      "fichaId": 129,
+      "refName": "PISTOLA 380 ACP G. P., MOD. STRIBOG SP",
+      "refPrice": 34869.33
+    },
+    {
+      "fichaId": 129,
+      "refName": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
+      "refPrice": 25872.67
+    },
+    {
+      "fichaId": 154,
+      "refName": "ESC.SOB.MAR.BETA.MOD.687SIL.PIG.V.12.28\"",
+      "refPrice": 78473.45
+    },
+    {
+      "fichaId": 224,
+      "refName": "ESCOPETA SP 12 BERETTA 694 SPO BE B-FAST",
+      "refPrice": 103351.02
+    },
+    {
+      "fichaId": 223,
+      "refName": "ESCOPETA 12 BERETTA DT11 BLACK EDITION S",
+      "refPrice": 215576.49
+    },
+    {
+      "fichaId": 223,
+      "refName": "ESCOPETA SOB 12 BERETTA DT11 BLACKTRAP",
+      "refPrice": 215576.49
+    },
+    {
+      "fichaId": 157,
+      "refName": "ESC.SOB.MAR.BER.MO.ULTRALEGGERO.12GA28\"",
+      "refPrice": 50977.19
+    },
+    {
+      "fichaId": 158,
+      "refName": "ES.SOB.MAR.BER.MOD.687EELLDIAMONDPIGE12G",
+      "refPrice": 165704.97
+    },
+    {
+      "fichaId": 245,
+      "refName": "ESC.SEMI.MOD.AST.CAL.12.CAÑ.71CM.28\"",
+      "refPrice": 25314.02
+    },
+    {
+      "fichaId": 245,
+      "refName": "ESC.SEMI.MOD.AST.CAMO.CAL.12.71CM.28\"",
+      "refPrice": 25750.46
+    },
+    {
+      "fichaId": 95,
+      "refName": "ESC.SEMI.MOD.AST.CAL.20.71CM.28\"",
+      "refPrice": 25314.02
+    },
+    {
+      "fichaId": 246,
+      "refName": "ESC.SEM.MOD.B12iT4.CAL.12.71CM28\"",
+      "refPrice": 34188.47
+    },
+    {
+      "fichaId": 246,
+      "refName": "ESC.SEM.MOD.B12iT4.CAL.12.71CM28\"",
+      "refPrice": 31278.81
+    },
+    {
+      "fichaId": 247,
+      "refName": "ESC.SEM.MOD.B12iS.CAL.12.71CM28\"",
+      "refPrice": 34042.99
+    },
+    {
+      "fichaId": 248,
+      "refName": "ESC.SEM.MOD.ECHO.CAL.12.71CM.28\"",
+      "refPrice": 33024.61
+    },
+    {
+      "fichaId": 249,
+      "refName": "ESC.SEM.MOD.TITANO L.71CM.28\"",
+      "refPrice": 45099.68
+    },
+    {
+      "fichaId": 250,
+      "refName": "ESC.SEM.MOD.TITANO.CAL.12.71CM28\"",
+      "refPrice": 40444.23
+    },
+    {
+      "fichaId": 251,
+      "refName": "ESC.SEM.MOD.930i.CAL.12.71CM.28\"",
+      "refPrice": 43644.85
+    },
+    {
+      "fichaId": 254,
+      "refName": "ESC.S.2C,BROWNING.CAL.12.B5.25S.MAD.71CM",
+      "refPrice": 46128.79
+    },
+    {
+      "fichaId": 146,
+      "refName": "RIFLE CAL.22\"LR WINCHESTER MODELO RANGER",
+      "refPrice": 16904.34
+    },
+    {
+      "fichaId": 162,
+      "refName": "ESCOP.SEMI.CAL.12GA.BENELLI.M4,CAÑÓN14\"",
+      "refPrice": 35788.78
+    },
+    {
+      "fichaId": 196,
+      "refName": "ESCOPETA CAL.12 FRANCHI AFFINITY3 LIN/WO",
+      "refPrice": 24091.96
+    },
+    {
+      "fichaId": 196,
+      "refName": "ESCOPETA 12 GA FRANCHI AFFINITY 3 B SYN",
+      "refPrice": 19756.57
+    },
+    {
+      "fichaId": 198,
+      "refName": "ESCOPETA CAL.12 FRANCHI FEELING LIN/STE",
+      "refPrice": 30318.63
+    },
+    {
+      "fichaId": 198,
+      "refName": "ESCOPETA CAL.12 FRANCHI FEELING LIN/ALL",
+      "refPrice": 33431.96
+    },
+    {
+      "fichaId": 198,
+      "refName": "ESCOPETA CAL.12 FRANCHI FEELING LIN/SEL",
+      "refPrice": 39629.53
+    },
+    {
+      "fichaId": 198,
+      "refName": "ESCOPETA CAL.12 FRANCHI FEELING LIN/SPOR",
+      "refPrice": 44168.59
+    },
+    {
+      "fichaId": 104,
+      "refName": "ESCOPETA CAL. 20 DERYA AG20 C. 26\"",
+      "refPrice": 14182.45
+    },
+    {
+      "fichaId": 206,
+      "refName": "RIFLE CESKA CZ 600 RANCE CAL308 WIN.",
+      "refPrice": 27270.01
+    }
+  ],
+  "totalPdf": 1328,
+  "totalMapped": 1154
+}
