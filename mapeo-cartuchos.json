@@ -1,121 +1,185 @@
 {
   "existencias": {
     "2004": 666,
-    "2018": 1240,
+    "2018": 1090,
     "2019": 12650,
     "2021": 370,
     "2024": 1460,
-    "2026": 1842,
+    "2026": 1792,
     "2028": 20,
     "2029": 300,
     "2030": 1300,
-    "2033": 10240,
-    "2034": 6300,
-    "2035": 8700,
+    "2033": 10440,
+    "2034": 6100,
+    "2035": 8900,
     "2036": 3150,
     "2042": 14800,
     "2043": 8520,
     "2044": 35,
     "2050": 4450,
     "2051": 1810,
-    "2057": 500,
-    "2063": 350,
-    "2075": 3000,
-    "2076": 1525,
-    "2077": 4600,
-    "2087": 1900,
-    "2089": 2150,
+    "2057": 2750,
+    "2063": 3150,
+    "2075": 750,
+    "2076": 1025,
+    "2077": 3350,
+    "2087": 650,
+    "2089": 1900,
     "2092": 500,
-    "2095": 1500,
-    "2101": 950,
+    "2095": 1000,
+    "2101": 3000,
     "2103": 7100
   },
   "precios": {
     "2004": 8.96,
     "2018": 18.18,
     "2019": 8.96,
-    "2021": 25.04,
-    "2024": 22.97,
-    "2026": 49.26,
-    "2028": 22.97,
-    "2029": 25.04,
+    "2021": 25.36,
+    "2024": 23.27,
+    "2026": 49.89,
+    "2028": 23.27,
+    "2029": 25.36,
     "2030": 28.16,
-    "2033": 14.07,
-    "2034": 10.76,
+    "2033": 14.25,
+    "2034": 10.9,
     "2035": 12.09,
-    "2036": 14.49,
-    "2042": 23.59,
-    "2043": 30.84,
-    "2044": 11.18,
-    "2050": 25.04,
-    "2051": 25.04,
-    "2057": 13.65,
-    "2063": 7.86,
-    "2075": 11.38,
-    "2076": 12.71,
-    "2077": 12.71,
-    "2087": 11.77,
-    "2089": 13.65,
-    "2092": 29.6,
-    "2095": 7.86,
-    "2101": 11.3,
+    "2036": 14.67,
+    "2042": 23.9,
+    "2043": 31.23,
+    "2044": 11.32,
+    "2050": 25.36,
+    "2051": 25.36,
+    "2057": 13.8,
+    "2063": 7.97,
+    "2075": 11.53,
+    "2076": 12.85,
+    "2077": 12.85,
+    "2087": 11.89,
+    "2089": 13.8,
+    "2092": 29.98,
+    "2095": 7.97,
+    "2101": 11.42,
     "2103": 8.96
   },
   "factores": [
-    1.011309,
+    1.01278,
     1.0
   ],
   "sinFicha": [
     {
-      "idx": 0,
-      "name": "CARTUCHO CALIBRE 9 mm LUGER, MARCA FEDE.",
-      "priceN": 12.42,
-      "qty": 150,
-      "desc": "CARTUCHO CALIBRE 9 mm LUGER, MARCA FEDERAL 124 Grs. FMJ."
+      "idx": 1,
+      "name": "CART CAL 12,GB, 32 GR, PERDIGON 7.5",
+      "priceN": 9.52,
+      "qty": 3000,
+      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB CLUB, 32 GRAMOS, PERDIGON 7.5"
+    },
+    {
+      "idx": 2,
+      "name": "CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5",
+      "priceN": 9.75,
+      "qty": 3000,
+      "desc": "CARTUCHO CALIBRE 12 MARCA ELEY , ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICION 7.5"
+    },
+    {
+      "idx": 3,
+      "name": "CART. CAL. 12 RIO, GL-32, 32G, P. 7.5",
+      "priceN": 10.23,
+      "qty": 3000,
+      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 7.5"
+    },
+    {
+      "idx": 4,
+      "name": "CART. CAL. 12 ELEY EOB 32GR 7.5",
+      "priceN": 10.47,
+      "qty": 3000,
+      "desc": "CARTUCHO CALIBRE 12, MARCA ELEY, ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICIÓN 7.5"
+    },
+    {
+      "idx": 7,
+      "name": "CART CAL. 12 EG DEL SUR (SH) 30 GR M.7.5",
+      "priceN": 10.47,
+      "qty": 3000,
+      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 30 GRAMOS, MUN. 7.5"
+    },
+    {
+      "idx": 8,
+      "name": "CART CAL.12 EG DEL SUR (SH) 32 GR M. 7.5",
+      "priceN": 10.94,
+      "qty": 3000,
+      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 32 GRAMOS, MUN. 7.5"
+    },
+    {
+      "idx": 18,
+      "name": "CART.STERLINGCAL.12GA.28GRA,7.5",
+      "priceN": 11.74,
+      "qty": 3000,
+      "desc": "CARTUCHO MARCA STERLING CAL. 12 GA. DE 28 GRAMOS, 7.5"
+    },
+    {
+      "idx": 19,
+      "name": "CART.STERLINGCAL.12GA.36GR.7.5.",
+      "priceN": 13.84,
+      "qty": 3000,
+      "desc": "CARTUCHO MARCA STERLING CAL. 12 GA., DE 36 GRAMOS, 7.5."
+    },
+    {
+      "idx": 21,
+      "name": "CART CAL12 SPRINT N7.5 24GR. T2",
+      "priceN": 9.04,
+      "qty": 3000,
+      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 24GR. T2 CAT. CEBUL B224 75"
+    },
+    {
+      "idx": 22,
+      "name": "CART CAL12 SPRINT N7.5 28GR. T2",
+      "priceN": 9.28,
+      "qty": 3000,
+      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 28 GR. T2 CAT. CEBUL B228 75"
+    },
+    {
+      "idx": 23,
+      "name": "CART CAL12 SPRINT N7.5 32GR T2",
+      "priceN": 10.23,
+      "qty": 3000,
+      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 32 GR. T2 CAT. CEBUL B232 75"
+    },
+    {
+      "idx": 25,
+      "name": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
+      "priceN": 9.04,
+      "qty": 3000,
+      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 24 GR. CAT. 0096-75"
+    },
+    {
+      "idx": 26,
+      "name": "CRT.BULLETC.CAL.12MUN.7.5 28 GR.CT.0098",
+      "priceN": 9.28,
+      "qty": 3000,
+      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 28 GR. CAT. 0098-75"
+    },
+    {
+      "idx": 29,
+      "name": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
+      "priceN": 9.28,
+      "qty": 3000,
+      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO TRAP COMPETICIÓN (COMPETITION) 24 GRAMOS, MUNICIÓN DEL 7.5, EMPAC"
+    },
+    {
+      "idx": 30,
+      "name": "CART CAL12 TRUST BLUE LINE 32GR M7.5",
+      "priceN": 10.7,
+      "qty": 3000,
+      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 7.5, EMPACADO"
+    },
+    {
+      "idx": 31,
+      "name": "CART CAL12 TRUST BLUE LINE 32GR M8",
+      "priceN": 10.7,
+      "qty": 3000,
+      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 8, EMPACADO E"
     }
   ],
-  "sinPrecio": [
-    {
-      "fichaId": 2072,
-      "refName": "CARTUCHO CAL12 SAGA SPORTING 32GR M8",
-      "refPrice": 11.17
-    },
-    {
-      "fichaId": 2015,
-      "refName": "CART.CAL.12.GB.GB.EXPRESS.OJEO.34GR.P4",
-      "refPrice": 10.24
-    },
-    {
-      "fichaId": 2061,
-      "refName": "CART.CAL.12.RIO.GAME.LOAD-32.32GR.P6",
-      "refPrice": 10.01
-    },
-    {
-      "fichaId": 2079,
-      "refName": "CART CAL. 12 EG DEL SUR TRAP 28 GR M. 8",
-      "refPrice": 9.54
-    },
-    {
-      "fichaId": 2078,
-      "refName": "CART.CAL.20G.A.SAGAC.20-70 GOLD, 28GR,M6",
-      "refPrice": 10.24
-    },
-    {
-      "fichaId": 2067,
-      "refName": "CART.CAL.20G.A.SAGAC.20-70GOLD,28GR,M7.5",
-      "refPrice": 10.24
-    },
-    {
-      "fichaId": 2086,
-      "refName": "CAR.BULLETC.CAL.12MUN.7.5-32GR.CAT0100-7",
-      "refPrice": 9.78
-    },
-    {
-      "fichaId": 2088,
-      "refName": "CRT.BULLETT-5P1400F.CL12M.7.5-36,0078-75",
-      "refPrice": 13.5
-    }
-  ],
-  "totalPdf": 102078,
-  "totalMapped": 101928
+  "sinPrecio": [],
+  "totalPdf": 154028,
+  "totalMapped": 103028
 }
