@@ -154,10 +154,13 @@ step_mapeo() {
 
   # Armas
   if [ -f "$WORKDIR/armas.json" ]; then
+    # --catalogo: precio por variante representativa (nombre de la ficha) y
+    # guardia de saltos que no encadenan (van a revisarPrecio, no se publican).
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" --verbose \
+      --catalogo src/data --antes-de "$FECHA_ISO" \
       > "$WORKDIR/mapeo-armas.json" 2>>"$LOG" \
       || { log "  mapeo armas falló"; return 1; }
-    log "  mapeo armas: $(jq '.totalMapped' "$WORKDIR/mapeo-armas.json") mapeados"
+    log "  mapeo armas: $(jq '.totalMapped' "$WORKDIR/mapeo-armas.json") mapeados, $(jq '.revisarPrecio | length' "$WORKDIR/mapeo-armas.json") precios a revisar"
   fi
 
   # Cartuchos

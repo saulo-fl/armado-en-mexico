@@ -113,13 +113,32 @@ console.log(JSON.stringify({expr}));
     return json.loads(r.stdout.strip())
 
 
+
+def _span_bloque(content, marcador):
+    """(inicio, fin) del objeto `marcador = { ... };` — para no editar otro mapa
+    que tenga la misma forma `id: [ ... ]` (p. ej. ACC_TRAMO)."""
+    i = content.find(marcador)
+    if i < 0:
+        return None
+    m = re.compile(r'^\s*\};', re.MULTILINE).search(content, i)
+    return (i, m.end() if m else len(content))
+
+
+def _buscar_en_bloque(content, marcador, fid_str):
+    span = _span_bloque(content, marcador)
+    if not span:
+        return None
+    pat = re.compile(r'(\s+' + fid_str + r':\s*\[)(.*?)(\],?\s*$)', re.MULTILINE)
+    return pat.search(content, span[0], span[1])
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 1) Register manuals
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def register_manual_armas(content, fecha, manual_id, dry_run=False):
     """Agrega entrada a AMX_MANUALES_SEED en data-precios.js."""
-    if manual_id in content:
+    if f"id: '{manual_id}'" in content:  # no basta con que aparezca en una ficha
         eprint(f"  [armas] manual {manual_id} ya registrado, skip")
         return content, False
 
@@ -151,7 +170,7 @@ def register_manual_armas(content, fecha, manual_id, dry_run=False):
 def register_manual_municiones(content, fecha, dry_run=False):
     """Agrega manual a MUNICIONES_MANUALES en data-municiones.js."""
     manual_id = fecha_to_manual_id(fecha, "man_mun_dcam")
-    if manual_id in content:
+    if f"id: '{manual_id}'" in content:  # no basta con que aparezca en una ficha
         eprint(f"  [municiones] manual {manual_id} ya registrado, skip")
         return content, manual_id, False
 
@@ -180,7 +199,7 @@ def register_manual_municiones(content, fecha, dry_run=False):
 def register_manual_accesorios(content, fecha, dry_run=False):
     """Agrega manual a ACCESORIOS_MANUALES en data-accesorios.js."""
     manual_id = fecha_to_manual_id(fecha, "man_acc")
-    if manual_id in content:
+    if f"id: '{manual_id}'" in content:  # no basta con que aparezca en una ficha
         eprint(f"  [accesorios] manual {manual_id} ya registrado, skip")
         return content, manual_id, False
 
@@ -240,9 +259,7 @@ def append_arma_history(content, ficha_id, manual_id, price_n, qty, fecha):
     # Check if ficha already has entries
     # Pattern: fichaId: [...]
     fid_str = str(ficha_id)
-    # Find the line for this ficha id
-    pat = re.compile(r'(\s+' + fid_str + r':\s*\[)(.*?)(\],?\s*$)', re.MULTILINE)
-    m = pat.search(content)
+    m = _buscar_en_bloque(content, 'window.AMX_PRICE_HISTORY_SEED', fid_str)
     if m:
         existing = m.group(2)
         # Check idempotency: is manual_id already there?
@@ -298,9 +315,7 @@ def append_mun_history(content, ficha_id, manual_id, price_n, qty, fecha):
     qty_part = f", qty: {qty}" if qty is not None else ""
     new_rec = f"{{ manualId: '{manual_id}', price: '{price_str}', date: '{fecha}'{qty_part} }}"
 
-    # Find existing entry
-    pat = re.compile(r'(\s+' + fid_str + r':\s*\[)(.*?)(\],?\s*$)', re.MULTILINE)
-    m = pat.search(content)
+    m = _buscar_en_bloque(content, 'window.MUNICIONES_PRICE_HISTORY', fid_str)
     if m:
         existing = m.group(2)
         if manual_id in existing:
@@ -348,8 +363,7 @@ def append_acc_history(content, ficha_id, manual_id, price_n, qty, fecha):
     qty_part = f", qty: {qty}" if qty is not None else ""
     new_rec = f"{{ manualId: '{manual_id}', price: '{price_str}', date: '{fecha}'{qty_part} }}"
 
-    pat = re.compile(r'(\s+' + fid_str + r':\s*\[)(.*?)(\],?\s*$)', re.MULTILINE)
-    m = pat.search(content)
+    m = _buscar_en_bloque(content, 'window.ACCESORIOS_PRICE_HISTORY', fid_str)
     if m:
         existing = m.group(2)
         if manual_id in existing:

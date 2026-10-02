@@ -331,6 +331,30 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
     dividiendo el precio del 16-jun entre ×0.89960 (general) y ×0.89447 (grupo Beretta), con
     ×1.00105 para OTCA: sus historiales empiezan en 2026.
 
+- **(1-oct-2026) Variante representativa — regla de Saulo, ya automatizada.** El precio de
+  una ficha que suma varios renglones sale del renglón cuyo nombre es EXACTAMENTE su
+  `dcamRef` (sin puntuación); si ninguno coincide, del que mejor encadena con su último
+  precio. `mapear-existencias.py --catalogo src/data --antes-de AAAA-MM-DD` lo aplica, y si
+  el elegido no encadena con ningún factor (±2 %) NO publica el salto: deja el último
+  precio y lo lista en `revisarPrecio`. Casos del 1-oct: Affinity 3 (196) → LIN/WO, no la
+  camo; Affinity 3.5 (197) → BLA/S; Huglu Atrox (99) → SB 26"; Stoeger P3500 (181) →
+  LIN WOOD; TS9 (23) → PAVON; Phenoma (211) → A.S.N. 14,320.
+  - Los saltos del 29-sep (TS9 +29 %, Atrox +11 %, Phenoma +12 %, P3500 −10 %) eran del
+    representante equivocado, no subidas: el 1-oct ya publica la variante de la ficha.
+- **(1-oct-2026) Altas y variantes decididas por Saulo:** Mendoza RM22-6000 Camo Commander
+  (262), RM22-6000 Camo Squad (263) y RM22-3000 Squad (264) = fichas nuevas, con riel.
+  Franchi Affinity 3 Black Synthetic y Elite Cobalt = variantes de la 196 (suman
+  existencia). IWI ARAD 11.5" = variante de la 78. Eley Olympic Blues 32 (2108, dos
+  renglones: «OLYMPIC» y «EOB», precio el de EOB), Sprint 28 (2109) y 32 (2110), Bullet
+  Competición 24 M7.5 (2111) = fichas nuevas. Galil ACE 31 (75): el PDF trae precio 0 →
+  solo suma existencia, se queda el último precio.
+- **`aplicar-mecanico.py` escribe historiales SOLO dentro de su bloque** (`*_PRICE_HISTORY`).
+  Antes buscaba `id: [` en todo el archivo y el 29-sep metió 11 registros de accesorios en
+  `ACC_TRAMO` (103…133), que tiene la misma forma. Ya se movieron a su sitio.
+- **Fichas nuevas de munición: sin `priceManualId` en el `mun()`.** Se deriva del historial;
+  escribirlo a mano además hacía creer a `aplicar-mecanico.py` que el inventario ya estaba
+  registrado (buscaba el id en todo el archivo) y no lo daba de alta.
+
 ## Cuando te invoca el conciliador headless
 
 `infra/conciliar.sh` te llama con `openclaw agent`, sin humano delante. Contrato duro:
@@ -387,7 +411,9 @@ El JSON de salida tiene `{existencias, factores, sinFicha, sinPrecio, totalPdf, 
 - `sinFicha`: renglones del PDF que NO existen en la referencia → **dar de alta fichas nuevas**.
   Pueden ser modelos nuevos O fichas que REGRESAN de agotadas; verificar contra el catálogo
   completo antes de crear una ficha nueva.
-- `sinPrecio`: fichas de la referencia sin renglón en el nuevo PDF → **marcar como agotadas**.
+- `sinPrecio`: fichas de la referencia sin renglón en el nuevo PDF → **marcar como agotadas**,
+  salvo que la ficha siga mapeada por otro renglón (`aplicar-mecanico.py` ya no las marca).
+- `revisarPrecio` (con `--catalogo`): fichas cuyo precio no se publicó por no encadenar.
 
 El mapa de `existencias` es la BASE pero NO es definitivo: las fichas en `sinFicha` pueden ser
 regresos que necesitan sumarse a una ficha existente, y las de `sinPrecio` pueden ser variantes
