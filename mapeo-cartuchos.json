@@ -38,7 +38,11 @@
     "2070": 3000,
     "2091": 3000,
     "2008": 1750,
-    "2015": 3000
+    "2015": 3000,
+    "2108": 4650,
+    "2109": 250,
+    "2110": 2000,
+    "2111": 3000
   },
   "precios": {
     "2004": 8.96,
@@ -79,49 +83,17 @@
     "2070": 10.71,
     "2091": 10.71,
     "2008": 9.52,
-    "2015": 10.48
+    "2015": 10.48,
+    "2108": 10.48,
+    "2109": 9.29,
+    "2110": 10.24,
+    "2111": 9.05
   },
   "factores": [
     1.01278,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 2,
-      "name": "CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5",
-      "priceN": 9.76,
-      "qty": 1750,
-      "desc": "CARTUCHO CALIBRE 12 MARCA ELEY , ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICION 7.5"
-    },
-    {
-      "idx": 3,
-      "name": "CART. CAL. 12 ELEY EOB 32GR 7.5",
-      "priceN": 10.48,
-      "qty": 2900,
-      "desc": "CARTUCHO CALIBRE 12, MARCA ELEY, ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICIÓN 7.5"
-    },
-    {
-      "idx": 21,
-      "name": "CART CAL12 SPRINT N7.5 28GR. T2",
-      "priceN": 9.29,
-      "qty": 250,
-      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 28 GR. T2 CAT. CEBUL B228 75"
-    },
-    {
-      "idx": 22,
-      "name": "CART CAL12 SPRINT N7.5 32GR T2",
-      "priceN": 10.24,
-      "qty": 2000,
-      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 32 GR. T2 CAT. CEBUL B232 75"
-    },
-    {
-      "idx": 24,
-      "name": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
-      "priceN": 9.05,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 24 GR. CAT. 0096-75"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [],
   "totalPdf": 139878,
   "totalMapped": 100478

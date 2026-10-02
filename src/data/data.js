@@ -643,6 +643,11 @@ window.DB = [
   mk(259, "Caesar Guerini Summit Black Ascent", "Caesar Guerini", "escopeta", "Italia", "12 GA", "2", "", "", "", null, "dcam", "ESCOPETA CAESAR GUERINI 12 GA SUMMIT BLA", "imagenes/Caesar_Guerini_Summit_Black_Ascent.webp", "Escopeta sobrepuesta Caesar Guerini Summit Black Ascent, cañones de 30\", acabado de madera, culata ajustable. Grabado D.C.A.M."),
   mk(260, "Caesar Guerini Invictus I Ascent Sporting", "Caesar Guerini", "escopeta", "Italia", "12 GA", "2", "", "", "", null, "dcam", "ESCOPETA CAESAR GUERINI 12GA INVICTUS I", "imagenes/Caesar_Guerini_Invictus_I_Ascent_Sporting.webp", "Escopeta sobrepuesta Caesar Guerini Invictus I Ascent Sporting, cañones de 32\", acabado de madera, culata ajustable. Grabado D.C.A.M."),
   mk(261, "Caesar Guerini Invictus III Ascent Sporting", "Caesar Guerini", "escopeta", "Italia", "12 GA", "2", "", "", "", null, "dcam", "ESCOPETA CAESAR GUERINI 12GA INVICTUSIII", "imagenes/Caesar_Guerini_Invictus_III_Ascent_Sporting.webp", "Escopeta sobrepuesta Caesar Guerini Invictus III Ascent Sporting, cañones de 32\", acabado de madera, culata ajustable. Grabado D.C.A.M."),
+  // 01-oct-2026 (#356): altas DCAM. Capacidad, peso y longitud = las del mismo modelo ya
+  // catalogado (52 / 54); año sin verificar.
+  mk(262, "Mendoza RM22-6000 Camo Commander", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2750g", "1010mm", "Semi-auto", null, "dcam", "MODELO RM22-6000 ACABADO CAMUFLAJE COMMA", "", "Rifle semiautomático Mendoza RM22-6000 en .22 LR con acabado camuflaje Commander y riel Picatinny. Calibre de libre adquisición civil."),
+  mk(263, "Mendoza RM22-6000 Camo Squad", "Mendoza", "rifle", "México", ".22 LR", "10+1", "2750g", "1010mm", "Semi-auto", null, "dcam", "MODELO RM22-6000 ACABADO CAMUFLAJE SQUAD", "", "Rifle semiautomático Mendoza RM22-6000 en .22 LR con acabado camuflaje Squad y riel Picatinny. Calibre de libre adquisición civil."),
+  mk(264, "Mendoza RM22-3000 Squad", "Mendoza", "rifle", "México", ".22 LR", "17", "2850g", "1020mm", "Semi-auto", null, "dcam", "MODELO RM22-3000 SQUAD", "", "Rifle semiautomático Mendoza RM22-3000 en .22 LR, presentación Squad con riel Picatinny. Calibre de libre adquisición civil."),
 ];
 
 // ──────────────────────────────────────────────────────────────
@@ -677,7 +682,8 @@ window.DB.forEach(a => { if (!a.img) a.img = window.armaPlaceholder(a); });
 const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
   112, 113, 114, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221,
   231, // MR1 16": PDF «riel Picatinny» + Benelli «Scope mounting rail», mismas fuentes que la 143 (#161)
-  239, 240]; // CZ 457 LRP Black y MDT Chassis: «Picatinny mounting rail with 25 MOA inclination» (czfirearms.com, #180)
+  239, 240, // CZ 457 LRP Black y MDT Chassis: «Picatinny mounting rail with 25 MOA inclination» (czfirearms.com, #180)
+  262, 263, 264]; // Mendoza RM22 (01-oct-2026): el PDF dice «riel Picatinny», igual que sus hermanos 50-54
 window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 
 // `fotoIlustrativa`: la foto es del modelo pero no del acabado que dice el registro

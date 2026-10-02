@@ -417,6 +417,14 @@
       "Cartucho de escopeta en calibre 12 GA, marca EG del Sur, Special Hunter (Perdigón 7.5, 32 gr). Precio de referencia por cartucho del inventario DCAM (25-sep-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]), priceManualId: SEP25 },
     { ...mun(2107, "Cartucho 9mm Luger · Federal", "Federal", "EUA", "9mm Parabellum", "pistola", "FMJ", "124 gr", "seguridad", 12.42, "CARTUCHO CALIBRE 9 mm LUGER, MARCA FEDERAL 124 Grs. FMJ.",
       "Cartucho de pistola en calibre 9mm Parabellum, marca Federal (FMJ, 124 gr). Precio de referencia por cartucho del inventario DCAM (29-sep-2026).", ["Armas calibre 9mm Parabellum"], [["Calibre", "9mm Parabellum"], ["Bala", "FMJ"], ["Peso", "124 gr"], ["Tipo", "Pistola"]]), priceManualId: 'man_mun_dcam_2026_09_29' },
+    { ...mun(2108, "Cartucho 12 GA · Eley (Olympic Blues 32)", "Eley", "Reino Unido", "12 GA", "escopeta", "Perdigón 7.5", "32 gr", "dcam", 10.48, "CART. CAL. 12 ELEY EOB 32GR 7.5",
+      "Cartucho de escopeta en calibre 12 GA, marca Eley, línea Olympic Blues (Perdigón 7.5, 32 gr). Precio de referencia por cartucho del inventario DCAM (1-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2109, "Cartucho 12 GA · Sprint (N7.5 28 gr T2)", "Sprint", "", "12 GA", "escopeta", "Perdigón 7.5", "28 gr", "dcam", 9.29, "CART CAL12 SPRINT N7.5 28GR. T2",
+      "Cartucho de escopeta en calibre 12 GA, marca Sprint (N. 7.5, 28 gr, T2, cat. CEBUL B228 75). Precio de referencia por cartucho del inventario DCAM (1-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "28 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2110, "Cartucho 12 GA · Sprint (N7.5 32 gr T2)", "Sprint", "", "12 GA", "escopeta", "Perdigón 7.5", "32 gr", "dcam", 10.24, "CART CAL12 SPRINT N7.5 32GR T2",
+      "Cartucho de escopeta en calibre 12 GA, marca Sprint (N. 7.5, 32 gr, T2, cat. CEBUL B232 75). Precio de referencia por cartucho del inventario DCAM (1-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2111, "Cartucho 12 GA · J&G Excopesa (Competición 24 M7.5)", "J&G Excopesa", "España", "12 GA", "escopeta", "Perdigón 7.5", "24 gr", "dcam", 9.05, "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
+      "Cartucho de escopeta en calibre 12 GA, marca J&G Excopesa (el DCAM lo vende como «Bullet»; Competición, Perdigón 7.5, 24 gr, cat. 0096-75). Precio de referencia por cartucho del inventario DCAM (1-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "24 gr"], ["Tipo", "Escopeta"]]) },
   ];
 
   function _mh(price, qty) { return { manualId: OTCA, price: _mFmt(price), date: OTCAd, qty: (qty == null ? null : qty) }; }
@@ -539,6 +547,10 @@
     2107: [{ manualId: 'man_mun_dcam_2026_09_29', price: '$12.42 MXN', date: '2026-09-29', qty: 150 }],
     2018: [{ manualId: 'man_mun_dcam_2026_09_29', price: '$18.18 MXN', date: '2026-09-29', qty: 1240 }, { manualId: 'man_mun_dcam_2026_10_01', price: '$18.18 MXN', date: '2026-10-01', qty: 1090 }],
     2029: [{ manualId: 'man_mun_dcam_2026_09_29', price: '$25.04 MXN', date: '2026-09-29', qty: 300 }, { manualId: 'man_mun_dcam_2026_10_01', price: '$25.36 MXN', date: '2026-10-01', qty: 300 }],
+    2108: [{ manualId: 'man_mun_dcam_2026_10_01', price: '$10.48 MXN', date: '2026-10-01', qty: 4650 }],
+    2109: [{ manualId: 'man_mun_dcam_2026_10_01', price: '$9.29 MXN', date: '2026-10-01', qty: 250 }],
+    2110: [{ manualId: 'man_mun_dcam_2026_10_01', price: '$10.24 MXN', date: '2026-10-01', qty: 2000 }],
+    2111: [{ manualId: 'man_mun_dcam_2026_10_01', price: '$9.05 MXN', date: '2026-10-01', qty: 3000 }],
   };
 
   window.getMunicionById = function (id) { var n = Number(id); return (window.MUNICIONES || []).find(function (m) { return m.id === n; }) || null; };

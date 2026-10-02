@@ -76,14 +76,14 @@
     "167": 1,
     "168": 1,
     "178": 12,
-    "180": 7,
+    "180": 13,
     "181": 18,
     "182": 6,
     "184": 2,
     "191": 1,
     "192": 16,
-    "196": 7,
-    "197": 7,
+    "196": 25,
+    "197": 12,
     "199": 8,
     "200": 7,
     "201": 9,
@@ -122,10 +122,14 @@
     "249": 6,
     "254": 4,
     "225": 5,
-    "231": 8,
-    "203": 6,
     "146": 6,
-    "75": 5
+    "262": 6,
+    "263": 6,
+    "264": 6,
+    "231": 8,
+    "78": 1,
+    "75": 5,
+    "203": 6
   },
   "precios": {
     "1": 10569.22,
@@ -150,7 +154,7 @@
     "37": 11632.95,
     "38": 11632.95,
     "40": 11397.15,
-    "41": 15065.2,
+    "41": 15667.8,
     "43": 29194.1,
     "44": 18308.8,
     "45": 10952.03,
@@ -173,19 +177,19 @@
     "85": 5505.78,
     "91": 10094.47,
     "92": 11444.31,
-    "99": 12031.2,
+    "99": 13204.97,
     "102": 24355.84,
     "103": 14378.75,
     "112": 38514.5,
     "113": 30366.19,
     "124": 14017.18,
     "125": 12121.33,
-    "126": 10130.31,
+    "126": 10511.79,
     "128": 104801.36,
     "132": 11397.15,
     "133": 8122.11,
     "134": 19582.71,
-    "136": 13987.65,
+    "136": 13690.04,
     "137": 8761.39,
     "138": 7346.58,
     "139": 12298.44,
@@ -205,13 +209,13 @@
     "168": 13791.86,
     "178": 16784.99,
     "180": 14999.52,
-    "181": 9799.69,
+    "181": 11066.32,
     "182": 15615.4,
     "184": 15615.4,
     "191": 26822.65,
     "192": 6743.97,
-    "196": 20832.67,
-    "197": 20832.67,
+    "196": 24642.07,
+    "197": 20207.69,
     "199": 17618.49,
     "200": 18808.93,
     "201": 19939.84,
@@ -221,7 +225,7 @@
     "207": 27300.75,
     "208": 27300.75,
     "209": 23370.7,
-    "211": 17547.94,
+    "211": 14320.06,
     "212": 13938.58,
     "214": 15464.49,
     "215": 15259.08,
@@ -250,58 +254,18 @@
     "249": 46129.49,
     "254": 47244.45,
     "225": 14965.63,
+    "146": 17313.18,
+    "262": 10687.93,
+    "263": 10687.93,
+    "264": 11863.1,
     "231": 36546.46,
-    "203": 19807.46,
-    "146": 17313.18
+    "203": 19807.46
   },
   "factores": [
     1.012774,
     1.011527
   ],
-  "sinFicha": [
-    {
-      "idx": 63,
-      "name": "MODELO RM22-6000 ACABADO CAMUFLAJE COMMA",
-      "priceN": 10687.93,
-      "qty": 6,
-      "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE COMMANDER RIEL PICATINNY, SUS RESP"
-    },
-    {
-      "idx": 64,
-      "name": "MODELO RM22-6000 ACABADO CAMUFLAJE SQUAD",
-      "priceN": 10687.93,
-      "qty": 6,
-      "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE SQUAD RIEL PICATINNY, SUS RESPECTI"
-    },
-    {
-      "idx": 68,
-      "name": "MODELO RM22-3000 SQUAD",
-      "priceN": 11863.1,
-      "qty": 6,
-      "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 SQUAD RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y L"
-    },
-    {
-      "idx": 94,
-      "name": "ESCOPETA 12 GA FRANCHI AFFINITY 3 B SYN",
-      "priceN": 20207.69,
-      "qty": 9,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA BLACK SYNT, CAÑÓN DE 28” . INCLUYE MANUAL DE U"
-    },
-    {
-      "idx": 98,
-      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 ELI/CO",
-      "priceN": 21130.28,
-      "qty": 4,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA ELITE COBALT, CON RECUBRIMIENTO CAMO OPTIFADE "
-    },
-    {
-      "idx": 113,
-      "name": "FUSIL 5.56X45 IWI M ARAD CAÑON 11.5\"",
-      "priceN": 45064.58,
-      "qty": 1,
-      "desc": "FUSIL DE ASALTO, MARCA IWI, MODELO ARAD CON CAÑÓN DE 11.5” , CAL. 5.56X45 MM, SEMIAUTOMÁTICO, INCLUYE: RIEL PICATINNY SU"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 211,
@@ -319,6 +283,7 @@
       "refPrice": 11770.8
     }
   ],
+  "revisarPrecio": [],
   "totalPdf": 1397,
-  "totalMapped": 1139
+  "totalMapped": 1155
 }
