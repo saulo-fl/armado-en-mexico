@@ -33,13 +33,22 @@
 // ── Inventarios (PDFs oficiales gob.mx) ──────────────────────────────────────
 window.ACCESORIOS_MANUALES = [
   {
+    id: 'man_acc_2026_10_01',
+    nombre: 'Existencias de accesorios DCAM · 1 de octubre 2026',
+    autoridad: 'DCAM',
+    fecha: '2026-10-01',
+    url: 'inventarios/dcam-accesorios-2026-10-01.pdf',
+    fileName: 'dcam-accesorios-2026-10-01.pdf',
+    primary: true,
+  },
+  {
     id: 'man_acc_2026_09_29',
     nombre: 'Existencias de accesorios DCAM · 29 de septiembre 2026',
     autoridad: 'DCAM',
     fecha: '2026-09-29',
     url: 'inventarios/dcam-accesorios-2026-09-29.pdf',
     fileName: 'dcam-accesorios-2026-09-29.pdf',
-    primary: true,
+    primary: false,
   },
   {
     id: 'man_acc_2026_09_25',
@@ -513,17 +522,17 @@ window.ACCESORIOS.forEach(a => { a.corto = ACC_CORTO[a.id] || ''; });
 const ACC_TRAMO_ARMAS = [['pistola', 'Pistolas'], ['rifle', 'Rifles'], ['escopeta', 'Escopetas']];
 const ACC_TRAMO_CALIBRES = ['.22 LR', '.380 ACP', '9mm', '.40 S&W', '.223 Rem', '5.56', '12 GA', '20 GA'];
 const ACC_TRAMO = {
-  101: ['rifle', '.22 LR'],      102: ['rifle', '.22 LR'],      103: ['rifle', '5.56', { manualId: 'man_acc_2026_09_29', price: '$620.88 MXN', date: '2026-09-29', qty: 4 }],
+  101: ['rifle', '.22 LR'],      102: ['rifle', '.22 LR'],      103: ['rifle', '5.56', { manualId: 'man_acc_2026_09_29', price: '$620.88 MXN', date: '2026-09-29', qty: 4 }, { manualId: 'man_acc_2026_10_01', price: '$628.81 MXN', date: '2026-10-01', qty: 4 }],
   104: ['rifle', '.223 Rem'],    105: ['pistola', '.380 ACP'],  106: ['pistola', '9mm', { manualId: 'man_acc_2026_09_29', price: '$517.40 MXN', date: '2026-09-29', qty: 2 }],
-  107: ['pistola', '9mm'],       108: ['pistola', '9mm'],       109: ['pistola', '9mm', { manualId: 'man_acc_2026_09_29', price: '$517.40 MXN', date: '2026-09-29', qty: 20 }],
-  110: ['pistola', '9mm'],       111: ['rifle', '.22 LR'],      112: ['pistola', '.380 ACP', { manualId: 'man_acc_2026_09_29', price: '$983.06 MXN', date: '2026-09-29', qty: 22 }],
-  113: ['pistola', '.380 ACP'],  114: ['pistola', '9mm'],       115: ['rifle', '5.56', { manualId: 'man_acc_2026_09_29', price: '$368.86 MXN', date: '2026-09-29', qty: 36 }],
-  116: ['rifle', '5.56'],        117: ['rifle', '5.56'],        118: ['pistola', '.380 ACP', { manualId: 'man_acc_2026_09_29', price: '$8,795.76 MXN', date: '2026-09-29', qty: 5 }],
-  119: ['pistola', '.22 LR'],    120: ['pistola', '9mm'],       121: ['pistola', '9mm', { manualId: 'man_acc_2026_09_29', price: '$217.31 MXN', date: '2026-09-29', qty: 17 }],
-  122: ['pistola', '.40 S&W'],   123: ['pistola', '9mm'],       124: ['pistola', '.22 LR', { manualId: 'man_acc_2026_09_29', price: '$485.11 MXN', date: '2026-09-29', qty: 38 }],
-  125: ['pistola', '.22 LR'],    126: ['escopeta', '12 GA'],    127: ['escopeta', '20 GA', { manualId: 'man_acc_2026_09_29', price: '$646.75 MXN', date: '2026-09-29', qty: 27 }],
-  128: ['pistola', '9mm'],       129: ['pistola', '.380 ACP'],  130: ['pistola', '.22 LR', { manualId: 'man_acc_2026_09_29', price: '$540.78 MXN', date: '2026-09-29', qty: 14 }],
-  131: ['rifle', '.22 LR'],      132: ['pistola', '.380 ACP'],  133: ['rifle', '5.56', { manualId: 'man_acc_2026_09_29', price: '$1,164.14 MXN', date: '2026-09-29', qty: 13 }],
+  107: ['pistola', '9mm'],       108: ['pistola', '9mm'],       109: ['pistola', '9mm', { manualId: 'man_acc_2026_09_29', price: '$517.40 MXN', date: '2026-09-29', qty: 20 }, { manualId: 'man_acc_2026_10_01', price: '$524.01 MXN', date: '2026-10-01', qty: 20 }],
+  110: ['pistola', '9mm'],       111: ['rifle', '.22 LR'],      112: ['pistola', '.380 ACP', { manualId: 'man_acc_2026_09_29', price: '$983.06 MXN', date: '2026-09-29', qty: 22 }, { manualId: 'man_acc_2026_10_01', price: '$995.61 MXN', date: '2026-10-01', qty: 22 }],
+  113: ['pistola', '.380 ACP'],  114: ['pistola', '9mm'],       115: ['rifle', '5.56', { manualId: 'man_acc_2026_09_29', price: '$368.86 MXN', date: '2026-09-29', qty: 36 }, { manualId: 'man_acc_2026_10_01', price: '$368.86 MXN', date: '2026-10-01', qty: 36 }],
+  116: ['rifle', '5.56'],        117: ['rifle', '5.56'],        118: ['pistola', '.380 ACP', { manualId: 'man_acc_2026_09_29', price: '$8,795.76 MXN', date: '2026-09-29', qty: 5 }, { manualId: 'man_acc_2026_10_01', price: '$8,908.12 MXN', date: '2026-10-01', qty: 5 }],
+  119: ['pistola', '.22 LR'],    120: ['pistola', '9mm'],       121: ['pistola', '9mm', { manualId: 'man_acc_2026_09_29', price: '$217.31 MXN', date: '2026-09-29', qty: 17 }, { manualId: 'man_acc_2026_10_01', price: '$220.08 MXN', date: '2026-10-01', qty: 17 }],
+  122: ['pistola', '.40 S&W'],   123: ['pistola', '9mm'],       124: ['pistola', '.22 LR', { manualId: 'man_acc_2026_09_29', price: '$485.11 MXN', date: '2026-09-29', qty: 38 }, { manualId: 'man_acc_2026_10_01', price: '$491.31 MXN', date: '2026-10-01', qty: 38 }],
+  125: ['pistola', '.22 LR'],    126: ['escopeta', '12 GA'],    127: ['escopeta', '20 GA', { manualId: 'man_acc_2026_09_29', price: '$646.75 MXN', date: '2026-09-29', qty: 27 }, { manualId: 'man_acc_2026_10_01', price: '$655.01 MXN', date: '2026-10-01', qty: 27 }],
+  128: ['pistola', '9mm'],       129: ['pistola', '.380 ACP'],  130: ['pistola', '.22 LR', { manualId: 'man_acc_2026_09_29', price: '$540.78 MXN', date: '2026-09-29', qty: 14 }, { manualId: 'man_acc_2026_10_01', price: '$547.69 MXN', date: '2026-10-01', qty: 12 }],
+  131: ['rifle', '.22 LR'],      132: ['pistola', '.380 ACP'],  133: ['rifle', '5.56', { manualId: 'man_acc_2026_09_29', price: '$1,164.14 MXN', date: '2026-09-29', qty: 13 }, { manualId: 'man_acc_2026_10_01', price: '$1,179.02 MXN', date: '2026-10-01', qty: 11 }],
   134: ['pistola', '.380 ACP'],
   135: ['pistola', '.22 LR'],
 };
@@ -684,10 +693,10 @@ window.ACCESORIOS_PRICE_HISTORY = {
   115: [_h(OCT, 546.2, OCTd, 18), _h(JUN, 546.2, JUNd, 18), _h(JUL, 546.20, JULd, 18), _h(S11, 546.20, S11d, 18), _h(S14, 546.20, S14d, 18), _h(S15, 546.2, S15d, 18), _h(S18, 546.20, S18d, 18), _h(S22, 546.2, S22d, 18), _h(S25, 546.2, S25d, 18)],
   116: [_h(OCT, 9426.46, OCTd, 5), _h(JUN, 8479.99, JUNd, 5), _h(JUL, 8615.57, JULd, 5), _h(S11, 8367.29, S11d, 5), _h(S14, 8366.56, S14d, 5), _h(S15, 8443.96, S15d, 5), _h(S18, 8473.29, S18d, 5), _h(S22, 8489.61, S22d, 5), _h(S25, 8697.75, S25d, 5)],
   117: [_h(OCT, 6931.22, OCTd, 2), _h(JUN, 6235.29, JUNd, 1), _h(JUL, 6334.98, JULd, 1), _h(S11, 6152.42, S11d, 1), _h(S14, 6151.88, S14d, 1), _h(S15, 6208.79, S15d, 1), _h(S18, 6230.36, S18d, 1), _h(S22, 6242.36, S22d, 1), _h(S25, 6242.36, S25d, 0)],
-  201: [_h(OCT, 29111.11, OCTd, 11), _h(JUL, 26606.91, JULd, 11), _h(S11, 25840.17, S11d, 10), _h(S14, 25837.89, S14d, 10), _h(S15, 26076.92, S15d, 10), _h(S18, 26167.51, S18d, 10), _h(S22, 26217.91, S22d, 10), _h(S25, 26860.71, S25d, 9), { manualId: 'man_acc_2026_09_29', price: '$27,163.38 MXN', date: '2026-09-29', qty: 9 }],
-  202: [_h(OCT, 24675.13, OCTd, 5), _h(JUL, 22552.52, JULd, 5), _h(S11, 21902.62, S11d, 5), _h(S14, 21900.69, S14d, 5), _h(S15, 22103.3, S15d, 5), _h(S18, 22180.08, S18d, 5), _h(S22, 22222.8, S22d, 5), _h(S25, 22767.65, S25d, 5), { manualId: 'man_acc_2026_09_29', price: '$23,024.20 MXN', date: '2026-09-29', qty: 5 }],
+  201: [_h(OCT, 29111.11, OCTd, 11), _h(JUL, 26606.91, JULd, 11), _h(S11, 25840.17, S11d, 10), _h(S14, 25837.89, S14d, 10), _h(S15, 26076.92, S15d, 10), _h(S18, 26167.51, S18d, 10), _h(S22, 26217.91, S22d, 10), _h(S25, 26860.71, S25d, 9), { manualId: 'man_acc_2026_09_29', price: '$27,163.38 MXN', date: '2026-09-29', qty: 9 }, { manualId: 'man_acc_2026_10_01', price: '$27,510.36 MXN', date: '2026-10-01', qty: 9 }],
+  202: [_h(OCT, 24675.13, OCTd, 5), _h(JUL, 22552.52, JULd, 5), _h(S11, 21902.62, S11d, 5), _h(S14, 21900.69, S14d, 5), _h(S15, 22103.3, S15d, 5), _h(S18, 22180.08, S18d, 5), _h(S22, 22222.8, S22d, 5), _h(S25, 22767.65, S25d, 5), { manualId: 'man_acc_2026_09_29', price: '$23,024.20 MXN', date: '2026-09-29', qty: 5 }, { manualId: 'man_acc_2026_10_01', price: '$23,318.30 MXN', date: '2026-10-01', qty: 5 }],
   301: [_h(OCT, 6475.47, OCTd, 1), _h(JUN, 5792.08, JUNd, 1), _h(JUL, 5799.04, JULd, 1), _h(S11, 5723.24, S11d, 1), _h(S14, 5705.00, S14d, 1), _h(S15, 5732.46, S15d, 1), _h(S18, 5720.71, S18d, 1), _h(S22, 5733.47, S22d, 1), _h(S25, 5819.31, S25d, 1)],
-  401: [_h(OCT, 5045.93, OCTd, 10), _h(JUN, 4539.29, JUNd, 10), _h(JUL, 4611.86, JULd, 10), _h(S11, 4478.96, S11d, 10), _h(S14, 4478.57, S14d, 10), _h(S15, 4520.0, S15d, 10), _h(S18, 4535.70, S18d, 10), _h(S22, 4544.44, S22d, 10), _h(S25, 4655.86, S25d, 10), { manualId: 'man_acc_2026_09_29', price: '$4,708.32 MXN', date: '2026-09-29', qty: 10 }],
+  401: [_h(OCT, 5045.93, OCTd, 10), _h(JUN, 4539.29, JUNd, 10), _h(JUL, 4611.86, JULd, 10), _h(S11, 4478.96, S11d, 10), _h(S14, 4478.57, S14d, 10), _h(S15, 4520.0, S15d, 10), _h(S18, 4535.70, S18d, 10), _h(S22, 4544.44, S22d, 10), _h(S25, 4655.86, S25d, 10), { manualId: 'man_acc_2026_09_29', price: '$4,708.32 MXN', date: '2026-09-29', qty: 10 }, { manualId: 'man_acc_2026_10_01', price: '$4,768.46 MXN', date: '2026-10-01', qty: 10 }],
   402: [_h(OCT, 809.43, OCTd, 5), _h(JUN, 724.01, JUNd, 5), _h(JUL, 724.88, JULd, 5), _h(S11, 715.40, S11d, 5), _h(S14, 713.12, S14d, 5), _h(S15, 716.56, S15d, 5), _h(S18, 715.09, S18d, 5), _h(S22, 716.68, S22d, 5), _h(S25, 727.41, S25d, 5)],
   // Datos reales del inventario DCAM 3-oct-2025 (EXIST_ACCESORIOS). OTCA 26-sep pendiente de conciliar.
   118: [_h(SEP, 580.17, SEPd, 9), _h(JUN18, 521.02, JUN18d, 3)],
