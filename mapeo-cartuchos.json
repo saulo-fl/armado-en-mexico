@@ -1,6 +1,6 @@
 {
   "existencias": {
-    "2004": 666,
+    "2004": 566,
     "2018": 1090,
     "2019": 12650,
     "2021": 370,
@@ -9,17 +9,17 @@
     "2028": 20,
     "2029": 300,
     "2030": 1300,
-    "2033": 10440,
+    "2033": 9440,
     "2034": 6100,
     "2035": 8900,
     "2036": 3150,
-    "2042": 14800,
+    "2042": 14600,
     "2043": 8520,
     "2044": 35,
     "2050": 4450,
     "2051": 1810,
-    "2057": 2750,
-    "2063": 3150,
+    "2057": 1750,
+    "2063": 2900,
     "2075": 750,
     "2076": 1025,
     "2077": 3350,
@@ -28,7 +28,21 @@
     "2092": 500,
     "2095": 1000,
     "2101": 3000,
-    "2103": 7100
+    "2103": 7100,
+    "2106": 3000,
+    "2097": 2000,
+    "2099": 2250,
+    "2100": 3000,
+    "2084": 2500,
+    "2069": 3000,
+    "2070": 3000,
+    "2091": 3000,
+    "2008": 1750,
+    "2015": 3000,
+    "2108": 4650,
+    "2109": 250,
+    "2110": 2000,
+    "2111": 3000
   },
   "precios": {
     "2004": 8.96,
@@ -44,142 +58,43 @@
     "2034": 10.9,
     "2035": 12.09,
     "2036": 14.67,
-    "2042": 23.9,
+    "2042": 23.89,
     "2043": 31.23,
     "2044": 11.32,
     "2050": 25.36,
     "2051": 25.36,
-    "2057": 13.8,
-    "2063": 7.97,
+    "2057": 13.81,
+    "2063": 7.96,
     "2075": 11.53,
-    "2076": 12.85,
-    "2077": 12.85,
-    "2087": 11.89,
-    "2089": 13.8,
-    "2092": 29.98,
-    "2095": 7.97,
-    "2101": 11.42,
-    "2103": 8.96
+    "2076": 12.86,
+    "2077": 12.86,
+    "2087": 11.9,
+    "2089": 13.81,
+    "2092": 29.97,
+    "2095": 7.96,
+    "2101": 11.43,
+    "2103": 8.96,
+    "2106": 10.95,
+    "2097": 11.74,
+    "2099": 13.83,
+    "2100": 9.05,
+    "2084": 9.29,
+    "2069": 9.29,
+    "2070": 10.71,
+    "2091": 10.71,
+    "2008": 9.52,
+    "2015": 10.48,
+    "2108": 10.48,
+    "2109": 9.29,
+    "2110": 10.24,
+    "2111": 9.05
   },
   "factores": [
     1.01278,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 1,
-      "name": "CART CAL 12,GB, 32 GR, PERDIGON 7.5",
-      "priceN": 9.52,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB CLUB, 32 GRAMOS, PERDIGON 7.5"
-    },
-    {
-      "idx": 2,
-      "name": "CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5",
-      "priceN": 9.75,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12 MARCA ELEY , ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICION 7.5"
-    },
-    {
-      "idx": 3,
-      "name": "CART. CAL. 12 RIO, GL-32, 32G, P. 7.5",
-      "priceN": 10.23,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 7.5"
-    },
-    {
-      "idx": 4,
-      "name": "CART. CAL. 12 ELEY EOB 32GR 7.5",
-      "priceN": 10.47,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA ELEY, ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICIÓN 7.5"
-    },
-    {
-      "idx": 7,
-      "name": "CART CAL. 12 EG DEL SUR (SH) 30 GR M.7.5",
-      "priceN": 10.47,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 30 GRAMOS, MUN. 7.5"
-    },
-    {
-      "idx": 8,
-      "name": "CART CAL.12 EG DEL SUR (SH) 32 GR M. 7.5",
-      "priceN": 10.94,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 32 GRAMOS, MUN. 7.5"
-    },
-    {
-      "idx": 18,
-      "name": "CART.STERLINGCAL.12GA.28GRA,7.5",
-      "priceN": 11.74,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA STERLING CAL. 12 GA. DE 28 GRAMOS, 7.5"
-    },
-    {
-      "idx": 19,
-      "name": "CART.STERLINGCAL.12GA.36GR.7.5.",
-      "priceN": 13.84,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA STERLING CAL. 12 GA., DE 36 GRAMOS, 7.5."
-    },
-    {
-      "idx": 21,
-      "name": "CART CAL12 SPRINT N7.5 24GR. T2",
-      "priceN": 9.04,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 24GR. T2 CAT. CEBUL B224 75"
-    },
-    {
-      "idx": 22,
-      "name": "CART CAL12 SPRINT N7.5 28GR. T2",
-      "priceN": 9.28,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 28 GR. T2 CAT. CEBUL B228 75"
-    },
-    {
-      "idx": 23,
-      "name": "CART CAL12 SPRINT N7.5 32GR T2",
-      "priceN": 10.23,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 32 GR. T2 CAT. CEBUL B232 75"
-    },
-    {
-      "idx": 25,
-      "name": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
-      "priceN": 9.04,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 24 GR. CAT. 0096-75"
-    },
-    {
-      "idx": 26,
-      "name": "CRT.BULLETC.CAL.12MUN.7.5 28 GR.CT.0098",
-      "priceN": 9.28,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 28 GR. CAT. 0098-75"
-    },
-    {
-      "idx": 29,
-      "name": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
-      "priceN": 9.28,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO TRAP COMPETICIÓN (COMPETITION) 24 GRAMOS, MUNICIÓN DEL 7.5, EMPAC"
-    },
-    {
-      "idx": 30,
-      "name": "CART CAL12 TRUST BLUE LINE 32GR M7.5",
-      "priceN": 10.7,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 7.5, EMPACADO"
-    },
-    {
-      "idx": 31,
-      "name": "CART CAL12 TRUST BLUE LINE 32GR M8",
-      "priceN": 10.7,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 8, EMPACADO E"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [],
-  "totalPdf": 154028,
-  "totalMapped": 103028
+  "totalPdf": 139878,
+  "totalMapped": 100478
 }
