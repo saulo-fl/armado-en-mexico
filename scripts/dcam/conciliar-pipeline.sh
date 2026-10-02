@@ -44,6 +44,15 @@ avisar_error(){
   telegram "⚠️ Pipeline DCAM falló en paso $STEP: ${1}. Inventario NO conciliado — revisar conciliar.log."
 }
 
+# Mismo contrato que conciliar.sh: la señal fallida se aparta para no re-disparar
+# en bucle; Saulo la re-crea tras arreglar.
+falla(){
+  avisar_error "$1"
+  [ -f "$SENAL" ] && mv "$SENAL" "$SENAL.fallida"
+  log "FALLO paso $STEP: $1 (señal -> pendiente-conciliar.json.fallida)"
+  exit 1
+}
+
 # ── Lock ──
 exec 9>"$LOCK"
 if ! flock -n 9; then log "otro pipeline en curso, salgo"; exit 0; fi
@@ -51,9 +60,23 @@ if ! flock -n 9; then log "otro pipeline en curso, salgo"; exit 0; fi
 # ── Leer señal ──
 [ -f "$SENAL" ] || { log "sin senal, nada que hacer"; exit 0; }
 FECHA="$(jq -r '.fecha' "$SENAL" 2>/dev/null)"
-[ -n "$FECHA" ] && [ "$FECHA" != "null" ] || { log "senal ilegible"; exit 1; }
+[ -n "$FECHA" ] && [ "$FECHA" != "null" ] || { STEP="senal"; falla "señal ilegible"; }
 PDFS="$(jq -r '.pdfs[]' "$SENAL" 2>/dev/null)"
-FECHA_ISO="$FECHA"
+# La señal trae «01-OCT-2026»; aplicar-mecanico.py espera «2026-10-01».
+# Si ya viene en ISO, se respeta tal cual.
+fecha_a_iso() {
+  local f="$1" d m y n
+  if [[ "$f" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then echo "$f"; return 0; fi
+  IFS='-' read -r d m y <<<"$f"
+  case "${m^^}" in
+    ENE|JAN) n=01;; FEB) n=02;; MAR) n=03;; ABR|APR) n=04;; MAY) n=05;; JUN) n=06;;
+    JUL) n=07;; AGO|AUG) n=08;; SEP|SET) n=09;; OCT) n=10;; NOV) n=11;; DIC|DEC) n=12;;
+    *) return 1;;
+  esac
+  [[ "$d" =~ ^[0-9]{1,2}$ && "$y" =~ ^[0-9]{4}$ ]] || return 1
+  printf '%s-%s-%02d\n' "$y" "$n" "$((10#$d))"
+}
+FECHA_ISO="$(fecha_a_iso "$FECHA")" || { STEP="senal"; falla "fecha ilegible en la señal: $FECHA"; }
 RAMA="auto/inventario-${FECHA}"
 WORKDIR="/tmp/dcam-pipeline-${FECHA}"
 STEP="init"
@@ -61,7 +84,7 @@ STEP="init"
 mkdir -p "$WORKDIR"
 log "arranco pipeline fecha=$FECHA rama=$RAMA"
 
-cd "$REPO" || { avisar_error "no cd al repo"; exit 1; }
+cd "$REPO" || falla "no cd al repo"
 git fetch origin --quiet 2>>"$LOG"
 
 # slug owner/repo
@@ -93,15 +116,16 @@ step_prep() {
 
     $VENV "$SCRIPTS/parse_pdf.py" "$pdf" \
       --tsv "$WORKDIR/${tag}.tsv" \
-      --json "$WORKDIR/${tag}.json" 2>>"$LOG"
+      --json "$WORKDIR/${tag}.json" 2>>"$LOG" \
+      || { log "  parse_pdf falló en $tag"; return 1; }
     log "  parseado $tag: $(wc -l < "$WORKDIR/${tag}.tsv") líneas TSV"
 
-    # Copy PDF to public/inventarios/
-    target="public/inventarios/dcam-existencias-${FECHA}.pdf"
+    # Copy PDF to public/inventarios/ — nombre en ISO: es el que enlazan los data-*.js
+    target="public/inventarios/dcam-existencias-${FECHA_ISO}.pdf"
     if [ "$tag" = "cartuchos" ]; then
-      target="public/inventarios/dcam-municiones-${FECHA}.pdf"
+      target="public/inventarios/dcam-municiones-${FECHA_ISO}.pdf"
     elif [ "$tag" = "accesorios" ]; then
-      target="public/inventarios/dcam-accesorios-${FECHA}.pdf"
+      target="public/inventarios/dcam-accesorios-${FECHA_ISO}.pdf"
     fi
     cp "$pdf" "$target"
   done
@@ -130,16 +154,21 @@ step_mapeo() {
 
   # Armas
   if [ -f "$WORKDIR/armas.json" ]; then
+    # --catalogo: precio por variante representativa (nombre de la ficha) y
+    # guardia de saltos que no encadenan (van a revisarPrecio, no se publican).
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" --verbose \
-      > "$WORKDIR/mapeo-armas.json" 2>>"$LOG"
-    log "  mapeo armas: $(jq '.totalMapped' "$WORKDIR/mapeo-armas.json") mapeados"
+      --catalogo src/data --antes-de "$FECHA_ISO" \
+      > "$WORKDIR/mapeo-armas.json" 2>>"$LOG" \
+      || { log "  mapeo armas falló"; return 1; }
+    log "  mapeo armas: $(jq '.totalMapped' "$WORKDIR/mapeo-armas.json") mapeados, $(jq '.revisarPrecio | length' "$WORKDIR/mapeo-armas.json") precios a revisar"
   fi
 
   # Cartuchos
   if [ -f "$WORKDIR/cartuchos.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
       --ref "$SCRIPTS/referencia-cartuchos.json" --verbose \
-      > "$WORKDIR/mapeo-cartuchos.json" 2>>"$LOG"
+      > "$WORKDIR/mapeo-cartuchos.json" 2>>"$LOG" \
+      || { log "  mapeo cartuchos falló"; return 1; }
     log "  mapeo cartuchos: $(jq '.totalMapped' "$WORKDIR/mapeo-cartuchos.json") mapeados"
   fi
 
@@ -147,7 +176,8 @@ step_mapeo() {
   if [ -f "$WORKDIR/accesorios.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
       --ref "$SCRIPTS/referencia-accesorios.json" --verbose \
-      > "$WORKDIR/mapeo-accesorios.json" 2>>"$LOG"
+      > "$WORKDIR/mapeo-accesorios.json" 2>>"$LOG" \
+      || { log "  mapeo accesorios falló"; return 1; }
     log "  mapeo accesorios: $(jq '.totalMapped' "$WORKDIR/mapeo-accesorios.json") mapeados"
   fi
 
@@ -199,7 +229,8 @@ step_mecanico() {
   $VENV "$SCRIPTS/aplicar-mecanico.py" \
     $MECANICO_ARGS \
     --fecha "$FECHA_ISO" \
-    --data-dir src/data/ 2>>"$LOG"
+    --data-dir src/data/ 2>>"$LOG" \
+    || { log "  aplicar-mecanico.py falló (ver traza arriba)"; return 1; }
 
   git add -A
   git commit -m "mecánico: precios + existencias $FECHA" --quiet 2>>"$LOG"
@@ -344,11 +375,11 @@ step_audit() {
 # Run pipeline
 # ═══════════════════════════════════════════════════════════════════════════════
 
-step_prep     || { avisar_error "prep falló"; exit 1; }
-step_mapeo    || { avisar_error "mapeo falló"; exit 1; }
-step_mecanico || { avisar_error "mecánico falló"; exit 1; }
-step_altas    || { avisar_error "altas falló (pasos 0-2 ya están en el PR)"; exit 1; }
-step_audit    || { avisar_error "auditoría falló"; exit 1; }
+step_prep     || falla "prep falló"
+step_mapeo    || falla "mapeo falló"
+step_mecanico || falla "mecánico falló"
+step_altas    || falla "altas falló (pasos 0-2 ya están en el PR)"
+step_audit    || falla "auditoría falló"
 
 log "pipeline completo $FECHA"
 exit 0
