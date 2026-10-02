@@ -36,7 +36,9 @@
     "2084": 2500,
     "2069": 3000,
     "2070": 3000,
-    "2091": 3000
+    "2091": 3000,
+    "2008": 1750,
+    "2015": 3000
   },
   "precios": {
     "2004": 8.96,
@@ -75,20 +77,15 @@
     "2084": 9.29,
     "2069": 9.29,
     "2070": 10.71,
-    "2091": 10.71
+    "2091": 10.71,
+    "2008": 9.52,
+    "2015": 10.48
   },
   "factores": [
     1.01278,
     1.0
   ],
   "sinFicha": [
-    {
-      "idx": 1,
-      "name": "CART CAL 12,GB, 32 GR, PERDIGON 7.5",
-      "priceN": 9.52,
-      "qty": 1750,
-      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB CLUB, 32 GRAMOS, PERDIGON 7.5"
-    },
     {
       "idx": 2,
       "name": "CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5",
@@ -102,13 +99,6 @@
       "priceN": 10.48,
       "qty": 2900,
       "desc": "CARTUCHO CALIBRE 12, MARCA ELEY, ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICIÓN 7.5"
-    },
-    {
-      "idx": 6,
-      "name": "CART CAL. 12 EG DEL SUR (SH) 30 GR M.7.5",
-      "priceN": 10.48,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 30 GRAMOS, MUN. 7.5"
     },
     {
       "idx": 21,

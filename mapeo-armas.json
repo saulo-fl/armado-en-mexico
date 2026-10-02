@@ -123,7 +123,9 @@
     "254": 4,
     "225": 5,
     "231": 8,
-    "203": 6
+    "203": 6,
+    "146": 6,
+    "75": 5
   },
   "precios": {
     "1": 10569.22,
@@ -249,20 +251,14 @@
     "254": 47244.45,
     "225": 14965.63,
     "231": 36546.46,
-    "203": 19807.46
+    "203": 19807.46,
+    "146": 17313.18
   },
   "factores": [
     1.012774,
     1.011527
   ],
   "sinFicha": [
-    {
-      "idx": 55,
-      "name": "RIFLE CAL.22\"LR WINCHESTER MODELO RANGER",
-      "priceN": 17313.18,
-      "qty": 6,
-      "desc": "RIFLE DE ACCIÓN DE PALANCA DE UN CAÑÓN, MARCA WINCHESTER, MODELO RANGER, VERSIÓN MADERA, CULATA Y GUARDAMANO MADERA, CAL"
-    },
     {
       "idx": 63,
       "name": "MODELO RM22-6000 ACABADO CAMUFLAJE COMMA",
@@ -304,13 +300,6 @@
       "priceN": 45064.58,
       "qty": 1,
       "desc": "FUSIL DE ASALTO, MARCA IWI, MODELO ARAD CON CAÑÓN DE 11.5” , CAL. 5.56X45 MM, SEMIAUTOMÁTICO, INCLUYE: RIEL PICATINNY SU"
-    },
-    {
-      "idx": 114,
-      "name": "FUSIL 7.62X39 mm IWI M GALIL ACE 31 C8.5",
-      "priceN": 0.0,
-      "qty": 5,
-      "desc": "FUSIL DE ASALTO, MARCA IWI, MODELO GALIL ACE 31 CON CAÑÓN DE 8.5” , CAL. 7.62X39 MM, SEMIAUTOMÁTICO-AUTOMÁTICO, INCLUYE:"
     }
   ],
   "sinPrecio": [
