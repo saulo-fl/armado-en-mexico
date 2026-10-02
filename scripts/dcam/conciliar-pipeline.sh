@@ -120,12 +120,12 @@ step_prep() {
       || { log "  parse_pdf falló en $tag"; return 1; }
     log "  parseado $tag: $(wc -l < "$WORKDIR/${tag}.tsv") líneas TSV"
 
-    # Copy PDF to public/inventarios/
-    target="public/inventarios/dcam-existencias-${FECHA}.pdf"
+    # Copy PDF to public/inventarios/ — nombre en ISO: es el que enlazan los data-*.js
+    target="public/inventarios/dcam-existencias-${FECHA_ISO}.pdf"
     if [ "$tag" = "cartuchos" ]; then
-      target="public/inventarios/dcam-municiones-${FECHA}.pdf"
+      target="public/inventarios/dcam-municiones-${FECHA_ISO}.pdf"
     elif [ "$tag" = "accesorios" ]; then
-      target="public/inventarios/dcam-accesorios-${FECHA}.pdf"
+      target="public/inventarios/dcam-accesorios-${FECHA_ISO}.pdf"
     fi
     cp "$pdf" "$target"
   done
