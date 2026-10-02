@@ -385,9 +385,14 @@ def update_acc_price(content, ficha_id, new_price):
 def mark_agotadas_armas(existencias_map, sin_precio, sin_ficha_ids):
     """Fichas in sinPrecio NOT in sinFicha → remove from existencias (qty=0)."""
     sf_ids = set(sf.get("fichaId") for sf in sin_ficha_ids) if sin_ficha_ids else set()
+    mapped_ids = set(k for k, v in existencias_map.items() if v)
     removed = []
     for sp in sin_precio:
         fid = str(sp["fichaId"])
+        # Si la ficha sigue mapeada por otro renglón (cambió el representante
+        # de la variante), NO está agotada: conserva su existencia.
+        if fid in mapped_ids:
+            continue
         if sp["fichaId"] not in sf_ids and fid in existencias_map:
             del existencias_map[fid]
             removed.append(sp["fichaId"])

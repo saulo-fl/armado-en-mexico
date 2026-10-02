@@ -118,7 +118,12 @@
     "243": 4,
     "244": 7,
     "252": 2,
-    "253": 1
+    "253": 1,
+    "249": 6,
+    "254": 4,
+    "225": 5,
+    "231": 8,
+    "203": 6
   },
   "precios": {
     "1": 10569.22,
@@ -239,34 +244,18 @@
     "243": 13362.17,
     "244": 20237.45,
     "252": 175280.27,
-    "253": 10123.81
+    "253": 10123.81,
+    "249": 46129.49,
+    "254": 47244.45,
+    "225": 14965.63,
+    "231": 36546.46,
+    "203": 19807.46
   },
   "factores": [
     1.012774,
     1.011527
   ],
   "sinFicha": [
-    {
-      "idx": 48,
-      "name": "ESC.SEM.MOD.TITANO L.71CM.28\"",
-      "priceN": 46129.49,
-      "qty": 6,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO TITANO L, VERSION BASCULA GRABADA, CULATA Y GUARDAMANO DE MADER"
-    },
-    {
-      "idx": 51,
-      "name": "ESC.S.2C,BROWNING.CAL.12.B5.25S.MAD.71CM",
-      "priceN": 47244.45,
-      "qty": 4,
-      "desc": "ESCOPETA SOBREPUESTA DE DOS CAÑONES MARCA BROWNING, MODELO B5.25S (SPORTER), VERSIÓN CULATA AJUSTABLE, CULATA Y GUARDAMA"
-    },
-    {
-      "idx": 52,
-      "name": "ESC.A.BOM.CAL12.WINCHESTER.SXP.CAMO,71CM",
-      "priceN": 14965.63,
-      "qty": 5,
-      "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN MARCA WINCHESTER, MODELO SXP, VERSIÓN CAMO, CULATA Y GUARDAMANO SINTÉTICOS CAMO,"
-    },
     {
       "idx": 55,
       "name": "RIFLE CAL.22\"LR WINCHESTER MODELO RANGER",
@@ -296,13 +285,6 @@
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 SQUAD RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y L"
     },
     {
-      "idx": 70,
-      "name": "RIFLE BENELLI CAL. 223REM MR1 CAÑ. 16\"",
-      "priceN": 36546.46,
-      "qty": 8,
-      "desc": "RIFLE SEMIAUTOMÁTICO MARCA BENELLI CAL. .223 REM, MODELO MR1, CAÑON DE 16” , CULATA FIJA, RIEL PICATINNY. INCLUYE: UN CA"
-    },
-    {
       "idx": 94,
       "name": "ESCOPETA 12 GA FRANCHI AFFINITY 3 B SYN",
       "priceN": 20207.69,
@@ -329,13 +311,6 @@
       "priceN": 0.0,
       "qty": 5,
       "desc": "FUSIL DE ASALTO, MARCA IWI, MODELO GALIL ACE 31 CON CAÑÓN DE 8.5” , CAL. 7.62X39 MM, SEMIAUTOMÁTICO-AUTOMÁTICO, INCLUYE:"
-    },
-    {
-      "idx": 119,
-      "name": "RIFLE CESKA CZ 600 ALPHA CAL.223REM",
-      "priceN": 19807.46,
-      "qty": 6,
-      "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 ALPHA CALIBRE 223 REM, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE"
     }
   ],
   "sinPrecio": [

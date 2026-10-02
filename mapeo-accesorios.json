@@ -24,7 +24,8 @@
     "133": 15,
     "201": 9,
     "202": 5,
-    "401": 10
+    "401": 10,
+    "301": 1
   },
   "precios": {
     "101": 628.81,
@@ -51,21 +52,14 @@
     "133": 707.41,
     "201": 27510.36,
     "202": 23318.3,
-    "401": 4768.46
+    "401": 4768.46,
+    "301": 5952.19
   },
   "factores": [
     1.012772,
     0.949575
   ],
-  "sinFicha": [
-    {
-      "idx": 23,
-      "name": "CULATA TSK PARA DT11 CODIGO E02352",
-      "priceN": 5952.19,
-      "qty": 1,
-      "desc": "BERETTA BY TSK GRIP FOR DT11 AND DT10 RH, CULATA TIPO TSK PARA DT11, CÓDIGO E02352"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 106,

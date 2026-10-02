@@ -28,7 +28,15 @@
     "2092": 500,
     "2095": 1000,
     "2101": 3000,
-    "2103": 7100
+    "2103": 7100,
+    "2106": 3000,
+    "2097": 2000,
+    "2099": 2250,
+    "2100": 3000,
+    "2084": 2500,
+    "2069": 3000,
+    "2070": 3000,
+    "2091": 3000
   },
   "precios": {
     "2004": 8.96,
@@ -59,7 +67,15 @@
     "2092": 29.97,
     "2095": 7.96,
     "2101": 11.43,
-    "2103": 8.96
+    "2103": 8.96,
+    "2106": 10.95,
+    "2097": 11.74,
+    "2099": 13.83,
+    "2100": 9.05,
+    "2084": 9.29,
+    "2069": 9.29,
+    "2070": 10.71,
+    "2091": 10.71
   },
   "factores": [
     1.01278,
@@ -95,34 +111,6 @@
       "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 30 GRAMOS, MUN. 7.5"
     },
     {
-      "idx": 7,
-      "name": "CART CAL.12 EG DEL SUR (SH) 32 GR M. 7.5",
-      "priceN": 10.95,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 32 GRAMOS, MUN. 7.5"
-    },
-    {
-      "idx": 17,
-      "name": "CART.STERLINGCAL.12GA.28GRA,7.5",
-      "priceN": 11.74,
-      "qty": 2000,
-      "desc": "CARTUCHO MARCA STERLING CAL. 12 GA. DE 28 GRAMOS, 7.5"
-    },
-    {
-      "idx": 18,
-      "name": "CART.STERLINGCAL.12GA.36GR.7.5.",
-      "priceN": 13.83,
-      "qty": 2250,
-      "desc": "CARTUCHO MARCA STERLING CAL. 12 GA., DE 36 GRAMOS, 7.5."
-    },
-    {
-      "idx": 20,
-      "name": "CART CAL12 SPRINT N7.5 24GR. T2",
-      "priceN": 9.05,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 24GR. T2 CAT. CEBUL B224 75"
-    },
-    {
       "idx": 21,
       "name": "CART CAL12 SPRINT N7.5 28GR. T2",
       "priceN": 9.29,
@@ -142,34 +130,6 @@
       "priceN": 9.05,
       "qty": 3000,
       "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 24 GR. CAT. 0096-75"
-    },
-    {
-      "idx": 25,
-      "name": "CRT.BULLETC.CAL.12MUN.7.5 28 GR.CT.0098",
-      "priceN": 9.29,
-      "qty": 2500,
-      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 28 GR. CAT. 0098-75"
-    },
-    {
-      "idx": 28,
-      "name": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
-      "priceN": 9.29,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO TRAP COMPETICIÓN (COMPETITION) 24 GRAMOS, MUNICIÓN DEL 7.5, EMPAC"
-    },
-    {
-      "idx": 29,
-      "name": "CART CAL12 TRUST BLUE LINE 32GR M7.5",
-      "priceN": 10.71,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 7.5, EMPACADO"
-    },
-    {
-      "idx": 30,
-      "name": "CART CAL12 TRUST BLUE LINE 32GR M8",
-      "priceN": 10.71,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 8, EMPACADO E"
     }
   ],
   "sinPrecio": [],
