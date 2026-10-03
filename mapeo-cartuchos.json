@@ -36,12 +36,17 @@
     "2097": 1250,
     "2099": 750,
     "2100": 3000,
-    "2101": 6000,
     "2103": 7100,
     "2106": 3000,
     "2108": 4150,
     "2110": 500,
-    "2111": 2000
+    "2111": 2000,
+    "2072": 6000,
+    "2061": 3000,
+    "2074": 3000,
+    "2096": 2000,
+    "2066": 3000,
+    "2067": 3000
   },
   "precios": {
     "2004": 8.96,
@@ -80,39 +85,23 @@
     "2097": 11.93,
     "2099": 14.06,
     "2100": 9.14,
-    "2101": 11.55,
     "2103": 8.96,
     "2106": 11.07,
     "2108": 10.59,
     "2110": 10.35,
-    "2111": 9.14
+    "2111": 9.14,
+    "2072": 11.55,
+    "2061": 10.35,
+    "2074": 10.35,
+    "2096": 15.88,
+    "2066": 10.59,
+    "2067": 10.59
   },
   "factores": [
     1.016581,
     1.010763
   ],
   "sinFicha": [
-    {
-      "idx": 3,
-      "name": "CART.CAL.12.RIO.GAME.LOAD-32.32GR.P6",
-      "priceN": 10.35,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 6"
-    },
-    {
-      "idx": 4,
-      "name": "CART. CAL. 12GA RIO GAME LOAD-32 32GR P4",
-      "priceN": 10.35,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 4"
-    },
-    {
-      "idx": 17,
-      "name": "CART.CAL.12.G.A.SAGA BUCK,34GR,M9 POSTAS",
-      "priceN": 15.88,
-      "qty": 2000,
-      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA BUCK, 34 GRAMOS, MUNICIÓN 9 POSTAS."
-    },
     {
       "idx": 20,
       "name": "CARTUCHO CAL 12 SAGA SPORTING 32 M7.5",
@@ -142,20 +131,6 @@
       "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA TOP EXPORT 36, 36 GRAMOS, MUNICIÓN 6."
     },
     {
-      "idx": 24,
-      "name": "CART.CAL.20G.A.SAGAC.20-70 GOLD, 28GR,M6",
-      "priceN": 10.59,
-      "qty": 3000,
-      "desc": "CARTUCHO CAL. 20 G.A. MARCA SAGA C.20-70 GOLD, 28 GRAMOS, MUNICIÓN 6."
-    },
-    {
-      "idx": 25,
-      "name": "CART.CAL.20G.A.SAGAC.20-70GOLD,28GR,M7.5",
-      "priceN": 10.59,
-      "qty": 3000,
-      "desc": "CARTUCHO CAL. 20 G.A. MARCA SAGA C.20-70 GOLD, 28 GRAMOS, MUNICIÓN 7.5."
-    },
-    {
       "idx": 31,
       "name": "CART. CAL. 12 EXCOPESA 24GR M8 110-80",
       "priceN": 10.11,
@@ -175,9 +150,14 @@
       "fichaId": 2109,
       "refName": "CART CAL12 SPRINT N7.5 28GR. T2",
       "refPrice": 9.29
+    },
+    {
+      "fichaId": 2101,
+      "refName": "CAR.BULLET E.C.CL.12MUN6 34 GR.C.007-06",
+      "refPrice": 11.3
     }
   ],
   "revisarPrecio": [],
   "totalPdf": 174828,
-  "totalMapped": 141828
+  "totalMapped": 155828
 }

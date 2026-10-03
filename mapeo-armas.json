@@ -128,7 +128,8 @@
     "254": 2,
     "262": 6,
     "263": 6,
-    "264": 6
+    "264": 6,
+    "3": 40
   },
   "precios": {
     "1": 10744.46,
@@ -259,7 +260,8 @@
     "254": 48027.8,
     "262": 10687.93,
     "263": 10687.93,
-    "264": 11863.1
+    "264": 11863.1,
+    "3": 16681.67
   },
   "factores": [
     1.016581,
@@ -286,20 +288,6 @@
       "priceN": 11825.83,
       "qty": 15,
       "desc": "PISTOLA CALIBRE 9 X 19 mm MARCA I.W.I. MODELO JERICHO II, CAÑON DE 4.4\" CODIGO: 046681058MEXICO. INCLUYE: 3 (TRES) CARGA"
-    },
-    {
-      "idx": 193,
-      "name": "PIST.F.C.TAURUSPT 59,CAL.0.380",
-      "priceN": 16681.67,
-      "qty": 20,
-      "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO PT 59, CALIBRE 0.380, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 19 CAR"
-    },
-    {
-      "idx": 194,
-      "name": "PIST.F.C.TAURUS,PT 59,CAL.0.380",
-      "priceN": 17367.78,
-      "qty": 20,
-      "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO PT 59, CALIBRE 0.380, COLOR ACERO INOXIDABLE, CON 3 CARGADORES CON CAPACIDA"
     }
   ],
   "sinPrecio": [
@@ -311,5 +299,5 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 1699,
-  "totalMapped": 1465
+  "totalMapped": 1505
 }
