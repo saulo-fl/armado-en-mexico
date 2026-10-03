@@ -1,7 +1,8 @@
 {
   "existencias": {
     "2004": 566,
-    "2008": 2400,
+    "2008": 500,
+    "2015": 3000,
     "2018": 990,
     "2019": 12550,
     "2021": 370,
@@ -19,25 +20,33 @@
     "2044": 35,
     "2050": 4450,
     "2051": 1810,
+    "2057": 4500,
     "2063": 4650,
     "2069": 3000,
+    "2070": 2025,
     "2075": 2750,
-    "2084": 3000,
+    "2076": 4025,
+    "2077": 3350,
+    "2084": 875,
+    "2087": 650,
+    "2089": 1900,
+    "2091": 3000,
     "2092": 500,
     "2095": 3600,
     "2097": 1250,
     "2099": 750,
     "2100": 3000,
-    "2101": 4025,
+    "2101": 6000,
     "2103": 7100,
-    "2108": 6000,
-    "2109": 500,
-    "2110": 3000,
-    "2111": 1250
+    "2106": 3000,
+    "2108": 4150,
+    "2110": 500,
+    "2111": 2000
   },
   "precios": {
     "2004": 8.96,
-    "2008": 10.59,
+    "2008": 9.63,
+    "2015": 10.59,
     "2018": 18.18,
     "2019": 8.96,
     "2021": 25.78,
@@ -55,54 +64,47 @@
     "2044": 11.51,
     "2050": 25.78,
     "2051": 25.78,
+    "2057": 13.96,
     "2063": 8.1,
-    "2069": 10.35,
+    "2069": 9.39,
+    "2070": 10.83,
     "2075": 11.72,
-    "2084": 10.35,
+    "2076": 13.0,
+    "2077": 13.0,
+    "2084": 9.39,
+    "2087": 12.03,
+    "2089": 13.96,
+    "2091": 10.83,
     "2092": 30.47,
     "2095": 8.1,
     "2097": 11.93,
     "2099": 14.06,
-    "2100": 10.11,
-    "2101": 13.0,
+    "2100": 9.14,
+    "2101": 11.55,
     "2103": 8.96,
-    "2108": 11.55,
-    "2109": 10.35,
-    "2110": 11.79,
-    "2111": 10.35
+    "2106": 11.07,
+    "2108": 10.59,
+    "2110": 10.35,
+    "2111": 9.14
   },
   "factores": [
-    1.016562,
-    1.155134
+    1.016581,
+    1.010763
   ],
   "sinFicha": [
     {
-      "idx": 1,
-      "name": "CART CAL 12,GB, 32 GR, PERDIGON 7.5",
-      "priceN": 9.63,
-      "qty": 500,
-      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB CLUB, 32 GRAMOS, PERDIGON 7.5"
-    },
-    {
-      "idx": 2,
-      "name": "CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5",
-      "priceN": 9.87,
-      "qty": 1750,
-      "desc": "CARTUCHO CALIBRE 12 MARCA ELEY , ELEY OLYMPIC BLUES 32, 32 GRAMOS, MUNICION 7.5"
-    },
-    {
-      "idx": 8,
-      "name": "CART CAL. 12 EG DEL SUR (SH) 30 GR M.7.5",
-      "priceN": 10.59,
+      "idx": 3,
+      "name": "CART.CAL.12.RIO.GAME.LOAD-32.32GR.P6",
+      "priceN": 10.35,
       "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 30 GRAMOS, MUN. 7.5"
+      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 6"
     },
     {
-      "idx": 9,
-      "name": "CART CAL.12 EG DEL SUR (SH) 32 GR M. 7.5",
-      "priceN": 11.07,
+      "idx": 4,
+      "name": "CART. CAL. 12GA RIO GAME LOAD-32 32GR P4",
+      "priceN": 10.35,
       "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 32 GRAMOS, MUN. 7.5"
+      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 4"
     },
     {
       "idx": 17,
@@ -112,11 +114,11 @@
       "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA BUCK, 34 GRAMOS, MUNICIÓN 9 POSTAS."
     },
     {
-      "idx": 19,
-      "name": "CART. CAL12 SAGA KING PIGEON CD 36GR M9",
-      "priceN": 13.0,
-      "qty": 3350,
-      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA, KING PIGEON CORTA DISTANCIA, 36 GRAMOS, MUNICIÓN 9."
+      "idx": 20,
+      "name": "CARTUCHO CAL 12 SAGA SPORTING 32 M7.5",
+      "priceN": 11.79,
+      "qty": 3000,
+      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA SPORTING 32, 32 GRAMOS, MUNICIÓN 7.5."
     },
     {
       "idx": 21,
@@ -154,122 +156,28 @@
       "desc": "CARTUCHO CAL. 20 G.A. MARCA SAGA C.20-70 GOLD, 28 GRAMOS, MUNICIÓN 7.5."
     },
     {
-      "idx": 29,
-      "name": "CART CAL12 SPRINT N7.5 24GR. T2",
-      "priceN": 9.14,
+      "idx": 31,
+      "name": "CART. CAL. 12 EXCOPESA 24GR M8 110-80",
+      "priceN": 10.11,
       "qty": 3000,
-      "desc": "CARTUCHO MARCA SPRINT CALIBRE 12 N. 7.5 24GR. T2 CAT. CEBUL B224 75"
+      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 ALTA COMPETICION MUN. 8 24GR CATALOGO 110 – 80"
     },
     {
-      "idx": 33,
-      "name": "CART. CAL. 12 EXCOPESA T5 PICH 36GR M7.5",
-      "priceN": 13.96,
-      "qty": 4500,
-      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 T5 PICHON MUN. 7.5 36GR CATALOGO 150 - 75"
-    },
-    {
-      "idx": 34,
-      "name": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
-      "priceN": 9.14,
-      "qty": 2000,
-      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 24 GR. CAT. 0096-75"
-    },
-    {
-      "idx": 35,
-      "name": "CRT.BULLETC.CAL.12MUN.7.5 28 GR.CT.0098",
-      "priceN": 9.39,
-      "qty": 875,
-      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 28 GR. CAT. 0098-75"
-    },
-    {
-      "idx": 36,
-      "name": "CART.BULLETT-4C.CAL.12MUN8 36GR.C0072-08",
-      "priceN": 12.03,
-      "qty": 650,
-      "desc": "CARTUCHO MARCA BULLET T-4 CAZA CAL. 12 MUN. 8 36 GR. CAT. 0072-08"
-    },
-    {
-      "idx": 37,
-      "name": "CARTBULLETT-5P1400F.CL.12MN.8-36,0078-80",
-      "priceN": 13.96,
-      "qty": 1900,
-      "desc": "CARTUCHO MARCA BULLET T-5 PICHON 1400 FPS CAL. 12 MUN. 8 36 GR. CAT. 0078-80"
-    },
-    {
-      "idx": 38,
-      "name": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
-      "priceN": 9.39,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO TRAP COMPETICIÓN (COMPETITION) 24 GRAMOS, MUNICIÓN DEL 7.5, EMPAC"
-    },
-    {
-      "idx": 39,
-      "name": "CART CAL12 TRUST BLUE LINE 32GR M7.5",
-      "priceN": 10.83,
-      "qty": 2025,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 7.5, EMPACADO"
-    },
-    {
-      "idx": 40,
-      "name": "CART CAL12 TRUST BLUE LINE 32GR M8",
-      "priceN": 10.83,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE) 32 GRAMOS, MUNICIÓN DEL 8, EMPACADO E"
+      "idx": 32,
+      "name": "CART. CAL. 12 EXCOPESA 28GR M7.5 130-75",
+      "priceN": 10.35,
+      "qty": 1250,
+      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 ALTA COMPETICION MUN. 7.5 28GR CATALOGO 130 - 75"
     }
   ],
   "sinPrecio": [
     {
-      "fichaId": 2108,
-      "refName": "CART. CAL. 12 ELEY EOB 32GR 7.5",
-      "refPrice": 10.48
-    },
-    {
-      "fichaId": 2015,
-      "refName": "CART CAL. 12 EG DEL SUR (SH) 30 GR M.7.5",
-      "refPrice": 10.48
-    },
-    {
-      "fichaId": 2106,
-      "refName": "CART CAL.12 EG DEL SUR (SH) 32 GR M. 7.5",
-      "refPrice": 10.95
-    },
-    {
-      "fichaId": 2076,
-      "refName": "CART. CAL12 SAGA KING PIGEON CD 36GR M8",
-      "refPrice": 12.86
-    },
-    {
-      "fichaId": 2077,
-      "refName": "CART. CAL12 SAGA KING PIGEON CD 36GR M9",
-      "refPrice": 12.86
-    },
-    {
-      "fichaId": 2057,
-      "refName": "CART. CAL. 12 EXCOPESA T5 PICH 36GR M7.5",
-      "refPrice": 13.81
-    },
-    {
-      "fichaId": 2087,
-      "refName": "CART.BULLETT-4C.CAL.12MUN8 36GR.C0072-08",
-      "refPrice": 11.9
-    },
-    {
-      "fichaId": 2089,
-      "refName": "CARTBULLETT-5P1400F.CL.12MN.8-36,0078-80",
-      "refPrice": 13.81
-    },
-    {
-      "fichaId": 2070,
-      "refName": "CART CAL12 TRUST BLUE LINE 32GR M7.5",
-      "refPrice": 10.71
-    },
-    {
-      "fichaId": 2091,
-      "refName": "CART CAL12 TRUST BLUE LINE 32GR M8",
-      "refPrice": 10.71
+      "fichaId": 2109,
+      "refName": "CART CAL12 SPRINT N7.5 28GR. T2",
+      "refPrice": 9.29
     }
   ],
   "revisarPrecio": [],
   "totalPdf": 174828,
-  "totalMapped": 122528
+  "totalMapped": 141828
 }

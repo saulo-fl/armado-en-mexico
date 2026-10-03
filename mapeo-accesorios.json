@@ -24,6 +24,7 @@
     "133": 15,
     "201": 9,
     "202": 5,
+    "301": 1,
     "401": 10
   },
   "precios": {
@@ -51,57 +52,16 @@
     "133": 719.14,
     "201": 27966.5,
     "202": 23704.94,
+    "301": 6016.25,
     "401": 4847.53
   },
   "factores": [
-    1.01658,
-    0.762523
+    1.016581,
+    1.010763
   ],
-  "sinFicha": [
-    {
-      "idx": 4,
-      "name": "CARG. P/RIFLE BENELLI MR1 CAP 5 CART",
-      "priceN": 782.11,
-      "qty": 15,
-      "desc": "CARGADOR PARA RIFLE MARCA BENELLI, MODELO (MR1), CON CAPACIDAD DE 5 CARTUCHOS. CÓDIGO: F0455900"
-    },
-    {
-      "idx": 7,
-      "name": "CARGADOR P/PIST. 0.380 GRAND POWER CP380",
-      "priceN": 336.91,
-      "qty": 6,
-      "desc": ""
-    },
-    {
-      "idx": 16,
-      "name": "CARGADOR BERETTA 92FS CAL.9MM 15 CART.",
-      "priceN": 600.18,
-      "qty": 24,
-      "desc": "CARGADOR PARA PISTOLA MARCA BERETTA MODELO 92FS CAL. 9x19MM CON CAPACIDAD DE 15 CARTUCHOS"
-    },
-    {
-      "idx": 23,
-      "name": "CULATA TSK PARA DT11 CODIGO E02352",
-      "priceN": 6016.25,
-      "qty": 1,
-      "desc": "BERETTA BY TSK GRIP FOR DT11 AND DT10 RH, CULATA TIPO TSK PARA DT11, CÓDIGO E02352"
-    },
-    {
-      "idx": 28,
-      "name": "CLIPS P/REVOLVER RHINO 0.38\" CHIAPPA",
-      "priceN": 752.03,
-      "qty": 5,
-      "desc": "CLIPS PARA REVOLVER RHINO MARCA CALIBRE 0.38\" SPL. MARCA CHIAPPA FIREARMS, (CAJA CON 10 PIEZAS)"
-    }
-  ],
-  "sinPrecio": [
-    {
-      "fichaId": 301,
-      "refName": "CULATA TSK PARA DT11 CODIGO E02352",
-      "refPrice": 5952.19
-    }
-  ],
+  "sinFicha": [],
+  "sinPrecio": [],
   "revisarPrecio": [],
   "totalPdf": 561,
-  "totalMapped": 510
+  "totalMapped": 511
 }
