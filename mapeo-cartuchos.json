@@ -46,7 +46,13 @@
     "2074": 3000,
     "2096": 2000,
     "2066": 3000,
-    "2067": 3000
+    "2067": 3000,
+    "2112": 3000,
+    "2113": 3000,
+    "2114": 3000,
+    "2115": 3000,
+    "2116": 3000,
+    "2117": 1250
   },
   "precios": {
     "2004": 8.96,
@@ -95,56 +101,19 @@
     "2074": 10.35,
     "2096": 15.88,
     "2066": 10.59,
-    "2067": 10.59
+    "2067": 10.59,
+    "2112": 11.79,
+    "2113": 10.11,
+    "2114": 10.83,
+    "2115": 10.83,
+    "2116": 10.11,
+    "2117": 10.35
   },
   "factores": [
     1.016581,
     1.010763
   ],
-  "sinFicha": [
-    {
-      "idx": 20,
-      "name": "CARTUCHO CAL 12 SAGA SPORTING 32 M7.5",
-      "priceN": 11.79,
-      "qty": 3000,
-      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA SPORTING 32, 32 GRAMOS, MUNICIÓN 7.5."
-    },
-    {
-      "idx": 21,
-      "name": "CART.CAL.12G.A.SAGA EXPORT28,28GR,M7.5.",
-      "priceN": 10.11,
-      "qty": 3000,
-      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA EXPORT 28, 28 GRAMOS, MUNICIÓN 7.5."
-    },
-    {
-      "idx": 22,
-      "name": "CAR. CAL. 12 G.A. MAR. SAGA TOP EXP. 36,",
-      "priceN": 10.83,
-      "qty": 3000,
-      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA TOP EXPORT 36, 36 GRAMOS, MUNICIÓN 4."
-    },
-    {
-      "idx": 23,
-      "name": "CART. CAL. 12 G.A. MAR. SAGA TOP EXPORT",
-      "priceN": 10.83,
-      "qty": 3000,
-      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA TOP EXPORT 36, 36 GRAMOS, MUNICIÓN 6."
-    },
-    {
-      "idx": 31,
-      "name": "CART. CAL. 12 EXCOPESA 24GR M8 110-80",
-      "priceN": 10.11,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 ALTA COMPETICION MUN. 8 24GR CATALOGO 110 – 80"
-    },
-    {
-      "idx": 32,
-      "name": "CART. CAL. 12 EXCOPESA 28GR M7.5 130-75",
-      "priceN": 10.35,
-      "qty": 1250,
-      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 ALTA COMPETICION MUN. 7.5 28GR CATALOGO 130 - 75"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2109,
@@ -159,5 +128,5 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 174828,
-  "totalMapped": 155828
+  "totalMapped": 172078
 }

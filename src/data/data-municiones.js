@@ -425,6 +425,19 @@
       "Cartucho de escopeta en calibre 12 GA, marca Sprint (N. 7.5, 32 gr, T2, cat. CEBUL B232 75). Precio de referencia por cartucho del inventario DCAM (1-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]) },
     { ...mun(2111, "Cartucho 12 GA · J&G Excopesa (Competición 24 M7.5)", "J&G Excopesa", "España", "12 GA", "escopeta", "Perdigón 7.5", "24 gr", "dcam", 9.14, "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
       "Cartucho de escopeta en calibre 12 GA, marca J&G Excopesa (el DCAM lo vende como «Bullet»; Competición, Perdigón 7.5, 24 gr, cat. 0096-75). Precio de referencia por cartucho del inventario DCAM (1-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "24 gr"], ["Tipo", "Escopeta"]]) },
+    // ── ALTAS del inventario DCAM 2-oct-2026 (cartuchos nuevos) ──
+    { ...mun(2112, "Cartucho 12 GA · Saga (Sporting 32 M7.5)", "Saga", "España", "12 GA", "escopeta", "Perdigón 7.5", "32 gr", "dcam", 11.79, "CARTUCHO CAL 12 SAGA SPORTING 32 M7.5",
+      "Cartucho de escopeta en calibre 12 GA, marca Saga, línea Sporting 32 (Perdigón 7.5, 32 gr). Precio de referencia por cartucho del inventario DCAM (2-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2113, "Cartucho 12 GA · Saga (Export 28 M7.5)", "Saga", "España", "12 GA", "escopeta", "Perdigón 7.5", "28 gr", "dcam", 10.11, "CART.CAL.12G.A.SAGA EXPORT28,28GR,M7.5.",
+      "Cartucho de escopeta en calibre 12 GA, marca Saga, línea Export 28 (Perdigón 7.5, 28 gr). Precio de referencia por cartucho del inventario DCAM (2-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "28 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2114, "Cartucho 12 GA · Saga (Top Export 36 M4)", "Saga", "España", "12 GA", "escopeta", "Perdigón 4", "36 gr", "dcam", 10.83, "CAR. CAL. 12 G.A. MAR. SAGA TOP EXP. 36,",
+      "Cartucho de escopeta en calibre 12 GA, marca Saga, línea Top Export 36 (Perdigón 4, 36 gr). Precio de referencia por cartucho del inventario DCAM (2-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 4"], ["Peso", "36 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2115, "Cartucho 12 GA · Saga (Top Export 36 M6)", "Saga", "España", "12 GA", "escopeta", "Perdigón 6", "36 gr", "dcam", 10.83, "CART. CAL. 12 G.A. MAR. SAGA TOP EXPORT",
+      "Cartucho de escopeta en calibre 12 GA, marca Saga, línea Top Export 36 (Perdigón 6, 36 gr). Precio de referencia por cartucho del inventario DCAM (2-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 6"], ["Peso", "36 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2116, "Cartucho 12 GA · J&G Excopesa (Alta Competición 24 M8)", "J&G Excopesa", "España", "12 GA", "escopeta", "Perdigón 8", "24 gr", "dcam", 10.11, "CART. CAL. 12 EXCOPESA 24GR M8 110-80",
+      "Cartucho de escopeta en calibre 12 GA, marca J&G Excopesa, línea Alta Competición (Perdigón 8, 24 gr, cat. 110-80). Precio de referencia por cartucho del inventario DCAM (2-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 8"], ["Peso", "24 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2117, "Cartucho 12 GA · J&G Excopesa (Alta Competición 28 M7.5)", "J&G Excopesa", "España", "12 GA", "escopeta", "Perdigón 7.5", "28 gr", "dcam", 10.35, "CART. CAL. 12 EXCOPESA 28GR M7.5 130-75",
+      "Cartucho de escopeta en calibre 12 GA, marca J&G Excopesa, línea Alta Competición (Perdigón 7.5, 28 gr, cat. 130-75). Precio de referencia por cartucho del inventario DCAM (2-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "28 gr"], ["Tipo", "Escopeta"]]) },
   ];
 
   function _mh(price, qty) { return { manualId: OTCA, price: _mFmt(price), date: OTCAd, qty: (qty == null ? null : qty) }; }
@@ -550,6 +563,12 @@
     2109: [{ manualId: 'man_mun_dcam_2026_10_01', price: '$9.29 MXN', date: '2026-10-01', qty: 250 }],
     2110: [{ manualId: 'man_mun_dcam_2026_10_01', price: '$10.24 MXN', date: '2026-10-01', qty: 2000 }, { manualId: 'man_mun_dcam_2026_10_02', price: '$10.35 MXN', date: '2026-10-02', qty: 500 }],
     2111: [{ manualId: 'man_mun_dcam_2026_10_01', price: '$9.05 MXN', date: '2026-10-01', qty: 3000 }, { manualId: 'man_mun_dcam_2026_10_02', price: '$9.14 MXN', date: '2026-10-02', qty: 2000 }],
+    2112: [{ manualId: 'man_mun_dcam_2026_10_02', price: '$11.79 MXN', date: '2026-10-02', qty: 3000 }],
+    2113: [{ manualId: 'man_mun_dcam_2026_10_02', price: '$10.11 MXN', date: '2026-10-02', qty: 3000 }],
+    2114: [{ manualId: 'man_mun_dcam_2026_10_02', price: '$10.83 MXN', date: '2026-10-02', qty: 3000 }],
+    2115: [{ manualId: 'man_mun_dcam_2026_10_02', price: '$10.83 MXN', date: '2026-10-02', qty: 3000 }],
+    2116: [{ manualId: 'man_mun_dcam_2026_10_02', price: '$10.11 MXN', date: '2026-10-02', qty: 3000 }],
+    2117: [{ manualId: 'man_mun_dcam_2026_10_02', price: '$10.35 MXN', date: '2026-10-02', qty: 1250 }],
   };
 
   window.getMunicionById = function (id) { var n = Number(id); return (window.MUNICIONES || []).find(function (m) { return m.id === n; }) || null; };
