@@ -38,6 +38,7 @@ Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
 Agentes delegables: **`deploy-main`** (publicar en producción, con resembrado de D1 y
 sondas de verificación) · **`deploy-develop`** (llevar a `develop` para ver el preview,
 sin tocar producción) · **`conciliador-inventario`** (conciliación completa) ·
+**`solucionador-dcam`** (lo lanza el pipeline DCAM cuando falla; repara la rama del PR) ·
 **`preparador-imagenes`** (fotos de arma con alfa) · **`revisor-armado`** (auditoría de
 datos + fidelidad de diseño) · **`disenador-oficial`** (rediseño y custodia del sistema
 visual) · **`auditor-a11y-perf`** (contraste, foco, áreas táctiles, peso, coste de scroll) ·
@@ -75,7 +76,7 @@ Prueba: `node .claude/hooks/guardia.test.mjs`.
 |---|---|---|
 | base | sesión principal, `deploy-main` | — |
 | `lectura` | `revisor-armado`, `auditor-a11y-perf`, `auditor-estructura`, `impeccable-finish-reviewer`, `Explore`, `Plan` | nada de git/gh/wrangler que escriba, ni `npm install` |
-| `trabajo` | `conciliador-inventario`, `preparador-imagenes`, `disenador-oficial`, `impeccable-*` que editan | ramas y PR sí; mergear, `gh api` de escritura y D1, no |
+| `trabajo` | `conciliador-inventario`, `solucionador-dcam`, `preparador-imagenes`, `disenador-oficial`, `impeccable-*` que editan | ramas y PR sí; mergear, `gh api` de escritura y D1, no |
 | `develop` | `deploy-develop` | PR y merge solo con base `develop` (lo consulta a GitHub); D1, no |
 
 **Base, para todos:** `deny` al push directo a `main`/`develop`, al push forzado o que
