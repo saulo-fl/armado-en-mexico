@@ -128,3 +128,16 @@ Lo que sobrevive es alta nueva.
   distínguelas por lo que el PDF distingue (línea, gramaje, perdigón).
 - Después: liga, re-mapeo, `--rehacer`, compuertas, `npm run build` (la ficha
   debe tener página).
+
+### C11. Registro de precio idéntico a varios renglones, en fichas que no vinieron (02-oct-2026)
+- **Síntoma**: una ficha tiene registro de una fecha en que su renglón **no
+  aparece** en el PDF archivado; otra ficha, que sí vino, no tiene ese registro.
+- **Causa**: el día del registro varios renglones tenían el mismo precio y la
+  misma existencia (25-sep: Gold M6, Gold M7.5 y GB Ojeo, los tres 3000 @ 10.24);
+  el emparejamiento por precio los repartió entre fichas ajenas (2015, 2078).
+- **Arreglo**: si la ficha receptora **no estaba en el PDF** de esa fecha, el
+  registro no es suyo: muévelo a la ficha cuyo renglón sí vino y le falta. Como los
+  valores son idénticos, el contenido es cierto aunque no sepas qué copia era de
+  quién. Si la receptora sí estaba en el PDF, no lo muevas (regla de C2).
+- **Comprobación**: `pdftotext -layout $DCAM_DIR/archivo/<fecha>/*CART*.pdf - | grep <precio>`
+  y el renglón de la receptora ausente.
