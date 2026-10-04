@@ -132,6 +132,56 @@ def _buscar_en_bloque(content, marcador, fid_str):
     return pat.search(content, span[0], span[1])
 
 
+# ── --rehacer: quitar los registros del día para volver a aplicar ─────────────
+# El aplicador es idempotente por manualId: si una ficha ya tiene el registro de
+# hoy, lo salta. Tras corregir un mapeo (ligas nuevas, altas) hay que quitar los
+# registros de hoy y aplicar de nuevo; antes se hacía con `git checkout <commit>
+# -- src/data/`, que también borraba las fichas recién creadas.
+
+_ULTIMO_PRECIO = re.compile(r"price:\s*'\$([\d,]+(?:\.\d+)?)")
+
+
+def quitar_registros_dia(content, marcador, manual_id):
+    """Quita de `marcador = { id: [...] }` los registros con `manual_id`.
+
+    Edita solo el texto del registro (y su coma) para no tocar el resto de la
+    línea: hay historiales con helpers (`_h(...)`, `_mh22(...)`) que no se
+    pueden re-serializar. Devuelve (content, {fid: último precio que queda o None}).
+    """
+    span = _span_bloque(content, marcador)
+    if not span:
+        return content, {}
+    ini, fin = span
+    bloque = content[ini:fin]
+    rec = r"\{\s*manualId:\s*'" + re.escape(manual_id) + r"'[^{}]*\}"
+    tocados = {}
+
+    def limpiar(m):
+        fid, lista = m.group(2), m.group(3)
+        if not re.search(rec, lista):
+            return m.group(0)
+        lista = re.sub(r",\s*" + rec, "", lista)
+        lista = re.sub(r"^\s*" + rec + r"\s*,?\s*", "", lista)
+        ultimo = None
+        p = _ULTIMO_PRECIO.findall(lista)
+        cola = lista[lista.rfind("{"):] if p else ""
+        # último elemento: registro literal o helper _xx(..., precio, ...)
+        resto = lista.rstrip().rsplit("}", 1)[-1] if p else lista
+        h = re.findall(r"_\w+\(\s*(?:\w+\s*,\s*)?([\d.]+)", resto)
+        if h:
+            ultimo = float(h[-1])
+        elif p:
+            ultimo = float(_ULTIMO_PRECIO.findall(cola)[-1].replace(",", ""))
+        tocados[int(fid)] = ultimo
+        if not lista.strip():
+            return ""
+        return f"{m.group(1)}{fid}: [{lista}]{m.group(4)}\n"
+
+    linea = re.compile(r"^(\s+)(\d+):\s*\[(.*)\](,?)[ \t]*\n", re.MULTILINE)
+    bloque = linea.sub(limpiar, bloque)
+    return content[:ini] + bloque + content[fin:], tocados
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # 1) Register manuals
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -417,7 +467,7 @@ def mark_agotadas_armas(existencias_map, sin_precio, sin_ficha_ids):
 # Main orchestration
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def process_armas(mapeo, fecha, manual_id, data_dir, dry_run):
+def process_armas(mapeo, fecha, manual_id, data_dir, dry_run, rehacer=False):
     """Process armas mapeo: prices, history, existencias.
 
     Prices are updated in AMX_ARMAS_PRECIOS (data-precios.js), NOT in data.js.
@@ -431,6 +481,11 @@ def process_armas(mapeo, fecha, manual_id, data_dir, dry_run):
     # Load data-precios.js (the ONLY file we touch for price changes)
     precios_path = Path(data_dir) / "data-precios.js"
     precios_content = read_file(precios_path)
+    quitados = {}
+    if rehacer:
+        precios_content, quitados = quitar_registros_dia(
+            precios_content, 'window.AMX_PRICE_HISTORY_SEED', manual_id)
+        eprint(f"  --rehacer: {len(quitados)} registros de {manual_id} quitados")
 
     # 1) Register manual
     precios_content, added = register_manual_armas(precios_content, fecha, manual_id, dry_run)
@@ -473,6 +528,11 @@ def process_armas(mapeo, fecha, manual_id, data_dir, dry_run):
             if added:
                 history_added += 1
 
+        # Fichas que hoy perdieron su registro: vuelven al último que queda
+        for fid, ultimo in quitados.items():
+            if str(fid) not in prices and ultimo is not None:
+                precios_map[str(fid)] = ultimo
+
         # Rewrite AMX_ARMAS_PRECIOS map
         precios_content = rewrite_precios_map(precios_content, precios_map)
 
@@ -493,7 +553,7 @@ def process_armas(mapeo, fecha, manual_id, data_dir, dry_run):
         eprint(f"    fichas: {agotadas[:10]}{'...' if len(agotadas) > 10 else ''}")
 
 
-def process_cartuchos(mapeo, fecha, data_dir, dry_run):
+def process_cartuchos(mapeo, fecha, data_dir, dry_run, rehacer=False):
     """Process cartuchos mapeo."""
     eprint("\n── CARTUCHOS ──")
     existencias = mapeo.get("existencias", {})
@@ -501,6 +561,11 @@ def process_cartuchos(mapeo, fecha, data_dir, dry_run):
 
     mun_path = Path(data_dir) / "data-municiones.js"
     content = read_file(mun_path)
+    quitados = {}
+    if rehacer:
+        content, quitados = quitar_registros_dia(
+            content, 'window.MUNICIONES_PRICE_HISTORY', fecha_to_manual_id(fecha, "man_mun_dcam"))
+        eprint(f"  --rehacer: {len(quitados)} registros de hoy quitados")
 
     # Register manual
     content, manual_id, added = register_manual_municiones(content, fecha, dry_run)
@@ -526,6 +591,10 @@ def process_cartuchos(mapeo, fecha, data_dir, dry_run):
             if added:
                 history_added += 1
 
+    for fid, ultimo in quitados.items():
+        if not prices.get(str(fid)) and ultimo is not None:
+            content, _ = update_mun_price(content, fid, ultimo)
+
     write_file(mun_path, content, dry_run)
 
     eprint(f"  precios actualizados: {prices_updated}")
@@ -533,7 +602,7 @@ def process_cartuchos(mapeo, fecha, data_dir, dry_run):
     eprint(f"  fichas con stock: {len([v for v in existencias.values() if int(v) > 0])}")
 
 
-def process_accesorios(mapeo, fecha, data_dir, dry_run):
+def process_accesorios(mapeo, fecha, data_dir, dry_run, rehacer=False):
     """Process accesorios mapeo."""
     eprint("\n── ACCESORIOS ──")
     existencias = mapeo.get("existencias", {})
@@ -541,6 +610,10 @@ def process_accesorios(mapeo, fecha, data_dir, dry_run):
 
     acc_path = Path(data_dir) / "data-accesorios.js"
     content = read_file(acc_path)
+    if rehacer:
+        content, quitados = quitar_registros_dia(
+            content, 'window.ACCESORIOS_PRICE_HISTORY', fecha_to_manual_id(fecha, "man_acc"))
+        eprint(f"  --rehacer: {len(quitados)} registros de hoy quitados")
 
     # Register manual
     content, manual_id, added = register_manual_accesorios(content, fecha, dry_run)
@@ -574,6 +647,9 @@ def main():
     parser.add_argument("--fecha", required=True, help="Fecha ISO (YYYY-MM-DD)")
     parser.add_argument("--data-dir", required=True, help="Directorio src/data/")
     parser.add_argument("--dry-run", action="store_true", help="Solo imprime, no escribe")
+    parser.add_argument("--rehacer", action="store_true",
+                        help="Quita primero los registros de esta fecha y vuelve a aplicar "
+                             "(tras corregir el mapeo; conserva las fichas nuevas)")
     args = parser.parse_args()
 
     if not any([args.armas, args.cartuchos, args.accesorios]):
@@ -595,15 +671,15 @@ def main():
     try:
         if args.armas:
             mapeo = load_mapeo(args.armas)
-            process_armas(mapeo, fecha, manual_id_armas, str(data_dir), args.dry_run)
+            process_armas(mapeo, fecha, manual_id_armas, str(data_dir), args.dry_run, args.rehacer)
 
         if args.cartuchos:
             mapeo = load_mapeo(args.cartuchos)
-            process_cartuchos(mapeo, fecha, str(data_dir), args.dry_run)
+            process_cartuchos(mapeo, fecha, str(data_dir), args.dry_run, args.rehacer)
 
         if args.accesorios:
             mapeo = load_mapeo(args.accesorios)
-            process_accesorios(mapeo, fecha, str(data_dir), args.dry_run)
+            process_accesorios(mapeo, fecha, str(data_dir), args.dry_run, args.rehacer)
 
         eprint("\n═══ Aplicador mecánico finalizado ═══")
         sys.exit(0)

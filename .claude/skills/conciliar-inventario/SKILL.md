@@ -355,18 +355,15 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   escribirlo a mano además hacía creer a `aplicar-mecanico.py` que el inventario ya estaba
   registrado (buscaba el id en todo el archivo) y no lo daba de alta.
 
-## Cuando te invoca el conciliador headless
+## Cuando te invoca el pipeline headless (desde el 03-oct-2026)
 
-`infra/conciliar.sh` te llama con `openclaw agent`, sin humano delante. Contrato duro:
-
-- Trabaja sobre `origin/main` fresco, en la rama `auto/inventario-<FECHA>`.
-- `auditar.js` es puerta dura: si no da «✔✔ AUDITORÍA SIN HALLAZGOS», **no abras PR**.
-- Abre los **dos** Draft-PR con `gh pr create --draft`, uno `--base main` y otro `--base develop`.
-- Tu **última línea** de salida debe ser SOLO este JSON:
-  `{"ok":true,"prs":["url1","url2"]}` o `{"ok":false,"motivo":"..."}`.
-
-Si cambias cualquiera de esos cuatro puntos, `conciliar.sh` lo lee como fallo: avisa por Telegram
-y manda la señal a `.fallida` aunque los PR estén abiertos.
+`scripts/dcam/conciliar-pipeline.sh` corre los pasos mecánicos solo. Si un paso falla
+o quedan renglones sin ficha, lanza **una vez** al agente `solucionador-dcam` (Claude
+Code, Opus) con el runbook `references/solucionador.md` y después repite el paso 4.
+El veredicto no lo da el agente: lo dan las compuertas —
+`auditar.js` ✔✔, `npm test` sin fallos y `scripts/verificar-cierre.py` (mapeo limpio +
+ningún salto de precio > 3 % sin explicar)—. Si pasan, el pipeline marca el PR listo
+y avisa a Saulo; mergear y resembrar D1 siguen siendo suyos.
 
 ## Atribución de existencias (mapear-existencias.py)
 
@@ -378,8 +375,14 @@ explícito. El método para resolverlo: **price chain + name similarity**.
 
 1. `referencia-armas.json` (y sus equivalentes para cartuchos y accesorios) contienen los
    renglones del último PDF verificado, cada uno etiquetado con su `fichaId`. Es la piedra Rosetta.
+   `ligas-<cat>.json` (`{"<nombre exacto del renglón>": fichaId|null}`) guarda las
+   decisiones de criterio que la cadena de precios no reconstruye: regresos de agotados,
+   variantes, altas, renglones a $0 (`null`). Son permanentes y ganan sobre la cadena.
+   Pásalas siempre con `--ligas`, también en `--update-ref`.
 2. `mapear-existencias.py` empareja el PDF nuevo contra la referencia:
-   - Detecta los factores de precio (1-2 factores dominantes entre PDFs consecutivos).
+   - Detecta los factores de precio (1-2 dominantes) SOLO entre renglones con el mismo
+     nombre en ambos PDFs, dentro de [0.90, 1.10] y con apoyo suficiente. Comparar todos
+     contra todos inventaba factores casuales (02-oct-2026: x1.155 y x0.76).
    - Para cada renglón del PDF nuevo, busca su equivalente en la referencia por
      `precio_nuevo / precio_ref ≈ factor`, desempatando por similitud de nombre.
    - Transfiere el `fichaId` y suma las cantidades.
@@ -424,9 +427,9 @@ que cambiaron de nombre. **Revisa ambas listas con criterio antes de aplicar.**
 Después de commitear y antes de abrir los PR, regenera las 3 referencias:
 
 ```bash
-$VENV $SCRIPTS/mapear-existencias.py /tmp/armas.json --update-ref
-$VENV $SCRIPTS/mapear-existencias.py /tmp/carts.json --ref $SCRIPTS/referencia-cartuchos.json --update-ref
-$VENV $SCRIPTS/mapear-existencias.py /tmp/accs.json --ref $SCRIPTS/referencia-accesorios.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/armas.json --ligas $SCRIPTS/ligas-armas.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/carts.json --ref $SCRIPTS/referencia-cartuchos.json --ligas $SCRIPTS/ligas-cartuchos.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/accs.json --ref $SCRIPTS/referencia-accesorios.json --ligas $SCRIPTS/ligas-accesorios.json --update-ref
 ```
 
 Esto mantiene la cadena de factores fresca para la siguiente conciliación. **Incluye los
