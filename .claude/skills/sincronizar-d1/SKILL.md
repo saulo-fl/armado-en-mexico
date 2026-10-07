@@ -16,6 +16,25 @@ Ya mordió tres veces: el texto «sede Monterrey» del FAQ (25-ago), las trece
 armas del inventario del 6-jul que estuvieron invisibles siete semanas, y las
 rutas de foto del piloto de pistolas.
 
+## Automático para inventarios (7-oct-2026)
+
+En APOLO, `armado-resembrar-d1.timer` (usuario `saulo`, cada 15 min) corre
+`scripts/dcam/resembrar-vigia.mjs`. Baja los `data-precios.js` + `data.js` que
+**armado.mx sirve** (así espera solo a que termine el deploy de Pages), y si son
+nuevos los compara arma por arma contra `/api/state`:
+
+- solo `priceExact`, `priceLvl` o armas nuevas → resiembra `armas`, relee
+  `/api/state`, exige que coincida y avisa por Telegram;
+- ids que existen **solo en D1** o **cualquier otro campo** → no escribe, avisa una
+  vez por versión del código. Eso se resiembra a mano con este script.
+
+Nunca toca `pages`. Token: `~/apps/dcam-bot/cloudflare.env` (D1 · Edit). Estado y
+bitácora: `~/apps/dcam-bot/resembrar-vigia.{json,log}`. Probar sin escribir:
+`node scripts/dcam/resembrar-vigia.mjs --simular` (con `VIGIA_CODIGO_DIR=<dir>`
+simula otro código publicado). Unidades en `scripts/dcam/systemd/armado-resembrar-d1.*`;
+la copia que corre vive en `~/apps/dcam-bot/infra/` (como el pipeline): al cambiar la del
+repo, cópiala allí.
+
 ## Uso
 
 ```bash
