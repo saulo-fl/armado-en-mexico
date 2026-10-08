@@ -363,7 +363,10 @@ Code, Opus) con el runbook `references/solucionador.md` y después repite el pas
 El veredicto no lo da el agente: lo dan las compuertas —
 `auditar.js` ✔✔, `npm test` sin fallos y `scripts/verificar-cierre.py` (mapeo limpio +
 ningún salto de precio > 3 % sin explicar)—. Si pasan, el pipeline marca el PR listo
-y avisa a Saulo; mergear y resembrar D1 siguen siendo suyos.
+y avisa a Saulo; mergear sigue siendo suyo. **Resembrar D1 ya no**: tras el merge, el
+vigía `scripts/dcam/resembrar-vigia.mjs` (timer de APOLO, cada 15 min) resiembra `armas`
+solo cuando armado.mx sirve el código nuevo y las diferencias son de inventario. Si avisa
+por Telegram «NO resembré», se resiembra a mano con la skill `sincronizar-d1`.
 
 ## Atribución de existencias (mapear-existencias.py)
 
