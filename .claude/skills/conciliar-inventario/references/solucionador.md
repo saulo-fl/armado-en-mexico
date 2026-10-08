@@ -141,3 +141,21 @@ Lo que sobrevive es alta nueva.
   quién. Si la receptora sí estaba en el PDF, no lo muevas (regla de C2).
 - **Comprobación**: `pdftotext -layout $DCAM_DIR/archivo/<fecha>/*CART*.pdf - | grep <precio>`
   y el renglón de la receptora ausente.
+
+### C12. Regresos en bloque: escopetas Beretta y otras con ficha exacta (07-oct-2026)
+- **Síntoma**: 10 renglones de armas en `sinFicha`, todos con ficha existente;
+  cinco con el `dcamRef` idéntico al renglón (194, 195, 206, 224, 254).
+- **Causa**: §B.1 en lote. La referencia solo guarda el PDF anterior y el paso 3b
+  del mapeador busca el renglón exacto solo para fichas que **ya** tienen renglón
+  hoy; una ficha que regresa tras días ausente no entra.
+- **Arreglo**: ligas. Prueba por ficha: precio de hoy / último registro de la
+  ficha = el factor acumulado de otras fichas en el mismo tramo, a 6 decimales
+  (cada tramo tiene su grupo: p. ej. 1.021961 en 10 fichas desde el 15-sep). Las
+  variantes (Pigeon V 30" junto a la 28"; Affinity 3 Elite Wood junto a la Wood)
+  van a la ficha del modelo; el representante lo elige el script (nombre exacto
+  o el que encadena).
+- **Por qué no se tocó el script**: enganchar solo por `dcamRef` pasaría por la
+  guardia de saltos, que compara contra el factor **del día**, no contra el
+  acumulado; un regreso de semanas acabaría en `revisarPrecio` con el precio
+  viejo. Si se automatiza, la guardia debe usar el factor acumulado desde el
+  último registro de la ficha.
