@@ -1,0 +1,10 @@
+[Unit]
+Description=Armado MX: revisar cada 15 min si D1 necesita resembrado
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=15min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

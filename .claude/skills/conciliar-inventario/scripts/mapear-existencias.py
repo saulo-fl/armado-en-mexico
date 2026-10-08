@@ -41,6 +41,24 @@ SCRIPT_DIR = Path(__file__).parent
 DEFAULT_REF = SCRIPT_DIR / "referencia-armas.json"
 
 
+FACTOR_MIN, FACTOR_MAX = 0.90, 1.10
+
+
+def clave_liga(row, ligas):
+    """Clave de `row` en el archivo de ligas, o None.
+
+    Las ligas son {"<nombre exacto del PDF>": fichaId|null}, permanentes: el
+    nombre de un producto en el PDF de la DCAM no cambia entre inventarios, así
+    que una liga sobrevive a días en que el producto no viene (agotado) y a la
+    cadena de precios. Si varios renglones comparten nombre, todos van a la
+    misma ficha (variantes: suman existencias, el precio lo elige la regla del
+    representante).
+    """
+    if not ligas:
+        return None
+    return row["name"] if row["name"] in ligas else None
+
+
 def find_factors(ref_rows, new_rows, tolerance=0.0005):
     """Encuentra los factores de precio entre el PDF de referencia y el nuevo.
 
@@ -51,14 +69,27 @@ def find_factors(ref_rows, new_rows, tolerance=0.0005):
     # la referencia. Los factores dominantes se agrupan por redondeo.
     ratios = Counter()
 
-    ref_prices = [(r["priceN"], r) for r in ref_rows]
-
+    # Preferente: solo pares con el MISMO nombre en los dos PDFs. Es el mismo
+    # producto, así que su razón de precios es un factor real. Comparar todos
+    # contra todos (lo de abajo) inventa factores casuales entre productos
+    # distintos — 02-oct-2026: x1.155 y x0.76 empataban con el real.
+    por_nombre = defaultdict(list)
+    for r in ref_rows:
+        if r["priceN"] > 0:
+            por_nombre[_norm_nombre(r["name"])].append(r["priceN"])
     for nr in new_rows:
-        np = nr["priceN"]
-        for rp, rr in ref_prices:
-            if rp > 0:
-                ratio = round(np / rp, 6)
-                ratios[ratio] += 1
+        for rp in por_nombre.get(_norm_nombre(nr["name"]), []):
+            if nr["priceN"] > 0:
+                ratios[round(nr["priceN"] / rp, 6)] += 1
+    if sum(ratios.values()) < 5:
+        ratios = Counter()
+        ref_prices = [(r["priceN"], r) for r in ref_rows]
+        for nr in new_rows:
+            np = nr["priceN"]
+            for rp, rr in ref_prices:
+                if rp > 0:
+                    ratio = round(np / rp, 6)
+                    ratios[ratio] += 1
 
     # Los factores dominantes son los con más ocurrencias
     top = ratios.most_common(20)
@@ -74,9 +105,19 @@ def find_factors(ref_rows, new_rows, tolerance=0.0005):
         if not merged:
             groups.append([factor, count])
 
-    # Filtrar factores espurios (≤0 o muy lejanos a 1.0)
-    groups = [g for g in groups if g[0] > 0.5]
+    # Filtrar factores espurios. Entre dos PDFs consecutivos la DCAM nunca ha
+    # movido precios fuera de ±10 %; un factor de 1.155 o 0.76 es una cadena
+    # casual entre productos distintos y empareja renglones con la ficha
+    # equivocada (02-oct-2026: 16 cartuchos «nuevos» que ya tenían ficha y 9
+    # precios inflados 10-15 %). Mismo rango que vigila el pipeline.
+    groups = [g for g in groups if FACTOR_MIN <= g[0] <= FACTOR_MAX]
     groups.sort(key=lambda g: -g[1])
+    # Un factor con 1-2 apoyos no es un movimiento de precios: es el cruce entre
+    # dos renglones homónimos de precio distinto (Huglu Renova ×2 → x1.0397, que
+    # emparejaba el renglón con su gemelo equivocado y dejaba el otro «nuevo»).
+    if groups:
+        minimo = max(3, groups[0][1] * 0.05)
+        groups = [g for g in groups if g[1] >= minimo]
     result = [(g[0], g[1]) for g in groups[:5]]
     # Siempre incluir factor 1.0 (sin cambio de precio) como candidato:
     # algunos renglones no cambian de precio entre PDFs consecutivos.
@@ -158,8 +199,75 @@ def match_rows(ref_rows, new_rows, factors, tolerance=0.005):
     return matched, unmatched_new
 
 
-def map_existencias(ref_path, new_items, verbose=False):
-    """Mapea renglones del nuevo PDF a fichas usando la referencia."""
+def _norm_nombre(s):
+    import re
+    return re.sub(r"[^A-Z0-9]", "", (s or "").upper())
+
+
+def elegir_representante(rows, dcam_ref, ultimo, factors, tol=0.02):
+    """Renglón que fija el precio de una ficha (regla de Saulo, 01-oct-2026).
+
+    1) Si algún renglón se llama EXACTAMENTE como la ficha (dcamRef, sin
+       puntuación), manda ese; si hay varios, el que mejor encadena.
+    2) Si no, el renglón que mejor encadena con el último precio publicado
+       (precio / último ≈ factor del PDF).
+    Devuelve (renglon, motivo, ok). ok=False si el elegido no encadena con
+    ningún factor (±tol): el precio no se publica y se manda a revisión.
+    """
+    if not rows:
+        return None, "sin renglones", False
+    facs = [f for f, _ in factors if f > 0] or [1.0]
+
+    def desvio(r):
+        return min(abs(r["priceN"] / ultimo - f) for f in facs) if ultimo else 0.0
+
+    ref = _norm_nombre(dcam_ref)
+    exactos = [r for r in rows if ref and _norm_nombre(r["name"]) == ref]
+    if exactos:
+        r = min(exactos, key=desvio)
+        motivo = "nombre exacto"
+    else:
+        r = min(rows, key=desvio)
+        motivo = "encadenado"
+    ok = (not ultimo) or desvio(r) <= tol
+    return r, motivo, ok
+
+
+def cargar_catalogo(data_dir, antes_de=None):
+    """{fichaId: {dcamRef, ultimo}} evaluando los data-*.js con node.
+
+    `ultimo` = precio del último registro DCAM del historial con fecha < antes_de.
+    """
+    import subprocess
+    js = r"""
+const fs = require('fs'); global.window = {};
+for (const f of ['data-precios.js', 'data.js', 'data-extra.js']) {
+  try { eval(fs.readFileSync(process.argv[1] + '/' + f, 'utf8')); } catch (e) {}
+}
+const antes = process.argv[2] || '9999-12-31';
+const H = window.AMX_PRICE_HISTORY_SEED || {}; const out = {};
+for (const a of (window.DB || [])) {
+  const regs = (H[a.id] || []).filter(r => /^man_dcam_/.test(r.manualId) && r.date < antes);
+  const u = regs.length ? parseFloat(regs[regs.length - 1].price.replace(/[^\d.]/g, '')) : null;
+  out[a.id] = { dcamRef: a.dcamRef || '', ultimo: u };
+}
+console.log(JSON.stringify(out));
+"""
+    r = subprocess.run(["node", "-e", js, str(data_dir), antes_de or ""],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"  ⚠ catálogo no cargado: {r.stderr[:300]}", file=sys.stderr)
+        return None
+    return json.loads(r.stdout)
+
+
+def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=None):
+    """Mapea renglones del nuevo PDF a fichas usando la referencia.
+
+    `ligas` (opcional) fuerza la ficha de renglones concretos por nombre: lo
+    decide el solucionador o un humano y gana sobre la cadena de precios.
+    Valor null = renglón conocido que a propósito no va a ninguna ficha.
+    """
     with open(ref_path) as f:
         ref = json.load(f)
 
@@ -174,6 +282,18 @@ def map_existencias(ref_path, new_items, verbose=False):
 
     # 2) Emparejar renglones
     matched, unmatched_new = match_rows(ref_rows, new_items, factors)
+
+    # 2b) Ligas manuales: sacan el renglón del emparejamiento automático
+    forzados = {}   # new_idx → fichaId (o None = excluido a propósito)
+    for ni, nr in enumerate(new_items):
+        k = clave_liga(nr, ligas)
+        if k is not None:
+            forzados[ni] = ligas[k]
+    if forzados:
+        matched = [(ni, ri, f) for ni, ri, f in matched if ni not in forzados]
+        unmatched_new = [ni for ni in unmatched_new if ni not in forzados]
+        if verbose:
+            print(f"Ligas manuales aplicadas: {len(forzados)}", file=sys.stderr)
     if verbose:
         print(f"\nEmparejados: {len(matched)} / {len(new_items)}", file=sys.stderr)
         print(f"Sin emparejar (nuevos): {len(unmatched_new)}", file=sys.stderr)
@@ -190,14 +310,71 @@ def map_existencias(ref_path, new_items, verbose=False):
             if qty > 0:
                 existencias[fid] += qty
                 ficha_rows[fid].append(new_items[ni])
-            # Guardar precio unitario (el del primer row mapeado a esta ficha)
+            # Precio provisional: el del primer renglón (se corrige abajo con
+            # la variante representativa si hay catálogo)
             if fid not in ficha_prices:
                 ficha_prices[fid] = new_items[ni]["priceN"]
+
+    for ni, fid in forzados.items():
+        if fid is None:
+            continue
+        nr = new_items[ni]
+        if nr["qty"] > 0:
+            existencias[fid] += nr["qty"]
+            ficha_rows[fid].append(nr)
+        if fid not in ficha_prices and nr["priceN"] > 0:
+            ficha_prices[fid] = nr["priceN"]
+
+    # 3b) Variante representativa (regla 01-oct-2026). Candidatos: los renglones
+    # mapeados a la ficha + los que se llaman exactamente como ella y no tienen
+    # dueño (referencia con fichaId null). Si el renglón exacto no estaba
+    # mapeado, su existencia también se suma a la ficha.
+    revisar = []
+    consumidos = set()
+    if catalogo:
+        dueno = {}
+        for ni, ri, _ in matched:
+            dueno[ni] = ref_rows[ri]["fichaId"]
+        for ni, fid in forzados.items():
+            dueno[ni] = fid if fid is not None else "excluido"
+        por_nombre = defaultdict(list)
+        for ni, nr in enumerate(new_items):
+            if dueno.get(ni) is None:
+                por_nombre[_norm_nombre(nr["name"])].append(nr)
+        for fid in list(ficha_rows.keys()):
+            info = catalogo.get(str(fid)) or {}
+            dref = info.get("dcamRef") or ""
+            libres = [r for r in por_nombre.get(_norm_nombre(dref), []) if r["priceN"] > 0]
+            cands = ficha_rows[fid] + libres
+            if len(cands) < 2:
+                continue
+            elegido, motivo, ok = elegir_representante(cands, dref, info.get("ultimo"), factors)
+            # Un renglón emparejado por la cadena de precios encadena por
+            # construcción con su renglón del PDF anterior: es válido aunque
+            # el último registro de la ficha fuera de otra variante.
+            if any(elegido is r for r in ficha_rows[fid] if r not in libres):
+                ok = True
+            if elegido in libres:
+                existencias[fid] += elegido["qty"]
+                ficha_rows[fid].append(elegido)
+                por_nombre[_norm_nombre(dref)].remove(elegido)
+                consumidos.add(id(elegido))
+            if ok:
+                ficha_prices[fid] = elegido["priceN"]
+            else:
+                # Guardia: no se publica un salto que no encadena; se queda el último.
+                if info.get("ultimo"):
+                    ficha_prices[fid] = info["ultimo"]
+                revisar.append({"fichaId": fid, "dcamRef": dref, "renglon": elegido["name"],
+                                "precio": elegido["priceN"], "ultimo": info.get("ultimo"),
+                                "motivo": motivo})
 
     # 4) Renglones sin emparejar en el nuevo PDF (posibles altas)
     sin_ficha = []
     for ni in unmatched_new:
         nr = new_items[ni]
+        if id(nr) in consumidos:
+            continue
         sin_ficha.append({
             "idx": ni,
             "name": nr["name"],
@@ -210,7 +387,7 @@ def map_existencias(ref_path, new_items, verbose=False):
     ref_matched = {ri for _, ri, _ in matched}
     sin_precio = []
     for i, rr in enumerate(ref_rows):
-        if i not in ref_matched and rr["fichaId"] is not None:
+        if i not in ref_matched and rr["fichaId"] is not None and rr["fichaId"] not in existencias:
             sin_precio.append({
                 "fichaId": rr["fichaId"],
                 "refName": rr["name"],
@@ -252,10 +429,14 @@ def map_existencias(ref_path, new_items, verbose=False):
         "factores": [f_val for f_val, _ in factors[:2]],
         "sinFicha": sin_ficha,
         "sinPrecio": sin_precio,
+        "revisarPrecio": revisar if catalogo else [],
         "totalPdf": total_pdf,
         "totalMapped": total_mapped,
+        "excluidos": [{"idx": ni, "name": new_items[ni]["name"], "priceN": new_items[ni]["priceN"],
+                       "qty": new_items[ni]["qty"]} for ni, fid in sorted(forzados.items()) if fid is None],
         "_matched": matched,          # internal: for --update-ref
         "_unmatched_new": unmatched_new,
+        "_forzados": forzados,
     }
 
 
@@ -277,6 +458,17 @@ def update_ref(ref_path, new_items, result, new_path):
     for ni, ri, f_used in matched:
         nr = new_items[ni]
         fid = ref_rows[ri]["fichaId"]
+        new_rows.append({
+            "idx": nr.get("idx", ni),
+            "name": nr["name"],
+            "desc": nr.get("desc", ""),
+            "priceN": nr["priceN"],
+            "qty": nr["qty"],
+            "fichaId": fid,
+        })
+
+    for ni, fid in result.get("_forzados", {}).items():
+        nr = new_items[ni]
         new_rows.append({
             "idx": nr.get("idx", ni),
             "name": nr["name"],
@@ -318,7 +510,8 @@ def update_ref(ref_path, new_items, result, new_path):
 
 def main():
     if len(sys.argv) < 2:
-        print("uso: mapear-existencias.py <nuevo.json> [--ref referencia.json] [--verbose] [--update-ref]")
+        print("uso: mapear-existencias.py <nuevo.json> [--ref referencia.json] [--verbose] [--update-ref]"
+              " [--catalogo src/data [--antes-de AAAA-MM-DD]] [--ligas ligas.json]")
         sys.exit(1)
 
     new_path = sys.argv[1]
@@ -332,7 +525,21 @@ def main():
     with open(new_path) as f:
         pdf_data = json.load(f)
 
-    result = map_existencias(ref_path, pdf_data["items"], verbose)
+    # --catalogo <src/data> [--antes-de AAAA-MM-DD]: activa la variante
+    # representativa (solo armas; cartuchos y accesorios no usan dcamRef).
+    catalogo = None
+    if "--catalogo" in sys.argv:
+        antes = sys.argv[sys.argv.index("--antes-de") + 1] if "--antes-de" in sys.argv else None
+        catalogo = cargar_catalogo(sys.argv[sys.argv.index("--catalogo") + 1], antes)
+
+    ligas = None
+    if "--ligas" in sys.argv:
+        lp = Path(sys.argv[sys.argv.index("--ligas") + 1])
+        if lp.exists():
+            with open(lp) as f:
+                ligas = json.load(f)
+
+    result = map_existencias(ref_path, pdf_data["items"], verbose, catalogo, ligas)
 
     # Strip internal keys before printing
     output = {k: v for k, v in result.items() if not k.startswith("_")}

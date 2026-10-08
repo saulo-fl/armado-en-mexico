@@ -31,13 +31,16 @@ Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
 - **`fotos-producto`** — preparar fotos de producto: quitar fondo con alfa, encuadrar a
   1:1, control de calidad y hoja de aprobación humana. Agente: **`preparador-imagenes`**.
 - **`sincronizar-d1`** — resembrar D1 desde el código tras publicar datos. **No basta con
-  desplegar**: los dominios de D1 pisan a los seeds.
+  desplegar**: los dominios de D1 pisan a los seeds. Desde el 7-oct-2026 el dominio `armas`
+  lo resiembra solo un vigía en APOLO (`scripts/dcam/resembrar-vigia.mjs`) cuando lo único
+  que cambia es inventario; lo demás sigue siendo a mano.
 - **`mejorar-tooling`** — al cerrar una tarea: capturar aprendizajes/edge-cases en las
   skills (automejora). Mantén su inventario al día.
 
 Agentes delegables: **`deploy-main`** (publicar en producción, con resembrado de D1 y
 sondas de verificación) · **`deploy-develop`** (llevar a `develop` para ver el preview,
 sin tocar producción) · **`conciliador-inventario`** (conciliación completa) ·
+**`solucionador-dcam`** (lo lanza el pipeline DCAM cuando falla; repara la rama del PR) ·
 **`preparador-imagenes`** (fotos de arma con alfa) · **`revisor-armado`** (auditoría de
 datos + fidelidad de diseño) · **`disenador-oficial`** (rediseño y custodia del sistema
 visual) · **`auditor-a11y-perf`** (contraste, foco, áreas táctiles, peso, coste de scroll) ·
@@ -75,7 +78,7 @@ Prueba: `node .claude/hooks/guardia.test.mjs`.
 |---|---|---|
 | base | sesión principal, `deploy-main` | — |
 | `lectura` | `revisor-armado`, `auditor-a11y-perf`, `auditor-estructura`, `impeccable-finish-reviewer`, `Explore`, `Plan` | nada de git/gh/wrangler que escriba, ni `npm install` |
-| `trabajo` | `conciliador-inventario`, `preparador-imagenes`, `disenador-oficial`, `impeccable-*` que editan | ramas y PR sí; mergear, `gh api` de escritura y D1, no |
+| `trabajo` | `conciliador-inventario`, `solucionador-dcam`, `preparador-imagenes`, `disenador-oficial`, `impeccable-*` que editan | ramas y PR sí; mergear, `gh api` de escritura y D1, no |
 | `develop` | `deploy-develop` | PR y merge solo con base `develop` (lo consulta a GitHub); D1, no |
 
 **Base, para todos:** `deny` al push directo a `main`/`develop`, al push forzado o que

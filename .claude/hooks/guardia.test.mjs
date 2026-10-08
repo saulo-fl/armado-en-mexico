@@ -74,6 +74,10 @@ const casos = [
   ['git push -u origin claude/fotos', 'preparador-imagenes', null],
   ['gh pr create --base main --title x --body y', 'preparador-imagenes', null],
   ['gh pr merge 12 --merge', 'conciliador-inventario', 'deny'],
+  ['gh pr merge 358 --squash', 'solucionador-dcam', 'deny'],
+  ['git push origin main', 'solucionador-dcam', 'deny'],
+  ['git push --force origin auto/inventario-02-OCT-2026', 'solucionador-dcam', 'deny'],
+  ['npx wrangler d1 execute armado --remote --command "DELETE FROM armas"', 'solucionador-dcam', 'deny'],
   ['npx wrangler d1 execute armado-en-mexico --remote --command "DELETE FROM state"', 'disenador-oficial', 'deny'],
 
   // perfil develop

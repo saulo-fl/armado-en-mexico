@@ -1,0 +1,16 @@
+[Unit]
+Description=Armado MX: resembrar D1 (armas) cuando se publica inventario nuevo
+After=network-online.target
+
+# Unidad de USUARIO (systemctl --user) en APOLO. Corre la copia de
+# ~/apps/dcam-bot/infra/ y no la del clon del bot, porque ese clon cambia de rama en cada
+# conciliación. Instalar: copiar este .service y el .timer a ~/.config/systemd/user/,
+# `systemctl --user daemon-reload && systemctl --user enable --now armado-resembrar-d1.timer`.
+# Primera vez (D1 ya al día): `node resembrar-vigia.mjs --base`.
+
+[Service]
+Type=oneshot
+Environment=DCAM_DIR=/home/saulo/apps/armadomx/dcam-bot
+ExecStart=/usr/bin/env node /home/saulo/apps/armadomx/dcam-bot/infra/resembrar-vigia.mjs
+TimeoutStartSec=300
+Nice=10

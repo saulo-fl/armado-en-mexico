@@ -405,6 +405,10 @@ build; o la aplicación deja un historial que no cumple las invariantes de la sk
   (`pub["dudoso"] = {"paso": "hecho", "pr": n}`, o `{"paso": "issue", "issue": n}` si
   `claude -p` no pudo). Una corrida que muere a medias deja ese paso escrito y la siguiente
   continúa desde ahí (encuentra rama o PR por su nombre) en vez de empezar de nuevo.
+- **Resembrado ya automático (7-oct-2026):** lo hace `scripts/dcam/resembrar-vigia.mjs`,
+  un timer aparte (cada 15 min) que no depende del pipeline ni del merge: mira el código que
+  armado.mx sirve, resiembra `armas` si las diferencias son solo de inventario y avisa por
+  Telegram; si hay algo más (ids solo en D1, otros campos) no escribe y avisa.
 - **Merge hecho pero D1 sin resembrar** es el caso grave (el código está publicado pero quien
   ya visitó el sitio ve lo viejo): «⚠️ publicado sin resembrar D1» y la siguiente corrida
   reintenta el resembrado.

@@ -331,18 +331,42 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
     dividiendo el precio del 16-jun entre ×0.89960 (general) y ×0.89447 (grupo Beretta), con
     ×1.00105 para OTCA: sus historiales empiezan en 2026.
 
-## Cuando te invoca el conciliador headless
+- **(1-oct-2026) Variante representativa — regla de Saulo, ya automatizada.** El precio de
+  una ficha que suma varios renglones sale del renglón cuyo nombre es EXACTAMENTE su
+  `dcamRef` (sin puntuación); si ninguno coincide, del que mejor encadena con su último
+  precio. `mapear-existencias.py --catalogo src/data --antes-de AAAA-MM-DD` lo aplica, y si
+  el elegido no encadena con ningún factor (±2 %) NO publica el salto: deja el último
+  precio y lo lista en `revisarPrecio`. Casos del 1-oct: Affinity 3 (196) → LIN/WO, no la
+  camo; Affinity 3.5 (197) → BLA/S; Huglu Atrox (99) → SB 26"; Stoeger P3500 (181) →
+  LIN WOOD; TS9 (23) → PAVON; Phenoma (211) → A.S.N. 14,320.
+  - Los saltos del 29-sep (TS9 +29 %, Atrox +11 %, Phenoma +12 %, P3500 −10 %) eran del
+    representante equivocado, no subidas: el 1-oct ya publica la variante de la ficha.
+- **(1-oct-2026) Altas y variantes decididas por Saulo:** Mendoza RM22-6000 Camo Commander
+  (262), RM22-6000 Camo Squad (263) y RM22-3000 Squad (264) = fichas nuevas, con riel.
+  Franchi Affinity 3 Black Synthetic y Elite Cobalt = variantes de la 196 (suman
+  existencia). IWI ARAD 11.5" = variante de la 78. Eley Olympic Blues 32 (2108, dos
+  renglones: «OLYMPIC» y «EOB», precio el de EOB), Sprint 28 (2109) y 32 (2110), Bullet
+  Competición 24 M7.5 (2111) = fichas nuevas. Galil ACE 31 (75): el PDF trae precio 0 →
+  solo suma existencia, se queda el último precio.
+- **`aplicar-mecanico.py` escribe historiales SOLO dentro de su bloque** (`*_PRICE_HISTORY`).
+  Antes buscaba `id: [` en todo el archivo y el 29-sep metió 11 registros de accesorios en
+  `ACC_TRAMO` (103…133), que tiene la misma forma. Ya se movieron a su sitio.
+- **Fichas nuevas de munición: sin `priceManualId` en el `mun()`.** Se deriva del historial;
+  escribirlo a mano además hacía creer a `aplicar-mecanico.py` que el inventario ya estaba
+  registrado (buscaba el id en todo el archivo) y no lo daba de alta.
 
-`infra/conciliar.sh` te llama con `openclaw agent`, sin humano delante. Contrato duro:
+## Cuando te invoca el pipeline headless (desde el 03-oct-2026)
 
-- Trabaja sobre `origin/main` fresco, en la rama `auto/inventario-<FECHA>`.
-- `auditar.js` es puerta dura: si no da «✔✔ AUDITORÍA SIN HALLAZGOS», **no abras PR**.
-- Abre los **dos** Draft-PR con `gh pr create --draft`, uno `--base main` y otro `--base develop`.
-- Tu **última línea** de salida debe ser SOLO este JSON:
-  `{"ok":true,"prs":["url1","url2"]}` o `{"ok":false,"motivo":"..."}`.
-
-Si cambias cualquiera de esos cuatro puntos, `conciliar.sh` lo lee como fallo: avisa por Telegram
-y manda la señal a `.fallida` aunque los PR estén abiertos.
+`scripts/dcam/conciliar-pipeline.sh` corre los pasos mecánicos solo. Si un paso falla
+o quedan renglones sin ficha, lanza **una vez** al agente `solucionador-dcam` (Claude
+Code, Opus) con el runbook `references/solucionador.md` y después repite el paso 4.
+El veredicto no lo da el agente: lo dan las compuertas —
+`auditar.js` ✔✔, `npm test` sin fallos y `scripts/verificar-cierre.py` (mapeo limpio +
+ningún salto de precio > 3 % sin explicar)—. Si pasan, el pipeline marca el PR listo
+y avisa a Saulo; mergear sigue siendo suyo. **Resembrar D1 ya no**: tras el merge, el
+vigía `scripts/dcam/resembrar-vigia.mjs` (timer de APOLO, cada 15 min) resiembra `armas`
+solo cuando armado.mx sirve el código nuevo y las diferencias son de inventario. Si avisa
+por Telegram «NO resembré», se resiembra a mano con la skill `sincronizar-d1`.
 
 ## Atribución de existencias (mapear-existencias.py)
 
@@ -354,8 +378,14 @@ explícito. El método para resolverlo: **price chain + name similarity**.
 
 1. `referencia-armas.json` (y sus equivalentes para cartuchos y accesorios) contienen los
    renglones del último PDF verificado, cada uno etiquetado con su `fichaId`. Es la piedra Rosetta.
+   `ligas-<cat>.json` (`{"<nombre exacto del renglón>": fichaId|null}`) guarda las
+   decisiones de criterio que la cadena de precios no reconstruye: regresos de agotados,
+   variantes, altas, renglones a $0 (`null`). Son permanentes y ganan sobre la cadena.
+   Pásalas siempre con `--ligas`, también en `--update-ref`.
 2. `mapear-existencias.py` empareja el PDF nuevo contra la referencia:
-   - Detecta los factores de precio (1-2 factores dominantes entre PDFs consecutivos).
+   - Detecta los factores de precio (1-2 dominantes) SOLO entre renglones con el mismo
+     nombre en ambos PDFs, dentro de [0.90, 1.10] y con apoyo suficiente. Comparar todos
+     contra todos inventaba factores casuales (02-oct-2026: x1.155 y x0.76).
    - Para cada renglón del PDF nuevo, busca su equivalente en la referencia por
      `precio_nuevo / precio_ref ≈ factor`, desempatando por similitud de nombre.
    - Transfiere el `fichaId` y suma las cantidades.
@@ -387,7 +417,9 @@ El JSON de salida tiene `{existencias, factores, sinFicha, sinPrecio, totalPdf, 
 - `sinFicha`: renglones del PDF que NO existen en la referencia → **dar de alta fichas nuevas**.
   Pueden ser modelos nuevos O fichas que REGRESAN de agotadas; verificar contra el catálogo
   completo antes de crear una ficha nueva.
-- `sinPrecio`: fichas de la referencia sin renglón en el nuevo PDF → **marcar como agotadas**.
+- `sinPrecio`: fichas de la referencia sin renglón en el nuevo PDF → **marcar como agotadas**,
+  salvo que la ficha siga mapeada por otro renglón (`aplicar-mecanico.py` ya no las marca).
+- `revisarPrecio` (con `--catalogo`): fichas cuyo precio no se publicó por no encadenar.
 
 El mapa de `existencias` es la BASE pero NO es definitivo: las fichas en `sinFicha` pueden ser
 regresos que necesitan sumarse a una ficha existente, y las de `sinPrecio` pueden ser variantes
@@ -398,9 +430,9 @@ que cambiaron de nombre. **Revisa ambas listas con criterio antes de aplicar.**
 Después de commitear y antes de abrir los PR, regenera las 3 referencias:
 
 ```bash
-$VENV $SCRIPTS/mapear-existencias.py /tmp/armas.json --update-ref
-$VENV $SCRIPTS/mapear-existencias.py /tmp/carts.json --ref $SCRIPTS/referencia-cartuchos.json --update-ref
-$VENV $SCRIPTS/mapear-existencias.py /tmp/accs.json --ref $SCRIPTS/referencia-accesorios.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/armas.json --ligas $SCRIPTS/ligas-armas.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/carts.json --ref $SCRIPTS/referencia-cartuchos.json --ligas $SCRIPTS/ligas-cartuchos.json --update-ref
+$VENV $SCRIPTS/mapear-existencias.py /tmp/accs.json --ref $SCRIPTS/referencia-accesorios.json --ligas $SCRIPTS/ligas-accesorios.json --update-ref
 ```
 
 Esto mantiene la cadena de factores fresca para la siguiente conciliación. **Incluye los

@@ -12,10 +12,17 @@
 #   0. PREP   — parsea PDFs, copia a public/inventarios/, commit
 #   1. MAPEO  — mapea existencias con price chain, verifica factores, commit
 #   2. MECÁNICO — aplica precios/historial/existencias a data-*.js, commit
-#   3. ALTAS  — solo si hay sinFicha: invoca agente para crear fichas
-#   4. AUDIT  — corre auditar.js, actualiza referencias, cierra PR
+#   3. ALTAS  — si quedan renglones sin ficha (ni liga), pasa al solucionador
+#   4. CIERRE — compuertas (auditar.js, npm test, verificar-cierre.py),
+#               actualiza referencias, marca el PR listo
 #
-# Cada paso commitea y pushea: si el paso 3 falla, los pasos 0–2 están en el PR.
+# Si falla cualquier paso del 1 al 4, se lanza UNA vez el SOLUCIONADOR: un agente
+# de Claude Code (Opus, agente `solucionador-dcam`) que diagnostica y repara la
+# rama con el runbook de fallos conocidos. Después se repite el paso 4: lo que
+# dice el agente no cuenta, cuentan las compuertas. Mergear y resembrar D1 siguen
+# siendo de Saulo (el guardia del repo lo impone).
+#
+# Cada paso commitea y pushea: si algo falla, lo anterior ya está en el PR.
 set -uo pipefail
 
 DCAM_DIR="${DCAM_DIR:-/home/saulo/apps/dcam-bot}"
@@ -26,6 +33,10 @@ LOG="$DCAM_DIR/conciliar.log"
 TG_ENV="${DCAM_TG_ENV:-$DCAM_DIR/telegram.env}"
 VENV="$DCAM_DIR/.venv/bin/python"
 SCRIPTS=".claude/skills/conciliar-inventario/scripts"
+CLAUDE_BIN="${DCAM_CLAUDE_BIN:-/home/saulo/.local/bin/claude}"
+SOLUCIONADOR_MIN="${DCAM_SOLUCIONADOR_MIN:-45}"
+MOTIVO=""
+PR_URL=""
 
 log(){ printf '%s %s\n' "$(date -Is)" "$*" >>"$LOG"; }
 
@@ -44,6 +55,15 @@ avisar_error(){
   telegram "⚠️ Pipeline DCAM falló en paso $STEP: ${1}. Inventario NO conciliado — revisar conciliar.log."
 }
 
+# Mismo contrato que conciliar.sh: la señal fallida se aparta para no re-disparar
+# en bucle; Saulo la re-crea tras arreglar.
+falla(){
+  avisar_error "$1"
+  [ -f "$SENAL" ] && mv "$SENAL" "$SENAL.fallida"
+  log "FALLO paso $STEP: $1 (señal -> pendiente-conciliar.json.fallida)"
+  exit 1
+}
+
 # ── Lock ──
 exec 9>"$LOCK"
 if ! flock -n 9; then log "otro pipeline en curso, salgo"; exit 0; fi
@@ -51,17 +71,31 @@ if ! flock -n 9; then log "otro pipeline en curso, salgo"; exit 0; fi
 # ── Leer señal ──
 [ -f "$SENAL" ] || { log "sin senal, nada que hacer"; exit 0; }
 FECHA="$(jq -r '.fecha' "$SENAL" 2>/dev/null)"
-[ -n "$FECHA" ] && [ "$FECHA" != "null" ] || { log "senal ilegible"; exit 1; }
+[ -n "$FECHA" ] && [ "$FECHA" != "null" ] || { STEP="senal"; falla "señal ilegible"; }
 PDFS="$(jq -r '.pdfs[]' "$SENAL" 2>/dev/null)"
-FECHA_ISO="$FECHA"
+# La señal trae «01-OCT-2026»; aplicar-mecanico.py espera «2026-10-01».
+# Si ya viene en ISO, se respeta tal cual.
+fecha_a_iso() {
+  local f="$1" d m y n
+  if [[ "$f" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then echo "$f"; return 0; fi
+  IFS='-' read -r d m y <<<"$f"
+  case "${m^^}" in
+    ENE|JAN) n=01;; FEB) n=02;; MAR) n=03;; ABR|APR) n=04;; MAY) n=05;; JUN) n=06;;
+    JUL) n=07;; AGO|AUG) n=08;; SEP|SET) n=09;; OCT) n=10;; NOV) n=11;; DIC|DEC) n=12;;
+    *) return 1;;
+  esac
+  [[ "$d" =~ ^[0-9]{1,2}$ && "$y" =~ ^[0-9]{4}$ ]] || return 1
+  printf '%s-%s-%02d\n' "$y" "$n" "$((10#$d))"
+}
+FECHA_ISO="$(fecha_a_iso "$FECHA")" || { STEP="senal"; falla "fecha ilegible en la señal: $FECHA"; }
 RAMA="auto/inventario-${FECHA}"
-WORKDIR="/tmp/dcam-pipeline-${FECHA}"
+WORKDIR="${DCAM_WORKDIR_BASE:-/tmp}/dcam-pipeline-${FECHA}"
 STEP="init"
 
 mkdir -p "$WORKDIR"
 log "arranco pipeline fecha=$FECHA rama=$RAMA"
 
-cd "$REPO" || { avisar_error "no cd al repo"; exit 1; }
+cd "$REPO" || falla "no cd al repo"
 git fetch origin --quiet 2>>"$LOG"
 
 # slug owner/repo
@@ -93,15 +127,16 @@ step_prep() {
 
     $VENV "$SCRIPTS/parse_pdf.py" "$pdf" \
       --tsv "$WORKDIR/${tag}.tsv" \
-      --json "$WORKDIR/${tag}.json" 2>>"$LOG"
+      --json "$WORKDIR/${tag}.json" 2>>"$LOG" \
+      || { log "  parse_pdf falló en $tag"; return 1; }
     log "  parseado $tag: $(wc -l < "$WORKDIR/${tag}.tsv") líneas TSV"
 
-    # Copy PDF to public/inventarios/
-    target="public/inventarios/dcam-existencias-${FECHA}.pdf"
+    # Copy PDF to public/inventarios/ — nombre en ISO: es el que enlazan los data-*.js
+    target="public/inventarios/dcam-existencias-${FECHA_ISO}.pdf"
     if [ "$tag" = "cartuchos" ]; then
-      target="public/inventarios/dcam-municiones-${FECHA}.pdf"
+      target="public/inventarios/dcam-municiones-${FECHA_ISO}.pdf"
     elif [ "$tag" = "accesorios" ]; then
-      target="public/inventarios/dcam-accesorios-${FECHA}.pdf"
+      target="public/inventarios/dcam-accesorios-${FECHA_ISO}.pdf"
     fi
     cp "$pdf" "$target"
   done
@@ -130,39 +165,50 @@ step_mapeo() {
 
   # Armas
   if [ -f "$WORKDIR/armas.json" ]; then
+    # --catalogo: precio por variante representativa (nombre de la ficha) y
+    # guardia de saltos que no encadenan (van a revisarPrecio, no se publican).
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" --verbose \
-      > "$WORKDIR/mapeo-armas.json" 2>>"$LOG"
-    log "  mapeo armas: $(jq '.totalMapped' "$WORKDIR/mapeo-armas.json") mapeados"
+      --catalogo src/data --antes-de "$FECHA_ISO" --ligas "$SCRIPTS/ligas-armas.json" \
+      > "$WORKDIR/mapeo-armas.json" 2>>"$LOG" \
+      || { log "  mapeo armas falló"; return 1; }
+    log "  mapeo armas: $(jq '.totalMapped' "$WORKDIR/mapeo-armas.json") mapeados, $(jq '.revisarPrecio | length' "$WORKDIR/mapeo-armas.json") precios a revisar"
   fi
 
   # Cartuchos
   if [ -f "$WORKDIR/cartuchos.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
-      --ref "$SCRIPTS/referencia-cartuchos.json" --verbose \
-      > "$WORKDIR/mapeo-cartuchos.json" 2>>"$LOG"
+      --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" --verbose \
+      > "$WORKDIR/mapeo-cartuchos.json" 2>>"$LOG" \
+      || { log "  mapeo cartuchos falló"; return 1; }
     log "  mapeo cartuchos: $(jq '.totalMapped' "$WORKDIR/mapeo-cartuchos.json") mapeados"
   fi
 
   # Accesorios
   if [ -f "$WORKDIR/accesorios.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
-      --ref "$SCRIPTS/referencia-accesorios.json" --verbose \
-      > "$WORKDIR/mapeo-accesorios.json" 2>>"$LOG"
+      --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" --verbose \
+      > "$WORKDIR/mapeo-accesorios.json" 2>>"$LOG" \
+      || { log "  mapeo accesorios falló"; return 1; }
     log "  mapeo accesorios: $(jq '.totalMapped' "$WORKDIR/mapeo-accesorios.json") mapeados"
   fi
 
-  # Verify factors (all should be between 0.90 and 1.10)
+  # Factores fuera de [0.90, 1.10] = emparejamiento equivocado: el paso 2
+  # publicaría precios ajenos (02-oct-2026). Antes solo se avisaba en el log.
+  local fuera=""
   for f in "$WORKDIR"/mapeo-*.json; do
     [ -f "$f" ] || continue
     FACTORS="$(jq -r '.factores[]' "$f" 2>/dev/null)"
     for fv in $FACTORS; do
-      if python3 -c "f=$fv; exit(0 if 0.90 <= f <= 1.10 else 1)" 2>/dev/null; then
-        :
-      else
+      if ! python3 -c "f=$fv; exit(0 if 0.90 <= f <= 1.10 else 1)" 2>/dev/null; then
         log "  ⚠ factor fuera de rango en $(basename "$f"): $fv"
+        fuera="$fuera $(basename "$f" .json | sed 's/mapeo-//')=$fv"
       fi
     done
   done
+  if [ -n "$fuera" ]; then
+    MOTIVO="factor fuera de rango:$fuera"
+    return 1
+  fi
 
   # Copy mapeos to repo for reference
   cp "$WORKDIR"/mapeo-*.json . 2>/dev/null || true
@@ -199,7 +245,8 @@ step_mecanico() {
   $VENV "$SCRIPTS/aplicar-mecanico.py" \
     $MECANICO_ARGS \
     --fecha "$FECHA_ISO" \
-    --data-dir src/data/ 2>>"$LOG"
+    --data-dir src/data/ 2>>"$LOG" \
+    || { log "  aplicar-mecanico.py falló (ver traza arriba)"; return 1; }
 
   git add -A
   git commit -m "mecánico: precios + existencias $FECHA" --quiet 2>>"$LOG"
@@ -228,61 +275,10 @@ step_altas() {
     return 0
   fi
 
-  log "  $TOTAL_SF fichas nuevas (sinFicha) — invocando agente"
-
-  # Build focused prompt with ONLY sinFicha items
-  SIN_FICHA_JSON="$(python3 -c "
-import json, sys
-items = []
-for f in ['$WORKDIR/mapeo-armas.json', '$WORKDIR/mapeo-cartuchos.json', '$WORKDIR/mapeo-accesorios.json']:
-    try:
-        with open(f) as fh:
-            m = json.load(fh)
-            for sf in m.get('sinFicha', []):
-                sf['_source'] = f.split('mapeo-')[1].split('.')[0]
-                items.append(sf)
-    except FileNotFoundError:
-        pass
-print(json.dumps(items, ensure_ascii=False))
-")"
-
-  SESSION_KEY="dcam-pipeline-altas-${FECHA}"
-  PROMPT="Estás en la rama ${RAMA} del repo armado.mx. El paso mecánico ya se aplicó.
-Crea fichas SOLO para estos renglones sinFicha (son altas nuevas del inventario DCAM del ${FECHA}):
-${SIN_FICHA_JSON}
-
-Para cada uno:
-1. Identifica si es arma, cartucho o accesorio (campo _source).
-2. Busca en el catálogo si ya existe una ficha similar (mismo modelo/calibre). Si existe, es un regreso — añade existencia, no crees ficha.
-3. Si es genuinamente nuevo, crea la ficha con alta mínima (specs de fabricante, '' si no hay imagen, año null si no se sabe).
-4. Añade su historial de precio y existencia.
-
-Trabaja sobre la rama ${RAMA} (ya tiene los pasos 0–2 commiteados).
-Commitea y pushea cuando termines. NO abras PR nuevo — el Draft PR ya existe.
-Tu ÚLTIMA línea debe ser: {\"ok\":true} o {\"ok\":false,\"motivo\":\"<razón>\"}"
-
-  OUT="$(openclaw agent --json --timeout 900 \
-        --session-key "$SESSION_KEY" --message "$PROMPT" 2>>"$LOG")" || true
-
-  TEXTO="$(printf '%s' "$OUT" | jq -r '.result.meta.finalAssistantVisibleText // empty' 2>/dev/null)"
-  [ -n "$TEXTO" ] || TEXTO="$OUT"
-  VEREDICTO="$(printf '%s' "$TEXTO" | grep -oE '\{"ok":(true|false).*' | tail -1)"
-  while [ -n "$VEREDICTO" ] && ! printf '%s' "$VEREDICTO" | jq -e . >/dev/null 2>&1; do
-    VEREDICTO="${VEREDICTO%?}"
-  done
-
-  OK="$(printf '%s' "$VEREDICTO" | jq -r 'if has("ok") then .ok else empty end' 2>/dev/null)"
-  if [ "$OK" = "true" ]; then
-    log "  altas OK"
-    return 0
-  elif [ "$OK" = "false" ]; then
-    MOTIVO="$(printf '%s' "$VEREDICTO" | jq -r '.motivo // "sin motivo"' 2>/dev/null)"
-    log "  altas FALLO: $MOTIVO"
-    return 1
-  else
-    log "  altas sin veredicto legible"
-    return 1
-  fi
+  # Triage, ligas y altas necesitan criterio: es trabajo del solucionador.
+  MOTIVO="$TOTAL_SF renglones sin ficha ni liga"
+  log "  $MOTIVO — paso al solucionador"
+  return 1
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -301,28 +297,50 @@ step_audit() {
 
   if [ $AUDIT_RC -ne 0 ]; then
     log "  auditoría FALLIDA"
-    eprint "$AUDIT_OUT"
+    MOTIVO="auditar.js falló (código $AUDIT_RC)"
     return 1
   fi
 
   if ! echo "$AUDIT_OUT" | grep -q '✔✔ AUDITORÍA SIN HALLAZGOS'; then
     log "  auditoría con hallazgos"
+    MOTIVO="auditar.js con hallazgos"
     return 1
   fi
 
   log "  auditoría ✔✔"
 
+  TEST_OUT="$(npm test 2>&1)"
+  if ! printf '%s' "$TEST_OUT" | grep -qE '^ℹ fail 0$'; then
+    printf '%s\n' "$TEST_OUT" | tail -30 >>"$LOG"
+    MOTIVO="npm test con fallos"
+    log "  $MOTIVO"
+    return 1
+  fi
+  log "  npm test ✔"
+
+  # Mapeo limpio con referencia+ligas de la rama y sin saltos de precio sin explicar
+  if ! $VENV "$SCRIPTS/verificar-cierre.py" --workdir "$WORKDIR" --fecha "$FECHA_ISO" \
+        --solucion "$WORKDIR/solucion.json" > "$WORKDIR/cierre.json" 2>>"$LOG"; then
+    MOTIVO="verificar-cierre: $(jq -r '.hallazgos | length' "$WORKDIR/cierre.json" 2>/dev/null) hallazgos ($(jq -r '.hallazgos[0] // ""' "$WORKDIR/cierre.json" 2>/dev/null | cut -c1-120))"
+    log "  $MOTIVO"
+    return 1
+  fi
+  log "  cierre verificado ✔"
+
   # Update references
   if [ -f "$WORKDIR/armas.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" --update-ref 2>>"$LOG"
+    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
+      --ligas "$SCRIPTS/ligas-armas.json" --update-ref >/dev/null 2>>"$LOG"
   fi
   if [ -f "$WORKDIR/cartuchos.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
-      --ref "$SCRIPTS/referencia-cartuchos.json" --update-ref 2>>"$LOG"
+      --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
+      --update-ref >/dev/null 2>>"$LOG"
   fi
   if [ -f "$WORKDIR/accesorios.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
-      --ref "$SCRIPTS/referencia-accesorios.json" --update-ref 2>>"$LOG"
+      --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
+      --update-ref >/dev/null 2>>"$LOG"
   fi
 
   git add -A
@@ -341,14 +359,74 @@ step_audit() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# SOLUCIONADOR — agente que repara la rama cuando falla un paso 1–4
+# ═══════════════════════════════════════════════════════════════════════════════
+step_solucionador() {
+  local fallo="$STEP" motivo="$1"
+  STEP="solucionador"
+  log "solucionador: paso $fallo falló ($motivo) — lanzo agente (máx ${SOLUCIONADOR_MIN} min)"
+  [ -x "$CLAUDE_BIN" ] || { log "  sin claude en $CLAUDE_BIN"; MOTIVO="sin claude"; return 1; }
+
+  git add -A
+  git commit -m "pipeline: estado al fallar el paso $fallo $FECHA" --quiet 2>>"$LOG" || true
+  git push origin "$RAMA" --quiet 2>>"$LOG" || true
+  rm -f "$WORKDIR/solucion.json"
+
+  local pr_url
+  pr_url="$(gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[0].url' 2>/dev/null)"
+  local prompt
+  prompt="Conciliación DCAM del ${FECHA} (ISO ${FECHA_ISO}) — falló el paso ${fallo}: ${motivo}.
+
+Rama: ${RAMA} (ya en el checkout; los pasos que terminaron están commiteados). PR: ${pr_url:-sin PR}.
+Carpeta de trabajo (W): ${WORKDIR} — PDFs parseados (<cat>.json/.tsv), mapeo-<cat>.json de esta corrida.
+Log de la corrida: ${LOG} (lee desde la línea «arranco pipeline fecha=${FECHA}»).
+PDFs archivados de días anteriores: ${DCAM_DIR}/archivo/<AAAA-MM-DD>/.
+Python con dependencias: ${VENV}.
+
+Repara la rama hasta que pasen las compuertas, escribe ${WORKDIR}/solucion.json y haz push a ${RAMA}.
+No marques el PR listo ni mergees: el pipeline vuelve a correr las compuertas y lo marca él."
+
+  timeout --kill-after=60 "$((SOLUCIONADOR_MIN * 60))" \
+    "$CLAUDE_BIN" -p "$prompt" --agent solucionador-dcam --model opus \
+      --permission-mode bypassPermissions --add-dir "$WORKDIR" --add-dir "$DCAM_DIR/archivo" \
+      --output-format json > "$WORKDIR/solucionador-salida.json" 2>>"$LOG"
+  local rc=$?
+  log "  agente terminó rc=$rc costo=\$$(jq -r '.total_cost_usd // "?"' "$WORKDIR/solucionador-salida.json" 2>/dev/null) turnos=$(jq -r '.num_turns // "?"' "$WORKDIR/solucionador-salida.json" 2>/dev/null)"
+  jq -r '.result // empty' "$WORKDIR/solucionador-salida.json" 2>/dev/null | head -40 >>"$LOG"
+
+  # Lo que el agente haya dejado sin commitear, que no se pierda
+  git add -A
+  git commit -m "solucionador: cambios sin commitear $FECHA" --quiet 2>>"$LOG" || true
+  git push origin "$RAMA" --quiet 2>>"$LOG" || true
+  return 0
+}
+
+resumen_solucion() {
+  [ -f "$WORKDIR/solucion.json" ] || { echo "(el agente no dejó solucion.json)"; return; }
+  jq -r '"Diagnóstico: \(.diagnostico // "—")\nLigas: \((.ligas // []) | length) · Altas: \((.altas // []) | length) · Correcciones: \((.correcciones // []) | length)" +
+         (if (.pendiente // []) | length > 0 then "\nPendiente: " + ((.pendiente) | join("; ")) else "" end)' \
+    "$WORKDIR/solucion.json" 2>/dev/null | cut -c1-900
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Run pipeline
 # ═══════════════════════════════════════════════════════════════════════════════
 
-step_prep     || { avisar_error "prep falló"; exit 1; }
-step_mapeo    || { avisar_error "mapeo falló"; exit 1; }
-step_mecanico || { avisar_error "mecánico falló"; exit 1; }
-step_altas    || { avisar_error "altas falló (pasos 0-2 ya están en el PR)"; exit 1; }
-step_audit    || { avisar_error "auditoría falló"; exit 1; }
+step_prep || falla "prep falló"
 
-log "pipeline completo $FECHA"
-exit 0
+if step_mapeo && step_mecanico && step_altas && step_audit; then
+  log "pipeline completo $FECHA"
+  telegram "✅ Inventario DCAM $FECHA conciliado. PR listo para revisar: $PR_URL"
+  exit 0
+fi
+
+# Algún paso 1–4 falló: una oportunidad al solucionador y vuelta a las compuertas
+FALLO_PASO="$STEP"; FALLO_MOTIVO="${MOTIVO:-paso $STEP falló}"
+step_solucionador "$FALLO_MOTIVO"
+if step_audit; then
+  log "pipeline completo $FECHA (reparado por el solucionador)"
+  telegram "🛠️ Inventario DCAM $FECHA: el paso $FALLO_PASO falló ($FALLO_MOTIVO) y el solucionador lo reparó. Compuertas ✔. PR listo para revisar: $PR_URL
+$(resumen_solucion)"
+  exit 0
+fi
+falla "paso $FALLO_PASO: $FALLO_MOTIVO; el solucionador no lo resolvió (${MOTIVO:-compuertas}). $(resumen_solucion)"

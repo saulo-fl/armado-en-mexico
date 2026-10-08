@@ -40,7 +40,11 @@ resembrar D1**.
 5. Commit → push → PR a **`main`** → mergear.
 6. **PR de la misma rama a `develop` y mergear**, para mantener el espejo. No lo
    dejes para luego: `develop` divergido es la vía por la que vuelve trabajo viejo.
-7. **Resiembra D1** si tocaste `data.js` o `DEFAULT_PAGES`:
+7. **Resiembra D1** si tocaste `data.js` o `DEFAULT_PAGES`. Si el cambio es SOLO de
+   inventario (precios, rango de precio, armas nuevas), no hace falta: el vigía de APOLO
+   (`scripts/dcam/resembrar-vigia.mjs`, cada 15 min) lo resiembra solo en cuanto armado.mx
+   sirve el código nuevo y avisa por Telegram. Cualquier otro cambio en `armas` (fotos,
+   nombres, campos) el vigía NO lo escribe —avisa— y lo resiembras tú:
    ```bash
    node .claude/skills/sincronizar-d1/scripts/resembrar.js armas   # diff, no escribe
    node .claude/skills/sincronizar-d1/scripts/resembrar.js armas --aplicar

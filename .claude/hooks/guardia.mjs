@@ -27,7 +27,7 @@ import { fileURLToPath } from 'node:url';
 export const PERFILES = {
   'revisor-armado': 'lectura', 'auditor-a11y-perf': 'lectura', 'auditor-estructura': 'lectura',
   'impeccable-finish-reviewer': 'lectura', Explore: 'lectura', Plan: 'lectura',
-  'conciliador-inventario': 'trabajo', 'preparador-imagenes': 'trabajo', 'disenador-oficial': 'trabajo',
+  'conciliador-inventario': 'trabajo', 'solucionador-dcam': 'trabajo', 'preparador-imagenes': 'trabajo', 'disenador-oficial': 'trabajo',
   'impeccable-asset-producer': 'trabajo', 'impeccable-manual-edit-applier': 'trabajo',
   'impeccable-documenter': 'trabajo',
   'deploy-develop': 'develop',
