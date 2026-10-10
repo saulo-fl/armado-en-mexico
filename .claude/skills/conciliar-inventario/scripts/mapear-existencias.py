@@ -261,7 +261,128 @@ console.log(JSON.stringify(out));
     return json.loads(r.stdout)
 
 
-def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=None):
+PREFIJO_DCAM = {"armas": "man_dcam_", "cartuchos": "man_mun_dcam_", "accesorios": "man_acc_"}
+TOL_REGRESO = 0.015   # misma tolerancia que el «aumento general» de verificar-cierre.py
+MIN_GRUPO_REGRESO = 5
+# Cada línea de producto sube a su ritmo (Beretta x1.0219 cuando la mediana era
+# x1.049; Saga x1.0496 contra x1.0724). Un regreso también cuadra si su razón
+# coincide casi exacta con la de varias fichas más desde la misma fecha.
+TOL_TRAMO = 0.0005
+MIN_TRAMO = 2
+
+
+def cuadra_regreso(razon, razones):
+    """¿La razón precio_hoy / precio_d de una ficha se explica por el movimiento
+    del resto del catálogo entre d y hoy? `razones` = las de las OTRAS fichas con
+    registro en d. Devuelve (ok, motivo, detalle) con detalle = {general, tramo, apoyos}.
+    """
+    det = {"apoyos": len(razones), "general": None, "tramo": 0}
+    if len(razones) >= MIN_GRUPO_REGRESO:
+        import statistics
+        det["general"] = round(statistics.median(razones), 6)
+        if abs(razon - det["general"]) <= TOL_REGRESO:
+            return True, "aumento general", det
+    det["tramo"] = sum(1 for x in razones if abs(x - razon) <= TOL_TRAMO)
+    if det["tramo"] >= MIN_TRAMO:
+        return True, f"mismo aumento que {det['tramo']} fichas de su tramo", det
+    if len(razones) < MIN_GRUPO_REGRESO:
+        return False, f"solo {len(razones)} fichas para comparar", det
+    return False, "el precio no cuadra con el aumento general ni con un tramo", det
+
+
+def cargar_historial(data_dir, cat, antes_de):
+    """Fichas de la categoría con su dcamRef y su historial DCAM anterior a `antes_de`.
+
+    Devuelve {fichaId(str): {"dcamRef": str, "regs": [(fecha, precio), ...]}}
+    con los registros ordenados por fecha.
+    """
+    import subprocess
+    js = r"""
+const fs = require('fs'); const win = {}; global.window = win;
+for (const f of ['data-precios.js', 'data.js', 'data-extra.js', 'data-accesorios.js', 'data-municiones.js'])
+  { try { eval(fs.readFileSync(process.argv[1] + '/' + f, 'utf8')); } catch (e) {} }
+const cat = process.argv[2], pref = process.argv[3], antes = process.argv[4];
+const fichas = { armas: win.DB, cartuchos: win.MUNICIONES, accesorios: win.ACCESORIOS }[cat] || [];
+const H = { armas: win.AMX_PRICE_HISTORY_SEED, cartuchos: win.MUNICIONES_PRICE_HISTORY,
+            accesorios: win.ACCESORIOS_PRICE_HISTORY }[cat] || {};
+const out = {};
+for (const a of fichas) {
+  const regs = (H[a.id] || []).filter(r => r && String(r.manualId || '').startsWith(pref) && r.date < antes)
+    .map(r => [r.date, parseFloat(String(r.price || '').replace(/[^\d.]/g, '')) || 0])
+    .filter(r => r[1] > 0).sort((x, y) => x[0] < y[0] ? -1 : 1);
+  out[a.id] = { dcamRef: a.dcamRef || '', regs };
+}
+console.log(JSON.stringify(out));
+"""
+    r = subprocess.run(["node", "-e", js, str(data_dir), cat, PREFIJO_DCAM[cat], antes_de],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print(f"  ⚠ historial no cargado: {r.stderr[:300]}", file=sys.stderr)
+        return None
+    return json.loads(r.stdout)
+
+
+def detectar_regresos(new_items, candidatos, ficha_prices, historial):
+    """Renglones sin emparejar que son una ficha existente que vuelve tras agotarse.
+
+    La referencia solo guarda el PDF anterior, así que un producto que faltó uno
+    o más días vuelve sin fichaId (runbook §B.1 / C12 / C13). Se liga solo si
+    se cumplen las tres cosas:
+      1. su nombre normalizado es el dcamRef de UNA sola ficha, que hoy no tiene
+         otro renglón;
+      2. la ficha tiene un registro DCAM anterior (fecha d, precio p);
+      3. precio_hoy / p cuadra con lo que se movió el resto del catálogo entre
+         d y hoy (`cuadra_regreso`): el aumento general (mediana, ±1.5 %) o el
+         de su tramo (≥2 fichas con la misma razón, ±0.0005).
+    Lo demás se queda en sinFicha para el solucionador: un precio que no cuadra
+    es justo lo que destapó el registro ajeno de la 2079 (09-oct-2026).
+    Devuelve ({new_idx: fichaId}, [detalle], [rechazos]).
+    """
+    por_ref = defaultdict(list)
+    for fid, info in historial.items():
+        k = _norm_nombre(info.get("dcamRef"))
+        if k:
+            por_ref[k].append(fid)
+    precio_en = {fid: dict(info["regs"]) for fid, info in historial.items()}
+
+    def razones_en(fecha):
+        return [p / precio_en[str(f)][fecha] for f, p in ficha_prices.items()
+                if p > 0 and precio_en.get(str(f), {}).get(fecha)]
+
+    aceptados, detalle, rechazos = {}, [], []
+    tomadas = {str(f) for f in ficha_prices}
+    for ni in candidatos:
+        nr = new_items[ni]
+        fids = por_ref.get(_norm_nombre(nr["name"]), [])
+        if not fids or nr["priceN"] <= 0:
+            continue
+        info = {"idx": ni, "name": nr["name"], "priceN": nr["priceN"]}
+        if len(fids) > 1:
+            rechazos.append(dict(info, motivo=f"dcamRef compartido por {len(fids)} fichas: {fids}"))
+            continue
+        fid = fids[0]
+        if fid in tomadas:
+            rechazos.append(dict(info, fichaId=int(fid), motivo="la ficha ya tiene renglón hoy"))
+            continue
+        regs = historial[fid]["regs"]
+        if not regs:
+            rechazos.append(dict(info, fichaId=int(fid), motivo="ficha sin registro DCAM anterior"))
+            continue
+        fecha, ultimo = regs[-1]
+        razon = nr["priceN"] / ultimo
+        ok, motivo, det = cuadra_regreso(razon, razones_en(fecha))
+        info.update(fichaId=int(fid), fechaAntes=fecha, antes=ultimo, razon=round(razon, 6),
+                    motivo=motivo, **det)
+        if ok:
+            aceptados[ni] = int(fid)
+            tomadas.add(fid)
+            detalle.append(info)
+        else:
+            rechazos.append(info)
+    return aceptados, detalle, rechazos
+
+
+def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=None, historial=None):
     """Mapea renglones del nuevo PDF a fichas usando la referencia.
 
     `ligas` (opcional) fuerza la ficha de renglones concretos por nombre: lo
@@ -369,6 +490,30 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
                                 "precio": elegido["priceN"], "ultimo": info.get("ultimo"),
                                 "motivo": motivo})
 
+    # 3c) Regresos tras agotarse: renglón sin pareja cuyo nombre es el dcamRef
+    # de una ficha y cuyo precio cuadra con el aumento general desde su último
+    # registro. Se tratan como una liga (también sobreviven en --update-ref).
+    regresos, regresos_rechazados = [], []
+    if historial:
+        cands = [ni for ni in unmatched_new if id(new_items[ni]) not in consumidos]
+        aceptados, regresos, regresos_rechazados = detectar_regresos(
+            new_items, cands, ficha_prices, historial)
+        for ni, fid in aceptados.items():
+            nr = new_items[ni]
+            if nr["qty"] > 0:
+                existencias[fid] += nr["qty"]
+                ficha_rows[fid].append(nr)
+            ficha_prices[fid] = nr["priceN"]
+            forzados[ni] = fid
+        unmatched_new = [ni for ni in unmatched_new if ni not in aceptados]
+        if verbose and (regresos or regresos_rechazados):
+            print(f"Regresos tras agotarse ligados: {len(regresos)}", file=sys.stderr)
+            for r in regresos:
+                print(f"  ✔ {r['name'][:45]} → {r['fichaId']}  {r['antes']} ({r['fechaAntes']}) → "
+                      f"{r['priceN']}  x{r['razon']:.6f}: {r['motivo']}", file=sys.stderr)
+            for r in regresos_rechazados:
+                print(f"  ✗ {r['name'][:45]} → {r.get('fichaId', '?')}: {r['motivo']}", file=sys.stderr)
+
     # 4) Renglones sin emparejar en el nuevo PDF (posibles altas)
     sin_ficha = []
     for ni in unmatched_new:
@@ -434,6 +579,8 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
         "totalMapped": total_mapped,
         "excluidos": [{"idx": ni, "name": new_items[ni]["name"], "priceN": new_items[ni]["priceN"],
                        "qty": new_items[ni]["qty"]} for ni, fid in sorted(forzados.items()) if fid is None],
+        "regresos": regresos,
+        "regresosRechazados": regresos_rechazados,
         "_matched": matched,          # internal: for --update-ref
         "_unmatched_new": unmatched_new,
         "_forzados": forzados,
@@ -511,7 +658,7 @@ def update_ref(ref_path, new_items, result, new_path):
 def main():
     if len(sys.argv) < 2:
         print("uso: mapear-existencias.py <nuevo.json> [--ref referencia.json] [--verbose] [--update-ref]"
-              " [--catalogo src/data [--antes-de AAAA-MM-DD]] [--ligas ligas.json]")
+              " [--catalogo src/data] [--regresos src/data] [--antes-de AAAA-MM-DD] [--ligas ligas.json]")
         sys.exit(1)
 
     new_path = sys.argv[1]
@@ -539,7 +686,24 @@ def main():
             with open(lp) as f:
                 ligas = json.load(f)
 
-    result = map_existencias(ref_path, pdf_data["items"], verbose, catalogo, ligas)
+    # --regresos <src/data> --antes-de AAAA-MM-DD: liga solo las fichas que
+    # vuelven tras agotarse (nombre = dcamRef y precio = aumento general).
+    # La categoría sale del nombre de la referencia (referencia-<cat>.json).
+    historial = None
+    if "--regresos" in sys.argv:
+        if "--antes-de" not in sys.argv:
+            print("--regresos necesita --antes-de AAAA-MM-DD", file=sys.stderr)
+            sys.exit(2)
+        cat = Path(ref_path).stem.replace("referencia-", "")
+        if cat not in PREFIJO_DCAM:
+            print(f"--regresos: categoría desconocida «{cat}» (de {ref_path})", file=sys.stderr)
+            sys.exit(2)
+        historial = cargar_historial(sys.argv[sys.argv.index("--regresos") + 1], cat,
+                                     sys.argv[sys.argv.index("--antes-de") + 1])
+        if historial is None:
+            sys.exit(2)
+
+    result = map_existencias(ref_path, pdf_data["items"], verbose, catalogo, ligas, historial)
 
     # Strip internal keys before printing
     output = {k: v for k, v in result.items() if not k.startswith("_")}

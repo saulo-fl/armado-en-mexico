@@ -169,7 +169,7 @@ step_mapeo() {
     # guardia de saltos que no encadenan (van a revisarPrecio, no se publican).
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" --verbose \
       --catalogo src/data --antes-de "$FECHA_ISO" --ligas "$SCRIPTS/ligas-armas.json" \
-      > "$WORKDIR/mapeo-armas.json" 2>>"$LOG" \
+      --regresos src/data > "$WORKDIR/mapeo-armas.json" 2>>"$LOG" \
       || { log "  mapeo armas falló"; return 1; }
     log "  mapeo armas: $(jq '.totalMapped' "$WORKDIR/mapeo-armas.json") mapeados, $(jq '.revisarPrecio | length' "$WORKDIR/mapeo-armas.json") precios a revisar"
   fi
@@ -178,7 +178,7 @@ step_mapeo() {
   if [ -f "$WORKDIR/cartuchos.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
       --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" --verbose \
-      > "$WORKDIR/mapeo-cartuchos.json" 2>>"$LOG" \
+      --regresos src/data --antes-de "$FECHA_ISO" > "$WORKDIR/mapeo-cartuchos.json" 2>>"$LOG" \
       || { log "  mapeo cartuchos falló"; return 1; }
     log "  mapeo cartuchos: $(jq '.totalMapped' "$WORKDIR/mapeo-cartuchos.json") mapeados"
   fi
@@ -187,7 +187,7 @@ step_mapeo() {
   if [ -f "$WORKDIR/accesorios.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
       --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" --verbose \
-      > "$WORKDIR/mapeo-accesorios.json" 2>>"$LOG" \
+      --regresos src/data --antes-de "$FECHA_ISO" > "$WORKDIR/mapeo-accesorios.json" 2>>"$LOG" \
       || { log "  mapeo accesorios falló"; return 1; }
     log "  mapeo accesorios: $(jq '.totalMapped' "$WORKDIR/mapeo-accesorios.json") mapeados"
   fi
@@ -330,17 +330,17 @@ step_audit() {
   # Update references
   if [ -f "$WORKDIR/armas.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
-      --ligas "$SCRIPTS/ligas-armas.json" --update-ref >/dev/null 2>>"$LOG"
+      --ligas "$SCRIPTS/ligas-armas.json" --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
   fi
   if [ -f "$WORKDIR/cartuchos.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
       --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
-      --update-ref >/dev/null 2>>"$LOG"
+      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
   fi
   if [ -f "$WORKDIR/accesorios.json" ]; then
     $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
       --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
-      --update-ref >/dev/null 2>>"$LOG"
+      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
   fi
 
   git add -A
