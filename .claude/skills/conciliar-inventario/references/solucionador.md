@@ -26,7 +26,14 @@ Los PDFs de días anteriores están en `$DCAM_DIR/archivo/<AAAA-MM-DD>/`.
 Antes de crear una ficha, descarta en este orden:
 
 1. **Regreso de un agotado.** El producto no vino en los últimos PDFs; la
-   referencia lo perdió. Busca su texto en el catálogo y en los PDFs archivados
+   referencia lo perdió. **Desde el 09-oct-2026 el paso 1 los liga solo**
+   (`mapear-existencias.py --regresos`, campo `regresos` del mapeo) cuando el
+   nombre es el `dcamRef` de una sola ficha y su precio cuadra con el aumento
+   general o con el de su tramo. Si te llega uno, el script lo rechazó: mira
+   `regresosRechazados` del mapeo, que dice por qué (dcamRef compartido, precio
+   que no cuadra, sin registro previo). Ese «no cuadra» es la pista de un
+   registro ajeno en el historial (C13) o de una variante.
+   A mano: busca su texto en el catálogo y en los PDFs archivados
    (`pdftotext -layout $DCAM_DIR/archivo/<fecha>/*ARMAS*.pdf - | grep -i …`).
    Comprueba: su precio de hoy / su último precio ≈ el aumento acumulado de las
    fichas que sí estuvieron (mismas fechas). Igual a 4–6 decimales = misma ficha.
@@ -154,6 +161,10 @@ Lo que sobrevive es alta nueva.
   variantes (Pigeon V 30" junto a la 28"; Affinity 3 Elite Wood junto a la Wood)
   van a la ficha del modelo; el representante lo elige el script (nombre exacto
   o el que encadena).
+- **Automatizado el 09-oct-2026** (`--regresos`, §B.1) como pide el punto
+  siguiente: la razón se compara contra el acumulado desde el último registro
+  de la ficha (mediana general ±1.5 %, o ≥2 fichas del tramo ±0.0005). Validado
+  con los PDFs del 02 al 09-oct: 13 regresos ligados con el precio publicado.
 - **Por qué no se tocó el script**: enganchar solo por `dcamRef` pasaría por la
   guardia de saltos, que compara contra el factor **del día**, no contra el
   acumulado; un regreso de semanas acabaría en `revisarPrecio` con el precio
