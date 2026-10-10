@@ -25,12 +25,15 @@
     "2069": 750,
     "2070": 3000,
     "2072": 2600,
+    "2075": 3000,
     "2076": 350,
     "2077": 600,
+    "2079": 2750,
     "2087": 150,
     "2089": 1700,
     "2091": 250,
     "2092": 500,
+    "2093": 200,
     "2095": 3600,
     "2100": 2250,
     "2103": 7100,
@@ -66,12 +69,15 @@
     "2069": 9.16,
     "2070": 10.51,
     "2072": 11.28,
+    "2075": 11.56,
     "2076": 12.69,
     "2077": 12.69,
+    "2079": 9.63,
     "2087": 11.75,
     "2089": 13.63,
     "2091": 10.57,
     "2092": 30.05,
+    "2093": 12.61,
     "2095": 7.98,
     "2100": 8.93,
     "2103": 8.96,
@@ -85,29 +91,7 @@
     1.00793,
     1.003162
   ],
-  "sinFicha": [
-    {
-      "idx": 1,
-      "name": "CARTUCHO CALIBRE .380” AUTO, MARCA FEDE.",
-      "priceN": 12.61,
-      "qty": 200,
-      "desc": "CARTUCHO CALIBRE .380” AUTO, MARCA FEDERAL, 95 Grs. FMJ."
-    },
-    {
-      "idx": 8,
-      "name": "CART.CAL.12.A.VEL.1330.M#7.5,36G",
-      "priceN": 11.56,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA AGUILA CAL. 12 ALTA VEL. 1330 M.#7.5, 36G"
-    },
-    {
-      "idx": 15,
-      "name": "CART. CAL12 SAGA SPORTING 28GR MUN7.5",
-      "priceN": 9.63,
-      "qty": 2750,
-      "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA SPORTING 28, 28 GRAMOS, MUNICIÓN 7.5."
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2074,
@@ -127,6 +111,6 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 117383,
-  "totalMapped": 109933,
+  "totalMapped": 115883,
   "excluidos": []
 }
