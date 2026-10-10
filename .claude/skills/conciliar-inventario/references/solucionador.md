@@ -159,3 +159,17 @@ Lo que sobrevive es alta nueva.
   acumulado; un regreso de semanas acabaría en `revisarPrecio` con el precio
   viejo. Si se automatiza, la guardia debe usar el factor acumulado desde el
   último registro de la ficha.
+
+### C13. Regresos de cartuchos + registro ajeno destapado al encadenar (09-oct-2026)
+- **Síntoma**: 3 cartuchos en `sinFicha` (Federal .380 → 2093, Águila 1330 M7.5 →
+  2075, Saga Sporting 28 M7.5 → 2079), los tres con `dcamRef` idéntico al renglón.
+- **Causa**: §B.1 / C12 en cartuchos. Al comprobar la cadena, la 2079 tenía
+  `_mh25(9.54, 3000)` aunque su renglón **no** viene en el PDF del 25-sep: ese
+  9.54 × 3000 era de «CART CAL. 12 EG DEL SUR TRAP 28 GR M. 8», renglón que solo
+  vino ese día y no tiene ficha (C11 sin receptora).
+- **Arreglo**: ligas; el registro ajeno se **borra** (no hay ficha a la que
+  moverlo; un renglón de un solo día no justifica alta). Sin él, 9.63/9.40 =
+  1.02447 = Saga 2061/2072 desde el 22-sep; con él, el factor no cuadraba.
+- **Ojo con el archivo**: las carpetas `archivo/2026-09-15` y `2026-09-16` guardan
+  los PDFs del 14 y 15-sep (la carpeta es la fecha de recepción). Mira el nombre
+  del PDF, no la carpeta, antes de declarar un registro ajeno.
