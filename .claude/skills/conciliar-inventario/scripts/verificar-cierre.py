@@ -64,9 +64,10 @@ def remapear(workdir, cat, fecha):
         return None
     cmd = [sys.executable, str(SCRIPTS / "mapear-existencias.py"), str(pdf),
            "--ref", str(SCRIPTS / f"referencia-{cat}.json"),
-           "--ligas", str(SCRIPTS / f"ligas-{cat}.json")]
+           "--ligas", str(SCRIPTS / f"ligas-{cat}.json"),
+           "--regresos", "src/data", "--antes-de", fecha]
     if cat == "armas":
-        cmd += ["--catalogo", "src/data", "--antes-de", fecha]
+        cmd += ["--catalogo", "src/data"]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode != 0:
         raise RuntimeError(f"mapear-existencias {cat} falló: {r.stderr[-400:]}")
