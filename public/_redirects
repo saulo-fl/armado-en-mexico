@@ -3,3 +3,6 @@
 # Solo reglas literales: un comodín /* se comería sitemap.xml y app.js (AGENTS.md).
 /legalidad/requisitos  /legalidad/tramites  301
 /legalidad/permisos    /legalidad/tramites  301
+# 14-oct-2026: dos fichas Mendoza duplicadas se fundieron en la 179 y la 52.
+/rifles/mendoza-rm22-6000-camo-commander  /rifles/mendoza-rm22-6000-commander  301
+/rifles/mendoza-rm22-6000-camo-squad      /rifles/mendoza-rm22-6000-squad      301
