@@ -465,7 +465,7 @@
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-1000 NOGAL, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 6532.42,
       "qty": 4,
-      "fichaId": null
+      "fichaId": 55
     },
     {
       "idx": 59,
@@ -473,7 +473,7 @@
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO NOGAL RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 9142.09,
       "qty": 6,
-      "fichaId": null
+      "fichaId": 50
     },
     {
       "idx": 60,
@@ -481,7 +481,7 @@
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE COMMANDER RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 10687.93,
       "qty": 3,
-      "fichaId": 262
+      "fichaId": 179
     },
     {
       "idx": 61,
@@ -489,7 +489,7 @@
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE SQUAD RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 10687.93,
       "qty": 6,
-      "fichaId": 263
+      "fichaId": 52
     },
     {
       "idx": 62,
@@ -497,7 +497,7 @@
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE SAFARI RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 10687.93,
       "qty": 4,
-      "fichaId": null
+      "fichaId": 53
     },
     {
       "idx": 63,
