@@ -329,16 +329,58 @@ cerrar_exito() {
 # "limpiar_jaula": exige una ruta absoluta con el prefijo esperado — nunca
 # borra algo que no reconozca — y un `chmod -R u+rwX` antes del `rm -rf` por si
 # algo quedó con permisos más estrictos que los del propio dueño.
+# Ronda de arreglo 3/5 (minor "la guardia se salta con .."): el `case` de
+# abajo comparaba el STRING literal contra el patrón — `*` en un patrón de
+# `case` también matchea `/` y `..`, así que
+# "/tmp/dcam-jaula-x/../../home/saulo" "parece" tener el prefijo correcto
+# aunque `rm -rf` lo resolvería a /home/saulo de verdad. Ahora se normaliza
+# con `realpath -m` ANTES de comparar, y se rechaza de entrada cualquier ruta
+# cuyo texto crudo contenga un componente "..".
 limpiar_jaula() {
-  local dir="$1"
+  local dir="$1" real
   [ -n "$dir" ] || return 0
   case "$dir" in
-    /tmp/dcam-jaula-*|/tmp/dcam-main-*) ;;
-    *) log "limpiar_jaula: '$dir' no tiene el prefijo esperado (/tmp/dcam-jaula-*, /tmp/dcam-main-*) — NO se borra"; return 1 ;;
+    *"/.."|*"/../"*|"../"*|*"/.") log "limpiar_jaula: '$dir' contiene un componente '..'/'.' — NO se borra"; return 1 ;;
   esac
-  [ -d "$dir" ] || return 0
-  chmod -R u+rwX "$dir" 2>/dev/null || true
-  rm -rf "$dir" 2>/dev/null || true
+  real="$(realpath -m -- "$dir" 2>/dev/null)" || { log "limpiar_jaula: no pude normalizar '$dir' — NO se borra"; return 1; }
+  case "$real" in
+    /tmp/dcam-jaula-*|/tmp/dcam-main-*) ;;
+    *) log "limpiar_jaula: '$dir' (normalizado: '$real') no tiene el prefijo esperado (/tmp/dcam-jaula-*, /tmp/dcam-main-*) — NO se borra"; return 1 ;;
+  esac
+  [ -d "$real" ] || return 0
+  chmod -R u+rwX "$real" 2>/dev/null || true
+  rm -rf "$real" 2>/dev/null || true
+}
+
+# Ronda de arreglo 3/5 (decisión de Saulo): la 3090 se comparte por turnos con
+# ComfyUI/osa-fotos-bot (`comfy-turno.timer` la devuelve a `llama-router` tras
+# 10 min sin uso) — antes de lanzar la jaula, el pipeline ESPERA a que el
+# modelo esté disponible, sin tocar NINGÚN servicio (ni arrancarlo ni
+# reiniciarlo: eso es infra, necesita su propio OK). Revisa cada
+# DCAM_ESPERA_PASO_S segundos, hasta DCAM_ESPERA_MODELO_MIN minutos, que:
+# (a) la unidad systemd --user `llama-router` esté activa, Y (b) el router
+# responda ALGO por HTTP en 127.0.0.1:8090 (cualquier código cuenta como
+# "arriba" — incluido 401 sin clave; "conexión rechazada"/sin respuesta,
+# "000", nunca cuenta). Los dos tiempos son variables para poder probar esto
+# con valores chicos sin esperar 30 minutos de verdad.
+esperar_modelo() {
+  local min="${DCAM_ESPERA_MODELO_MIN:-30}" paso="${DCAM_ESPERA_PASO_S:-60}"
+  local total=$((min * 60)) transcurrido=0 codigo
+  while :; do
+    if systemctl --user is-active --quiet llama-router 2>/dev/null; then
+      codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:8090/ 2>/dev/null || echo 000)"
+      if [ "$codigo" != "000" ]; then
+        log "esperar_modelo: router arriba (HTTP $codigo) tras ${transcurrido}s"
+        return 0
+      fi
+    fi
+    if [ "$transcurrido" -ge "$total" ]; then
+      log "esperar_modelo: el modelo no estuvo disponible tras ${total}s (DCAM_ESPERA_MODELO_MIN=${min})"
+      return 1
+    fi
+    sleep "$paso"
+    transcurrido=$((transcurrido + paso))
+  done
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -411,6 +453,13 @@ if [ "${DCAM_SOLUCIONADOR:-}" != "jaula" ]; then
 fi
 
 log "paso $STEP falló (${MOTIVO:-sin motivo}) — intento solucionador (jaula)"
+
+# Espera al modelo (ver esperar_modelo arriba) ANTES de gastar nada más —
+# commit de "estado al fallar", clon de MAIN, npm ci — si la 3090 está en
+# turno de ComfyUI y no vuelve a tiempo, ninguno de esos pasos sirve de nada.
+if ! esperar_modelo; then
+  falla "solucionador (jaula): el modelo local no estuvo disponible (turno de la 3090); la rama queda para revisión a mano"
+fi
 
 # Vacía $WORKDIR/salida ANTES de lanzar la jaula: una corrida anterior fallida
 # pudo dejar algo ahí (incluido, en el peor caso, algo que no sea un archivo

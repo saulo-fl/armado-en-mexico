@@ -90,9 +90,8 @@ mapfile -t RUTAS <<< "$PERMITIDOS"
 for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
   if ruta_segura_bajo "$DIR_JAULA" "$ruta"; then
-    # install -m 0644 (ronda de arreglo 1/5, punto 6): esta copia intermedia se
-    # pisa igual con `chmod -R a+rwX` más abajo, pero se deja consistente con la
-    # del paso 9 — nunca `--preserve=mode` en ninguna de las dos copias.
+    # install -m 0644 (ronda de arreglo 1/5, punto 6): consistente con la
+    # copia del paso 9 — nunca `--preserve=mode` en ninguna de las dos copias.
     install -m 0644 "$DIR_JAULA/$ruta" "$LIMPIO/nuevo/$ruta"
   fi
 done
@@ -123,7 +122,12 @@ fi
 VALIDADO="$LIMPIO/validado"
 cp -a "$LIMPIO/nuevo" "$VALIDADO"
 
-chmod -R a+rwX "$LIMPIO/nuevo"
+# Ronda de arreglo 3/5 (punto 4, "fuera de alcance pero barato"): ya NO se
+# ensancha $LIMPIO/nuevo a mundo con `chmod -R a+rwX`. Con el uid del host
+# (ronda 2/5), el contenedor de compuertas corre como el mismo usuario que
+# hizo el `cp -a`/`git clone` — ya es dueño, no hace falta abrirlo a 777/666
+# (que además deja esa copia tocable por cualquier otro proceso local
+# mientras el contenedor trabaja).
 
 # --- defensa contra solucion.json como FIFO/symlink/dispositivo (ronda de arreglo
 # 1/5, punto 3): `verificar-cierre.py`, DENTRO del contenedor, abre el archivo que
@@ -209,10 +213,10 @@ for ruta in "${RUTAS[@]}"; do
   ruta_segura_bajo "$VALIDADO" "$ruta" || continue
   dst="$REPO/$ruta"
   # install -m 0644, NUNCA --preserve=mode (ronda de arreglo 1/5, punto 6): el
-  # `chmod -R a+rwX` de arriba (paso 7, para que el contenedor pueda escribir)
-  # deja el árbol en 666/777; con --preserve=mode ese modo viajaba tal cual
-  # hasta el commit real en $REPO (un data.js con el bit +x, o world-writable).
-  # El dato que se publica siempre es un archivo plano 0644, sin excepción.
+  # agente, dentro de la jaula, puede dejar un archivo con +x (o cualquier otro
+  # modo) — con --preserve=mode eso viajaba tal cual hasta el commit real en
+  # $REPO. El dato que se publica siempre es un archivo plano 0644, sin
+  # excepción, sin importar qué modo tenía en la jaula.
   install -m 0644 "$src" "$dst"
   git -C "$REPO" add -- "$ruta"
 done
@@ -231,6 +235,20 @@ FUERA_DE_PERMITIDOS="$(comm -23 <(printf '%s\n' "$CAMBIOS_INDICE" | sort) <(prin
 if [ -n "$FUERA_DE_PERMITIDOS" ]; then
   echo "compuertas: el índice de \$REPO tiene rutas fuera de PERMITIDOS antes de commitear — abortando sin commit: $FUERA_DE_PERMITIDOS" >&2
   git -C "$REPO" reset --quiet
+  # Ronda de arreglo 3/5 (punto 5): `git reset` solo desarma el ÍNDICE — el
+  # árbol de trabajo de $REPO se queda con lo que `install` copió. Se
+  # restaura cada ruta de PERMITIDOS desde HEAD (si no existía en HEAD, se
+  # borra: era un archivo nuevo). Nunca un comando que descarte el árbol
+  # entero (`checkout -- .`, `reset --hard`) — el guardia del repo los
+  # bloquea; esto es, archivo por archivo, solo las rutas conocidas.
+  for ruta in "${RUTAS[@]}"; do
+    [ -n "$ruta" ] || continue
+    if git -C "$REPO" cat-file -e "HEAD:$ruta" 2>/dev/null; then
+      git -C "$REPO" show "HEAD:$ruta" > "$REPO/$ruta" 2>/dev/null || true
+    else
+      rm -f "$REPO/$ruta" 2>/dev/null || true
+    fi
+  done
   exit 1
 fi
 

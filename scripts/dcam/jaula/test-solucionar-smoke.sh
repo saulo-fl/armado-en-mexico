@@ -124,6 +124,10 @@ set -e
 # mano) — los de (d)/(d2) ya los limpia el propio `solucionar.sh` en su camino
 # de fallo (ver el fix de huérfanos en ese script), así que no hay nada más que
 # rastrear ni borrar aquí.
-rm -rf "$JAULA_RUTA_C" 2>/dev/null || true
+# Ronda de arreglo 3/5 (re-revisión de la 2/5, "9-comprobación"): $JAULA_RUTA_C
+# es "$JAULA/repo" (lo que imprime solucionar.sh en éxito), NO "$JAULA" — borrar
+# solo esa ruta deja "$JAULA/entrada" huérfano en /tmp en CADA corrida de este
+# test. Hay que borrar la carpeta del propio `mktemp` completa: su dirname.
+rm -rf "$(dirname "$JAULA_RUTA_C")" 2>/dev/null || true
 
 exit $FAIL

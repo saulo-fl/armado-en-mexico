@@ -70,7 +70,15 @@ rm -rf "$W/salida"
 mkdir -p "$W/salida"
 cp "$W"/*.json "$W"/*.tsv "$JAULA/entrada/" 2>/dev/null || true
 cp "$W/motivo.txt" "$W/prompt.txt" "$JAULA/entrada/"
-chmod -R a+rwX "$JAULA/repo" "$W/salida"
+# Ronda de arreglo 3/5 (punto 4, "fuera de alcance pero barato"): ya NO se
+# hace `chmod -R a+rwX` de $JAULA/repo ni de $W/salida. Con el uid del host
+# (ronda 2/5) el contenedor YA es dueño de lo que `git clone`/`mkdir` crearon
+# aquí — no hace falta ensancharlo a mundo. Dejarlo en a+rwX (777/666) abría
+# una ventana real: cualquier otro proceso LOCAL del mismo host podría leer o
+# modificar solucion.json/agente.json entre que la jaula termina y
+# compuertas.sh los usa. $W/salida queda en 700 (solo su dueño, el usuario
+# que corre el pipeline).
+chmod 700 "$W/salida"
 
 timeout --kill-after="${SOLUCIONADOR_KILL_AFTER:-60}" "${SOLUCIONADOR_TIMEOUT:-45m}" \
   docker run --rm --init --name "$NOMBRE_CONTENEDOR" --network dcam-interna \
