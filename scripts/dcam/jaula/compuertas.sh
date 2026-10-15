@@ -99,7 +99,13 @@ correr_compuertas() {
     -v "$nuevo:/trabajo/repo:rw" -v "$workdir:/trabajo/w:ro" dcam-jaula:1 bash -c '
       cd /trabajo/repo && ln -sfn /opt/deps/node_modules node_modules &&
       node .claude/skills/conciliar-inventario/scripts/auditar.js | tail -1 | grep -q "SIN HALLAZGOS" &&
-      npm test 2>&1 | grep -q "^ℹ fail 0" &&
+      npm test 2>&1 | grep -q "^# fail 0" &&
+      # "^# fail 0", NO "^ℹ fail 0" (verificado en APOLO contra dcam-jaula:1): el
+      # Node 22.23.3 horneado en la imagen emite el resumen de `node --test` en
+      # formato TAP ("# fail N") cuando stdout no es una TTY — el host (Node 26)
+      # usa el reportero "spec" ("ℹ fail N"), que es de donde salió el patrón
+      # original del plan. Con "ℹ" este grep nunca empareja y NINGÚN cambio,
+      # por legítimo que sea, podría pasar jamás las compuertas.
       /opt/venv/bin/python .claude/skills/conciliar-inventario/scripts/verificar-cierre.py \
         --workdir /trabajo/w --fecha "'"$fecha"'" --solucion /trabajo/w/salida/solucion.json'
 }
