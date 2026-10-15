@@ -321,16 +321,23 @@ cerrar_exito() {
   rm -f "$SENAL"
 }
 
-# Borra una carpeta que puede contener archivos/directorios creados por el uid
-# 10001 DENTRO de un contenedor (p. ej. $JAULA/repo, $W/salida): un `rm -rf` del
-# host (usuario distinto, sin root) puede no poder atravesar un directorio que
-# ese uid creó con 700 durante la corrida. Se borra el CONTENIDO desde dentro,
-# con un contenedor efímero del mismo uid (que sí es dueño), y luego el host
-# borra la carpeta ya vacía (que sí es suya: la creó `mktemp -d`).
+# Borra una carpeta temporal de la jaula ($JAULA o $MAIN_TMP_DIR). Ronda de
+# arreglo 2/5: ya NO hace falta un contenedor efímero para esto — la jaula y
+# compuertas.sh corren con el uid:gid del usuario del host (ver solucionar.sh y
+# compuertas.sh), así que todo lo que el agente o el contenedor de compuertas
+# crearon ahí dentro ya es del mismo usuario que corre el pipeline. Minor
+# "limpiar_jaula": exige una ruta absoluta con el prefijo esperado — nunca
+# borra algo que no reconozca — y un `chmod -R u+rwX` antes del `rm -rf` por si
+# algo quedó con permisos más estrictos que los del propio dueño.
 limpiar_jaula() {
   local dir="$1"
-  [ -n "$dir" ] && [ -d "$dir" ] || return 0
-  docker run --rm --init -v "$dir:/x" dcam-jaula:1 sh -c 'rm -rf /x/* /x/.[!.]* 2>/dev/null' >/dev/null 2>&1 || true
+  [ -n "$dir" ] || return 0
+  case "$dir" in
+    /tmp/dcam-jaula-*|/tmp/dcam-main-*) ;;
+    *) log "limpiar_jaula: '$dir' no tiene el prefijo esperado (/tmp/dcam-jaula-*, /tmp/dcam-main-*) — NO se borra"; return 1 ;;
+  esac
+  [ -d "$dir" ] || return 0
+  chmod -R u+rwX "$dir" 2>/dev/null || true
   rm -rf "$dir" 2>/dev/null || true
 }
 
@@ -423,16 +430,37 @@ instrucción). Resuelve lo que puedas con el criterio de tus instrucciones y
 deja tu solución en /trabajo/salida/solucion.json.
 EOF
 
+# Ronda de arreglo 2/5 (minor "índice de $REPO"): si el paso que falló dejó
+# $REPO con cambios sin commitear (p. ej. aplicar-mecanico.py escribió algo en
+# src/data/ antes de reventar, sin llegar al `git commit` de step_mecanico),
+# ese estado se commitea AQUÍ, de una vez, como hacía el `step_solucionador`
+# antiguo — es trabajo del HOST, de confianza, antes de que nada entre a la
+# jaula. Así el `git clone --branch "$RAMA"` que hace `solucionar.sh` ve ese
+# estado (si no se commiteara, se perdería silenciosamente), y el `git add -A`
+# de `cerrar_exito` más abajo solo recoge lo que generan los `--update-ref`,
+# nunca una mezcla con esto. Si el repo no queda limpio tras el intento, no se
+# lanza la jaula sobre un estado a medias.
+if [ -n "$(git status --porcelain)" ]; then
+  git add -A
+  git commit --quiet -m "pipeline: estado al fallar el paso $STEP $FECHA" 2>>"$LOG" || true
+fi
+if [ -n "$(git status --porcelain)" ]; then
+  falla "solucionador (jaula): el repo de trabajo no quedó limpio antes de lanzar la jaula"
+fi
+
 # main fresco para la jaula: aislado del checkout de trabajo del pipeline.
 MAIN_TMP_DIR="$(mktemp -d /tmp/dcam-main-XXXX)"
 MAIN="$MAIN_TMP_DIR/main"
 if ! { git clone --quiet --depth 1 --branch main "file://$REPO" "$MAIN" >>"$LOG" 2>&1 \
         && npm ci --ignore-scripts --prefix "$MAIN" >>"$LOG" 2>&1; }; then
-  rm -rf "$MAIN_TMP_DIR"
+  limpiar_jaula "$MAIN_TMP_DIR"
   falla "solucionador (jaula): no se pudo preparar main fresco"
 fi
 
-JAULA_REPO="$(bash "$MAIN/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$MAIN")"
+# Ronda de arreglo 2/5 (minor "logs"): stderr de solucionar.sh va a $LOG — stdout
+# se sigue capturando aparte (es la ruta de $JAULA/repo, el contrato de
+# solucionar.sh, nunca se mezcla con el log).
+JAULA_REPO="$(bash "$MAIN/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$MAIN" 2>>"$LOG")"
 JAULA_RC=$?
 if [ "$JAULA_RC" -ne 0 ] || [ -z "$JAULA_REPO" ]; then
   [ -n "$JAULA_REPO" ] && limpiar_jaula "$(dirname "$JAULA_REPO")"
@@ -444,7 +472,9 @@ fi
 # commiteó" de "compuertas pasó pero no había nada que commitear" — ronda de
 # arreglo 1/5 (C1): este segundo caso avisaba «resolvió» sin haber resuelto nada.
 ANTES_SHA_JAULA="$(git -C "$REPO" rev-parse HEAD)"
-if ! bash "$MAIN/scripts/dcam/jaula/compuertas.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$JAULA_REPO" "$MAIN"; then
+# compuertas.sh no produce ningún stdout que el pipeline necesite capturar
+# (solo su código de salida); todo va a $LOG (ronda de arreglo 2/5, minor "logs").
+if ! bash "$MAIN/scripts/dcam/jaula/compuertas.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$JAULA_REPO" "$MAIN" >>"$LOG" 2>&1; then
   limpiar_jaula "$(dirname "$JAULA_REPO")"
   limpiar_jaula "$MAIN_TMP_DIR"
   falla "solucionador (jaula): no pasó validación/compuertas"

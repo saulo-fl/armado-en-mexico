@@ -30,6 +30,15 @@ FECHA_ISO="$1" RAMA="$2" W="$3" DIR_JAULA="$4" MAIN="$5"
 
 REPO="${DCAM_DIR:?fija DCAM_DIR (REPO=\$DCAM_DIR/repo, el checkout real de la rama en el host)}/repo"
 
+# Ronda de arreglo 2/5: el contenedor de compuertas corre con el uid:gid DEL
+# USUARIO DEL HOST (nunca un uid fijo) — ver la nota larga en solucionar.sh.
+# Lo que ese contenedor crea dentro de $LIMPIO/nuevo (el symlink de
+# node_modules, cachés de npm) queda del mismo usuario que corre el pipeline,
+# así que el `rm -rf "$LIMPIO"` del trap de abajo nunca puede fallar por
+# permisos de un uid ajeno.
+UID_HOST="$(id -u)"
+GID_HOST="$(id -g)"
+
 LIMPIO="$(mktemp -d "${TMPDIR:-/tmp}/dcam-compuertas-XXXXXX")"
 # Nombre único del contenedor de compuertas: permite `docker rm -f` de respaldo
 # en el trap aunque el `timeout` del paso 8 solo mate al cliente `docker`, no al
@@ -149,7 +158,7 @@ correr_compuertas() {
   # el trap de arriba son el cierre real.
   timeout --kill-after="${COMPUERTAS_KILL_AFTER:-30}" "${COMPUERTAS_TIMEOUT:-10m}" \
   docker run --rm --init --name "$NOMBRE_COMPUERTAS" --network none --read-only --tmpfs /tmp:size=512m --cap-drop ALL \
-    --security-opt no-new-privileges --pids-limit 512 --memory 4g --user 10001:10001 \
+    --security-opt no-new-privileges --pids-limit 512 --memory 4g --user "${UID_HOST}:${GID_HOST}" -e HOME=/tmp \
     -v "$nuevo:/trabajo/repo:rw" -v "$workdir:/trabajo/w:ro" -v "$salida_validada:/trabajo/solucion-validada:ro" \
     dcam-jaula:1 bash -c '
       cd /trabajo/repo && ln -sfn /opt/deps/node_modules node_modules &&
@@ -168,7 +177,14 @@ correr_compuertas() {
 # `npm test` roto que no corra NINGUNA prueba también imprime "# fail 0" y antes
 # pasaba igual.
 
-if ! correr_compuertas "$LIMPIO/nuevo" "$W" "$FECHA_ISO" "$SALIDA_VALIDADA"; then
+correr_compuertas "$LIMPIO/nuevo" "$W" "$FECHA_ISO" "$SALIDA_VALIDADA" && RC_COMPUERTAS=0 || RC_COMPUERTAS=$?
+# ^ con `set -e`, un simple `correr_compuertas ...; RC=$?` corta el script en
+# la propia llamada si sale != 0 (nunca llegaría a la línea siguiente) — mismo
+# idiom que ya usa solucionar.sh para el `docker run`.
+# Ronda de arreglo 2/5 (minor "orden del trap"): explícito aquí, antes de
+# cualquier limpieza o declaración de éxito/fallo — no solo en el trap EXIT.
+docker rm -f "$NOMBRE_COMPUERTAS" >/dev/null 2>&1 || true
+if [ "$RC_COMPUERTAS" -ne 0 ]; then
   echo "compuertas: el contenedor de compuertas (docker run --network none) falló — abortando sin commit" >&2
   exit 1
 fi
@@ -205,4 +221,17 @@ if git -C "$REPO" diff --cached --quiet; then
   echo "compuertas: las compuertas pasaron, pero no hubo cambios que commitear"
   exit 0
 fi
+
+# Ronda de arreglo 2/5 (minor "índice de $REPO"): antes de commitear, el índice
+# de $REPO debe ser SOLO rutas de PERMITIDOS — el loop de arriba solo hace
+# `git add` de esas rutas, así que esto debería ser siempre cierto; es una
+# aserción defensiva (p. ej. si $REPO ya llegó con algo staged de otro lado).
+CAMBIOS_INDICE="$(git -C "$REPO" diff --cached --name-only)"
+FUERA_DE_PERMITIDOS="$(comm -23 <(printf '%s\n' "$CAMBIOS_INDICE" | sort) <(printf '%s\n' "$PERMITIDOS" | sort))"
+if [ -n "$FUERA_DE_PERMITIDOS" ]; then
+  echo "compuertas: el índice de \$REPO tiene rutas fuera de PERMITIDOS antes de commitear — abortando sin commit: $FUERA_DE_PERMITIDOS" >&2
+  git -C "$REPO" reset --quiet
+  exit 1
+fi
+
 git -C "$REPO" commit --quiet -m "solucionador (jaula): datos validados $FECHA_ISO"

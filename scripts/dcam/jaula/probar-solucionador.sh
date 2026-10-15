@@ -42,17 +42,28 @@ if [ "$MODO" = "--escenario-13oct" ]; then
   git -C "$DCAM_DIR/repo" checkout --quiet -b "$RAMA"
   git -C "$DCAM_DIR/repo" remote remove origin
 
+  # ligas-armas.json de la RAMA del 13-oct (ya clonada arriba), nunca el de
+  # main — y quita 2 claves que de verdad aparecen entre los nombres de
+  # armas.json del 13-oct (ronda de arreglo 2/5, punto 17b: un `slice(0,2)`
+  # ciego podía quitar 2 claves que ya no estaban en ningún renglón de esa
+  # fecha, y entonces no se generaba ningún "sin ficha" de verdad).
   LIGAS="$DCAM_DIR/repo/.claude/skills/conciliar-inventario/scripts/ligas-armas.json"
   node -e '
     const fs = require("fs");
-    const p = process.argv[1];
-    const j = JSON.parse(fs.readFileSync(p, "utf8"));
-    const claves = Object.keys(j).slice(0, 2);
-    if (claves.length < 2) { console.error("ligas-armas.json no tiene 2 claves para quitar"); process.exit(1); }
-    for (const k of claves) delete j[k];
-    fs.writeFileSync(p, JSON.stringify(j, null, 2) + "\n");
-    console.error("ligas quitadas a propósito: " + claves.join(", "));
-  ' "$LIGAS"
+    const [ligasPath, armasPath] = process.argv.slice(1);
+    const ligas = JSON.parse(fs.readFileSync(ligasPath, "utf8"));
+    const armas = JSON.parse(fs.readFileSync(armasPath, "utf8"));
+    const nombresPDF = new Set((armas.items || []).map((r) => r.name));
+    const candidatas = Object.keys(ligas).filter((k) => nombresPDF.has(k));
+    if (candidatas.length < 2) {
+      console.error("no hay 2 ligas cuya clave esté en armas.json del 13-oct (candidatas: " + candidatas.length + ")");
+      process.exit(1);
+    }
+    const quitar = candidatas.slice(0, 2);
+    for (const k of quitar) delete ligas[k];
+    fs.writeFileSync(ligasPath, JSON.stringify(ligas, null, 2) + "\n");
+    console.error("ligas quitadas a propósito (SÍ aparecen en armas.json del 13-oct): " + quitar.join(" | "));
+  ' "$LIGAS" "$ORIGEN_WORKDIR/armas.json"
   git -C "$DCAM_DIR/repo" -c user.email=test@local -c user.name=dcam-test \
     commit --quiet -am "prueba e2e (escenario 13-oct): quita 2 ligas a propósito"
 
@@ -162,9 +173,15 @@ if [ -n "$JAULA_REPO" ] && [ "$RC_SOLUCIONAR" -eq 0 ]; then
   cat "$TMP/compuertas.log" 2>/dev/null
   rm -rf "$(dirname "$JAULA_REPO")"
 else
-  echo "(2) solucionar.sh no produjo resultado (RC=$RC_SOLUCIONAR, JAULA_REPO='$JAULA_REPO') — nada que validar."
+  # Ronda de arreglo 2/5 (punto 17a): esto es un FALLO del juez (exit != 0),
+  # aunque la CAUSA probable sea infraestructura y no código de esta fase —
+  # antes solo imprimía texto informativo y el script terminaba con éxito
+  # igual ("TODO OK" con el puente en 502). Nunca se da nada por bueno sin el
+  # modelo de verdad funcionando.
+  mal "(2) solucionar.sh no produjo resultado (RC=$RC_SOLUCIONAR, JAULA_REPO='$JAULA_REPO') — nada que validar"
   echo "    Si fue por infraestructura (el puente no llega al router: ver probar-jaula.sh),"
-  echo "    NO es un fallo de esta fase — es la regla ufw pendiente de Saulo. No se da nada por bueno."
+  echo "    NO es un fallo de CÓDIGO de esta fase — es la regla ufw pendiente de Saulo. De cualquier"
+  echo "    forma este juez termina con fallo: no se da nada por bueno sin el modelo funcionando."
 fi
 
 # --- (3) nada nuevo en el host fuera de WORKDIR: ni contenedores ni carpetas huérfanas ---

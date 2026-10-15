@@ -150,16 +150,21 @@ else
 fi
 rm -rf "$J"
 
-# --- (f) timeout real (ronda de arreglo 1/5, punto 2): un dentro.sh falso que
-#     duerme mucho más que el timeout de prueba -> tras salir, NINGÚN contenedor
-#     dcam-solucionador-* sigue vivo. `timeout` por sí solo solo mata al cliente
-#     `docker`, nunca al contenedor — esto prueba que el `--name` + `docker rm -f`
-#     del trap de `solucionar.sh` sí lo hace. ---
+# --- (f) timeout real (ronda de arreglo 1/5, punto 2; corregido en la 2/5 —
+#     "test (f) no muerde"): un dentro.sh falso que IGNORA SIGTERM y nunca
+#     termina solo (`trap '' TERM` + loop infinito) — un `sleep 300` normal SÍ
+#     muere con el SIGTERM que `timeout`/`--init` reenvían, así que esa versión
+#     pasaba por la razón EQUIVOCADA (el proceso se portaba bien, no porque el
+#     `docker rm -f` del trap de solucionar.sh hiciera algo). Con un proceso que
+#     de verdad ignora la señal, solo un `docker rm -f` (SIGKILL del daemon,
+#     nunca del `timeout` del host, que solo llega al cliente `docker`) puede
+#     pararlo — eso es lo que de verdad se está probando. ---
 MAIN_LENTO="$TMP/main-lento"
 cp -a "$MAIN" "$MAIN_LENTO"
 cat > "$MAIN_LENTO/scripts/dcam/jaula/dentro.sh" <<'EOF'
 #!/usr/bin/env bash
-sleep 300
+trap '' TERM
+while :; do sleep 1; done
 EOF
 W_F="$TMP/w-f"
 mkdir -p "$W_F"
@@ -180,6 +185,58 @@ else
   ok "(f) timeout: ningún contenedor dcam-solucionador-* quedó corriendo tras el timeout interno (solucionar.sh RC=$RC_F)"
 fi
 rm -rf "$W_F" "$MAIN_LENTO"
+
+# --- (i) un subdirectorio 700 que la jaula crea en /trabajo/salida se borra
+#     sin problema en el SIGUIENTE intento con el mismo WORKDIR (ronda de
+#     arreglo 2/5, "Important nuevo": con un uid fijo ajeno al host, el host no
+#     podía atravesar/borrar ese subdirectorio — `rm -rf "$W/salida"` del
+#     arranque de solucionar.sh fallaba bajo `set -e` y el script abortaba
+#     ANTES del `docker run`, con el mensaje engañoso "el agente no produjo
+#     resultado". Con el uid del host (esta ronda), ese subdirectorio ya es
+#     del mismo usuario que corre el pipeline. ---
+MAIN_RESTRICTIVO="$TMP/main-restrictivo"
+cp -a "$MAIN" "$MAIN_RESTRICTIVO"
+cat > "$MAIN_RESTRICTIVO/scripts/dcam/jaula/dentro.sh" <<'EOF'
+#!/usr/bin/env bash
+mkdir -p /trabajo/salida/sub
+chmod 700 /trabajo/salida/sub
+echo '{"dato":"de prueba"}' > /trabajo/salida/sub/archivo.json
+echo '{"ok":true}' > /trabajo/salida/agente.json
+EOF
+W_I="$TMP/w-i"
+mkdir -p "$W_I"
+echo "motivo de prueba" > "$W_I/motivo.txt"
+echo "prompt de prueba" > "$W_I/prompt.txt"
+
+set +e
+RUTA_I1="$(timeout 120 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_I" "$MAIN_RESTRICTIVO" 2>"$TMP/log-i1.txt")"
+RC_I1=$?
+set -e
+if [ "$RC_I1" -ne 0 ]; then
+  mal "(i) subdirectorio 700 en salida/: la primera corrida ya falló (ver $TMP/log-i1.txt)"
+  tail -20 "$TMP/log-i1.txt"
+else
+  rm -rf "$(dirname "$RUTA_I1")"
+  SUBDIR_I="$W_I/salida/sub"
+  if [ ! -d "$SUBDIR_I" ]; then
+    mal "(i) subdirectorio 700 en salida/: la jaula no lo dejó donde se esperaba ($SUBDIR_I)"
+  else
+    # El segundo intento, con el MISMO WORKDIR, es la prueba real: su propio
+    # `rm -rf "$W/salida"` de arranque tiene que poder borrar $SUBDIR_I.
+    set +e
+    RUTA_I2="$(timeout 120 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_I" "$MAIN_RESTRICTIVO" 2>"$TMP/log-i2.txt")"
+    RC_I2=$?
+    set -e
+    if [ "$RC_I2" -eq 0 ]; then
+      ok "(i) subdirectorio 700 en salida/: el siguiente intento con el mismo WORKDIR corrió de verdad, sin abortar por permisos"
+      rm -rf "$(dirname "$RUTA_I2")"
+    else
+      mal "(i) subdirectorio 700 en salida/: el segundo intento abortó (ver $TMP/log-i2.txt)"
+      tail -20 "$TMP/log-i2.txt"
+    fi
+  fi
+fi
+rm -rf "$W_I" "$MAIN_RESTRICTIVO"
 
 # --- (g) solucion.json como FIFO (ronda de arreglo 1/5, punto 3): no debe
 #     colgar las compuertas (verificar-cierre.py, dentro del contenedor, abriría

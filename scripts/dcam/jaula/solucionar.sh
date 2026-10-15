@@ -29,16 +29,31 @@ REPO="${DCAM_DIR:?}/repo"
 JAULA="$(mktemp -d /tmp/dcam-jaula-XXXX)"
 # NO borrar $JAULA en ningún trap: lo usa compuertas.sh después para copiar los
 # archivos permitidos; el pipeline la borra al final de la corrida (ver
-# `limpiar_jaula` en conciliar-pipeline.sh — el uid 10001 puede haber dejado
-# directorios que el host no puede atravesar con un `rm -rf` normal).
+# `limpiar_jaula` en conciliar-pipeline.sh).
+# ponytail: $JAULA y $W/salida son bind mounts normales de /tmp, sin cuota — el
+# agente puede llenar el disco hasta el kill de 45 min (SOLUCIONADOR_TIMEOUT).
+# Mejora: volumen tmpfs con tope + extractor, o un FS con cuota dedicado
+# (decisión de Saulo, fuera de esta fase).
 
-# Nombre único del contenedor: permite un `docker rm -f` de respaldo en el trap
-# de abajo. Ronda de arreglo 1/5 (punto 2), probado en APOLO: un `timeout` que
-# vence solo mata al CLIENTE `docker` (el proceso que corre aquí) — el
-# contenedor sigue `Up` en el daemon sin límite si el agente, dentro, ignora o
-# atrapa la señal (p. ej. un hijo en estado STOP). `--init` (reaper de PID 1)
-# ayuda a que las señales lleguen bien dentro del contenedor; el `docker rm -f`
-# del trap es el cierre real, sin importar cómo haya terminado `timeout`.
+# Ronda de arreglo 2/5 (causa común de los puntos 9 y el "Important nuevo" de
+# huérfanos en /tmp): la jaula y el contenedor de compuertas corren con el
+# uid:gid DEL USUARIO DEL HOST que lanza el pipeline — NUNCA con un uid fijo
+# (10001) que el host no es. Con un uid fijo, cualquier archivo/directorio que
+# el agente crea dentro de /trabajo/repo o /trabajo/salida (bind mounts reales,
+# no tmpfs) queda en el host con ESE dueño; si el usuario del host no es root,
+# ni puede atravesarlo ni puede borrarlo con un `rm -rf` normal — hacía falta
+# un contenedor efímero solo para limpiar. Con el uid del host, todo lo que
+# crea el agente ya es del mismo usuario que corre el pipeline: `rm -rf`
+# normal basta, siempre. Hoy ese usuario es saulo; en Fase 4 será el usuario
+# dedicado `dcam`.
+UID_HOST="$(id -u)"
+GID_HOST="$(id -g)"
+
+# Nombre único del contenedor: permite un `docker rm -f` explícito (ver abajo,
+# justo después del `docker run`) y, como respaldo, en el trap EXIT — ronda de
+# arreglo 1/5 (punto 2), probado en APOLO: un `timeout` que vence solo mata al
+# CLIENTE `docker` (el proceso que corre aquí), nunca al contenedor en el
+# daemon. `--init` (reaper de PID 1) ayuda a que las señales lleguen dentro.
 NOMBRE_CONTENEDOR="dcam-solucionador-${FECHA_ISO}-$$"
 trap 'docker rm -f "$NOMBRE_CONTENEDOR" >/dev/null 2>&1 || true' EXIT
 
@@ -47,10 +62,10 @@ git -C "$JAULA/repo" remote remove origin
 
 mkdir -p "$JAULA/entrada"
 # Vacía $W/salida antes de montarla rw en la jaula (ronda de arreglo 1/5, punto
-# 3): una corrida anterior pudo dejar algo ahí — en el peor caso, algo que no
-# sea un archivo regular (ver la defensa de compuertas.sh más abajo en la
-# cadena). También se vacía desde conciliar-pipeline.sh antes de llamar aquí;
-# repetirlo es barato y no depende de que el llamador se acuerde.
+# 3): una corrida anterior pudo dejar algo ahí. Con el uid del host (arriba),
+# este `rm -rf` ya no puede fallar por permisos de un uid ajeno (ronda 2/5,
+# "Important nuevo": con uid 10001 fijo, esto abortaba el script ANTES del
+# `docker run` en cada reintento con la misma fecha, con un mensaje engañoso).
 rm -rf "$W/salida"
 mkdir -p "$W/salida"
 cp "$W"/*.json "$W"/*.tsv "$JAULA/entrada/" 2>/dev/null || true
@@ -59,9 +74,9 @@ chmod -R a+rwX "$JAULA/repo" "$W/salida"
 
 timeout --kill-after="${SOLUCIONADOR_KILL_AFTER:-60}" "${SOLUCIONADOR_TIMEOUT:-45m}" \
   docker run --rm --init --name "$NOMBRE_CONTENEDOR" --network dcam-interna \
-  --read-only --tmpfs /tmp:size=512m --tmpfs /home/agente:size=256m \
+  --read-only --tmpfs /tmp:size=512m --tmpfs "/home/agente:size=256m,uid=${UID_HOST},gid=${GID_HOST}" \
   --cap-drop ALL --security-opt no-new-privileges --pids-limit 512 --memory 4g --cpus 2 \
-  --user 10001:10001 \
+  --user "${UID_HOST}:${GID_HOST}" -e HOME=/home/agente \
   -v "$JAULA/repo:/trabajo/repo:rw" -v "$JAULA/entrada:/trabajo/entrada:ro" -v "$W/salida:/trabajo/salida:rw" \
   -v "$MAIN/scripts/dcam/jaula/dentro.sh:/opt/main/dentro.sh:ro" \
   -v "$MAIN/.claude/agents/solucionador-dcam.md:/opt/main/solucionador-dcam.md:ro" \
@@ -70,6 +85,14 @@ timeout --kill-after="${SOLUCIONADOR_KILL_AFTER:-60}" "${SOLUCIONADOR_TIMEOUT:-4
 # falla corta el script ANTES de llegar a la línea `RC=$?` de abajo (nunca se
 # ejecutaría), y el chequeo de agente.json vacío (RC=0 pero sin salida útil)
 # tampoco se alcanzaría nunca.
+
+# Ronda de arreglo 2/5 (minor "orden del trap"): el `docker rm -f` del
+# contenedor del agente se hace AQUÍ, explícito, antes de cualquier limpieza o
+# declaración de éxito/fallo — no solo en el trap EXIT (que sigue como
+# respaldo si el script muriera antes de llegar aquí). Importa el orden: si el
+# contenedor sigue vivo (p. ej. ignoró la señal), borrar $JAULA mientras sigue
+# montada dentro de él es el escenario que se quiere evitar.
+docker rm -f "$NOMBRE_CONTENEDOR" >/dev/null 2>&1 || true
 
 AGENTE_JSON="$W/salida/agente.json"
 # Ronda de arreglo 1/5 (punto 10): `[ -f ] && [ ! -L ]` + tamaño > 0, no `[ -s ]`
@@ -82,13 +105,12 @@ if [ "$RC" -eq 0 ] && [ -f "$AGENTE_JSON" ] && [ ! -L "$AGENTE_JSON" ] \
 fi
 # Fallo: $JAULA solo hace falta cuando hay algo que compuertas.sh tenga que validar.
 # Sin éxito no hay nada que validar — se limpia aquí (nunca en un trap: el trap
-# también dispararía en el camino de ÉXITO, que es justo el que no se debe borrar).
-# Dejarla huérfana en /tmp con el contenido de la rama (y de lo que haya escrito el
-# agente a medias) hasta la próxima limpieza manual es el hueco que esto cierra.
-# El uid 10001 puede haber creado ahí dentro algo que el host no pueda borrar
-# directo (ronda de arreglo 1/5, punto 9): se limpia por dentro, con un
-# contenedor efímero del mismo uid, antes del `rm -rf` normal del host.
-docker run --rm --init -v "$JAULA:/x" dcam-jaula:1 sh -c 'rm -rf /x/* /x/.[!.]* 2>/dev/null' >/dev/null 2>&1 || true
+# también dispararía en el camino de ÉXITO, que es justo el que no se debe
+# borrar). Dejarla huérfana en /tmp con el contenido de la rama (y de lo que
+# haya escrito el agente a medias) hasta la próxima limpieza manual es el
+# hueco que esto cierra. Con el uid del host (arriba) un `rm -rf` normal
+# siempre basta — ya no hace falta un contenedor efímero para limpiar por
+# dentro (ronda de arreglo 2/5, quitado ese mecanismo).
 rm -rf "$JAULA" 2>/dev/null || true
 echo "solucionar.sh: docker run salió $RC o agente.json vacío/irregular; ver $W/docker-solucionar.log" >&2
 exit 1
