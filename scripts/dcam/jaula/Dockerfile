@@ -16,4 +16,7 @@ RUN python3 -m venv /opt/venv && /opt/venv/bin/pip install --no-cache-dir -r /op
 RUN useradd -u 10001 -m agente
 ENV DISABLE_TELEMETRY=1 DISABLE_ERROR_REPORTING=1 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 DISABLE_AUTOUPDATER=1
 ENV ANTHROPIC_BASE_URL=http://dcam-puente:1235 ANTHROPIC_AUTH_TOKEN=jaula-sin-clave
+# Fija el modelo para Fase 3: sin esto Claude Code intenta hablar con un modelo
+# Anthropic por defecto, que el puente no sabe traducir.
+ENV ANTHROPIC_MODEL=qwen3.8-27b ANTHROPIC_SMALL_FAST_MODEL=qwen3.8-27b
 USER agente
