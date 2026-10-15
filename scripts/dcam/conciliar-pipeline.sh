@@ -415,13 +415,30 @@ fi
 
 # Validación y compuertas pasaron: compuertas.sh ya dejó el commit (si hubo
 # cambios) en $REPO, sin push. Push de la RAMA del inventario — igual que
-# hacen los demás pasos del pipeline; nunca a main/develop.
-git -C "$REPO" push origin "$RAMA" --quiet 2>>"$LOG"
+# hacen los demás pasos del pipeline; nunca a main/develop. A diferencia del
+# resto del pipeline, SÍ se revisa el código de salida: aquí hay un commit
+# real que la jaula ayudó a producir y que nadie más va a reintentar solo.
+if ! git -C "$REPO" push origin "$RAMA" --quiet 2>>"$LOG"; then
+  rm -rf "$(dirname "$JAULA_REPO")" "$MAIN_TMP_DIR" 2>/dev/null
+  falla "solucionador (jaula): compuertas pasaron pero el push de la rama falló"
+fi
 
-# Aviso con SOLO contadores: nunca texto libre del agente ni URLs.
+# Aviso con SOLO contadores: nunca texto libre del agente ni URLs. solucion.json lo
+# escribió el agente dentro de la jaula en una carpeta que él controla (/trabajo/salida,
+# montada rw): nunca se lee si no es, en el host, un archivo REGULAR y sin enlaces (un
+# symlink ahí, al resolverse fuera de cualquier espacio de nombres de contenedor, podría
+# apuntar a cualquier ruta del host) y de tamaño razonable.
 resumen_seguro() {
+  local f="$WORKDIR/salida/solucion.json" tam
+  if [ ! -f "$f" ] || [ -L "$f" ]; then
+    echo "(sin solucion.json)"; return
+  fi
+  tam="$(stat -c%s "$f" 2>/dev/null || echo 0)"
+  if [ "$tam" -gt 1048576 ]; then
+    echo "(sin solucion.json)"; return
+  fi
   jq -r '"Ligas: \((.ligas // [])|length) · Altas: \((.altas // [])|length) · Pendientes: \((.pendiente // [])|length)"' \
-    "$WORKDIR/salida/solucion.json" 2>/dev/null || echo "(sin solucion.json)"
+    "$f" 2>/dev/null || echo "(sin solucion.json)"
 }
 telegram "🔧 Solucionador (jaula) resolvió $FECHA: $(resumen_seguro). Revisa la rama $RAMA."
 log "solucionador (jaula) OK: $(resumen_seguro)"

@@ -31,19 +31,32 @@ REPO="${DCAM_DIR:?fija DCAM_DIR (REPO=\$DCAM_DIR/repo, el checkout real de la ra
 LIMPIO="$(mktemp -d "${TMPDIR:-/tmp}/dcam-compuertas-XXXXXX")"
 trap 'rm -rf "$LIMPIO"' EXIT
 
-# $1 no existe (ni como symlink) -> no hay nada que hacer con él (exit 1 de este helper,
-# para distinguirlo con el valor de retorno del "existe y es regular" = 0).
-# $1 existe y NO es un archivo regular (symlink, directorio...) -> aborta TODO el script
-# sin copiar nada y sin commit — ese es el hueco que cierra este paso (un archivo
-# permitido sustituido por un symlink a, p. ej., /etc/passwd).
-# $1 existe y es regular -> 0 (sigue, cópialo).
-existe_y_es_regular_o_abortar() {
-  local p="$1"
-  if [ ! -e "$p" ] && [ ! -L "$p" ]; then
+# $1 = directorio base, $2 = ruta relativa dentro de ese base.
+# Revisa el camino COMPLETO, no solo el último componente: `[ -L ]`/`[ ! -f ]` sobre
+# "$base/$ruta" no detecta un symlink en un componente INTERMEDIO (p. ej. `src/data`
+# sustituido por un enlace a un directorio fuera de la jaula) — el kernel resuelve esos
+# enlaces al abrir la ruta de todas formas, así que `cp` acabaría leyendo un archivo de
+# fuera de la copia de la jaula aunque el componente final sí fuera "regular". Por eso
+# se compara `realpath -e` del camino completo contra la concatenación LITERAL de
+# `realpath -e "$base"` + la ruta: si no coinciden byte a byte, algún componente —
+# intermedio o final— es un enlace y se abortó TODO antes de copiar nada.
+# Retorno: 1 si ni existe ni es symlink (nada que hacer, válido); exit 1 (aborta el
+# script completo) si existe pero no es seguro; 0 si existe y es un archivo regular
+# sin ningún enlace en el camino.
+ruta_segura_bajo() {
+  local base="$1" ruta="$2" full="$1/$2"
+  if [ ! -e "$full" ] && [ ! -L "$full" ]; then
     return 1
   fi
-  if [ -L "$p" ] || [ ! -f "$p" ]; then
-    echo "compuertas: '$p' existe pero no es un archivo regular (symlink u otra cosa) — abortando sin commit" >&2
+  local base_real full_real
+  base_real="$(realpath -e "$base")" || { echo "compuertas: '$base' no existe — abortando sin commit" >&2; exit 1; }
+  full_real="$(realpath -e "$full" 2>/dev/null)" || { echo "compuertas: '$ruta' no se pudo resolver bajo '$base' (enlace roto u otra cosa) — abortando sin commit" >&2; exit 1; }
+  if [ "$full_real" != "$base_real/$ruta" ]; then
+    echo "compuertas: '$ruta' resuelve fuera de '$base' (un componente del camino, intermedio o final, es un enlace) — abortando sin commit" >&2
+    exit 1
+  fi
+  if [ -L "$full" ] || [ ! -f "$full" ]; then
+    echo "compuertas: '$full' no es un archivo regular (symlink u otra cosa) — abortando sin commit" >&2
     exit 1
   fi
   return 0
@@ -59,7 +72,7 @@ mapfile -t RUTAS <<< "$PERMITIDOS"
 
 for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
-  if existe_y_es_regular_o_abortar "$DIR_JAULA/$ruta"; then
+  if ruta_segura_bajo "$DIR_JAULA" "$ruta"; then
     cp --no-dereference --preserve=mode "$DIR_JAULA/$ruta" "$LIMPIO/nuevo/$ruta"
   fi
 done
@@ -100,9 +113,10 @@ fi
 for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
   src="$LIMPIO/nuevo/$ruta"
-  # misma regla del paso 5: re-confirma que sigue siendo regular (defensa en profundidad)
-  # justo antes de escribir en el REPO real; si no existe, nada que hacer con esta ruta.
-  existe_y_es_regular_o_abortar "$src" || continue
+  # misma regla del paso 5 (camino completo, no solo el último componente): re-confirma
+  # que sigue siendo seguro — defensa en profundidad — justo antes de escribir en el REPO
+  # real; si no existe, nada que hacer con esta ruta.
+  ruta_segura_bajo "$LIMPIO/nuevo" "$ruta" || continue
   dst="$REPO/$ruta"
   if [ -e "$dst" ] && cmp -s "$src" "$dst"; then
     continue
