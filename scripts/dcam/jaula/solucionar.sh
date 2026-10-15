@@ -55,5 +55,11 @@ if [ "$RC" -eq 0 ] && [ -s "$W/salida/agente.json" ]; then
   echo "$JAULA/repo"   # ÚNICA línea de stdout en éxito: el host la captura con $(...)
   exit 0
 fi
+# Fallo: $JAULA solo hace falta cuando hay algo que compuertas.sh tenga que validar.
+# Sin éxito no hay nada que validar — se limpia aquí (nunca en un trap: el trap
+# también dispararía en el camino de ÉXITO, que es justo el que no se debe borrar).
+# Dejarla huérfana en /tmp con el contenido de la rama (y de lo que haya escrito el
+# agente a medias) hasta la próxima limpieza manual es el hueco que esto cierra.
+rm -rf "$JAULA"
 echo "solucionar.sh: docker run salió $RC o agente.json vacío; ver $W/docker-solucionar.log" >&2
 exit 1
