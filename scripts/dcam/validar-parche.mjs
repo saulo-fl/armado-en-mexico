@@ -9,8 +9,9 @@
 // de clases (solo literales dentro de mk/mun/acc); el resto del archivo, igual en ambos
 // lados, ni se mira.
 import { readFileSync, writeFileSync, lstatSync, mkdtempSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { execFileSync } from 'node:child_process';
 import { parse } from '@babel/parser';
 import { VISITOR_KEYS } from '@babel/types';
@@ -132,9 +133,11 @@ function contenidoStringMalo(crudo) {
   // (V2/V2a: el string ya no es sospechoso por sí solo bajo la regla vieja de escapes, pero
   // sí lo es si contiene marcadores de comentario de JS).
   // Excepción: una comilla escapada (\" o \') SÍ es dato legítimo — calibres como 0.38"
-  // la necesitan (hallazgo real del 07-oct-2026) — así que se descarta ANTES de buscar
-  // backslashes peligrosos; cualquier OTRO backslash (\u, \x, \n, \\, …) sigue prohibido.
-  const sinComillasEscapadas = crudo.replace(/\\(['"])/g, '$1');
+  // la necesitan (hallazgo real del 07-oct-2026) — y \$ también es dato legítimo (precios
+  // de la ficha, p. ej. mk(128) en data.js:451) — así que ambas se descartan ANTES de
+  // buscar backslashes peligrosos; cualquier OTRO backslash (\u, \x, \n, \\, …) sigue
+  // prohibido.
+  const sinComillasEscapadas = crudo.replace(/\\(['"$])/g, '$1');
   return /\\/.test(sinComillasEscapadas) || /[`<>]/.test(crudo) || /[\u0000-\u001f]/.test(crudo) || crudo.includes('//') || crudo.includes('/*') || crudo.includes('*/');
 }
 
@@ -174,8 +177,15 @@ function revisarToken(src, toks, i, ruta, callables) {
 // las otras dos capas).
 // Ronda 3 (Minor #4 + hallazgos 1f/1g de la re-revisión): exige `const` (no `let`/`var` —
 // antes se colaba un `let` reasignado) y, además, descarta cualquier nombre que vuelva a
-// aparecer en CUALQUIER OTRO lugar del archivo como parámetro de función, declarador
-// anidado o blanco de una asignación/incremento. No resuelve ámbitos de verdad (no hace
+// aparecer en el archivo como parámetro SIMPLE (Identifier, con default o rest) de una
+// función, declarador `let`/`var` con id Identifier (anidado o no), o blanco de una
+// asignación/incremento. `marcarParam` NO baja a patrones de desestructuración
+// (ObjectPattern/ArrayPattern en params o declaradores), ni a parámetros de `catch`, ni a
+// métodos de objeto/clase — y no hace falta que lo haga: para colarse por ahí un parche
+// tendría que escribir sintaxis que NO existe en la base (un `{`/`[` nuevo en un parámetro,
+// un `catch` nuevo, un método nuevo), y esa sintaxis nueva ya reprueba antes de llegar
+// aquí: por la capa de tokens (identificador o puntuación no vistos en base) o por la de
+// esqueleto (la estructura del Program cambió). No resuelve ámbitos de verdad (no hace
 // falta: es barato y conservador) — si el nombre se toca de cualquier otra forma, en ESE
 // punto puede no ser el literal de arriba, así que nunca se trata como dato puro.
 function constantesLiterales(programa) {
@@ -432,7 +442,11 @@ export function verificarArchivoEnNuevo(dirNuevo, ruta) {
   return [];
 }
 
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('validar-parche.mjs')) {
+// Guard del CLI: compara rutas RESUELTAS, no la cadena cruda — `process.argv[1]?.endsWith(
+// 'validar-parche.mjs')` fallaba abierto en Windows (`node .../Validar-Parche.mjs …` salía
+// EXIT=0 sin validar nada, porque NTFS no distingue mayúsculas pero `endsWith` sí). Se
+// normaliza a minúsculas por el mismo motivo.
+if (resolve(process.argv[1] ?? '').toLowerCase() === fileURLToPath(import.meta.url).toLowerCase()) {
   const [dirBase, dirNuevo] = process.argv.slice(2);
   if (!dirBase || !dirNuevo) { console.error('uso: validar-parche.mjs <dir-base> <dir-nuevo>'); process.exit(1); }
   const problemas = [];

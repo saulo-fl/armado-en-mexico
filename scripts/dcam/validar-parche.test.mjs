@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { compararArchivo, compararArchivoSeguro, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES } from './validar-parche.mjs';
+import { spawnSync } from 'node:child_process';
+import { compararArchivo, compararArchivoSeguro, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES, PERMITIDOS } from './validar-parche.mjs';
 
 const D = 'src/data/data.js';
 const base = 'const X = [\n  mk(1, "A", "M"),\n];\nwindow.DB.forEach(a => a);\n';
@@ -377,5 +378,75 @@ test('compararArchivoSeguro convierte cualquier excepción (p. ej. git ausente) 
     assert.match(probs[0], /no se pudo validar/);
   } finally {
     process.env.PATH = pathOriginal;
+  }
+});
+
+// --- Fase 1b, hueco #1: `\$` vuelve impura una ficha legítima (data.js real, mk(128)) ---
+
+test('Fase 1b #1: con el data.js real, añadir una ficha nueva al final de window.DB con literales pasa', () => {
+  // Antes del fix, mk(128) (que contiene \$ en su descripción larga) hacía que window.DB
+  // entero no fuera "dato puro" y por lo tanto nunca colapsara a un marcador D fijo en el
+  // esqueleto — así que CUALQUIER ficha añadida cambiaba el esqueleto serializado completo
+  // ("la estructura del código cambió"), sin importar qué tan literal fuera lo añadido.
+  const real = readFileSync(D, 'utf8');
+  const marcaInicio = real.indexOf('window.DB = [');
+  assert.ok(marcaInicio >= 0, 'window.DB = [ no está donde se esperaba; ajustar el test');
+  // El archivo real usa CRLF; buscar el cierre del array sin asumir el fin de línea exacto.
+  const finArrayMatch = /\r?\n\];\r?\n/.exec(real.slice(marcaInicio));
+  assert.ok(finArrayMatch, 'cierre de window.DB no encontrado; ajustar el test');
+  const finArray = marcaInicio + finArrayMatch.index;
+  const nuevaFicha = '\r\n  mk(999, "Arma de prueba", "Fabricante de prueba", "pistola", "México", "9mm Parabellum", "10+1", "1 kg", "100 mm", "Semi-auto", 2026, "dcam", "FICHA DE PRUEBA", "imagenes/arma-prueba.webp", "Ficha sintética para el test del validador; no es un arma real."),';
+  const nuevo = real.slice(0, finArray) + nuevaFicha + real.slice(finArray);
+  assert.deepEqual(compararArchivo(D, real, nuevo), []);
+});
+
+test('Fase 1b #1: con el data.js real, cambiar el año de mk(128) pasa', () => {
+  const real = readFileSync(D, 'utf8');
+  const objetivo = 'gatillo de dos etapas", 2023,';
+  assert.ok(real.includes(objetivo), 'el patrón real de mk(128) cambió; ajustar el test');
+  const nuevo = real.replace(objetivo, 'gatillo de dos etapas", 2024,');
+  assert.deepEqual(compararArchivo(D, real, nuevo), []);
+});
+
+test('Fase 1b #1: \\$ es dato legítimo (mismo trato que \\" y \\\'), pero \\u0024 y \\x24 (mismo carácter, otro escape) siguen rechazados', () => {
+  const pasa = base.replace('];', '  mk(2, "a\\$"),\n];');
+  assert.deepEqual(compararArchivo(D, base, pasa), []);
+  // Ningún OTRO escape nuevo: solo se tocó la regla para \$, no para otras formas de producir
+  // el mismo carácter ($).
+  for (const s of ['"\\u0024"', '"\\x24"']) {
+    const nuevo = base.replace('];', `  mk(2, ${s}),\n];`);
+    assert.ok(compararArchivo(D, base, nuevo).length > 0, s);
+  }
+});
+
+// --- Fase 1b, hueco #2: el guard del CLI fallaba en abierto con otra capitalización ---
+
+test('Fase 1b #2: el guard del CLI corre el validador aunque la ruta tenga otra capitalización (Windows)', () => {
+  const scriptOtraCapitalizacion = join(process.cwd(), 'scripts', 'dcam', 'Validar-Parche.mjs');
+  const dirBase = mkdtempSync(join(tmpdir(), 'dcam-cli-base-'));
+  const dirNuevo = mkdtempSync(join(tmpdir(), 'dcam-cli-nuevo-'));
+  try {
+    // Los otros 12 archivos PERMITIDOS: idénticos (vacíos) en base y nuevo -> se saltan sin
+    // validar, para que el único problema real sea el ataque de abajo.
+    for (const ruta of PERMITIDOS) {
+      if (ruta === D) continue;
+      mkdirSync(join(dirNuevo, dirname(ruta)), { recursive: true });
+      writeFileSync(join(dirNuevo, ruta), '');
+    }
+    mkdirSync(join(dirBase, dirname(D)), { recursive: true });
+    writeFileSync(join(dirBase, D), 'const X = [\n  mk(1, "a"),\n];\n');
+    mkdirSync(join(dirNuevo, dirname(D)), { recursive: true });
+    writeFileSync(join(dirNuevo, D), 'const X = [\n  mk(1, "a"),\n  fetch(1),\n];\n');
+
+    const r = spawnSync(process.execPath, [scriptOtraCapitalizacion, dirBase, dirNuevo], { encoding: 'utf8' });
+    // En Windows (NTFS insensible a mayúsculas) el script SÍ corre con esta ruta: debe
+    // detectar el ataque y salir con status != 0. En Linux, con otra capitalización el
+    // archivo no existe y node también sale != 0 (por otra razón) — por eso se acepta
+    // cualquier status != 0, y lo que de verdad prueba el guard es que NUNCA imprima éxito.
+    assert.notEqual(r.status, 0, `status=${r.status} stdout=${r.stdout} stderr=${r.stderr}`);
+    assert.ok(!r.stdout.includes('✔ solo datos'), `stdout=${r.stdout}`);
+  } finally {
+    rmSync(dirBase, { recursive: true, force: true });
+    rmSync(dirNuevo, { recursive: true, force: true });
   }
 });
