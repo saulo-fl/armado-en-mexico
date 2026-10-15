@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSyn
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { compararArchivo, compararArchivoSeguro, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES, PERMITIDOS } from './validar-parche.mjs';
+import { compararArchivo, compararArchivoSeguro, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES, PERMITIDOS } from './validar-parche-lib.mjs';
 
 const D = 'src/data/data.js';
 const base = 'const X = [\n  mk(1, "A", "M"),\n];\nwindow.DB.forEach(a => a);\n';
@@ -395,7 +395,10 @@ test('Fase 1b #1: con el data.js real, añadir una ficha nueva al final de windo
   const finArrayMatch = /\r?\n\];\r?\n/.exec(real.slice(marcaInicio));
   assert.ok(finArrayMatch, 'cierre de window.DB no encontrado; ajustar el test');
   const finArray = marcaInicio + finArrayMatch.index;
-  const nuevaFicha = '\r\n  mk(999, "Arma de prueba", "Fabricante de prueba", "pistola", "México", "9mm Parabellum", "10+1", "1 kg", "100 mm", "Semi-auto", 2026, "dcam", "FICHA DE PRUEBA", "imagenes/arma-prueba.webp", "Ficha sintética para el test del validador; no es un arma real."),';
+  // No asumir CRLF: usar el mismo fin de línea que el cierre encontrado (ronda de arreglo
+  // 1/5, Minor: antes estaba fijo a '\r\n').
+  const eol = finArrayMatch[0].startsWith('\r') ? '\r\n' : '\n';
+  const nuevaFicha = `${eol}  mk(999, "Arma de prueba", "Fabricante de prueba", "pistola", "México", "9mm Parabellum", "10+1", "1 kg", "100 mm", "Semi-auto", 2026, "dcam", "FICHA DE PRUEBA", "imagenes/arma-prueba.webp", "Ficha sintética para el test del validador; no es un arma real."),`;
   const nuevo = real.slice(0, finArray) + nuevaFicha + real.slice(finArray);
   assert.deepEqual(compararArchivo(D, real, nuevo), []);
 });
@@ -419,34 +422,103 @@ test('Fase 1b #1: \\$ es dato legítimo (mismo trato que \\" y \\\'), pero \\u00
   }
 });
 
-// --- Fase 1b, hueco #2: el guard del CLI fallaba en abierto con otra capitalización ---
-
-test('Fase 1b #2: el guard del CLI corre el validador aunque la ruta tenga otra capitalización (Windows)', () => {
-  const scriptOtraCapitalizacion = join(process.cwd(), 'scripts', 'dcam', 'Validar-Parche.mjs');
-  const dirBase = mkdtempSync(join(tmpdir(), 'dcam-cli-base-'));
-  const dirNuevo = mkdtempSync(join(tmpdir(), 'dcam-cli-nuevo-'));
-  try {
-    // Los otros 12 archivos PERMITIDOS: idénticos (vacíos) en base y nuevo -> se saltan sin
-    // validar, para que el único problema real sea el ataque de abajo.
-    for (const ruta of PERMITIDOS) {
-      if (ruta === D) continue;
-      mkdirSync(join(dirNuevo, dirname(ruta)), { recursive: true });
-      writeFileSync(join(dirNuevo, ruta), '');
-    }
-    mkdirSync(join(dirBase, dirname(D)), { recursive: true });
-    writeFileSync(join(dirBase, D), 'const X = [\n  mk(1, "a"),\n];\n');
-    mkdirSync(join(dirNuevo, dirname(D)), { recursive: true });
-    writeFileSync(join(dirNuevo, D), 'const X = [\n  mk(1, "a"),\n  fetch(1),\n];\n');
-
-    const r = spawnSync(process.execPath, [scriptOtraCapitalizacion, dirBase, dirNuevo], { encoding: 'utf8' });
-    // En Windows (NTFS insensible a mayúsculas) el script SÍ corre con esta ruta: debe
-    // detectar el ataque y salir con status != 0. En Linux, con otra capitalización el
-    // archivo no existe y node también sale != 0 (por otra razón) — por eso se acepta
-    // cualquier status != 0, y lo que de verdad prueba el guard es que NUNCA imprima éxito.
-    assert.notEqual(r.status, 0, `status=${r.status} stdout=${r.stdout} stderr=${r.stderr}`);
-    assert.ok(!r.stdout.includes('✔ solo datos'), `stdout=${r.stdout}`);
-  } finally {
-    rmSync(dirBase, { recursive: true, force: true });
-    rmSync(dirNuevo, { recursive: true, force: true });
+test('Fase 1b (ronda 1) #2: una barra SUELTA delante de $ sigue rechazada (2 y 3 backslashes reales, y mezclada con otro escape malo)', () => {
+  // El regex (/\\(['"$])/g) solo consume UN par barra+carácter por cada "$"/comilla,
+  // empezando por el que está pegado al "$" — cualquier backslash EXTRA antes de ese par
+  // queda sin consumir y cae en el /\\/.test de abajo. Se construye con .repeat() (no a
+  // ojo) para que el número de backslashes REALES en el crudo del subject quede inequívoco.
+  const dosBarras = '"a' + '\\'.repeat(2) + '$"'; // crudo del subject: a \\ $ (escapa un backslash real, luego "$" suelto)
+  const tresBarras = '"' + '\\'.repeat(3) + '$"'; // crudo del subject: \\\ $ (dos backslashes reales sobran)
+  for (const s of [dosBarras, tresBarras]) {
+    const nuevo = base.replace('];', `  mk(2, ${s}),\n];`);
+    assert.ok(compararArchivo(D, base, nuevo).length > 0, JSON.stringify(s));
   }
+  // Un \$ legítimo en el MISMO string que un < ilegítimo: el \$ se descarta bien, pero
+  // el backslash de < sigue sin consumir -> se rechaza igual (el fix no exime al resto
+  // del string de las demás reglas).
+  const mezclado = '"' + '\\' + '$' + '\\' + 'u003c"';
+  const nuevoMezclado = base.replace('];', `  mk(2, ${mezclado}),\n];`);
+  assert.ok(compararArchivo(D, base, nuevoMezclado).length > 0, mezclado);
+});
+
+// --- Fase 1b, ronda de arreglo 1/5: el guard del CLI se elimina (Critical: fallaba en
+// abierto por symlink/junction) — el CLI ya no se auto-identifica, siempre corre ---
+
+test('Fase 1b (ronda 1) #1 Critical: el CLI corre y detecta el ataque aunque se invoque por symlink o junction', () => {
+  // No se usa el script real del repo como DESTINO del enlace: se copian los dos archivos a
+  // un directorio desechable, y el symlink/junction apunta ahí. Así, si algo sale mal al
+  // limpiar un enlace de directorio (junction) con rmSync recursivo, lo peor que puede pasar
+  // es borrar la copia desechable — nunca el repo real.
+  // Tiene que vivir DENTRO del repo (no en os.tmpdir()): `validar-parche-lib.mjs` importa
+  // `@babel/parser`/`@babel/types` como paquetes, y Node busca `node_modules` subiendo desde
+  // la ruta REAL del archivo que se ejecuta (la del symlink, no la del enlace) — fuera del
+  // árbol del repo no hay ningún `node_modules` que encontrar.
+  const dirEnlaces = mkdtempSync(join(process.cwd(), 'scripts', 'dcam', '.tmp-enlace-'));
+  const dirReal = join(dirEnlaces, 'real');
+  let enlace;
+  try {
+    mkdirSync(dirReal, { recursive: true });
+    writeFileSync(join(dirReal, 'validar-parche.mjs'), readFileSync(join(process.cwd(), 'scripts', 'dcam', 'validar-parche.mjs')));
+    writeFileSync(join(dirReal, 'validar-parche-lib.mjs'), readFileSync(join(process.cwd(), 'scripts', 'dcam', 'validar-parche-lib.mjs')));
+
+    const symlinkArchivo = join(dirEnlaces, 'enlace-validar-parche.mjs');
+    try {
+      symlinkSync(join(dirReal, 'validar-parche.mjs'), symlinkArchivo, 'file');
+      enlace = symlinkArchivo;
+    } catch {
+      // Sin privilegio para symlink de ARCHIVO (típico en Windows sin modo desarrollador):
+      // junction al directorio completo, y se invoca el script a través de ella.
+      const junctionDir = join(dirEnlaces, 'junction-dir');
+      symlinkSync(dirReal, junctionDir, 'junction');
+      enlace = join(junctionDir, 'validar-parche.mjs');
+    }
+
+    const dirBase = mkdtempSync(join(tmpdir(), 'dcam-cli-base-'));
+    const dirNuevo = mkdtempSync(join(tmpdir(), 'dcam-cli-nuevo-'));
+    try {
+      // Los otros 12 archivos PERMITIDOS: idénticos (vacíos) en base y nuevo -> se saltan sin
+      // validar, para que el único problema real sea el ataque de abajo.
+      for (const ruta of PERMITIDOS) {
+        if (ruta === D) continue;
+        mkdirSync(join(dirNuevo, dirname(ruta)), { recursive: true });
+        writeFileSync(join(dirNuevo, ruta), '');
+      }
+      const contenidoLimpio = 'const X = [\n  mk(1, "a"),\n];\n';
+      mkdirSync(join(dirBase, dirname(D)), { recursive: true });
+      writeFileSync(join(dirBase, D), contenidoLimpio);
+      mkdirSync(join(dirNuevo, dirname(D)), { recursive: true });
+      writeFileSync(join(dirNuevo, D), contenidoLimpio);
+
+      // Control positivo PRIMERO (mismos 13 archivos, data.js todavía sin ataque): el enlace
+      // tiene que dar "✔ solo datos" con status 0. Sin este control, un status != 0 contra el
+      // ataque de abajo podría ser un crash cualquiera (p. ej. MODULE_NOT_FOUND de
+      // @babel/parser) en vez de la detección real — ambos casos dan "status != 0 y sin ✔
+      // solo datos" por igual.
+      const rLimpio = spawnSync(process.execPath, [enlace, dirBase, dirNuevo], { encoding: 'utf8' });
+      assert.equal(rLimpio.status, 0, `status=${rLimpio.status} stdout=${rLimpio.stdout} stderr=${rLimpio.stderr}`);
+      assert.match(rLimpio.stdout, /✔ solo datos/, `stdout=${rLimpio.stdout}`);
+
+      writeFileSync(join(dirNuevo, D), 'const X = [\n  mk(1, "a"),\n  fetch(1),\n];\n');
+      const r = spawnSync(process.execPath, [enlace, dirBase, dirNuevo], { encoding: 'utf8' });
+      assert.notEqual(r.status, 0, `status=${r.status} stdout=${r.stdout} stderr=${r.stderr}`);
+      assert.ok(!r.stdout.includes('✔ solo datos'), `stdout=${r.stdout}`);
+      // No se exige un mensaje concreto (fetch(1) agregado a un array dispara la capa de
+      // esqueleto, "la estructura del código cambió", no la de tokens) — solo que señale el
+      // archivo real y no una traza de otra cosa (p. ej. MODULE_NOT_FOUND).
+      assert.match(r.stderr, /data\.js/, `debe señalar data.js, no tronar por otra razón: stderr=${r.stderr}`);
+    } finally {
+      rmSync(dirBase, { recursive: true, force: true });
+      rmSync(dirNuevo, { recursive: true, force: true });
+    }
+  } finally {
+    rmSync(dirEnlaces, { recursive: true, force: true });
+  }
+});
+
+test('Fase 1b (ronda 1) #3: el CLI sin exactamente 2 argumentos sale con status 2 (uso)', () => {
+  const scriptReal = join(process.cwd(), 'scripts', 'dcam', 'validar-parche.mjs');
+  const sinArgs = spawnSync(process.execPath, [scriptReal], { encoding: 'utf8' });
+  assert.equal(sinArgs.status, 2, `status=${sinArgs.status} stdout=${sinArgs.stdout} stderr=${sinArgs.stderr}`);
+  const unArgDeMas = spawnSync(process.execPath, [scriptReal, 'a', 'b', 'c'], { encoding: 'utf8' });
+  assert.equal(unArgDeMas.status, 2, `status=${unArgDeMas.status} stdout=${unArgDeMas.stdout} stderr=${unArgDeMas.stderr}`);
 });
