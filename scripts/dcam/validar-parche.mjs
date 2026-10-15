@@ -24,25 +24,26 @@ const MAPEOS = new Set(CATS.map((c) => `mapeo-${c}.json`));
 export const PERMITIDOS = new Set([...JS, ...LIGAS, ...REFS, ...MAPEOS]);
 // Callees permitidos, POR ARCHIVO (ronda 2: antes era una sola lista global y `_mh*` quedaba
 // "permitido" en los 4 .js aunque solo existe en data-municiones.js — minor de la revisión).
-// mk/mun: constructores de ficha de data.js/data-municiones.js. `_mh*`: helpers locales que
-// data-municiones.js define y usa en MUNICIONES_PRICE_HISTORY para no repetir fecha/manualId
-// en cada renglón (p. ej. `_mh18s(8.96, 966)`); decenas de renglones los llaman con los
-// MISMOS literales que un renglón de otra ficha distinta, y el diff de tokens (Myers, vía
-// `git diff`) puede emparejar por error una ocurrencia sin tocar de un lado con otra sin
-// tocar del otro cuando hay tanta repetición exacta — hallazgo real del parche del
-// 07-oct-2026 (#364). Permitirlos como llamada (con argumentos literales) es seguro: son
-// funciones fijas ya auditadas, no redefinibles por un parche de datos. data-accesorios.js
-// escribe cada ficha como OBJETO LITERAL (no hay función `acc`) y data-precios.js solo
-// reasigna los mapas `window.AMX_ARMAS_*` (object literal también): ninguno de los dos
-// necesita ningún callee permitido — confirmado con `grep` contra los 4 archivos reales.
+// mk/mun/amx: constructores de ficha de data.js/data-municiones.js/data-accesorios.js.
+// `_mh*`/`_h`: helpers locales que cada archivo define y usa en su historial de precios para
+// no repetir fecha/manualId en cada renglón (p. ej. `_mh18s(8.96, 966)`, `_h(S25, 613.96,
+// S25d, 4)`); decenas de renglones los llaman con los MISMOS literales que un renglón de otra
+// ficha distinta, y el diff de tokens (Myers, vía `git diff`) puede emparejar por error una
+// ocurrencia sin tocar de un lado con otra sin tocar del otro cuando hay tanta repetición
+// exacta — hallazgo real del parche del 07-oct-2026 (#364). Permitirlos como llamada (con
+// argumentos literales) es seguro: son funciones fijas ya auditadas, no redefinibles por un
+// parche de datos. data-precios.js solo reasigna los mapas `window.AMX_ARMAS_*` (objeto
+// literal): no necesita ningún callee permitido.
+// Ronda 3 (Important de la re-revisión): el comentario anterior decía que data-accesorios.js
+// "escribe cada ficha como objeto literal (no hay función acc)" y por eso no necesitaba
+// ningún callee — FALSO: la ficha SÍ se construye con una función, `amx` (data-accesorios.js
+// :285, 30 llamadas). Se me pasó porque solo grepeé `acc(` y `function _xxx(`, nunca
+// `const amx = (`. Sin `amx` en la lista, añadir una ficha de accesorio NUEVA o cambiar el
+// precio de una existente rechazaba por "la estructura del código cambió".
 export const CALLABLES_POR_ARCHIVO = {
   'src/data/data.js': new Set(['mk']),
   'src/data/data-municiones.js': new Set(['mun', '_mh', '_mh14', '_mh15', '_mh18', '_mh18s', '_mh22', '_mh25', '_mhj', '_mhl', '_mhs']),
-  // `_h` (data-accesorios.js:720) es el equivalente de `_mh*` para ACCESORIOS_PRICE_HISTORY
-  // — hallazgo real al validar contra el parche del 13-oct-2026 (#369): sin él, CUALQUIER
-  // ficha de accesorio con historial se vuelve "código" porque el array completo deja de
-  // ser dato puro (un elemento `_h(...)` no permitido basta para contagiar al resto).
-  'src/data/data-accesorios.js': new Set(['_h']),
+  'src/data/data-accesorios.js': new Set(['amx', '_h']),
   'src/data/data-precios.js': new Set(),
 };
 const PUNTOS = new Set(['{', '}', '[', ']', ',', ':', '...', '(', ')', ';']);
@@ -99,12 +100,12 @@ function diferenciaDeTokens(toksBase, toksNuevo, src1, src2) {
     writeFileSync(pNuevo, serializarTokens(src2, toksNuevo));
     let salida, status;
     try {
-      salida = execFileSync('git', ['-c', 'core.attributesFile=', 'diff', '--no-index', '--text', '-U0', '--no-color', '--no-ext-diff', 'base.tok', 'nuevo.tok'], {
+      salida = execFileSync('git', ['-c', 'core.attributesFile=', 'diff', '--no-index', '--text', '--no-textconv', '-U0', '--no-color', '--no-ext-diff', 'base.tok', 'nuevo.tok'], {
         cwd: dir,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
         maxBuffer: 256 * 1024 * 1024,
-        env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: pGitConfigVacio, HOME: dir, USERPROFILE: dir },
+        env: { ...process.env, GIT_CONFIG_NOSYSTEM: '1', GIT_CONFIG_GLOBAL: pGitConfigVacio, GIT_ATTR_NOSYSTEM: '1', HOME: dir, USERPROFILE: dir },
       });
       status = 0;
     } catch (e) {
@@ -171,17 +172,50 @@ function revisarToken(src, toks, i, ruta, callables) {
 // un alias de un literal fijo que el solucionador NUNCA toca (una declaración nueva sí
 // cambiaría la estructura del Program y los tokens: `const`/el nombre nuevo no pasarían
 // las otras dos capas).
-function constantesLiterales(cuerpoPrograma) {
-  const nombres = new Set();
+// Ronda 3 (Minor #4 + hallazgos 1f/1g de la re-revisión): exige `const` (no `let`/`var` —
+// antes se colaba un `let` reasignado) y, además, descarta cualquier nombre que vuelva a
+// aparecer en CUALQUIER OTRO lugar del archivo como parámetro de función, declarador
+// anidado o blanco de una asignación/incremento. No resuelve ámbitos de verdad (no hace
+// falta: es barato y conservador) — si el nombre se toca de cualquier otra forma, en ESE
+// punto puede no ser el literal de arriba, así que nunca se trata como dato puro.
+function constantesLiterales(programa) {
   const esLiteral = (t) => t === 'StringLiteral' || t === 'NumericLiteral' || t === 'NullLiteral' || t === 'BooleanLiteral';
-  for (const st of cuerpoPrograma) {
-    if (st.type !== 'VariableDeclaration') continue;
+  const declaradoresTope = new Set();
+  const nombres = new Set();
+  for (const st of programa.body) {
+    if (st.type !== 'VariableDeclaration' || st.kind !== 'const') continue;
     for (const d of st.declarations) {
+      declaradoresTope.add(d);
       if (d.id.type === 'Identifier' && d.init && esLiteral(d.init.type)) nombres.add(d.id.name);
     }
   }
+
+  const inseguros = new Set();
+  const marcarParam = (p) => {
+    if (!p) return;
+    if (p.type === 'Identifier') inseguros.add(p.name);
+    else if (p.type === 'AssignmentPattern') marcarParam(p.left);
+    else if (p.type === 'RestElement') marcarParam(p.argument);
+  };
+  (function walk(n) {
+    if (!n || typeof n !== 'object') return;
+    if (Array.isArray(n)) { n.forEach(walk); return; }
+    if (typeof n.type !== 'string') return;
+    if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') (n.params || []).forEach(marcarParam);
+    if (n.type === 'VariableDeclarator' && !declaradoresTope.has(n) && n.id.type === 'Identifier') inseguros.add(n.id.name);
+    if (n.type === 'AssignmentExpression' && n.left.type === 'Identifier') inseguros.add(n.left.name);
+    if (n.type === 'UpdateExpression' && n.argument.type === 'Identifier') inseguros.add(n.argument.name);
+    for (const k of VISITOR_KEYS[n.type] || []) walk(n[k]);
+  })(programa);
+
+  for (const n of inseguros) nombres.delete(n);
   return nombres;
 }
+
+// Nunca son dato puro como CLAVE de un objeto (ronda 3, endurecimiento #6): envenenar el
+// prototipo no añade ningún token "peligroso" por sí solo si el valor también es literal,
+// pero no tiene ningún motivo legítimo en una ficha de datos.
+const CLAVES_PELIGROSAS = new Set(['__proto__', 'constructor', 'prototype']);
 
 // ¿Es `node` un nodo de datos puros? Recursivo. Un literal suelto NUNCA cuenta como "nodo
 // sustituible" por sí mismo (eso lo decide serializarEsqueleto: solo Array/Object/Call);
@@ -206,7 +240,12 @@ export function esDatoPuro(node, src, callables, constantes) {
         if (p.type === 'SpreadElement') return esDatoPuro(p.argument, src, callables, constantes);
         if (p.type !== 'ObjectProperty' || p.computed) return false;
         const k = p.key;
-        if (k.type !== 'Identifier' && k.type !== 'StringLiteral' && k.type !== 'NumericLiteral') return false;
+        let nombreClave;
+        if (k.type === 'Identifier') nombreClave = k.name;
+        else if (k.type === 'StringLiteral') nombreClave = k.value;
+        else if (k.type === 'NumericLiteral') nombreClave = String(k.value);
+        else return false;
+        if (CLAVES_PELIGROSAS.has(nombreClave)) return false;
         return esDatoPuro(p.value, src, callables, constantes);
       });
     case 'CallExpression':
@@ -219,26 +258,44 @@ export function esDatoPuro(node, src, callables, constantes) {
 
 const SUSTITUIBLES = new Set(['ArrayExpression', 'ObjectExpression', 'CallExpression']);
 
-// Serializa el AST completo a una cadena canónica: tipo de nodo, nombres de identificador,
-// operadores y valor de los literales que queden EN POSICIÓN DE CÓDIGO (no sustituidos) —
-// nunca posiciones/loc/comentarios (los comentarios ya los exige iguales el chequeo de
-// arriba). Recorre los hijos en el orden fijo de `VISITOR_KEYS` (de @babel/types — la misma
-// tabla que usa @babel/traverse; no reinventa un recorrido propio nodo por nodo).
+// Campos que nunca entran en el esqueleto: posición/rango, y metadatos de comentarios (esos
+// ya los exige iguales el chequeo de arriba, byte a byte, en otro lado).
+const IGNORAR_CAMPOS = new Set(['type', 'start', 'end', 'loc', 'range', 'extra', 'leadingComments', 'trailingComments', 'innerComments', 'comments', 'tokens', 'errors']);
+
+// Serializa el AST completo a una cadena canónica: tipo de nodo, TODO campo propio de valor
+// primitivo (string/number/boolean/null — cubre `computed`, `shorthand`, `kind`, `async`,
+// `generator`, `prefix`, `method`, `static`, `operator`, el valor de cualquier literal,
+// `pattern`/`flags`…) y los nodos-hijo en el orden fijo de `VISITOR_KEYS` (de @babel/types —
+// la misma tabla que usa @babel/traverse; no reinventa un recorrido propio nodo por nodo).
+// Ronda 3 (Critical de la re-revisión): la versión anterior solo guardaba `operator` y un
+// puñado de campos a mano — se le escapaba `computed` (entre otros), así que
+// `{ k: v }` -> `{ [k]: v }` (clave normal -> clave computada) salía con el MISMO esqueleto,
+// porque los únicos tokens nuevos (`[`/`]`) son puntuación permitida. Serializar TODO campo
+// escalar propio, genérico por `Object.keys` menos la lista de ignorados, cierra esa familia
+// entera de una vez (no solo `computed`) sin tener que enumerar cada caso a mano.
 export function serializarEsqueleto(node, src, callables, constantes) {
   if (node == null) return 'null';
   if (Array.isArray(node)) return `[${node.map((n) => serializarEsqueleto(n, src, callables, constantes)).join(',')}]`;
   if (typeof node.type !== 'string') return 'null'; // campos no-nodo (p. ej. un booleano suelto)
 
-  if (SUSTITUIBLES.has(node.type) && esDatoPuro(node, src, callables, constantes)) return 'D';
+  // Marcador con el TIPO de nodo (Minor #2): sin esto, `[1, 2]` sustituido por `mk(1, 2)` o
+  // por `{ length: 9 }` salían con el mismo "D" — un dato puro de otra FORMA ya no es
+  // intercambiable en el esqueleto aunque ambos sean "puros".
+  if (SUSTITUIBLES.has(node.type) && esDatoPuro(node, src, callables, constantes)) return 'D:' + node.type;
 
+  const vk = VISITOR_KEYS[node.type] || [];
+  const vkSet = new Set(vk);
   const partes = [node.type];
-  if (node.type === 'Identifier') partes.push(node.name);
-  else if (node.type === 'StringLiteral') partes.push(JSON.stringify(src.slice(node.start, node.end)));
-  else if (node.type === 'NumericLiteral' || node.type === 'BooleanLiteral') partes.push(String(node.value));
-  else if ('operator' in node) partes.push(node.operator);
-  else if (node.type === 'MemberExpression' || node.type === 'OptionalMemberExpression') partes.push(node.computed ? 'computado' : 'estatico');
+  for (const campo of Object.keys(node).filter((k) => !IGNORAR_CAMPOS.has(k) && !vkSet.has(k)).sort()) {
+    const v = node[campo];
+    // Nodo (o arreglo de nodos) que VISITOR_KEYS no catalogó para este tipo: no debería
+    // pasar (verificado contra los 4 archivos reales), pero por si acaso se recorre igual
+    // en vez de ignorarlo en silencio.
+    const esNodo = v && typeof v === 'object' && (typeof v.type === 'string' || (Array.isArray(v) && v.some((x) => x && typeof x.type === 'string')));
+    partes.push(`${campo}=${esNodo ? serializarEsqueleto(v, src, callables, constantes) : JSON.stringify(v)}`);
+  }
 
-  for (const campo of VISITOR_KEYS[node.type] || []) partes.push(serializarEsqueleto(node[campo], src, callables, constantes));
+  for (const campo of vk) partes.push(serializarEsqueleto(node[campo], src, callables, constantes));
   return partes.join('\u0001');
 }
 
@@ -254,8 +311,8 @@ function compararJS(ruta, base, nuevo) {
   }
 
   const callables = CALLABLES_POR_ARCHIVO[ruta] || new Set();
-  const esqB = serializarEsqueleto(astBase.program, base, callables, constantesLiterales(astBase.program.body));
-  const esqN = serializarEsqueleto(astNuevo.program, nuevo, callables, constantesLiterales(astNuevo.program.body));
+  const esqB = serializarEsqueleto(astBase.program, base, callables, constantesLiterales(astBase.program));
+  const esqN = serializarEsqueleto(astNuevo.program, nuevo, callables, constantesLiterales(astNuevo.program));
   if (esqB !== esqN) return [`${ruta}: la estructura del código cambió`];
 
   const toksBase = astBase.tokens.filter((t) => t.loc && tipo(t) !== 'eof');
@@ -352,6 +409,18 @@ export function compararArchivo(ruta, base, nuevo) {
   return compararJS(ruta, base, nuevo);
 }
 
+// Minor #5 (re-revisión): sin git en PATH (u otro fallo real de `diferenciaDeTokens`),
+// `compararArchivo` deja pasar la excepción (`spawnSync git ENOENT`) y el CLI terminaba en
+// una traza en vez de un problema limpio. Nunca deja pasar una excepción sin convertir:
+// fail-closed (problema, salida 1), nunca "sin problemas" por accidente.
+export function compararArchivoSeguro(ruta, base, nuevo) {
+  try {
+    return compararArchivo(ruta, base, nuevo);
+  } catch (e) {
+    return [`${ruta}: no se pudo validar (${e.message})`];
+  }
+}
+
 // Comprobaciones que solo tienen sentido contra archivos reales en disco (la CLI las usa
 // antes de leer contenido; expuestas aparte para poder probarlas con directorios de verdad).
 export function verificarArchivoEnNuevo(dirNuevo, ruta) {
@@ -368,13 +437,17 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
   if (!dirBase || !dirNuevo) { console.error('uso: validar-parche.mjs <dir-base> <dir-nuevo>'); process.exit(1); }
   const problemas = [];
   for (const ruta of [...PERMITIDOS].sort()) {
-    const probsExistencia = verificarArchivoEnNuevo(dirNuevo, ruta);
-    if (probsExistencia.length) { problemas.push(...probsExistencia); continue; }
-    const nuevoBuf = readFileSync(join(dirNuevo, ruta));
-    let baseBuf;
-    try { baseBuf = readFileSync(join(dirBase, ruta)); } catch { baseBuf = Buffer.alloc(0); }
-    if (baseBuf.equals(nuevoBuf)) continue;
-    problemas.push(...compararArchivo(ruta, baseBuf.toString('utf8'), nuevoBuf.toString('utf8')));
+    try {
+      const probsExistencia = verificarArchivoEnNuevo(dirNuevo, ruta);
+      if (probsExistencia.length) { problemas.push(...probsExistencia); continue; }
+      const nuevoBuf = readFileSync(join(dirNuevo, ruta));
+      let baseBuf;
+      try { baseBuf = readFileSync(join(dirBase, ruta)); } catch { baseBuf = Buffer.alloc(0); }
+      if (baseBuf.equals(nuevoBuf)) continue;
+      problemas.push(...compararArchivoSeguro(ruta, baseBuf.toString('utf8'), nuevoBuf.toString('utf8')));
+    } catch (e) {
+      problemas.push(`${ruta}: no se pudo validar (${e.message})`);
+    }
   }
   if (problemas.length) { console.error(problemas.join('\n')); process.exit(1); }
   console.log('✔ solo datos');

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
-import { compararArchivo, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES } from './validar-parche.mjs';
+import { compararArchivo, compararArchivoSeguro, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES } from './validar-parche.mjs';
 
 const D = 'src/data/data.js';
 const base = 'const X = [\n  mk(1, "A", "M"),\n];\nwindow.DB.forEach(a => a);\n';
@@ -296,4 +296,86 @@ test('referencia: una fila con un campo extra o un tipo equivocado se rechaza', 
   assert.ok(compararArchivo(r, '{}', JSON.stringify(conExtra)).length > 0);
   const tipoMalo = { ...base, rows: [{ ...base.rows[0], fichaId: '52' }] };
   assert.ok(compararArchivo(r, '{}', JSON.stringify(tipoMalo)).length > 0);
+});
+
+// --- Ronda de arreglo 3: clave computada no serializada, callees de accesorios, etc. ---
+
+test('esqueleto: clave computada en el archivo REAL de accesorios se rechaza (4a de la re-revisión)', () => {
+  const ACC = 'src/data/data-accesorios.js';
+  const real = readFileSync(ACC, 'utf8');
+  const objetivo = '({ manualId: mid,';
+  assert.ok(real.includes(objetivo), 'el patrón real de _h cambió; ajustar el test');
+  const nuevo = real.replace(objetivo, '({ [manualId]: mid,');
+  assert.ok(compararArchivo(ACC, real, nuevo).length > 0);
+});
+
+test('esqueleto: clave computada sintética { textContent: v } -> { [textContent]: v } se rechaza (4c)', () => {
+  const b = 'const textContent = "innerHTML";\nconst v = location.hash;\nObject.assign(document.body, { textContent: v });\n';
+  const n = b.replace('{ textContent: v }', '{ [textContent]: v }');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('esqueleto: una directiva cambiada ("use strict" -> "use strixt") se rechaza (4f)', () => {
+  const b = '"use strict";\nwindow.X = [mk(1, "a", "M")];\n';
+  const n = b.replace('"use strict"', '"use strixt"');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('marcador D lleva el tipo de nodo: un array de datos no es intercambiable con una llamada o un objeto (Minor #2)', () => {
+  const b1 = 'window.X = [1, 2];\nwindow.X.forEach(f);\n';
+  const n1 = b1.replace('[1, 2]', 'mk(1, 2)');
+  assert.ok(compararArchivo(D, b1, n1).length > 0);
+
+  const b2 = 'window.X = [1, 2];\nfor (let i = 0; i < window.X.length; i++) g(window.X[i]);\n';
+  const n2 = b2.replace('[1, 2]', '{ length: 9 }');
+  assert.ok(compararArchivo(D, b2, n2).length > 0);
+});
+
+test('callees: amx es el constructor de ficha de data-accesorios.js (Important #3, antes faltaba)', () => {
+  const ACC = 'src/data/data-accesorios.js';
+  const real = readFileSync(ACC, 'utf8');
+  // Añadir una ficha nueva con literales debe pasar.
+  const objetivoAlta = "  amx(102, ";
+  assert.ok(real.includes(objetivoAlta), 'el patrón real de amx cambió; ajustar el test');
+  const conAlta = real.replace(objetivoAlta, "  amx(9999, 'Nuevo', 'M', 'EUA', 'cargadores', 'dcam', 1.5, null, {}, {}, 'x'),\n  amx(102, ");
+  assert.deepEqual(compararArchivo(ACC, real, conAlta), []);
+  // Cambiar el precio de una ficha amx existente debe pasar.
+  const objetivoPrecio = "'cargadores', 'dcam', 590.63,";
+  assert.ok(real.includes(objetivoPrecio), 'el precio real cambió; ajustar el test');
+  const conPrecio = real.replace(objetivoPrecio, "'cargadores', 'dcam', 600.01,");
+  assert.deepEqual(compararArchivo(ACC, real, conPrecio), []);
+});
+
+test('constantesLiterales exige `const` — un `let` nunca cuenta como dato puro (Minor #4)', () => {
+  const b = "let K = 'x';\nK = location.hash;\nwindow.R = [K, 1];\n";
+  const n = b.replace('[K, 1]', '[K, 2]');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('constantesLiterales ignora un nombre que se sombrea como parámetro en otro lado del archivo', () => {
+  const b = "const S25 = 'x';\nfunction f(S25) { return [S25, 1]; }\nwindow.R = f(location.hash);\n";
+  const n = b.replace('[S25, 1]', '[S25, 2]');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('datos puros: una clave __proto__/constructor/prototype se rechaza aunque el valor sea literal (endurecimiento #6)', () => {
+  const b = 'const X = [\n  mk(1, "a"),\n];\n';
+  const n = b.replace('];', '  mk(2, { "__proto__": { "x": 1 } }),\n];');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('compararArchivoSeguro convierte cualquier excepción (p. ej. git ausente) en un problema, nunca una traza (Minor #5)', () => {
+  const b = 'const X = [\n  mk(1, "A", "M"),\n];\n';
+  const n = b.replace('];', '  mk(2, "B", "M"),\n];');
+  const pathOriginal = process.env.PATH;
+  try {
+    // Sin git en PATH, diferenciaDeTokens debe fallar con una excepción real (no "sin
+    // diferencias"); compararArchivoSeguro debe atraparla y devolver un problema, no tronar.
+    process.env.PATH = '';
+    const probs = compararArchivoSeguro(D, b, n);
+    assert.ok(probs.length > 0);
+    assert.match(probs[0], /no se pudo validar/);
+  } finally {
+    process.env.PATH = pathOriginal;
+  }
 });
