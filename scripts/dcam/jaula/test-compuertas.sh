@@ -150,6 +150,95 @@ else
 fi
 rm -rf "$J"
 
+# --- (f) timeout real (ronda de arreglo 1/5, punto 2): un dentro.sh falso que
+#     duerme mucho más que el timeout de prueba -> tras salir, NINGÚN contenedor
+#     dcam-solucionador-* sigue vivo. `timeout` por sí solo solo mata al cliente
+#     `docker`, nunca al contenedor — esto prueba que el `--name` + `docker rm -f`
+#     del trap de `solucionar.sh` sí lo hace. ---
+MAIN_LENTO="$TMP/main-lento"
+cp -a "$MAIN" "$MAIN_LENTO"
+cat > "$MAIN_LENTO/scripts/dcam/jaula/dentro.sh" <<'EOF'
+#!/usr/bin/env bash
+sleep 300
+EOF
+W_F="$TMP/w-f"
+mkdir -p "$W_F"
+echo "motivo de prueba" > "$W_F/motivo.txt"
+echo "prompt de prueba" > "$W_F/prompt.txt"
+set +e
+SOLUCIONADOR_TIMEOUT=3s SOLUCIONADOR_KILL_AFTER=2 \
+  timeout 90 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_F" "$MAIN_LENTO" >/dev/null 2>"$TMP/log-f.txt"
+RC_F=$?
+set -e
+sleep 2  # margen para que el daemon de Docker termine de limpiar tras el SIGKILL
+RESTANTES_F="$(docker ps -a --filter "name=dcam-solucionador-${FECHA_ISO}" -q)"
+if [ "$RC_F" -eq 124 ]; then
+  mal "(f) timeout: el timeout de la PRUEBA (90s) venció — solucionar.sh no terminó ni con su propio timeout interno"
+elif [ -n "$RESTANTES_F" ]; then
+  mal "(f) timeout: quedó un contenedor dcam-solucionador-* corriendo tras el timeout interno"
+else
+  ok "(f) timeout: ningún contenedor dcam-solucionador-* quedó corriendo tras el timeout interno (solucionar.sh RC=$RC_F)"
+fi
+rm -rf "$W_F" "$MAIN_LENTO"
+
+# --- (g) solucion.json como FIFO (ronda de arreglo 1/5, punto 3): no debe
+#     colgar las compuertas (verificar-cierre.py, dentro del contenedor, abriría
+#     el FIFO y se quedaría esperando para siempre con el flock del pipeline
+#     tomado) — debe rechazar rápido, sin commit. ---
+ANTES="$(sha_head)"
+J="$(jaula_desde_rama)"
+node -e '
+  const fs = require("fs");
+  const p = process.argv[1];
+  let s = fs.readFileSync(p, "utf8");
+  if (!s.includes("1020mm")) { console.error("no encontré 1020mm en " + p); process.exit(1); }
+  s = s.replace("1020mm", "1021mm");
+  fs.writeFileSync(p, s);
+' "$J/src/data/data.js"
+mkdir -p "$WORKDIR/salida"
+rm -f "$WORKDIR/salida/solucion.json"
+mkfifo "$WORKDIR/salida/solucion.json"
+set +e
+timeout 60 "$COMPUERTAS" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$J" "$MAIN" >"$TMP/log-g.txt" 2>&1
+RC_G=$?
+set -e
+DESPUES="$(sha_head)"
+if [ "$RC_G" -eq 124 ]; then
+  mal "(g) FIFO en solucion.json: compuertas.sh SE COLGÓ (lo mató el timeout de la prueba, 60s)"
+elif [ "$DESPUES" != "$ANTES" ]; then
+  mal "(g) FIFO en solucion.json: compuertas.sh commiteó, no debía"
+else
+  ok "(g) FIFO en solucion.json: no se colgó, rechazó rápido y sin commit (RC=$RC_G)"
+fi
+rm -f "$WORKDIR/salida/solucion.json"
+rm -rf "$J"
+
+# --- (h) un data.js con +x dentro de la jaula no debe llegar +x al commit real
+#     (ronda de arreglo 1/5, punto 6: antes `cp --preserve=mode` lo arrastraba) ---
+ANTES="$(sha_head)"
+J="$(jaula_desde_rama)"
+node -e '
+  const fs = require("fs");
+  const p = process.argv[1];
+  let s = fs.readFileSync(p, "utf8");
+  if (!s.includes("2851g")) { console.error("no encontré 2851g en " + p + " (se esperaba tras el caso (a))"); process.exit(1); }
+  s = s.replace("2851g", "2852g");
+  fs.writeFileSync(p, s);
+' "$J/src/data/data.js"
+chmod +x "$J/src/data/data.js"
+if correr "$J" >"$TMP/log-h.txt" 2>&1; then
+  MODO_FINAL="$(git -C "$DCAM_DIR/repo" ls-files -s src/data/data.js | awk '{print $1}')"
+  if [ "$MODO_FINAL" = "100644" ]; then
+    ok "(h) data.js +x en la jaula: el commit real queda en 100644, no 100755"
+  else
+    mal "(h) data.js +x en la jaula: el commit quedó en modo $MODO_FINAL (se esperaba 100644)"
+  fi
+else
+  mal "(h) data.js +x en la jaula: compuertas.sh rechazó un cambio legítimo (ver $TMP/log-h.txt)"
+  tail -20 "$TMP/log-h.txt"
+fi
+rm -rf "$J"
+
 echo "=================================================="
 if [ "$FALLOS" -eq 0 ]; then
   echo "test-compuertas.sh: TODO OK"

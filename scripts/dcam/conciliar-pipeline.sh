@@ -25,7 +25,7 @@
 # Cada paso commitea y pushea: si algo falla, lo anterior ya está en el PR.
 set -uo pipefail
 
-DCAM_DIR="${DCAM_DIR:-/home/saulo/apps/dcam-bot}"
+export DCAM_DIR="${DCAM_DIR:-/home/saulo/apps/dcam-bot}"
 REPO="$DCAM_DIR/repo"
 SENAL="$DCAM_DIR/pendiente-conciliar.json"
 LOCK="$DCAM_DIR/conciliar.lock"
@@ -280,6 +280,61 @@ step_altas() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# CIERRE DE ÉXITO — común a los dos caminos: el cierre normal (step_audit, tras
+# auditar.js/npm test/verificar-cierre.py en el host) y el de la jaula (tras
+# compuertas.sh, que ya corrió las mismas compuertas dentro del contenedor). Ronda
+# de arreglo 1/5 (C1): antes el camino de la jaula solo hacía push+aviso+borrar
+# señal, sin esta cola — ni actualizaba referencia-*.json, ni corría `gh pr ready`.
+# Esta función NUNCA vuelve a correr auditar.js/npm test: eso ya pasó (en el host
+# para el camino normal, dentro del contenedor para el de la jaula).
+# ═══════════════════════════════════════════════════════════════════════════════
+cerrar_exito() {
+  if [ -f "$WORKDIR/armas.json" ]; then
+    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
+      --ligas "$SCRIPTS/ligas-armas.json" --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+  fi
+  if [ -f "$WORKDIR/cartuchos.json" ]; then
+    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
+      --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
+      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+  fi
+  if [ -f "$WORKDIR/accesorios.json" ]; then
+    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
+      --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
+      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+  fi
+
+  git add -A
+  git commit -m "audit: ✔✔ + refs actualizadas $FECHA" --quiet 2>>"$LOG" || true
+  # Se revisa el código de salida (a diferencia de los pasos 0-2): aquí hay un
+  # commit real — de datos resueltos por la jaula, o de referencias actualizadas
+  # — que nadie más va a reintentar solo si el push se pierde en silencio.
+  git push origin "$RAMA" --quiet 2>>"$LOG" || falla "cerrar_exito: el push de la rama falló"
+
+  # Mark PR ready
+  PR_URL="$(gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[0].url' 2>/dev/null)"
+  if [ -n "$PR_URL" ]; then
+    gh pr ready "$PR_URL" --repo "$GH_REPO" 2>>"$LOG" || true
+    log "  PR marcado ready: $PR_URL"
+  fi
+
+  rm -f "$SENAL"
+}
+
+# Borra una carpeta que puede contener archivos/directorios creados por el uid
+# 10001 DENTRO de un contenedor (p. ej. $JAULA/repo, $W/salida): un `rm -rf` del
+# host (usuario distinto, sin root) puede no poder atravesar un directorio que
+# ese uid creó con 700 durante la corrida. Se borra el CONTENIDO desde dentro,
+# con un contenedor efímero del mismo uid (que sí es dueño), y luego el host
+# borra la carpeta ya vacía (que sí es suya: la creó `mktemp -d`).
+limpiar_jaula() {
+  local dir="$1"
+  [ -n "$dir" ] && [ -d "$dir" ] || return 0
+  docker run --rm --init -v "$dir:/x" dcam-jaula:1 sh -c 'rm -rf /x/* /x/.[!.]* 2>/dev/null' >/dev/null 2>&1 || true
+  rm -rf "$dir" 2>/dev/null || true
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # STEP 4: AUDIT + CLOSE
 # ═══════════════════════════════════════════════════════════════════════════════
 step_audit() {
@@ -325,34 +380,7 @@ step_audit() {
   fi
   log "  cierre verificado ✔"
 
-  # Update references
-  if [ -f "$WORKDIR/armas.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
-      --ligas "$SCRIPTS/ligas-armas.json" --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-  if [ -f "$WORKDIR/cartuchos.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
-      --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
-      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-  if [ -f "$WORKDIR/accesorios.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
-      --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
-      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-
-  git add -A
-  git commit -m "audit: ✔✔ + refs actualizadas $FECHA" --quiet 2>>"$LOG" || true
-  git push origin "$RAMA" --quiet 2>>"$LOG"
-
-  # Mark PR ready
-  PR_URL="$(gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[0].url' 2>/dev/null)"
-  if [ -n "$PR_URL" ]; then
-    gh pr ready "$PR_URL" --repo "$GH_REPO" 2>>"$LOG" || true
-    log "  PR marcado ready: $PR_URL"
-  fi
-
-  rm -f "$SENAL"
+  cerrar_exito
   log "paso 4 OK — pipeline completo"
 }
 
@@ -377,6 +405,10 @@ fi
 
 log "paso $STEP falló (${MOTIVO:-sin motivo}) — intento solucionador (jaula)"
 
+# Vacía $WORKDIR/salida ANTES de lanzar la jaula: una corrida anterior fallida
+# pudo dejar algo ahí (incluido, en el peor caso, algo que no sea un archivo
+# regular) y esta carpeta es justo la que el agente controla por completo.
+rm -rf "$WORKDIR/salida"
 mkdir -p "$WORKDIR/salida"
 
 # El motivo es DATO para el agente, nunca instrucción.
@@ -403,24 +435,25 @@ fi
 JAULA_REPO="$(bash "$MAIN/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$MAIN")"
 JAULA_RC=$?
 if [ "$JAULA_RC" -ne 0 ] || [ -z "$JAULA_REPO" ]; then
-  [ -n "$JAULA_REPO" ] && rm -rf "$JAULA_REPO"
-  [ -n "$MAIN_TMP_DIR" ] && rm -rf "$MAIN_TMP_DIR"
+  [ -n "$JAULA_REPO" ] && limpiar_jaula "$(dirname "$JAULA_REPO")"
+  limpiar_jaula "$MAIN_TMP_DIR"
   falla "solucionador (jaula): el agente no produjo resultado"
 fi
 
+# SHA antes de compuertas.sh: así se puede distinguir "compuertas pasó y
+# commiteó" de "compuertas pasó pero no había nada que commitear" — ronda de
+# arreglo 1/5 (C1): este segundo caso avisaba «resolvió» sin haber resuelto nada.
+ANTES_SHA_JAULA="$(git -C "$REPO" rev-parse HEAD)"
 if ! bash "$MAIN/scripts/dcam/jaula/compuertas.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$JAULA_REPO" "$MAIN"; then
-  rm -rf "$JAULA_REPO" "$MAIN_TMP_DIR"
+  limpiar_jaula "$(dirname "$JAULA_REPO")"
+  limpiar_jaula "$MAIN_TMP_DIR"
   falla "solucionador (jaula): no pasó validación/compuertas"
 fi
-
-# Validación y compuertas pasaron: compuertas.sh ya dejó el commit (si hubo
-# cambios) en $REPO, sin push. Push de la RAMA del inventario — igual que
-# hacen los demás pasos del pipeline; nunca a main/develop. A diferencia del
-# resto del pipeline, SÍ se revisa el código de salida: aquí hay un commit
-# real que la jaula ayudó a producir y que nadie más va a reintentar solo.
-if ! git -C "$REPO" push origin "$RAMA" --quiet 2>>"$LOG"; then
-  rm -rf "$(dirname "$JAULA_REPO")" "$MAIN_TMP_DIR" 2>/dev/null
-  falla "solucionador (jaula): compuertas pasaron pero el push de la rama falló"
+DESPUES_SHA_JAULA="$(git -C "$REPO" rev-parse HEAD)"
+limpiar_jaula "$(dirname "$JAULA_REPO")"
+limpiar_jaula "$MAIN_TMP_DIR"
+if [ "$ANTES_SHA_JAULA" = "$DESPUES_SHA_JAULA" ]; then
+  falla "solucionador (jaula): la jaula no produjo cambios"
 fi
 
 # Aviso con SOLO contadores: nunca texto libre del agente ni URLs. solucion.json lo
@@ -440,12 +473,15 @@ resumen_seguro() {
   jq -r '"Ligas: \((.ligas // [])|length) · Altas: \((.altas // [])|length) · Pendientes: \((.pendiente // [])|length)"' \
     "$f" 2>/dev/null || echo "(sin solucion.json)"
 }
-telegram "🔧 Solucionador (jaula) resolvió $FECHA: $(resumen_seguro). Revisa la rama $RAMA."
-log "solucionador (jaula) OK: $(resumen_seguro)"
+RESUMEN="$(resumen_seguro)"
 
-# Limpieza: la carpeta padre de $JAULA_REPO es el mktemp -d de solucionar.sh.
-rm -rf "$(dirname "$JAULA_REPO")" "$MAIN_TMP_DIR"
-# Igual que el cierre normal del pipeline (paso 4): consume la señal para no
-# re-disparar sobre la misma corrida ya resuelta.
-rm -f "$SENAL"
+# compuertas.sh ya dejó el commit de datos en $REPO (sin push). La cola de
+# éxito es la MISMA que la del cierre normal (update-ref + commit de
+# referencias + push + gh pr ready + borrar señal) — nunca se vuelve a correr
+# auditar.js/npm test en el host, eso ya pasó dentro del contenedor.
+cerrar_exito
+
+telegram "🔧 Solucionador (jaula) resolvió $FECHA: $RESUMEN. Revisa la rama $RAMA."
+log "solucionador (jaula) OK: $RESUMEN"
+log "paso 4 OK — pipeline completo (jaula)"
 exit 0

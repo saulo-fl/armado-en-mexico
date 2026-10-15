@@ -48,7 +48,6 @@ Prefiere dejar algo sin resolver (y decirlo) a inventarlo.
 
 - Mergear, `gh pr ready`, push a main/develop, push forzado, tocar D1/Cloudflare.
   El guardia del repo lo bloquea; no intentes rodearlo.
-- Renombrar la señal (`pendiente-conciliar.json*`): relanza el pipeline.
 - Inventar specs de fabricante: si no las encuentras, deja el campo como lo dejan
   las altas mínimas del catálogo (`''`, `null`) y dilo.
 - Ajustar umbrales o compuertas para que algo pase.
@@ -75,7 +74,9 @@ Prefiere dejar algo sin resolver (y decirlo) a inventarlo.
    el paso 1 — no hace falta copiarlos a ningún otro lado).
 4. **Compuertas** (las mismas que corre el host después; no te fíes de ti):
    - `node /trabajo/repo/.claude/skills/conciliar-inventario/scripts/auditar.js | tail -1` → `✔✔ AUDITORÍA SIN HALLAZGOS`
-   - `npm test 2>&1 | grep -E '^ℹ (pass|fail)'` → `fail 0`
+   - `npm test 2>&1 | grep -E '^# (pass|fail)'` → `fail 0` (dentro de la jaula `node
+     --test` imprime el resumen en formato TAP, `# pass`/`# fail` — NUNCA `ℹ`, que es
+     el formato que usa Node en el host; con `ℹ` este grep no ve nada)
    - `/opt/venv/bin/python /trabajo/repo/.claude/skills/conciliar-inventario/scripts/verificar-cierre.py --workdir /trabajo/entrada --fecha <ISO> --solucion /trabajo/salida/solucion.json`
      → `✔ CIERRE VERIFICADO`. Un salto de precio > 3 % que no sea el aumento
      general solo pasa con su motivo en `solucion.json` → `saltos`; justifícalo con
@@ -109,8 +110,7 @@ Escribe `/trabajo/salida/solucion.json`:
   "altas": [{"cat": "cartuchos", "ficha": 2112, "nombre": "…", "precio": 11.79, "existencias": 3000, "motivo": "…"}],
   "correcciones": ["2101 dejaba de recibir el renglón de la Saga Sporting (…)"],
   "saltos": {"cartuchos:2066": "motivo con evidencia"},
-  "tooling": ["mapear-existencias.py: …"],
-  "pendiente": ["lo que no pudiste resolver y por qué"],
+  "pendiente": ["lo que no pudiste resolver y por qué (incluye fallos de código/tooling)"],
   "runbook": "propuesta opcional de texto para references/solucionador.md; Saulo decide si la añade"
 }
 ```

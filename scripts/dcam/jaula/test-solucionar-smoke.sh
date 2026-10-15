@@ -116,8 +116,14 @@ set -e
 [ "$RC" -eq 1 ] && [ -z "$OUT" ] && ok "(d2) rc=0 pero agente.json vacío/ausente -> exit 1, stdout vacío" \
   || mal "(d2) rc=0 sin agente.json: RC=$RC OUT='$OUT'"
 
-# limpieza de las $JAULA que este test sí creó (no son las del pipeline real)
+# Limpieza SOLO de la $JAULA que este test sí creó (ronda de arreglo 1/5, punto
+# 14): un `find /tmp -name 'dcam-jaula-*' ... -exec rm -rf` barría CUALQUIER
+# carpeta con ese prefijo — si esto se corre en APOLO mientras un pipeline real
+# está en medio de una corrida de verdad, le borraba la suya. Los únicos $JAULA
+# reales de este test son el de (c) (éxito, se queda y hay que limpiarlo a
+# mano) — los de (d)/(d2) ya los limpia el propio `solucionar.sh` en su camino
+# de fallo (ver el fix de huérfanos en ese script), así que no hay nada más que
+# rastrear ni borrar aquí.
 rm -rf "$JAULA_RUTA_C" 2>/dev/null || true
-find /tmp -maxdepth 1 -name 'dcam-jaula-*' -newer "$W/motivo.txt" -exec rm -rf {} + 2>/dev/null || true
 
 exit $FAIL

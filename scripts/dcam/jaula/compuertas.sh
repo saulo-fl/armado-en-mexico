@@ -24,12 +24,20 @@ fi
 FECHA_ISO="$1" RAMA="$2" W="$3" DIR_JAULA="$4" MAIN="$5"
 
 [[ "$FECHA_ISO" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || { echo "FECHA_ISO inválida (quiero AAAA-MM-DD): $FECHA_ISO" >&2; exit 2; }
-[[ "$RAMA" =~ ^auto/inventario-[A-Za-z0-9._/-]+$ ]] || { echo "RAMA inválida (quiero auto/inventario-<algo>): $RAMA" >&2; exit 2; }
+# Ronda de arreglo 1/5 (punto 11): misma regex estricta que solucionar.sh — antes
+# esta era más laxa (A-Za-z0-9._/-) y las dos podían aceptar ramas distintas.
+[[ "$RAMA" =~ ^auto/inventario-[0-9A-Z-]+$ ]] || { echo "RAMA inválida (quiero auto/inventario-<algo>): $RAMA" >&2; exit 2; }
 
 REPO="${DCAM_DIR:?fija DCAM_DIR (REPO=\$DCAM_DIR/repo, el checkout real de la rama en el host)}/repo"
 
 LIMPIO="$(mktemp -d "${TMPDIR:-/tmp}/dcam-compuertas-XXXXXX")"
-trap 'rm -rf "$LIMPIO"' EXIT
+# Nombre único del contenedor de compuertas: permite `docker rm -f` de respaldo
+# en el trap aunque el `timeout` del paso 8 solo mate al cliente `docker`, no al
+# contenedor en el daemon (ronda de arreglo 1/5, punto 2). Se referencia por
+# nombre de variable (comillas simples): bash la resuelve al valor que tenga EN
+# EL MOMENTO en que el trap de verdad se dispara, no al registrar el trap.
+NOMBRE_COMPUERTAS="dcam-compuertas-${FECHA_ISO}-$$"
+trap 'docker rm -f "$NOMBRE_COMPUERTAS" >/dev/null 2>&1 || true; rm -rf "$LIMPIO"' EXIT
 
 # $1 = directorio base, $2 = ruta relativa dentro de ese base.
 # Revisa el camino COMPLETO, no solo el último componente: `[ -L ]`/`[ ! -f ]` sobre
@@ -73,61 +81,123 @@ mapfile -t RUTAS <<< "$PERMITIDOS"
 for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
   if ruta_segura_bajo "$DIR_JAULA" "$ruta"; then
-    cp --no-dereference --preserve=mode "$DIR_JAULA/$ruta" "$LIMPIO/nuevo/$ruta"
+    # install -m 0644 (ronda de arreglo 1/5, punto 6): esta copia intermedia se
+    # pisa igual con `chmod -R a+rwX` más abajo, pero se deja consistente con la
+    # del paso 9 — nunca `--preserve=mode` en ninguna de las dos copias.
+    install -m 0644 "$DIR_JAULA/$ruta" "$LIMPIO/nuevo/$ruta"
   fi
 done
 
-# --- 6: el validador de MAIN decide, doble cinturón (exit 0 Y el texto exacto) ---
+# --- 6: el validador de MAIN decide, doble cinturón (exit 0 Y el texto exacto EN
+# STDOUT) --- Ronda de arreglo 1/5 (punto 12): antes se mezclaba stderr con `2>&1`
+# dentro de la misma variable que se greppeaba — un parche podría, en principio,
+# imprimir "✔ solo datos" por STDERR (p. ej. en un mensaje de error) y colarse.
+# Ahora stdout y stderr se capturan por separado; el texto exacto se exige SOLO
+# en stdout.
 set +e
-SALIDA_VALIDADOR="$(node "$MAIN/scripts/dcam/validar-parche.mjs" "$LIMPIO/base" "$LIMPIO/nuevo" 2>&1)"
+SALIDA_STDOUT="$(node "$MAIN/scripts/dcam/validar-parche.mjs" "$LIMPIO/base" "$LIMPIO/nuevo" 2>"$LIMPIO/validador.stderr")"
 EC_VALIDADOR=$?
 set -e
-if [ "$EC_VALIDADOR" -ne 0 ] || ! grep -qF '✔ solo datos' <<<"$SALIDA_VALIDADOR"; then
+if [ "$EC_VALIDADOR" -ne 0 ] || ! grep -qF '✔ solo datos' <<<"$SALIDA_STDOUT"; then
   echo "compuertas: el validador de parches rechazó el resultado (exit $EC_VALIDADOR):" >&2
-  echo "$SALIDA_VALIDADOR" >&2
+  echo "$SALIDA_STDOUT" >&2
+  cat "$LIMPIO/validador.stderr" >&2
   exit 1
 fi
 
-# --- 7 ---
+# --- 7: snapshot INMUTABLE de lo ya validado (ronda de arreglo 1/5, punto 8):
+# "lo commiteado = lo validado". A partir de aquí, `nuevo` queda libre para que
+# el contenedor de compuertas escriba lo que necesite (el symlink de
+# node_modules, cachés de npm/node --test, lo que sea) sin que eso pueda, ni por
+# accidente, cambiar un solo byte de lo que de verdad se va a commitear: eso
+# sale SIEMPRE de `validado`, nunca de `nuevo`.
+VALIDADO="$LIMPIO/validado"
+cp -a "$LIMPIO/nuevo" "$VALIDADO"
+
 chmod -R a+rwX "$LIMPIO/nuevo"
+
+# --- defensa contra solucion.json como FIFO/symlink/dispositivo (ronda de arreglo
+# 1/5, punto 3): `verificar-cierre.py`, DENTRO del contenedor, abre el archivo que
+# le pase `--solucion` sin comprobar su tipo. Si esa ruta fuera un FIFO, abrirlo se
+# QUEDA ESPERANDO a que alguien escriba del otro lado — con el `flock` del
+# pipeline tomado, eso cuelga la corrida entera (denegación de servicio real,
+# sembrada por el propio agente en una carpeta que él controla). El host SIEMPRE
+# copia (nunca monta directo) a una carpeta PROPIA antes de que el contenedor la
+# vea, y solo si es un archivo regular, sin enlaces, ≤ 1 MiB — si no, es FALLO.
+SALIDA_VALIDADA="$LIMPIO/salida-validada"
+mkdir -p "$SALIDA_VALIDADA"
+SOLUCION_ORIG="$W/salida/solucion.json"
+if [ -e "$SOLUCION_ORIG" ] || [ -L "$SOLUCION_ORIG" ]; then
+  if [ -L "$SOLUCION_ORIG" ] || [ ! -f "$SOLUCION_ORIG" ]; then
+    echo "compuertas: '$SOLUCION_ORIG' existe pero no es un archivo regular (symlink, FIFO u otra cosa) — abortando sin commit" >&2
+    exit 1
+  fi
+  TAM_SOLUCION="$(stat -c%s "$SOLUCION_ORIG" 2>/dev/null || echo 0)"
+  if [ "$TAM_SOLUCION" -gt 1048576 ]; then
+    echo "compuertas: '$SOLUCION_ORIG' excede 1 MiB — abortando sin commit" >&2
+    exit 1
+  fi
+  cp --no-dereference "$SOLUCION_ORIG" "$SALIDA_VALIDADA/solucion.json"
+fi
 
 # --- 8: compuertas deterministas, sin red, código de la RAMA ya probado "solo datos" ---
 correr_compuertas() {
-  local nuevo="$1" workdir="$2" fecha="$3"
-  docker run --rm --network none --read-only --tmpfs /tmp:size=512m --cap-drop ALL \
+  local nuevo="$1" workdir="$2" fecha="$3" salida_validada="$4"
+  # --init (reaper de zombies/señales) + --name (para el `docker rm -f` del trap)
+  # + timeout con --kill-after: ronda de arreglo 1/5, punto 2. `timeout` por sí
+  # solo mata al CLIENTE `docker`, no al contenedor en el daemon — el `--name` +
+  # el trap de arriba son el cierre real.
+  timeout --kill-after="${COMPUERTAS_KILL_AFTER:-30}" "${COMPUERTAS_TIMEOUT:-10m}" \
+  docker run --rm --init --name "$NOMBRE_COMPUERTAS" --network none --read-only --tmpfs /tmp:size=512m --cap-drop ALL \
     --security-opt no-new-privileges --pids-limit 512 --memory 4g --user 10001:10001 \
-    -v "$nuevo:/trabajo/repo:rw" -v "$workdir:/trabajo/w:ro" dcam-jaula:1 bash -c '
+    -v "$nuevo:/trabajo/repo:rw" -v "$workdir:/trabajo/w:ro" -v "$salida_validada:/trabajo/solucion-validada:ro" \
+    dcam-jaula:1 bash -c '
       cd /trabajo/repo && ln -sfn /opt/deps/node_modules node_modules &&
       node .claude/skills/conciliar-inventario/scripts/auditar.js | tail -1 | grep -q "SIN HALLAZGOS" &&
-      npm test 2>&1 | grep -q "^# fail 0" &&
-      # "^# fail 0", NO "^ℹ fail 0" (verificado en APOLO contra dcam-jaula:1): el
-      # Node 22.23.3 horneado en la imagen emite el resumen de `node --test` en
-      # formato TAP ("# fail N") cuando stdout no es una TTY — el host (Node 26)
-      # usa el reportero "spec" ("ℹ fail N"), que es de donde salió el patrón
-      # original del plan. Con "ℹ" este grep nunca empareja y NINGÚN cambio,
-      # por legítimo que sea, podría pasar jamás las compuertas.
+      { npm test >/tmp/t.log 2>&1; rc=$?; cat /tmp/t.log; [ $rc -eq 0 ] && grep -Eq "^# pass [1-9]" /tmp/t.log && grep -q "^# fail 0$" /tmp/t.log; } &&
       /opt/venv/bin/python .claude/skills/conciliar-inventario/scripts/verificar-cierre.py \
-        --workdir /trabajo/w --fecha "'"$fecha"'" --solucion /trabajo/w/salida/solucion.json'
+        --workdir /trabajo/w --fecha "'"$fecha"'" --solucion /trabajo/solucion-validada/solucion.json'
 }
+# "^# fail 0", NO "^ℹ fail 0" (verificado en APOLO contra dcam-jaula:1): el Node
+# 22.23.3 horneado en la imagen emite el resumen de `node --test` en formato TAP
+# ("# fail N") cuando stdout no es una TTY — el host (Node 26) usa el reportero
+# "spec" ("ℹ fail N"), que es de donde salió el patrón original del plan. Con "ℹ"
+# este grep nunca empareja y NINGÚN cambio podría pasar jamás las compuertas.
+# Ronda de arreglo 1/5 (punto 4): además exige "# pass [1-9]" (al menos una
+# prueba de verdad) — sin `pipefail` dentro del `bash -c` del contenedor, un
+# `npm test` roto que no corra NINGUNA prueba también imprime "# fail 0" y antes
+# pasaba igual.
 
-if ! correr_compuertas "$LIMPIO/nuevo" "$W" "$FECHA_ISO"; then
+if ! correr_compuertas "$LIMPIO/nuevo" "$W" "$FECHA_ISO" "$SALIDA_VALIDADA"; then
   echo "compuertas: el contenedor de compuertas (docker run --network none) falló — abortando sin commit" >&2
   exit 1
 fi
 
-# --- 9: todo pasó — aplica al REPO real y commitea SOLO las rutas permitidas tocadas ---
+# --- 9: todo pasó — aplica al REPO real y commitea SOLO las rutas permitidas
+# tocadas. SIEMPRE desde $VALIDADO (lo que de verdad pasó el validador), NUNCA
+# desde $LIMPIO/nuevo (que el contenedor de compuertas pudo haber tocado: el
+# symlink de node_modules, cachés, lo que sea) — "lo commiteado = lo validado"
+# (ronda de arreglo 1/5, punto 8). Y sin el `cmp -s` que había antes (punto 7):
+# ese atajo se saltaba el `git add` si el árbol de trabajo de $REPO ya tenía,
+# por lo que fuera, el mismo contenido sin commitear — y el pipeline avisaba
+# "resolvió" sin que el cambio llegara a un commit real. Siempre se copia y se
+# `git add`; si al final no hay nada en el índice, se trata como "sin cambios"
+# más abajo (compuertas.sh no decide solo si eso es éxito o fallo: lo decide
+# quien lo llama).
 for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
-  src="$LIMPIO/nuevo/$ruta"
+  src="$VALIDADO/$ruta"
   # misma regla del paso 5 (camino completo, no solo el último componente): re-confirma
   # que sigue siendo seguro — defensa en profundidad — justo antes de escribir en el REPO
   # real; si no existe, nada que hacer con esta ruta.
-  ruta_segura_bajo "$LIMPIO/nuevo" "$ruta" || continue
+  ruta_segura_bajo "$VALIDADO" "$ruta" || continue
   dst="$REPO/$ruta"
-  if [ -e "$dst" ] && cmp -s "$src" "$dst"; then
-    continue
-  fi
-  cp --no-dereference --preserve=mode "$src" "$dst"
+  # install -m 0644, NUNCA --preserve=mode (ronda de arreglo 1/5, punto 6): el
+  # `chmod -R a+rwX` de arriba (paso 7, para que el contenedor pueda escribir)
+  # deja el árbol en 666/777; con --preserve=mode ese modo viajaba tal cual
+  # hasta el commit real en $REPO (un data.js con el bit +x, o world-writable).
+  # El dato que se publica siempre es un archivo plano 0644, sin excepción.
+  install -m 0644 "$src" "$dst"
   git -C "$REPO" add -- "$ruta"
 done
 
