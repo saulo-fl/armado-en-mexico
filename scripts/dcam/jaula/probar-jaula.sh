@@ -68,6 +68,38 @@ for raro in '//dcam-puente/v1/messages' '/v1/../v1/messages' '/v1//messages'; do
   cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 --path-as-is -X POST "http://dcam-puente:1235$raro" -d '{}')
   [ "$cod" = "404" ] && ok "POST $raro -> 404" || mal "POST $raro no dio 404 (fue '$cod')"
 done
+# Fase 3d, ronda de arreglo 1: el puente filtra el CUERPO por lista blanca. Las
+# herramientas de servidor (web_search, web_fetch, code_execution, mcp_servers…)
+# las ejecutaría la API fuera de la jaula: 400 del puente, sin reenviar.
+post_puente() {  # $1 = cuerpo JSON; imprime el código HTTP
+  correr curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST 'http://dcam-puente:1235/v1/messages?beta=true' \
+    -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -H 'anthropic-beta: mcp-client-2025-04-04' -d "$1"
+}
+base='"max_tokens":8,"messages":[{"role":"user","content":"di hola"}]'
+for caso in \
+  "mcp_servers|{\"model\":\"claude-haiku-5-5\",$base,\"mcp_servers\":[{\"type\":\"url\",\"url\":\"https://example.com/mcp\",\"name\":\"x\"}]}|clave_de_primer_nivel_no_permitida" \
+  "tools[].type de servidor|{\"model\":\"claude-haiku-5-5\",$base,\"tools\":[{\"type\":\"web_search_20250305\",\"name\":\"web_search\"}]}|herramienta_de_servidor" \
+  "modelo claude-sonnet-5-5|{\"model\":\"claude-sonnet-5-5\",$base}|modelo_no_permitido" \
+  "effort high|{\"model\":\"claude-haiku-5-5\",$base,\"output_config\":{\"effort\":\"high\"}}|effort_mayor_que_medium"; do
+  IFS='|' read -r nombre cuerpo motivo <<< "$caso"
+  cod=$(post_puente "$cuerpo")
+  [ "$cod" = "400" ] && ok "POST con $nombre -> 400 del puente" || mal "POST con $nombre no dio 400 (fue '$cod')"
+done
+# Claude Code con WebSearch permitido y un prompt que obliga a buscar: el puente
+# rechaza la petición (lleva la herramienta de servidor) y no hay ninguna búsqueda.
+res_ws="$(correr sh -c 'cd /tmp && HOME=/tmp timeout 120 claude -p "Usa la herramienta WebSearch para buscar armado.mx y dime el primer resultado. Es obligatorio buscar." --model claude-haiku-5-5 --allowedTools WebSearch --output-format json' 2>/dev/null)"
+ws="$(printf '%s' "$res_ws" | jq -r 'select(.type == "result") | (.usage.server_tool_use.web_search_requests // 0)' 2>/dev/null)"
+echo "    claude -p con WebSearch: $(printf '%s' "$res_ws" | jq -c 'select(.type == "result") | {is_error, api_error_status, web_search_requests: (.usage.server_tool_use.web_search_requests // 0), result: ((.result // "") | .[0:160])}' 2>/dev/null)"
+[ "${ws:-0}" = "0" ] && ok "claude -p con --allowedTools WebSearch: web_search_requests = 0" || mal "claude -p con WebSearch hizo $ws búsquedas"
+# Un cuerpo que pasa la lista blanca pero la API rechaza (mal formado): la
+# respuesta (cabeceras + cuerpo) no trae nada con prefijo sk-ant ni cabeceras de
+# organización o límites. Solo se CUENTAN las coincidencias, nunca se imprimen.
+resp="$(correr curl -s -i --max-time 30 -X POST 'http://dcam-puente:1235/v1/messages?beta=true' \
+  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d '{"model":"claude-haiku-5-5","max_tokens":8,"messages":"mal"}')"
+n_sk=$(printf '%s' "$resp" | grep -c 'sk-ant')
+n_org=$(printf '%s' "$resp" | grep -ciE '^(anthropic-organization|anthropic-workspace|anthropic-ratelimit|set-cookie|cf-)')
+echo "    respuesta a un cuerpo mal formado: $(printf '%s' "$resp" | head -1 | tr -d '\r'); cabeceras: $(printf '%s' "$resp" | sed -n '2,/^\r\?$/p' | cut -d: -f1 | tr -d '\r' | grep . | tr '\n' ' ')"
+[ "$n_sk" = "0" ] && [ "$n_org" = "0" ] && ok "respuesta de error de la API: 0 'sk-ant' y 0 cabeceras de organización/límites" || mal "respuesta de error: $n_sk 'sk-ant', $n_org cabeceras de organización/límites"
 sleep 1
 LOG_PUENTE="$(docker logs --since "$DESDE" dcam-puente 2>&1)"
 echo "--- docker logs dcam-puente de estas peticiones ---"
@@ -76,7 +108,11 @@ printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms m
 printf '%s\n' "$LOG_PUENTE" | grep -qE ' GET /v1/messages 404 ' && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/models 404 ' \
   && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST \(rechazada\) /v1/\.\./v1/messages 404 ' \
   && ok "el puente registró los rechazos (GET, /v1/models, ruta con ..)" || mal "faltan líneas de rechazo en docker logs dcam-puente"
-if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|anthropic-version|authorization|bearer|oauth|responde solo'; then
+for m in clave_de_primer_nivel_no_permitida herramienta_de_servidor modelo_no_permitido effort_mayor_que_medium; do
+  printf '%s\n' "$LOG_PUENTE" | grep -qE " POST /v1/messages 400 0 [0-9]+ms .* rechazo=$m$" \
+    && ok "el puente registró el rechazo '$m' (línea fija, sin valores)" || mal "falta la línea de rechazo '$m' en el log del puente"
+done
+if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|anthropic-version|authorization|bearer|oauth|responde solo|example.com|web_search_2'; then
   mal "el log del puente trae query, cabeceras o cuerpo"
 elif printf '%s\n' "$LOG_PUENTE" | grep -qE "$FORMA_TOKEN"; then
   mal "algo con forma de token aparece en el log del puente"

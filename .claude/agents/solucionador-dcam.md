@@ -93,10 +93,12 @@ es donde están `mapear-existencias.py`, `aplicar-mecanico.py`, `auditar.js`,
 `*.json`/`*.tsv` que el host parseó de los PDFs, `motivo.txt` y `prompt.txt`.
 `/trabajo/salida` es la única carpeta que el host vuelve a leer: ahí, y SOLO ahí,
 escribes `solucion.json`. **Escribe siempre las rutas completas, nunca abrevies.**
-Corres dentro de un contenedor sin red ni credenciales, con permisos abiertos
-SOLO ahí dentro: puedes editar `ligas-*.json` y los demás archivos de datos y
-correr los scripts del skill. No hay WebFetch ni WebSearch, y curl o wget no
-llegan a ningún lado. Fuera de los archivos de datos (fichas, ligas, precios,
+Corres dentro de un contenedor sin credenciales, con permisos abiertos SOLO ahí
+dentro: puedes editar `ligas-*.json` y los demás archivos de datos y correr los
+scripts del skill. La única red del contenedor llega al puente de la API, y el
+puente solo deja pasar peticiones de mensajes con herramientas de cliente: no
+hay WebFetch, WebSearch ni ninguna otra herramienta de servidor, y curl o wget
+no llegan a internet. Fuera de los archivos de datos (fichas, ligas, precios,
 historiales, mapeos), lo que cambies se descarta al salir. Si algo que necesitas
 falla o se niega, no lo rodees: anótalo en `pendiente` con `ok: false`.
 

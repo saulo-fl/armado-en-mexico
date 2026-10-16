@@ -31,8 +31,10 @@ INSTRUCCIONES="$(awk '/^---$/{n++; next} n>=2' /opt/main/solucionador-dcam.md)"
 # Con --permission-mode dontAsk, Claude Code niega SIEMPRE Edit/Write dentro de
 # .claude/ (ni reglas por ruta ni acceptEdits lo abren), y ahí viven los
 # ligas-*.json que el agente tiene que poder reponer. Aquí sí vale bypass porque
-# la frontera es el CONTENEDOR, no la lista de herramientas: sin red salvo el
-# puente (que solo reenvía /v1/messages), sin credenciales, FS de solo lectura
+# la frontera es el CONTENEDOR, no la lista de herramientas: su red solo llega
+# al puente, y el puente solo deja pasar peticiones de mensajes con modelo,
+# effort y betas de lista blanca y herramientas de CLIENTE (las de servidor,
+# que ejecutaría la API fuera de la jaula, dan 400); sin credenciales, FS de solo lectura
 # salvo el volumen tmpfs con tope, sin capacidades, uid sin privilegios; y lo
 # único que sale al host lo extrae extraer.sh (solo PERMITIDOS, con tope), lo
 # valida el validador de MAIN y lo prueban las compuertas sin red. FUERA de la
