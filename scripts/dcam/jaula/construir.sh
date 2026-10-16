@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 # Construye la jaula del solucionador DCAM: imágenes dcam-puente:1 y dcam-jaula:1,
 # las redes dcam-interna/dcam-salida y el contenedor permanente dcam-puente.
-# Idempotente.
+# Idempotente. Con --solo-puente reconstruye y recrea solo dcam-puente (no toca
+# la imagen dcam-jaula:1 ni pide CLAUDE_VERSION).
 set -euo pipefail
 cd "$(dirname "$0")"
 RAIZ="$(git rev-parse --show-toplevel)"
-: "${CLAUDE_VERSION:?fija la versión de Claude Code (ej. 2.1.299)}"
+SOLO_PUENTE=0
+[ "${1:-}" = "--solo-puente" ] && SOLO_PUENTE=1
+[ "$SOLO_PUENTE" -eq 1 ] || : "${CLAUDE_VERSION:?fija la versión de Claude Code (ej. 2.1.299)}"
 : "${ROUTER_KEY_FILE:?fija la ruta a la clave del router (archivo 640, dueño saulo, nunca en el repo)}"
 [ -s "$ROUTER_KEY_FILE" ] || { echo "ROUTER_KEY_FILE no existe o está vacío: $ROUTER_KEY_FILE" >&2; exit 1; }
 
@@ -28,13 +31,15 @@ docker network inspect dcam-salida >/dev/null 2>&1 || \
 
 docker build -t dcam-puente:1 puente
 
-docker build -t dcam-jaula:1 --build-arg CLAUDE_VERSION="$CLAUDE_VERSION" -f Dockerfile "$RAIZ"
+[ "$SOLO_PUENTE" -eq 1 ] || \
+  docker build -t dcam-jaula:1 --build-arg CLAUDE_VERSION="$CLAUDE_VERSION" -f Dockerfile "$RAIZ"
 
 docker rm -f dcam-puente >/dev/null 2>&1 || true
 docker run -d --name dcam-puente --restart unless-stopped \
   --read-only --cap-drop ALL --security-opt no-new-privileges \
   --memory 256m --pids-limit 64 \
   --group-add 1000 \
+  --log-opt max-size=1m --log-opt max-file=2 \
   --network dcam-salida --ip 172.30.0.2 \
   -v "$(cd "$(dirname "$ROUTER_KEY_FILE")" && pwd)/$(basename "$ROUTER_KEY_FILE")":/run/secrets/router-key:ro \
   dcam-puente:1

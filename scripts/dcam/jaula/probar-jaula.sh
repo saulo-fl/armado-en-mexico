@@ -45,6 +45,37 @@ cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 180 -X POST http:
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://dcam-puente:1235/v1/models)
 [ "$cod" = "404" ] && ok "el puente no expone /v1/models" || mal "el puente expuso algo en /v1/models (fue '$cod')"
 
+# Fase 3c: Claude Code pide /v1/messages?beta=true (la query no cuenta), el resto
+# se rechaza, y el puente deja una línea por petición sin query, cabeceras, cuerpo
+# ni clave.
+DESDE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+sleep 1
+cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 180 -X POST 'http://dcam-puente:1235/v1/messages?beta=true' -H 'content-type: application/json' -d "$cuerpo")
+[ "$cod" = "200" ] && ok "POST /v1/messages?beta=true -> 200 (la query no cuenta)" || mal "POST /v1/messages?beta=true no dio 200 (fue '$cod')"
+cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://dcam-puente:1235/v1/messages)
+[ "$cod" = "404" ] && ok "GET /v1/messages -> 404" || mal "GET /v1/messages no dio 404 (fue '$cod')"
+cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST http://dcam-puente:1235/v1/models -d '{}')
+[ "$cod" = "404" ] && ok "POST /v1/models -> 404" || mal "POST /v1/models no dio 404 (fue '$cod')"
+for raro in '//dcam-puente/v1/messages' '/v1/../v1/messages' '/v1//messages'; do
+  cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 --path-as-is -X POST "http://dcam-puente:1235$raro" -d '{}')
+  [ "$cod" = "404" ] && ok "POST $raro -> 404" || mal "POST $raro no dio 404 (fue '$cod')"
+done
+sleep 1
+LOG_PUENTE="$(docker logs --since "$DESDE" dcam-puente 2>&1)"
+echo "--- docker logs dcam-puente de estas peticiones ---"
+printf '%s\n' "$LOG_PUENTE"
+printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms$' && ok "el puente registró el POST /v1/messages con 200" || mal "no hay línea 'POST /v1/messages 200' en docker logs dcam-puente"
+printf '%s\n' "$LOG_PUENTE" | grep -qE ' GET /v1/messages 404 ' && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/models 404 ' \
+  && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST \(rechazada\) //dcam-puente/v1/messages 404 ' \
+  && ok "el puente registró los rechazos (GET, /v1/models, ruta con //)" || mal "faltan líneas de rechazo en docker logs dcam-puente"
+if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|authorization|bearer|di hola'; then
+  mal "el log del puente trae query, cabeceras o cuerpo"
+elif printf '%s\n' "$LOG_PUENTE" | grep -q -F -f "$ROUTER_KEY_FILE"; then
+  mal "la clave del router aparece en el log del puente"
+else
+  ok "el log del puente no trae query, cabeceras, cuerpo ni la clave"
+fi
+
 cod=$(crudo_cl "abc")
 [ "$cod" = "400" ] && ok "Content-Length no numérico -> 400" || mal "Content-Length 'abc' no dio 400 (fue '$cod')"
 

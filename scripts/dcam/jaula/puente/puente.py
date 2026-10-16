@@ -14,7 +14,7 @@
 # Endurecido en la ronda de revisión 1/5 (Fase 2): límites de cuerpo/tiempo,
 # lista blanca de cabeceras, sin seguir redirecciones, effort solo para Qwen
 # 3.8, sin tracebacks hacia el cliente.
-import http.server, json, os, sys, urllib.request, urllib.error
+import http.server, json, os, sys, time, urllib.parse, urllib.request, urllib.error
 
 UPSTREAM = os.environ.get("PUENTE_UPSTREAM", "http://172.30.0.1:8090")
 with open("/run/secrets/router-key") as f:
@@ -69,8 +69,31 @@ class SinRedireccion(urllib.request.HTTPRedirectHandler):
 
 OPENER = urllib.request.build_opener(SinRedireccion)
 
+def ruta_de(crudo):
+    """Ruta sin query de la línea de petición, o None si no es aceptable.
+
+    Fase 3c: Claude Code 2.1.299 pide `/v1/messages?beta=true`; antes se comparaba
+    `self.path` entero (con la query) y todo daba 404. Se rechaza ANTES de partir:
+    lo que no empieza por una sola `/` (con `//x/...`, urlsplit tomaría `x` como
+    host), cualquier `..` y cualquier carácter de control."""
+    if not crudo.startswith("/") or crudo.startswith("//") or ".." in crudo:
+        return None
+    if any(ord(c) < 0x20 or ord(c) == 0x7f for c in crudo):
+        return None
+    ruta = urllib.parse.urlsplit(crudo).path
+    return ruta if "//" not in ruta else None
+
+def para_log(texto, maximo=120):
+    # La ruta la manda la jaula: se recorta y se escapa (nada de saltos de línea
+    # ni bytes de control en el log del host).
+    return texto[:maximo].encode("unicode_escape").decode("ascii")
+
 class H(http.server.BaseHTTPRequestHandler):
     timeout = 120  # protege la lectura de la petición del cliente (slowloris); no limita la espera al router
+
+    def send_response(self, code, message=None):
+        self._codigo = code
+        super().send_response(code, message)
 
     def responder_sin_cuerpo(self, codigo):
         try:
@@ -80,8 +103,11 @@ class H(http.server.BaseHTTPRequestHandler):
             pass
 
     def handle_one(self):
+        t0 = time.monotonic()
+        self._codigo, enviados = 0, 0
+        ruta = ruta_de(self.path)
         try:
-            if self.command != "POST" or self.path not in RUTAS_PERMITIDAS:
+            if self.command != "POST" or ruta not in RUTAS_PERMITIDAS:
                 # 404 SIN reenviar ni leer el cuerpo: ni se gasta la clave ni se toca el upstream.
                 return self.responder_sin_cuerpo(404)
 
@@ -104,7 +130,8 @@ class H(http.server.BaseHTTPRequestHandler):
 
             hdrs = {k: v for k, v in self.headers.items() if k.lower() in CABECERAS_PERMITIDAS}
             hdrs["Authorization"] = "Bearer " + KEY   # Claude Code manda su propio token; el router necesita el suyo
-            req = urllib.request.Request(UPSTREAM + self.path, data=body, method=self.command, headers=hdrs)
+            # Al router va SOLO la ruta permitida, sin la query del cliente.
+            req = urllib.request.Request(UPSTREAM + ruta, data=body, method=self.command, headers=hdrs)
             try:
                 r = OPENER.open(req, timeout=3600)
             except urllib.error.HTTPError as e:
@@ -127,12 +154,22 @@ class H(http.server.BaseHTTPRequestHandler):
                 chunk = leer(65536)
                 if not chunk: break
                 self.wfile.write(chunk)
+                enviados += len(chunk)
         except Exception:
             # Nunca se deja escapar un traceback (ni al cliente ni con datos de la petición
             # de por medio); el contenedor solo necesita saber que algo falló.
             self.responder_sin_cuerpo(500)
+        finally:
+            # Una línea por petición (Fase 3c): hora, método, ruta SIN query, código,
+            # bytes de respuesta y duración. Nunca cabeceras, cuerpo ni clave.
+            # docker logs: el contenedor corre con --log-opt max-size=1m max-file=2.
+            etiqueta = ruta if ruta is not None else "(rechazada) " + self.path.split("?", 1)[0]
+            sys.stderr.write("%s %s %s %s %d %dms\n" % (
+                time.strftime("%Y-%m-%dT%H:%M:%S"), para_log(self.command or "-", 10),
+                para_log(etiqueta), self._codigo, enviados, (time.monotonic() - t0) * 1000))
+            sys.stderr.flush()
 
     do_POST = do_GET = do_PUT = do_DELETE = do_PATCH = handle_one
-    def log_message(self, *a): pass
+    def log_message(self, *a): pass   # el log propio va en handle_one (sin query ni cabeceras)
 
 http.server.ThreadingHTTPServer(("0.0.0.0", PORT), H).serve_forever()

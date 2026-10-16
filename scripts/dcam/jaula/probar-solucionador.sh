@@ -133,7 +133,9 @@ fi
 
 ANTES_CONTENEDORES="$(docker ps -q | sort)"
 ANTES_VOLUMENES="$(docker volume ls -q --filter name=dcam-jaula- | sort)"
-LINEA_PUENTE_ANTES="$(docker logs dcam-puente 2>&1 | wc -l)"
+# Desde la Fase 3c el puente deja una línea por petición: "<hora> <método> <ruta> <código> <bytes> <ms>ms".
+DESDE_PUENTE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+AGENTE_CORRIO=0
 
 # La 3090 se comparte por turnos con ComfyUI/osa-fotos-bot: antes de gastar un
 # docker run entero (y un posible 502 genérico, indistinguible de cualquier
@@ -155,9 +157,11 @@ if ! router_arriba; then
   JAULA_REPO=""
 else
   echo "== corriendo solucionar.sh (modelo real vía dcam-puente, timeout interno 45 min) =="
+  AGENTE_CORRIO=1
+  INICIO_S=$SECONDS
   JAULA_REPO="$(bash "$MAIN/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$MAIN" 2>"$TMP/solucionar.err")"
   RC_SOLUCIONAR=$?
-  echo "solucionar.sh RC=$RC_SOLUCIONAR"
+  echo "solucionar.sh RC=$RC_SOLUCIONAR en $((SECONDS - INICIO_S))s"
   [ -s "$TMP/solucionar.err" ] && { echo "--- stderr de solucionar.sh ---"; cat "$TMP/solucionar.err"; }
   # Lo que el extractor sacó de la jaula (ronda de arreglo 4/5): para el informe.
   echo "--- agente.json (resumen) ---"
@@ -168,13 +172,18 @@ else
 fi
 
 # --- (1) lo único que el puente vio durante esta corrida: solo /v1/messages[/count_tokens] ---
-docker logs dcam-puente 2>&1 | tail -n "+$((LINEA_PUENTE_ANTES + 1))" > "$TMP/puente-ventana.log" || true
-echo "--- ventana de logs de dcam-puente durante esta corrida (revisar que no haya nada fuera de /v1/messages, ni la clave) ---"
-cat "$TMP/puente-ventana.log" 2>/dev/null || echo "(sin líneas nuevas)"
-if [ -s "$TMP/puente-ventana.log" ] && grep -Ev '/v1/messages' "$TMP/puente-ventana.log" | grep -q .; then
-  mal "(1) el log del puente tiene líneas fuera de /v1/messages durante esta corrida"
+sleep 1
+docker logs --since "$DESDE_PUENTE" dcam-puente > "$TMP/puente-ventana.log" 2>&1 || true
+echo "--- docker logs dcam-puente durante esta corrida ($(grep -c . "$TMP/puente-ventana.log") líneas; primeras y últimas 15) ---"
+if [ "$(grep -c . "$TMP/puente-ventana.log")" -le 30 ]; then cat "$TMP/puente-ventana.log"
+else head -15 "$TMP/puente-ventana.log"; echo "  [...]"; tail -15 "$TMP/puente-ventana.log"; fi
+FUERA_PUENTE="$(awk '$3 != "/v1/messages" && $3 != "/v1/messages/count_tokens"' "$TMP/puente-ventana.log")"
+if [ -n "$FUERA_PUENTE" ]; then
+  mal "(1) el puente vio rutas fuera de /v1/messages[/count_tokens] durante esta corrida: $(printf '%s' "$FUERA_PUENTE" | head -5)"
+elif [ "$AGENTE_CORRIO" -eq 1 ] && [ ! -s "$TMP/puente-ventana.log" ]; then
+  mal "(1) el agente corrió pero el puente no registró ninguna petición"
 else
-  ok "(1) el log del puente, durante esta corrida, no muestra nada fuera de /v1/messages"
+  ok "(1) el puente registró $(grep -c . "$TMP/puente-ventana.log") peticiones, todas a /v1/messages[/count_tokens]"
 fi
 
 # --- (2) si hubo commit, solo tocó rutas de PERMITIDOS ---
