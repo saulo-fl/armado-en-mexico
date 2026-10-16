@@ -39,6 +39,17 @@ WORKDIR="$TMP/w"
 mkdir -p "$WORKDIR"
 
 sha_head() { git -C "$DCAM_DIR/repo" rev-parse HEAD; }
+# Volúmenes dcam-jaula-* que no existían al arrancar esta prueba (ronda de
+# arreglo 4/5: solucionar.sh debe borrar siempre el suyo).
+VOLUMENES_ANTES="$(docker volume ls -q --filter name=dcam-jaula- | sort)"
+volumenes_jaula_nuevos() {
+  comm -13 <(printf '%s\n' "$VOLUMENES_ANTES") <(docker volume ls -q --filter name=dcam-jaula- | sort) | grep . || true
+}
+# MAIN falso cuyo dentro.sh llega por stdin (la "jaula" sin agente real).
+main_con_dentro() {  # $1 = carpeta destino, stdin = contenido de dentro.sh
+  cp -a "$MAIN" "$1"
+  cat > "$1/scripts/dcam/jaula/dentro.sh"
+}
 correr() {  # $1 = carpeta DIR-JAULA-REPO ya preparada
   "$COMPUERTAS" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$1" "$MAIN"
 }
@@ -181,22 +192,20 @@ if [ "$RC_F" -eq 124 ]; then
   mal "(f) timeout: el timeout de la PRUEBA (90s) venció — solucionar.sh no terminó ni con su propio timeout interno"
 elif [ -n "$RESTANTES_F" ]; then
   mal "(f) timeout: quedó un contenedor dcam-solucionador-* corriendo tras el timeout interno"
+elif [ -n "$(volumenes_jaula_nuevos)" ]; then
+  mal "(f) timeout: quedó vivo un volumen de la jaula: $(volumenes_jaula_nuevos)"
 else
-  ok "(f) timeout: ningún contenedor dcam-solucionador-* quedó corriendo tras el timeout interno (solucionar.sh RC=$RC_F)"
+  ok "(f) timeout: ningún contenedor dcam-solucionador-* ni volumen dcam-jaula-* quedó vivo tras el timeout interno (solucionar.sh RC=$RC_F)"
 fi
 rm -rf "$W_F" "$MAIN_LENTO"
 
-# --- (i) un subdirectorio 700 que la jaula crea en /trabajo/salida se borra
-#     sin problema en el SIGUIENTE intento con el mismo WORKDIR (ronda de
-#     arreglo 2/5, "Important nuevo": con un uid fijo ajeno al host, el host no
-#     podía atravesar/borrar ese subdirectorio — `rm -rf "$W/salida"` del
-#     arranque de solucionar.sh fallaba bajo `set -e` y el script abortaba
-#     ANTES del `docker run`, con el mensaje engañoso "el agente no produjo
-#     resultado". Con el uid del host (esta ronda), ese subdirectorio ya es
-#     del mismo usuario que corre el pipeline. ---
+# --- (i) un subdirectorio 700 que la jaula crea en /trabajo/salida (ronda de
+#     arreglo 2/5: con un uid ajeno, el `rm -rf "$W/salida"` del siguiente
+#     intento abortaba). Desde la ronda 4/5 /trabajo/salida vive en el volumen
+#     tmpfs: el subdirectorio NO llega al host (solo agente.json/solucion.json),
+#     y el siguiente intento con el mismo WORKDIR corre igual. ---
 MAIN_RESTRICTIVO="$TMP/main-restrictivo"
-cp -a "$MAIN" "$MAIN_RESTRICTIVO"
-cat > "$MAIN_RESTRICTIVO/scripts/dcam/jaula/dentro.sh" <<'EOF'
+main_con_dentro "$MAIN_RESTRICTIVO" <<'EOF'
 #!/usr/bin/env bash
 mkdir -p /trabajo/salida/sub
 chmod 700 /trabajo/salida/sub
@@ -215,25 +224,20 @@ set -e
 if [ "$RC_I1" -ne 0 ]; then
   mal "(i) subdirectorio 700 en salida/: la primera corrida ya falló (ver $TMP/log-i1.txt)"
   tail -20 "$TMP/log-i1.txt"
+elif [ -e "$W_I/salida/sub" ] || [ ! -f "$W_I/salida/agente.json" ]; then
+  mal "(i) subdirectorio 700 en salida/: llegó al host (o faltó agente.json): $(ls -la "$W_I/salida")"
 else
-  rm -rf "$(dirname "$RUTA_I1")"
-  SUBDIR_I="$W_I/salida/sub"
-  if [ ! -d "$SUBDIR_I" ]; then
-    mal "(i) subdirectorio 700 en salida/: la jaula no lo dejó donde se esperaba ($SUBDIR_I)"
+  rm -rf "$(dirname "${RUTA_I1:?}")"
+  set +e
+  RUTA_I2="$(timeout 120 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_I" "$MAIN_RESTRICTIVO" 2>"$TMP/log-i2.txt")"
+  RC_I2=$?
+  set -e
+  if [ "$RC_I2" -eq 0 ]; then
+    ok "(i) subdirectorio 700 en salida/: se quedó en el volumen (no llegó al host) y el siguiente intento con el mismo WORKDIR corrió"
+    rm -rf "$(dirname "${RUTA_I2:?}")"
   else
-    # El segundo intento, con el MISMO WORKDIR, es la prueba real: su propio
-    # `rm -rf "$W/salida"` de arranque tiene que poder borrar $SUBDIR_I.
-    set +e
-    RUTA_I2="$(timeout 120 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_I" "$MAIN_RESTRICTIVO" 2>"$TMP/log-i2.txt")"
-    RC_I2=$?
-    set -e
-    if [ "$RC_I2" -eq 0 ]; then
-      ok "(i) subdirectorio 700 en salida/: el siguiente intento con el mismo WORKDIR corrió de verdad, sin abortar por permisos"
-      rm -rf "$(dirname "$RUTA_I2")"
-    else
-      mal "(i) subdirectorio 700 en salida/: el segundo intento abortó (ver $TMP/log-i2.txt)"
-      tail -20 "$TMP/log-i2.txt"
-    fi
+    mal "(i) subdirectorio 700 en salida/: el segundo intento abortó (ver $TMP/log-i2.txt)"
+    tail -20 "$TMP/log-i2.txt"
   fi
 fi
 rm -rf "$W_I" "$MAIN_RESTRICTIVO"
@@ -295,6 +299,168 @@ else
   tail -20 "$TMP/log-h.txt"
 fi
 rm -rf "$J"
+
+set +e
+PERMITIDOS_T="$(cd "$MAIN" && node -e "import('./scripts/dcam/validar-parche-lib.mjs').then(m=>console.log([...m.PERMITIDOS].join('\n')))")"
+
+# --- (j) la aserción "índice de $REPO fuera de PERMITIDOS" de compuertas.sh
+#     (ronda de arreglo 3/5, punto 5) restaura el árbol de trabajo: $REPO llega
+#     con una ruta NO permitida en el índice (solo en el índice: el árbol es
+#     igual a HEAD) y la jaula trae un cambio legítimo de data.js. compuertas.sh
+#     pasa todo, copia data.js a $REPO, ve el índice sucio y aborta. Después,
+#     `git status --porcelain` vacío y cada ruta de PERMITIDOS igual a HEAD. ---
+R="$DCAM_DIR/repo"
+ANTES="$(sha_head)"
+echo "# índice sucio de prueba" >> "$R/scripts/dcam/vigia.py"
+git -C "$R" add scripts/dcam/vigia.py
+git -C "$R" show HEAD:scripts/dcam/vigia.py > "$R/scripts/dcam/vigia.py"
+J="$(jaula_desde_rama)"
+node -e '
+  const fs = require("fs");
+  const p = process.argv[1];
+  let s = fs.readFileSync(p, "utf8");
+  if (!s.includes("2852g")) { console.error("no encontré 2852g en " + p + " (se esperaba tras el caso (h))"); process.exit(1); }
+  fs.writeFileSync(p, s.replace("2852g", "2853g"));
+' "$J/src/data/data.js" || mal "(j) fixture: no se pudo preparar el cambio legítimo de data.js"
+if correr "$J" >"$TMP/log-j.txt" 2>&1; then
+  mal "(j) índice fuera de PERMITIDOS: compuertas.sh NO debió salir 0"
+else
+  ESTADO_J="$(git -C "$R" status --porcelain)"
+  DISTINTOS_J=""
+  while IFS= read -r ruta; do
+    [ -n "$ruta" ] || continue
+    if git -C "$R" cat-file -e "HEAD:$ruta" 2>/dev/null; then
+      git -C "$R" show "HEAD:$ruta" | cmp -s - "$R/$ruta" || DISTINTOS_J="$DISTINTOS_J $ruta"
+    elif [ -e "$R/$ruta" ]; then
+      DISTINTOS_J="$DISTINTOS_J $ruta"
+    fi
+  done <<< "$PERMITIDOS_T"
+  if [ "$(sha_head)" = "$ANTES" ] && grep -q "fuera de PERMITIDOS" "$TMP/log-j.txt" \
+     && [ -z "$ESTADO_J" ] && [ -z "$DISTINTOS_J" ]; then
+    ok "(j) índice fuera de PERMITIDOS: abortó sin commit; status --porcelain vacío y las $(grep -c . <<< "$PERMITIDOS_T") rutas de PERMITIDOS iguales a HEAD"
+  else
+    mal "(j) índice fuera de PERMITIDOS: status='$ESTADO_J' distintas de HEAD='$DISTINTOS_J' (ver $TMP/log-j.txt)"
+    tail -5 "$TMP/log-j.txt"
+  fi
+fi
+rm -rf "$J"
+
+# --- (k) tope de disco (ronda de arreglo 4/5): el agente intenta escribir 3 GB
+#     en /trabajo/repo. El volumen tmpfs (2g por defecto) da ENOSPC dentro, la
+#     jaula termina y limpia, y el disco del host casi no cambia. ---
+MAIN_LLENO="$TMP/main-lleno"
+main_con_dentro "$MAIN_LLENO" <<'EOF'
+#!/usr/bin/env bash
+dd if=/dev/zero of=/trabajo/repo/relleno bs=1M count=3072 2>&1 | tail -3
+echo '{"ok":true}' > /trabajo/salida/agente.json
+EOF
+W_K="$TMP/w-k"
+mkdir -p "$W_K"
+echo "motivo de prueba" > "$W_K/motivo.txt"
+echo "prompt de prueba" > "$W_K/prompt.txt"
+usado() { df -B1 --output=used / | tail -1 | tr -d ' '; }
+USADO_ANTES="$(usado)"
+echo "$USADO_ANTES" > "$TMP/pico-k"
+( while [ ! -e "$TMP/fin-k" ]; do
+    u="$(usado)"; [ "$u" -gt "$(cat "$TMP/pico-k")" ] && echo "$u" > "$TMP/pico-k"; sleep 1
+  done ) &
+PID_MUESTREO=$!
+INICIO_K=$SECONDS
+RUTA_K="$(timeout 600 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_K" "$MAIN_LLENO" 2>"$TMP/log-k.txt")"
+RC_K=$?
+touch "$TMP/fin-k"; wait "$PID_MUESTREO"
+USADO_DESPUES="$(usado)"
+PICO_K="$(cat "$TMP/pico-k")"
+DIF_K=$(( USADO_DESPUES - USADO_ANTES )); [ "$DIF_K" -lt 0 ] && DIF_K=$(( -DIF_K ))
+SUBIDA_K=$(( PICO_K - USADO_ANTES ))
+echo "    (k) solucionar.sh RC=$RC_K en $((SECONDS - INICIO_K))s; consola de la jaula:"
+sed 's/^/      /' "$W_K/docker-solucionar.log"
+echo "    (k) df -B1 --output=used /: antes=$USADO_ANTES después=$USADO_DESPUES |dif|=$DIF_K pico=$PICO_K (subida máx $SUBIDA_K)"
+echo "    (k) docker volume ls (dcam-jaula-*) tras la corrida: '$(docker volume ls -q --filter name=dcam-jaula- | tr '\n' ' ')'"
+if ! grep -q "No space left on device" "$W_K/docker-solucionar.log"; then
+  mal "(k) tope de disco: no hubo ENOSPC dentro de la jaula"
+elif [ "$DIF_K" -ge 104857600 ] || [ "$SUBIDA_K" -ge 104857600 ]; then
+  mal "(k) tope de disco: el disco del host cambió 100 MB o más"
+elif [ -n "$(volumenes_jaula_nuevos)" ]; then
+  mal "(k) tope de disco: quedó vivo el volumen $(volumenes_jaula_nuevos)"
+elif [ -n "$RUTA_K" ] && [ -e "$RUTA_K/relleno" ]; then
+  mal "(k) tope de disco: el relleno llegó al host"
+else
+  ok "(k) tope de disco: ENOSPC dentro, el disco del host cambió < 100 MB (antes/después y pico) y no quedó volumen"
+fi
+[ -n "$RUTA_K" ] && rm -rf "$(dirname "$RUTA_K")"
+rm -rf "$W_K" "$MAIN_LLENO"
+
+# --- (l) un archivo de 6 MB en una ruta PERMITIDA + un cambio en un archivo NO
+#     permitido: ninguno de los dos llega al host (la extracción aborta entera
+#     por el tope de 5 MB). ---
+MARCA="marca-extraccion-$$-$RANDOM"
+MAIN_6MB="$TMP/main-6mb"
+main_con_dentro "$MAIN_6MB" <<EOF
+#!/usr/bin/env bash
+{ echo "// $MARCA"; head -c 6291456 /dev/zero | tr '\\0' a; } > /trabajo/repo/src/data/data.js
+echo "# $MARCA" >> /trabajo/repo/scripts/dcam/vigia.py
+echo '{"ok":true}' > /trabajo/salida/agente.json
+EOF
+W_L="$TMP/w-l"
+mkdir -p "$W_L"
+echo "motivo de prueba" > "$W_L/motivo.txt"
+echo "prompt de prueba" > "$W_L/prompt.txt"
+RUTA_L="$(timeout 300 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_L" "$MAIN_6MB" 2>"$TMP/log-l.txt")"
+RC_L=$?
+echo "    (l) solucionar.sh RC=$RC_L; extractor: $(cat "$W_L/docker-extraer.log" 2>/dev/null)"
+CON_MARCA_L="$(grep -rlF "$MARCA" "$W_L" "$R" /tmp/dcam-jaula-* 2>/dev/null)"
+GRANDES_L="$( { find "$W_L" -size +5M; find /tmp -maxdepth 4 -path '/tmp/dcam-jaula-*' -size +5M; } 2>/dev/null)"
+if [ "$RC_L" -eq 0 ]; then
+  mal "(l) 6 MB en ruta permitida: solucionar.sh NO debió salir 0"
+elif [ -n "$CON_MARCA_L" ] || [ -n "$GRANDES_L" ]; then
+  mal "(l) 6 MB en ruta permitida: llegó algo al host: $CON_MARCA_L $GRANDES_L"
+elif [ -n "$(volumenes_jaula_nuevos)" ]; then
+  mal "(l) 6 MB en ruta permitida: quedó vivo el volumen $(volumenes_jaula_nuevos)"
+else
+  ok "(l) 6 MB en ruta permitida + archivo no permitido: la extracción abortó y ninguno de los dos llegó al host"
+fi
+[ -n "$RUTA_L" ] && rm -rf "$(dirname "$RUTA_L")"
+rm -rf "$W_L" "$MAIN_6MB"
+
+# --- (m) archivo NO permitido + archivo nuevo fuera de la lista + un cambio
+#     legítimo de data.js: la corrida sale bien, al host llegan SOLO rutas de
+#     PERMITIDOS (con el cambio legítimo) y solucion.json. ---
+MAIN_M="$TMP/main-m"
+main_con_dentro "$MAIN_M" <<EOF
+#!/usr/bin/env bash
+echo "# $MARCA" >> /trabajo/repo/scripts/dcam/vigia.py
+echo "$MARCA" > /trabajo/repo/no-permitido.txt
+sed -i 's/1020mm/1021mm/' /trabajo/repo/src/data/data.js
+echo '{"ligas":[],"altas":[],"pendiente":[]}' > /trabajo/salida/solucion.json
+echo '{"ok":true}' > /trabajo/salida/agente.json
+EOF
+W_M="$TMP/w-m"
+mkdir -p "$W_M"
+echo "motivo de prueba" > "$W_M/motivo.txt"
+echo "prompt de prueba" > "$W_M/prompt.txt"
+RUTA_M="$(timeout 300 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_M" "$MAIN_M" 2>"$TMP/log-m.txt")"
+RC_M=$?
+if [ "$RC_M" -ne 0 ] || [ -z "$RUTA_M" ]; then
+  mal "(m) no permitidos: solucionar.sh falló (RC=$RC_M, ver $TMP/log-m.txt)"
+  tail -5 "$TMP/log-m.txt"
+else
+  EXTRAIDOS_M="$(cd "$RUTA_M" && find . -type f -o -type l | sed 's|^\./||' | sort)"
+  FUERA_M="$(comm -23 <(printf '%s\n' "$EXTRAIDOS_M") <(printf '%s\n' "$PERMITIDOS_T" | sort))"
+  CON_MARCA_M="$(grep -rlF "$MARCA" "$RUTA_M" "$W_M" "$R" 2>/dev/null)"
+  echo "    (m) extraído al host: $(grep -c . <<< "$EXTRAIDOS_M") archivos; salida: $(ls "$W_M/salida" | tr '\n' ' ')"
+  if [ -n "$FUERA_M" ] || [ -n "$CON_MARCA_M" ]; then
+    mal "(m) no permitidos: llegó al host algo fuera de PERMITIDOS: $FUERA_M $CON_MARCA_M"
+  elif ! grep -q "1021mm" "$RUTA_M/src/data/data.js" || [ ! -f "$W_M/salida/solucion.json" ]; then
+    mal "(m) no permitidos: no llegó el cambio legítimo de data.js o solucion.json"
+  elif [ -n "$(volumenes_jaula_nuevos)" ]; then
+    mal "(m) no permitidos: quedó vivo el volumen $(volumenes_jaula_nuevos)"
+  else
+    ok "(m) no permitidos: al host llegaron solo rutas de PERMITIDOS (con el cambio legítimo) y solucion.json"
+  fi
+  rm -rf "$(dirname "$RUTA_M")"
+fi
+rm -rf "$W_M" "$MAIN_M"
 
 echo "=================================================="
 if [ "$FALLOS" -eq 0 ]; then

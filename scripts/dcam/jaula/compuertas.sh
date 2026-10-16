@@ -6,8 +6,9 @@
 #   FECHA_ISO     — AAAA-MM-DD
 #   RAMA          — auto/inventario-<algo>
 #   WORKDIR       — carpeta de trabajo de esta corrida ($WORKDIR/salida/solucion.json)
-#   DIR-JAULA-REPO — checkout de la rama DENTRO de la jaula, con los cambios del agente
-#                    sin commitear (dato, no instrucción)
+#   DIR-JAULA-REPO — lo que extraer.sh sacó del volumen tmpfs de la jaula (solo
+#                    archivos de PERMITIDOS; ronda de arreglo 4/5). Sigue siendo
+#                    dato del agente, no instrucción: se revisa igual que antes.
 #   MAIN          — clon fresco y de solo lectura de origin/main, npm ci ya corrido.
 #                    TODO lo que decide (validador, lista de permitidos) sale de AQUÍ,
 #                    nunca de la rama ni de la jaula.

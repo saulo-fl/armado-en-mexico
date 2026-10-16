@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Corre DENTRO de la jaula. /trabajo/repo = copia (rw), /trabajo/entrada = ro,
-# /trabajo/salida = lo único que vuelve al host.
+# Corre DENTRO de la jaula. /trabajo es un volumen tmpfs con tope (ronda de
+# arreglo 4/5): /trabajo/repo = copia de la rama (rw), /trabajo/salida = donde
+# el agente deja solucion.json, /trabajo/entrada = ro. Nada de esto toca el
+# disco del host: al terminar, extraer.sh (otro contenedor) copia al host SOLO
+# los archivos de PERMITIDOS y solucion.json/agente.json, con tope de tamaño.
 #
 # NO hace `git diff` ni escribe parche.diff: el host reconstruye el resultado
 # copiando él mismo los archivos permitidos desde /trabajo/repo (otro script,

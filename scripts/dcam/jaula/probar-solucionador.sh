@@ -132,6 +132,7 @@ EOF
 fi
 
 ANTES_CONTENEDORES="$(docker ps -q | sort)"
+ANTES_VOLUMENES="$(docker volume ls -q --filter name=dcam-jaula- | sort)"
 LINEA_PUENTE_ANTES="$(docker logs dcam-puente 2>&1 | wc -l)"
 
 # La 3090 se comparte por turnos con ComfyUI/osa-fotos-bot: antes de gastar un
@@ -139,15 +140,17 @@ LINEA_PUENTE_ANTES="$(docker logs dcam-puente 2>&1 | wc -l)"
 # otro fallo del puente), se comprueba el modelo local directo — mismo
 # criterio que `esperar_modelo()` del pipeline, pero una sola vez (este es un
 # juez, no el pipeline: no espera 30 min, solo reporta el estado real).
+# Ronda de arreglo 4/5: sin `systemctl --user` (no hay bus de usuario desde
+# una unidad de sistema); "arriba" = curl rc=0 Y código distinto de 000.
 router_arriba() {
-  systemctl --user is-active --quiet llama-router 2>/dev/null || return 1
   local codigo
-  codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:8090/ 2>/dev/null || echo 000)"
-  [ "$codigo" != "000" ]
+  codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
+    "${DCAM_ROUTER_URL:-http://127.0.0.1:8090/v1/models}" 2>/dev/null)" || return 1
+  [ -n "$codigo" ] && [ "$codigo" != "000" ]
 }
 
 if ! router_arriba; then
-  mal "(0) el modelo local (llama-router) no está disponible ahora mismo — servicio inactivo o sin respuesta en 127.0.0.1:8090 (turno de la 3090 con ComfyUI/osa-fotos-bot). Distinto de un 502 genérico del puente: aquí ni se intentó correr la jaula."
+  mal "(0) el modelo local (llama-router) no está disponible ahora mismo — sin respuesta HTTP en ${DCAM_ROUTER_URL:-http://127.0.0.1:8090/v1/models} (turno de la 3090 con ComfyUI/osa-fotos-bot). Distinto de un 502 genérico del puente: aquí ni se intentó correr la jaula."
   RC_SOLUCIONAR=2
   JAULA_REPO=""
 else
@@ -224,6 +227,14 @@ if [ "$ANTES_CONTENEDORES" = "$DESPUES_CONTENEDORES" ]; then
   ok "(3) ningún contenedor quedó corriendo de más (docker ps antes == después)"
 else
   mal "(3) quedaron contenedores nuevos corriendo: $(comm -13 <(printf '%s\n' "$ANTES_CONTENEDORES") <(printf '%s\n' "$DESPUES_CONTENEDORES"))"
+fi
+# Ronda de arreglo 4/5: el volumen tmpfs de la jaula (dcam-jaula-*) se borra
+# siempre en el trap de solucionar.sh.
+DESPUES_VOLUMENES="$(docker volume ls -q --filter name=dcam-jaula- | sort)"
+if [ "$ANTES_VOLUMENES" = "$DESPUES_VOLUMENES" ]; then
+  ok "(3) ningún volumen dcam-jaula-* quedó vivo (docker volume ls antes == después)"
+else
+  mal "(3) quedaron volúmenes dcam-jaula-*: $(comm -13 <(printf '%s\n' "$ANTES_VOLUMENES") <(printf '%s\n' "$DESPUES_VOLUMENES"))"
 fi
 HUERFANOS="$(find /tmp -maxdepth 1 -newer "$TMP" \( -name 'dcam-jaula-*' -o -name 'dcam-main-*' \) 2>/dev/null)"
 if [ -z "$HUERFANOS" ]; then

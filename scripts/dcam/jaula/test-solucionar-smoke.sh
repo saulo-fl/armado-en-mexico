@@ -21,11 +21,14 @@ git init --quiet "$DCAM_DIR/repo"
 git -C "$DCAM_DIR/repo" -c user.email=t@t -c user.name=t commit --quiet --allow-empty -m init
 git -C "$DCAM_DIR/repo" branch --quiet "auto/inventario-13-OCT-2026"
 
-# --- MAIN falso: solo necesita existir para la ruta -v, el docker falso no la usa ---
+# --- MAIN falso: las rutas -v existen y la lib exporta un PERMITIDOS mínimo
+# (solucionar.sh lo lee en el host para el extractor) ---
 MAIN="$TMP/main"
 mkdir -p "$MAIN/scripts/dcam/jaula" "$MAIN/.claude/agents"
 : > "$MAIN/scripts/dcam/jaula/dentro.sh"
+: > "$MAIN/scripts/dcam/jaula/extraer.sh"
 : > "$MAIN/.claude/agents/solucionador-dcam.md"
+echo 'export const PERMITIDOS = new Set(["src/data/data.js"]);' > "$MAIN/scripts/dcam/validar-parche-lib.mjs"
 
 # --- W con la entrada mínima que solucionar.sh copia a la jaula ---
 W="$TMP/w"
@@ -54,16 +57,14 @@ set -e
 [ "$RC" -eq 2 ] && [ -z "$OUT" ] && ok "(b) rama inválida -> exit 2, stdout vacío" \
   || mal "(b) rama inválida: RC=$RC OUT='$OUT'"
 
-# (c) docker falso que simula éxito: crea agente.json no vacío en $W/salida (el
-# 6º argumento posicional del docker run real -v "$W/salida:..." es el que se
-# vuelve a mapear aquí vía la propia variable de entorno que exportamos).
+# (c) docker falso que simula éxito: el contenedor extractor monta $W/salida
+# como "<ruta>:/x/salida" (ronda de arreglo 4/5) — ahí escribe agente.json.
+# volume create/rm, el ancla y el resto salen 0 sin hacer nada.
 cat > "$FAKEBIN/docker" <<'EOF'
 #!/usr/bin/env bash
-# docker falso de éxito: a "run" le sigue, entre los argumentos, la ruta real
-# de W/salida como "<ruta>:/trabajo/salida:rw" — la extraemos y escribimos ahí.
 for a in "$@"; do
   case "$a" in
-    *:/trabajo/salida:rw) echo '{"ok":true}' > "${a%%:/trabajo/salida:rw}/agente.json" ;;
+    *:/x/salida) echo '{"ok":true}' > "${a%%:/x/salida}/agente.json" ;;
   esac
 done
 exit 0
@@ -128,6 +129,8 @@ set -e
 # es "$JAULA/repo" (lo que imprime solucionar.sh en éxito), NO "$JAULA" — borrar
 # solo esa ruta deja "$JAULA/entrada" huérfano en /tmp en CADA corrida de este
 # test. Hay que borrar la carpeta del propio `mktemp` completa: su dirname.
-rm -rf "$(dirname "$JAULA_RUTA_C")" 2>/dev/null || true
+# Ronda de arreglo 4/5 (minor): sin la guardia, con (c) fallido y la variable
+# vacía, esto sería `rm -rf .`.
+rm -rf "$(dirname "${JAULA_RUTA_C:?(c) no dejó ruta de JAULA}")" 2>/dev/null || true
 
 exit $FAIL
