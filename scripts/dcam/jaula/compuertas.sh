@@ -194,8 +194,81 @@ if [ "$RC_COMPUERTAS" -ne 0 ]; then
   exit 1
 fi
 
+# Si el agente no cambió ninguna ruta permitida, no hay nada que commitear (ni
+# referencias que actualizar): mismo resultado que el paso 9 sin cambios.
+CAMBIO_AGENTE=0
+for ruta in "${RUTAS[@]}"; do
+  [ -n "$ruta" ] || continue
+  [ -e "$LIMPIO/base/$ruta" ] || [ -e "$VALIDADO/$ruta" ] || continue
+  cmp -s "$LIMPIO/base/$ruta" "$VALIDADO/$ruta" || { CAMBIO_AGENTE=1; break; }
+done
+if [ "$CAMBIO_AGENTE" -eq 0 ]; then
+  echo "compuertas: las compuertas pasaron, pero no hubo cambios que commitear"
+  exit 0
+fi
+
+# --- 8b: referencia-*.json (revisión final, I1). Antes las actualizaba el
+# pipeline en el HOST con `mapear-existencias.py --update-ref`, que evalúa con
+# `node` los data-*.js: aquí son datos del AGENTE, y nada suyo se ejecuta en el
+# host. Corre en un contenedor con las mismas banderas que las compuertas y el
+# uid del host, con el repo validado en SOLO LECTURA; lo único escribible es
+# $REFS_OUT. Lo que sale de ahí es dato no confiable (el código evaluado pudo
+# escribir cualquier cosa en esa carpeta): solo se toman los tres
+# referencia-*.json, solo si son archivos regulares, y pasan OTRA VEZ por el
+# validador de MAIN junto con todo lo demás antes del commit. Mismo comando y
+# mismos argumentos que cerrar_exito en el camino normal, salvo --ref, que
+# apunta a la copia escribible.
+REFS_OUT="$LIMPIO/refs"
+mkdir -p "$REFS_OUT"
+timeout --kill-after="${COMPUERTAS_KILL_AFTER:-30}" "${COMPUERTAS_TIMEOUT:-10m}" \
+docker run --rm --init --name "$NOMBRE_COMPUERTAS" --network none --read-only --tmpfs /tmp:size=512m --cap-drop ALL \
+  --security-opt no-new-privileges --pids-limit 512 --memory 4g --user "${UID_HOST}:${GID_HOST}" -e HOME=/tmp \
+  -v "$VALIDADO:/trabajo/repo:ro" -v "$W:/trabajo/w:ro" -v "$REFS_OUT:/trabajo/refs:rw" \
+  dcam-jaula:1 bash -c '
+    cd /trabajo/repo && S=.claude/skills/conciliar-inventario/scripts || exit 1
+    for c in armas cartuchos accesorios; do
+      [ -f "/trabajo/w/$c.json" ] || continue
+      cp "$S/referencia-$c.json" "/trabajo/refs/referencia-$c.json" &&
+      /opt/venv/bin/python "$S/mapear-existencias.py" "/trabajo/w/$c.json" \
+        --ref "/trabajo/refs/referencia-$c.json" --ligas "$S/ligas-$c.json" \
+        --regresos src/data --antes-de "$1" --update-ref >/dev/null || exit 1
+    done' _ "$FECHA_ISO" && RC_REFS=0 || RC_REFS=$?
+docker rm -f "$NOMBRE_COMPUERTAS" >/dev/null 2>&1 || true
+if [ "$RC_REFS" -ne 0 ]; then
+  echo "compuertas: el contenedor de referencias (--update-ref, docker run --network none) falló — abortando sin commit" >&2
+  exit 1
+fi
+
+# $FINAL = las rutas permitidas de $VALIDADO + las referencias nuevas. Es lo que
+# se commitea, y antes pasa entero por el validador de MAIN contra la base.
+S_REFS=".claude/skills/conciliar-inventario/scripts"
+FINAL="$LIMPIO/final"
+for ruta in "${RUTAS[@]}"; do
+  [ -n "$ruta" ] || continue
+  ruta_segura_bajo "$VALIDADO" "$ruta" || continue
+  mkdir -p "$FINAL/$(dirname "$ruta")"
+  install -m 0644 "$VALIDADO/$ruta" "$FINAL/$ruta"
+done
+for c in armas cartuchos accesorios; do
+  [ -f "$W/$c.json" ] || continue
+  ruta_segura_bajo "$REFS_OUT" "referencia-$c.json" \
+    || { echo "compuertas: el contenedor de referencias no dejó referencia-$c.json — abortando sin commit" >&2; exit 1; }
+  install -m 0644 "$REFS_OUT/referencia-$c.json" "$FINAL/$S_REFS/referencia-$c.json"
+done
+set +e
+SALIDA_REFS="$(node "$MAIN/scripts/dcam/validar-parche.mjs" "$LIMPIO/base" "$FINAL" 2>"$LIMPIO/validador-refs.stderr")"
+EC_REFS=$?
+set -e
+if [ "$EC_REFS" -ne 0 ] || ! grep -qF '✔ solo datos' <<<"$SALIDA_REFS"; then
+  echo "compuertas: el validador de parches rechazó las referencias actualizadas (exit $EC_REFS):" >&2
+  echo "$SALIDA_REFS" >&2
+  cat "$LIMPIO/validador-refs.stderr" >&2
+  exit 1
+fi
+
 # --- 9: todo pasó — aplica al REPO real y commitea SOLO las rutas permitidas
-# tocadas. SIEMPRE desde $VALIDADO (lo que de verdad pasó el validador), NUNCA
+# tocadas. SIEMPRE desde $FINAL ($VALIDADO + referencias, validado otra vez en
+# el paso 8b; antes era $VALIDADO), NUNCA
 # desde $LIMPIO/nuevo (que el contenedor de compuertas pudo haber tocado: el
 # symlink de node_modules, cachés, lo que sea) — "lo commiteado = lo validado"
 # (ronda de arreglo 1/5, punto 8). Y sin el `cmp -s` que había antes (punto 7):
@@ -207,11 +280,11 @@ fi
 # quien lo llama).
 for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
-  src="$VALIDADO/$ruta"
+  src="$FINAL/$ruta"
   # misma regla del paso 5 (camino completo, no solo el último componente): re-confirma
   # que sigue siendo seguro — defensa en profundidad — justo antes de escribir en el REPO
   # real; si no existe, nada que hacer con esta ruta.
-  ruta_segura_bajo "$VALIDADO" "$ruta" || continue
+  ruta_segura_bajo "$FINAL" "$ruta" || continue
   dst="$REPO/$ruta"
   # install -m 0644, NUNCA --preserve=mode (ronda de arreglo 1/5, punto 6): el
   # agente, dentro de la jaula, puede dejar un archivo con +x (o cualquier otro

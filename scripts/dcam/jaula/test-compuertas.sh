@@ -541,6 +541,53 @@ fi
 [ -n "$RUTA_O" ] && rm -rf "$(dirname "$RUTA_O")"
 rm -rf "$W_O" "$MAIN_O"
 
+# --- (p) Revisión final, I1: los data-*.js que escribió el agente NUNCA se
+#     ejecutan en el host. Un data.js con una expresión ejecutable que «pasó» el
+#     validador (MAIN falso cuyo validador siempre dice ✔: el salto es SOLO de esta
+#     prueba) y un WORKDIR con armas.json, para que corra el --update-ref de
+#     referencias. El marcador en /tmp del HOST no debe aparecer; el control (el
+#     comando que corría el host antes, en cerrar_exito) sí lo crea: la expresión
+#     es real y la prueba muerde. ---
+MARCADOR_P="/tmp/dcam-marcador-i1-$$-$RANDOM"
+rm -f "$MARCADOR_P"
+MAIN_P="$TMP/main-p"
+cp -a "$MAIN" "$MAIN_P"
+printf "console.log('✔ solo datos');\n" > "$MAIN_P/scripts/dcam/validar-parche.mjs"
+W_P="$TMP/w-p"
+mkdir -p "$W_P"
+# armas.json = los renglones de la referencia de la rama, tal cual: mapeo limpio.
+node -e '
+  const r = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+  console.log(JSON.stringify({ items: r.rows.map(({ fichaId, ...x }) => x) }));
+' "$DCAM_DIR/repo/.claude/skills/conciliar-inventario/scripts/referencia-armas.json" > "$W_P/armas.json"
+ANTES="$(sha_head)"
+J="$(jaula_desde_rama)"
+printf "\ntry { require('fs').writeFileSync('%s', 'x'); } catch (e) {}\n" "$MARCADOR_P" >> "$J/src/data/data.js"
+"$COMPUERTAS" "$FECHA_ISO" "$RAMA" "$W_P" "$J" "$MAIN_P" >"$TMP/log-p.txt" 2>&1 && RC_P=0 || RC_P=$?
+DESPUES="$(sha_head)"
+CAMBIADOS_P="$(git -C "$DCAM_DIR/repo" diff --name-only "$ANTES" "$DESPUES" | tr '\n' ' ')"
+echo "    (p) compuertas.sh RC=$RC_P; commit: $CAMBIADOS_P"
+if [ -e "$MARCADOR_P" ]; then
+  mal "(p) el marcador $MARCADOR_P apareció en el HOST: algo evaluó ahí los datos del agente"
+elif [ "$RC_P" -ne 0 ]; then
+  mal "(p) compuertas.sh falló (ver $TMP/log-p.txt)"
+  tail -20 "$TMP/log-p.txt"
+elif [ "$CAMBIADOS_P" != ".claude/skills/conciliar-inventario/scripts/referencia-armas.json src/data/data.js " ]; then
+  mal "(p) el commit no es data.js + referencia-armas.json: '$CAMBIADOS_P'"
+else
+  ok "(p) data.js ejecutable + --update-ref: nada se ejecutó en el host y referencia-armas.json llegó al commit (validada)"
+fi
+( cd "$J" && python3 .claude/skills/conciliar-inventario/scripts/mapear-existencias.py "$W_P/armas.json" \
+    --ligas .claude/skills/conciliar-inventario/scripts/ligas-armas.json --regresos src/data \
+    --antes-de "$FECHA_ISO" >/dev/null 2>&1 ) || true
+if [ -e "$MARCADOR_P" ]; then
+  ok "(p) control: el comando que corría el host antes SÍ crea el marcador (la expresión es real)"
+else
+  mal "(p) control: la expresión no se ejecutó ni con el comando viejo del host: la prueba no muerde"
+fi
+rm -f "$MARCADOR_P"
+rm -rf "$J" "$W_P" "$MAIN_P"
+
 echo "=================================================="
 if [ "$FALLOS" -eq 0 ]; then
   echo "test-compuertas.sh: TODO OK"

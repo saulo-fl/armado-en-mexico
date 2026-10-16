@@ -16,11 +16,15 @@
 #   4. CIERRE — compuertas (auditar.js, npm test, verificar-cierre.py),
 #               actualiza referencias, marca el PR listo
 #
-# Si falla cualquier paso del 1 al 4, se lanza UNA vez el SOLUCIONADOR: un agente
-# de Claude Code (Opus, agente `solucionador-dcam`) que diagnostica y repara la
-# rama con el runbook de fallos conocidos. Después se repite el paso 4: lo que
-# dice el agente no cuenta, cuentan las compuertas. Mergear y resembrar D1 siguen
-# siendo de Saulo (el guardia del repo lo impone).
+# Si falla cualquier paso del 1 al 4 y DCAM_SOLUCIONADOR no vale «jaula» (lo
+# normal), se avisa y la rama queda para revisión a mano. Con
+# DCAM_SOLUCIONADOR=jaula se lanza UNA vez el SOLUCIONADOR (agente
+# `solucionador-dcam` de Claude Code) DENTRO de la jaula Docker
+# (scripts/dcam/jaula/solucionar.sh, código de origin/main), sin más red que
+# dcam-puente. Lo que deja solo entra a la rama si pasa el validador de main y
+# las compuertas en contenedor (compuertas.sh); lo que dice el agente no
+# cuenta, cuentan las compuertas. Mergear y resembrar D1 siguen siendo de
+# Saulo (el guardia del repo lo impone).
 #
 # Cada paso commitea y pushea: si algo falla, lo anterior ya está en el PR.
 set -uo pipefail
@@ -287,21 +291,28 @@ step_altas() {
 # señal, sin esta cola — ni actualizaba referencia-*.json, ni corría `gh pr ready`.
 # Esta función NUNCA vuelve a correr auditar.js/npm test: eso ya pasó (en el host
 # para el camino normal, dentro del contenedor para el de la jaula).
+# Revisión final (I1): con `cerrar_exito jaula` NO corre aquí el `--update-ref`.
+# Ese paso evalúa con `node` los data-*.js, y en el camino de la jaula esos datos
+# los escribió el agente: nada suyo se ejecuta en el host. Las referencias ya las
+# actualizó compuertas.sh en un contenedor sin red y las volvió a pasar por el
+# validador de main; llegan aquí dentro de su commit.
 # ═══════════════════════════════════════════════════════════════════════════════
 cerrar_exito() {
-  if [ -f "$WORKDIR/armas.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
-      --ligas "$SCRIPTS/ligas-armas.json" --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-  if [ -f "$WORKDIR/cartuchos.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
-      --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
-      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-  if [ -f "$WORKDIR/accesorios.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
-      --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
-      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+  if [ "${1:-}" != "jaula" ]; then
+    if [ -f "$WORKDIR/armas.json" ]; then
+      $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
+        --ligas "$SCRIPTS/ligas-armas.json" --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+    fi
+    if [ -f "$WORKDIR/cartuchos.json" ]; then
+      $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
+        --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
+        --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+    fi
+    if [ -f "$WORKDIR/accesorios.json" ]; then
+      $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
+        --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
+        --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+    fi
   fi
 
   git add -A
@@ -371,7 +382,26 @@ barrer_jaulas() {
       docker volume rm "$n" >/dev/null 2>&1 && log "barrer_jaulas: volumen $n de una corrida anterior, borrado"
     fi
   done
+  # Revisión final (M2): carpetas de corridas que murieron sin pasar por su trap
+  # (SIGKILL al vencer TimeoutStartSec). Solo /tmp/dcam-main-* y /tmp/dcam-jaula-*
+  # con la forma exacta de mktemp y de más de 2 h; nunca /tmp/dcam-pipeline-*
+  # (son los workdirs). limpiar_jaula vuelve a exigir el prefijo.
+  for n in /tmp/dcam-main-* /tmp/dcam-jaula-*; do
+    [[ "$n" =~ ^/tmp/dcam-(main|jaula)-[A-Za-z0-9]+$ ]] && [ -d "$n" ] && [ ! -L "$n" ] || continue
+    [ -n "$(find "$n" -maxdepth 0 -mmin +120 2>/dev/null)" ] || continue
+    limpiar_jaula "$n" && log "barrer_jaulas: carpeta $n de una corrida anterior, borrada"
+  done
   return 0
+}
+
+# Revisión final (I2): MAIN sale de origin/main recién traído, nunca del main
+# LOCAL de $REPO (el pipeline no lo adelanta nunca). Sin .git: nadie lo necesita.
+# Devuelve 2 si el fetch falla (nunca se usa un main viejo en silencio) y 1 si
+# falla lo demás.
+preparar_main() {  # $1 = carpeta destino
+  git -C "$REPO" fetch --quiet origin main >>"$LOG" 2>&1 || return 2
+  mkdir -p "$1" && git -C "$REPO" archive origin/main | tar -x -C "$1" \
+    && npm ci --ignore-scripts --prefix "$1" >>"$LOG" 2>&1 || return 1
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -490,9 +520,16 @@ barrer_jaulas
 # main fresco para la jaula: aislado del checkout de trabajo del pipeline.
 MAIN_TMP_DIR="$(mktemp -d /tmp/dcam-main-XXXX)"
 MAIN="$MAIN_TMP_DIR/main"
-if ! { git clone --quiet --depth 1 --branch main "file://$REPO" "$MAIN" >>"$LOG" 2>&1 \
-        && npm ci --ignore-scripts --prefix "$MAIN" >>"$LOG" 2>&1; }; then
+JAULA_REPO=""
+# Revisión final (M2): las carpetas de ESTA corrida se borran también si el
+# pipeline sale por `falla` o lo termina systemd (SIGTERM). limpiar_jaula es
+# idempotente: los borrados explícitos de abajo siguen valiendo.
+trap 'limpiar_jaula "$MAIN_TMP_DIR"; [ -z "$JAULA_REPO" ] || limpiar_jaula "$(dirname "$JAULA_REPO")"' EXIT
+trap 'exit 143' TERM INT HUP
+preparar_main "$MAIN" && RC_MAIN=0 || RC_MAIN=$?
+if [ "$RC_MAIN" -ne 0 ]; then
   limpiar_jaula "$MAIN_TMP_DIR"
+  [ "$RC_MAIN" -eq 2 ] && falla "solucionador (jaula): git fetch origin main falló; no se usa un main viejo"
   falla "solucionador (jaula): no se pudo preparar main fresco"
 fi
 
@@ -544,11 +581,11 @@ resumen_seguro() {
 }
 RESUMEN="$(resumen_seguro)"
 
-# compuertas.sh ya dejó el commit de datos en $REPO (sin push). La cola de
-# éxito es la MISMA que la del cierre normal (update-ref + commit de
-# referencias + push + gh pr ready + borrar señal) — nunca se vuelve a correr
-# auditar.js/npm test en el host, eso ya pasó dentro del contenedor.
-cerrar_exito
+# compuertas.sh ya dejó el commit de datos y referencias en $REPO (sin push).
+# La cola de éxito es la del cierre normal SIN el update-ref (push + gh pr ready
+# + borrar señal): nunca se vuelve a correr auditar.js/npm test ni se evalúan
+# los data-*.js en el host; eso ya pasó dentro del contenedor (I1).
+cerrar_exito jaula
 
 telegram "🔧 Solucionador (jaula) resolvió $FECHA: $RESUMEN. Revisa la rama $RAMA."
 log "solucionador (jaula) OK: $RESUMEN"
