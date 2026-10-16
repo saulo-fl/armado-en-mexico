@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Jueces de la jaula del solucionador DCAM. Cada línea imprime OK o FALLA; sale 1 si alguna falla.
-# Requiere: dcam-jaula:1 construida, dcam-puente levantado (dcam-salida + dcam-interna),
-# la regla ufw de Saulo ya aplicada (scripts/dcam/jaula/construir.sh).
-# ROUTER_KEY_FILE: la misma clave que se montó en dcam-puente, para el juez de fuga
-# (nunca se imprime, solo se cuenta contra ella).
+# Requiere: dcam-jaula:1 construida y dcam-puente levantado (dcam-salida + dcam-interna,
+# scripts/dcam/jaula/construir.sh).
+# Fase 3d: el puente habla con api.anthropic.com con el token OAuth de Saulo. Este
+# juez NUNCA lee el archivo del token: la fuga se busca por la FORMA de un token
+# de Anthropic (sk-ant-<tipo><nn>-…) y solo se imprimen nombres, nunca contenido.
+# Gasta una petición mínima (Haiku, max_tokens 8) de la suscripción.
 set -u
 IMG=dcam-jaula:1
 RED=dcam-interna
-ROUTER_KEY_FILE="${ROUTER_KEY_FILE:?fija la ruta de la clave del router para el juez de fuga}"
-[ -s "$ROUTER_KEY_FILE" ] || { echo "ROUTER_KEY_FILE no existe o está vacío" >&2; exit 2; }
+FORMA_TOKEN='sk-ant-[a-z]{2,4}[0-9]{2}-[A-Za-z0-9_-]{20,}'
 
 # Gateways reales — el de dcam-interna (la propia red de la jaula: si --internal
 # de verdad aísla, ni su propio gateway debe responder nada) y el de dcam-salida
@@ -38,20 +39,19 @@ print(d.split(b" ")[1].decode() if b" " in d else "000")
 ' "$1"
 }
 
-cuerpo='{"model":"qwen3.8-27b","max_tokens":8,"messages":[{"role":"user","content":"di hola"}]}'
-cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 180 -X POST http://dcam-puente:1235/v1/messages -H 'content-type: application/json' -d "$cuerpo")
-[ "$cod" = "200" ] && ok "el puente responde 200 a /v1/messages (el router puede tardar en despertar)" || mal "el puente no respondió 200 a /v1/messages (fue '$cod')"
-
+# La jaula llega al puente (y el puente no expone nada fuera de su lista).
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://dcam-puente:1235/v1/models)
-[ "$cod" = "404" ] && ok "el puente no expone /v1/models" || mal "el puente expuso algo en /v1/models (fue '$cod')"
+[ "$cod" = "404" ] && ok "la jaula llega al puente; el puente no expone /v1/models (404)" || mal "GET /v1/models al puente no dio 404 (fue '$cod'; 000 = la jaula no llega al puente)"
 
-# Fase 3c: Claude Code pide /v1/messages?beta=true (la query no cuenta), el resto
-# se rechaza, y el puente deja una línea por petición sin query, cabeceras, cuerpo
-# ni clave.
+# Una petición mínima de verdad (Fase 3d): Claude Code pide /v1/messages?beta=true;
+# el resto se rechaza, y el puente deja una línea por petición sin query,
+# cabeceras, cuerpo ni token (solo modelo y effort del cuerpo).
+cuerpo='{"model":"claude-haiku-5-5","max_tokens":8,"messages":[{"role":"user","content":"di hola"}]}'
 DESDE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 sleep 1
-cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 180 -X POST 'http://dcam-puente:1235/v1/messages?beta=true' -H 'content-type: application/json' -d "$cuerpo")
-[ "$cod" = "200" ] && ok "POST /v1/messages?beta=true -> 200 (la query no cuenta)" || mal "POST /v1/messages?beta=true no dio 200 (fue '$cod')"
+cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 120 -X POST 'http://dcam-puente:1235/v1/messages?beta=true' \
+  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d "$cuerpo")
+[ "$cod" = "200" ] && ok "POST /v1/messages?beta=true con claude-haiku-5-5, max_tokens 8 -> 200 (token OAuth del puente)" || mal "POST /v1/messages?beta=true no dio 200 (fue '$cod')"
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://dcam-puente:1235/v1/messages)
 [ "$cod" = "404" ] && ok "GET /v1/messages -> 404" || mal "GET /v1/messages no dio 404 (fue '$cod')"
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST http://dcam-puente:1235/v1/models -d '{}')
@@ -67,16 +67,16 @@ sleep 1
 LOG_PUENTE="$(docker logs --since "$DESDE" dcam-puente 2>&1)"
 echo "--- docker logs dcam-puente de estas peticiones ---"
 printf '%s\n' "$LOG_PUENTE"
-printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms$' && ok "el puente registró el POST /v1/messages con 200" || mal "no hay línea 'POST /v1/messages 200' en docker logs dcam-puente"
+printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms modelo=claude-haiku-5-5 effort=-$' && ok "el puente registró el POST /v1/messages con 200 y el modelo" || mal "no hay línea 'POST /v1/messages 200 … modelo=claude-haiku-5-5' en docker logs dcam-puente"
 printf '%s\n' "$LOG_PUENTE" | grep -qE ' GET /v1/messages 404 ' && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/models 404 ' \
   && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST \(rechazada\) /v1/\.\./v1/messages 404 ' \
   && ok "el puente registró los rechazos (GET, /v1/models, ruta con ..)" || mal "faltan líneas de rechazo en docker logs dcam-puente"
-if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|authorization|bearer|di hola'; then
+if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|anthropic-version|authorization|bearer|oauth|di hola'; then
   mal "el log del puente trae query, cabeceras o cuerpo"
-elif printf '%s\n' "$LOG_PUENTE" | grep -q -F -f "$ROUTER_KEY_FILE"; then
-  mal "la clave del router aparece en el log del puente"
+elif printf '%s\n' "$LOG_PUENTE" | grep -qE "$FORMA_TOKEN"; then
+  mal "algo con forma de token aparece en el log del puente"
 else
-  ok "el log del puente no trae query, cabeceras, cuerpo ni la clave"
+  ok "el log del puente no trae query, cabeceras, cuerpo ni nada con forma de token"
 fi
 
 cod=$(crudo_cl "abc")
@@ -88,8 +88,9 @@ cod=$(crudo_cl "-1")
 cod=$(correr sh -c "head -c 34603008 /dev/zero | curl -s -o /dev/null -w '%{http_code}' --max-time 60 -X POST http://dcam-puente:1235/v1/messages -H 'content-type: application/json' --data-binary @-")
 [ "$cod" = "413" ] && ok "cuerpo de 33 MiB -> 413" || mal "cuerpo de 33 MiB no dio 413 (fue '$cod')"
 
-correr curl -s -o /dev/null --max-time 10 https://api.anthropic.com/v1/messages >/dev/null 2>&1 && mal "sale a api.anthropic.com" || ok "api.anthropic.com bloqueado"
+correr curl -s -o /dev/null --max-time 10 https://api.anthropic.com/v1/messages >/dev/null 2>&1 && mal "la jaula sale directo a api.anthropic.com" || ok "api.anthropic.com bloqueado desde la jaula"
 correr curl -s -o /dev/null --max-time 10 https://example.com >/dev/null 2>&1 && mal "sale a example.com" || ok "example.com bloqueado"
+correr curl -s -o /dev/null --max-time 10 http://1.1.1.1 >/dev/null 2>&1 && mal "sale a internet por IP (1.1.1.1)" || ok "internet por IP (1.1.1.1) bloqueado"
 correr curl -s -o /dev/null --max-time 5 "http://$GW_INTERNA:8090" >/dev/null 2>&1 && mal "llega a 8090 en el gateway de su propia red (dcam-interna)" || ok "gateway de dcam-interna:8090 bloqueado"
 correr curl -s -o /dev/null --max-time 5 "http://$GW_INTERNA:22" >/dev/null 2>&1 && mal "llega a 22 (SSH) en el gateway de dcam-interna" || ok "gateway de dcam-interna:22 bloqueado"
 correr curl -s -o /dev/null --max-time 5 "http://$GW_SALIDA:8090" >/dev/null 2>&1 && mal "llega a dcam-salida (no debería ni tener ruta)" || ok "dcam-salida inalcanzable desde la jaula"
@@ -98,17 +99,32 @@ correr curl -s -o /dev/null --max-time 5 http://100.64.0.1 >/dev/null 2>&1 && ma
 correr sh -c 'ls /home/saulo 2>/dev/null; ls /var/run/docker.sock 2>/dev/null' | grep -q . && mal "ve el home o el socket de docker" || ok "sin home ni socket de docker"
 correr sh -c 'touch /home/agente/x 2>/dev/null' && mal "escribe en su propio home (FS no es de solo lectura)" || ok "sistema de archivos de solo lectura"
 
-entorno="$(correr env 2>/dev/null)"
-if ! printf '%s' "$entorno" | grep -q ANTHROPIC_BASE_URL; then
-  mal "el juez de fuga no pudo leer el entorno de la jaula (env no respondió lo esperado)"
+# Fuga del token hacia la jaula: entorno, entorno del PID 1 y todo el sistema de
+# archivos visible. En el FS, el prefijo pelado "sk-ant-" solo puede salir en el
+# código de Claude Code (que lo menciona); nada con FORMA de token, en ningún lado.
+entorno="$(correr sh -c 'env; echo ===; tr "\0" "\n" < /proc/1/environ' 2>/dev/null)"
+if ! printf '%s' "$entorno" | grep -q ANTHROPIC_BASE_URL || ! printf '%s' "$entorno" | grep -q '^===$'; then
+  mal "el juez de fuga no pudo leer el entorno de la jaula (env o /proc/1/environ no respondió lo esperado)"
+elif printf '%s' "$entorno" | grep -qE "sk-ant-|$FORMA_TOKEN"; then
+  mal "algo con prefijo sk-ant- aparece en env o /proc/1/environ de la jaula"
 else
-  fuga=$(printf '%s' "$entorno" | grep -c -F -f "$ROUTER_KEY_FILE")
-  [ "${fuga:-0}" = "0" ] && ok "la clave del router no llega al entorno de la jaula" || mal "la clave del router aparece en el entorno de la jaula"
+  ok "ni env ni /proc/1/environ de la jaula traen nada con prefijo sk-ant- (ANTHROPIC_AUTH_TOKEN=$(printf '%s\n' "$entorno" | sed -n 's/^ANTHROPIC_AUTH_TOKEN=//p' | head -1))"
+fi
+fs="$(correr sh -c 'echo "== prefijo"; grep -rlaF "sk-ant-" / --exclude-dir=proc --exclude-dir=sys --exclude-dir=dev 2>/dev/null; echo "== forma"; grep -rlaE "$1" / --exclude-dir=proc --exclude-dir=sys --exclude-dir=dev 2>/dev/null; echo "== fin"' _ "$FORMA_TOKEN")"
+printf '%s\n' "$fs" | sed 's/^/    /'
+PREFIJO_FUERA="$(printf '%s\n' "$fs" | sed -n '/^== prefijo$/,/^== forma$/p' | grep -v '^==' | grep -v '^/usr/local/lib/node_modules/@anthropic-ai/claude-code/' || true)"
+FORMA="$(printf '%s\n' "$fs" | sed -n '/^== forma$/,/^== fin$/p' | grep -v '^==' || true)"
+if ! printf '%s\n' "$fs" | grep -q '^== fin$'; then
+  mal "la búsqueda en el FS de la jaula no terminó"
+elif [ -n "$FORMA" ] || [ -n "$PREFIJO_FUERA" ]; then
+  mal "token en el FS de la jaula: forma='$FORMA' prefijo fuera de Claude Code='$PREFIJO_FUERA'"
+else
+  ok "FS de la jaula: nada con forma de token; el prefijo sk-ant- solo en los binarios de Claude Code"
 fi
 
-# Informativo para la Fase 3 (no bloqueante): si el router ya implementa
-# /v1/messages/count_tokens. Se anota el código, no se falla el juez por esto.
-cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST http://dcam-puente:1235/v1/messages/count_tokens -H 'content-type: application/json' -d "$cuerpo")
-echo "INFO count_tokens a través del puente: $cod (no bloqueante, para Fase 3)"
+# Informativo (no bloqueante): count_tokens a través del puente.
+cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST http://dcam-puente:1235/v1/messages/count_tokens \
+  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d "$cuerpo")
+echo "INFO count_tokens a través del puente: $cod (no bloqueante)"
 
 exit $r

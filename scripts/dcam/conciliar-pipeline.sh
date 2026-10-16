@@ -352,42 +352,6 @@ limpiar_jaula() {
   rm -rf "$real" 2>/dev/null || true
 }
 
-# Ronda de arreglo 3/5 (decisión de Saulo): la 3090 se comparte por turnos con
-# ComfyUI/osa-fotos-bot (`comfy-turno.timer` la devuelve a `llama-router` tras
-# 10 min sin uso) — antes de lanzar la jaula, el pipeline ESPERA a que el
-# modelo esté disponible, sin tocar NINGÚN servicio (ni arrancarlo ni
-# reiniciarlo: eso es infra, necesita su propio OK). Revisa cada
-# DCAM_ESPERA_PASO_S segundos, hasta DCAM_ESPERA_MODELO_MIN minutos.
-# Ronda de arreglo 4/5: la ÚNICA señal es la respuesta HTTP del router
-# (DCAM_ROUTER_URL, por defecto http://127.0.0.1:8090/v1/models). Ya no se
-# mira `systemctl --user`: desde dcam-conciliar.service (unidad de sistema con
-# User=saulo, sin XDG_RUNTIME_DIR) no hay bus de usuario y fallaba siempre.
-# "Arriba" = curl sale con rc=0 Y el código no es 000; cualquier código HTTP
-# real cuenta, incluido 401. (Antes, `… || echo 000` daba "000000" con la
-# conexión rechazada, y eso se tomaba como arriba.)
-router_responde() {
-  local codigo
-  codigo="$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 \
-    "${DCAM_ROUTER_URL:-http://127.0.0.1:8090/v1/models}" 2>/dev/null)" || return 1
-  [ -n "$codigo" ] && [ "$codigo" != "000" ]
-}
-esperar_modelo() {
-  local min="${DCAM_ESPERA_MODELO_MIN:-30}" paso="${DCAM_ESPERA_PASO_S:-60}"
-  local total=$((min * 60)) transcurrido=0
-  while :; do
-    if router_responde; then
-      log "esperar_modelo: router arriba tras ${transcurrido}s"
-      return 0
-    fi
-    if [ "$transcurrido" -ge "$total" ]; then
-      log "esperar_modelo: el modelo local no estuvo disponible tras ${total}s (DCAM_ESPERA_MODELO_MIN=${min})"
-      return 1
-    fi
-    sleep "$paso"
-    transcurrido=$((transcurrido + paso))
-  done
-}
-
 # Fase 3c (menor 1): restos de corridas anteriores que murieron sin pasar por su
 # trap (SIGKILL, OOM): contenedores y volúmenes de la jaula. Se llama bajo el
 # flock del pipeline, así que ninguna otra corrida puede estar usándolos. Solo
@@ -481,12 +445,9 @@ fi
 
 log "paso $STEP falló (${MOTIVO:-sin motivo}) — intento solucionador (jaula)"
 
-# Espera al modelo (ver esperar_modelo arriba) ANTES de gastar nada más —
-# commit de "estado al fallar", clon de MAIN, npm ci — si la 3090 está en
-# turno de ComfyUI y no vuelve a tiempo, ninguno de esos pasos sirve de nada.
-if ! esperar_modelo; then
-  falla "solucionador (jaula): el modelo local no estuvo disponible (turno de la 3090); la rama queda para revisión a mano"
-fi
+# Fase 3d: el agente habla con la API de Anthropic (suscripción de Saulo) por
+# dcam-puente; ya no hay turno de la 3090 que esperar. Si la API falla, el
+# agente falla, la jaula aborta limpio y la rama queda para revisión a mano.
 
 # Vacía $WORKDIR/salida ANTES de lanzar la jaula: una corrida anterior fallida
 # pudo dejar algo ahí (incluido, en el peor caso, algo que no sea un archivo

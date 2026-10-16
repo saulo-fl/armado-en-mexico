@@ -1,79 +1,53 @@
-# puente.py — el único puente entre la jaula del solucionador DCAM y el router
-# llama-server de APOLO (RTX 3090, accesible en PUENTE_UPSTREAM). Copia adaptada
-# de claude-lm-proxy.py (HEFESTO, ~/.local/bin): mueve el system message de
-# Claude Code al inicio (las plantillas Jinja de Qwen exigen "System message
-# must be at the beginning"; la API de Anthropic no) y traduce el effort del
-# lanzador al reasoning_effort nativo de Qwen 3.8.
+# puente.py — el único puente entre la jaula del solucionador DCAM y la API de
+# Anthropic (Fase 3d: Claude con la suscripción de Saulo, token OAuth).
 #
-# Por qué existe este contenedor y no tinyproxy: la jaula del agente NO lleva
-# ninguna clave ni puede llegar al router por sí misma (red --internal). Este
-# es el ÚNICO componente con la clave del router y con salida al host; solo
-# reenvía las dos rutas que Claude Code necesita — todo lo demás es 404 SIN
-# reenviar, para no exponer el router entero a la jaula.
+# Por qué existe este contenedor: la jaula del agente NO lleva ninguna credencial
+# ni puede salir a internet (red --internal). Este es el ÚNICO componente con el
+# token OAuth (montado en solo lectura) y con salida; solo reenvía las dos rutas
+# que Claude Code necesita, al destino FIJO de abajo — todo lo demás es 404 SIN
+# reenviar. Si el agente tuviera el token, una inyección podría escribirlo en un
+# string de data.js y acabaría publicado en el repo público.
 #
 # Endurecido en la ronda de revisión 1/5 (Fase 2): límites de cuerpo/tiempo,
-# lista blanca de cabeceras, sin seguir redirecciones, effort solo para Qwen
-# 3.8, sin tracebacks hacia el cliente.
-import http.server, json, os, sys, time, urllib.parse, urllib.request, urllib.error
+# lista blanca de cabeceras, sin seguir redirecciones, sin tracebacks hacia el
+# cliente. Fase 3d: fuera las traducciones de llama.cpp y la clave del router.
+import http.server, json, sys, time, urllib.parse, urllib.request, urllib.error
 
-UPSTREAM = os.environ.get("PUENTE_UPSTREAM", "http://172.30.0.1:8090")
-with open("/run/secrets/router-key") as f:
-    KEY = f.read().strip()
+UPSTREAM = "https://api.anthropic.com"   # fijo: la jaula no puede elegir destino
+with open("/run/secrets/claude-oauth-token") as f:
+    TOKEN = f.read().strip()
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 1235
 
 RUTAS_PERMITIDAS = ("/v1/messages", "/v1/messages/count_tokens")
-MAX_CUERPO = 32 * 1024 * 1024  # 32 MiB — ni Claude Code ni el router mandan/esperan más
+MAX_CUERPO = 32 * 1024 * 1024  # 32 MiB — Claude Code no manda más
+# Lista blanca: authorization, x-api-key y cookie de la jaula nunca pasan.
 CABECERAS_PERMITIDAS = ("content-type", "anthropic-version", "anthropic-beta", "accept")
+BETA_OAUTH = "oauth-2025-04-20"   # la API exige este beta con un token OAuth
 
-# Qwen 3.8: reasoning_effort nativo de su plantilla (solo low | medium | xhigh;
-# otro valor rompe la plantilla). xhigh entra en bucle con este modelo — nunca
-# se manda, aunque el lanzador lo pida. Si la petición no trae effort, medium.
-QWEN38 = {"low": "low", "medium": "medium", "high": "medium", "xhigh": "medium", "max": "medium"}
+def con_beta_oauth(valor):
+    betas = [b.strip() for b in (valor or "").split(",") if b.strip()]
+    return ",".join(betas if BETA_OAUTH in betas else betas + [BETA_OAUTH])
 
-def fix(body):
+def modelo_y_effort(body):
+    """Solo para el log: el modelo y el effort que pidió Claude Code. Nada más del cuerpo."""
     try:
         b = json.loads(body)
+        return str(b.get("model", "-")), str((b.get("output_config") or {}).get("effort", "-"))
     except Exception:
-        return body
-    msgs = b.get("messages")
-    if not isinstance(msgs, list):
-        return body
-    out = []
-    for m in msgs:
-        if m.get("role") != "system" or not out:
-            out.append(m); continue
-        c = m.get("content", "")
-        blocks = [{"type": "text", "text": c}] if isinstance(c, str) else c
-        blocks = [dict(x, text="<system-reminder>\n" + x["text"] + "\n</system-reminder>") if x.get("type") == "text" else x
-                  for x in blocks]
-        prev = out[-1]
-        if prev.get("role") == "user":   # se pega al último turno de usuario para no duplicar turnos
-            pc = prev["content"]
-            prev["content"] = ([{"type": "text", "text": pc}] if isinstance(pc, str) else list(pc)) + blocks
-        else:
-            out.append({"role": "user", "content": blocks})
-    b["messages"] = out
-    # Solo Qwen 3.8 entiende reasoning_effort; otro modelo lo ignoraría de todas
-    # formas, pero no hay razón para mandarle un campo que no es suyo.
-    if "qwen3.8" in b.get("model", ""):
-        effort = (b.get("output_config") or {}).get("effort")
-        b["chat_template_kwargs"] = dict(b.get("chat_template_kwargs") or {}, reasoning_effort=QWEN38.get(effort, "medium"))
-    return json.dumps(b).encode()
+        return "-", "-"
 
 class SinRedireccion(urllib.request.HTTPRedirectHandler):
-    # No hay ninguna razón legítima para que el router redirija, y seguir una
-    # redirección reenviaría la cabecera Authorization (la clave real) a
+    # Seguir una redirección reenviaría la cabecera Authorization (el token) a
     # dondequiera que apunte. Se trata como error, nunca se sigue.
     def redirect_request(self, *a, **k):
         return None
 
-OPENER = urllib.request.build_opener(SinRedireccion)
+OPENER = urllib.request.build_opener(SinRedireccion)   # TLS: contexto por defecto (valida certificado y host)
 
 def ruta_de(crudo):
     """Ruta sin query de la línea de petición, o None si no es aceptable.
 
-    Fase 3c: Claude Code 2.1.299 pide `/v1/messages?beta=true`; antes se comparaba
-    `self.path` entero (con la query) y todo daba 404. Se rechaza ANTES de partir:
+    Claude Code 2.1.299 pide `/v1/messages?beta=true`. Se rechaza ANTES de partir:
     lo que no empieza por una sola `/` (con `//x/...`, urlsplit tomaría `x` como
     host), cualquier `..` y cualquier carácter de control."""
     if not crudo.startswith("/") or crudo.startswith("//") or ".." in crudo:
@@ -84,12 +58,12 @@ def ruta_de(crudo):
     return ruta if "//" not in ruta else None
 
 def para_log(texto, maximo=120):
-    # La ruta la manda la jaula: se recorta y se escapa (nada de saltos de línea
-    # ni bytes de control en el log del host).
+    # Lo manda la jaula: se recorta y se escapa (nada de saltos de línea ni bytes
+    # de control en el log del host).
     return texto[:maximo].encode("unicode_escape").decode("ascii")
 
 class H(http.server.BaseHTTPRequestHandler):
-    timeout = 120  # protege la lectura de la petición del cliente (slowloris); no limita la espera al router
+    timeout = 120  # protege la lectura de la petición del cliente (slowloris); no limita la espera a la API
 
     def send_response(self, code, message=None):
         self._codigo = code
@@ -104,11 +78,11 @@ class H(http.server.BaseHTTPRequestHandler):
 
     def handle_one(self):
         t0 = time.monotonic()
-        self._codigo, enviados = 0, 0
+        self._codigo, enviados, modelo, effort = 0, 0, "-", "-"
         ruta = ruta_de(self.path)
         try:
             if self.command != "POST" or ruta not in RUTAS_PERMITIDAS:
-                # 404 SIN reenviar ni leer el cuerpo: ni se gasta la clave ni se toca el upstream.
+                # 404 SIN reenviar ni leer el cuerpo: ni se usa el token ni se toca la API.
                 return self.responder_sin_cuerpo(404)
 
             crudo = self.headers.get("content-length")
@@ -126,12 +100,17 @@ class H(http.server.BaseHTTPRequestHandler):
 
             body = self.rfile.read(n) if n else None
             if body:
-                body = fix(body)
+                modelo, effort = modelo_y_effort(body)
 
             hdrs = {k: v for k, v in self.headers.items() if k.lower() in CABECERAS_PERMITIDAS}
-            hdrs["Authorization"] = "Bearer " + KEY   # Claude Code manda su propio token; el router necesita el suyo
-            # Al router va SOLO la ruta permitida, sin la query del cliente.
-            req = urllib.request.Request(UPSTREAM + ruta, data=body, method=self.command, headers=hdrs)
+            beta = next((v for k, v in hdrs.items() if k.lower() == "anthropic-beta"), None)
+            hdrs = {k: v for k, v in hdrs.items() if k.lower() != "anthropic-beta"}
+            hdrs["anthropic-beta"] = con_beta_oauth(beta)
+            hdrs["Authorization"] = "Bearer " + TOKEN
+            # A la API va la ruta permitida con la query original (?beta=true).
+            q = urllib.parse.urlsplit(self.path).query
+            req = urllib.request.Request(UPSTREAM + ruta + ("?" + q if q else ""), data=body,
+                                         method="POST", headers=hdrs)
             try:
                 r = OPENER.open(req, timeout=3600)
             except urllib.error.HTTPError as e:
@@ -146,7 +125,7 @@ class H(http.server.BaseHTTPRequestHandler):
 
             self.send_response(estado)
             for k, v in r.headers.items():
-                if k.lower() not in ("transfer-encoding", "content-length", "connection", "content-encoding"):
+                if k.lower() not in ("transfer-encoding", "content-length", "connection", "content-encoding", "set-cookie"):
                     self.send_header(k, v)
             self.end_headers()
             leer = getattr(r, "read1", None) or r.read   # read1: entrega cada trozo del stream sin esperar a llenar el buffer
@@ -156,17 +135,18 @@ class H(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(chunk)
                 enviados += len(chunk)
         except Exception:
-            # Nunca se deja escapar un traceback (ni al cliente ni con datos de la petición
-            # de por medio); el contenedor solo necesita saber que algo falló.
+            # Nunca se deja escapar un traceback (ni al cliente ni con datos de la petición).
             self.responder_sin_cuerpo(500)
         finally:
-            # Una línea por petición (Fase 3c): hora, método, ruta SIN query, código,
-            # bytes de respuesta y duración. Nunca cabeceras, cuerpo ni clave.
+            # Una línea por petición: hora, método, ruta SIN query, código, bytes de
+            # respuesta, duración, y (Fase 3d) modelo y effort pedidos. Nunca
+            # cabeceras, el resto del cuerpo ni el token.
             # docker logs: el contenedor corre con --log-opt max-size=1m max-file=2.
             etiqueta = ruta if ruta is not None else "(rechazada) " + self.path.split("?", 1)[0]
-            sys.stderr.write("%s %s %s %s %d %dms\n" % (
+            sys.stderr.write("%s %s %s %s %d %dms modelo=%s effort=%s\n" % (
                 time.strftime("%Y-%m-%dT%H:%M:%S"), para_log(self.command or "-", 10),
-                para_log(etiqueta), self._codigo, enviados, (time.monotonic() - t0) * 1000))
+                para_log(etiqueta), self._codigo, enviados, (time.monotonic() - t0) * 1000,
+                para_log(modelo, 60), para_log(effort, 20)))
             sys.stderr.flush()
 
     do_POST = do_GET = do_PUT = do_DELETE = do_PATCH = handle_one

@@ -1,7 +1,8 @@
 # dcam-jaula — imagen del agente solucionador DCAM. Sin salida a internet: habla
 # únicamente con dcam-puente:1235 (ANTHROPIC_BASE_URL), que es quien de verdad
-# llega al router local. node_modules horneados desde el package-lock.json de
-# main, no instalados en caliente dentro de la jaula.
+# llega a api.anthropic.com con el token OAuth (la jaula no lo ve nunca).
+# node_modules horneados desde el package-lock.json de main, no instalados en
+# caliente dentro de la jaula.
 # trixie (no bookworm): requirements-dcam.txt trae networkx==3.7, que exige
 # Python >=3.12; el python3 de apt en bookworm es 3.11. trixie trae 3.13.
 FROM node:22-trixie-slim@sha256:154ba2f4d6fec323d28e4f4bb86bba4677f1223391a1979cf521304e03a98dfa
@@ -16,7 +17,9 @@ RUN python3 -m venv /opt/venv && /opt/venv/bin/pip install --no-cache-dir -r /op
 RUN useradd -u 10001 -m agente
 ENV DISABLE_TELEMETRY=1 DISABLE_ERROR_REPORTING=1 CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 DISABLE_AUTOUPDATER=1
 ENV ANTHROPIC_BASE_URL=http://dcam-puente:1235 ANTHROPIC_AUTH_TOKEN=jaula-sin-clave
-# Fija el modelo para Fase 3: sin esto Claude Code intenta hablar con un modelo
-# Anthropic por defecto, que el puente no sabe traducir.
-ENV ANTHROPIC_MODEL=qwen3.8-27b ANTHROPIC_SMALL_FAST_MODEL=qwen3.8-27b
+# Fase 3d (decisión de Saulo, 15-oct): Opus 5.5; el modelo pequeño/rápido es
+# Haiku 5.5. Claude Code 2.1.299 lee ANTHROPIC_DEFAULT_HAIKU_MODEL (actual) y
+# todavía ANTHROPIC_SMALL_FAST_MODEL (antiguo): se fijan los dos. El effort NO
+# va aquí: lo pone dentro.sh (de MAIN) con --effort medium.
+ENV ANTHROPIC_MODEL=claude-opus-5-5 ANTHROPIC_DEFAULT_HAIKU_MODEL=claude-haiku-5-5 ANTHROPIC_SMALL_FAST_MODEL=claude-haiku-5-5
 USER agente

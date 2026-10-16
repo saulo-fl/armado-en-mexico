@@ -10,8 +10,14 @@
 # fuera de la jaula). Este script tampoco escribe solucion.json: lo escribe el
 # propio agente en /trabajo/salida/solucion.json, según sus instrucciones.
 #
-# El modelo lo fija la imagen (ANTHROPIC_MODEL=qwen3.8-27b vía el puente
-# dcam-puente); por eso no hay --model aquí.
+# El modelo lo fija la imagen (ANTHROPIC_MODEL=claude-opus-5-5 vía el puente
+# dcam-puente); por eso no hay --model aquí. El effort sí va aquí (Fase 3d,
+# Saulo: «Opus 5.5 en razonamiento medio»): este archivo viene de MAIN, nunca
+# de la rama, así que la rama no puede cambiarlo.
+#
+# Fase 3d: stream-json (una línea JSON por evento) en vez de json: si el agente
+# muere por timeout, agente.json conserva lo que hizo. El resultado, el costo y
+# los turnos van en la última línea con type=result.
 set -uo pipefail
 cd /trabajo/repo
 ln -sfn /opt/deps/node_modules node_modules
@@ -30,4 +36,5 @@ timeout --kill-after=60 "$((${SOLUCIONADOR_MIN:-45} * 60))" \
                    "Bash(ls *)" "Bash(head *)" "Bash(tail *)" "Bash(grep *)" "Bash(jq *)" "Bash(wc *)" "Bash(cp *)" \
     --disallowedTools WebFetch WebSearch \
     --add-dir /trabajo/entrada --add-dir /trabajo/salida \
-    --output-format json > /trabajo/salida/agente.json
+    --effort medium \
+    --output-format stream-json --verbose > /trabajo/salida/agente.json

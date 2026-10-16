@@ -507,6 +507,40 @@ fi
 [ -n "$RUTA_N" ] && rm -rf "$(dirname "$RUTA_N")"
 rm -rf "$MAIN_N"
 
+# --- (o) Fase 3d: agente.json es stream-json. Si pasa de 1 MB NO se descarta:
+#     llegan sus últimos 1 MB (con la línea type=result) y queda el AVISO. ---
+MAIN_O="$TMP/main-o"
+main_con_dentro "$MAIN_O" <<'EOF'
+#!/usr/bin/env bash
+for i in $(seq 1 15000); do
+  printf '{"type":"assistant","n":%d,"relleno":"%0100d"}\n' "$i" 0
+done > /trabajo/salida/agente.json
+echo '{"type":"result","subtype":"success","num_turns":7}' >> /trabajo/salida/agente.json
+EOF
+W_O="$TMP/w-o"
+mkdir -p "$W_O"
+echo "motivo de prueba" > "$W_O/motivo.txt"
+echo "prompt de prueba" > "$W_O/prompt.txt"
+set +e
+RUTA_O="$(timeout 300 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_O" "$MAIN_O" 2>"$TMP/log-o.txt")"
+RC_O=$?
+set -e
+TAM_O="$(stat -c%s "$W_O/salida/agente.json" 2>/dev/null || echo 0)"
+ULTIMA_O="$(tail -n 1 "$W_O/salida/agente.json" 2>/dev/null || true)"
+PRIMERA_O="$(head -n 1 "$W_O/salida/agente.json" 2>/dev/null || true)"
+echo "    (o) solucionar.sh RC=$RC_O; agente.json en el host: $TAM_O bytes; aviso: $(grep -h AVISO "$TMP/log-o.txt" || true)"
+if [ "$RC_O" -ne 0 ] || [ "$TAM_O" -le 0 ] || [ "$TAM_O" -gt 1048576 ]; then
+  mal "(o) agente.json > 1 MB: RC=$RC_O, tamaño en el host $TAM_O (ver $TMP/log-o.txt)"
+elif [ "$(jq -r .type <<< "$ULTIMA_O" 2>/dev/null)" != "result" ] || ! jq -e . <<< "$PRIMERA_O" >/dev/null 2>&1; then
+  mal "(o) agente.json > 1 MB: la última línea no es type=result o la primera quedó partida"
+elif ! grep -q "AVISO: 'agente.json' medía .* truncado" "$TMP/log-o.txt"; then
+  mal "(o) agente.json > 1 MB: no quedó el AVISO del truncado en stderr"
+else
+  ok "(o) agente.json > 1 MB: truncado a sus últimos $TAM_O bytes, con type=result al final y el AVISO en stderr"
+fi
+[ -n "$RUTA_O" ] && rm -rf "$(dirname "$RUTA_O")"
+rm -rf "$W_O" "$MAIN_O"
+
 echo "=================================================="
 if [ "$FALLOS" -eq 0 ]; then
   echo "test-compuertas.sh: TODO OK"

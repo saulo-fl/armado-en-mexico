@@ -183,18 +183,30 @@ else
 fi
 [ -n "$OUT" ] && rm -rf "$(dirname "$OUT")"
 
-# (h) menor 1: el ancla duerme el timeout del agente + 15 min, no `infinity`
+# (h) menor 1 (3c) + menor de la revisión de 3c (3d): el ancla duerme copia
+# previa (300+10) + agente (timeout + kill-after) + extracción (300+10) + 300,
+# no `infinity`; y "08m" se lee en decimal (sin `10#`, bash lo tomaba por octal).
 falso_docker "$INSPECT_NO"
-correr_falso h SOLUCIONADOR_TIMEOUT=3s
-ANCLA_CMD="$(grep -- '-ancla' "$FAKEBIN/registro" | head -1)"
-if [ "$RC" -eq 0 ] && [[ "$ANCLA_CMD" == *" sleep 903" ]]; then
-  ok "(h) ancla con SOLUCIONADOR_TIMEOUT=3s: ...${ANCLA_CMD: -40}"
-else
-  mal "(h) ancla: RC=$RC cmd='$ANCLA_CMD'"
-fi
-[ -n "$OUT" ] && rm -rf "$(dirname "$OUT")"
-correr_falso h2 SOLUCIONADOR_TIMEOUT=45x
-[ "$RC" -eq 2 ] && ok "(h) SOLUCIONADOR_TIMEOUT inválido -> exit 2" || mal "(h) SOLUCIONADOR_TIMEOUT=45x: RC=$RC"
+for caso in "3s:60:983" "08m:60:1460" "45m:90:3710"; do
+  IFS=: read -r t k esperado <<< "$caso"
+  : > "$FAKEBIN/registro"
+  correr_falso h SOLUCIONADOR_TIMEOUT="$t" SOLUCIONADOR_KILL_AFTER="$k"
+  ANCLA_CMD="$(grep -- '-ancla' "$FAKEBIN/registro" | head -1 || true)"
+  if [ "$RC" -eq 0 ] && [[ "$ANCLA_CMD" == *" sleep $esperado" ]]; then
+    ok "(h) ancla con SOLUCIONADOR_TIMEOUT=$t KILL_AFTER=$k: ...${ANCLA_CMD: -40}"
+  else
+    mal "(h) ancla con $t/$k: RC=$RC cmd='$ANCLA_CMD' (esperaba sleep $esperado)"
+  fi
+  if [ -n "$OUT" ]; then rm -rf "$(dirname "$OUT")"; fi
+done
+for t in 45x 0 0m 121m 3h 1234567; do
+  correr_falso h2 SOLUCIONADOR_TIMEOUT="$t"
+  [ "$RC" -eq 2 ] && ok "(h) SOLUCIONADOR_TIMEOUT=$t -> exit 2: $(cat "$TMP/err-h2")" || mal "(h) SOLUCIONADOR_TIMEOUT=$t: RC=$RC"
+done
+for k in 0 601 abc; do
+  correr_falso h3 SOLUCIONADOR_KILL_AFTER="$k"
+  [ "$RC" -eq 2 ] && ok "(h) SOLUCIONADOR_KILL_AFTER=$k -> exit 2: $(cat "$TMP/err-h3")" || mal "(h) SOLUCIONADOR_KILL_AFTER=$k: RC=$RC"
+done
 
 # Limpieza SOLO de la $JAULA que este test sí creó (ronda de arreglo 1/5, punto
 # 14): un `find /tmp -name 'dcam-jaula-*' ... -exec rm -rf` barría CUALQUIER

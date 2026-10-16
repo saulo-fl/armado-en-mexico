@@ -9,8 +9,10 @@ RAIZ="$(git rev-parse --show-toplevel)"
 SOLO_PUENTE=0
 [ "${1:-}" = "--solo-puente" ] && SOLO_PUENTE=1
 [ "$SOLO_PUENTE" -eq 1 ] || : "${CLAUDE_VERSION:?fija la versión de Claude Code (ej. 2.1.299)}"
-: "${ROUTER_KEY_FILE:?fija la ruta a la clave del router (archivo 640, dueño saulo, nunca en el repo)}"
-[ -s "$ROUTER_KEY_FILE" ] || { echo "ROUTER_KEY_FILE no existe o está vacío: $ROUTER_KEY_FILE" >&2; exit 1; }
+# El token OAuth de Claude: solo se comprueba que exista (nunca se lee aquí) y
+# se monta en solo lectura en dcam-puente, el único que lo ve.
+: "${CLAUDE_TOKEN_FILE:?fija la ruta al token OAuth de Claude (archivo 640, dueño saulo, nunca en el repo)}"
+[ -s "$CLAUDE_TOKEN_FILE" ] || { echo "CLAUDE_TOKEN_FILE no existe o está vacío: $CLAUDE_TOKEN_FILE" >&2; exit 1; }
 
 # dcam-interna: la red de la jaula. Debe ser --internal (sin salida); si alguien
 # la recreó sin ese flag, aquí no se repara sola — se para antes de construir
@@ -22,8 +24,9 @@ else
   docker network create --internal dcam-interna
 fi
 
-# dcam-salida: red PROPIA del puente para llegar al router (decisión de Saulo,
-# 19:06 — "solo el puente", IP fija + regla ufw que solo deja pasar desde ella).
+# dcam-salida: red PROPIA del puente para salir (decisión de Saulo, 19:06 —
+# "solo el puente", IP fija). Fase 3d: sale a api.anthropic.com:443; la regla
+# ufw 172.30.0.2 → 8090 (router local) queda sin uso, la quita Saulo.
 # NO es --internal (necesita salir al host) y dcam-puente YA NO se conecta al
 # bridge por defecto (ahí vive portainer y cualquier otra cosa del host).
 docker network inspect dcam-salida >/dev/null 2>&1 || \
@@ -41,6 +44,6 @@ docker run -d --name dcam-puente --restart unless-stopped \
   --group-add 1000 \
   --log-opt max-size=1m --log-opt max-file=2 \
   --network dcam-salida --ip 172.30.0.2 \
-  -v "$(cd "$(dirname "$ROUTER_KEY_FILE")" && pwd)/$(basename "$ROUTER_KEY_FILE")":/run/secrets/router-key:ro \
+  -v "$(cd "$(dirname "$CLAUDE_TOKEN_FILE")" && pwd)/$(basename "$CLAUDE_TOKEN_FILE")":/run/secrets/claude-oauth-token:ro \
   dcam-puente:1
 docker network connect dcam-interna dcam-puente

@@ -28,8 +28,8 @@
 #   3. el agente trabaja sobre el volumen;
 #   4. un contenedor corto de extracción (extraer.sh de MAIN) monta el volumen
 #      en solo lectura y copia al host SOLO los archivos de PERMITIDOS (regular,
-#      sin enlaces, ≤ 5 MB) a $JAULA/repo y solucion.json/agente.json (≤ 1 MB)
-#      a $W/salida. Lo máximo que llega al disco del host está acotado.
+#      sin enlaces, ≤ 5 MB) a $JAULA/repo y solucion.json/agente.json (≤ 1 MB;
+#      agente.json se trunca y se avisa) a $W/salida. Lo máximo que llega al disco del host está acotado.
 # La salida de consola de los contenedores no pasa por el log json-file del
 # daemon (--log-driver none) y en el host se recorta a 1 MB.
 # Un volumen tmpfs de Docker se desmonta (y PIERDE el contenido) en cuanto
@@ -46,12 +46,26 @@ FECHA_ISO="$1" RAMA="$2" W="$3" MAIN="$4"
 TAM_TMPFS="${DCAM_JAULA_TMPFS:-2g}"
 [[ "$TAM_TMPFS" =~ ^[0-9]+[kmg]?$ ]] || { echo "DCAM_JAULA_TMPFS inválido: $TAM_TMPFS" >&2; exit 2; }
 TIEMPO_AGENTE="${SOLUCIONADOR_TIMEOUT:-45m}"
-[[ "$TIEMPO_AGENTE" =~ ^([0-9]+)([smh]?)$ ]] || { echo "SOLUCIONADOR_TIMEOUT inválido: $TIEMPO_AGENTE" >&2; exit 2; }
-# Fase 3c (menor 1): el ancla caduca sola, timeout del agente + 15 min, aunque
-# este script muera con SIGKILL sin pasar por el trap (con --rm se borra y el
-# volumen tmpfs se desmonta; el objeto vacío lo barre el pipeline al arrancar).
+[[ "$TIEMPO_AGENTE" =~ ^([0-9]{1,6})([smh]?)$ ]] || { echo "SOLUCIONADOR_TIMEOUT inválido: $TIEMPO_AGENTE (formato: <n>[s|m|h])" >&2; exit 2; }
+# Fase 3d (menor de la revisión de 3c): `10#` para que "08m" no se lea en octal;
+# 0 desactivaría el tope (timeout 0 = sin límite) y se rechaza, igual que más de
+# 120 min. Abajo de un minuto solo tiene sentido en los tests (3s).
 case "${BASH_REMATCH[2]}" in m) F=60 ;; h) F=3600 ;; *) F=1 ;; esac
-ANCLA_S=$(( BASH_REMATCH[1] * F + 900 ))
+AGENTE_S=$(( 10#${BASH_REMATCH[1]} * F ))
+(( AGENTE_S >= 1 && AGENTE_S <= 7200 )) || { echo "SOLUCIONADOR_TIMEOUT fuera de rango: $TIEMPO_AGENTE (de 1s a 120m)" >&2; exit 2; }
+KILL_S="${SOLUCIONADOR_KILL_AFTER:-60}"
+[[ "$KILL_S" =~ ^[0-9]{1,4}$ ]] && (( 10#$KILL_S >= 1 && 10#$KILL_S <= 600 )) \
+  || { echo "SOLUCIONADOR_KILL_AFTER inválido: $KILL_S (segundos, de 1 a 600)" >&2; exit 2; }
+KILL_S=$(( 10#$KILL_S ))
+# Tope de la copia previa y de la extracción (cada una: timeout + kill-after).
+COPIA_S=300 COPIA_KILL_S=10
+# Fase 3c (menor 1) + 3d: el ancla caduca sola aunque este script muera con
+# SIGKILL sin pasar por el trap (con --rm se borra y el volumen tmpfs se
+# desmonta; el objeto vacío lo barre el pipeline al arrancar). Tiene que
+# sobrevivir a TODO lo que la necesita: copia previa + agente (con su
+# kill-after) + extracción, más 5 min de margen; si no, una corrida legítima
+# larga perdería el volumen y parecería culpa del agente.
+ANCLA_S=$(( (COPIA_S + COPIA_KILL_S) + (AGENTE_S + KILL_S) + (COPIA_S + COPIA_KILL_S) + 300 ))
 
 REPO="${DCAM_DIR:?}/repo"
 JAULA="$(mktemp -d /tmp/dcam-jaula-XXXX)"
@@ -121,7 +135,7 @@ docker run -d --rm --init --name "$ANCLA" --network none "${DURO[@]}" \
 
 # Copia de la rama al volumen: contenedor previo con un comando fijo del host;
 # el clon del host entra en solo lectura. La copia no sabe a dónde empujar.
-timeout --kill-after=10 5m \
+timeout --kill-after="$COPIA_KILL_S" "$COPIA_S" \
   docker run --rm --init --name "$PREP" --network none "${DURO[@]}" \
   --pids-limit 64 --memory 1g --tmpfs /tmp:size=64m -e HOME=/tmp -e RAMA="$RAMA" \
   -v "$REPO:/fuente:ro" -v "$VOL:/trabajo" \
@@ -137,7 +151,7 @@ fi
 # `--init` (reaper de PID 1) ayuda a que las señales lleguen dentro; un
 # `timeout` que vence solo mata al CLIENTE docker, por eso el `docker rm -f`
 # explícito de abajo (ronda de arreglo 1/5, punto 2).
-timeout --kill-after="${SOLUCIONADOR_KILL_AFTER:-60}" "$TIEMPO_AGENTE" \
+timeout --kill-after="$KILL_S" "$AGENTE_S" \
   docker run --rm --init --name "$NOMBRE_CONTENEDOR" --network dcam-interna "${DURO[@]}" \
   --tmpfs /tmp:size=512m --tmpfs "/home/agente:size=256m,uid=${UID_HOST},gid=${GID_HOST}" \
   --pids-limit 512 --memory 4g --cpus 2 -e HOME=/home/agente \
@@ -158,7 +172,7 @@ if docker container inspect "$NOMBRE_CONTENEDOR" >/dev/null 2>&1; then
 fi
 
 # Extracción acotada: el volumen en solo lectura, el agente ya muerto.
-timeout --kill-after=10 5m \
+timeout --kill-after="$COPIA_KILL_S" "$COPIA_S" \
   docker run --rm --init --name "$EXTRACTOR" --network none "${DURO[@]}" \
   --pids-limit 64 --memory 512m \
   -v "$VOL:/v:ro" -v "$JAULA/repo:/x/repo" -v "$W/salida:/x/salida" \
@@ -167,6 +181,8 @@ timeout --kill-after=10 5m \
   dcam-jaula:1 bash /opt/main/extraer.sh \
   2>&1 | recortar 65536 "$W/docker-extraer.log" && RC_EXT=0 || RC_EXT=$?
 docker rm -f "$EXTRACTOR" >/dev/null 2>&1 || true
+# Fase 3d: que el truncado de agente.json quede en el $LOG del pipeline.
+grep -h "^extraer: AVISO" "$W/docker-extraer.log" >&2 || true
 
 AGENTE_JSON="$W/salida/agente.json"
 # `[ -f ] && [ ! -L ]` + tamaño > 0, no `[ -s ]` a secas (ronda de arreglo 1/5,
