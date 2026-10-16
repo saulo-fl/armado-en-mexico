@@ -124,4 +124,19 @@ assert res["existencias"][2093] == 8, res["existencias"]
 assert [(g["idx"], g["fichaId"], g["qty"]) for g in res["gemelos"]] == [(7, 2093, 3)], res["gemelos"]
 assert res["sinFicha"] == [] and res["regresosRechazados"] == [], (res["sinFicha"], res["regresosRechazados"])
 
+# Falso positivo: 92 y 212 comparten dcamRef y precio; el segundo renglón NO es gemelo
+# de la 92, conserva su rechazo «compartido» y se queda en sinFicha.
+ARM = "ESCOPETA CAL. 12 ARMSAN P612 A.C."
+h4 = dict(hist, **{"92": {"dcamRef": ARM, "regs": [["2026-09-15", 10.0]]},
+                   "212": {"dcamRef": ARM, "regs": [["2026-09-15", 10.0]]}})
+with tempfile.TemporaryDirectory() as td:
+    ref = os.path.join(td, "referencia-armas.json")
+    json.dump({"rows": [{"name": f"OTRA {i}", "priceN": 10.0, "fichaId": i} for i in range(1, 7)]
+               + [{"name": ARM, "priceN": 10.0, "fichaId": 92}]}, open(ref, "w"))
+    nuevos = [fila(f"OTRA {i}", 10.574) for i in range(1, 7)] + [fila(ARM, 10.574, 2), fila(ARM, 10.574, 1)]
+    res = m.map_existencias(ref, nuevos, historial=h4)
+assert res["existencias"][92] == 2 and res["gemelos"] == [], (res["existencias"], res["gemelos"])
+assert [x["idx"] for x in res["sinFicha"]] == [7], res["sinFicha"]
+assert "compartido" in res["regresosRechazados"][0]["motivo"], res["regresosRechazados"]
+
 print("✔ regresos: 7 casos + gemelos, renombres e integración")

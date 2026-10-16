@@ -563,8 +563,6 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
             for r in regresos:
                 print(f"  ✔ {r['name'][:45]} → {r['fichaId']}  {r['antes']} ({r['fechaAntes']}) → "
                       f"{r['priceN']}  x{r['razon']:.6f}: {r['motivo']}", file=sys.stderr)
-            for r in regresos_rechazados:
-                print(f"  ✗ {r['name'][:45]} → {r.get('fichaId', '?')}: {r['motivo']}", file=sys.stderr)
 
     # 3d) Gemelos: segundo renglón del mismo producto (no cambia el precio de la ficha).
     cands = [ni for ni in unmatched_new if id(new_items[ni]) not in consumidos]
@@ -578,7 +576,12 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
     for fid, rows in ficha_rows.items():
         ligados[fid] += [r for r in rows if not any(r is x for x in ligados[fid])]
     gemelos = []
+    # Un renglón con rechazo del 3c sin fichaId (compartido) o de otra ficha no es gemelo:
+    # conserva su rechazo para el solucionador.
+    bloqueado = {r["idx"]: r.get("fichaId") for r in regresos_rechazados}
     for ni, fid in ligar_gemelos(new_items, cands, ligados).items():
+        if ni in bloqueado and bloqueado[ni] != fid:
+            continue
         nr = new_items[ni]
         if nr["qty"] > 0:
             existencias[fid] += nr["qty"]
@@ -587,6 +590,9 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
         gemelos.append({"idx": ni, "name": nr["name"], "qty": nr["qty"], "fichaId": fid})
     unmatched_new = [ni for ni in unmatched_new if ni not in forzados]
     regresos_rechazados = [r for r in regresos_rechazados if r["idx"] not in forzados]
+    if verbose:
+        for r in regresos_rechazados:
+            print(f"  ✗ {r['name'][:45]} → {r.get('fichaId', '?')}: {r['motivo']}", file=sys.stderr)
     if verbose and gemelos:
         print(f"Gemelos (mismo nombre y precio que un renglón ya ligado): {len(gemelos)}", file=sys.stderr)
         for g in gemelos:
