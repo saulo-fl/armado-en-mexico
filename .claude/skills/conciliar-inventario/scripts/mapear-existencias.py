@@ -208,8 +208,11 @@ def _clave_calibre(s):
     """Como _norm_nombre, pero iguala las notaciones de calibre del PDF:
     0.22 / .22 / CAL22 / CAL 22 / CAL. 22 / CALIBRE 22 → 22 (y 0.380 → 380)."""
     import re
-    s = re.sub(r"\bCAL(?:IBRE)?\.?\s*(?=\.?\d)", "", (s or "").upper())
-    return _norm_nombre(re.sub(r"(?<!\d)0?\.(?=\d)", "", s))
+    # Solo es calibre un número de 2-3 cifras tras CAL/CAL./CALIBRE, o 0.NN / .NN
+    # suelto; nunca pegado a otra cifra ni a una letra (0.5, 1.22, M4-22 no lo son).
+    s = re.sub(r"\bCAL(?:IBRE)?\.?\s*(?=\d{2,3}(?!\d))", "", (s or "").upper())
+    s = re.sub(r"(?<![\w.])0?\.(?=\d{2,3}(?!\w))", "", s)
+    return _norm_nombre(re.sub(r"(?<=\d)\.(?=\d)", "P", s))   # 1.22 no pasa a 122
 
 
 def elegir_representante(rows, dcam_ref, ultimo, factors, tol=0.02):
@@ -371,8 +374,16 @@ def detectar_regresos(new_items, candidatos, ficha_prices, historial):
         if not fids:
             # Renombre: el PDF cambió la notación del calibre. Solo cuentan las
             # fichas que hoy no tienen renglón.
-            fids = [f for f in por_canon.get(_clave_calibre(nr["name"]), []) if f not in tomadas]
+            canon = por_canon.get(_clave_calibre(nr["name"]), [])
+            fids = [f for f in canon if f not in tomadas]
             renombre = bool(fids)
+            if canon and not fids and nr["priceN"] > 0:
+                # Todas las candidatas ya tienen renglón: sin liga, pero con pista.
+                rechazos.append({"idx": ni, "name": nr["name"], "priceN": nr["priceN"],
+                                 "fichaId": int(canon[0]),
+                                 "motivo": f"posible renombre de «{historial[canon[0]]['dcamRef']}»: "
+                                           "la ficha ya tiene renglón hoy"})
+                continue
         if not fids or nr["priceN"] <= 0:
             continue
         info = {"idx": ni, "name": nr["name"], "priceN": nr["priceN"]}
@@ -404,14 +415,14 @@ def detectar_regresos(new_items, candidatos, ficha_prices, historial):
     return aceptados, detalle, rechazos
 
 
-def ligar_gemelos(new_items, candidatos, ficha_rows):
+def ligar_gemelos(new_items, candidatos, ligados):
     """Renglones sin pareja que repiten (nombre exacto y precio ±0.005) a uno ya
     ligado: el PDF trae el mismo producto en dos renglones. Se ligan a la misma
     ficha, salvo que ese nombre ya esté ligado a fichas distintas.
     Devuelve {new_idx: fichaId}.
     """
     por_nombre = defaultdict(list)   # name → [(fichaId, priceN)]
-    for fid, rows in ficha_rows.items():
+    for fid, rows in ligados.items():   # TODOS los ligados hoy, también con qty 0
         for r in rows:
             por_nombre[r["name"]].append((fid, r["priceN"]))
     gemelos = {}
@@ -557,8 +568,17 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
 
     # 3d) Gemelos: segundo renglón del mismo producto (no cambia el precio de la ficha).
     cands = [ni for ni in unmatched_new if id(new_items[ni]) not in consumidos]
+    ligados = defaultdict(list)   # fichaId → renglones ligados, sin filtrar por qty
+    for ni, ri, _ in matched:
+        if ref_rows[ri]["fichaId"] is not None:
+            ligados[ref_rows[ri]["fichaId"]].append(new_items[ni])
+    for ni, fid in forzados.items():
+        if fid is not None:
+            ligados[fid].append(new_items[ni])
+    for fid, rows in ficha_rows.items():
+        ligados[fid] += [r for r in rows if not any(r is x for x in ligados[fid])]
     gemelos = []
-    for ni, fid in ligar_gemelos(new_items, cands, ficha_rows).items():
+    for ni, fid in ligar_gemelos(new_items, cands, ligados).items():
         nr = new_items[ni]
         if nr["qty"] > 0:
             existencias[fid] += nr["qty"]
@@ -566,6 +586,7 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
         forzados[ni] = fid
         gemelos.append({"idx": ni, "name": nr["name"], "qty": nr["qty"], "fichaId": fid})
     unmatched_new = [ni for ni in unmatched_new if ni not in forzados]
+    regresos_rechazados = [r for r in regresos_rechazados if r["idx"] not in forzados]
     if verbose and gemelos:
         print(f"Gemelos (mismo nombre y precio que un renglón ya ligado): {len(gemelos)}", file=sys.stderr)
         for g in gemelos:

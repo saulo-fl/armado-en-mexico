@@ -96,4 +96,32 @@ assert ok == {} and "compartido" in rech[0]["motivo"], (ok, rech)
 ok, det, rech = m.detectar_regresos(r_ok, [0], dict(ph, **{"82": 21.0}), h3)
 assert ok == {0: 81}, (ok, rech)
 
-print("✔ regresos: 7 casos + gemelos y renombres")
+# Gemelo: el mismo nombre ligado a OTRA ficha con qty 0 también cuenta (no se liga)
+Z = fila("ATROX SB", 13511.62, 0)
+g = m.ligar_gemelos([A, Z, B], [2], {99: [A], 100: [Z]})
+assert g == {}, g
+
+# Clave de calibre acotada: lo que no es calibre no colisiona
+assert m._clave_calibre("BOLSA 0.5") != m._clave_calibre("BOLSA 5")
+assert m._clave_calibre("TUBO 1.22") != m._clave_calibre("TUBO 122")
+assert m._clave_calibre("RIFLE M4-22") == m._norm_nombre("RIFLE M4-22")
+assert m._clave_calibre("PISTOLA CAL 9") == m._norm_nombre("PISTOLA CAL 9")
+
+# Renombre cuya única candidata ya tiene renglón: rechazo con pista, no silencio
+ok, det, rech = m.detectar_regresos(r_ok, [0], dict(ph, **{"81": 21.0}), h2)
+assert ok == {} and rech[0]["fichaId"] == 81 and "ya tiene renglón" in rech[0]["motivo"], (ok, rech)
+
+# Integración (paso 3d): gemelo de un regreso (ficha ligada por forzado) suma qty,
+# sale de sinFicha y aparece en gemelos, sin duplicarse en regresosRechazados.
+import json, tempfile
+with tempfile.TemporaryDirectory() as td:
+    ref = os.path.join(td, "referencia-cartuchos.json")
+    json.dump({"rows": [{"name": f"OTRA {i}", "priceN": 10.0, "fichaId": i} for i in range(1, 7)]}, open(ref, "w"))
+    nom = "CARTUCHO CALIBRE .380” AUTO, MARCA FEDE."
+    nuevos = [fila(f"OTRA {i}", 10.574) for i in range(1, 7)] + [fila(nom, 12.61, 5), fila(nom, 12.61, 3)]
+    res = m.map_existencias(ref, nuevos, historial=hist)
+assert res["existencias"][2093] == 8, res["existencias"]
+assert [(g["idx"], g["fichaId"], g["qty"]) for g in res["gemelos"]] == [(7, 2093, 3)], res["gemelos"]
+assert res["sinFicha"] == [] and res["regresosRechazados"] == [], (res["sinFicha"], res["regresosRechazados"])
+
+print("✔ regresos: 7 casos + gemelos, renombres e integración")
