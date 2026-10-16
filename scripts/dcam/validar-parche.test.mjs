@@ -249,7 +249,7 @@ test('callees por archivo: un helper de data-municiones.js no es válido en data
   assert.ok(compararArchivo(D, b, n).length > 0);
   // y en su archivo sí es válido:
   const bM = 'const H = [\n  _mh(1, 2),\n];\n';
-  const nM = bM.replace(']', '  _mh(3, 4),\n]');
+  const nM = bM.replace('];', '  _mh(3, 4),\n];');
   assert.deepEqual(compararArchivo('src/data/data-municiones.js', bM, nM), []);
 });
 
