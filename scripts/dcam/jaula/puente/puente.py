@@ -30,7 +30,13 @@ import http.server, json, sys, time, urllib.parse, urllib.request, urllib.error
 
 UPSTREAM = "https://api.anthropic.com"   # fijo: la jaula no puede elegir destino
 RUTAS_PERMITIDAS = ("/v1/messages", "/v1/messages/count_tokens")
-MAX_CUERPO = 32 * 1024 * 1024  # 32 MiB — Claude Code no manda más
+# 16 MiB (revisión final): medido en APOLO el 16-oct, puente.py con --memory 256m
+# como en construir.sh, pico del contenedor por un solo cuerpo del tope: ASCII
+# 79 MiB, «ñ» 135, emoji 142, 620 mil bloques de texto mínimos 209. Con 32 MiB:
+# 142/254/270/407 y los dos últimos morían por OOM. Se bajó el tope en vez de
+# subir la memoria: APOLO tenía ~3 GB libres, y 16 MiB son ~4 millones de tokens
+# de texto, de sobra para Claude Code con 200 mil de contexto.
+MAX_CUERPO = 16 * 1024 * 1024
 # Lista blanca de la petición: authorization, x-api-key y cookie nunca pasan.
 CABECERAS_PERMITIDAS = ("content-type", "anthropic-version", "anthropic-beta", "accept")
 # Lista blanca de la respuesta: nada de organización, workspace ni límites de la

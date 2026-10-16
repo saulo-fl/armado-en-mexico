@@ -133,8 +133,8 @@ cod=$(crudo_cl "abc")
 cod=$(crudo_cl "-1")
 [ "$cod" = "400" ] && ok "Content-Length negativo -> 400" || mal "Content-Length -1 no dio 400 (fue '$cod')"
 
-cod=$(correr sh -c "head -c 34603008 /dev/zero | curl -s -o /dev/null -w '%{http_code}' --max-time 60 -X POST http://dcam-puente:1235/v1/messages -H 'content-type: application/json' --data-binary @-")
-[ "$cod" = "413" ] && ok "cuerpo de 33 MiB -> 413" || mal "cuerpo de 33 MiB no dio 413 (fue '$cod')"
+cod=$(correr sh -c "head -c 17825792 /dev/zero | curl -s -o /dev/null -w '%{http_code}' --max-time 60 -X POST http://dcam-puente:1235/v1/messages -H 'content-type: application/json' --data-binary @-")
+[ "$cod" = "413" ] && ok "cuerpo de 17 MiB (tope 16) -> 413" || mal "cuerpo de 17 MiB no dio 413 (fue '$cod')"
 
 correr curl -s -o /dev/null --max-time 10 https://api.anthropic.com/v1/messages >/dev/null 2>&1 && mal "la jaula sale directo a api.anthropic.com" || ok "api.anthropic.com bloqueado desde la jaula"
 correr curl -s -o /dev/null --max-time 10 https://example.com >/dev/null 2>&1 && mal "sale a example.com" || ok "example.com bloqueado"
