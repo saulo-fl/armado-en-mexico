@@ -1,0 +1,568 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+import { compararArchivo, compararArchivoSeguro, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES, PERMITIDOS } from './validar-parche-lib.mjs';
+
+const D = 'src/data/data.js';
+// Los tests «con el archivo real» leen una COPIA CONGELADA (fixtures/validar-parche/), nunca
+// src/data/ en vivo: una edición normal de los datos no puede romper npm test (revisión final, I3).
+const FIXTURE = (f) => join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'validar-parche', f);
+const base = 'const X = [\n  mk(1, "A", "M"),\n];\nwindow.DB.forEach(a => a);\n';
+
+// --- los 9 casos del brief original, adaptados a la firma nueva (ruta, base, nuevo) ---
+
+test('una ficha nueva con literales pasa', () => {
+  const nuevo = base.replace('];', '  mk(2, "Mendoza RM22-3000 Squad", "Mendoza", null, 10.5),\n];');
+  assert.deepEqual(compararArchivo(D, base, nuevo), []);
+});
+
+test('una llamada que no es mk/mun/acc se rechaza', () => {
+  const nuevo = base.replace('];', '  fetch("https://x.y"),\n];');
+  assert.ok(compararArchivo(D, base, nuevo).length > 0);
+});
+
+test('un argumento que no es literal se rechaza', () => {
+  const nuevo = base.replace('];', '  mk(2, window.name),\n];');
+  assert.ok(compararArchivo(D, base, nuevo).length > 0);
+});
+
+test('template literal y escapes se rechazan', () => {
+  for (const s of ['`x`', '"\\u003cscript"', '"a</script>"']) {
+    const nuevo = base.replace('];', `  mk(2, ${s}),\n];`);
+    assert.ok(compararArchivo(D, base, nuevo).length > 0, s);
+  }
+});
+
+test('borrar una línea de código se rechaza', () => {
+  const nuevo = base.replace('window.DB.forEach(a => a);\n', '');
+  assert.ok(compararArchivo(D, base, nuevo).length > 0);
+});
+
+test('el mapa de existencias regenerado pasa', () => {
+  const b = 'window.AMX_ARMAS_EXISTENCIAS = { 1: 9 };\n';
+  const n = 'window.AMX_ARMAS_EXISTENCIAS = { 1: 9, 52: 6 };\n';
+  assert.deepEqual(compararArchivo('src/data/data-precios.js', b, n), []);
+});
+
+test('ligas: solo enteros o null', () => {
+  const r = '.claude/skills/conciliar-inventario/scripts/ligas-armas.json';
+  assert.deepEqual(compararArchivo(r, '{}', '{"MODELO X": 52, "Y": null}'), []);
+  assert.ok(compararArchivo(r, '{}', '{"MODELO X": "52"}').length > 0);
+});
+
+// El brief original probaba "archivos nuevos/renombrados/binarios/cambios de modo" vía
+// leerDiff (ya no existe: el validador no lee diffs). Equivalentes con la firma nueva:
+test('archivo fuera de la lista se rechaza', () => {
+  assert.ok(compararArchivo('scripts/x.py', 'a', 'b').length > 0);
+});
+test('un archivo nuevo (sin base) se valida igual que cualquier otro — y rechaza código', () => {
+  const nuevo = 'const X = [\n  fetch(1),\n];\n';
+  assert.ok(compararArchivo(D, '', nuevo).length > 0);
+});
+test('un archivo binario (no parsea como JS) se rechaza', () => {
+  const nuevo = Buffer.from([0, 1, 2, 0xff, 0xfe]).toString('latin1');
+  assert.ok(compararArchivo(D, base, nuevo).length > 0);
+});
+// "cambios de modo"/symlink: ver verificarArchivoEnNuevo abajo (Paso directorios).
+
+// leerDiff ya no existe (el validador no lee diffs); su cobertura ("se aísla solo lo que
+// cambió") queda demostrada por los casos de abajo (hallazgo del parche real + V9b).
+
+test('paréntesis de llamada pegados a algo que no es mk/mun/acc se rechazan (mordida del paso 5)', () => {
+  // A diferencia de `fetch(...)`, aquí no hay ningún identificador fuera de lista — solo
+  // paréntesis de llamada pegados a un literal.
+  const nuevo = base.replace('];', '  mk(2, "a"()),\n];');
+  assert.ok(compararArchivo(D, base, nuevo).length > 0);
+});
+
+test('CRLF en JSON no rompe la validación de ligas', () => {
+  const r = '.claude/skills/conciliar-inventario/scripts/ligas-armas.json';
+  const b = '{}\r\n';
+  const n = '{"MODELO X": 52, "Y": null}\r\n';
+  assert.deepEqual(compararArchivo(r, b, n), []);
+});
+
+// --- hallazgos del parche real del 07-oct (ronda anterior): solo cambia lo que de verdad
+// cambió dentro de un renglón de historial escrito en una sola línea ---
+
+test('un renglón de historial en una sola línea: solo lo nuevo se valida, lo viejo (un helper no-mk/mun/acc) no', () => {
+  const ruta = 'src/data/data-municiones.js';
+  const b = 'const H = {\n  2004: [_mh(1, 2), _mh(3, 4)],\n};\n';
+  const n = 'const H = {\n  2004: [_mh(1, 2), _mh(3, 4), { manualId: "x", price: "y", date: "z", qty: 5 }],\n};\n';
+  assert.deepEqual(compararArchivo(ruta, b, n), []);
+});
+
+test('solo cambia un número junto a un string ya existente con comilla escapada', () => {
+  const ruta = 'src/data/data-municiones.js';
+  const b = 'const F = [\n  mun(1, "Cartucho 0.38\\" Super", 10),\n];\n';
+  const n = 'const F = [\n  mun(1, "Cartucho 0.38\\" Super", 12),\n];\n';
+  assert.deepEqual(compararArchivo(ruta, b, n), []);
+});
+
+// --- Ronda de arreglo 1: vectores Critical de la revisión (ataques.mjs) ---
+
+test('V2: una sola comilla insertada re-tokeniza el sufijo común en código (se rechaza)', () => {
+  const b = 'const X = [\n  mk(1, "x", "a), fetch(1), //"),\n];\n';
+  const n = 'const X = [\n  mk(1, "x", "a"), fetch(1), //"),\n];\n';
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('V2a: plantar el string con "//" y paréntesis de llamada ya se rechaza (antes de que lo reabran)', () => {
+  const b = 'const X = [\n];\n';
+  const n = 'const X = [\n  mk(1, "x", "a), fetch(1), //"),\n];\n';
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('V6: una línea añadida que empieza con "++" ya no se lee como cabecera de diff (no se lee ningún diff)', () => {
+  const b = 'const X = [\n  mk(1, "a"),\n];\n';
+  const n = 'const X = [\n  mk(1, "a"),\n  ++window[fetch("https://evil.example")],\n];\n';
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('un archivo PERMITIDO sustituido por un symlink en el nuevo se rechaza', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'dcam-test-'));
+  try {
+    const dirNuevo = join(dir, 'nuevo');
+    mkdirSync(join(dirNuevo, dirname(D)), { recursive: true });
+    const objetivo = join(dir, 'fuera-de-la-jaula.js');
+    writeFileSync(objetivo, 'const X = [];\n');
+    symlinkSync(objetivo, join(dirNuevo, D), 'file');
+    const probs = verificarArchivoEnNuevo(dirNuevo, D);
+    assert.ok(probs.length > 0, 'un symlink debe rechazarse aunque "parezca" el archivo correcto');
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('un archivo PERMITIDO ausente en el nuevo se rechaza', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'dcam-test-'));
+  try {
+    const dirNuevo = join(dir, 'nuevo');
+    mkdirSync(dirNuevo, { recursive: true }); // vacío: falta todo, incluido D
+    const probs = verificarArchivoEnNuevo(dirNuevo, D);
+    assert.ok(probs.length > 0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('un archivo PERMITIDO que excede MAX_BYTES se rechaza', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'dcam-test-'));
+  try {
+    const dirNuevo = join(dir, 'nuevo');
+    mkdirSync(join(dirNuevo, dirname(D)), { recursive: true });
+    writeFileSync(join(dirNuevo, D), Buffer.alloc(MAX_BYTES + 1, 0x61));
+    const probs = verificarArchivoEnNuevo(dirNuevo, D);
+    assert.ok(probs.length > 0);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test('un comentario añadido se rechaza (los comentarios no se tocan)', () => {
+  const b = 'const X = [\n  mk(1, "a"),\n];\n';
+  const n = 'const X = [\n  mk(1, "a"), // nota\n];\n';
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('un comentario de bloque que reactiva código comentado se rechaza (V4)', () => {
+  const b = 'const X = [\n/* ejemplo\nfetch("https://evil.example"),\n*/\n];\n';
+  const n = 'const X = [\n/* ejemplo\n*/\nfetch("https://evil.example"),\n/*\n*/\n];\n';
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('comentar código existente para desactivarlo se rechaza (V5)', () => {
+  const b = 'const X = [\n];\nwindow.DB.forEach(a => a);\n';
+  const n = 'const X = [\n];\n/*\nwindow.DB.forEach(a => a);\n*/\n';
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('CRLF en .js: una adición legítima sigue pasando y un ataque se sigue rechazando', () => {
+  const b = 'const X = [\r\n  mk(1, "A", "M"),\r\n];\r\n';
+  const bien = b.replace('];', '  mk(2, "B", "M"),\r\n];');
+  assert.deepEqual(compararArchivo(D, b, bien), []);
+  const mal = b.replace('];', '  fetch(1),\r\n];');
+  assert.ok(compararArchivo(D, b, mal).length > 0);
+});
+
+test('mapeo: un string donde va un número entero (existencias) se rechaza', () => {
+  const r = 'mapeo-armas.json';
+  const base = JSON.stringify({ existencias: { 1: 9 }, precios: { 1: 10.5 }, factores: [1.0, 1.0], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 1, totalMapped: 1, excluidos: [], regresos: [], regresosRechazados: [] });
+  const malo = JSON.stringify({ existencias: { 1: '9' }, precios: { 1: 10.5 }, factores: [1.0, 1.0], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 1, totalMapped: 1, excluidos: [], regresos: [], regresosRechazados: [] });
+  assert.deepEqual(compararArchivo(r, base, base), []);
+  assert.ok(compararArchivo(r, base, malo).length > 0);
+});
+
+test('mapeo: claves fuera de esquema o faltantes se rechazan', () => {
+  const r = 'mapeo-armas.json';
+  const base = JSON.stringify({ existencias: {}, precios: {}, factores: [], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 0, totalMapped: 0, excluidos: [], regresos: [], regresosRechazados: [] });
+  const conExtra = JSON.stringify({ ...JSON.parse(base), __proto__eval: 'x' });
+  const sinClave = JSON.stringify((() => { const o = JSON.parse(base); delete o.totalPdf; return o; })());
+  assert.ok(compararArchivo(r, '{}', conExtra).length > 0);
+  assert.ok(compararArchivo(r, '{}', sinClave).length > 0);
+});
+
+// --- Ronda de arreglo 2: esqueleto AST, callees por archivo, git en cerrado, esquema JSON ---
+
+test('esqueleto: insertar solo puntuación permitida que re-estructura una función existente se rechaza', () => {
+  // Ninguno de los tokens insertados (un "}" de más y el ";" que ya estaba) es "peligroso"
+  // por sí solo — son justo los que el diff de tokens siempre deja pasar sin revisar su
+  // contenido. Mueve el final de la función de lugar: lo que antes corría DENTRO de f ahora
+  // corre fuera. El archivo sigue parseando.
+  const b = 'function f(a) {\n  mk(1, "a");\n  mk(2, "b");\n}\n';
+  const n = 'function f(a) {\n  mk(1, "a");\n}\nmk(2, "b");\n';
+  const probs = compararArchivo(D, b, n);
+  assert.ok(probs.length > 0, 'debe rechazar: la estructura cambió sin ningún token peligroso');
+  assert.match(probs[0], /estructura/);
+});
+
+test('esqueleto: cambiar el string literal de una llamada de código existente se rechaza', () => {
+  const b = 'const X = [\n  mk(1, "A", "M"),\n];\nwindow.DB.forEach(a => { a.x = "ok"; });\n';
+  const n = b.replace('"ok"', '"no"');
+  const probs = compararArchivo(D, b, n);
+  assert.ok(probs.length > 0, 'un literal en posición de código debe quedar fijo en el esqueleto');
+});
+
+test('esqueleto: añadir ficha, registro de historial o número de mapa sigue pasando', () => {
+  const b1 = 'const X = [\n  mk(1, "A", "M"),\n];\nwindow.DB.forEach(a => { a.x = "ok"; });\n';
+  const n1 = b1.replace('];', '  mk(2, "B", "M"),\n];');
+  assert.deepEqual(compararArchivo(D, b1, n1), []);
+
+  const b2 = 'const H = {\n  2004: [_mh(1, 2)],\n};\n';
+  const n2 = 'const H = {\n  2004: [_mh(1, 2), _mh(3, 4)],\n};\n';
+  assert.deepEqual(compararArchivo('src/data/data-municiones.js', b2, n2), []);
+
+  const b3 = 'window.AMX_ARMAS_EXISTENCIAS = { 1: 9 };\n';
+  const n3 = 'window.AMX_ARMAS_EXISTENCIAS = { 1: 9, 52: 6 };\n';
+  assert.deepEqual(compararArchivo('src/data/data-precios.js', b3, n3), []);
+});
+
+test('callees por archivo: un helper de data-municiones.js no es válido en data.js', () => {
+  // Minor de la revisión: antes `_mh` quedaba permitido en los 4 .js aunque solo existe en
+  // data-municiones.js. Mismo texto, ruta distinta: en data.js debe rechazarse.
+  const b = 'const X = [\n  mk(1, "a"),\n];\n';
+  const n = b.replace('];', '  _mh(1, 2),\n];');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+  // y en su archivo sí es válido:
+  const bM = 'const H = [\n  _mh(1, 2),\n];\n';
+  const nM = bM.replace('];', '  _mh(3, 4),\n];');
+  assert.deepEqual(compararArchivo('src/data/data-municiones.js', bM, nM), []);
+});
+
+test('leerHunksDeDiff: una salida "Binary files … differ" (sin ningún hunk) se detecta como tal', () => {
+  // Decisión C: simula la salida en vez de depender de que git produzca ese caso (los
+  // temporales que escribe este script nunca deberían parecer binarios, pero si algo en el
+  // entorno los marca así —p. ej. un .gitattributes global que no debería aplicar—, esto es
+  // lo que distingue ese caso de un diff normal: ningún "@@").
+  const salida = 'diff --git a/base.tok b/nuevo.tok\nBinary files a/base.tok and b/nuevo.tok differ\n';
+  const { añadidos, borrados, huboHunk } = leerHunksDeDiff(salida);
+  assert.equal(huboHunk, false);
+  assert.deepEqual(añadidos, []);
+  assert.deepEqual(borrados, []);
+});
+
+test('leerHunksDeDiff: una salida normal con un hunk sí se detecta', () => {
+  const salida = '@@ -2,1 +2,2 @@\nstring\t"x"\nname\t"y"\n';
+  const { huboHunk } = leerHunksDeDiff(salida);
+  assert.equal(huboHunk, true);
+});
+
+test('mapeo: una clave extra en un objeto de sinFicha se rechaza', () => {
+  const r = 'mapeo-armas.json';
+  const base = { existencias: {}, precios: {}, factores: [], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 0, totalMapped: 0, excluidos: [], regresos: [], regresosRechazados: [] };
+  const malo = { ...base, sinFicha: [{ idx: 1, name: 'X', priceN: 10, qty: 1, desc: '', extra: 'no debería estar aquí' }] };
+  assert.ok(compararArchivo(r, '{}', JSON.stringify(malo)).length > 0);
+});
+
+test('mapeo: un null en existencias se rechaza (a diferencia de ligas, aquí no se permite)', () => {
+  const r = 'mapeo-armas.json';
+  const base = { existencias: { 1: 9 }, precios: { 1: 10 }, factores: [], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 0, totalMapped: 0, excluidos: [], regresos: [], regresosRechazados: [] };
+  const malo = { ...base, existencias: { 1: null } };
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(base)), []);
+  assert.ok(compararArchivo(r, '{}', JSON.stringify(malo)).length > 0);
+});
+
+test('mapeo: una clave "abc" en precios (no ^\\d+$) se rechaza', () => {
+  const r = 'mapeo-armas.json';
+  const base = { existencias: { 1: 9 }, precios: { 1: 10 }, factores: [], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 0, totalMapped: 0, excluidos: [], regresos: [], regresosRechazados: [] };
+  const malo = { ...base, precios: { abc: 10 } };
+  assert.ok(compararArchivo(r, '{}', JSON.stringify(malo)).length > 0);
+});
+
+test('referencia: una fila con un campo extra o un tipo equivocado se rechaza', () => {
+  const r = '.claude/skills/conciliar-inventario/scripts/referencia-armas.json';
+  const base = { pdfDate: '2026-10-13', pdfFile: 'armas', totalRows: 1, rows: [{ idx: 1, name: 'X', desc: '', priceN: 10, qty: 1, fichaId: null }] };
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(base)), []);
+  const conExtra = { ...base, rows: [{ ...base.rows[0], extra: 1 }] };
+  assert.ok(compararArchivo(r, '{}', JSON.stringify(conExtra)).length > 0);
+  const tipoMalo = { ...base, rows: [{ ...base.rows[0], fichaId: '52' }] };
+  assert.ok(compararArchivo(r, '{}', JSON.stringify(tipoMalo)).length > 0);
+});
+
+// --- Ronda de arreglo 3: clave computada no serializada, callees de accesorios, etc. ---
+
+test('esqueleto: clave computada en la copia congelada de accesorios se rechaza (4a de la re-revisión)', () => {
+  const ACC = 'src/data/data-accesorios.js';
+  const real = readFileSync(FIXTURE('data-accesorios.js'), 'utf8');
+  const objetivo = '({ manualId: mid,';
+  assert.ok(real.includes(objetivo), 'el patrón real de _h cambió; ajustar el test');
+  const nuevo = real.replace(objetivo, '({ [manualId]: mid,');
+  assert.ok(compararArchivo(ACC, real, nuevo).length > 0);
+});
+
+test('esqueleto: clave computada sintética { textContent: v } -> { [textContent]: v } se rechaza (4c)', () => {
+  const b = 'const textContent = "innerHTML";\nconst v = location.hash;\nObject.assign(document.body, { textContent: v });\n';
+  const n = b.replace('{ textContent: v }', '{ [textContent]: v }');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('esqueleto: una directiva cambiada ("use strict" -> "use strixt") se rechaza (4f)', () => {
+  const b = '"use strict";\nwindow.X = [mk(1, "a", "M")];\n';
+  const n = b.replace('"use strict"', '"use strixt"');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('marcador D lleva el tipo de nodo: un array de datos no es intercambiable con una llamada o un objeto (Minor #2)', () => {
+  const b1 = 'window.X = [1, 2];\nwindow.X.forEach(f);\n';
+  const n1 = b1.replace('[1, 2]', 'mk(1, 2)');
+  assert.ok(compararArchivo(D, b1, n1).length > 0);
+
+  const b2 = 'window.X = [1, 2];\nfor (let i = 0; i < window.X.length; i++) g(window.X[i]);\n';
+  const n2 = b2.replace('[1, 2]', '{ length: 9 }');
+  assert.ok(compararArchivo(D, b2, n2).length > 0);
+});
+
+test('callees: amx es el constructor de ficha de data-accesorios.js (Important #3, antes faltaba)', () => {
+  const ACC = 'src/data/data-accesorios.js';
+  const real = readFileSync(FIXTURE('data-accesorios.js'), 'utf8');
+  // Añadir una ficha nueva con literales debe pasar.
+  const objetivoAlta = "  amx(102, ";
+  assert.ok(real.includes(objetivoAlta), 'el patrón real de amx cambió; ajustar el test');
+  const conAlta = real.replace(objetivoAlta, "  amx(9999, 'Nuevo', 'M', 'EUA', 'cargadores', 'dcam', 1.5, null, {}, {}, 'x'),\n  amx(102, ");
+  assert.deepEqual(compararArchivo(ACC, real, conAlta), []);
+  // Cambiar el precio de una ficha amx existente debe pasar.
+  const objetivoPrecio = "'cargadores', 'dcam', 590.63,";
+  assert.ok(real.includes(objetivoPrecio), 'el precio real cambió; ajustar el test');
+  const conPrecio = real.replace(objetivoPrecio, "'cargadores', 'dcam', 600.01,");
+  assert.deepEqual(compararArchivo(ACC, real, conPrecio), []);
+});
+
+test('constantesLiterales exige `const` — un `let` nunca cuenta como dato puro (Minor #4)', () => {
+  const b = "let K = 'x';\nK = location.hash;\nwindow.R = [K, 1];\n";
+  const n = b.replace('[K, 1]', '[K, 2]');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('constantesLiterales ignora un nombre que se sombrea como parámetro en otro lado del archivo', () => {
+  const b = "const S25 = 'x';\nfunction f(S25) { return [S25, 1]; }\nwindow.R = f(location.hash);\n";
+  const n = b.replace('[S25, 1]', '[S25, 2]');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('datos puros: una clave __proto__/constructor/prototype se rechaza aunque el valor sea literal (endurecimiento #6)', () => {
+  const b = 'const X = [\n  mk(1, "a"),\n];\n';
+  const n = b.replace('];', '  mk(2, { "__proto__": { "x": 1 } }),\n];');
+  assert.ok(compararArchivo(D, b, n).length > 0);
+});
+
+test('compararArchivoSeguro convierte cualquier excepción (p. ej. git ausente) en un problema, nunca una traza (Minor #5)', () => {
+  const b = 'const X = [\n  mk(1, "A", "M"),\n];\n';
+  const n = b.replace('];', '  mk(2, "B", "M"),\n];');
+  const pathOriginal = process.env.PATH;
+  try {
+    // Sin git en PATH, diferenciaDeTokens debe fallar con una excepción real (no "sin
+    // diferencias"); compararArchivoSeguro debe atraparla y devolver un problema, no tronar.
+    process.env.PATH = '';
+    const probs = compararArchivoSeguro(D, b, n);
+    assert.ok(probs.length > 0);
+    assert.match(probs[0], /no se pudo validar/);
+  } finally {
+    process.env.PATH = pathOriginal;
+  }
+});
+
+// --- Fase 1b, hueco #1: `\$` vuelve impura una ficha legítima (data.js real, mk(128)) ---
+
+test('Fase 1b #1: con la copia congelada de data.js, añadir una ficha nueva al final de window.DB con literales pasa', () => {
+  // Antes del fix, mk(128) (que contiene \$ en su descripción larga) hacía que window.DB
+  // entero no fuera "dato puro" y por lo tanto nunca colapsara a un marcador D fijo en el
+  // esqueleto — así que CUALQUIER ficha añadida cambiaba el esqueleto serializado completo
+  // ("la estructura del código cambió"), sin importar qué tan literal fuera lo añadido.
+  const real = readFileSync(FIXTURE('data.js'), 'utf8');
+  const marcaInicio = real.indexOf('window.DB = [');
+  assert.ok(marcaInicio >= 0, 'window.DB = [ no está donde se esperaba; ajustar el test');
+  // El archivo real usa CRLF; buscar el cierre del array sin asumir el fin de línea exacto.
+  const finArrayMatch = /\r?\n\];\r?\n/.exec(real.slice(marcaInicio));
+  assert.ok(finArrayMatch, 'cierre de window.DB no encontrado; ajustar el test');
+  const finArray = marcaInicio + finArrayMatch.index;
+  // No asumir CRLF: usar el mismo fin de línea que el cierre encontrado (ronda de arreglo
+  // 1/5, Minor: antes estaba fijo a '\r\n').
+  const eol = finArrayMatch[0].startsWith('\r') ? '\r\n' : '\n';
+  const nuevaFicha = `${eol}  mk(999, "Arma de prueba", "Fabricante de prueba", "pistola", "México", "9mm Parabellum", "10+1", "1 kg", "100 mm", "Semi-auto", 2026, "dcam", "FICHA DE PRUEBA", "imagenes/arma-prueba.webp", "Ficha sintética para el test del validador; no es un arma real."),`;
+  const nuevo = real.slice(0, finArray) + nuevaFicha + real.slice(finArray);
+  assert.deepEqual(compararArchivo(D, real, nuevo), []);
+});
+
+test('Fase 1b #1: con la copia congelada de data.js, cambiar el año de mk(128) pasa', () => {
+  const real = readFileSync(FIXTURE('data.js'), 'utf8');
+  const objetivo = 'gatillo de dos etapas", 2023,';
+  assert.ok(real.includes(objetivo), 'el patrón real de mk(128) cambió; ajustar el test');
+  const nuevo = real.replace(objetivo, 'gatillo de dos etapas", 2024,');
+  assert.deepEqual(compararArchivo(D, real, nuevo), []);
+});
+
+test('Fase 1b #1: \\$ es dato legítimo (mismo trato que \\" y \\\'), pero \\u0024 y \\x24 (mismo carácter, otro escape) siguen rechazados', () => {
+  const pasa = base.replace('];', '  mk(2, "a\\$"),\n];');
+  assert.deepEqual(compararArchivo(D, base, pasa), []);
+  // Ningún OTRO escape nuevo: solo se tocó la regla para \$, no para otras formas de producir
+  // el mismo carácter ($).
+  for (const s of ['"\\u0024"', '"\\x24"']) {
+    const nuevo = base.replace('];', `  mk(2, ${s}),\n];`);
+    assert.ok(compararArchivo(D, base, nuevo).length > 0, s);
+  }
+});
+
+test('Fase 1b (ronda 1) #2: una barra SUELTA delante de $ sigue rechazada (2 y 3 backslashes reales, y mezclada con otro escape malo)', () => {
+  // El regex (/\\(['"$])/g) solo consume UN par barra+carácter por cada "$"/comilla,
+  // empezando por el que está pegado al "$" — cualquier backslash EXTRA antes de ese par
+  // queda sin consumir y cae en el /\\/.test de abajo. Se construye con .repeat() (no a
+  // ojo) para que el número de backslashes REALES en el crudo del subject quede inequívoco.
+  const dosBarras = '"a' + '\\'.repeat(2) + '$"'; // crudo del subject: a \\ $ (escapa un backslash real, luego "$" suelto)
+  const tresBarras = '"' + '\\'.repeat(3) + '$"'; // crudo del subject: \\\ $ (dos backslashes reales sobran)
+  for (const s of [dosBarras, tresBarras]) {
+    const nuevo = base.replace('];', `  mk(2, ${s}),\n];`);
+    assert.ok(compararArchivo(D, base, nuevo).length > 0, JSON.stringify(s));
+  }
+  // Un \$ legítimo en el MISMO string que un < ilegítimo: el \$ se descarta bien, pero
+  // el backslash de < sigue sin consumir -> se rechaza igual (el fix no exime al resto
+  // del string de las demás reglas).
+  const mezclado = '"' + '\\' + '$' + '\\' + 'u003c"';
+  const nuevoMezclado = base.replace('];', `  mk(2, ${mezclado}),\n];`);
+  assert.ok(compararArchivo(D, base, nuevoMezclado).length > 0, mezclado);
+});
+
+// --- Fase 1b, ronda de arreglo 1/5: el guard del CLI se elimina (Critical: fallaba en
+// abierto por symlink/junction) — el CLI ya no se auto-identifica, siempre corre ---
+
+test('Fase 1b (ronda 1) #1 Critical: el CLI corre y detecta el ataque aunque se invoque por symlink o junction', () => {
+  // No se usa el script real del repo como DESTINO del enlace: se copian los dos archivos a
+  // un directorio desechable, y el symlink/junction apunta ahí. Así, si algo sale mal al
+  // limpiar un enlace de directorio (junction) con rmSync recursivo, lo peor que puede pasar
+  // es borrar la copia desechable — nunca el repo real.
+  // Tiene que vivir DENTRO del repo (no en os.tmpdir()): `validar-parche-lib.mjs` importa
+  // `@babel/parser`/`@babel/types` como paquetes, y Node busca `node_modules` subiendo desde
+  // la ruta REAL del archivo que se ejecuta (la del symlink, no la del enlace) — fuera del
+  // árbol del repo no hay ningún `node_modules` que encontrar.
+  const dirEnlaces = mkdtempSync(join(process.cwd(), 'scripts', 'dcam', '.tmp-enlace-'));
+  const dirReal = join(dirEnlaces, 'real');
+  let enlace;
+  try {
+    mkdirSync(dirReal, { recursive: true });
+    writeFileSync(join(dirReal, 'validar-parche.mjs'), readFileSync(join(process.cwd(), 'scripts', 'dcam', 'validar-parche.mjs')));
+    writeFileSync(join(dirReal, 'validar-parche-lib.mjs'), readFileSync(join(process.cwd(), 'scripts', 'dcam', 'validar-parche-lib.mjs')));
+
+    const symlinkArchivo = join(dirEnlaces, 'enlace-validar-parche.mjs');
+    try {
+      symlinkSync(join(dirReal, 'validar-parche.mjs'), symlinkArchivo, 'file');
+      enlace = symlinkArchivo;
+    } catch {
+      // Sin privilegio para symlink de ARCHIVO (típico en Windows sin modo desarrollador):
+      // junction al directorio completo, y se invoca el script a través de ella.
+      const junctionDir = join(dirEnlaces, 'junction-dir');
+      symlinkSync(dirReal, junctionDir, 'junction');
+      enlace = join(junctionDir, 'validar-parche.mjs');
+    }
+
+    const dirBase = mkdtempSync(join(tmpdir(), 'dcam-cli-base-'));
+    const dirNuevo = mkdtempSync(join(tmpdir(), 'dcam-cli-nuevo-'));
+    try {
+      // Los otros 12 archivos PERMITIDOS: idénticos (vacíos) en base y nuevo -> se saltan sin
+      // validar, para que el único problema real sea el ataque de abajo.
+      for (const ruta of PERMITIDOS) {
+        if (ruta === D) continue;
+        mkdirSync(join(dirNuevo, dirname(ruta)), { recursive: true });
+        writeFileSync(join(dirNuevo, ruta), '');
+      }
+      const contenidoLimpio = 'const X = [\n  mk(1, "a"),\n];\n';
+      mkdirSync(join(dirBase, dirname(D)), { recursive: true });
+      writeFileSync(join(dirBase, D), contenidoLimpio);
+      mkdirSync(join(dirNuevo, dirname(D)), { recursive: true });
+      writeFileSync(join(dirNuevo, D), contenidoLimpio);
+
+      // Control positivo PRIMERO (mismos 13 archivos, data.js todavía sin ataque): el enlace
+      // tiene que dar "✔ solo datos" con status 0. Sin este control, un status != 0 contra el
+      // ataque de abajo podría ser un crash cualquiera (p. ej. MODULE_NOT_FOUND de
+      // @babel/parser) en vez de la detección real — ambos casos dan "status != 0 y sin ✔
+      // solo datos" por igual.
+      const rLimpio = spawnSync(process.execPath, [enlace, dirBase, dirNuevo], { encoding: 'utf8' });
+      assert.equal(rLimpio.status, 0, `status=${rLimpio.status} stdout=${rLimpio.stdout} stderr=${rLimpio.stderr}`);
+      assert.match(rLimpio.stdout, /✔ solo datos/, `stdout=${rLimpio.stdout}`);
+
+      writeFileSync(join(dirNuevo, D), 'const X = [\n  mk(1, "a"),\n  fetch(1),\n];\n');
+      const r = spawnSync(process.execPath, [enlace, dirBase, dirNuevo], { encoding: 'utf8' });
+      assert.notEqual(r.status, 0, `status=${r.status} stdout=${r.stdout} stderr=${r.stderr}`);
+      assert.ok(!r.stdout.includes('✔ solo datos'), `stdout=${r.stdout}`);
+      // No se exige un mensaje concreto (fetch(1) agregado a un array dispara la capa de
+      // esqueleto, "la estructura del código cambió", no la de tokens) — solo que señale el
+      // archivo real y no una traza de otra cosa (p. ej. MODULE_NOT_FOUND).
+      assert.match(r.stderr, /data\.js/, `debe señalar data.js, no tronar por otra razón: stderr=${r.stderr}`);
+    } finally {
+      rmSync(dirBase, { recursive: true, force: true });
+      rmSync(dirNuevo, { recursive: true, force: true });
+    }
+  } finally {
+    rmSync(dirEnlaces, { recursive: true, force: true });
+  }
+});
+
+test('Fase 1b (ronda 1) #3: el CLI sin exactamente 2 argumentos sale con status 2 (uso)', () => {
+  const scriptReal = join(process.cwd(), 'scripts', 'dcam', 'validar-parche.mjs');
+  const sinArgs = spawnSync(process.execPath, [scriptReal], { encoding: 'utf8' });
+  assert.equal(sinArgs.status, 2, `status=${sinArgs.status} stdout=${sinArgs.stdout} stderr=${sinArgs.stderr}`);
+  const unArgDeMas = spawnSync(process.execPath, [scriptReal, 'a', 'b', 'c'], { encoding: 'utf8' });
+  assert.equal(unArgDeMas.status, 2, `status=${unArgDeMas.status} stdout=${unArgDeMas.stdout} stderr=${unArgDeMas.stderr}`);
+});
+
+// --- Fase 3c: mapeador de #375 (gemelos y regresos renombrados) ---
+const MAPEO_VACIO = { existencias: {}, precios: {}, factores: [], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 0, totalMapped: 0, excluidos: [], regresos: [], regresosRechazados: [] };
+
+test('mapeo (#375): gemelos válido pasa, y un mapeo sin gemelos (anterior a #375) también', () => {
+  const r = 'mapeo-armas.json';
+  const con = { ...MAPEO_VACIO, gemelos: [{ idx: 12, name: 'RIFLE CAL22 X', qty: 0, fichaId: 81 }, { idx: 13, name: 'RIFLE CAL22 X', qty: 2, fichaId: 81 }] };
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(con)), []);
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, gemelos: [] })), []);
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(MAPEO_VACIO)), []);
+});
+
+test('mapeo (#375): gemelos con una clave extra o un tipo malo se rechaza', () => {
+  const r = 'mapeo-armas.json';
+  const g = { idx: 12, name: 'RIFLE CAL22 X', qty: 1, fichaId: 81 };
+  for (const malo of [
+    { ...g, extra: 1 },
+    { ...g, fichaId: '81' },
+    { ...g, qty: -1 },
+    { ...g, idx: 1.5 },
+    { ...g, name: 'a\u0000b' },
+    { idx: 12, name: 'X', qty: 1 },
+  ]) {
+    assert.ok(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, gemelos: [malo] })).length > 0, JSON.stringify(malo));
+  }
+  assert.ok(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, gemelos: {} })).length > 0);
+});
+
+test('mapeo (#375): los rechazos y regresos «renombre» caben aunque el dcamRef sea el más largo real (120)', () => {
+  const r = 'mapeo-armas.json';
+  const ref = 'X'.repeat(120);
+  const rechazoPista = { idx: 3, name: 'RIFLE CAL22 TIPPMANN M4-22 REDLINE', priceN: 9999.5, fichaId: 81, motivo: `posible renombre de «${ref}»: la ficha ya tiene renglón hoy` };
+  const rechazoCompleto = { idx: 4, name: 'RIFLE CAL22 Y', priceN: 100, fichaId: 81, fechaAntes: '2026-10-01', antes: 117, razon: 0.854701, general: null, tramo: 0, apoyos: 0, motivo: `posible renombre de «${ref}»: el precio no cuadra con el aumento general ni con un tramo` };
+  const regreso = { idx: 5, name: 'RIFLE 0.22 Z', priceN: 110, fichaId: 82, fechaAntes: '2026-10-01', antes: 100, razon: 1.1, motivo: `renombre de «${ref}»: mismo aumento que 12 fichas de su tramo`, general: 1.1, tramo: 12, apoyos: 12 };
+  const m = { ...MAPEO_VACIO, regresos: [regreso], regresosRechazados: [rechazoPista, rechazoCompleto] };
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(m)), []);
+  // El tope sigue existiendo: un motivo desmesurado se rechaza.
+  const largo = { ...MAPEO_VACIO, regresosRechazados: [{ ...rechazoPista, motivo: 'x'.repeat(301) }] };
+  assert.ok(compararArchivo(r, '{}', JSON.stringify(largo)).length > 0);
+});
