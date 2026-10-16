@@ -33,6 +33,13 @@ Antes de crear una ficha, descarta en este orden:
    `regresosRechazados` del mapeo, que dice por qué (dcamRef compartido, precio
    que no cuadra, sin registro previo). Ese «no cuadra» es la pista de un
    registro ajeno en el historial (C13) o de una variante.
+   También liga solo (15-oct-2026) dos casos más: el **gemelo** (segundo renglón
+   con el mismo nombre exacto y precio ±0.005 que uno ya ligado; solo si todos los
+   ligados con ese nombre van a la misma ficha; campo `gemelos`, suma qty sin tocar
+   el precio) y el **regreso renombrado** (el PDF cambió la notación del calibre:
+   `0.22`/`.22`/`CAL22`/`CAL 22`; solo si apunta a UNA ficha sin renglón y el precio
+   cuadra igual). Un renombre que no cuadra sale en `regresosRechazados` con
+   `fichaId` y «posible renombre de …»: esa es la ficha a revisar.
    A mano: busca su texto en el catálogo y en los PDFs archivados
    (`pdftotext -layout $DCAM_DIR/archivo/<fecha>/*ARMAS*.pdf - | grep -i …`).
    Comprueba: su precio de hoy / su último precio ≈ el aumento acumulado de las

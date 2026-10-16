@@ -63,4 +63,80 @@ assert not r, motivo
 r, motivo, _ = m.cuadra_regreso(1.0245, [1.0574] * 5 + [1.0245, 1.02452])
 assert r, motivo
 
-print("✔ regresos: 7 casos")
+# --- Gemelos: mismo nombre exacto y mismo precio que un renglón ya ligado ---
+A, B = fila("ATROX SB", 13511.62, 1), fila("ATROX SB", 13511.62, 6)
+g = m.ligar_gemelos([A, B], [1], {99: [A]})
+assert g == {1: 99}, g
+# ligado a dos fichas distintas con ese nombre: ambiguo, no se liga
+g = m.ligar_gemelos([A, A, B], [2], {99: [A], 100: [A]})
+assert g == {}, g
+# precio distinto (> 0.005): no es gemelo
+g = m.ligar_gemelos([A, fila("ATROX SB", 13511.63, 6)], [1], {99: [A]})
+assert g == {}, g
+
+# --- Regreso renombrado: otra notación del calibre ---
+assert m._clave_calibre("RIFLE CAL22 TIPPMANN") == m._clave_calibre("RIFLE 0.22 TIPPMANN")     == m._clave_calibre("RIFLE CAL. 22 TIPPMANN") == m._clave_calibre("RIFLE .22 TIPPMANN")
+assert m._clave_calibre("PISTOLA 0.380") == m._clave_calibre("PISTOLA CALIBRE 380")
+h2 = dict(hist)
+h2["81"] = {"dcamRef": "RIFLE 0.22 TIPPMANN M4-22 REDLINE", "regs": [["2026-09-15", 20.0]]}
+ph = dict(precios_hoy)
+r_ok = [fila("RIFLE CAL22 TIPPMANN M4-22 REDLINE", 20.0 * 1.0574)]
+ok, det, rech = m.detectar_regresos(r_ok, [0], ph, h2)
+assert ok == {0: 81} and "renombre" in det[0]["motivo"], (ok, det, rech)
+# el precio no cuadra (razón 0.85 con la mediana en 1.0574): rechazo con pista
+r_mal = [fila("RIFLE CAL22 TIPPMANN M4-22 REDLINE", 20.0 * 0.85)]
+ok, det, rech = m.detectar_regresos(r_mal, [0], ph, h2)
+assert ok == {} and rech[0]["fichaId"] == 81 and "renombre" in rech[0]["motivo"], (ok, rech)
+# la forma canónica apunta a 2 fichas: no se adivina
+h3 = dict(h2)
+h3["82"] = {"dcamRef": "RIFLE .22 TIPPMANN M4-22 REDLINE", "regs": [["2026-09-15", 20.0]]}
+ok, det, rech = m.detectar_regresos(r_ok, [0], ph, h3)
+assert ok == {} and "compartido" in rech[0]["motivo"], (ok, rech)
+# ...pero si una de las dos ya tiene renglón hoy, la otra es la única candidata
+ok, det, rech = m.detectar_regresos(r_ok, [0], dict(ph, **{"82": 21.0}), h3)
+assert ok == {0: 81}, (ok, rech)
+
+# Gemelo: el mismo nombre ligado a OTRA ficha con qty 0 también cuenta (no se liga)
+Z = fila("ATROX SB", 13511.62, 0)
+g = m.ligar_gemelos([A, Z, B], [2], {99: [A], 100: [Z]})
+assert g == {}, g
+
+# Clave de calibre acotada: lo que no es calibre no colisiona
+assert m._clave_calibre("BOLSA 0.5") != m._clave_calibre("BOLSA 5")
+assert m._clave_calibre("TUBO 1.22") != m._clave_calibre("TUBO 122")
+assert m._clave_calibre("RIFLE M4-22") == m._norm_nombre("RIFLE M4-22")
+assert m._clave_calibre("PISTOLA CAL 9") == m._norm_nombre("PISTOLA CAL 9")
+
+# Renombre cuya única candidata ya tiene renglón: rechazo con pista, no silencio
+ok, det, rech = m.detectar_regresos(r_ok, [0], dict(ph, **{"81": 21.0}), h2)
+assert ok == {} and rech[0]["fichaId"] == 81 and "ya tiene renglón" in rech[0]["motivo"], (ok, rech)
+
+# Integración (paso 3d): gemelo de un regreso (ficha ligada por forzado) suma qty,
+# sale de sinFicha y aparece en gemelos, sin duplicarse en regresosRechazados.
+import json, tempfile
+with tempfile.TemporaryDirectory() as td:
+    ref = os.path.join(td, "referencia-cartuchos.json")
+    json.dump({"rows": [{"name": f"OTRA {i}", "priceN": 10.0, "fichaId": i} for i in range(1, 7)]}, open(ref, "w"))
+    nom = "CARTUCHO CALIBRE .380” AUTO, MARCA FEDE."
+    nuevos = [fila(f"OTRA {i}", 10.574) for i in range(1, 7)] + [fila(nom, 12.61, 5), fila(nom, 12.61, 3)]
+    res = m.map_existencias(ref, nuevos, historial=hist)
+assert res["existencias"][2093] == 8, res["existencias"]
+assert [(g["idx"], g["fichaId"], g["qty"]) for g in res["gemelos"]] == [(7, 2093, 3)], res["gemelos"]
+assert res["sinFicha"] == [] and res["regresosRechazados"] == [], (res["sinFicha"], res["regresosRechazados"])
+
+# Falso positivo: 92 y 212 comparten dcamRef y precio; el segundo renglón NO es gemelo
+# de la 92, conserva su rechazo «compartido» y se queda en sinFicha.
+ARM = "ESCOPETA CAL. 12 ARMSAN P612 A.C."
+h4 = dict(hist, **{"92": {"dcamRef": ARM, "regs": [["2026-09-15", 10.0]]},
+                   "212": {"dcamRef": ARM, "regs": [["2026-09-15", 10.0]]}})
+with tempfile.TemporaryDirectory() as td:
+    ref = os.path.join(td, "referencia-armas.json")
+    json.dump({"rows": [{"name": f"OTRA {i}", "priceN": 10.0, "fichaId": i} for i in range(1, 7)]
+               + [{"name": ARM, "priceN": 10.0, "fichaId": 92}]}, open(ref, "w"))
+    nuevos = [fila(f"OTRA {i}", 10.574) for i in range(1, 7)] + [fila(ARM, 10.574, 2), fila(ARM, 10.574, 1)]
+    res = m.map_existencias(ref, nuevos, historial=h4)
+assert res["existencias"][92] == 2 and res["gemelos"] == [], (res["existencias"], res["gemelos"])
+assert [x["idx"] for x in res["sinFicha"]] == [7], res["sinFicha"]
+assert "compartido" in res["regresosRechazados"][0]["motivo"], res["regresosRechazados"]
+
+print("✔ regresos: 7 casos + gemelos, renombres e integración")
