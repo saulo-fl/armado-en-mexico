@@ -15,6 +15,13 @@
 # reales de Claude Code 2.1.299, solo nombres): modelo, claves de primer nivel,
 # tipos de herramienta (solo de cliente), effort ≤ medium y betas. Lo demás es
 # 400 del puente, sin reenviar, con una línea fija en el log.
+# Ronda de arreglo 2: también los bloques de contenido (image/document solo con
+# source base64/text: una URL la descargaría la API), sin claves repetidas a
+# ninguna profundidad, query solo «beta=true», y lo que se reenvía es el objeto
+# validado RE-SERIALIZADO, nunca los bytes de la jaula. Riesgo aceptado (ruling
+# del controlador): max_tokens, thinking.budget_tokens, context_management y el
+# output_config por mensaje no se topan; el gasto lo acotan el timeout de 45 min
+# de la jaula y los límites de la suscripción.
 #
 # Endurecido en la ronda de revisión 1/5 (Fase 2): límites de cuerpo/tiempo,
 # lista blanca de cabeceras, sin seguir redirecciones, sin tracebacks hacia el
@@ -50,34 +57,99 @@ def betas_filtrados(valor):
     ok = [b for b in betas if b in BETAS and not b.startswith(BETAS_VETADOS)]
     return ",".join(ok if BETA_OAUTH in ok else ok + [BETA_OAUTH])
 
+# Tipos de bloque de contenido (system, messages[].content y, por dentro,
+# tool_result.content): la base del ruling más lo observado en Claude Code
+# 2.1.299 (text, thinking, tool_use, tool_result; solo nombres). image/document
+# solo con source base64 o text: con source "url" la API descargaría esa URL
+# desde fuera de la jaula (salida a internet).
+TIPOS_BLOQUE = {"text", "image", "document", "tool_use", "tool_result", "thinking", "redacted_thinking"}
+FUENTES = {"base64", "text"}
+
+class Repetida(ValueError):
+    pass
+
+def sin_repetidas(pares):
+    # Python se queda con la ÚLTIMA aparición de una clave; otro parser podría
+    # quedarse con la primera. Un objeto con claves repetidas no se acepta nunca.
+    d = {}
+    for k, v in pares:
+        if k in d:
+            raise Repetida(k)
+        d[k] = v
+    return d
+
+def _sin_nan(c):
+    raise ValueError(c)   # NaN/Infinity no son JSON estándar
+
+def bloques_ok(contenido):
+    """True si `contenido` (texto o lista de bloques) solo trae bloques permitidos."""
+    if isinstance(contenido, str):
+        return True
+    if not isinstance(contenido, list):
+        return False
+    for x in contenido:
+        if not isinstance(x, dict) or x.get("type") not in TIPOS_BLOQUE:
+            return False
+        if x["type"] in ("image", "document"):
+            src = x.get("source")
+            if not isinstance(src, dict) or src.get("type") not in FUENTES:
+                return False
+        if x["type"] == "tool_result" and "content" in x and not bloques_ok(x["content"]):
+            return False
+    return True
+
 def validar(body):
-    """(motivo de rechazo o None, modelo, effort). El motivo es un texto FIJO del
-    puente; modelo y effort solo para el log (recortados y escapados allí)."""
+    """(motivo de rechazo o None, modelo, effort, cuerpo a reenviar). El motivo es
+    un texto FIJO del puente; modelo y effort solo para el log (recortados y
+    escapados allí). Lo que se reenvía es SIEMPRE el objeto validado vuelto a
+    serializar, nunca los bytes que mandó la jaula."""
     try:
-        b = json.loads(body)
+        b = json.loads(body, object_pairs_hook=sin_repetidas, parse_constant=_sin_nan)
+    except Repetida:
+        return "clave repetida", "-", "-", None
     except Exception:
-        return "cuerpo no es JSON", "-", "-"
+        return "cuerpo no es JSON", "-", "-", None
     if not isinstance(b, dict):
-        return "cuerpo no es un objeto", "-", "-"
+        return "cuerpo no es un objeto", "-", "-", None
     modelo = b.get("model")
     oc = b.get("output_config")
     effort = oc.get("effort") if isinstance(oc, dict) else None
     log_m, log_e = str(modelo if modelo is not None else "-"), str(effort if effort is not None else "-")
+    def no(motivo):
+        return motivo, log_m, log_e, None
     if set(b) - CLAVES:
-        return "clave de primer nivel no permitida", log_m, log_e
-    if modelo not in MODELOS:
-        return "modelo no permitido", log_m, log_e
+        return no("clave de primer nivel no permitida")
+    if not isinstance(modelo, str) or modelo not in MODELOS:
+        return no("modelo no permitido")
     if oc is not None and not isinstance(oc, dict):
-        return "output_config no es un objeto", log_m, log_e
-    if effort is not None and effort not in EFFORTS:
-        return "effort mayor que medium", log_m, log_e
+        return no("output_config no es un objeto")
+    if effort is not None and (not isinstance(effort, str) or effort not in EFFORTS):
+        return no("effort mayor que medium")
     tools = b.get("tools", [])
     if not isinstance(tools, list):
-        return "tools no es una lista", log_m, log_e
+        return no("tools no es una lista")
     for t in tools:
         if not isinstance(t, dict) or t.get("type", "custom") != "custom":
-            return "herramienta de servidor", log_m, log_e
-    return None, log_m, log_e
+            return no("herramienta de servidor")
+    try:
+        mensajes = b.get("messages", [])
+        if "system" in b and not bloques_ok(b["system"]):
+            return no("bloque de contenido no permitido")
+        if not isinstance(mensajes, list):
+            return no("messages no es una lista")
+        for m in mensajes:
+            if not isinstance(m, dict) or not bloques_ok(m.get("content", "")):
+                return no("bloque de contenido no permitido")
+    except RecursionError:
+        return no("contenido demasiado anidado")
+    return None, log_m, log_e, json.dumps(b, ensure_ascii=False, allow_nan=False,
+                                          separators=(",", ":")).encode("utf-8")
+
+def query_de(crudo):
+    """La query que se reenvía: vacía o exactamente beta=true (lo único que manda
+    Claude Code). Cualquier otra -> None (400)."""
+    q = urllib.parse.urlsplit(crudo).query
+    return q if q in ("", "beta=true") else None
 
 class SinRedireccion(urllib.request.HTTPRedirectHandler):
     # Seguir una redirección reenviaría la cabecera Authorization (el token) a
@@ -142,7 +214,11 @@ class H(http.server.BaseHTTPRequestHandler):
                 return self.responder_sin_cuerpo(413)
 
             body = self.rfile.read(n) if n else b""
-            rechazo, modelo, effort = validar(body)
+            q = query_de(self.path)
+            if q is None:
+                rechazo = "query no permitida"
+                return self.responder_sin_cuerpo(400)   # sin reenviar
+            rechazo, modelo, effort, body = validar(body)
             if rechazo:
                 return self.responder_sin_cuerpo(400)   # sin reenviar
 
@@ -151,8 +227,9 @@ class H(http.server.BaseHTTPRequestHandler):
             hdrs = {k: v for k, v in hdrs.items() if k.lower() != "anthropic-beta"}
             hdrs["anthropic-beta"] = betas_filtrados(beta)
             hdrs["Authorization"] = "Bearer " + TOKEN
-            # A la API va la ruta permitida con la query original (?beta=true).
-            q = urllib.parse.urlsplit(self.path).query
+            # A la API va la ruta permitida, la query permitida (?beta=true o nada) y
+            # el cuerpo RE-SERIALIZADO desde el objeto validado; urllib pone el
+            # Content-Length de ese cuerpo (el del cliente no se reenvía).
             req = urllib.request.Request(UPSTREAM + ruta + ("?" + q if q else ""), data=body,
                                          method="POST", headers=hdrs)
             try:

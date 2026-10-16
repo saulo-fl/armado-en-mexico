@@ -32,6 +32,10 @@ fi
 docker network inspect dcam-salida >/dev/null 2>&1 || \
   docker network create --subnet 172.30.0.0/29 --gateway 172.30.0.1 dcam-salida
 
+# Fase 3d: un puente.py que no compila dejaba dcam-puente en bucle de reinicio
+# (pasó el 16-oct, ~60 s). Se valida ANTES de construir y de tumbar el viejo.
+python3 -c 'import sys; compile(open(sys.argv[1], encoding="utf-8").read(), sys.argv[1], "exec")' puente/puente.py \
+  || { echo "puente/puente.py no compila; no se toca dcam-puente" >&2; exit 1; }
 docker build -t dcam-puente:1 puente
 
 [ "$SOLO_PUENTE" -eq 1 ] || \

@@ -80,11 +80,17 @@ for caso in \
   "mcp_servers|{\"model\":\"claude-haiku-5-5\",$base,\"mcp_servers\":[{\"type\":\"url\",\"url\":\"https://example.com/mcp\",\"name\":\"x\"}]}|clave_de_primer_nivel_no_permitida" \
   "tools[].type de servidor|{\"model\":\"claude-haiku-5-5\",$base,\"tools\":[{\"type\":\"web_search_20250305\",\"name\":\"web_search\"}]}|herramienta_de_servidor" \
   "modelo claude-sonnet-5-5|{\"model\":\"claude-sonnet-5-5\",$base}|modelo_no_permitido" \
-  "effort high|{\"model\":\"claude-haiku-5-5\",$base,\"output_config\":{\"effort\":\"high\"}}|effort_mayor_que_medium"; do
+  "effort high|{\"model\":\"claude-haiku-5-5\",$base,\"output_config\":{\"effort\":\"high\"}}|effort_mayor_que_medium" \
+  "clave model repetida (sonnet primero)|{\"model\":\"claude-sonnet-5-5\",\"model\":\"claude-haiku-5-5\",$base}|clave_repetida" \
+  "image con source url|{\"model\":\"claude-haiku-5-5\",\"max_tokens\":8,\"messages\":[{\"role\":\"user\",\"content\":[{\"type\":\"image\",\"source\":{\"type\":\"url\",\"url\":\"https://example.com/x.png\"}}]}]}|bloque_de_contenido_no_permitido"; do
   IFS='|' read -r nombre cuerpo motivo <<< "$caso"
   cod=$(post_puente "$cuerpo")
   [ "$cod" = "400" ] && ok "POST con $nombre -> 400 del puente" || mal "POST con $nombre no dio 400 (fue '$cod')"
 done
+# Ronda de arreglo 2: la query solo puede ser vacía o exactamente beta=true.
+cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST 'http://dcam-puente:1235/v1/messages?beta=false' \
+  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d "{\"model\":\"claude-haiku-5-5\",$base}")
+[ "$cod" = "400" ] && ok "POST /v1/messages?beta=false -> 400 del puente" || mal "POST con ?beta=false no dio 400 (fue '$cod')"
 # Claude Code con WebSearch permitido y un prompt que obliga a buscar: el puente
 # rechaza la petición (lleva la herramienta de servidor) y no hay ninguna búsqueda.
 res_ws="$(correr sh -c 'cd /tmp && HOME=/tmp timeout 120 claude -p "Usa la herramienta WebSearch para buscar armado.mx y dime el primer resultado. Es obligatorio buscar." --model claude-haiku-5-5 --allowedTools WebSearch --output-format json' 2>/dev/null)"
@@ -108,7 +114,7 @@ printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms m
 printf '%s\n' "$LOG_PUENTE" | grep -qE ' GET /v1/messages 404 ' && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/models 404 ' \
   && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST \(rechazada\) /v1/\.\./v1/messages 404 ' \
   && ok "el puente registró los rechazos (GET, /v1/models, ruta con ..)" || mal "faltan líneas de rechazo en docker logs dcam-puente"
-for m in clave_de_primer_nivel_no_permitida herramienta_de_servidor modelo_no_permitido effort_mayor_que_medium; do
+for m in clave_de_primer_nivel_no_permitida herramienta_de_servidor modelo_no_permitido effort_mayor_que_medium clave_repetida bloque_de_contenido_no_permitido query_no_permitida; do
   printf '%s\n' "$LOG_PUENTE" | grep -qE " POST /v1/messages 400 0 [0-9]+ms .* rechazo=$m$" \
     && ok "el puente registró el rechazo '$m' (línea fija, sin valores)" || mal "falta la línea de rechazo '$m' en el log del puente"
 done
