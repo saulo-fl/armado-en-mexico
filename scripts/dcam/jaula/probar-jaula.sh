@@ -97,15 +97,16 @@ res_ws="$(correr sh -c 'cd /tmp && HOME=/tmp timeout 120 claude -p "Usa la herra
 ws="$(printf '%s' "$res_ws" | jq -r 'select(.type == "result") | (.usage.server_tool_use.web_search_requests // 0)' 2>/dev/null)"
 echo "    claude -p con WebSearch: $(printf '%s' "$res_ws" | jq -c 'select(.type == "result") | {is_error, api_error_status, web_search_requests: (.usage.server_tool_use.web_search_requests // 0), result: ((.result // "") | .[0:160])}' 2>/dev/null)"
 [ "${ws:-0}" = "0" ] && ok "claude -p con --allowedTools WebSearch: web_search_requests = 0" || mal "claude -p con WebSearch hizo $ws búsquedas"
-# Un cuerpo que pasa la lista blanca pero la API rechaza (mal formado): la
+# Un cuerpo que pasa la lista blanca pero la API rechaza (messages vacío): la
 # respuesta (cabeceras + cuerpo) no trae nada con prefijo sk-ant ni cabeceras de
 # organización o límites. Solo se CUENTAN las coincidencias, nunca se imprimen.
 resp="$(correr curl -s -i --max-time 30 -X POST 'http://dcam-puente:1235/v1/messages?beta=true' \
-  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d '{"model":"claude-haiku-5-5","max_tokens":8,"messages":"mal"}')"
+  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d '{"model":"claude-haiku-5-5","max_tokens":8,"messages":[]}')"
 n_sk=$(printf '%s' "$resp" | grep -c 'sk-ant')
 n_org=$(printf '%s' "$resp" | grep -ciE '^(anthropic-organization|anthropic-workspace|anthropic-ratelimit|set-cookie|cf-)')
+n_rid=$(printf '%s' "$resp" | grep -ci '^request-id:')   # 1 = la respuesta vino de la API (no es un 400 del puente)
 echo "    respuesta a un cuerpo mal formado: $(printf '%s' "$resp" | head -1 | tr -d '\r'); cabeceras: $(printf '%s' "$resp" | sed -n '2,/^\r\?$/p' | cut -d: -f1 | tr -d '\r' | grep . | tr '\n' ' ')"
-[ "$n_sk" = "0" ] && [ "$n_org" = "0" ] && ok "respuesta de error de la API: 0 'sk-ant' y 0 cabeceras de organización/límites" || mal "respuesta de error: $n_sk 'sk-ant', $n_org cabeceras de organización/límites"
+[ "$n_rid" = "1" ] && [ "$n_sk" = "0" ] && [ "$n_org" = "0" ] && ok "respuesta de error de la API (con request-id): 0 'sk-ant' y 0 cabeceras de organización/límites" || mal "respuesta de error: request-id=$n_rid, $n_sk 'sk-ant', $n_org cabeceras de organización/límites"
 sleep 1
 LOG_PUENTE="$(docker logs --since "$DESDE" dcam-puente 2>&1)"
 echo "--- docker logs dcam-puente de estas peticiones ---"
