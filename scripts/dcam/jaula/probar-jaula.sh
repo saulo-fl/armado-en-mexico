@@ -5,7 +5,7 @@
 # Fase 3d: el puente habla con api.anthropic.com con el token OAuth de Saulo. Este
 # juez NUNCA lee el archivo del token: la fuga se busca por la FORMA de un token
 # de Anthropic (sk-ant-<tipo><nn>-…) y solo se imprimen nombres, nunca contenido.
-# Gasta una petición mínima (Haiku, max_tokens 8) de la suscripción.
+# Gasta una corrida mínima de Claude Code con Haiku (un turno) de la suscripción.
 set -u
 IMG=dcam-jaula:1
 RED=dcam-interna
@@ -43,15 +43,20 @@ print(d.split(b" ")[1].decode() if b" " in d else "000")
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://dcam-puente:1235/v1/models)
 [ "$cod" = "404" ] && ok "la jaula llega al puente; el puente no expone /v1/models (404)" || mal "GET /v1/models al puente no dio 404 (fue '$cod'; 000 = la jaula no llega al puente)"
 
-# Una petición mínima de verdad (Fase 3d): Claude Code pide /v1/messages?beta=true;
-# el resto se rechaza, y el puente deja una línea por petición sin query,
-# cabeceras, cuerpo ni token (solo modelo y effort del cuerpo).
-cuerpo='{"model":"claude-haiku-5-5","max_tokens":8,"messages":[{"role":"user","content":"di hola"}]}'
+# Una petición mínima de verdad (Fase 3d), hecha por Claude Code mismo desde la
+# jaula (POST /v1/messages?beta=true con Haiku). NO con curl: la API responde
+# 429 «Error» a una petición con el token de la suscripción que no viene de
+# Claude Code (medido el 15-oct), y fabricar una que lo parezca sería rodear ese
+# control. El resto se rechaza, y el puente deja una línea por petición sin
+# query, cabeceras, cuerpo ni token (solo modelo y effort del cuerpo).
 DESDE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 sleep 1
-cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 120 -X POST 'http://dcam-puente:1235/v1/messages?beta=true' \
-  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d "$cuerpo")
-[ "$cod" = "200" ] && ok "POST /v1/messages?beta=true con claude-haiku-5-5, max_tokens 8 -> 200 (token OAuth del puente)" || mal "POST /v1/messages?beta=true no dio 200 (fue '$cod')"
+res="$(correr sh -c 'cd /tmp && HOME=/tmp timeout 120 claude -p "Responde solo con la palabra hola" --model claude-haiku-5-5 --output-format json' 2>/dev/null)"
+if [ "$(printf '%s' "$res" | jq -r 'select(.type == "result") | "\(.is_error) \(.modelUsage | keys | join(","))"' 2>/dev/null)" = "false claude-haiku-5-5" ]; then
+  ok "Claude Code en la jaula -> puente -> API con claude-haiku-5-5: resultado sin error ($(printf '%s' "$res" | jq -c '{num_turns, total_cost_usd, result}'))"
+else
+  mal "Claude Code en la jaula no obtuvo respuesta por el puente: $(printf '%s' "$res" | head -c 300)"
+fi
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://dcam-puente:1235/v1/messages)
 [ "$cod" = "404" ] && ok "GET /v1/messages -> 404" || mal "GET /v1/messages no dio 404 (fue '$cod')"
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST http://dcam-puente:1235/v1/models -d '{}')
@@ -67,11 +72,11 @@ sleep 1
 LOG_PUENTE="$(docker logs --since "$DESDE" dcam-puente 2>&1)"
 echo "--- docker logs dcam-puente de estas peticiones ---"
 printf '%s\n' "$LOG_PUENTE"
-printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms modelo=claude-haiku-5-5 effort=-$' && ok "el puente registró el POST /v1/messages con 200 y el modelo" || mal "no hay línea 'POST /v1/messages 200 … modelo=claude-haiku-5-5' en docker logs dcam-puente"
+printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms modelo=claude-haiku-5-5 effort=[a-z-]+$' && ok "el puente registró el POST /v1/messages con 200 y el modelo" || mal "no hay línea 'POST /v1/messages 200 … modelo=claude-haiku-5-5' en docker logs dcam-puente"
 printf '%s\n' "$LOG_PUENTE" | grep -qE ' GET /v1/messages 404 ' && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/models 404 ' \
   && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST \(rechazada\) /v1/\.\./v1/messages 404 ' \
   && ok "el puente registró los rechazos (GET, /v1/models, ruta con ..)" || mal "faltan líneas de rechazo en docker logs dcam-puente"
-if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|anthropic-version|authorization|bearer|oauth|di hola'; then
+if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|anthropic-version|authorization|bearer|oauth|responde solo'; then
   mal "el log del puente trae query, cabeceras o cuerpo"
 elif printf '%s\n' "$LOG_PUENTE" | grep -qE "$FORMA_TOKEN"; then
   mal "algo con forma de token aparece en el log del puente"
@@ -121,10 +126,5 @@ elif [ -n "$FORMA" ] || [ -n "$PREFIJO_FUERA" ]; then
 else
   ok "FS de la jaula: nada con forma de token; el prefijo sk-ant- solo en los binarios de Claude Code"
 fi
-
-# Informativo (no bloqueante): count_tokens a través del puente.
-cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 30 -X POST http://dcam-puente:1235/v1/messages/count_tokens \
-  -H 'content-type: application/json' -H 'anthropic-version: 2023-06-01' -d "$cuerpo")
-echo "INFO count_tokens a través del puente: $cod (no bloqueante)"
 
 exit $r
