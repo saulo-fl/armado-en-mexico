@@ -92,11 +92,13 @@ es donde están `mapear-existencias.py`, `aplicar-mecanico.py`, `auditar.js`,
 `mapeo-<cat>.json`. `/trabajo/entrada` es de **solo lectura**: ahí están los
 `*.json`/`*.tsv` que el host parseó de los PDFs, `motivo.txt` y `prompt.txt`.
 `/trabajo/salida` es la única carpeta que el host vuelve a leer: ahí, y SOLO ahí,
-escribes `solucion.json`. **Escribe siempre las rutas completas, nunca abrevies**:
-corres con `--permission-mode dontAsk` y una lista cerrada de comandos que se
-compara con el texto literal; lo que no está en la lista se niega sin preguntar
-(sin red: ni WebFetch, ni curl, ni wget). Si algo que necesitas se niega, no lo
-rodees: anótalo en `pendiente` con `ok: false`.
+escribes `solucion.json`. **Escribe siempre las rutas completas, nunca abrevies.**
+Corres dentro de un contenedor sin red ni credenciales, con permisos abiertos
+SOLO ahí dentro: puedes editar `ligas-*.json` y los demás archivos de datos y
+correr los scripts del skill. No hay WebFetch ni WebSearch, y curl o wget no
+llegan a ningún lado. Fuera de los archivos de datos (fichas, ligas, precios,
+historiales, mapeos), lo que cambies se descarta al salir. Si algo que necesitas
+falla o se niega, no lo rodees: anótalo en `pendiente` con `ok: false`.
 
 ## Entrega
 
