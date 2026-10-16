@@ -159,6 +159,12 @@ else
   RC_SOLUCIONAR=$?
   echo "solucionar.sh RC=$RC_SOLUCIONAR"
   [ -s "$TMP/solucionar.err" ] && { echo "--- stderr de solucionar.sh ---"; cat "$TMP/solucionar.err"; }
+  # Lo que el extractor sacó de la jaula (ronda de arreglo 4/5): para el informe.
+  echo "--- agente.json (resumen) ---"
+  jq -c '{subtype, is_error, num_turns, duration_ms, result: ((.result // "") | .[0:300])}' "$WORKDIR/salida/agente.json" 2>/dev/null || echo "(sin agente.json)"
+  echo "--- solucion.json (primeros 4000 bytes) ---"
+  head -c 4000 "$WORKDIR/salida/solucion.json" 2>/dev/null || echo "(sin solucion.json)"
+  echo
 fi
 
 # --- (1) lo único que el puente vio durante esta corrida: solo /v1/messages[/count_tokens] ---
@@ -180,6 +186,8 @@ if [ -n "$JAULA_REPO" ] && [ "$RC_SOLUCIONAR" -eq 0 ]; then
       CAMBIADOS="$(git -C "$DCAM_DIR/repo" diff --name-only "$ANTES_SHA" "$DESPUES_SHA")"
       PERMITIDOS="$(node -e "import('$MAIN/scripts/dcam/validar-parche-lib.mjs').then(m=>console.log([...m.PERMITIDOS].join('\n')))")"
       FUERA="$(comm -23 <(printf '%s\n' "$CAMBIADOS" | sort) <(printf '%s\n' "$PERMITIDOS" | sort))"
+      echo "--- diff final del commit de compuertas.sh (primeras 200 líneas) ---"
+      git -C "$DCAM_DIR/repo" diff "$ANTES_SHA" "$DESPUES_SHA" | head -200
       if [ -z "$FUERA" ]; then
         ok "(2) el commit del agente solo tocó rutas de PERMITIDOS: $CAMBIADOS"
       else
