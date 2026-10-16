@@ -91,7 +91,7 @@ print("ok  betas:", b)
 # Ronda 2: lo que se REENVÍA es el objeto validado re-serializado, no los bytes de
 # la jaula. Puente real (clase H) contra una API falsa local que guarda lo que recibe.
 original = ('{ "model" : "claude-haiku-5-5", "max_tokens": 8,\n  "messages": [{"role": "user", "content": "hólà"}] }').encode("utf-8")
-esperado_bytes = json.dumps(json.loads(original), ensure_ascii=False, allow_nan=False, separators=(",", ":")).encode("utf-8")
+esperado_bytes = json.dumps(json.loads(original), ensure_ascii=True, allow_nan=False, separators=(",", ":")).encode("utf-8")
 assert validar(original)[3] == esperado_bytes and esperado_bytes != original
 recibido = {}
 class API(http.server.BaseHTTPRequestHandler):
@@ -114,12 +114,20 @@ try:
         "http://127.0.0.1:%d/v1/messages?beta=true" % srv.server_port, data=original, method="POST",
         headers={"content-type": "application/json"}), timeout=10)
     assert r.status == 200
+    primero = dict(recibido)
+    # Revisión final, M1: un surrogate suelto (emoji partido) se reenvía; antes, 500.
+    suelto = rb'{"model":"claude-haiku-5-5","max_tokens":8,"messages":[{"role":"user","content":"a\ud83d"}]}'
+    r2 = urllib.request.urlopen(urllib.request.Request(
+        "http://127.0.0.1:%d/v1/messages?beta=true" % srv.server_port, data=suelto, method="POST",
+        headers={"content-type": "application/json"}), timeout=10)
+    assert r2.status == 200 and recibido["body"] == suelto, (r2.status, recibido["body"])
 finally:
     sys.stderr = stderr
 api.shutdown(); srv.shutdown()
-assert recibido["body"] == esperado_bytes, (recibido["body"], esperado_bytes)
-assert recibido["cl"] == str(len(esperado_bytes)), recibido["cl"]
-assert recibido["path"] == "/v1/messages?beta=true", recibido["path"]
+assert primero["body"] == esperado_bytes, (primero["body"], esperado_bytes)
+assert primero["cl"] == str(len(esperado_bytes)), primero["cl"]
+assert primero["path"] == "/v1/messages?beta=true", primero["path"]
+print("ok  surrogate suelto: reenviado (200) y escapado, sin 500")
 print("ok  reenviado = re-serializado (%d bytes en vez de %d), Content-Length %s, query %s"
-      % (len(esperado_bytes), len(original), recibido["cl"], recibido["path"].split("?")[1]))
+      % (len(esperado_bytes), len(original), primero["cl"], primero["path"].split("?")[1]))
 print("test_puente: OK")

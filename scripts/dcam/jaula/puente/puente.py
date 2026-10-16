@@ -142,7 +142,11 @@ def validar(body):
                 return no("bloque de contenido no permitido")
     except RecursionError:
         return no("contenido demasiado anidado")
-    return None, log_m, log_e, json.dumps(b, ensure_ascii=False, allow_nan=False,
+    # ensure_ascii=True (revisión final, M1): un surrogate suelto («\ud83d», p. ej. un
+    # emoji partido al recortar una salida) es JSON válido, pero con ensure_ascii=False
+    # el .encode("utf-8") revienta y cada reintento era un 500. Escapado sigue siendo
+    # el mismo JSON.
+    return None, log_m, log_e, json.dumps(b, ensure_ascii=True, allow_nan=False,
                                           separators=(",", ":")).encode("utf-8")
 
 def query_de(crudo):
