@@ -522,3 +522,43 @@ test('Fase 1b (ronda 1) #3: el CLI sin exactamente 2 argumentos sale con status 
   const unArgDeMas = spawnSync(process.execPath, [scriptReal, 'a', 'b', 'c'], { encoding: 'utf8' });
   assert.equal(unArgDeMas.status, 2, `status=${unArgDeMas.status} stdout=${unArgDeMas.stdout} stderr=${unArgDeMas.stderr}`);
 });
+
+// --- Fase 3c: mapeador de #375 (gemelos y regresos renombrados) ---
+const MAPEO_VACIO = { existencias: {}, precios: {}, factores: [], sinFicha: [], sinPrecio: [], revisarPrecio: [], totalPdf: 0, totalMapped: 0, excluidos: [], regresos: [], regresosRechazados: [] };
+
+test('mapeo (#375): gemelos válido pasa, y un mapeo sin gemelos (anterior a #375) también', () => {
+  const r = 'mapeo-armas.json';
+  const con = { ...MAPEO_VACIO, gemelos: [{ idx: 12, name: 'RIFLE CAL22 X', qty: 0, fichaId: 81 }, { idx: 13, name: 'RIFLE CAL22 X', qty: 2, fichaId: 81 }] };
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(con)), []);
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, gemelos: [] })), []);
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(MAPEO_VACIO)), []);
+});
+
+test('mapeo (#375): gemelos con una clave extra o un tipo malo se rechaza', () => {
+  const r = 'mapeo-armas.json';
+  const g = { idx: 12, name: 'RIFLE CAL22 X', qty: 1, fichaId: 81 };
+  for (const malo of [
+    { ...g, extra: 1 },
+    { ...g, fichaId: '81' },
+    { ...g, qty: -1 },
+    { ...g, idx: 1.5 },
+    { ...g, name: 'a\u0000b' },
+    { idx: 12, name: 'X', qty: 1 },
+  ]) {
+    assert.ok(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, gemelos: [malo] })).length > 0, JSON.stringify(malo));
+  }
+  assert.ok(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, gemelos: {} })).length > 0);
+});
+
+test('mapeo (#375): los rechazos y regresos «renombre» caben aunque el dcamRef sea el más largo real (120)', () => {
+  const r = 'mapeo-armas.json';
+  const ref = 'X'.repeat(120);
+  const rechazoPista = { idx: 3, name: 'RIFLE CAL22 TIPPMANN M4-22 REDLINE', priceN: 9999.5, fichaId: 81, motivo: `posible renombre de «${ref}»: la ficha ya tiene renglón hoy` };
+  const rechazoCompleto = { idx: 4, name: 'RIFLE CAL22 Y', priceN: 100, fichaId: 81, fechaAntes: '2026-10-01', antes: 117, razon: 0.854701, general: null, tramo: 0, apoyos: 0, motivo: `posible renombre de «${ref}»: el precio no cuadra con el aumento general ni con un tramo` };
+  const regreso = { idx: 5, name: 'RIFLE 0.22 Z', priceN: 110, fichaId: 82, fechaAntes: '2026-10-01', antes: 100, razon: 1.1, motivo: `renombre de «${ref}»: mismo aumento que 12 fichas de su tramo`, general: 1.1, tramo: 12, apoyos: 12 };
+  const m = { ...MAPEO_VACIO, regresos: [regreso], regresosRechazados: [rechazoPista, rechazoCompleto] };
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify(m)), []);
+  // El tope sigue existiendo: un motivo desmesurado se rechaza.
+  const largo = { ...MAPEO_VACIO, regresosRechazados: [{ ...rechazoPista, motivo: 'x'.repeat(301) }] };
+  assert.ok(compararArchivo(r, '{}', JSON.stringify(largo)).length > 0);
+});

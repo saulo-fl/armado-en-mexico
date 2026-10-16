@@ -384,9 +384,17 @@ const ESQ_REVISAR_PRECIO = { fichaId: esEnteroNoNeg, dcamRef: (v) => esStringLim
 const ESQ_EXCLUIDOS = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), priceN: esNumeroNoNeg, qty: esEnteroNoNeg };
 // regresos (detalle, `det` de cuadra_regreso() siempre completo) y regresosRechazados
 // (rechazo, puede quedarse a medio camino: motivo. SIN fichaId; o +fichaId; o completo).
-const ESQ_REGRESOS = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), priceN: esNumeroNoNeg, fichaId: esEnteroNoNeg, fechaAntes: (v) => esStringLimpio(v), antes: esNumeroNoNeg, razon: esNumero, motivo: (v) => esStringLimpio(v), general: esNumeroNoNegOuNull, tramo: esEnteroNoNeg, apoyos: esEnteroNoNeg };
-const ESQ_REGRESOS_RECHAZADOS_REQ = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), priceN: esNumeroNoNeg, motivo: (v) => esStringLimpio(v) };
+// Desde #375 el motivo puede citar el dcamRef de la ficha («[posible ]renombre de «<dcamRef>»:
+// <motivo>»): 21 + dcamRef (≤ 200, el mismo tope que un nombre) + 3 + el motivo base más
+// largo (63) = 287 → tope de 300 para el motivo de regresos y rechazos (el dcamRef real más
+// largo hoy mide 120: con 200 no cabía).
+const MAX_MOTIVO_REGRESO = 300;
+const ESQ_REGRESOS = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), priceN: esNumeroNoNeg, fichaId: esEnteroNoNeg, fechaAntes: (v) => esStringLimpio(v), antes: esNumeroNoNeg, razon: esNumero, motivo: (v) => esStringLimpio(v, MAX_MOTIVO_REGRESO), general: esNumeroNoNegOuNull, tramo: esEnteroNoNeg, apoyos: esEnteroNoNeg };
+const ESQ_REGRESOS_RECHAZADOS_REQ = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), priceN: esNumeroNoNeg, motivo: (v) => esStringLimpio(v, MAX_MOTIVO_REGRESO) };
 const ESQ_REGRESOS_RECHAZADOS_OPC = { fichaId: esEnteroNoNeg, fechaAntes: (v) => esStringLimpio(v), antes: esNumeroNoNeg, razon: esNumero, general: esNumeroNoNegOuNull, tramo: esEnteroNoNeg, apoyos: esEnteroNoNeg };
+// gemelos (#375, ligar_gemelos): segundo renglón del mismo producto ligado a la misma ficha.
+// Clave OPCIONAL del mapeo: los mapeos anteriores a #375 no la traen.
+const ESQ_GEMELOS = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), qty: esEnteroNoNeg, fichaId: esEnteroNoNeg };
 
 function jsonMalo(ruta, texto) {
   let j; try { j = JSON.parse(texto); } catch { return [`${ruta}: JSON inválido`]; }
@@ -416,7 +424,8 @@ function jsonMalo(ruta, texto) {
       regresos: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_REGRESOS)),
       regresosRechazados: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_REGRESOS_RECHAZADOS_REQ, ESQ_REGRESOS_RECHAZADOS_OPC)),
     };
-    return objetoCerrado(j, req) ? [] : [`${ruta}: no cumple el esquema exacto de mapeo-*`];
+    const opc = { gemelos: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_GEMELOS)) };
+    return objetoCerrado(j, req, opc) ? [] : [`${ruta}: no cumple el esquema exacto de mapeo-*`];
   }
 
   return [`${ruta}: no permitido`];
