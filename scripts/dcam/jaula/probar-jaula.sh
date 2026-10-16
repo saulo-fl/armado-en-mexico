@@ -56,6 +56,9 @@ cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 http://dcam-pu
 [ "$cod" = "404" ] && ok "GET /v1/messages -> 404" || mal "GET /v1/messages no dio 404 (fue '$cod')"
 cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 -X POST http://dcam-puente:1235/v1/models -d '{}')
 [ "$cod" = "404" ] && ok "POST /v1/models -> 404" || mal "POST /v1/models no dio 404 (fue '$cod')"
+# (El http.server de Python 3.12 ya colapsa un "//" inicial antes de que lo vea
+# el puente: //dcam-puente/v1/messages llega como /dcam-puente/v1/messages y se
+# rechaza igual por no ser una ruta permitida.)
 for raro in '//dcam-puente/v1/messages' '/v1/../v1/messages' '/v1//messages'; do
   cod=$(correr curl -s -o /dev/null -w '%{http_code}' --max-time 10 --path-as-is -X POST "http://dcam-puente:1235$raro" -d '{}')
   [ "$cod" = "404" ] && ok "POST $raro -> 404" || mal "POST $raro no dio 404 (fue '$cod')"
@@ -66,8 +69,8 @@ echo "--- docker logs dcam-puente de estas peticiones ---"
 printf '%s\n' "$LOG_PUENTE"
 printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/messages 200 [0-9]+ [0-9]+ms$' && ok "el puente registró el POST /v1/messages con 200" || mal "no hay línea 'POST /v1/messages 200' en docker logs dcam-puente"
 printf '%s\n' "$LOG_PUENTE" | grep -qE ' GET /v1/messages 404 ' && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST /v1/models 404 ' \
-  && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST \(rechazada\) //dcam-puente/v1/messages 404 ' \
-  && ok "el puente registró los rechazos (GET, /v1/models, ruta con //)" || mal "faltan líneas de rechazo en docker logs dcam-puente"
+  && printf '%s\n' "$LOG_PUENTE" | grep -qE ' POST \(rechazada\) /v1/\.\./v1/messages 404 ' \
+  && ok "el puente registró los rechazos (GET, /v1/models, ruta con ..)" || mal "faltan líneas de rechazo en docker logs dcam-puente"
 if printf '%s\n' "$LOG_PUENTE" | grep -qiE 'beta=true|content-type|authorization|bearer|di hola'; then
   mal "el log del puente trae query, cabeceras o cuerpo"
 elif printf '%s\n' "$LOG_PUENTE" | grep -q -F -f "$ROUTER_KEY_FILE"; then
