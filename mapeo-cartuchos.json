@@ -1,142 +1,121 @@
 {
   "existencias": {
     "2004": 566,
-    "2018": 790,
+    "2018": 190,
     "2019": 12350,
     "2024": 1460,
     "2026": 1792,
     "2028": 20,
     "2029": 300,
     "2030": 1300,
-    "2033": 5520,
+    "2033": 4120,
     "2034": 6100,
-    "2035": 8100,
-    "2036": 3150,
+    "2035": 7900,
     "2042": 14600,
-    "2043": 8420,
+    "2043": 8220,
     "2044": 35,
     "2050": 4050,
     "2051": 1410,
-    "2069": 300,
-    "2070": 2100,
-    "2075": 400,
-    "2077": 600,
-    "2087": 150,
-    "2089": 1700,
+    "2061": 750,
+    "2070": 250,
+    "2074": 1350,
+    "2078": 750,
+    "2089": 2250,
     "2092": 500,
-    "2095": 3600,
-    "2100": 1250,
-    "2103": 7100,
-    "2111": 750,
-    "2116": 2500
+    "2095": 150,
+    "2103": 7100
   },
   "precios": {
     "2004": 8.96,
     "2018": 18.18,
     "2019": 8.96,
-    "2024": 23.5,
-    "2026": 50.4,
-    "2028": 23.5,
-    "2029": 25.62,
+    "2024": 23.81,
+    "2026": 51.04,
+    "2028": 23.81,
+    "2029": 25.95,
     "2030": 28.16,
-    "2033": 14.4,
-    "2034": 11.01,
+    "2033": 14.58,
+    "2034": 11.15,
     "2035": 12.09,
-    "2036": 14.82,
-    "2042": 24.14,
-    "2043": 31.55,
-    "2044": 11.43,
-    "2050": 25.62,
-    "2051": 25.62,
-    "2069": 9.23,
-    "2070": 10.59,
-    "2075": 11.65,
-    "2077": 12.78,
-    "2087": 11.83,
-    "2089": 13.72,
-    "2092": 30.28,
-    "2095": 8.05,
-    "2100": 8.99,
-    "2103": 8.96,
-    "2111": 8.99,
-    "2116": 9.94
+    "2042": 24.45,
+    "2043": 31.96,
+    "2044": 11.58,
+    "2050": 25.95,
+    "2051": 25.95,
+    "2061": 10.32,
+    "2070": 10.72,
+    "2074": 10.32,
+    "2078": 10.56,
+    "2089": 13.92,
+    "2092": 30.67,
+    "2095": 8.15,
+    "2103": 8.96
   },
   "factores": [
-    1.007868,
-    1.007092
+    1.012881,
+    1.0
   ],
   "sinFicha": [],
   "sinPrecio": [
     {
-      "fichaId": 2072,
-      "refName": "CARTUCHO CAL12 SAGA SPORTING 32GR M8",
-      "refPrice": 11.28
+      "fichaId": 2075,
+      "refName": "CART.CAL.12.A.VEL.1330.M#7.5,36G",
+      "refPrice": 11.65
     },
     {
-      "fichaId": 2093,
-      "refName": "CARTUCHO CALIBRE .380” AUTO, MARCA FEDE.",
-      "refPrice": 12.61
+      "fichaId": 2077,
+      "refName": "CART. CAL12 SAGA KING PIGEON CD 36GR M9",
+      "refPrice": 12.78
     },
     {
-      "fichaId": 2061,
-      "refName": "CART.CAL.12.RIO.GAME.LOAD-32.32GR.P6",
-      "refPrice": 10.1
+      "fichaId": 2100,
+      "refName": "CART CAL12 SPRINT N7.5 24GR. T2",
+      "refPrice": 8.99
     },
     {
-      "fichaId": 2021,
-      "refName": "CART.CAL.243WIN100GR,B.T.",
-      "refPrice": 25.42
+      "fichaId": 2116,
+      "refName": "CART. CAL. 12 EXCOPESA 24GR M8 110-80",
+      "refPrice": 9.94
     },
     {
-      "fichaId": 2063,
-      "refName": "CART.AGUILA.CAL12.TRP.AMER.1350M#7.5,24G",
-      "refPrice": 7.98
+      "fichaId": 2111,
+      "refName": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
+      "refPrice": 8.99
     },
     {
-      "fichaId": 2076,
-      "refName": "CART. CAL12 SAGA KING PIGEON CD 36GR M8",
-      "refPrice": 12.69
+      "fichaId": 2087,
+      "refName": "CART.BULLETT-4C.CAL.12MUN8 36GR.C0072-08",
+      "refPrice": 11.83
     },
     {
-      "fichaId": 2015,
-      "refName": "CART. CAL. 12 SAGA ELITE 28 GR MUN. 7.5",
-      "refPrice": 10.34
+      "fichaId": 2069,
+      "refName": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
+      "refPrice": 9.23
     },
     {
-      "fichaId": 2079,
-      "refName": "CART. CAL12 SAGA SPORTING 28GR MUN7.5",
-      "refPrice": 9.63
-    },
-    {
-      "fichaId": 2113,
-      "refName": "CART.CAL.12G.A.SAGA EXPORT28,28GR,M7.5.",
-      "refPrice": 9.87
-    },
-    {
-      "fichaId": 2057,
-      "refName": "CART. CAL. 12 EXCOPESA T5 PICH 36GR M7.5",
-      "refPrice": 13.63
-    },
-    {
-      "fichaId": 2091,
-      "refName": "CART CAL12 TRUST BLUE LINE 32GR M8",
-      "refPrice": 10.57
-    },
-    {
-      "fichaId": 2115,
-      "refName": "CART.MARC.FIOCCHI, CAL.12 GA, 7.5, 28 GR",
-      "refPrice": 10.51
-    },
-    {
-      "fichaId": 2114,
-      "refName": "CART.MARC.FIOCCHI, CAL.12 GA, 7.5, 32 GR",
-      "refPrice": 10.51
+      "fichaId": 2036,
+      "refName": "CARTS CAL.308\" W REMINGTON UMC FMJ 150GR",
+      "refPrice": 14.82
     }
   ],
   "revisarPrecio": [],
-  "totalPdf": 90913,
-  "totalMapped": 90913,
+  "totalPdf": 77513,
+  "totalMapped": 77513,
   "excluidos": [],
-  "regresos": [],
+  "regresos": [
+    {
+      "idx": 8,
+      "name": "CART. CAL. 12 SAGA ELITE 28 GR MUN. 7.5",
+      "priceN": 10.56,
+      "fichaId": 2078,
+      "fechaAntes": "2026-09-22",
+      "antes": 10.09,
+      "razon": 1.046581,
+      "motivo": "mismo aumento que 2 fichas de su tramo",
+      "apoyos": 19,
+      "general": 1.073504,
+      "tramo": 2
+    }
+  ],
   "regresosRechazados": []
 }
