@@ -27,13 +27,28 @@ ln -sfn /opt/deps/node_modules node_modules
 # confianza que deba poder cambiar sus propias reglas.
 INSTRUCCIONES="$(awk '/^---$/{n++; next} n>=2' /opt/main/solucionador-dcam.md)"
 
+# Fase 3d, decisión de Saulo (16-oct): «bypass solo dentro de la jaula».
+# Con --permission-mode dontAsk, Claude Code niega SIEMPRE Edit/Write dentro de
+# .claude/ (ni reglas por ruta ni acceptEdits lo abren), y ahí viven los
+# ligas-*.json que el agente tiene que poder reponer. Aquí sí vale bypass porque
+# la frontera es el CONTENEDOR, no la lista de herramientas: sin red salvo el
+# puente (que solo reenvía /v1/messages), sin credenciales, FS de solo lectura
+# salvo el volumen tmpfs con tope, sin capacidades, uid sin privilegios; y lo
+# único que sale al host lo extrae extraer.sh (solo PERMITIDOS, con tope), lo
+# valida el validador de MAIN y lo prueban las compuertas sin red. FUERA de la
+# jaula está prohibido correr Claude Code con bypass (ni el pipeline, ni
+# solucionar.sh, ni compuertas.sh lo hacen). --disallowedTools se sigue
+# respetando en bypass: WebFetch y WebSearch (este lo ejecutaría la API, fuera
+# de la jaula) quedan fuera.
+if [ "$(id -u)" -eq 0 ]; then
+  echo "dentro.sh: me niego a correr como root" >&2; exit 1
+fi
+echo "dentro.sh: uid=$(id -u) gid=$(id -g)" >&2
+
 timeout --kill-after=60 "$((${SOLUCIONADOR_MIN:-45} * 60))" \
   claude -p "$(cat /trabajo/entrada/prompt.txt)" \
     --append-system-prompt "$INSTRUCCIONES" \
-    --permission-mode dontAsk \
-    --allowedTools Read Write Edit Grep Glob "Bash(python3 *)" "Bash(/opt/venv/bin/python *)" "Bash(node *)" \
-                   "Bash(npm test *)" "Bash(git status *)" "Bash(git diff *)" "Bash(git log *)" \
-                   "Bash(ls *)" "Bash(head *)" "Bash(tail *)" "Bash(grep *)" "Bash(jq *)" "Bash(wc *)" "Bash(cp *)" \
+    --permission-mode bypassPermissions \
     --disallowedTools WebFetch WebSearch \
     --add-dir /trabajo/entrada --add-dir /trabajo/salida \
     --effort medium \
