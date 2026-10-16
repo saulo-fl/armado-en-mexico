@@ -300,7 +300,8 @@ else
 fi
 rm -rf "$J"
 
-set +e
+# (Fase 3c, menor 6: ya no hay un `set +e` abierto de aquí al final; cada
+# corrida que puede fallar lleva el suyo, como el resto de los casos.)
 PERMITIDOS_T="$(cd "$MAIN" && node -e "import('./scripts/dcam/validar-parche-lib.mjs').then(m=>console.log([...m.PERMITIDOS].join('\n')))")"
 
 # --- (j) la aserción "índice de $REPO fuera de PERMITIDOS" de compuertas.sh
@@ -366,15 +367,17 @@ echo "$USADO_ANTES" > "$TMP/pico-k"
   done ) &
 PID_MUESTREO=$!
 INICIO_K=$SECONDS
+set +e
 RUTA_K="$(timeout 600 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_K" "$MAIN_LLENO" 2>"$TMP/log-k.txt")"
 RC_K=$?
+set -e
 touch "$TMP/fin-k"; wait "$PID_MUESTREO"
 USADO_DESPUES="$(usado)"
 PICO_K="$(cat "$TMP/pico-k")"
 DIF_K=$(( USADO_DESPUES - USADO_ANTES )); [ "$DIF_K" -lt 0 ] && DIF_K=$(( -DIF_K ))
 SUBIDA_K=$(( PICO_K - USADO_ANTES ))
 echo "    (k) solucionar.sh RC=$RC_K en $((SECONDS - INICIO_K))s; consola de la jaula:"
-sed 's/^/      /' "$W_K/docker-solucionar.log"
+sed 's/^/      /' "$W_K/docker-solucionar.log" 2>/dev/null || true
 echo "    (k) df -B1 --output=used /: antes=$USADO_ANTES después=$USADO_DESPUES |dif|=$DIF_K pico=$PICO_K (subida máx $SUBIDA_K)"
 echo "    (k) docker volume ls (dcam-jaula-*) tras la corrida: '$(docker volume ls -q --filter name=dcam-jaula- | tr '\n' ' ')'"
 if ! grep -q "No space left on device" "$W_K/docker-solucionar.log"; then
@@ -406,11 +409,13 @@ W_L="$TMP/w-l"
 mkdir -p "$W_L"
 echo "motivo de prueba" > "$W_L/motivo.txt"
 echo "prompt de prueba" > "$W_L/prompt.txt"
+set +e
 RUTA_L="$(timeout 300 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_L" "$MAIN_6MB" 2>"$TMP/log-l.txt")"
 RC_L=$?
+set -e
 echo "    (l) solucionar.sh RC=$RC_L; extractor: $(cat "$W_L/docker-extraer.log" 2>/dev/null)"
-CON_MARCA_L="$(grep -rlF "$MARCA" "$W_L" "$R" /tmp/dcam-jaula-* 2>/dev/null)"
-GRANDES_L="$( { find "$W_L" -size +5M; find /tmp -maxdepth 4 -path '/tmp/dcam-jaula-*' -size +5M; } 2>/dev/null)"
+CON_MARCA_L="$(grep -rlF "$MARCA" "$W_L" "$R" /tmp/dcam-jaula-* 2>/dev/null || true)"
+GRANDES_L="$( { find "$W_L" -size +5M; find /tmp -maxdepth 4 -path '/tmp/dcam-jaula-*' -size +5M; } 2>/dev/null || true)"
 if [ "$RC_L" -eq 0 ]; then
   mal "(l) 6 MB en ruta permitida: solucionar.sh NO debió salir 0"
 elif [ -n "$CON_MARCA_L" ] || [ -n "$GRANDES_L" ]; then
@@ -439,15 +444,17 @@ W_M="$TMP/w-m"
 mkdir -p "$W_M"
 echo "motivo de prueba" > "$W_M/motivo.txt"
 echo "prompt de prueba" > "$W_M/prompt.txt"
+set +e
 RUTA_M="$(timeout 300 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W_M" "$MAIN_M" 2>"$TMP/log-m.txt")"
 RC_M=$?
+set -e
 if [ "$RC_M" -ne 0 ] || [ -z "$RUTA_M" ]; then
   mal "(m) no permitidos: solucionar.sh falló (RC=$RC_M, ver $TMP/log-m.txt)"
   tail -5 "$TMP/log-m.txt"
 else
   EXTRAIDOS_M="$(cd "$RUTA_M" && find . -type f -o -type l | sed 's|^\./||' | sort)"
   FUERA_M="$(comm -23 <(printf '%s\n' "$EXTRAIDOS_M") <(printf '%s\n' "$PERMITIDOS_T" | sort))"
-  CON_MARCA_M="$(grep -rlF "$MARCA" "$RUTA_M" "$W_M" "$R" 2>/dev/null)"
+  CON_MARCA_M="$(grep -rlF "$MARCA" "$RUTA_M" "$W_M" "$R" 2>/dev/null || true)"
   echo "    (m) extraído al host: $(grep -c . <<< "$EXTRAIDOS_M") archivos; salida: $(ls "$W_M/salida" | tr '\n' ' ')"
   if [ -n "$FUERA_M" ] || [ -n "$CON_MARCA_M" ]; then
     mal "(m) no permitidos: llegó al host algo fuera de PERMITIDOS: $FUERA_M $CON_MARCA_M"
@@ -461,6 +468,44 @@ else
   rm -rf "$(dirname "$RUTA_M")"
 fi
 rm -rf "$W_M" "$MAIN_M"
+
+# --- (n) Fase 3c (menor 5): de punta a punta sin modelo. Una jaula falsa hace un
+#     cambio legítimo de data.js y toca un archivo no permitido; solucionar.sh
+#     extrae y compuertas.sh consume ESE directorio extraído (sin .git, solo
+#     PERMITIDOS): pasa y commitea solo src/data/data.js. ---
+MAIN_N="$TMP/main-n"
+main_con_dentro "$MAIN_N" <<'EOF'
+#!/usr/bin/env bash
+sed -i 's/2852g/2853g/' /trabajo/repo/src/data/data.js
+echo "# no permitido" >> /trabajo/repo/scripts/dcam/vigia.py
+echo '{"ok":true}' > /trabajo/salida/agente.json
+EOF
+echo "motivo de prueba" > "$WORKDIR/motivo.txt"
+echo "prompt de prueba" > "$WORKDIR/prompt.txt"
+ANTES="$(sha_head)"
+set +e
+RUTA_N="$(timeout 300 bash "$RAIZ/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$MAIN_N" 2>"$TMP/log-n1.txt")"
+RC_N=$?
+set -e
+if [ "$RC_N" -ne 0 ] || [ -z "$RUTA_N" ]; then
+  mal "(n) extracción -> compuertas: solucionar.sh falló (RC=$RC_N, ver $TMP/log-n1.txt)"
+  tail -5 "$TMP/log-n1.txt"
+elif [ -e "$RUTA_N/.git" ] || [ -e "$RUTA_N/scripts/dcam/vigia.py" ]; then
+  mal "(n) extracción -> compuertas: lo extraído trae .git o un archivo no permitido"
+elif correr "$RUTA_N" >"$TMP/log-n2.txt" 2>&1; then
+  CAMBIADOS="$(git -C "$DCAM_DIR/repo" diff --name-only "$ANTES" "$(sha_head)")"
+  if [ "$(sha_head)" != "$ANTES" ] && [ "$CAMBIADOS" = "src/data/data.js" ] \
+     && [[ "$(git -C "$DCAM_DIR/repo" show HEAD:src/data/data.js)" == *2853g* ]]; then   # sin `| grep -q`: con pipefail, el SIGPIPE de git lo daría por falso
+    ok "(n) extracción -> compuertas: compuertas.sh pasó sobre lo extraído y commiteó solo src/data/data.js (2852g -> 2853g)"
+  else
+    mal "(n) extracción -> compuertas: el commit no es el esperado ($CAMBIADOS)"
+  fi
+else
+  mal "(n) extracción -> compuertas: compuertas.sh rechazó lo extraído (ver $TMP/log-n2.txt)"
+  tail -20 "$TMP/log-n2.txt"
+fi
+[ -n "$RUTA_N" ] && rm -rf "$(dirname "$RUTA_N")"
+rm -rf "$MAIN_N"
 
 echo "=================================================="
 if [ "$FALLOS" -eq 0 ]; then

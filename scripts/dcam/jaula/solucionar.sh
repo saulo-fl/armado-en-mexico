@@ -45,6 +45,13 @@ FECHA_ISO="$1" RAMA="$2" W="$3" MAIN="$4"
 [[ "$RAMA" =~ ^auto/inventario-[0-9A-Z-]+$ ]] || { echo "rama inválida" >&2; exit 2; }
 TAM_TMPFS="${DCAM_JAULA_TMPFS:-2g}"
 [[ "$TAM_TMPFS" =~ ^[0-9]+[kmg]?$ ]] || { echo "DCAM_JAULA_TMPFS inválido: $TAM_TMPFS" >&2; exit 2; }
+TIEMPO_AGENTE="${SOLUCIONADOR_TIMEOUT:-45m}"
+[[ "$TIEMPO_AGENTE" =~ ^([0-9]+)([smh]?)$ ]] || { echo "SOLUCIONADOR_TIMEOUT inválido: $TIEMPO_AGENTE" >&2; exit 2; }
+# Fase 3c (menor 1): el ancla caduca sola, timeout del agente + 15 min, aunque
+# este script muera con SIGKILL sin pasar por el trap (con --rm se borra y el
+# volumen tmpfs se desmonta; el objeto vacío lo barre el pipeline al arrancar).
+case "${BASH_REMATCH[2]}" in m) F=60 ;; h) F=3600 ;; *) F=1 ;; esac
+ANCLA_S=$(( BASH_REMATCH[1] * F + 900 ))
 
 REPO="${DCAM_DIR:?}/repo"
 JAULA="$(mktemp -d /tmp/dcam-jaula-XXXX)"
@@ -74,6 +81,10 @@ limpiar() {
       docker volume inspect "$VOL" >/dev/null 2>&1 || break
       sleep 1
     done
+    # Fase 3c (menor 4): que la fuga deje rastro en el $LOG del pipeline.
+    if docker volume inspect "$VOL" >/dev/null 2>&1; then
+      echo "solucionar.sh: AVISO: el volumen $VOL sigue vivo tras 10 intentos de borrarlo" >&2
+    fi
   fi
   # $JAULA se queda solo en éxito (la usa compuertas.sh; el pipeline la borra
   # al final con limpiar_jaula). En cualquier fallo, incluido un `set -e` a
@@ -106,7 +117,7 @@ docker volume create --driver local --opt type=tmpfs --opt device=tmpfs \
   --opt "o=size=${TAM_TMPFS},uid=${UID_HOST},gid=${GID_HOST},mode=0700" "$VOL" >/dev/null
 
 docker run -d --rm --init --name "$ANCLA" --network none "${DURO[@]}" \
-  --pids-limit 16 --memory 64m -v "$VOL:/trabajo:ro" dcam-jaula:1 sleep infinity >/dev/null
+  --pids-limit 16 --memory 64m -v "$VOL:/trabajo:ro" dcam-jaula:1 sleep "$ANCLA_S" >/dev/null
 
 # Copia de la rama al volumen: contenedor previo con un comando fijo del host;
 # el clon del host entra en solo lectura. La copia no sabe a dónde empujar.
@@ -116,13 +127,17 @@ timeout --kill-after=10 5m \
   -v "$REPO:/fuente:ro" -v "$VOL:/trabajo" \
   dcam-jaula:1 sh -c 'git clone --quiet --no-hardlinks --branch "$RAMA" file:///fuente /trabajo/repo &&
     git -C /trabajo/repo remote remove origin && mkdir /trabajo/salida' \
-  2>&1 | recortar 65536 "$W/docker-prep.log"
+  2>&1 | recortar 65536 "$W/docker-prep.log" && RC_PREP=0 || RC_PREP=$?
 docker rm -f "$PREP" >/dev/null 2>&1 || true
+if [ "$RC_PREP" -ne 0 ]; then   # Fase 3c (menor 3): que el $LOG diga dónde mirar
+  echo "solucionar.sh: falló la copia previa de la rama al volumen (rc=$RC_PREP); ver $W/docker-prep.log" >&2
+  exit 1
+fi
 
 # `--init` (reaper de PID 1) ayuda a que las señales lleguen dentro; un
 # `timeout` que vence solo mata al CLIENTE docker, por eso el `docker rm -f`
 # explícito de abajo (ronda de arreglo 1/5, punto 2).
-timeout --kill-after="${SOLUCIONADOR_KILL_AFTER:-60}" "${SOLUCIONADOR_TIMEOUT:-45m}" \
+timeout --kill-after="${SOLUCIONADOR_KILL_AFTER:-60}" "$TIEMPO_AGENTE" \
   docker run --rm --init --name "$NOMBRE_CONTENEDOR" --network dcam-interna "${DURO[@]}" \
   --tmpfs /tmp:size=512m --tmpfs "/home/agente:size=256m,uid=${UID_HOST},gid=${GID_HOST}" \
   --pids-limit 512 --memory 4g --cpus 2 -e HOME=/home/agente \
@@ -134,6 +149,13 @@ timeout --kill-after="${SOLUCIONADOR_KILL_AFTER:-60}" "${SOLUCIONADOR_TIMEOUT:-4
 # ^ `&& RC=0 || RC=$?` porque con `set -e` un docker run que falla cortaría el
 # script aquí; con pipefail, RC es el del docker run (recortar sale 0).
 docker rm -f "$NOMBRE_CONTENEDOR" >/dev/null 2>&1 || true
+# Fase 3c (menor 2): no se extrae nada mientras el agente pueda seguir vivo
+# (un `docker rm -f` que falló en silencio): podría cambiar los archivos
+# entre la revisión y la copia.
+if docker container inspect "$NOMBRE_CONTENEDOR" >/dev/null 2>&1; then
+  echo "solucionar.sh: el contenedor del agente ($NOMBRE_CONTENEDOR) sigue existiendo tras docker rm -f; no se extrae nada" >&2
+  exit 1
+fi
 
 # Extracción acotada: el volumen en solo lectura, el agente ya muerto.
 timeout --kill-after=10 5m \

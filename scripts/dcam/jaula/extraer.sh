@@ -34,7 +34,15 @@ copiar() {
     echo "extraer: '$ruta' mide $tam bytes (tope $tope)" >&2; exit 1
   fi
   mkdir -p "$(dirname "$destino")"
-  install -m 0644 "$full" "$destino"
+  # Fase 3c (menor 2): la copia misma lleva el tope (lee como mucho tope+1
+  # bytes), no solo la medición previa: aunque el archivo cambiara entre el
+  # `stat` y la lectura, al host no llega más que eso.
+  head -c "$((tope + 1))" < "$full" > "$destino"
+  if [ "$(stat -c%s -- "$destino")" -gt "$tope" ]; then
+    rm -f -- "$destino"
+    echo "extraer: '$ruta' superó el tope de $tope bytes al copiarlo" >&2; exit 1
+  fi
+  chmod 0644 -- "$destino"
 }
 
 while IFS= read -r ruta; do

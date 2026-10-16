@@ -62,6 +62,9 @@ set -e
 # volume create/rm, el ancla y el resto salen 0 sin hacer nada.
 cat > "$FAKEBIN/docker" <<'EOF'
 #!/usr/bin/env bash
+# `container inspect`/`volume inspect` = "ya no existe" (el agente murió y el
+# volumen se borró), como en el camino real.
+case "$1 $2" in "container inspect"|"volume inspect") exit 1 ;; esac
 for a in "$@"; do
   case "$a" in
     *:/x/salida) echo '{"ok":true}' > "${a%%:/x/salida}/agente.json" ;;
@@ -107,6 +110,9 @@ set -e
 rm -f "$W/salida/agente.json"
 cat > "$FAKEBIN/docker" <<'EOF'
 #!/usr/bin/env bash
+# `container inspect`/`volume inspect` = "ya no existe" (el agente murió y el
+# volumen se borró), como en el camino real.
+case "$1 $2" in "container inspect"|"volume inspect") exit 1 ;; esac
 exit 0
 EOF
 chmod +x "$FAKEBIN/docker"
@@ -116,6 +122,79 @@ RC=$?
 set -e
 [ "$RC" -eq 1 ] && [ -z "$OUT" ] && ok "(d2) rc=0 pero agente.json vacío/ausente -> exit 1, stdout vacío" \
   || mal "(d2) rc=0 sin agente.json: RC=$RC OUT='$OUT'"
+
+# --- Fase 3c, menores de la re-revisión 4 (docker falso; $FAKEBIN/registro anota
+#     cada llamada para ver qué se ejecutó y qué no) ---
+falso_docker() {  # $1 = cuerpo del case para "$1 $2" (antes del comportamiento de éxito)
+  cat > "$FAKEBIN/docker" <<EOF
+#!/usr/bin/env bash
+echo "\$*" >> "$FAKEBIN/registro"
+case "\$1 \$2" in
+$1
+esac
+for a in "\$@"; do
+  case "\$a" in
+    *:/x/salida) echo '{"ok":true}' > "\${a%%:/x/salida}/agente.json" ;;
+  esac
+done
+exit 0
+EOF
+  chmod +x "$FAKEBIN/docker"
+  : > "$FAKEBIN/registro"
+}
+correr_falso() {  # $1 = sufijo del stderr; el resto, variables de entorno
+  local suf="$1"; shift
+  set +e
+  OUT="$(env "$@" PATH="$FAKEBIN:$PATH" bash "$SCRIPT" "2026-10-13" "auto/inventario-13-OCT-2026" "$W" "$MAIN" 2>"$TMP/err-$suf")"
+  RC=$?
+  set -e
+}
+INSPECT_NO='  "container inspect"|"volume inspect") exit 1 ;;'
+
+# (e) menor 3: falla la copia previa -> exit 1 y stderr nombra docker-prep.log
+falso_docker "$INSPECT_NO
+  \"run --rm\") case \"\$*\" in *-prep*) exit 128 ;; esac ;;"
+correr_falso e
+if [ "$RC" -eq 1 ] && [ -z "$OUT" ] && grep -q "docker-prep.log" "$TMP/err-e" && ! grep -q "^run .*--name dcam-solucionador-" "$FAKEBIN/registro"; then
+  ok "(e) copia previa fallida -> exit 1, stderr: $(cat "$TMP/err-e")"
+else
+  mal "(e) copia previa fallida: RC=$RC stderr='$(cat "$TMP/err-e")'"
+fi
+
+# (f) menor 2: el contenedor del agente sigue existiendo tras rm -f -> no se extrae
+falso_docker '  "container inspect") exit 0 ;;
+  "volume inspect") exit 1 ;;'
+correr_falso f
+if [ "$RC" -eq 1 ] && [ -z "$OUT" ] && grep -q "sigue existiendo" "$TMP/err-f" && ! grep -q "extraer.sh" "$FAKEBIN/registro"; then
+  ok "(f) agente aún vivo -> exit 1 sin lanzar el extractor, stderr: $(cat "$TMP/err-f")"
+else
+  mal "(f) agente aún vivo: RC=$RC stderr='$(cat "$TMP/err-f")' (¿se lanzó el extractor? $(grep -c extraer.sh "$FAKEBIN/registro"))"
+fi
+
+# (g) menor 4: el volumen no se deja borrar -> AVISO en stderr
+falso_docker '  "container inspect") exit 1 ;;
+  "volume rm") exit 1 ;;
+  "volume inspect") exit 0 ;;'
+correr_falso g
+if grep -q "AVISO: el volumen dcam-jaula-.* sigue vivo" "$TMP/err-g"; then
+  ok "(g) volumen que no se borra -> $(grep AVISO "$TMP/err-g")"
+else
+  mal "(g) volumen que no se borra: sin AVISO en stderr ('$(cat "$TMP/err-g")')"
+fi
+[ -n "$OUT" ] && rm -rf "$(dirname "$OUT")"
+
+# (h) menor 1: el ancla duerme el timeout del agente + 15 min, no `infinity`
+falso_docker "$INSPECT_NO"
+correr_falso h SOLUCIONADOR_TIMEOUT=3s
+ANCLA_CMD="$(grep -- '-ancla' "$FAKEBIN/registro" | head -1)"
+if [ "$RC" -eq 0 ] && [[ "$ANCLA_CMD" == *" sleep 903" ]]; then
+  ok "(h) ancla con SOLUCIONADOR_TIMEOUT=3s: ...${ANCLA_CMD: -40}"
+else
+  mal "(h) ancla: RC=$RC cmd='$ANCLA_CMD'"
+fi
+[ -n "$OUT" ] && rm -rf "$(dirname "$OUT")"
+correr_falso h2 SOLUCIONADOR_TIMEOUT=45x
+[ "$RC" -eq 2 ] && ok "(h) SOLUCIONADOR_TIMEOUT inválido -> exit 2" || mal "(h) SOLUCIONADOR_TIMEOUT=45x: RC=$RC"
 
 # Limpieza SOLO de la $JAULA que este test sí creó (ronda de arreglo 1/5, punto
 # 14): un `find /tmp -name 'dcam-jaula-*' ... -exec rm -rf` barría CUALQUIER

@@ -388,6 +388,28 @@ esperar_modelo() {
   done
 }
 
+# Fase 3c (menor 1): restos de corridas anteriores que murieron sin pasar por su
+# trap (SIGKILL, OOM): contenedores y volúmenes de la jaula. Se llama bajo el
+# flock del pipeline, así que ninguna otra corrida puede estar usándolos. Solo
+# se borra lo que tiene EXACTAMENTE la forma de los nombres que crea
+# solucionar.sh / compuertas.sh.
+barrer_jaulas() {
+  local n
+  for n in $(docker ps -a --format '{{.Names}}' --filter name=dcam- 2>/dev/null); do
+    if [[ "$n" =~ ^dcam-jaula-[A-Za-z0-9]+-(ancla|prep|extraer)$ ]] \
+       || [[ "$n" =~ ^dcam-solucionador-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+$ ]] \
+       || [[ "$n" =~ ^dcam-compuertas-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]+$ ]]; then
+      docker rm -f "$n" >/dev/null 2>&1 && log "barrer_jaulas: contenedor $n de una corrida anterior, borrado"
+    fi
+  done
+  for n in $(docker volume ls -q --filter name=dcam-jaula- 2>/dev/null); do
+    if [[ "$n" =~ ^dcam-jaula-[A-Za-z0-9]+$ ]]; then
+      docker volume rm "$n" >/dev/null 2>&1 && log "barrer_jaulas: volumen $n de una corrida anterior, borrado"
+    fi
+  done
+  return 0
+}
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # STEP 4: AUDIT + CLOSE
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -501,6 +523,8 @@ fi
 if [ -n "$(git status --porcelain)" ]; then
   falla "solucionador (jaula): el repo de trabajo no quedó limpio antes de lanzar la jaula"
 fi
+
+barrer_jaulas
 
 # main fresco para la jaula: aislado del checkout de trabajo del pipeline.
 MAIN_TMP_DIR="$(mktemp -d /tmp/dcam-main-XXXX)"
