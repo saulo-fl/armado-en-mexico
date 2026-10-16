@@ -141,6 +141,11 @@ correr curl -s -o /dev/null --max-time 10 https://example.com >/dev/null 2>&1 &&
 correr curl -s -o /dev/null --max-time 10 http://1.1.1.1 >/dev/null 2>&1 && mal "sale a internet por IP (1.1.1.1)" || ok "internet por IP (1.1.1.1) bloqueado"
 correr curl -s -o /dev/null --max-time 5 "http://$GW_INTERNA:8090" >/dev/null 2>&1 && mal "llega a 8090 en el gateway de su propia red (dcam-interna)" || ok "gateway de dcam-interna:8090 bloqueado"
 correr curl -s -o /dev/null --max-time 5 "http://$GW_INTERNA:22" >/dev/null 2>&1 && mal "llega a 22 (SSH) en el gateway de dcam-interna" || ok "gateway de dcam-interna:22 bloqueado"
+# Revisión final (M4): otro puerto del host que escucha en 0.0.0.0 (Home
+# Assistant) y el DNS: si el DNS embebido reenviara consultas desde una red
+# --internal, sería un canal de salida.
+correr curl -s -o /dev/null --max-time 5 "http://$GW_INTERNA:8123" >/dev/null 2>&1 && mal "llega a 8123 (Home Assistant) en el gateway de dcam-interna" || ok "gateway de dcam-interna:8123 (Home Assistant) bloqueado"
+correr getent hosts example.com >/dev/null 2>&1 && mal "la jaula resuelve DNS externo (getent hosts example.com)" || ok "DNS externo (getent hosts example.com) no resuelve"
 correr curl -s -o /dev/null --max-time 5 "http://$GW_SALIDA:8090" >/dev/null 2>&1 && mal "llega a dcam-salida (no debería ni tener ruta)" || ok "dcam-salida inalcanzable desde la jaula"
 correr curl -s -o /dev/null --max-time 5 http://100.64.0.1 >/dev/null 2>&1 && mal "llega a Tailscale" || ok "Tailscale bloqueado"
 

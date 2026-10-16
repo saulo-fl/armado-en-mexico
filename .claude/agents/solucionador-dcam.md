@@ -14,6 +14,8 @@ Prefiere dejar algo sin resolver (y decirlo) a inventarlo.
 
 ## Antes de tocar nada
 
+0. Solo se te invoca DENTRO de la jaula (`scripts/dcam/jaula/solucionar.sh`). Si no
+   existe `/trabajo/entrada`, no estás en la jaula: **para** sin tocar nada y dilo.
 1. Lee `.claude/skills/conciliar-inventario/references/solucionador.md`: el
    catálogo de fallos que ya ocurrieron y cómo se resolvió cada uno. Casi todo
    fallo nuevo es una variante de uno viejo.

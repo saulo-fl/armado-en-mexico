@@ -31,7 +31,13 @@
 #      sin enlaces, ≤ 5 MB) a $JAULA/repo y solucion.json/agente.json (≤ 1 MB;
 #      agente.json se trunca y se avisa) a $W/salida. Lo máximo que llega al disco del host está acotado.
 # La salida de consola de los contenedores no pasa por el log json-file del
-# daemon (--log-driver none) y en el host se recorta a 1 MB.
+# daemon (--log-driver none) y en el host se recorta: 64 KiB la copia previa y
+# la extracción, 1 MB la del agente.
+# TERCER CANAL (revisión final, M3): además de los archivos de PERMITIDOS y de
+# solucion.json/agente.json, al host llega $W/docker-solucionar.log, la consola
+# del contenedor del agente (en la práctica, el stderr del CLI), recortada a
+# 1 MB. Es texto que el agente puede influir: solo se guarda para diagnóstico.
+# Nunca se ejecuta, nunca se commitea, nunca va a Telegram ni se interpreta.
 # Un volumen tmpfs de Docker se desmonta (y PIERDE el contenido) en cuanto
 # ningún contenedor lo usa — comprobado en APOLO. Por eso un contenedor "ancla"
 # (sleep, sin red, solo lectura) lo mantiene montado de la copia a la extracción.
