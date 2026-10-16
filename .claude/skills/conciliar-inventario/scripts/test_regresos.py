@@ -63,4 +63,37 @@ assert not r, motivo
 r, motivo, _ = m.cuadra_regreso(1.0245, [1.0574] * 5 + [1.0245, 1.02452])
 assert r, motivo
 
-print("✔ regresos: 7 casos")
+# --- Gemelos: mismo nombre exacto y mismo precio que un renglón ya ligado ---
+A, B = fila("ATROX SB", 13511.62, 1), fila("ATROX SB", 13511.62, 6)
+g = m.ligar_gemelos([A, B], [1], {99: [A]})
+assert g == {1: 99}, g
+# ligado a dos fichas distintas con ese nombre: ambiguo, no se liga
+g = m.ligar_gemelos([A, A, B], [2], {99: [A], 100: [A]})
+assert g == {}, g
+# precio distinto (> 0.005): no es gemelo
+g = m.ligar_gemelos([A, fila("ATROX SB", 13511.63, 6)], [1], {99: [A]})
+assert g == {}, g
+
+# --- Regreso renombrado: otra notación del calibre ---
+assert m._clave_calibre("RIFLE CAL22 TIPPMANN") == m._clave_calibre("RIFLE 0.22 TIPPMANN")     == m._clave_calibre("RIFLE CAL. 22 TIPPMANN") == m._clave_calibre("RIFLE .22 TIPPMANN")
+assert m._clave_calibre("PISTOLA 0.380") == m._clave_calibre("PISTOLA CALIBRE 380")
+h2 = dict(hist)
+h2["81"] = {"dcamRef": "RIFLE 0.22 TIPPMANN M4-22 REDLINE", "regs": [["2026-09-15", 20.0]]}
+ph = dict(precios_hoy)
+r_ok = [fila("RIFLE CAL22 TIPPMANN M4-22 REDLINE", 20.0 * 1.0574)]
+ok, det, rech = m.detectar_regresos(r_ok, [0], ph, h2)
+assert ok == {0: 81} and "renombre" in det[0]["motivo"], (ok, det, rech)
+# el precio no cuadra (razón 0.85 con la mediana en 1.0574): rechazo con pista
+r_mal = [fila("RIFLE CAL22 TIPPMANN M4-22 REDLINE", 20.0 * 0.85)]
+ok, det, rech = m.detectar_regresos(r_mal, [0], ph, h2)
+assert ok == {} and rech[0]["fichaId"] == 81 and "renombre" in rech[0]["motivo"], (ok, rech)
+# la forma canónica apunta a 2 fichas: no se adivina
+h3 = dict(h2)
+h3["82"] = {"dcamRef": "RIFLE .22 TIPPMANN M4-22 REDLINE", "regs": [["2026-09-15", 20.0]]}
+ok, det, rech = m.detectar_regresos(r_ok, [0], ph, h3)
+assert ok == {} and "compartido" in rech[0]["motivo"], (ok, rech)
+# ...pero si una de las dos ya tiene renglón hoy, la otra es la única candidata
+ok, det, rech = m.detectar_regresos(r_ok, [0], dict(ph, **{"82": 21.0}), h3)
+assert ok == {0: 81}, (ok, rech)
+
+print("✔ regresos: 7 casos + gemelos y renombres")

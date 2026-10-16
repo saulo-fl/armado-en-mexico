@@ -204,6 +204,14 @@ def _norm_nombre(s):
     return re.sub(r"[^A-Z0-9]", "", (s or "").upper())
 
 
+def _clave_calibre(s):
+    """Como _norm_nombre, pero iguala las notaciones de calibre del PDF:
+    0.22 / .22 / CAL22 / CAL 22 / CAL. 22 / CALIBRE 22 → 22 (y 0.380 → 380)."""
+    import re
+    s = re.sub(r"\bCAL(?:IBRE)?\.?\s*(?=\.?\d)", "", (s or "").upper())
+    return _norm_nombre(re.sub(r"(?<!\d)0?\.(?=\d)", "", s))
+
+
 def elegir_representante(rows, dcam_ref, ultimo, factors, tol=0.02):
     """Renglón que fija el precio de una ficha (regla de Saulo, 01-oct-2026).
 
@@ -343,6 +351,11 @@ def detectar_regresos(new_items, candidatos, ficha_prices, historial):
         k = _norm_nombre(info.get("dcamRef"))
         if k:
             por_ref[k].append(fid)
+    por_canon = defaultdict(list)   # dcamRef con otra notación de calibre (renombres)
+    for fid, info in historial.items():
+        k = _clave_calibre(info.get("dcamRef"))
+        if k:
+            por_canon[k].append(fid)
     precio_en = {fid: dict(info["regs"]) for fid, info in historial.items()}
 
     def razones_en(fecha):
@@ -354,6 +367,12 @@ def detectar_regresos(new_items, candidatos, ficha_prices, historial):
     for ni in candidatos:
         nr = new_items[ni]
         fids = por_ref.get(_norm_nombre(nr["name"]), [])
+        renombre = False
+        if not fids:
+            # Renombre: el PDF cambió la notación del calibre. Solo cuentan las
+            # fichas que hoy no tienen renglón.
+            fids = [f for f in por_canon.get(_clave_calibre(nr["name"]), []) if f not in tomadas]
+            renombre = bool(fids)
         if not fids or nr["priceN"] <= 0:
             continue
         info = {"idx": ni, "name": nr["name"], "priceN": nr["priceN"]}
@@ -371,6 +390,9 @@ def detectar_regresos(new_items, candidatos, ficha_prices, historial):
         fecha, ultimo = regs[-1]
         razon = nr["priceN"] / ultimo
         ok, motivo, det = cuadra_regreso(razon, razones_en(fecha))
+        if renombre:
+            motivo = (f"renombre de «{historial[fid]['dcamRef']}»: {motivo}" if ok else
+                      f"posible renombre de «{historial[fid]['dcamRef']}»: {motivo}")
         info.update(fichaId=int(fid), fechaAntes=fecha, antes=ultimo, razon=round(razon, 6),
                     motivo=motivo, **det)
         if ok:
@@ -380,6 +402,25 @@ def detectar_regresos(new_items, candidatos, ficha_prices, historial):
         else:
             rechazos.append(info)
     return aceptados, detalle, rechazos
+
+
+def ligar_gemelos(new_items, candidatos, ficha_rows):
+    """Renglones sin pareja que repiten (nombre exacto y precio ±0.005) a uno ya
+    ligado: el PDF trae el mismo producto en dos renglones. Se ligan a la misma
+    ficha, salvo que ese nombre ya esté ligado a fichas distintas.
+    Devuelve {new_idx: fichaId}.
+    """
+    por_nombre = defaultdict(list)   # name → [(fichaId, priceN)]
+    for fid, rows in ficha_rows.items():
+        for r in rows:
+            por_nombre[r["name"]].append((fid, r["priceN"]))
+    gemelos = {}
+    for ni in candidatos:
+        nr = new_items[ni]
+        lig = por_nombre.get(nr["name"], [])
+        if lig and len({f for f, _ in lig}) == 1 and all(abs(p - nr["priceN"]) <= 0.005 for _, p in lig):
+            gemelos[ni] = lig[0][0]
+    return gemelos
 
 
 def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=None, historial=None):
@@ -514,6 +555,22 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
             for r in regresos_rechazados:
                 print(f"  ✗ {r['name'][:45]} → {r.get('fichaId', '?')}: {r['motivo']}", file=sys.stderr)
 
+    # 3d) Gemelos: segundo renglón del mismo producto (no cambia el precio de la ficha).
+    cands = [ni for ni in unmatched_new if id(new_items[ni]) not in consumidos]
+    gemelos = []
+    for ni, fid in ligar_gemelos(new_items, cands, ficha_rows).items():
+        nr = new_items[ni]
+        if nr["qty"] > 0:
+            existencias[fid] += nr["qty"]
+            ficha_rows[fid].append(nr)
+        forzados[ni] = fid
+        gemelos.append({"idx": ni, "name": nr["name"], "qty": nr["qty"], "fichaId": fid})
+    unmatched_new = [ni for ni in unmatched_new if ni not in forzados]
+    if verbose and gemelos:
+        print(f"Gemelos (mismo nombre y precio que un renglón ya ligado): {len(gemelos)}", file=sys.stderr)
+        for g in gemelos:
+            print(f"  ✔ {g['name'][:45]} → {g['fichaId']}  qty={g['qty']}", file=sys.stderr)
+
     # 4) Renglones sin emparejar en el nuevo PDF (posibles altas)
     sin_ficha = []
     for ni in unmatched_new:
@@ -581,6 +638,7 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
                        "qty": new_items[ni]["qty"]} for ni, fid in sorted(forzados.items()) if fid is None],
         "regresos": regresos,
         "regresosRechazados": regresos_rechazados,
+        "gemelos": gemelos,
         "_matched": matched,          # internal: for --update-ref
         "_unmatched_new": unmatched_new,
         "_forzados": forzados,
