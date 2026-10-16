@@ -3,10 +3,14 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, symlinkSync, rmSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { compararArchivo, compararArchivoSeguro, verificarArchivoEnNuevo, leerHunksDeDiff, MAX_BYTES, PERMITIDOS } from './validar-parche-lib.mjs';
 
 const D = 'src/data/data.js';
+// Los tests «con el archivo real» leen una COPIA CONGELADA (fixtures/validar-parche/), nunca
+// src/data/ en vivo: una edición normal de los datos no puede romper npm test (revisión final, I3).
+const FIXTURE = (f) => join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'validar-parche', f);
 const base = 'const X = [\n  mk(1, "A", "M"),\n];\nwindow.DB.forEach(a => a);\n';
 
 // --- los 9 casos del brief original, adaptados a la firma nueva (ruta, base, nuevo) ---
@@ -301,9 +305,9 @@ test('referencia: una fila con un campo extra o un tipo equivocado se rechaza', 
 
 // --- Ronda de arreglo 3: clave computada no serializada, callees de accesorios, etc. ---
 
-test('esqueleto: clave computada en el archivo REAL de accesorios se rechaza (4a de la re-revisión)', () => {
+test('esqueleto: clave computada en la copia congelada de accesorios se rechaza (4a de la re-revisión)', () => {
   const ACC = 'src/data/data-accesorios.js';
-  const real = readFileSync(ACC, 'utf8');
+  const real = readFileSync(FIXTURE('data-accesorios.js'), 'utf8');
   const objetivo = '({ manualId: mid,';
   assert.ok(real.includes(objetivo), 'el patrón real de _h cambió; ajustar el test');
   const nuevo = real.replace(objetivo, '({ [manualId]: mid,');
@@ -334,7 +338,7 @@ test('marcador D lleva el tipo de nodo: un array de datos no es intercambiable c
 
 test('callees: amx es el constructor de ficha de data-accesorios.js (Important #3, antes faltaba)', () => {
   const ACC = 'src/data/data-accesorios.js';
-  const real = readFileSync(ACC, 'utf8');
+  const real = readFileSync(FIXTURE('data-accesorios.js'), 'utf8');
   // Añadir una ficha nueva con literales debe pasar.
   const objetivoAlta = "  amx(102, ";
   assert.ok(real.includes(objetivoAlta), 'el patrón real de amx cambió; ajustar el test');
@@ -383,12 +387,12 @@ test('compararArchivoSeguro convierte cualquier excepción (p. ej. git ausente) 
 
 // --- Fase 1b, hueco #1: `\$` vuelve impura una ficha legítima (data.js real, mk(128)) ---
 
-test('Fase 1b #1: con el data.js real, añadir una ficha nueva al final de window.DB con literales pasa', () => {
+test('Fase 1b #1: con la copia congelada de data.js, añadir una ficha nueva al final de window.DB con literales pasa', () => {
   // Antes del fix, mk(128) (que contiene \$ en su descripción larga) hacía que window.DB
   // entero no fuera "dato puro" y por lo tanto nunca colapsara a un marcador D fijo en el
   // esqueleto — así que CUALQUIER ficha añadida cambiaba el esqueleto serializado completo
   // ("la estructura del código cambió"), sin importar qué tan literal fuera lo añadido.
-  const real = readFileSync(D, 'utf8');
+  const real = readFileSync(FIXTURE('data.js'), 'utf8');
   const marcaInicio = real.indexOf('window.DB = [');
   assert.ok(marcaInicio >= 0, 'window.DB = [ no está donde se esperaba; ajustar el test');
   // El archivo real usa CRLF; buscar el cierre del array sin asumir el fin de línea exacto.
@@ -403,8 +407,8 @@ test('Fase 1b #1: con el data.js real, añadir una ficha nueva al final de windo
   assert.deepEqual(compararArchivo(D, real, nuevo), []);
 });
 
-test('Fase 1b #1: con el data.js real, cambiar el año de mk(128) pasa', () => {
-  const real = readFileSync(D, 'utf8');
+test('Fase 1b #1: con la copia congelada de data.js, cambiar el año de mk(128) pasa', () => {
+  const real = readFileSync(FIXTURE('data.js'), 'utf8');
   const objetivo = 'gatillo de dos etapas", 2023,';
   assert.ok(real.includes(objetivo), 'el patrón real de mk(128) cambió; ajustar el test');
   const nuevo = real.replace(objetivo, 'gatillo de dos etapas", 2024,');
