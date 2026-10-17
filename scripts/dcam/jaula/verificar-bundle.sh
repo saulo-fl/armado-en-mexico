@@ -9,8 +9,9 @@
 # verificar_bundle <REPO> <BUNDLE> <RAMA> [BASE]
 #   Acepta el bundle solo si es un archivo regular, `git bundle verify` pasa en
 #   REPO, trae UNA sola ref (refs/heads/<RAMA>) y su commit tiene exactamente un
-#   padre y ese padre es BASE (por defecto, la HEAD de REPO). Es decir: un solo
-#   commit hijo de la rama tal como la dejó `dcam`. Deja los objetos en REPO
+#   padre y ese padre es BASE (por defecto, la HEAD de REPO; el pipeline pasa el
+#   `base` de su solicitud). Es decir: un solo commit hijo de la rama tal como la
+#   dejó `dcam`. Deja los objetos en REPO
 #   (git fetch a FETCH_HEAD, sin tocar ramas) e imprime en stdout el SHA del
 #   commit, que es lo que se aplica con `git merge --ff-only <SHA>`.
 #   Sale distinto de 0, sin imprimir nada, en cualquier otro caso.

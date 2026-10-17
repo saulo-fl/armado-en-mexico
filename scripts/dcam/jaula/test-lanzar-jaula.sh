@@ -5,13 +5,15 @@
 # Juez del lanzador de la jaula (lanzar-jaula.sh) y de verificar_bundle.
 #
 #   bash test-lanzar-jaula.sh
-#     Todo en un mktemp -d: IPC, clon de `dcam`, árbol de main fijado (con
+#     Todo en un mktemp -d: IPC, un «GitHub» simulado (bare local, por
+#     DCAM_GITHUB_URL), árbol de main fijado (con
 #     solucionar.sh/compuertas.sh de mentira) y `docker` de mentira en el PATH.
 #     No toca /srv, /etc, /var/lib ni Docker, y no llama al modelo.
 #     Requiere git, jq, flock y stat GNU (APOLO).
 #     LANZADOR=<ruta> y VERIFICAR=<ruta> prueban otra copia (mordidas).
 #
 #   bash test-lanzar-jaula.sh --real <FECHA_ISO> <RAMA> [DIR_DATOS]
+#     (base = la punta de <RAMA> en GitHub, con ls-remote; la rama tiene que existir)
 #     Paso 15 del despliegue, como `dcam`: deja una solicitud REAL en
 #     $DCAM_IPC/solicitud (por defecto /srv/dcam-ipc) y espera `hecho`.
 #     Corre el agente de verdad (gasta suscripción). No empuja ni mergea.
@@ -29,8 +31,10 @@ if [ "${1:-}" = "--real" ]; then
   ID="$(date +%Y%m%dT%H%M%S)-$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')"
   TMPD="$IPC/solicitud/.tmp-$ID"
   mkdir "$TMPD" || exit 1
-  jq -n --arg i "$ISO" --arg r "$RAMA" --arg f "${RAMA#auto/inventario-}" \
-    '{fecha_iso: $i, rama: $r, fecha_dcam: $f}' > "$TMPD/solicitud.json" || exit 1
+  B="$(git ls-remote "${DCAM_GITHUB_URL:-https://github.com/saulo-fl/armado-en-mexico.git}" "refs/heads/$RAMA" | cut -f1)"
+  [[ "$B" =~ ^[0-9a-f]{40}$ ]] || { echo "la rama $RAMA no está en GitHub" >&2; rmdir "$TMPD"; exit 1; }
+  jq -n --arg i "$ISO" --arg r "$RAMA" --arg f "${RAMA#auto/inventario-}" --arg b "$B" \
+    '{fecha_iso: $i, rama: $r, fecha_dcam: $f, base: $b}' > "$TMPD/solicitud.json" || exit 1
   printf 'prueba del despliegue (paso 15): solicitud real, sin push\n' > "$TMPD/motivo.txt"
   if [ -n "$DATOS" ]; then
     for n in armas.json armas.tsv cartuchos.json cartuchos.tsv accesorios.json accesorios.tsv \
@@ -58,7 +62,7 @@ mal(){ echo "  MAL  $*"; MAL=$((MAL+1)); }
 
 # Sin GIT_CONFIG_NOSYSTEM ni LC_ALL aquí: el lanzador tiene que ponerlos él (se comprueba).
 export HOME="$T/home"
-export DCAM_IPC="$T/ipc" DCAM_REPO_FUENTE="$T/fuente" DCAM_MAIN="$T/main" \
+export DCAM_IPC="$T/ipc" DCAM_GITHUB_URL="file://$T/github.git" DCAM_MAIN="$T/main" \
        DCAM_ESTADO="$T/estado" DCAM_TMP="$T/tmp" DCAM_ESPERA_TMP=2 \
        STUB_LOG="$T/stub.log" DOCKER_LOG="$T/docker.log" T_VISTO="$T/visto"
 mkdir -p "$HOME" "$DCAM_IPC"/{solicitud,resultado,rechazadas} "$DCAM_ESTADO" "$DCAM_TMP" \
@@ -70,9 +74,10 @@ printf '#!/usr/bin/env bash\necho "docker $*" >> "$DOCKER_LOG"\n' > "$T/bin/dock
 chmod +x "$T/bin/docker"
 export PATH="$T/bin:$PATH"
 
-# Clon de `dcam`: main con 3 commits (x.sh v1, x.sh v2, README) y la rama encima.
+# Repo de trabajo F: main con 3 commits (x.sh v1, x.sh v2, README) y la rama encima.
+# Se publica en un bare limpio, que hace de GitHub.
 RAMA="auto/inventario-16-OCT-2026"
-F="$DCAM_REPO_FUENTE"
+F="$T/fuente" GH="$T/github.git"
 g(){ git -C "$F" -c user.name='Saulo Prueba' -c user.email=prueba@example.invalid "$@"; }
 git init -q -b main "$F"
 mkdir -p "$F/scripts/dcam/jaula"
@@ -81,9 +86,7 @@ echo v2 > "$F/scripts/dcam/jaula/x.sh"; g commit -qam c2
 echo leeme > "$F/README"; g add -A; g commit -qm c3
 g switch -qc "$RAMA"; echo mecanico > "$F/dato.txt"; g add -A; g commit -qm mecanico; g switch -q main
 BASE_RAMA="$(git -C "$F" rev-parse "$RAMA")"
-# Config normal de un clon, con una rama que lleva «hooks» en el nombre: no debe
-# disparar repo_fuente_limpio (solo mira nombres de sección y de clave).
-git -C "$F" config branch.fix-hooks.remote origin
+git clone -q --bare "$F" "$GH"
 
 # Árbol de main fijado: verificar-bundle.sh de verdad, solucionar/compuertas de mentira.
 J="$DCAM_MAIN/scripts/dcam/jaula"
@@ -119,7 +122,7 @@ nuevo_id(){ N=$((N + 1)); printf -v id '20261017T2000%02d-%08x' "$N" "$N"; }   #
 preparar(){
   local d="$SOLS/.tmp-$1"
   mkdir "$d"
-  printf '{"fecha_iso":"2026-10-16","rama":"%s","fecha_dcam":"16-OCT-2026"}\n' "$RAMA" > "$d/solicitud.json"
+  printf '{"fecha_iso":"2026-10-16","rama":"%s","fecha_dcam":"16-OCT-2026","base":"%s"}\n' "$RAMA" "${2:-$BASE_RAMA}" > "$d/solicitud.json"
   echo '[]' > "$d/armas.json"; printf 'a\tb\n' > "$d/armas.tsv"
   echo '{"totalMapped":0}' > "$d/mapeo-armas.json"
   echo 'paso 3-altas: 2 renglones sin ficha' > "$d/motivo.txt"
@@ -146,19 +149,24 @@ rechazada(){
 echo "— solicitudes malas"
 caso_json(){  # $1 nombre, $2 contenido de solicitud.json, $3 motivo esperado
   local id d; nuevo_id; d="$(preparar "$id")"
-  printf '%s\n' "$2" > "$d/solicitud.json"; publicar "$id"; correr; rechazada "$1" "$id" "$3"
+  printf '%s\n' "${2//@B@/$BASE_RAMA}" > "$d/solicitud.json"; publicar "$id"; correr; rechazada "$1" "$id" "$3"
 }
-caso_json "fecha rara" '{"fecha_iso":"2026-1O-16","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "fecha inválida"
-caso_json "fecha con salto de línea" '{"fecha_iso":"2026-10-16\nx","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "fecha inválida"
-caso_json "rama con ;" '{"fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026;id","fecha_dcam":"16-OCT-2026;id"}' "rama inválida"
-caso_json "rama con .." '{"fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026/../../main","fecha_dcam":"16-OCT-2026/../../main"}' "rama inválida"
-caso_json "rama y fecha_dcam distintas" '{"fecha_iso":"2026-10-16","rama":"auto/inventario-17-OCT-2026","fecha_dcam":"16-OCT-2026"}' "rama y fecha_dcam no cuadran"
-caso_json "claves extra" '{"fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026","prompt":"haz otra cosa"}' "solicitud.json con forma inválida"
-caso_json "valor que no es texto" '{"fecha_iso":20261016,"rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "solicitud.json con forma inválida"
-caso_json "solicitud.json de más de 4 KiB" "{\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}$(printf '%5000s' '')" "solicitud.json de más del tope"
-caso_json "dos documentos JSON" "\"x\" {\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}" "solicitud.json con forma inválida"
-J1="{\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}"
+caso_json "fecha rara" '{"base":"@B@","fecha_iso":"2026-1O-16","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "fecha inválida"
+caso_json "fecha con salto de línea" '{"base":"@B@","fecha_iso":"2026-10-16\nx","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "fecha inválida"
+caso_json "rama con ;" '{"base":"@B@","fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026;id","fecha_dcam":"16-OCT-2026;id"}' "rama inválida"
+caso_json "rama con .." '{"base":"@B@","fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026/../../main","fecha_dcam":"16-OCT-2026/../../main"}' "rama inválida"
+caso_json "rama y fecha_dcam distintas" '{"base":"@B@","fecha_iso":"2026-10-16","rama":"auto/inventario-17-OCT-2026","fecha_dcam":"16-OCT-2026"}' "rama y fecha_dcam no cuadran"
+caso_json "claves extra" '{"base":"@B@","fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026","prompt":"haz otra cosa"}' "solicitud.json con forma inválida"
+caso_json "valor que no es texto" '{"base":"@B@","fecha_iso":20261016,"rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "solicitud.json con forma inválida"
+caso_json "solicitud.json de más de 4 KiB" "{\"base\":\"@B@\",\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}$(printf '%5000s' '')" "solicitud.json de más del tope"
+caso_json "dos documentos JSON" "\"x\" {\"base\":\"@B@\",\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}" "solicitud.json con forma inválida"
+J1="{\"base\":\"@B@\",\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}"
 caso_json "dos documentos JSON válidos" "$J1 $J1" "solicitud.json con forma inválida"
+caso_json "sin base (contrato viejo)" '{"fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "solicitud.json con forma inválida"
+caso_json "base que no es un SHA" '{"base":"main","fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "base inválida"
+caso_json "rama que no está en GitHub" '{"base":"@B@","fecha_iso":"2026-10-17","rama":"auto/inventario-17-OCT-2026","fecha_dcam":"17-OCT-2026"}' "la rama no está en GitHub"
+nuevo_id; preparar "$id" "$(git -C "$F" rev-parse main)" >/dev/null; publicar "$id"; correr
+rechazada "punta de la rama ≠ base" "$id" "la rama en GitHub no coincide con base"
 
 nuevo_id; d="$(preparar "$id")"; rm "$d/solicitud.json"; publicar "$id"; correr
 rechazada "sin solicitud.json" "$id" "falta solicitud.json"
@@ -285,65 +293,35 @@ else
 fi
 
 echo "— un tag que se llama igual que la rama"
-g tag "$RAMA" main~2
+git -C "$F" push -q "$GH" "main~2:refs/tags/$RAMA"
 nuevo_id; preparar "$id" >/dev/null; publicar "$id"; correr
 C3="$T/clon3"; git clone -q --no-tags --branch "$RAMA" "file://$F" "$C3"
 . "$VERIFICAR"
 [ "$(leer "$id" rc)" = 0 ] && [ -n "$(verificar_bundle "$C3" "$RESS/$id/rama.bundle" "$RAMA")" ] \
   && bien "tag homónimo: rc=0 y bundle de la RAMA" || mal "tag homónimo: rc=$(leer "$id" rc)"
-git -C "$F" tag -d "$RAMA" >/dev/null
+git -C "$GH" tag -d "$RAMA" >/dev/null
 
-echo "— repo de dcam hostil: se lee como dato y se rechaza ANTES de clonar"
-MARK="$T/MARK"
-echo "[core]" > "$T/otra.cfg"
-hostil(){  # $1 nombre, $2 función que estropea $H (copia del repo de dcam)
-  local id H; nuevo_id; H="$T/hostil-$id"; cp -a "$F" "$H"; "$2" "$H"
-  preparar "$id" >/dev/null; publicar "$id"
-  # GIT_NO_LAZY_FETCH=0 desde fuera: el lanzador tiene que imponer el suyo.
-  DCAM_REPO_FUENTE="$H" GIT_NO_LAZY_FETCH=0 correr
-  rechazada "$1" "$id" "repo de dcam con configuración no permitida"
-}
-c(){ printf "$2\n" "$MARK" >> "$1/.git/config"; }
-h_fsmonitor(){ c "$1" '[core]\n\tfsmonitor = touch %s'; }
-h_misma_linea(){ c "$1" '[core]fsmonitor=touch %s'; }
-h_ssh(){ c "$1" '[core]\n\tsshCommand = touch %s'; }
-h_hookspath(){ c "$1" '[core]\n\thooksPath = %s'; }
-h_packhook(){ c "$1" '[uploadPack]\n\tpackObjectsHook = touch %s'; }
-h_receive(){ c "$1" '[remote "x"]\n\treceivepack = touch %s'; }
-h_corchete(){ c "$1" '[remote "o]"] promisor = true # %s'; }
-h_include(){ c "$1" '[include]\n\tpath = %s.cfg'; }
-h_includeif(){ c "$1" '[includeIf "gitdir:/"]\n\tpath = %s.cfg'; }
-h_cabecera_rota(){ c "$1" '[branch "sin-cerrar\n\tremote = %s'; }
-h_bom(){ { printf '\357\273\277[include]\n\tpath = %s\n' "$T/otra.cfg"; cat "$1/.git/config"; } > "$T/cfg.tmp" && mv "$T/cfg.tmp" "$1/.git/config"; }
-h_worktree(){ printf '[core]\n\tfsmonitor = touch %s\n' "$MARK" > "$1/.git/config.worktree"; }
-h_alternates(){ echo "$F/.git/objects" > "$1/.git/objects/info/alternates"; }
-h_commondir(){ echo "$F/.git" > "$1/.git/commondir"; }
-h_gitfile(){ mv "$1/.git" "$1/.git-real"; echo "gitdir: $1/.git-real" > "$1/.git"; }
-h_parcial(){  # clon parcial sin blobs y con un uploadpack que deja el marcador (CVE-2024-32004)
-  rm -rf "$1"
-  git -C "$F" config uploadpack.allowFilter true
-  git clone -q --no-checkout --filter=blob:none "file://$F" "$1"
-  git -C "$F" config --unset uploadpack.allowFilter
-  git -C "$1" branch -q "$RAMA" "origin/$RAMA"
-  git -C "$1" config remote.origin.uploadpack "touch $MARK; git-upload-pack"
-}
-hostil "clon parcial con uploadpack hostil" h_parcial
-hostil "core.fsmonitor" h_fsmonitor
-hostil "clave en la línea de la sección" h_misma_linea
-hostil "core.sshCommand" h_ssh
-hostil "core.hooksPath" h_hookspath
-hostil "uploadpack.packObjectsHook" h_packhook
-hostil "remote.*.receivepack" h_receive
-hostil "promisor tras un ] entre comillas" h_corchete
-hostil "include.path" h_include
-hostil "includeIf" h_includeif
-hostil "cabecera que no se entiende" h_cabecera_rota
-hostil "include tras un BOM" h_bom
-hostil "config.worktree" h_worktree
-hostil "objects/info/alternates" h_alternates
-hostil "commondir" h_commondir
-hostil ".git como gitfile" h_gitfile
-[ ! -e "$MARK" ] && bien "el marcador no aparece: nada del repo de dcam se ejecutó" || mal "SE EJECUTÓ código del repo de dcam (existe $MARK)"
+echo "— GitHub inaccesible y repo de dcam hostil al lado"
+nuevo_id; preparar "$id" >/dev/null; publicar "$id"; DCAM_GITHUB_URL="file://$T/no-existe.git" correr
+[ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ ! -s "$STUB_LOG" ] && limpio \
+  && bien "GitHub inaccesible → rc=6 (no se confunde con «la rama no está»)" || mal "GitHub inaccesible: rc=$(leer "$id" rc)"
+# Lo que antes era un ataque: el repo de `dcam` como clon parcial sin blobs, con un
+# uploadpack y un fsmonitor que dejan el marcador (CVE-2024-32004), y
+# GIT_NO_LAZY_FETCH=0 desde fuera. El lanzador ya no lo lee: ni lo mira.
+MARK="$T/MARK" H="$T/hostil"
+git -C "$F" config uploadpack.allowFilter true
+git clone -q --no-checkout --filter=blob:none "file://$F" "$H"
+git -C "$F" config --unset uploadpack.allowFilter
+git -C "$H" branch -q "$RAMA" "origin/$RAMA"
+git -C "$H" config remote.origin.uploadpack "touch $MARK; git-upload-pack"
+git -C "$H" config core.fsmonitor "touch $MARK"
+nuevo_id; preparar "$id" >/dev/null; publicar "$id"
+DCAM_REPO_FUENTE="$H" GIT_NO_LAZY_FETCH=0 correr
+[ "$(leer "$id" rc)" = 0 ] && [ ! -e "$MARK" ] \
+  && bien "repo de dcam hostil (+ GIT_NO_LAZY_FETCH=0 fuera): rc=0 y el marcador no aparece" \
+  || mal "repo de dcam hostil: rc=$(leer "$id" rc) marcador=$([ -e "$MARK" ] && echo SÍ || echo no)"
+! grep -qE 'safe\.directory|DCAM_REPO_FUENTE|/srv/dcam/repo' "$LANZADOR" \
+  && bien "el lanzador no nombra el repo de dcam ni safe.directory" || mal "el lanzador aún nombra el repo de dcam"
 
 echo "— aviso de main fijado desactualizado"
 git -C "$F" rev-parse main~1 > "$DCAM_MAIN/.sha"   # difiere solo en README: fuera de las rutas

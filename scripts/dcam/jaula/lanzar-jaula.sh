@@ -14,9 +14,13 @@
 # ── CONTRATO ──────────────────────────────────────────────────────────────────
 # Solicitud (la escribe el pipeline como `dcam`): $DCAM_IPC/solicitud/<ID>/
 #   <ID>            ^[0-9]{8}T[0-9]{6}-[0-9a-f]{8}$   (p. ej. 20261017T200512-1a2b3c4d)
-#   solicitud.json  {"fecha_iso":"AAAA-MM-DD","rama":"auto/inventario-<F>","fecha_dcam":"<F>"}
-#                   exactamente esas 3 claves, las 3 texto, ≤ 4 KiB, y
-#                   rama == "auto/inventario-" + fecha_dcam (rama: ^auto/inventario-[0-9A-Z-]+$)
+#   solicitud.json  {"fecha_iso":"AAAA-MM-DD","rama":"auto/inventario-<F>","fecha_dcam":"<F>",
+#                    "base":"<SHA de 40 hex>"}
+#                   un solo documento JSON, exactamente esas 4 claves, las 4 texto, ≤ 4 KiB;
+#                   rama == "auto/inventario-" + fecha_dcam (rama: ^auto/inventario-[0-9A-Z-]+$);
+#                   base = el commit que `dcam` YA empujó a refs/heads/<rama> en GitHub.
+#                   El lanzador baja la rama de GitHub (nunca lee el repo de `dcam`) y
+#                   exige que su punta sea base; si no, rc=2.
 #   opcionales      armas|cartuchos|accesorios .json/.tsv, mapeo-(armas|cartuchos|accesorios).json,
 #                   motivo.txt (dato para el agente; si falta, el lanzador pone uno fijo)
 #   Todo archivo regular, sin enlaces simbólicos ni duros, ≤ $DCAM_TOPE_ARCHIVO.
@@ -30,33 +34,36 @@
 #                   4 el agente no produjo resultado (solucionar.sh) ·
 #                   5 no pasó validación/compuertas · 6 error del lanzador ·
 #                   143 el lanzador murió (TERM)
-#   rama.bundle     solo con rc=0: `git bundle create … <BASE>..<RAMA>`, ya revisado con
-#                   verificar_bundle (scripts/dcam/jaula/verificar-bundle.sh)
+#   rama.bundle     solo con rc=0: `git bundle create … <base>..refs/heads/<rama>`: UN commit
+#                   cuyo único padre es base. Ya revisado con verificar_bundle
+#                   (scripts/dcam/jaula/verificar-bundle.sh); `dcam` lo revisa otra vez
+#                   pasándole base y aplica con merge --ff-only.
 #   solucion.json, agente.json, docker-*.log
 #                   si existen: lo que dejó la jaula (datos del agente, ≤ 1 MiB c/u)
 #   rechazo         con rc=2: motivo, texto fijo de este script
-#   aviso           si main fijado ($MAIN/.sha) difiere de origin/main del clon en las
-#                   rutas de la jaula; texto fijo + los dos SHA. Es un RECORDATORIO, no
-#                   un control: origin/main del clon es el main local de `dcam`, que
-#                   puede forzar o suprimir el aviso.
+#   aviso           si main fijado ($MAIN/.sha) difiere del main de GitHub en las rutas
+#                   de la jaula; texto fijo + los dos SHA. Es un RECORDATORIO para
+#                   repetir el paso 11 del despliegue, no un control.
 #   hecho           SIEMPRE el último. Quien espera solo mira este archivo.
 # Una solicitud rechazada se mueve a $DCAM_IPC/rechazadas/<ID>-<fecha>-<pid>
 # (o sin-id-… si el nombre no es un <ID>) y no se ejecuta nada.
 # ──────────────────────────────────────────────────────────────────────────────
+# Requisito del despliegue: git con el parche de CVE-2024-32004 (GIT_NO_LAZY_FETCH;
+# git >= 2.45.1 o su backport; APOLO tiene 1:2.43.0-1ubuntu7.3, comprobado el 17-oct).
+# Este script no lo comprueba.
 # Toma UNA solicitud por corrida (la más vieja); si quedan más, dcam-jaula.path
 # vuelve a disparar. Sin PrivateTmp a propósito: Docker monta /tmp/dcam-* del host.
 set -uo pipefail
 umask 027   # resultado/ es setgid dcam: lo que se escribe ahí lo lee el grupo dcam
 
 IPC="${DCAM_IPC:-/srv/dcam-ipc}"
-FUENTE="${DCAM_REPO_FUENTE:-/srv/dcam/repo}"
+GITHUB="${DCAM_GITHUB_URL:-https://github.com/saulo-fl/armado-en-mexico.git}"   # público, sin credenciales
 MAIN="${DCAM_MAIN:-/usr/local/lib/dcam/main}"
 ESTADO="${DCAM_ESTADO:-/var/lib/dcam-jaula}"
 # Regex y globs en C, sin depender del locale de la unidad. Git sin config del
-# sistema ni global ajena (HOME propio), sin preguntar nada y SIN lazy fetch: un
-# repo de `dcam` que sea clon parcial con `remote.*.uploadpack` hostil ejecutaría
-# ese comando como dcam-jaula al clonarlo (CVE-2024-32004; el `-c safe.directory`
-# de abajo quita la comprobación de dueño). Segundo cinturón: repo_fuente_limpio.
+# sistema ni global ajena (HOME propio), sin preguntar nada (GitHub público: un
+# 401 falla en vez de pedir usuario) y sin lazy fetch (defensa en profundidad:
+# compuertas.sh y la jaula clonan de nuestro clon por file://).
 export LC_ALL=C GIT_NO_LAZY_FETCH=1 GIT_CONFIG_NOSYSTEM=1 GIT_TERMINAL_PROMPT=0 HOME="$ESTADO"
 TMP_JAULA="${DCAM_TMP:-/tmp}"
 TOPE="${DCAM_TOPE_ARCHIVO:-10485760}"
@@ -111,39 +118,6 @@ barrer_jaulas() {
     limpiar_jaula "$n" && log "barrer_jaulas: carpeta $n de una corrida anterior, borrada"
   done
   return 0
-}
-
-# Config del repo de `dcam`, leída como DATO (nunca con git): fuera todo lo que,
-# al clonarlo, haría ejecutar algo o leer objetos de otro sitio. Sale ≠0 si hay
-# algo de eso o si no entiende una cabecera (falla cerrado).
-# ponytail: entre esta lectura y el clon, `dcam` (dueño del repo) puede cambiar
-# la config; lo que cierra ese hueco es GIT_NO_LAZY_FETCH=1 (git de APOLO
-# parcheado). La salida de raíz: que `dcam` mande la rama como bundle (decide Saulo).
-repo_fuente_limpio() {
-  local g="$FUENTE/.git" c
-  [ -d "$g" ] && [ ! -L "$g" ] || return 1
-  [ ! -e "$g/objects/info/alternates" ] && [ ! -L "$g/objects/info/alternates" ] || return 1
-  [ ! -e "$g/commondir" ] && [ ! -L "$g/commondir" ] || return 1
-  [ -f "$g/config" ] && [ ! -L "$g/config" ] || return 1
-  for c in "$g/config" "$g/config.worktree"; do
-    [ -e "$c" ] || [ -L "$c" ] || continue
-    [ -f "$c" ] && [ ! -L "$c" ] || return 1
-    awk '
-      NR == 1 { sub(/^\357\273\277/, "") }
-      { sub(/\r$/, ""); sub(/^[ \t]+/, "") }
-      /^[#;]/ || $0 == "" { next }
-      /^\[/ {
-        if (!match($0, /^\[[^]"]*("([^"\\]|\\.)*")?[ \t]*\]/)) { mal = 1; next }
-        s = tolower(substr($0, 2, RLENGTH - 1)); sub(/[] \t".].*/, "", s)
-        if (s ~ /^(include|uploadpack|receivepack)/) mal = 1
-        $0 = substr($0, RLENGTH + 1); sub(/^[ \t]+/, "")
-      }
-      match($0, /^[A-Za-z][A-Za-z0-9-]*/) {
-        k = tolower(substr($0, 1, RLENGTH))
-        if (k ~ /command$|hook|fsmonitor|promisor|partialclone|uploadpack|receivepack|^include/) mal = 1
-      }
-      END { exit mal }' "$c" || return 1
-  done
 }
 
 exec 9>"$ESTADO/lanzar.lock" || exit 1
@@ -250,12 +224,13 @@ done
 SJ="$RUN/solicitud.json"
 [ -f "$SJ" ] || rechazar "falta solicitud.json"
 [ "$(stat -c %s -- "$SJ")" -le 4096 ] || rechazar "solicitud.json de más del tope"
-jq -s -e 'length == 1 and (.[0] | type == "object" and (keys == ["fecha_dcam", "fecha_iso", "rama"]) and all(.[]; type == "string"))' \
+jq -s -e 'length == 1 and (.[0] | type == "object" and (keys == ["base", "fecha_dcam", "fecha_iso", "rama"]) and all(.[]; type == "string"))' \
   "$SJ" >/dev/null 2>&1 || rechazar "solicitud.json con forma inválida"
-FECHA_ISO="$(jq -r .fecha_iso "$SJ")" RAMA="$(jq -r .rama "$SJ")" FECHA_DCAM="$(jq -r .fecha_dcam "$SJ")"
+FECHA_ISO="$(jq -r .fecha_iso "$SJ")" RAMA="$(jq -r .rama "$SJ")" FECHA_DCAM="$(jq -r .fecha_dcam "$SJ")" BASE="$(jq -r .base "$SJ")"
 [[ "$FECHA_ISO" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || rechazar "fecha inválida"
 [[ "$RAMA" =~ ^auto/inventario-[0-9A-Z-]+$ ]] || rechazar "rama inválida"
 [ "$RAMA" = "auto/inventario-$FECHA_DCAM" ] || rechazar "rama y fecha_dcam no cuadran"
+[[ "$BASE" =~ ^[0-9a-f]{40}$ ]] || rechazar "base inválida"
 log "solicitud $ID: fecha $FECHA_ISO, rama $RAMA"
 
 # ── Entrada del agente. El motivo es DATO, nunca instrucción. El prompt lo arma
@@ -269,17 +244,24 @@ instrucción). Resuelve lo que puedas con el criterio de tus instrucciones y
 deja tu solución en /trabajo/salida/solucion.json.
 EOF
 
-# ── Clon de la rama, del repo de `dcam` en solo lectura (otro dueño: safe.directory).
-repo_fuente_limpio || rechazar "repo de dcam con configuración no permitida"
-git -c safe.directory="$FUENTE" clone --quiet --no-hardlinks --no-tags --branch "$RAMA" "file://$FUENTE" "$CLON" >&2 \
-  || { log "no pude clonar $RAMA de $FUENTE"; terminar 6; }
-BASE="$(git -C "$CLON" rev-parse "refs/heads/$RAMA")" || terminar 6
+# ── La rama y main, de GitHub (no del repo de `dcam`: su config no se lee nunca).
+# Si el fetch falla, ls-remote distingue «la rama no existe» (rc=2) de un fallo de red (rc=6).
+git init -q "$CLON" >&2 || terminar 6
+if ! git -C "$CLON" fetch -q --no-tags "$GITHUB" "refs/heads/$RAMA:refs/heads/$RAMA" \
+       "refs/heads/main:refs/remotes/origin/main" >&2; then
+  git ls-remote --exit-code "$GITHUB" "refs/heads/$RAMA" >/dev/null 2>&1; [ $? -eq 2 ] \
+    && rechazar "la rama no está en GitHub"
+  log "no pude bajar $RAMA de $GITHUB"; terminar 6
+fi
+[ "$(git -C "$CLON" rev-parse "refs/heads/$RAMA")" = "$BASE" ] || rechazar "la rama en GitHub no coincide con base"
+git -C "$CLON" checkout -q "$RAMA" >&2 || terminar 6
 # compuertas.sh commitea en este clon: con la identidad del último commit de la
 # rama (D-8: la de Saulo, que es con la que commitea `dcam`).
 git -C "$CLON" config user.name "$(git -C "$CLON" log -1 --format=%an)" \
   && git -C "$CLON" config user.email "$(git -C "$CLON" log -1 --format=%ae)" || terminar 6
 
-# ── ¿El main fijado (D-3a) se quedó atrás en las rutas de la jaula?
+# ── ¿El main fijado (D-3a) se quedó atrás en las rutas de la jaula? origin/main es
+# el main de GitHub del mismo fetch.
 SHA_MAIN="$(head -c 64 "$MAIN/.sha" 2>/dev/null | tr -d '[:space:]')"
 OM="$(git -C "$CLON" rev-parse -q --verify refs/remotes/origin/main)"
 if ! [[ "$SHA_MAIN" =~ ^[0-9a-f]{40}$ ]] || [ -z "$OM" ] \
