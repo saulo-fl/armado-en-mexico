@@ -36,7 +36,9 @@
 #                   si existen: lo que dejó la jaula (datos del agente, ≤ 1 MiB c/u)
 #   rechazo         con rc=2: motivo, texto fijo de este script
 #   aviso           si main fijado ($MAIN/.sha) difiere de origin/main del clon en las
-#                   rutas de la jaula; texto fijo + los dos SHA
+#                   rutas de la jaula; texto fijo + los dos SHA. Es un RECORDATORIO, no
+#                   un control: origin/main del clon es el main local de `dcam`, que
+#                   puede forzar o suprimir el aviso.
 #   hecho           SIEMPRE el último. Quien espera solo mira este archivo.
 # Una solicitud rechazada se mueve a $DCAM_IPC/rechazadas/<ID>-<fecha>-<pid>
 # (o sin-id-… si el nombre no es un <ID>) y no se ejecuta nada.
@@ -50,6 +52,12 @@ IPC="${DCAM_IPC:-/srv/dcam-ipc}"
 FUENTE="${DCAM_REPO_FUENTE:-/srv/dcam/repo}"
 MAIN="${DCAM_MAIN:-/usr/local/lib/dcam/main}"
 ESTADO="${DCAM_ESTADO:-/var/lib/dcam-jaula}"
+# Regex y globs en C, sin depender del locale de la unidad. Git sin config del
+# sistema ni global ajena (HOME propio), sin preguntar nada y SIN lazy fetch: un
+# repo de `dcam` que sea clon parcial con `remote.*.uploadpack` hostil ejecutaría
+# ese comando como dcam-jaula al clonarlo (CVE-2024-32004; el `-c safe.directory`
+# de abajo quita la comprobación de dueño). Segundo cinturón: repo_fuente_limpio.
+export LC_ALL=C GIT_NO_LAZY_FETCH=1 GIT_CONFIG_NOSYSTEM=1 GIT_TERMINAL_PROMPT=0 HOME="$ESTADO"
 TMP_JAULA="${DCAM_TMP:-/tmp}"
 TOPE="${DCAM_TOPE_ARCHIVO:-10485760}"
 ESPERA_TMP="${DCAM_ESPERA_TMP:-120}"
@@ -78,7 +86,8 @@ limpiar_jaula() {
 }
 
 # Restos de corridas que murieron sin pasar por su trap (SIGKILL, OOM):
-# contenedores, volúmenes y carpetas de la jaula de más de 2 h. Corre bajo el
+# contenedores y volúmenes de la jaula (todos) y sus carpetas (las de más de
+# 2 h). Corre en cada disparo, valga o no la solicitud, bajo el
 # flock del lanzador, así que nadie más puede estar usándolos. Solo se borra lo
 # que tiene EXACTAMENTE la forma de los nombres que crean solucionar.sh y
 # compuertas.sh. Movida aquí desde conciliar-pipeline.sh (Fase 4).
@@ -104,8 +113,42 @@ barrer_jaulas() {
   return 0
 }
 
+# Config del repo de `dcam`, leída como DATO (nunca con git): fuera todo lo que,
+# al clonarlo, haría ejecutar algo o leer objetos de otro sitio. Sale ≠0 si hay
+# algo de eso o si no entiende una cabecera (falla cerrado).
+# ponytail: entre esta lectura y el clon, `dcam` (dueño del repo) puede cambiar
+# la config; lo que cierra ese hueco es GIT_NO_LAZY_FETCH=1 (git de APOLO
+# parcheado). La salida de raíz: que `dcam` mande la rama como bundle (decide Saulo).
+repo_fuente_limpio() {
+  local g="$FUENTE/.git" c
+  [ -d "$g" ] && [ ! -L "$g" ] || return 1
+  [ ! -e "$g/objects/info/alternates" ] && [ ! -L "$g/objects/info/alternates" ] || return 1
+  [ ! -e "$g/commondir" ] && [ ! -L "$g/commondir" ] || return 1
+  [ -f "$g/config" ] && [ ! -L "$g/config" ] || return 1
+  for c in "$g/config" "$g/config.worktree"; do
+    [ -e "$c" ] || [ -L "$c" ] || continue
+    [ -f "$c" ] && [ ! -L "$c" ] || return 1
+    awk '
+      NR == 1 { sub(/^\357\273\277/, "") }
+      { sub(/\r$/, ""); sub(/^[ \t]+/, "") }
+      /^[#;]/ || $0 == "" { next }
+      /^\[/ {
+        if (!match($0, /^\[[^]"]*("([^"\\]|\\.)*")?[ \t]*\]/)) { mal = 1; next }
+        s = tolower(substr($0, 2, RLENGTH - 1)); sub(/[] \t".].*/, "", s)
+        if (s ~ /^(include|uploadpack|receivepack)/) mal = 1
+        $0 = substr($0, RLENGTH + 1); sub(/^[ \t]+/, "")
+      }
+      match($0, /^[A-Za-z][A-Za-z0-9-]*/) {
+        k = tolower(substr($0, 1, RLENGTH))
+        if (k ~ /command$|hook|fsmonitor|promisor|partialclone|uploadpack|receivepack|^include/) mal = 1
+      }
+      END { exit mal }' "$c" || return 1
+  done
+}
+
 exec 9>"$ESTADO/lanzar.lock" || exit 1
 flock -n 9 || { log "otro lanzador en curso, salgo"; exit 0; }
+barrer_jaulas            # en cada disparo, valga o no la solicitud: un agente huérfano gasta
 rm -rf "$ESTADO"/run-*   # corridas muertas a medias (bajo el lock: ninguna está viva)
 
 # ── Elegir UNA solicitud. Las .tmp-<ID> se están escribiendo: se esperan hasta
@@ -124,20 +167,18 @@ for ((s = 0; ; s++)); do
 done
 [ -n "$ENTRADA" ] || { log "sin solicitudes"; exit 0; }
 
-NOMBRE="${ENTRADA##*/}" ID="" RES=""
+NOMBRE="${ENTRADA##*/}" ID="" RES="" JAULA_REPO=""
 [[ "$NOMBRE" =~ ^[0-9]{8}T[0-9]{6}-[0-9a-f]{8}$ ]] && ID="$NOMBRE"
-# El resultado se reserva con mkdir (atómico): un <ID> repetido nunca pisa uno anterior.
-[ -n "$ID" ] && mkdir "$IPC/resultado/$ID" 2>/dev/null && RES="$IPC/resultado/$ID"
 RUN="$ESTADO/run-${ID:-sin-id-$$}"
 SOL="$RUN/solicitud" W="$RUN/w" CLON="$RUN/repo"
-mkdir -m 700 "$RUN" "$W" || exit 1
-JAULA_REPO=""
 
-copiar_salidas() {  # lo que dejó la jaula, solo si es regular, sin enlaces y acotado
-  local f
+copiar_salidas() {  # lo que dejó la jaula: regular, sin enlaces y acotado, antes y después de copiar
+  local f d
   for f in "$W/salida/solucion.json" "$W/salida/agente.json" "$W"/docker-*.log; do
     [ -f "$f" ] && [ ! -L "$f" ] && [ "$(stat -c %s -- "$f")" -le "$TOPE_SALIDA" ] || continue
-    cp -P -- "$f" "$RES/${f##*/}" || true
+    d="$RES/${f##*/}"
+    timeout 60 cp -P -- "$f" "$d" 2>/dev/null && [ -f "$d" ] && [ ! -L "$d" ] \
+      && [ "$(stat -c %s -- "$d")" -le "$TOPE_SALIDA" ] || { rm -f -- "$d"; log "salida ${f##*/} irregular: no se copia"; }
   done
 }
 terminar() {  # $1 = rc del contrato; deja rc y hecho (una sola vez) y sale
@@ -154,9 +195,6 @@ cierre() {
   if [ -n "$RES" ] && [ ! -e "$RES/hecho" ]; then printf '6\n' > "$RES/rc"; : > "$RES/hecho"; fi
   rm -rf "$RUN"
 }
-trap cierre EXIT
-trap 'terminar 143 143' TERM INT HUP
-
 rechazar() {  # $1 = motivo fijo (nunca texto de la solicitud)
   log "solicitud ${ID:-sin id} rechazada: $1"
   if [ -e "$SOL" ] || [ -L "$SOL" ]; then
@@ -166,6 +204,19 @@ rechazar() {  # $1 = motivo fijo (nunca texto de la solicitud)
   [ -z "$RES" ] || printf '%s\n' "$1" > "$RES/rechazo"
   terminar 2
 }
+
+# Desde aquí, todo camino de salida (salvo SIGKILL) deja rc y hecho.
+trap cierre EXIT
+trap 'terminar 143 143' TERM INT HUP
+# El resultado se reserva con mkdir (atómico): un <ID> repetido nunca pisa uno anterior.
+[ -n "$ID" ] && mkdir "$IPC/resultado/$ID" 2>/dev/null && RES="$IPC/resultado/$ID"
+mkdir -m 700 "$RUN" "$W" || terminar 6
+# Con solicitud/ y $ESTADO en sistemas de archivos distintos, el mv de abajo sería
+# copiar+borrar: la carpeta de `dcam` entera, sin tope, antes de validar nada.
+if [ "$(stat -c %d -- "$SOLS")" != "$(stat -c %d -- "$ESTADO")" ]; then
+  log "$SOLS y $ESTADO están en sistemas de archivos distintos: no se toma la solicitud (arregla el despliegue)"
+  terminar 6
+fi
 
 # ── Tomarla: a una carpeta 700 de dcam-jaula. Desde aquí `dcam` ya no la alcanza
 # por ruta, y todo lo que se mira se mira DESPUÉS del mv.
@@ -199,7 +250,7 @@ done
 SJ="$RUN/solicitud.json"
 [ -f "$SJ" ] || rechazar "falta solicitud.json"
 [ "$(stat -c %s -- "$SJ")" -le 4096 ] || rechazar "solicitud.json de más del tope"
-jq -e 'type == "object" and (keys == ["fecha_dcam", "fecha_iso", "rama"]) and all(.[]; type == "string")' \
+jq -s -e 'length == 1 and (.[0] | type == "object" and (keys == ["fecha_dcam", "fecha_iso", "rama"]) and all(.[]; type == "string"))' \
   "$SJ" >/dev/null 2>&1 || rechazar "solicitud.json con forma inválida"
 FECHA_ISO="$(jq -r .fecha_iso "$SJ")" RAMA="$(jq -r .rama "$SJ")" FECHA_DCAM="$(jq -r .fecha_dcam "$SJ")"
 [[ "$FECHA_ISO" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || rechazar "fecha inválida"
@@ -219,7 +270,8 @@ deja tu solución en /trabajo/salida/solucion.json.
 EOF
 
 # ── Clon de la rama, del repo de `dcam` en solo lectura (otro dueño: safe.directory).
-git -c safe.directory="$FUENTE" clone --quiet --no-hardlinks --branch "$RAMA" "file://$FUENTE" "$CLON" >&2 \
+repo_fuente_limpio || rechazar "repo de dcam con configuración no permitida"
+git -c safe.directory="$FUENTE" clone --quiet --no-hardlinks --no-tags --branch "$RAMA" "file://$FUENTE" "$CLON" >&2 \
   || { log "no pude clonar $RAMA de $FUENTE"; terminar 6; }
 BASE="$(git -C "$CLON" rev-parse "refs/heads/$RAMA")" || terminar 6
 # compuertas.sh commitea en este clon: con la identidad del último commit de la
@@ -238,8 +290,6 @@ if ! [[ "$SHA_MAIN" =~ ^[0-9a-f]{40}$ ]] || [ -z "$OM" ] \
   log "aviso: main fijado $SHA_MAIN, origin/main ${OM:-ausente}"
 fi
 
-barrer_jaulas
-
 # ── La jaula, con el código del árbol fijado. DCAM_DIR=$RUN → REPO=$CLON.
 export DCAM_DIR="$RUN"
 JAULA_REPO="$(bash "$MAIN/scripts/dcam/jaula/solucionar.sh" "$FECHA_ISO" "$RAMA" "$W" "$MAIN")" \
@@ -253,7 +303,7 @@ N="$(git -C "$CLON" rev-list --count "$BASE..refs/heads/$RAMA")" || terminar 6
 [ "$N" -eq 1 ] || { log "compuertas dejó $N commits; se esperaba 1"; terminar 6; }
 # shellcheck source=verificar-bundle.sh
 . "$MAIN/scripts/dcam/jaula/verificar-bundle.sh" || terminar 6
-git -C "$CLON" bundle create -q "$RUN/rama.bundle" "$BASE..$RAMA" >&2 \
+git -C "$CLON" bundle create -q "$RUN/rama.bundle" "$BASE..refs/heads/$RAMA" >&2 \
   && verificar_bundle "$CLON" "$RUN/rama.bundle" "$RAMA" "$BASE" >/dev/null \
   && cp -- "$RUN/rama.bundle" "$RES/rama.bundle" || { log "bundle inválido"; terminar 6; }
 terminar 0

@@ -51,21 +51,22 @@ fi
 
 LANZADOR="${LANZADOR:-$AQUI/lanzar-jaula.sh}"
 VERIFICAR="${VERIFICAR:-$AQUI/verificar-bundle.sh}"
-T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
+T="$(mktemp -d)"; SHM=""; trap 'rm -rf "$T" ${SHM:+"$SHM"}' EXIT
 OK=0; MAL=0
 bien(){ echo "  ok   $*"; OK=$((OK+1)); }
 mal(){ echo "  MAL  $*"; MAL=$((MAL+1)); }
 
-export HOME="$T/home" GIT_CONFIG_NOSYSTEM=1
+# Sin GIT_CONFIG_NOSYSTEM ni LC_ALL aquí: el lanzador tiene que ponerlos él (se comprueba).
+export HOME="$T/home"
 export DCAM_IPC="$T/ipc" DCAM_REPO_FUENTE="$T/fuente" DCAM_MAIN="$T/main" \
        DCAM_ESTADO="$T/estado" DCAM_TMP="$T/tmp" DCAM_ESPERA_TMP=2 \
-       STUB_LOG="$T/stub.log" T_VISTO="$T/visto"
+       STUB_LOG="$T/stub.log" DOCKER_LOG="$T/docker.log" T_VISTO="$T/visto"
 mkdir -p "$HOME" "$DCAM_IPC"/{solicitud,resultado,rechazadas} "$DCAM_ESTADO" "$DCAM_TMP" \
          "$T/bin" "$T_VISTO" "$DCAM_MAIN/scripts/dcam/jaula"
 SOLS="$DCAM_IPC/solicitud" RESS="$DCAM_IPC/resultado" RECH="$DCAM_IPC/rechazadas"
 
 # docker de mentira: solo anota que lo llamaron.
-printf '#!/usr/bin/env bash\necho "docker $*" >> "$STUB_LOG"\n' > "$T/bin/docker"
+printf '#!/usr/bin/env bash\necho "docker $*" >> "$DOCKER_LOG"\n' > "$T/bin/docker"
 chmod +x "$T/bin/docker"
 export PATH="$T/bin:$PATH"
 
@@ -80,6 +81,9 @@ echo v2 > "$F/scripts/dcam/jaula/x.sh"; g commit -qam c2
 echo leeme > "$F/README"; g add -A; g commit -qm c3
 g switch -qc "$RAMA"; echo mecanico > "$F/dato.txt"; g add -A; g commit -qm mecanico; g switch -q main
 BASE_RAMA="$(git -C "$F" rev-parse "$RAMA")"
+# Config normal de un clon, con una rama que lleva «hooks» en el nombre: no debe
+# disparar repo_fuente_limpio (solo mira nombres de sección y de clave).
+git -C "$F" config branch.fix-hooks.remote origin
 
 # Árbol de main fijado: verificar-bundle.sh de verdad, solucionar/compuertas de mentira.
 J="$DCAM_MAIN/scripts/dcam/jaula"
@@ -89,11 +93,13 @@ cat > "$J/solucionar.sh" <<'EOF'
 W="$3"
 echo "solucionar $*" >> "$STUB_LOG"
 [ -d "$DCAM_DIR/repo/.git" ] || exit 9
+env | grep -E '^(GIT_NO_LAZY_FETCH|GIT_CONFIG_NOSYSTEM|GIT_TERMINAL_PROMPT|HOME|LC_ALL)=' | sort > "$T_VISTO/env.txt"
 ls -A "$W" > "$T_VISTO/w.txt"; cp "$W/prompt.txt" "$W/motivo.txt" "$T_VISTO/"
 [ "${STUB_SOLUCIONAR_RC:-0}" -eq 0 ] || exit 1
 JA="$(mktemp -d "$DCAM_TMP/dcam-jaula-XXXX")"; mkdir -p "$JA/repo" "$W/salida"
 echo '{"ok":true}' > "$W/salida/solucion.json"; echo '{"r":1}' > "$W/salida/agente.json"
 echo consola > "$W/docker-solucionar.log"
+[ -z "${STUB_SALIDA_ENLACE:-}" ] || { rm "$W/salida/solucion.json"; ln -s /etc/hostname "$W/salida/solucion.json"; }
 echo "$JA/repo"
 EOF
 cat > "$J/compuertas.sh" <<'EOF'
@@ -120,7 +126,7 @@ preparar(){
   echo "$d"
 }
 publicar(){ mv -T "$SOLS/.tmp-$1" "$SOLS/$1"; }
-correr(){ : > "$STUB_LOG"; rm -rf "$T_VISTO"/*; bash "$LANZADOR" 2>>"$T/lanzador.err"; }
+correr(){ : > "$STUB_LOG"; : > "$DOCKER_LOG"; rm -rf "$T_VISTO"/*; bash "$LANZADOR" 2>>"$T/lanzador.err"; }
 leer(){ cat "$RESS/$1/$2" 2>/dev/null; }
 limpio(){  # sin restos de la corrida en estado/ ni en tmp/
   ! compgen -G "$DCAM_ESTADO/run-*" >/dev/null && ! compgen -G "$DCAM_TMP/dcam-jaula-*" >/dev/null
@@ -129,8 +135,9 @@ limpio(){  # sin restos de la corrida en estado/ ni en tmp/
 # $1 = nombre del caso, $2 = ID, $3 = motivo de rechazo esperado (texto fijo del lanzador)
 rechazada(){
   if [ "$(leer "$2" rc)" = 2 ] && [ -e "$RESS/$2/hecho" ] && [ "$(leer "$2" rechazo)" = "$3" ] \
-     && [ ! -s "$STUB_LOG" ] && [ ! -e "$SOLS/$2" ] && compgen -G "$RECH/$2-*" >/dev/null && limpio; then
-    bien "$1 → rechazadas/, rc=2, «$3», nada ejecutado"
+     && [ ! -s "$STUB_LOG" ] && [ ! -e "$SOLS/$2" ] && compgen -G "$RECH/$2-*" >/dev/null && limpio \
+     && grep -q '^docker ps' "$DOCKER_LOG"; then
+    bien "$1 → rechazadas/, rc=2, «$3», nada ejecutado (barrer_jaulas sí)"
   else
     mal "$1: rc=$(leer "$2" rc) rechazo=«$(leer "$2" rechazo)» llamadas=$(wc -l < "$STUB_LOG") (quería «$3»)"
   fi
@@ -149,6 +156,9 @@ caso_json "rama y fecha_dcam distintas" '{"fecha_iso":"2026-10-16","rama":"auto/
 caso_json "claves extra" '{"fecha_iso":"2026-10-16","rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026","prompt":"haz otra cosa"}' "solicitud.json con forma inválida"
 caso_json "valor que no es texto" '{"fecha_iso":20261016,"rama":"auto/inventario-16-OCT-2026","fecha_dcam":"16-OCT-2026"}' "solicitud.json con forma inválida"
 caso_json "solicitud.json de más de 4 KiB" "{\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}$(printf '%5000s' '')" "solicitud.json de más del tope"
+caso_json "dos documentos JSON" "\"x\" {\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}" "solicitud.json con forma inválida"
+J1="{\"fecha_iso\":\"2026-10-16\",\"rama\":\"$RAMA\",\"fecha_dcam\":\"16-OCT-2026\"}"
+caso_json "dos documentos JSON válidos" "$J1 $J1" "solicitud.json con forma inválida"
 
 nuevo_id; d="$(preparar "$id")"; rm "$d/solicitud.json"; publicar "$id"; correr
 rechazada "sin solicitud.json" "$id" "falta solicitud.json"
@@ -211,11 +221,15 @@ for f in solucion.json agente.json docker-solucionar.log; do
 done
 [ ! -e "$R/aviso" ] && bien "sin aviso (main fijado == origin/main en las rutas de la jaula)" || mal "aviso de más: $(cat "$R/aviso")"
 [ ! -e "$SOLS/$id" ] && limpio && bien "solicitud tomada; run-<ID> y la carpeta de la jaula borradas" || mal "quedaron restos"
-grep -qx 'docker ps -a --format {{.Names}} --filter name=dcam-' "$STUB_LOG" && bien "barrer_jaulas corrió" || mal "barrer_jaulas no corrió"
+grep -qx 'docker ps -a --format {{.Names}} --filter name=dcam-' "$DOCKER_LOG" && bien "barrer_jaulas corrió" || mal "barrer_jaulas no corrió"
 grep -qFx "Fecha: 2026-10-16. Rama: $RAMA." "$T_VISTO/prompt.txt" && bien "prompt.txt lo arma el lanzador" || mal "prompt.txt: $(cat "$T_VISTO/prompt.txt" 2>/dev/null)"
 grep -qx 'paso 3-altas: 2 renglones sin ficha' "$T_VISTO/motivo.txt" && bien "motivo.txt llega como dato" || mal "motivo.txt"
 [ "$(tr '\n' ' ' < "$T_VISTO/w.txt")" = "armas.json armas.tsv mapeo-armas.json motivo.txt prompt.txt " ] \
   && bien "WORKDIR solo con los permitidos (sin solicitud.json)" || mal "WORKDIR: $(tr '\n' ' ' < "$T_VISTO/w.txt")"
+printf -v ENV_ESPERADO 'GIT_CONFIG_NOSYSTEM=1\nGIT_NO_LAZY_FETCH=1\nGIT_TERMINAL_PROMPT=0\nHOME=%s\nLC_ALL=C' "$DCAM_ESTADO"
+[ "$(cat "$T_VISTO/env.txt")" = "$ENV_ESPERADO" ] \
+  && bien "entorno: GIT_NO_LAZY_FETCH=1, sin config de sistema, sin preguntas, HOME propio, LC_ALL=C" \
+  || mal "entorno de la jaula: $(tr '\n' ' ' < "$T_VISTO/env.txt")"
 
 # El pipeline (dcam) verifica el bundle en su clon, con la rama en su HEAD.
 # shellcheck source=verificar-bundle.sh
@@ -243,6 +257,93 @@ caso_rc "dos commits" 6 STUB_COMMITS=2
 caso_rc "sin cambios" 3 STUB_COMMITS=0
 caso_rc "solucionar.sh falla" 4 STUB_SOLUCIONAR_RC=1
 caso_rc "compuertas.sh falla" 5 STUB_COMPUERTAS_RC=1
+
+echo "— salidas de la jaula y resultado"
+nuevo_id; preparar "$id" >/dev/null; publicar "$id"; STUB_SALIDA_ENLACE=1 correr
+[ "$(leer "$id" rc)" = 0 ] && [ ! -e "$RESS/$id/solucion.json" ] && [ ! -L "$RESS/$id/solucion.json" ] && [ -f "$RESS/$id/agente.json" ] \
+  && bien "solucion.json-enlace en la salida → no llega al resultado" || mal "salida-enlace: «$(ls -lA "$RESS/$id" | tr '\n' ' ')»"
+# $ESTADO donde no se puede crear run-<ID>: el resultado tiene que cerrarse igual.
+nuevo_id; preparar "$id" >/dev/null; publicar "$id"
+: > "$DCAM_ESTADO/lanzar.lock"; chmod 555 "$DCAM_ESTADO"; correr; chmod 755 "$DCAM_ESTADO"
+[ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ ! -s "$STUB_LOG" ] \
+  && bien "no se pudo crear run-<ID> → rc=6 y hecho (el pipeline no espera)" || mal "sin run-<ID>: rc=$(leer "$id" rc) hecho=$([ -e "$RESS/$id/hecho" ] && echo sí || echo no)"
+rm -rf "${SOLS:?}/$id"
+
+echo "— solicitud/ y el estado en sistemas de archivos distintos"
+SHM="$(mktemp -d -p /dev/shm 2>/dev/null)" || SHM=""
+if [ -n "$SHM" ] && [ "$(stat -c %d "$SHM")" != "$(stat -c %d "$SOLS")" ]; then
+  nuevo_id; preparar "$id" >/dev/null; publicar "$id"; DCAM_ESTADO="$SHM" correr
+  if [ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ -d "$SOLS/$id" ] && [ ! -s "$STUB_LOG" ] \
+     && grep -q 'sistemas de archivos distintos' "$T/lanzador.err"; then
+    bien "otro sistema de archivos → rc=6, hecho, la solicitud ni se mueve"
+  else
+    mal "otro sistema de archivos: rc=$(leer "$id" rc) en-solicitud=$([ -d "$SOLS/$id" ] && echo sí || echo no)"
+  fi
+  rm -rf "${SOLS:?}/$id"
+else
+  mal "no hay /dev/shm en otro sistema de archivos: el caso no se pudo probar"
+fi
+
+echo "— un tag que se llama igual que la rama"
+g tag "$RAMA" main~2
+nuevo_id; preparar "$id" >/dev/null; publicar "$id"; correr
+C3="$T/clon3"; git clone -q --no-tags --branch "$RAMA" "file://$F" "$C3"
+. "$VERIFICAR"
+[ "$(leer "$id" rc)" = 0 ] && [ -n "$(verificar_bundle "$C3" "$RESS/$id/rama.bundle" "$RAMA")" ] \
+  && bien "tag homónimo: rc=0 y bundle de la RAMA" || mal "tag homónimo: rc=$(leer "$id" rc)"
+git -C "$F" tag -d "$RAMA" >/dev/null
+
+echo "— repo de dcam hostil: se lee como dato y se rechaza ANTES de clonar"
+MARK="$T/MARK"
+echo "[core]" > "$T/otra.cfg"
+hostil(){  # $1 nombre, $2 función que estropea $H (copia del repo de dcam)
+  local id H; nuevo_id; H="$T/hostil-$id"; cp -a "$F" "$H"; "$2" "$H"
+  preparar "$id" >/dev/null; publicar "$id"
+  # GIT_NO_LAZY_FETCH=0 desde fuera: el lanzador tiene que imponer el suyo.
+  DCAM_REPO_FUENTE="$H" GIT_NO_LAZY_FETCH=0 correr
+  rechazada "$1" "$id" "repo de dcam con configuración no permitida"
+}
+c(){ printf "$2\n" "$MARK" >> "$1/.git/config"; }
+h_fsmonitor(){ c "$1" '[core]\n\tfsmonitor = touch %s'; }
+h_misma_linea(){ c "$1" '[core]fsmonitor=touch %s'; }
+h_ssh(){ c "$1" '[core]\n\tsshCommand = touch %s'; }
+h_hookspath(){ c "$1" '[core]\n\thooksPath = %s'; }
+h_packhook(){ c "$1" '[uploadPack]\n\tpackObjectsHook = touch %s'; }
+h_receive(){ c "$1" '[remote "x"]\n\treceivepack = touch %s'; }
+h_corchete(){ c "$1" '[remote "o]"] promisor = true # %s'; }
+h_include(){ c "$1" '[include]\n\tpath = %s.cfg'; }
+h_includeif(){ c "$1" '[includeIf "gitdir:/"]\n\tpath = %s.cfg'; }
+h_cabecera_rota(){ c "$1" '[branch "sin-cerrar\n\tremote = %s'; }
+h_bom(){ { printf '\357\273\277[include]\n\tpath = %s\n' "$T/otra.cfg"; cat "$1/.git/config"; } > "$T/cfg.tmp" && mv "$T/cfg.tmp" "$1/.git/config"; }
+h_worktree(){ printf '[core]\n\tfsmonitor = touch %s\n' "$MARK" > "$1/.git/config.worktree"; }
+h_alternates(){ echo "$F/.git/objects" > "$1/.git/objects/info/alternates"; }
+h_commondir(){ echo "$F/.git" > "$1/.git/commondir"; }
+h_gitfile(){ mv "$1/.git" "$1/.git-real"; echo "gitdir: $1/.git-real" > "$1/.git"; }
+h_parcial(){  # clon parcial sin blobs y con un uploadpack que deja el marcador (CVE-2024-32004)
+  rm -rf "$1"
+  git -C "$F" config uploadpack.allowFilter true
+  git clone -q --no-checkout --filter=blob:none "file://$F" "$1"
+  git -C "$F" config --unset uploadpack.allowFilter
+  git -C "$1" branch -q "$RAMA" "origin/$RAMA"
+  git -C "$1" config remote.origin.uploadpack "touch $MARK; git-upload-pack"
+}
+hostil "clon parcial con uploadpack hostil" h_parcial
+hostil "core.fsmonitor" h_fsmonitor
+hostil "clave en la línea de la sección" h_misma_linea
+hostil "core.sshCommand" h_ssh
+hostil "core.hooksPath" h_hookspath
+hostil "uploadpack.packObjectsHook" h_packhook
+hostil "remote.*.receivepack" h_receive
+hostil "promisor tras un ] entre comillas" h_corchete
+hostil "include.path" h_include
+hostil "includeIf" h_includeif
+hostil "cabecera que no se entiende" h_cabecera_rota
+hostil "include tras un BOM" h_bom
+hostil "config.worktree" h_worktree
+hostil "objects/info/alternates" h_alternates
+hostil "commondir" h_commondir
+hostil ".git como gitfile" h_gitfile
+[ ! -e "$MARK" ] && bien "el marcador no aparece: nada del repo de dcam se ejecutó" || mal "SE EJECUTÓ código del repo de dcam (existe $MARK)"
 
 echo "— aviso de main fijado desactualizado"
 git -C "$F" rev-parse main~1 > "$DCAM_MAIN/.sha"   # difiere solo en README: fuera de las rutas
