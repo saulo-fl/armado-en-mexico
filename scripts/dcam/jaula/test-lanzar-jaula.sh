@@ -167,6 +167,15 @@ caso_json "base que no es un SHA" '{"base":"main","fecha_iso":"2026-10-16","rama
 caso_json "rama que no está en GitHub" '{"base":"@B@","fecha_iso":"2026-10-17","rama":"auto/inventario-17-OCT-2026","fecha_dcam":"17-OCT-2026"}' "la rama no está en GitHub"
 nuevo_id; preparar "$id" "$(git -C "$F" rev-parse main)" >/dev/null; publicar "$id"; correr
 rechazada "punta de la rama ≠ base" "$id" "la rama en GitHub no coincide con base"
+# Una rama con un enlace simbólico en el árbol se rechaza antes de sacarla a disco.
+RAMA_E="auto/inventario-18-OCT-2026"
+g switch -qc "$RAMA_E" "$RAMA"; ln -s /tmp "$F/enlace"; g add enlace; g commit -qm enlace; g switch -q main
+git -C "$F" push -q "$GH" "$RAMA_E"
+nuevo_id; d="$(preparar "$id")"
+printf '{"fecha_iso":"2026-10-18","rama":"%s","fecha_dcam":"18-OCT-2026","base":"%s"}\n' \
+  "$RAMA_E" "$(git -C "$F" rev-parse "$RAMA_E")" > "$d/solicitud.json"
+publicar "$id"; correr
+rechazada "rama con un enlace simbólico" "$id" "la rama trae enlaces simbólicos"
 
 nuevo_id; d="$(preparar "$id")"; rm "$d/solicitud.json"; publicar "$id"; correr
 rechazada "sin solicitud.json" "$id" "falta solicitud.json"
@@ -302,6 +311,18 @@ C3="$T/clon3"; git clone -q --no-tags --branch "$RAMA" "file://$F" "$C3"
 git -C "$GH" tag -d "$RAMA" >/dev/null
 
 echo "— GitHub inaccesible y repo de dcam hostil al lado"
+# «GitHub» que acepta y no contesta: un bare cuyo packed-refs es una FIFO deja
+# upload-pack colgado. Con DCAM_TIEMPO_GIT=3 el lanzador corta y sale rc=6. El
+# `timeout 30` de aquí solo evita que un lanzador roto cuelgue el test.
+git init -q --bare "$T/cuelga.git"; rm -f "$T/cuelga.git/packed-refs"; mkfifo "$T/cuelga.git/packed-refs"
+nuevo_id; preparar "$id" >/dev/null; publicar "$id"; : > "$STUB_LOG"; S0=$SECONDS
+DCAM_GITHUB_URL="file://$T/cuelga.git" DCAM_TIEMPO_GIT=3 timeout 30 bash "$LANZADOR" 2>>"$T/lanzador.err"
+if [ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ $((SECONDS - S0)) -lt 25 ] \
+   && tail -3 "$T/lanzador.err" | grep -q 'rc=124' && limpio; then
+  bien "GitHub que no contesta → corta a los DCAM_TIEMPO_GIT s, rc=6 ($((SECONDS - S0)) s)"
+else
+  mal "GitHub que no contesta: rc=$(leer "$id" rc) en $((SECONDS - S0)) s"
+fi
 nuevo_id; preparar "$id" >/dev/null; publicar "$id"; DCAM_GITHUB_URL="file://$T/no-existe.git" correr
 [ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ ! -s "$STUB_LOG" ] && limpio \
   && bien "GitHub inaccesible → rc=6 (no se confunde con «la rama no está»)" || mal "GitHub inaccesible: rc=$(leer "$id" rc)"

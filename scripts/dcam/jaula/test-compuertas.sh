@@ -588,6 +588,41 @@ fi
 rm -f "$MARCADOR_P"
 rm -rf "$J" "$W_P" "$MAIN_P"
 
+# --- (q) Fase 4, Task 1, ronda 3: la RAMA trae src/data como enlace a un directorio
+#     de fuera; la jaula devuelve un src/data real con data.js cambiado. El destino
+#     $LIMPIO/nuevo/src/data/data.js cruzaría el enlace (heredado por `cp -a base
+#     nuevo`) y `install` escribiría FUERA antes del validador. Debe abortar sin
+#     escribir fuera y sin commit. Repo propio para no ensuciar a los demás casos.
+DCAM_Q="$TMP/dcam-q"
+FUERA_Q="$TMP/fuera-q"
+mkdir -p "$DCAM_Q" "$FUERA_Q"
+git clone --quiet --no-hardlinks "$DCAM_DIR/repo" "$DCAM_Q/repo"
+git -C "$DCAM_Q/repo" checkout --quiet "$RAMA"
+cp "$DCAM_Q/repo/src/data/data.js" "$FUERA_Q/data.js"
+cp "$FUERA_Q/data.js" "$TMP/fuera-q-antes.js"
+J="$(jaula_desde_rama)"
+node -e '
+  const fs = require("fs"); const p = process.argv[1];
+  let s = fs.readFileSync(p, "utf8");
+  if (!s.includes("2850g")) { console.error("no encontré 2850g"); process.exit(1); }
+  fs.writeFileSync(p, s.replace("2850g", "2851g"));
+' "$J/src/data/data.js"
+mv "$DCAM_Q/repo/src/data" "$DCAM_Q/repo/src/data-real"
+ln -s "$FUERA_Q" "$DCAM_Q/repo/src/data"
+git -C "$DCAM_Q/repo" add -A src >/dev/null 2>&1
+git -C "$DCAM_Q/repo" -c user.name=prueba -c user.email=prueba@example.invalid commit --quiet -m "src/data como enlace"
+ANTES_Q="$(git -C "$DCAM_Q/repo" rev-parse HEAD)"
+if DCAM_DIR="$DCAM_Q" "$COMPUERTAS" "$FECHA_ISO" "$RAMA" "$WORKDIR" "$J" "$MAIN" >"$TMP/log-q.txt" 2>&1; then
+  mal "(q) src/data de la RAMA como enlace: compuertas.sh NO debió salir 0"
+elif ! cmp -s "$FUERA_Q/data.js" "$TMP/fuera-q-antes.js" || [ "$(ls -A "$FUERA_Q")" != "data.js" ]; then
+  mal "(q) src/data de la RAMA como enlace: ESCRIBIÓ FUERA ($FUERA_Q)"
+elif [ "$(git -C "$DCAM_Q/repo" rev-parse HEAD)" != "$ANTES_Q" ] || ! grep -q "cruza un enlace" "$TMP/log-q.txt"; then
+  mal "(q) src/data de la RAMA como enlace: abortó, pero con commit o sin la razón esperada"
+else
+  ok "(q) src/data de la RAMA como enlace: abortó sin escribir fuera ni commitear (destino que cruza un enlace)"
+fi
+rm -rf "$J" "$DCAM_Q" "$FUERA_Q" "$TMP/fuera-q-antes.js"
+
 echo "=================================================="
 if [ "$FALLOS" -eq 0 ]; then
   echo "test-compuertas.sh: TODO OK"

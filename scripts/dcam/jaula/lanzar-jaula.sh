@@ -42,8 +42,10 @@
 #                   si existen: lo que dejó la jaula (datos del agente, ≤ 1 MiB c/u)
 #   rechazo         con rc=2: motivo, texto fijo de este script
 #   aviso           si main fijado ($MAIN/.sha) difiere del main de GitHub en las rutas
-#                   de la jaula; texto fijo + los dos SHA. Es un RECORDATORIO para
-#                   repetir el paso 11 del despliegue, no un control.
+#                   de la jaula; texto fijo + los dos SHA. Es un RECORDATORIO, no un
+#                   control: `dcam` puede provocarlo (si mergeara algo a main). El árbol
+#                   fijado se actualiza (paso 11) solo después de revisar QUÉ cambió en
+#                   main, nunca por el aviso en sí.
 #   hecho           SIEMPRE el último. Quien espera solo mira este archivo.
 # Una solicitud rechazada se mueve a $DCAM_IPC/rechazadas/<ID>-<fecha>-<pid>
 # (o sin-id-… si el nombre no es un <ID>) y no se ejecuta nada.
@@ -68,6 +70,7 @@ export LC_ALL=C GIT_NO_LAZY_FETCH=1 GIT_CONFIG_NOSYSTEM=1 GIT_TERMINAL_PROMPT=0 
 TMP_JAULA="${DCAM_TMP:-/tmp}"
 TOPE="${DCAM_TOPE_ARCHIVO:-10485760}"
 ESPERA_TMP="${DCAM_ESPERA_TMP:-120}"
+TIEMPO_GIT="${DCAM_TIEMPO_GIT:-600}"   # tope (s) de cada fetch/ls-remote a GitHub
 TOPE_SALIDA=1048576
 SOLS="$IPC/solicitud" RECH="$IPC/rechazadas"
 
@@ -245,15 +248,25 @@ deja tu solución en /trabajo/salida/solucion.json.
 EOF
 
 # ── La rama y main, de GitHub (no del repo de `dcam`: su config no se lee nunca).
-# Si el fetch falla, ls-remote distingue «la rama no existe» (rc=2) de un fallo de red (rc=6).
+# Si el fetch falla, ls-remote distingue «la rama no existe» (rc=2) de un fallo de red
+# (rc=6). Los dos con tope de tiempo: si se pasa, rc=6.
 git init -q "$CLON" >&2 || terminar 6
-if ! git -C "$CLON" fetch -q --no-tags "$GITHUB" "refs/heads/$RAMA:refs/heads/$RAMA" \
-       "refs/heads/main:refs/remotes/origin/main" >&2; then
-  git ls-remote --exit-code "$GITHUB" "refs/heads/$RAMA" >/dev/null 2>&1; [ $? -eq 2 ] \
-    && rechazar "la rama no está en GitHub"
-  log "no pude bajar $RAMA de $GITHUB"; terminar 6
+timeout "$TIEMPO_GIT" git -C "$CLON" fetch -q --no-tags "$GITHUB" "refs/heads/$RAMA:refs/heads/$RAMA" \
+  "refs/heads/main:refs/remotes/origin/main" >&2
+RC_GIT=$?
+if [ "$RC_GIT" -ne 0 ]; then
+  if [ "$RC_GIT" -ne 124 ]; then
+    timeout "$TIEMPO_GIT" git ls-remote --exit-code "$GITHUB" "refs/heads/$RAMA" >/dev/null 2>&1
+    [ $? -eq 2 ] && rechazar "la rama no está en GitHub"
+  fi
+  log "no pude bajar $RAMA de $GITHUB (rc=$RC_GIT; 124 = más de ${TIEMPO_GIT}s)"; terminar 6
 fi
 [ "$(git -C "$CLON" rev-parse "refs/heads/$RAMA")" = "$BASE" ] || rechazar "la rama en GitHub no coincide con base"
+# Ni un enlace simbólico en el árbol: compuertas.sh copia y escribe por rutas de la
+# rama en el host, y un directorio-enlace (src/data → otra carpeta) haría que esa
+# escritura saliera de su sitio. Se mira el árbol, antes de sacarlo a disco.
+ARBOL="$(git -C "$CLON" ls-tree -r "$BASE")" || terminar 6
+awk '$1 == "120000" { f = 1 } END { exit !f }' <<<"$ARBOL" && rechazar "la rama trae enlaces simbólicos"
 git -C "$CLON" checkout -q "$RAMA" >&2 || terminar 6
 # compuertas.sh commitea en este clon: con la identidad del último commit de la
 # rama (D-8: la de Saulo, que es con la que commitea `dcam`).

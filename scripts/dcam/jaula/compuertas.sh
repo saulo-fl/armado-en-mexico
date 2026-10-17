@@ -80,6 +80,25 @@ ruta_segura_bajo() {
   return 0
 }
 
+# Fase 4, Task 1 (ronda de arreglo 3): el DESTINO de cada escritura tampoco puede
+# cruzar un enlace. `install` (y `>`/`rm`) solo tratan el último componente y siguen
+# los intermedios: si un directorio del camino bajo $1 fuera un enlace (p. ej.
+# src/data → otra carpeta, heredado de la rama por el `cp -a base nuevo`), la
+# escritura saldría de su sitio en el host ANTES del validador. Compara
+# `realpath -m` del directorio destino con la ruta literal esperada; si no
+# coinciden, aborta todo. (El lanzador ya rechaza ramas con enlaces; esto es la
+# segunda capa.)
+destino_seguro() {  # $1 = base, $2 = ruta relativa del archivo destino
+  local base_real dir esperado
+  base_real="$(realpath -e "$1")" || { echo "compuertas: '$1' no existe — abortando sin commit" >&2; exit 1; }
+  dir="$(dirname "$2")"; esperado="$base_real"
+  [ "$dir" = . ] || esperado="$base_real/$dir"
+  if [ "$(realpath -m "$1/$dir")" != "$esperado" ]; then
+    echo "compuertas: el destino '$2' cruza un enlace bajo '$1' — abortando sin commit" >&2
+    exit 1
+  fi
+}
+
 # --- 3/4: clon limpio de la rama (sin lo que hizo el agente) + copia de trabajo ---
 git clone --quiet --no-hardlinks --branch "$RAMA" "file://$REPO" "$LIMPIO/base"
 cp -a "$LIMPIO/base" "$LIMPIO/nuevo"
@@ -93,6 +112,7 @@ for ruta in "${RUTAS[@]}"; do
   if ruta_segura_bajo "$DIR_JAULA" "$ruta"; then
     # install -m 0644 (ronda de arreglo 1/5, punto 6): consistente con la
     # copia del paso 9 — nunca `--preserve=mode` en ninguna de las dos copias.
+    destino_seguro "$LIMPIO/nuevo" "$ruta"
     install -m 0644 "$DIR_JAULA/$ruta" "$LIMPIO/nuevo/$ruta"
   fi
 done
@@ -247,12 +267,14 @@ for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
   ruta_segura_bajo "$VALIDADO" "$ruta" || continue
   mkdir -p "$FINAL/$(dirname "$ruta")"
+  destino_seguro "$FINAL" "$ruta"
   install -m 0644 "$VALIDADO/$ruta" "$FINAL/$ruta"
 done
 for c in armas cartuchos accesorios; do
   [ -f "$W/$c.json" ] || continue
   ruta_segura_bajo "$REFS_OUT" "referencia-$c.json" \
     || { echo "compuertas: el contenedor de referencias no dejó referencia-$c.json — abortando sin commit" >&2; exit 1; }
+  destino_seguro "$FINAL" "$S_REFS/referencia-$c.json"
   install -m 0644 "$REFS_OUT/referencia-$c.json" "$FINAL/$S_REFS/referencia-$c.json"
 done
 set +e
@@ -291,6 +313,7 @@ for ruta in "${RUTAS[@]}"; do
   # modo) — con --preserve=mode eso viajaba tal cual hasta el commit real en
   # $REPO. El dato que se publica siempre es un archivo plano 0644, sin
   # excepción, sin importar qué modo tenía en la jaula.
+  destino_seguro "$REPO" "$ruta"
   install -m 0644 "$src" "$dst"
   git -C "$REPO" add -- "$ruta"
 done
@@ -317,6 +340,7 @@ if [ -n "$FUERA_DE_PERMITIDOS" ]; then
   # bloquea; esto es, archivo por archivo, solo las rutas conocidas.
   for ruta in "${RUTAS[@]}"; do
     [ -n "$ruta" ] || continue
+    destino_seguro "$REPO" "$ruta"
     if git -C "$REPO" cat-file -e "HEAD:$ruta" 2>/dev/null; then
       git -C "$REPO" show "HEAD:$ruta" > "$REPO/$ruta" 2>/dev/null || true
     else
