@@ -3,6 +3,7 @@
     "101": 4,
     "102": 42,
     "103": 20,
+    "106": 20,
     "107": 20,
     "108": 60,
     "111": 22,
@@ -14,6 +15,8 @@
     "120": 32,
     "121": 39,
     "122": 38,
+    "123": 22,
+    "124": 20,
     "125": 27,
     "126": 20,
     "127": 6,
@@ -31,6 +34,7 @@
     "101": 641.19,
     "102": 320.6,
     "103": 133.58,
+    "106": 534.33,
     "107": 534.33,
     "108": 534.33,
     "111": 1015.22,
@@ -42,6 +46,8 @@
     "120": 500.98,
     "121": 500.98,
     "122": 500.98,
+    "123": 597.75,
+    "124": 548.38,
     "125": 667.91,
     "126": 1047.28,
     "127": 1047.28,
@@ -59,26 +65,11 @@
     1.00937,
     1.013057
   ],
-  "sinFicha": [
-    {
-      "idx": 8,
-      "name": "CARGADOR PPISTOLA IWI M JERICHO II 9mm",
-      "priceN": 534.33,
-      "qty": 20,
-      "desc": "CARGADOR PARA PISTOLA MARCA IWI, PARA MODELO JERICHO PL, PSL, II, II M, CALIBRE 9X19 MM, CON CAPACIDAD PARA 17 CARTUCHOS"
-    },
-    {
-      "idx": 18,
-      "name": "CARG. P/PISTOLA BERETTA 22LR 92FS 10 CAR",
-      "priceN": 548.38,
-      "qty": 20,
-      "desc": "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA, MARCA BERETTA, MODELO 92 FS, CALIBRE .22LR, CAPACIDAD DE 10 CARTUCHOS."
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [],
   "revisarPrecio": [],
   "totalPdf": 586,
-  "totalMapped": 504,
+  "totalMapped": 566,
   "excluidos": [],
   "regresos": [],
   "regresosRechazados": [],

@@ -17,12 +17,15 @@
     "2050": 4050,
     "2051": 1310,
     "2061": 3250,
-    "2070": 3000,
     "2074": 3000,
     "2075": 3000,
     "2092": 500,
     "2103": 7100,
-    "2113": 3000
+    "2113": 3000,
+    "2117": 3000,
+    "2118": 3000,
+    "2119": 3000,
+    "2120": 3000
   },
   "precios": {
     "2004": 8.96,
@@ -42,40 +45,21 @@
     "2050": 25.86,
     "2051": 25.86,
     "2061": 10.31,
-    "2070": 10.69,
     "2074": 10.31,
     "2075": 11.76,
     "2092": 30.56,
     "2103": 8.96,
-    "2113": 10.07
+    "2113": 10.07,
+    "2117": 10.69,
+    "2118": 10.69,
+    "2119": 10.69,
+    "2120": 16.54
   },
   "factores": [
     1.009368,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 8,
-      "name": "CART.ESCP.TRUST.CAL12.C.L.A00BUCK35.9POS",
-      "priceN": 16.54,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO CAZA LINEA AZUL (BLUE LINE), 35 GRAMOS, MUNICIÓN DEL 00 BUCK, 9 P"
-    },
-    {
-      "idx": 15,
-      "name": "CART.MARC.FIOCCHI, CAL.12 GA, 7.5, 28 GR",
-      "priceN": 10.69,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA FIOCCHI, CALIBRE 12 GA, 7.5, 28 GR."
-    },
-    {
-      "idx": 16,
-      "name": "CART.MARC.FIOCCHI, CAL.12 GA, 7.5, 32 GR",
-      "priceN": 10.69,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA FIOCCHI, CALIBRE 12 GA, 7.5, 32 GR."
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2095,
@@ -118,6 +102,11 @@
       "refPrice": 9.23
     },
     {
+      "fichaId": 2070,
+      "refName": "CART.MAR.FIOCCHI,CAL. 12 GA, 7.5, 24 GR.",
+      "refPrice": 10.59
+    },
+    {
       "fichaId": 2036,
       "refName": "CARTS CAL.308\" W REMINGTON UMC FMJ 150GR",
       "refPrice": 14.82
@@ -130,7 +119,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 98773,
-  "totalMapped": 89773,
+  "totalMapped": 98773,
   "excluidos": [],
   "regresos": [
     {
@@ -142,8 +131,8 @@
       "antes": 25.42,
       "razon": 1.017309,
       "motivo": "aumento general",
-      "apoyos": 21,
-      "general": 1.017153,
+      "apoyos": 23,
+      "general": 1.017127,
       "tramo": 0
     }
   ],

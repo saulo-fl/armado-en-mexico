@@ -47,6 +47,7 @@
     "76": 8,
     "78": 1,
     "79": 2,
+    "81": 7,
     "83": 1,
     "85": 4,
     "91": 9,
@@ -177,6 +178,7 @@
     "76": 51321.92,
     "78": 45951.95,
     "79": 45417.63,
+    "81": 28052.06,
     "83": 39219.46,
     "85": 5542.53,
     "91": 10293.24,
@@ -263,15 +265,7 @@
     1.009357,
     1.013062
   ],
-  "sinFicha": [
-    {
-      "idx": 117,
-      "name": "RIFLE CAL22 TIPPMANN M4-22 REDLINE",
-      "priceN": 28052.06,
-      "qty": 7,
-      "desc": "RIFLE CAL. 22 MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN REDLINE INCLUYE: UN ESTUCHE DE PLÁSTICO RÍGIDO, UN CARGADOR DE "
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 153,
@@ -306,7 +300,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 1457,
-  "totalMapped": 1342,
+  "totalMapped": 1349,
   "excluidos": [],
   "regresos": [
     {
@@ -375,21 +369,7 @@
       "tramo": 0
     }
   ],
-  "regresosRechazados": [
-    {
-      "idx": 117,
-      "name": "RIFLE CAL22 TIPPMANN M4-22 REDLINE",
-      "priceN": 28052.06,
-      "fichaId": 81,
-      "fechaAntes": "2026-07-06",
-      "antes": 32941.88,
-      "razon": 0.851562,
-      "motivo": "posible renombre de «RIFLE 0.22 TIPPMANN M4-22 REDLINE»: el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 85,
-      "general": 1.054315,
-      "tramo": 0
-    }
-  ],
+  "regresosRechazados": [],
   "gemelos": [
     {
       "idx": 136,
