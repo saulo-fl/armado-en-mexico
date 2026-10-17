@@ -604,7 +604,8 @@ if solucion_ok; then
 else
   # Se commitea y empuja igual (los datos validados no se pierden), pero sin `gh pr ready`.
   cerrar_exito jaula borrador
-  telegram "⚠️ Solucionador (jaula) resolvió en parte $FECHA: $RESUMEN. El PR queda en borrador: revisa los pendientes."
+  # La ruta la pone el host (WORKDIR), nunca texto del agente: ahí está la lista de pendientes.
+  telegram "⚠️ Solucionador (jaula) resolvió en parte $FECHA: $RESUMEN. El PR queda en borrador: revisa los pendientes en $WORKDIR/salida/solucion.json (APOLO)."
   log "solucionador (jaula) EN PARTE (PR en borrador): $RESUMEN"
 fi
 log "paso 4 OK — pipeline completo (jaula)"

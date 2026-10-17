@@ -132,7 +132,8 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
 - **(16-sep-2026) Tramo de los cargadores.** Al dar de alta un cargador, añade su entrada en
   `ACC_TRAMO` (`data-accesorios.js`): `[tipo de arma, calibre]` con los valores de
   `ACC_TRAMO_ARMAS` y `ACC_TRAMO_CALIBRES` (un calibre nuevo se añade ahí, en su orden). Si el
-  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente junto a la tabla.
+  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente en el motivo del
+  alta (`solucion.json` → `altas[].motivo`), no en un comentario de `src/data`.
   `auditar.js` falla si falta.
 
 ## 4) Verificar (obligatorio antes de commitear)

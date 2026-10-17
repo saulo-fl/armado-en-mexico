@@ -889,3 +889,36 @@ test('ronda 2 (Minor): una ficha existente SIN id que cambia de aridad no se rep
   // y una ficha nueva sin id de aridad mala sí se reporta como nueva
   assert.match(compararArchivo(D, b, b.replace('\n];', '\n  mk(null, "C", 3),\n];'))[0], /nueva/);
 });
+
+// --- Revisión final de la rama (16-oct-2026) ---
+
+test('final (Minor 3): un id en string es el mismo id que el número — la gemela se rechaza', () => {
+  const dj = readFileSync(FIXTURE('data.js'), 'utf8');
+  const i = dj.indexOf('window.DB = [');
+  const m = /\r?\n {2}mk\((\d+),/.exec(dj.slice(i));
+  assert.ok(i >= 0 && m, 'window.DB cambió; ajustar el test');
+  const id = m[1];
+  const fin = i + /\r?\n\];\r?\n/.exec(dj.slice(i)).index;
+  const gemela = `\r\n  mk("${id}", "Arma de prueba", "Fabricante de prueba", "pistola", "México", "9mm Parabellum", "10+1", "1 kg", "100 mm", "Semi-auto", 2026, "dcam", "FICHA DE PRUEBA", "imagenes/arma-prueba.webp", "Ficha sintética."),`;
+  const r1 = compararArchivo(D, dj, dj.slice(0, fin) + gemela + dj.slice(fin));
+  assert.equal(r1.length, 1);
+  assert.match(r1[0], new RegExp(`"${id}" aparece 2 veces`));
+  const real = realMun();
+  const r2 = compararArchivo(MUN, real, conFichaMun(real, FICHA_2117().replace('mun(2117,', 'mun("2115",')));
+  assert.equal(r2.length, 1);
+  assert.match(r2[0], /"2115" aparece 2 veces/);
+});
+
+test('final (Minor 4): si todas las fichas del arreglo tienen id, una alta sin id literal se rechaza', () => {
+  const real = realMun();
+  for (const linea of [FICHA_2117().replace('mun(2117,', 'mun(null,'), '    mun(null, "x", "M", "P", "12 GA", "escopeta", "B", "1 gr", "dcam", 1, "R", "D", [], []),']) {
+    const r = compararArchivo(MUN, real, conFichaMun(real, linea));
+    assert.equal(r.length, 1, linea);
+    assert.match(r[0], /no tiene id literal/);
+  }
+  const dj = readFileSync(FIXTURE('data.js'), 'utf8');
+  const i = dj.indexOf('window.DB = [');
+  const fin = i + /\r?\n\];\r?\n/.exec(dj.slice(i)).index;
+  const sinId = '\r\n  mk(null, "Arma de prueba", "Fabricante de prueba", "pistola", "México", "9mm Parabellum", "10+1", "1 kg", "100 mm", "Semi-auto", 2026, "dcam", "FICHA DE PRUEBA", "imagenes/arma-prueba.webp", "Ficha sintética."),';
+  assert.match(compararArchivo(D, dj, dj.slice(0, fin) + sinId + dj.slice(fin))[0], /no tiene id literal/);
+});

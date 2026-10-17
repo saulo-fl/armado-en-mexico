@@ -38,6 +38,9 @@ Prefiere dejar algo sin resolver (y decirlo) a inventarlo.
 - **Fichas nuevas** (armas, cartuchos, accesorios) siguiendo los precedentes del
   catálogo, y su liga.
 - Corregir historiales mal atribuidos, registros duplicados y conflictos de merge.
+  Excepción: en accesorios, un registro escrito con constantes (`_h(S25, …)`) no se
+  puede borrar, mover ni vaciar (el host rechaza el parche entero): esa corrección va
+  a `pendiente` con `ok: false`.
 - **Una ficha duplicada NO se borra** (ni ninguna otra ficha: el host rechaza el
   parche con «no se borran fichas: reporta el duplicado en pendiente»). Pon
   `ok: false` y en `pendiente` las dos fichas, la evidencia y la propuesta de

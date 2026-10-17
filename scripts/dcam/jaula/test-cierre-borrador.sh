@@ -44,7 +44,7 @@ JSON_T='{"ok":true,"ligas":[1],"altas":[1,2],"pendiente":[]}'
 caso f "$JSON_F"
 grep -q 'git push' "$TMP/f/calls" && bien "ok:false: commit y push igual" || mal "ok:false: no empujó"
 ! grep -q 'gh pr ready' "$TMP/f/calls" && bien "ok:false: NO gh pr ready" || mal "ok:false: llamó gh pr ready"
-grep -qF '⚠️ Solucionador (jaula) resolvió en parte 16-OCT-2026: Ligas: 1 · Altas: 0 · Pendientes: 7. El PR queda en borrador: revisa los pendientes.' "$TMP/f/tg" && bien "ok:false: aviso de borrador" || mal "ok:false: aviso: $(cat "$TMP/f/tg" 2>/dev/null)"
+grep -qF "⚠️ Solucionador (jaula) resolvió en parte 16-OCT-2026: Ligas: 1 · Altas: 0 · Pendientes: 7. El PR queda en borrador: revisa los pendientes en $TMP/f/salida/solucion.json (APOLO)." "$TMP/f/tg" && bien "ok:false: aviso de borrador" || mal "ok:false: aviso: $(cat "$TMP/f/tg" 2>/dev/null)"
 grep -q 'rc=0' "$TMP/f/rc" && bien "ok:false: rc=0" || mal "ok:false: $(cat "$TMP/f/rc")"
 
 caso t "$JSON_T"

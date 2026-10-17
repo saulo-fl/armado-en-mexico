@@ -5,7 +5,7 @@
 // las dos secuencias de tokens con un diff de verdad (`git diff --no-index` sobre dos
 // temporales que ESTE script escribe, uno-token-por-línea — de confianza porque los
 // escribimos nosotros, no el parche). Cada token insertado o borrado se valida con la regla
-// de clases (solo literales dentro de mk/mun/acc); el resto del archivo, igual en ambos
+// de clases (solo literales dentro de mk/mun/amx); el resto del archivo, igual en ambos
 // lados, ni se mira.
 //
 // Toda la lógica de validación vive AQUÍ (no en el CLI): `validar-parche.mjs` es solo un
@@ -398,7 +398,11 @@ function formaDeFicha(el, declarados) {
 // nueva tiene la forma de alguna de la base y, si usa constructor (mun/mk/amx), el mismo
 // número de argumentos que alguna de esa forma. Cambiar VALORES sigue igual que antes (lo
 // vigila la capa de tokens); los historiales viven en arreglos ANIDADOS en un objeto
-// colapsado, no aquí, y se pueden corregir (borrar, mover, vaciar registros).
+// colapsado, no aquí, y se pueden corregir (borrar, mover, vaciar registros) MIENTRAS el
+// registro no lleve nombres: los de municiones (`_mh25(9.54, 3000)`) y los literales
+// `{ manualId: … }` sí; los de accesorios con constantes (`_h(S25, 613.96, S25d, 4)`) NO,
+// porque la capa de tokens rechaza todo identificador borrado o insertado que no sea clave
+// o callee (límite conocido; abrirlo es otra tarea).
 // El mensaje de rechazo dice qué hacer, porque lo lee el solucionador.
 function constructoresDeclarados(programa) {
   const nombres = new Set();
@@ -420,7 +424,9 @@ function constructoresDeclarados(programa) {
 // (en data.js las 261 fichas tienen la misma forma): ahora cada id de la base tiene que seguir.
 const CONSTRUCTORES_DE_FICHA = new Set(['mk', 'mun', 'amx']);
 function idDeFicha(el) {
-  const lit = (n) => (n && (n.type === 'NumericLiteral' || n.type === 'StringLiteral') ? JSON.stringify(n.value) : null);
+  // String(): `"101"` y `101` son el MISMO id (la app hace Number(id)); con JSON.stringify eran
+  // dos, y una alta `mk("101", …)` colaba una ficha gemela (revisión final, Minor 3).
+  const lit = (n) => (n && (n.type === 'NumericLiteral' || n.type === 'StringLiteral') ? String(n.value) : null);
   const deLlamada = (c) => (c.type === 'CallExpression' && c.callee.type === 'Identifier' && CONSTRUCTORES_DE_FICHA.has(c.callee.name) ? lit(c.arguments[0]) : null);
   if (el.type === 'CallExpression') return deLlamada(el);
   if (el.type !== 'ObjectExpression') return null;
@@ -456,10 +462,16 @@ function problemaDeFichas(base, nuevo) {
     return null;
   };
   for (const x of nuevo) if (x.id !== null && !idsB.has(x.id)) { const p = revisarNueva(x); if (p) return p; }
+  const sinIdB = base.filter((x) => x.id === null), sinIdN = nuevo.filter((x) => x.id === null);
+  // Si TODAS las de la base tienen id, una nueva sin id literal (`mk(null, …)`) no pasa: si no,
+  // colaba fichas sin identidad por la regla de subsecuencia (revisión final, Minor 4).
+  if (sinIdB.length === 0 && idsB.size > 0) {
+    const sinId = nuevo.find((x) => x.id === null);
+    if (sinId) return `una ficha nueva no tiene id literal (${txt(sinId.a)}): todas las del arreglo lo tienen`;
+  }
   // 3) Elementos sin id: las de la base siguen, en orden y con su forma (subsecuencia de las
   //    del nuevo). Se empareja por la forma CON aridad: si fuera sin ella, una ficha nueva de
   //    aridad mala metida justo antes de una existente de su forma «ocuparía» el lugar de esa.
-  const sinIdB = base.filter((x) => x.id === null), sinIdN = nuevo.filter((x) => x.id === null);
   let i = 0;
   for (const x of sinIdN) {
     if (i < sinIdB.length && x.a === sinIdB[i].a) { i++; continue; }
