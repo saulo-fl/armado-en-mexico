@@ -58,6 +58,14 @@ export const MAX_BYTES = 5 * 1024 * 1024;
 
 const tipo = (t) => (typeof t.type === 'string' ? t.type : t.type.label);
 
+// Todo texto que venga de un archivo (o de un error que lo cite) entra a un mensaje por
+// aquí: JSON lo deja en UNA línea (escapa saltos de línea y controles; aquí también
+// U+0085/U+2028/U+2029) y el tope corta lo largo. Los mensajes acaban en conciliar.log: sin
+// esto, una clave con un salto de línea y «FAKE compuertas: ✔ solo datos» escribía un
+// renglón falso en el log (re-revisión de la ronda 1).
+const SEPARADORES = new RegExp('[' + String.fromCharCode(0x85, 0x2028, 0x2029) + ']', 'g');
+export const txt = (v) => JSON.stringify(String(v)).replace(SEPARADORES, (c) => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).slice(0, 200);
+
 // Un token por línea: "<tipo>\t<JSON.stringify(texto crudo)>". JSON.stringify escapa
 // cualquier salto de línea real dentro del token (strings con continuación de línea), así
 // que la invariante "una línea = un token" se cumple pase lo que pase en el contenido.
@@ -120,9 +128,9 @@ function diferenciaDeTokens(toksBase, toksNuevo, src1, src2) {
       salida = e.stdout || ''; status = e.status;
     }
     if (status === 0) return { añadidos: [], borrados: [] }; // idénticos
-    if (status !== 1) throw new Error(`git diff --no-index falló (status ${status}): ${salida.slice(0, 500)}`);
+    if (status !== 1) throw new Error(`git diff --no-index falló (status ${status}): ${txt(salida)}`);
     const { añadidos, borrados, huboHunk } = leerHunksDeDiff(salida);
-    if (!huboHunk) throw new Error(`git diff --no-index dijo que hay diferencias (status 1) pero no imprimió ningún hunk: ${salida.slice(0, 500)}`);
+    if (!huboHunk) throw new Error(`git diff --no-index dijo que hay diferencias (status 1) pero no imprimió ningún hunk: ${txt(salida)}`);
     if (toksNuevo.length - añadidos.length !== toksBase.length - borrados.length) {
       throw new Error('git diff --no-index: el invariante de tokens sin tocar no cuadra (toksNuevo - añadidos !== toksBase - borrados)');
     }
@@ -155,7 +163,7 @@ function revisarToken(src, toks, i, ruta, callables) {
   const t = toks[i];
   const k = tipo(t), sig = toks[i + 1] && tipo(toks[i + 1]), crudo = src.slice(t.start, t.end);
   if (k === 'string') {
-    if (contenidoStringMalo(crudo)) return [`${ruta}:${t.loc.start.line}: string con escape, <>, o marcador de comentario (${crudo.slice(0, 40)})`];
+    if (contenidoStringMalo(crudo)) return [`${ruta}:${t.loc.start.line}: string con escape, <>, o marcador de comentario (${txt(crudo)})`];
     return [];
   }
   if (k === 'num' || k === 'null' || k === 'true' || k === 'false' || PUNTOS.has(k)) {
@@ -163,10 +171,10 @@ function revisarToken(src, toks, i, ruta, callables) {
     return [];
   }
   if (k === 'name') {
-    if (!(callables.has(crudo) && sig === '(') && sig !== ':') return [`${ruta}:${t.loc.start.line}: identificador no permitido «${crudo}»`];
+    if (!(callables.has(crudo) && sig === '(') && sig !== ':') return [`${ruta}:${t.loc.start.line}: identificador no permitido ${txt(crudo)}`];
     return [];
   }
-  return [`${ruta}:${t.loc.start.line}: token no permitido «${crudo.slice(0, 20)}»`];
+  return [`${ruta}:${t.loc.start.line}: token no permitido ${txt(crudo)}`];
 }
 
 // --- Segunda capa (ronda 2): el esqueleto del programa tiene que ser idéntico ---
@@ -384,7 +392,9 @@ function formaDeFicha(el, declarados) {
 // forma pasaría — antes lo rechazaba el esqueleto (por accidente: el arreglo no colapsaba).
 // Regla, por arreglo colapsado y en los 4 archivos (decisión de Saulo, 16-oct: las fichas
 // no se borran; un duplicado lo funde él, con su 301, ligas y D1): las fichas de la base
-// siguen ahí, en orden y con su forma (son una subsecuencia de las del nuevo), y cada ficha
+// siguen ahí, en orden y con su forma — las que tienen id (ver idDeFicha), por IDENTIDAD
+// (ronda 2: por forma sola, «borrar una + dar de alta otra» pasaba); las que no, como
+// subsecuencia de las del nuevo —, ningún id se repite, y cada ficha
 // nueva tiene la forma de alguna de la base y, si usa constructor (mun/mk/amx), el mismo
 // número de argumentos que alguna de esa forma. Cambiar VALORES sigue igual que antes (lo
 // vigila la capa de tokens); los historiales viven en arreglos ANIDADOS en un objeto
@@ -403,28 +413,67 @@ function constructoresDeclarados(programa) {
   return nombres;
 }
 
-function problemaDeFichas(base, nuevo) {
-  const lista = (xs) => { const s = [...new Set(xs)].join(' · '); return s.length > 300 ? s.slice(0, 300) + '…' : s; };
-  const conocidas = new Set(base.map((x) => x.f)), conocidasA = new Set(base.map((x) => x.a));
-  let i = 0;
-  for (const x of nuevo) {
-    // Se empareja por la forma CON aridad: si fuera sin ella, una ficha nueva de aridad mala
-    // metida justo antes de una existente de su forma «ocuparía» el lugar de esa y la
-    // existente quedaría como la nueva (aridad conocida): pasaría. Efecto: cambiar el número
-    // de argumentos de una ficha existente también es cambiarle la forma.
-    if (i < base.length && x.a === base[i].a) { i++; continue; }
-    if (!conocidas.has(x.f)) return `una ficha nueva tiene una forma que ninguna del arreglo tiene (${x.f}); usa una de: ${lista(base.map((y) => y.f))}`;
-    if (!conocidasA.has(x.a)) return `una ficha nueva no lleva el número de argumentos de ninguna existente (${x.a}); usa uno de: ${lista(base.filter((y) => y.f === x.f).map((y) => y.a))}`;
+// Id de una ficha: primer argumento literal de mk/mun/amx (también dentro de
+// `{ ...mun(id, …) }`) o la clave `id` literal de un objeto (manuales). Si un objeto trae las
+// dos, gana la que va DESPUÉS (es la que queda en tiempo de ejecución). null si no tiene.
+// Ronda de arreglo 2: comparar solo FORMAS dejaba pasar «borrar mk(101) + alta mk(9999)»
+// (en data.js las 261 fichas tienen la misma forma): ahora cada id de la base tiene que seguir.
+const CONSTRUCTORES_DE_FICHA = new Set(['mk', 'mun', 'amx']);
+function idDeFicha(el) {
+  const lit = (n) => (n && (n.type === 'NumericLiteral' || n.type === 'StringLiteral') ? JSON.stringify(n.value) : null);
+  const deLlamada = (c) => (c.type === 'CallExpression' && c.callee.type === 'Identifier' && CONSTRUCTORES_DE_FICHA.has(c.callee.name) ? lit(c.arguments[0]) : null);
+  if (el.type === 'CallExpression') return deLlamada(el);
+  if (el.type !== 'ObjectExpression') return null;
+  let id = null;
+  for (const p of el.properties) {
+    if (p.type === 'SpreadElement') { const x = deLlamada(p.argument); if (x !== null) id = x; }
+    else if (p.type === 'ObjectProperty' && !p.computed && ((p.key.type === 'Identifier' && p.key.name === 'id') || (p.key.type === 'StringLiteral' && p.key.value === 'id'))) id = lit(p.value);
   }
-  if (i === base.length) return null;
-  const que = nuevo.length < base.length ? `se borró una ficha (${base.length} → ${nuevo.length})` : `cambió la forma de una ficha existente (era ${base[i].a})`;
-  return `${que}: no se borran fichas: reporta el duplicado en pendiente`;
+  return id;
+}
+
+function problemaDeFichas(base, nuevo) {
+  const NO_BORRAR = 'no se borran fichas: reporta el duplicado en pendiente';
+  const lista = (xs) => { const s = [...new Set(xs)].join(' · '); return s.length > 300 ? s.slice(0, 300) + '…' : s; };
+  const cuenta = (xs) => xs.reduce((m, x) => (x.id === null ? m : m.set(x.id, (m.get(x.id) || 0) + 1)), new Map());
+  const idsB = cuenta(base), idsN = cuenta(nuevo);
+  // 1) Identidad (fichas con id): cada id de la base sigue, en el mismo orden relativo, con su
+  //    forma (aridad incluida); ningún id aparece más veces que en la base (y uno nuevo, una).
+  for (const x of base) if (x.id !== null && !idsN.has(x.id)) return `se borró una ficha (${base.length} → ${nuevo.length}), la ${txt(x.id)}: ${NO_BORRAR}`;
+  for (const [id, n] of idsN) if (n > Math.max(1, idsB.get(id) || 0)) return `la ficha ${txt(id)} aparece ${n} veces: un id no se repite`;
+  const formaB = new Map(base.filter((x) => x.id !== null).map((x) => [x.id, x.a]));
+  for (const x of nuevo) {
+    if (x.id !== null && formaB.has(x.id) && formaB.get(x.id) !== x.a) return `la ficha existente ${txt(x.id)} cambió de forma (era ${txt(formaB.get(x.id))}, ahora ${txt(x.a)})`;
+  }
+  const ordenB = base.filter((x) => x.id !== null).map((x) => x.id).join(',');
+  const ordenN = nuevo.filter((x) => x.id !== null && idsB.has(x.id)).map((x) => x.id).join(',');
+  if (ordenB !== ordenN) return 'cambió el orden de las fichas existentes';
+  // 2) Fichas nuevas (id que la base no tiene): forma y aridad de alguna existente.
+  const conocidas = new Set(base.map((x) => x.f)), conocidasA = new Set(base.map((x) => x.a));
+  const revisarNueva = (x) => {
+    if (!conocidas.has(x.f)) return `una ficha nueva tiene una forma que ninguna del arreglo tiene (${txt(x.f)}); usa una de: ${lista(base.map((y) => y.f))}`;
+    if (!conocidasA.has(x.a)) return `una ficha nueva no lleva el número de argumentos de ninguna existente (${txt(x.a)}); usa uno de: ${lista(base.filter((y) => y.f === x.f).map((y) => y.a))}`;
+    return null;
+  };
+  for (const x of nuevo) if (x.id !== null && !idsB.has(x.id)) { const p = revisarNueva(x); if (p) return p; }
+  // 3) Elementos sin id: las de la base siguen, en orden y con su forma (subsecuencia de las
+  //    del nuevo). Se empareja por la forma CON aridad: si fuera sin ella, una ficha nueva de
+  //    aridad mala metida justo antes de una existente de su forma «ocuparía» el lugar de esa.
+  const sinIdB = base.filter((x) => x.id === null), sinIdN = nuevo.filter((x) => x.id === null);
+  let i = 0;
+  for (const x of sinIdN) {
+    if (i < sinIdB.length && x.a === sinIdB[i].a) { i++; continue; }
+    if (sinIdN.length <= sinIdB.length) return `una ficha existente cambió de forma u orden (${txt(x.a)})`;
+    const p = revisarNueva(x); if (p) return p;
+  }
+  if (i === sinIdB.length) return null;
+  return sinIdN.length < sinIdB.length ? `se borró una ficha (${base.length} → ${nuevo.length}): ${NO_BORRAR}` : `una ficha existente cambió de forma u orden (era ${txt(sinIdB[i].a)})`;
 }
 
 function compararJS(ruta, base, nuevo) {
   let astBase, astNuevo;
-  try { astBase = parse(base, { sourceType: 'script', tokens: true }); } catch (e) { return [`${ruta}: la base no parsea (${e.message})`]; }
-  try { astNuevo = parse(nuevo, { sourceType: 'script', tokens: true }); } catch (e) { return [`${ruta}: el nuevo no parsea (${e.message})`]; }
+  try { astBase = parse(base, { sourceType: 'script', tokens: true }); } catch (e) { return [`${ruta}: la base no parsea (${txt(e.message)})`]; }
+  try { astNuevo = parse(nuevo, { sourceType: 'script', tokens: true }); } catch (e) { return [`${ruta}: el nuevo no parsea (${txt(e.message)})`]; }
 
   const comentarios = (ast) => (ast.comments || []).map((c) => `${c.type}\u0000${c.value}`);
   const cB = comentarios(astBase), cN = comentarios(astNuevo);
@@ -441,7 +490,7 @@ function compararJS(ruta, base, nuevo) {
   // cuenta para constructores definidos en el archivo (mk/mun/amx en los reales): en un
   // fragmento sin su definición no hay firma contra la cual medir.
   const declarados = constructoresDeclarados(astBase.program);
-  const aFormas = (els) => els.map((el) => ({ f: formaDeFicha(el, null), a: formaDeFicha(el, declarados) }));
+  const aFormas = (els) => els.map((el) => ({ f: formaDeFicha(el, null), a: formaDeFicha(el, declarados), id: idDeFicha(el) }));
   for (let k = 0; k < formasB.length; k++) {
     const p = problemaDeFichas(aFormas(formasB[k]), aFormas(formasN[k]));
     if (p) return [`${ruta}: ${p}`];
@@ -558,7 +607,7 @@ export function compararArchivoSeguro(ruta, base, nuevo) {
   try {
     return compararArchivo(ruta, base, nuevo);
   } catch (e) {
-    return [`${ruta}: no se pudo validar (${e.message})`];
+    return [`${ruta}: no se pudo validar (${txt(e.message)})`];
   }
 }
 

@@ -792,3 +792,100 @@ test('ronda 1 (Minor 1): parámetros de métodos, `with` y `eval` también desca
   const b = envolver('var o = { f(B) { return B; } };');
   assert.deepEqual(compararArchivo(MUN, b, alta(b)), [], 'un método con OTRO parámetro no estorba');
 });
+
+// --- Ronda de arreglo 2 (16-oct-2026) ---
+
+test('ronda 2 (Important): borrar una ficha y dar de alta otra en el mismo parche se rechaza (por id, no por forma)', () => {
+  const pista = /no se borran fichas: reporta el duplicado en pendiente/;
+  // data.js: borrar la primera mk() de window.DB y añadir una mk(9999) de 15 argumentos al final.
+  const dj = readFileSync(FIXTURE('data.js'), 'utf8');
+  const i = dj.indexOf('window.DB = [');
+  const a = dj.indexOf('  mk(', i), b = dj.indexOf('\n', dj.indexOf('),', a)) + 1;
+  const fin = i + /\r?\n\];\r?\n/.exec(dj.slice(i)).index;
+  assert.ok(i >= 0 && a > i && b > a && fin > b, 'window.DB cambió; ajustar el test');
+  const alta = `\r\n  mk(9999, "Arma de prueba", "Fabricante de prueba", "pistola", "México", "9mm Parabellum", "10+1", "1 kg", "100 mm", "Semi-auto", 2026, "dcam", "FICHA DE PRUEBA", "imagenes/arma-prueba.webp", "Ficha sintética."),`;
+  const soloAlta = dj.slice(0, fin) + alta + dj.slice(fin);
+  assert.deepEqual(compararArchivo(D, dj, soloAlta), [], 'la alta sola pasa');
+  const r1 = compararArchivo(D, dj, dj.slice(0, a) + dj.slice(b, fin) + alta + dj.slice(fin));
+  assert.equal(r1.length, 1);
+  assert.match(r1[0], pista);
+  // municiones (forma spread): borrar la 2115 y añadir la 2117.
+  const real = realMun();
+  const lineas = real.split(/(?<=\n)/);
+  const i2115 = lineas.findIndex((l) => l.startsWith('    { ...mun(2115,'));
+  assert.ok(i2115 >= 0, 'la 2115 no está en la copia congelada; ajustar el test');
+  const sin2115 = [...lineas.slice(0, i2115), ...lineas.slice(i2115 + 2)].join('');
+  const r2 = compararArchivo(MUN, real, conFichaMun(sin2115, FICHA_2117()));
+  assert.equal(r2.length, 1);
+  assert.match(r2[0], pista);
+  assert.match(r2[0], /"2115"/);
+  // un manual (clave `id`): borrar el primero de AMX_MANUALES_SEED y añadir otro con las mismas claves.
+  const PRE = 'src/data/data-precios.js';
+  const pre = readFileSync(FIXTURE('data-precios.js'), 'utf8');
+  const ini = pre.indexOf('window.AMX_MANUALES_SEED = [');
+  const m1 = pre.indexOf('  {', ini), m2 = pre.indexOf('  {', m1 + 3);
+  assert.ok(ini >= 0 && m1 > ini && m2 > m1, 'AMX_MANUALES_SEED cambió; ajustar el test');
+  const primero = pre.slice(m1, m2);
+  const otro = primero.replace(/man_dcam_2026_10_15/g, 'man_dcam_2026_10_16');
+  assert.notEqual(otro, primero);
+  assert.deepEqual(compararArchivo(PRE, pre, pre.slice(0, m1) + otro + pre.slice(m1)), [], 'un manual nuevo solo pasa');
+  const r3 = compararArchivo(PRE, pre, pre.slice(0, m1) + otro + pre.slice(m2));
+  assert.equal(r3.length, 1);
+  assert.match(r3[0], pista);
+});
+
+test('ronda 2 (Important): un id repetido en el nuevo se rechaza', () => {
+  const real = realMun();
+  const r = compararArchivo(MUN, real, conFichaMun(real, FICHA_2117()).replace('mun(2117,', 'mun(2116,'));
+  assert.equal(r.length, 1);
+  assert.match(r[0], /"2116" aparece 2 veces/);
+});
+
+test('ronda 2 (Important): reordenar fichas existentes se rechaza', () => {
+  const real = realMun();
+  const lineas = real.split(/(?<=\n)/);
+  const i15 = lineas.findIndex((l) => l.startsWith('    { ...mun(2115,'));
+  const i16 = lineas.findIndex((l) => l.startsWith('    { ...mun(2116,'));
+  assert.ok(i15 >= 0 && i16 === i15 + 2, 'la 2115/2116 cambiaron; ajustar el test');
+  const cruzado = [...lineas.slice(0, i15), ...lineas.slice(i16, i16 + 2), ...lineas.slice(i15, i15 + 2), ...lineas.slice(i16 + 2)].join('');
+  assert.match(compararArchivo(MUN, real, cruzado)[0], /orden/);
+});
+
+test('ronda 2 (Minor): el mensaje no deja que el archivo escriba renglones en el log', () => {
+  const real = realMun();
+  const r = compararArchivo(MUN, real, conFichaMun(real, FICHA_2117(', "x\\nFAKE compuertas: ✔ solo datos": 1')));
+  assert.equal(r.length, 1);
+  assert.ok(!/[\r\n\u2028\u2029\u0085]/.test(r[0]), `el mensaje tiene un salto de línea: ${JSON.stringify(r[0])}`);
+  assert.ok(r[0].includes('\\\\n') || r[0].includes('\\n'), `la clave no salió escapada: ${r[0]}`);
+  // Y largo: una clave enorme no se copia entera.
+  const larga = compararArchivo(MUN, real, conFichaMun(real, FICHA_2117(`, ${'k'.repeat(5000)}: 1`)));
+  assert.ok(larga[0].length < 900, `mensaje de ${larga[0].length} caracteres`);
+  // Un string con salto de línea (continuación) tampoco escribe renglones: hoy lo para la capa
+  // de esqueleto con un mensaje fijo; el txt() de la capa de tokens es defensa en profundidad
+  // sin camino para probarlo desde compararArchivo (un string malo nunca es dato puro).
+  const b = 'const X = [\n  mk(1, "A"),\n];\n';
+  const t = compararArchivo(D, b, b.replace('];', '  mk(2, "a\\\nFAKE: ✔ solo datos"),\n];'));
+  assert.ok(t.length > 0 && t.every((m) => !/[\r\n]/.test(m)), JSON.stringify(t));
+});
+
+test('ronda 2 (Minor): una ficha EXISTENTE que cambia de aridad o de forma no se reporta como nueva ni como duplicado', () => {
+  const real = realMun();
+  const ar = compararArchivo(MUN, real, real.replace('["Tipo", "Escopeta"]]) },', '["Tipo", "Escopeta"]], 1) },'));
+  assert.equal(ar.length, 1);
+  assert.match(ar[0], /existente/);
+  assert.doesNotMatch(ar[0], /nueva|duplicado/);
+  const fo = compararArchivo(MUN, real, real.replace(']]), priceManualId: SEP18 },', ']]) },'));
+  assert.equal(fo.length, 1);
+  assert.match(fo[0], /la ficha existente "2016" cambió de forma/);
+  assert.doesNotMatch(fo[0], /nueva|duplicado/);
+});
+
+test('ronda 2 (Minor): una ficha existente SIN id que cambia de aridad no se reporta como nueva', () => {
+  const b = 'const mk = (a, b, c) => ({ a, b, c });\nwindow.X = [\n  mk(null, "A"),\n  mk(null, "B"),\n];\n';
+  const r = compararArchivo(D, b, b.replace('mk(null, "B")', 'mk(null, "B", 3)'));
+  assert.equal(r.length, 1);
+  assert.match(r[0], /existente/);
+  assert.doesNotMatch(r[0], /nueva|duplicado/);
+  // y una ficha nueva sin id de aridad mala sí se reporta como nueva
+  assert.match(compararArchivo(D, b, b.replace('\n];', '\n  mk(null, "C", 3),\n];'))[0], /nueva/);
+});
