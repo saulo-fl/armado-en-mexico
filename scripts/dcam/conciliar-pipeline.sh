@@ -324,7 +324,9 @@ cerrar_exito() {
 
   # Mark PR ready
   PR_URL="$(gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[0].url' 2>/dev/null)"
-  if [ -n "$PR_URL" ]; then
+  if [ -n "$PR_URL" ] && [ "${2:-}" = "borrador" ]; then
+    log "  PR se queda en borrador (solucion.json sin ok:true): $PR_URL"
+  elif [ -n "$PR_URL" ]; then
     gh pr ready "$PR_URL" --repo "$GH_REPO" 2>>"$LOG" || true
     log "  PR marcado ready: $PR_URL"
   fi
@@ -581,13 +583,27 @@ resumen_seguro() {
 }
 RESUMEN="$(resumen_seguro)"
 
+# ok:true solo si solucion.json es regular, sin enlaces, razonable y trae `ok` == true.
+# Cualquier otra cosa (ok:false, ausente, ilegible) deja el PR en borrador.
+solucion_ok() {
+  local f="$WORKDIR/salida/solucion.json"
+  [ -f "$f" ] && [ ! -L "$f" ] && [ "$(stat -c%s "$f" 2>/dev/null || echo 0)" -le 1048576 ] \
+    && [ "$(jq -r '.ok' "$f" 2>/dev/null)" = "true" ]
+}
+
 # compuertas.sh ya dejó el commit de datos y referencias en $REPO (sin push).
 # La cola de éxito es la del cierre normal SIN el update-ref (push + gh pr ready
 # + borrar señal): nunca se vuelve a correr auditar.js/npm test ni se evalúan
 # los data-*.js en el host; eso ya pasó dentro del contenedor (I1).
-cerrar_exito jaula
-
-telegram "🔧 Solucionador (jaula) resolvió $FECHA: $RESUMEN. Revisa la rama $RAMA."
-log "solucionador (jaula) OK: $RESUMEN"
+if solucion_ok; then
+  cerrar_exito jaula
+  telegram "🔧 Solucionador (jaula) resolvió $FECHA: $RESUMEN. Revisa la rama $RAMA."
+  log "solucionador (jaula) OK: $RESUMEN"
+else
+  # Se commitea y empuja igual (los datos validados no se pierden), pero sin `gh pr ready`.
+  cerrar_exito jaula borrador
+  telegram "⚠️ Solucionador (jaula) resolvió en parte $FECHA: $RESUMEN. El PR queda en borrador: revisa los pendientes."
+  log "solucionador (jaula) EN PARTE (PR en borrador): $RESUMEN"
+fi
 log "paso 4 OK — pipeline completo (jaula)"
 exit 0
