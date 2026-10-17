@@ -584,11 +584,13 @@ resumen_seguro() {
 RESUMEN="$(resumen_seguro)"
 
 # ok:true solo si solucion.json es regular, sin enlaces, razonable y trae `ok` == true.
-# Cualquier otra cosa (ok:false, ausente, ilegible) deja el PR en borrador.
+# Cualquier otra cosa (ok:false, "true" como texto, ausente, ilegible) deja el PR en borrador.
+# Límite: con claves `ok` repetidas jq se queda con la última; el agente ya controla todo el
+# archivo, así que duplicar no gana nada que un `"ok":true` directo no gane.
 solucion_ok() {
   local f="$WORKDIR/salida/solucion.json"
   [ -f "$f" ] && [ ! -L "$f" ] && [ "$(stat -c%s "$f" 2>/dev/null || echo 0)" -le 1048576 ] \
-    && [ "$(jq -r '.ok' "$f" 2>/dev/null)" = "true" ]
+    && jq -e '.ok == true' "$f" >/dev/null 2>&1
 }
 
 # compuertas.sh ya dejó el commit de datos y referencias en $REPO (sin push).
