@@ -566,3 +566,127 @@ test('mapeo (#375): los rechazos y regresos «renombre» caben aunque el dcamRef
   const largo = { ...MAPEO_VACIO, regresosRechazados: [{ ...rechazoPista, motivo: 'x'.repeat(301) }] };
   assert.ok(compararArchivo(r, '{}', JSON.stringify(largo)).length > 0);
 });
+
+// --- 16-oct-2026: altas de cartuchos (data-municiones.js) ---
+// Causa raíz: las constantes de fecha/manualId de data-municiones.js (`var SEP18 = '…'`) viven
+// en el primer nivel de su IIFE, no en el tope del Program; constantesLiterales no las veía,
+// 75 fichas con `priceManualId: SEP18` dejaban de ser dato puro, window.MUNICIONES nunca
+// colapsaba a un marcador D y CUALQUIER ficha nueva (aun sin identificadores) cambiaba el
+// esqueleto. La copia congelada es un extracto literal del archivo real de main (6238b5d).
+const MUN = 'src/data/data-municiones.js';
+const realMun = () => readFileSync(FIXTURE('data-municiones.js'), 'utf8');
+// Inserta `linea` (sin fin de línea) al final de window.MUNICIONES, con el fin de línea del archivo.
+function conFichaMun(real, linea) {
+  const ini = real.indexOf('window.MUNICIONES = [');
+  assert.ok(ini >= 0, 'window.MUNICIONES = [ no está en la copia congelada; ajustar el test');
+  const m = /\r?\n {2}\];\r?\n/.exec(real.slice(ini));
+  assert.ok(m, 'cierre de window.MUNICIONES no encontrado; ajustar el test');
+  const eol = m[0].startsWith('\r') ? '\r\n' : '\n';
+  const fin = ini + m.index;
+  return real.slice(0, fin) + eol + linea + real.slice(fin);
+}
+// Ficha en el formato de las altas del 02-oct (las que dejó redactadas el solucionador el 16-oct).
+const FICHA_2117 = (resto = '') => '    { ...mun(2117, "Cartucho 12 GA · Fiocchi (7.5 24 gr)", "Fiocchi", "Italia", "12 GA", "escopeta", "Perdigón 7.5", "24 gr", "dcam", 10.69, "CART.MAR.FIOCCHI,CAL. 12 GA, 7.5, 24 GR.", '
+  + '"Cartucho de escopeta en calibre 12 GA, marca Fiocchi (Perdigón 7.5, 24 gr). Precio de referencia por cartucho del inventario DCAM (16-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "24 gr"], ["Tipo", "Escopeta"]])' + resto + ' },';
+
+test('altas (a): con la copia congelada de data-municiones.js, una ficha nueva en el formato real pasa (con su historial)', () => {
+  const real = realMun();
+  const conAlta = conFichaMun(real, FICHA_2117());
+  assert.deepEqual(compararArchivo(MUN, real, conAlta), []);
+  // …y con su primer registro de historial, como lo escribe la conciliación.
+  const ancla = /( {4}2116: \[[^\n]*\],)(\r?\n)/.exec(conAlta);
+  assert.ok(ancla, 'historial de la 2116 no encontrado; ajustar el test');
+  const conHist = conAlta.replace(ancla[0], `${ancla[1]}${ancla[2]}    2117: [{ manualId: 'man_mun_dcam_2026_10_16', price: '$10.69 MXN', date: '2026-10-16', qty: 3000 }],${ancla[2]}`);
+  assert.deepEqual(compararArchivo(MUN, real, conHist), []);
+});
+
+test('altas (b): la misma ficha con un identificador no permitido se rechaza', () => {
+  const real = realMun();
+  for (const resto of [
+    ', priceManualId: window.x', //   expresión de miembro
+    ', priceManualId: _mFmt', //      nombre del archivo que NO es una constante literal (es una función)
+    ', priceManualId: mun', //        ídem, el propio constructor
+    ', priceManualId: SEP25', //      constante literal de la IIFE: en una ficha NUEVA tampoco (un alta no la necesita)
+    ', priceManualId: undefined',
+  ]) {
+    assert.ok(compararArchivo(MUN, real, conFichaMun(real, FICHA_2117(resto))).length > 0, resto);
+  }
+});
+
+test('altas (c): una ficha nueva con una llamada o una expresión se rechaza', () => {
+  const real = realMun();
+  for (const [de, a] of [
+    ['10.69,', '10.69 + 1,'],
+    ['10.69,', '-(10.69),'],
+    ['"dcam",', '"dc" + "am",'],
+    ['"Fiocchi",', 'fetch("https://x.y"),'],
+    ['"Fiocchi",', '_caja(1),'],
+    ['{ ...mun(', '{ ...window.x, ...mun('],
+  ]) {
+    const linea = FICHA_2117().replace(de, a);
+    assert.notEqual(linea, FICHA_2117(), `el reemplazo ${de} no aplicó`);
+    assert.ok(compararArchivo(MUN, real, conFichaMun(real, linea)).length > 0, a);
+  }
+  assert.ok(compararArchivo(MUN, real, conFichaMun(real, FICHA_2117(', img: _caja(2117)'))).length > 0, 'img: _caja(…)');
+  assert.ok(compararArchivo(MUN, real, conFichaMun(real, '    mun(2117, "x"()),')).length > 0, 'paréntesis sobre un literal');
+});
+
+test('altas (d): borrar una ficha o cambiar la forma de una existente se sigue rechazando; cambiar un valor sigue pasando', () => {
+  const real = realMun();
+  const lineas = real.split(/(?<=\n)/);
+  const i2116 = lineas.findIndex((l) => l.startsWith('    { ...mun(2116,'));
+  assert.ok(i2116 >= 0, 'la 2116 no está en la copia congelada; ajustar el test');
+  // borrar la 2116 (dos renglones)
+  const sin2116 = [...lineas.slice(0, i2116), ...lineas.slice(i2116 + 2)].join('');
+  assert.ok(compararArchivo(MUN, real, sin2116).length > 0, 'borrar la 2116');
+  // { ...mun(…) } -> mun(…)
+  const desenvuelta = [...lineas.slice(0, i2116), lineas[i2116].replace('{ ...mun(2116,', 'mun(2116,'), lineas[i2116 + 1].replace(/\) \},(\r?\n)$/, '),$1'), ...lineas.slice(i2116 + 2)].join('');
+  assert.notEqual(desenvuelta, real);
+  assert.ok(compararArchivo(MUN, real, desenvuelta).length > 0, '{ ...mun } -> mun');
+  // quitarle a la 2016 su `priceManualId: SEP18`
+  assert.ok(real.includes(']]), priceManualId: SEP18 },'), 'la 2016 cambió; ajustar el test');
+  assert.ok(compararArchivo(MUN, real, real.replace(']]), priceManualId: SEP18 },', ']]) },')).length > 0, 'quitar priceManualId de la 2016');
+  // una ficha nueva con una forma que ninguna del arreglo tiene (aunque sea dato puro)
+  for (const linea of [FICHA_2117(', extra: 1'), '    "suelto",', '    [2117, "x"],', '    { id: 2117 },']) {
+    assert.ok(compararArchivo(MUN, real, conFichaMun(real, linea)).length > 0, linea);
+  }
+  // cambiar el precio de una ficha existente sigue pasando (no se endurece lo que ya pasaba)
+  assert.ok(real.includes('"dcam", 9.94, "CART. CAL. 12 EXCOPESA'), 'precio de la 2116 cambió; ajustar el test');
+  assert.deepEqual(compararArchivo(MUN, real, real.replace('"dcam", 9.94, "CART. CAL. 12 EXCOPESA', '"dcam", 9.99, "CART. CAL. 12 EXCOPESA')), []);
+});
+
+test('constantes de la IIFE: `var`/`const` literal del primer nivel cuenta como dato puro; cualquier otra forma de tocarla no', () => {
+  const envolver = (cuerpo, extra = '') => `(function () {\n  ${cuerpo}\n  window.L = [\n    { p: 1, q: A },\n  ];\n  ${extra}\n})();\n`;
+  const alta = (b) => b.replace('  ];', '    { p: 2, q: "y" },\n  ];');
+  for (const decl of ["var A = 'x';", "const A = 'x';", "var Z = 1, A = 'x';"]) {
+    const b = envolver(decl);
+    assert.deepEqual(compararArchivo(MUN, b, alta(b)), [], decl);
+  }
+  for (const [nombre, b] of [
+    ['reasignada', envolver("var A = 'x';", 'A = location.hash;')],
+    ['incrementada', envolver("var A = 'x';", 'A++;')],
+    ['desestructuración de arreglo', envolver("var A = 'x';", '[A] = [location.hash];')],
+    ['desestructuración de objeto', envolver("var A = 'x';", '({ k: A } = location);')],
+    ['blanco de for-of', envolver("var A = 'x';", 'for (A of [location.hash]) {}')],
+    ['blanco de for-in', envolver("var A = 'x';", 'for (A in location) {}')],
+    ['declarada dos veces', envolver("var A = 'x';", 'var A = location.hash;')],
+    ['let', envolver("let A = 'x';")],
+    ['no literal', envolver('var A = location.hash;')],
+    ['función homónima', envolver("var A = 'x';", 'function A() {}')],
+    ['clase homónima (anidada)', envolver("var A = 'x';", 'function g() { class A {} return A; }')],
+    ['parámetro desestructurado', envolver("var A = 'x';", 'function f({ A }) { return A; }')],
+    ['parámetro de catch', envolver("var A = 'x';", 'try { f(); } catch (A) { g(A); }')],
+    ['usada fuera de la IIFE', envolver("var A = 'x';") + 'window.M = [A];\n'],
+    ['var del tope (global: otro script la reasigna)', "var A = 'x';\nwindow.L = [\n    { p: 1, q: A },\n  ];\n"],
+  ]) {
+    assert.ok(compararArchivo(MUN, b, alta(b)).length > 0, nombre);
+  }
+});
+
+test('forma de las fichas: con la copia congelada de data.js, borrar una ficha de window.DB ahora se rechaza', () => {
+  const real = readFileSync(FIXTURE('data.js'), 'utf8');
+  const i = real.indexOf('window.DB = [');
+  const a = real.indexOf('  mk(', i), b = real.indexOf('\n', real.indexOf('),', a)) + 1;
+  assert.ok(i >= 0 && a > i && b > a, 'window.DB cambió; ajustar el test');
+  assert.ok(compararArchivo(D, real, real.slice(0, a) + real.slice(b)).length > 0);
+});

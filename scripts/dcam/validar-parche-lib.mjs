@@ -189,46 +189,78 @@ function revisarToken(src, toks, i, ruta, callables) {
 // antes se colaba un `let` reasignado) y, además, descarta cualquier nombre que vuelva a
 // aparecer en el archivo como parámetro SIMPLE (Identifier, con default o rest) de una
 // función, declarador `let`/`var` con id Identifier (anidado o no), o blanco de una
-// asignación/incremento. `marcarParam` NO baja a patrones de desestructuración
-// (ObjectPattern/ArrayPattern en params o declaradores), ni a parámetros de `catch`, ni a
-// métodos de objeto/clase — y no hace falta que lo haga: para colarse por ahí un parche
-// tendría que escribir sintaxis que NO existe en la base (un `{`/`[` nuevo en un parámetro,
-// un `catch` nuevo, un método nuevo), y esa sintaxis nueva ya reprueba antes de llegar
-// aquí: por la capa de tokens (identificador o puntuación no vistos en base) o por la de
-// esqueleto (la estructura del Program cambió). No resuelve ámbitos de verdad (no hace
+// asignación/incremento (el 16-oct se amplió a desestructuración, `catch` y nombres de
+// función/clase: ver abajo). Un parche no puede AÑADIR esa sintaxis (un `{`/`[` nuevo en un
+// parámetro, un `catch` nuevo, un método nuevo): reprueba antes de llegar aquí, por la capa
+// de tokens (identificador o puntuación no vistos en base) o por la de esqueleto (la
+// estructura del Program cambió). No resuelve ámbitos de verdad (no hace
 // falta: es barato y conservador) — si el nombre se toca de cualquier otra forma, en ESE
 // punto puede no ser el literal de arriba, así que nunca se trata como dato puro.
+// 16-oct-2026 (altas de cartuchos): data-municiones.js declara sus constantes
+// (`var SEP18 = 'man_mun_dcam_2026_09_18', …`) en el primer nivel de su IIFE, no en el tope;
+// por eso no se veía ninguna, 75 fichas con `priceManualId: SEP18` no eran dato puro y
+// window.MUNICIONES nunca colapsaba: cualquier alta cambiaba el esqueleto. Ahora cuenta
+// también el primer nivel del cuerpo de una IIFE de tope `(function () { … })();`, con
+// `const` o `var` (local: solo el código de ESTE archivo puede tocarla; un `var` del tope,
+// en cambio, es una propiedad global que cualquier otro script reasigna). Al admitir `var`,
+// las otras formas de tocar un nombre dejan de ser imposibles (con `const` tronaban), así
+// que ahora se descarta todo nombre que: se declare otra vez en cualquier lado (declarador,
+// parámetro —desestructurado o no—, `catch`, función o clase homónima); sea blanco de una
+// asignación (también desestructurada), de `++`/`--` o de un for-in/for-of; o, si viene de
+// una IIFE, aparezca fuera del rango de ESA IIFE (afuera es otro nombre: el global).
 function constantesLiterales(programa) {
   const esLiteral = (t) => t === 'StringLiteral' || t === 'NumericLiteral' || t === 'NullLiteral' || t === 'BooleanLiteral';
-  const declaradoresTope = new Set();
-  const nombres = new Set();
-  for (const st of programa.body) {
-    if (st.type !== 'VariableDeclaration' || st.kind !== 'const') continue;
+  const candidatos = new Map(); // nombre -> [desde, hasta] (rango del archivo donde vale)
+  const declarar = (st, kinds, desde, hasta) => {
+    if (st.type !== 'VariableDeclaration' || !kinds.includes(st.kind)) return;
     for (const d of st.declarations) {
-      declaradoresTope.add(d);
-      if (d.id.type === 'Identifier' && d.init && esLiteral(d.init.type)) nombres.add(d.id.name);
+      if (d.id.type === 'Identifier' && d.init && esLiteral(d.init.type)) candidatos.set(d.id.name, [desde, hasta]);
+    }
+  };
+  for (const st of programa.body) {
+    declarar(st, ['const'], -Infinity, Infinity);
+    const e = st.type === 'ExpressionStatement' ? st.expression : null;
+    if (e && e.type === 'CallExpression' && e.arguments.length === 0 && e.callee.type === 'FunctionExpression' && !e.callee.async && !e.callee.generator) {
+      for (const s of e.callee.body.body) declarar(s, ['const', 'var'], e.start, e.end);
     }
   }
 
-  const inseguros = new Set();
-  const marcarParam = (p) => {
-    if (!p) return;
-    if (p.type === 'Identifier') inseguros.add(p.name);
-    else if (p.type === 'AssignmentPattern') marcarParam(p.left);
-    else if (p.type === 'RestElement') marcarParam(p.argument);
+  // Identificadores ligados por un patrón (parámetro, declarador, blanco de asignación).
+  const nombresDe = (p, out = []) => {
+    if (!p) return out;
+    if (p.type === 'Identifier') out.push(p.name);
+    else if (p.type === 'AssignmentPattern') nombresDe(p.left, out);
+    else if (p.type === 'RestElement') nombresDe(p.argument, out);
+    else if (p.type === 'ArrayPattern') p.elements.forEach((el) => nombresDe(el, out));
+    else if (p.type === 'ObjectPattern') p.properties.forEach((pr) => nombresDe(pr.type === 'RestElement' ? pr : pr.value, out));
+    return out;
   };
+  const declaraciones = new Map(); // nombre -> cuántas veces se liga en el archivo
+  const inseguros = new Set();
+  const ligar = (nombres) => nombres.forEach((n) => declaraciones.set(n, (declaraciones.get(n) || 0) + 1));
   (function walk(n) {
     if (!n || typeof n !== 'object') return;
     if (Array.isArray(n)) { n.forEach(walk); return; }
     if (typeof n.type !== 'string') return;
-    if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') (n.params || []).forEach(marcarParam);
-    if (n.type === 'VariableDeclarator' && !declaradoresTope.has(n) && n.id.type === 'Identifier') inseguros.add(n.id.name);
-    if (n.type === 'AssignmentExpression' && n.left.type === 'Identifier') inseguros.add(n.left.name);
-    if (n.type === 'UpdateExpression' && n.argument.type === 'Identifier') inseguros.add(n.argument.name);
+    if (n.type === 'FunctionDeclaration' || n.type === 'FunctionExpression' || n.type === 'ArrowFunctionExpression') {
+      ligar(nombresDe(n.id));
+      (n.params || []).forEach((p) => ligar(nombresDe(p)));
+    }
+    if (n.type === 'ClassDeclaration' || n.type === 'ClassExpression') ligar(nombresDe(n.id));
+    if (n.type === 'VariableDeclarator') ligar(nombresDe(n.id));
+    if (n.type === 'CatchClause') ligar(nombresDe(n.param));
+    if (n.type === 'AssignmentExpression') nombresDe(n.left).forEach((x) => inseguros.add(x));
+    if (n.type === 'UpdateExpression') nombresDe(n.argument).forEach((x) => inseguros.add(x));
+    if ((n.type === 'ForInStatement' || n.type === 'ForOfStatement') && n.left.type !== 'VariableDeclaration') nombresDe(n.left).forEach((x) => inseguros.add(x));
+    if (n.type === 'Identifier' && candidatos.has(n.name)) {
+      const [desde, hasta] = candidatos.get(n.name);
+      if (n.start < desde || n.end > hasta) inseguros.add(n.name);
+    }
     for (const k of VISITOR_KEYS[n.type] || []) walk(n[k]);
   })(programa);
 
-  for (const n of inseguros) nombres.delete(n);
+  const nombres = new Set();
+  for (const nombre of candidatos.keys()) if (declaraciones.get(nombre) === 1 && !inseguros.has(nombre)) nombres.add(nombre);
   return nombres;
 }
 
@@ -293,15 +325,21 @@ const IGNORAR_CAMPOS = new Set(['type', 'start', 'end', 'loc', 'range', 'extra',
 // porque los únicos tokens nuevos (`[`/`]`) son puntuación permitida. Serializar TODO campo
 // escalar propio, genérico por `Object.keys` menos la lista de ignorados, cierra esa familia
 // entera de una vez (no solo `computed`) sin tener que enumerar cada caso a mano.
-export function serializarEsqueleto(node, src, callables, constantes) {
+// `formas` (opcional): por cada ARREGLO que colapsa a "D", en orden de recorrido, la lista de
+// formas de sus elementos (ver formaDeFicha) — para que compararJS exija que las fichas que
+// ya existían sigan ahí con su misma forma, y que una nueva tenga la forma de alguna de ellas.
+export function serializarEsqueleto(node, src, callables, constantes, formas) {
   if (node == null) return 'null';
-  if (Array.isArray(node)) return `[${node.map((n) => serializarEsqueleto(n, src, callables, constantes)).join(',')}]`;
+  if (Array.isArray(node)) return `[${node.map((n) => serializarEsqueleto(n, src, callables, constantes, formas)).join(',')}]`;
   if (typeof node.type !== 'string') return 'null'; // campos no-nodo (p. ej. un booleano suelto)
 
   // Marcador con el TIPO de nodo (Minor #2): sin esto, `[1, 2]` sustituido por `mk(1, 2)` o
   // por `{ length: 9 }` salían con el mismo "D" — un dato puro de otra FORMA ya no es
   // intercambiable en el esqueleto aunque ambos sean "puros".
-  if (SUSTITUIBLES.has(node.type) && esDatoPuro(node, src, callables, constantes)) return 'D:' + node.type;
+  if (SUSTITUIBLES.has(node.type) && esDatoPuro(node, src, callables, constantes)) {
+    if (formas && node.type === 'ArrayExpression') formas.push(node.elements.map(formaDeFicha));
+    return 'D:' + node.type;
+  }
 
   const vk = VISITOR_KEYS[node.type] || [];
   const vkSet = new Set(vk);
@@ -312,11 +350,38 @@ export function serializarEsqueleto(node, src, callables, constantes) {
     // pasar (verificado contra los 4 archivos reales), pero por si acaso se recorre igual
     // en vez de ignorarlo en silencio.
     const esNodo = v && typeof v === 'object' && (typeof v.type === 'string' || (Array.isArray(v) && v.some((x) => x && typeof x.type === 'string')));
-    partes.push(`${campo}=${esNodo ? serializarEsqueleto(v, src, callables, constantes) : JSON.stringify(v)}`);
+    partes.push(`${campo}=${esNodo ? serializarEsqueleto(v, src, callables, constantes, formas) : JSON.stringify(v)}`);
   }
 
-  for (const campo of vk) partes.push(serializarEsqueleto(node[campo], src, callables, constantes));
+  for (const campo of vk) partes.push(serializarEsqueleto(node[campo], src, callables, constantes, formas));
   return partes.join('\u0001');
+}
+
+// Forma de un elemento de un arreglo de datos puros (ya validado por esDatoPuro): qué
+// constructor usa y qué claves lleva, sin los valores. `{ ...mun(…), priceManualId: SEP18 }`
+// -> `O{...C:mun,priceManualId}`; `mun(…)` -> `C:mun`; un literal o una constante -> `L`.
+function formaDeFicha(el) {
+  if (el.type === 'CallExpression') return 'C:' + el.callee.name;
+  if (el.type === 'ArrayExpression') return 'A';
+  if (el.type !== 'ObjectExpression') return 'L';
+  const clave = (k) => (k.type === 'Identifier' ? k.name : String(k.value));
+  return `O{${el.properties.map((p) => (p.type === 'SpreadElement' ? '...' + formaDeFicha(p.argument) : clave(p.key))).join(',')}}`;
+}
+
+// 16-oct-2026: al colapsar window.MUNICIONES a "D" (ver constantesLiterales), el esqueleto
+// ya no ve el número ni la forma de sus fichas. Sin esto, borrar una ficha o cambiarle la
+// forma pasaría — antes lo rechazaba el esqueleto (por accidente: el arreglo no colapsaba).
+// Regla, por arreglo: las fichas de la base siguen ahí, en orden y con su forma (son una
+// subsecuencia de las del nuevo), y cada ficha nueva tiene la forma de alguna de la base.
+// Cambiar VALORES sigue igual que antes (lo vigila la capa de tokens).
+function problemaDeFichas(base, nuevo) {
+  const conocidas = new Set(base);
+  let i = 0;
+  for (const f of nuevo) {
+    if (i < base.length && f === base[i]) i++;
+    else if (!conocidas.has(f)) return `una ficha nueva tiene una forma que ninguna del arreglo tiene (${f})`;
+  }
+  return i === base.length ? null : 'se borró una ficha o cambió la forma de una existente';
 }
 
 function compararJS(ruta, base, nuevo) {
@@ -331,9 +396,15 @@ function compararJS(ruta, base, nuevo) {
   }
 
   const callables = CALLABLES_POR_ARCHIVO[ruta] || new Set();
-  const esqB = serializarEsqueleto(astBase.program, base, callables, constantesLiterales(astBase.program));
-  const esqN = serializarEsqueleto(astNuevo.program, nuevo, callables, constantesLiterales(astNuevo.program));
-  if (esqB !== esqN) return [`${ruta}: la estructura del código cambió`];
+  const formasB = [], formasN = [];
+  const esqB = serializarEsqueleto(astBase.program, base, callables, constantesLiterales(astBase.program), formasB);
+  const esqN = serializarEsqueleto(astNuevo.program, nuevo, callables, constantesLiterales(astNuevo.program), formasN);
+  if (esqB !== esqN || formasB.length !== formasN.length) return [`${ruta}: la estructura del código cambió`];
+  // Esqueletos iguales => los mismos arreglos colapsados, en el mismo orden.
+  for (let k = 0; k < formasB.length; k++) {
+    const p = problemaDeFichas(formasB[k], formasN[k]);
+    if (p) return [`${ruta}: ${p}`];
+  }
 
   const toksBase = astBase.tokens.filter((t) => t.loc && tipo(t) !== 'eof');
   const toksNuevo = astNuevo.tokens.filter((t) => t.loc && tipo(t) !== 'eof');
