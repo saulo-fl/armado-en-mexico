@@ -84,8 +84,12 @@ Lo que sobrevive es alta nueva.
 ### C3. Ficha duplicada (25-sep)
 - **Síntoma**: dos fichas con el mismo texto DCAM.
 - **Causa**: un alta creada por un agente sin buscar en el catálogo (2104 = 2074).
-- **Arreglo**: mueve el historial al original, borra el `mun()`/`mk()` duplicado y
-  su línea de historial (no hay bandera «oculta»). Anótalo en `correcciones`.
+- **Arreglo**: **no la borras** (decisión de Saulo, 16-oct-2026; el validador del
+  host rechaza cualquier ficha borrada: «no se borran fichas: reporta el duplicado en
+  pendiente»). Pon `ok: false` y en `pendiente` las dos fichas (ids y `dcamRef`), la
+  evidencia de que son el mismo producto y la propuesta de fusión (cuál queda y qué
+  historial se mueve). La fusión la hace Saulo: necesita redirección 301, ligas y
+  resembrar D1.
 
 ### C4. Variante representativa equivocada (29/30-sep)
 - **Síntoma**: salto grande en una ficha con varios renglones (acabados).

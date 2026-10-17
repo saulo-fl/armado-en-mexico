@@ -690,3 +690,105 @@ test('forma de las fichas: con la copia congelada de data.js, borrar una ficha d
   assert.ok(i >= 0 && a > i && b > a, 'window.DB cambió; ajustar el test');
   assert.ok(compararArchivo(D, real, real.slice(0, a) + real.slice(b)).length > 0);
 });
+
+// --- Ronda de arreglo 1 (16-oct-2026) ---
+
+test('ronda 1 (Important 1): borrar una ficha se rechaza en los 4 archivos y el mensaje dice qué hacer', () => {
+  const pista = /no se borran fichas: reporta el duplicado en pendiente/;
+  const real = realMun();
+  const lineas = real.split(/(?<=\n)/);
+  const i2116 = lineas.findIndex((l) => l.startsWith('    { ...mun(2116,'));
+  assert.ok(i2116 >= 0, 'la 2116 no está en la copia congelada; ajustar el test');
+  const r1 = compararArchivo(MUN, real, [...lineas.slice(0, i2116), ...lineas.slice(i2116 + 2)].join(''));
+  assert.equal(r1.length, 1);
+  assert.match(r1[0], pista);
+  assert.match(r1[0], /se borró una ficha \(14 → 13\)/);
+  const dj = readFileSync(FIXTURE('data.js'), 'utf8');
+  const i = dj.indexOf('window.DB = [');
+  const a = dj.indexOf('  mk(', i), b = dj.indexOf('\n', dj.indexOf('),', a)) + 1;
+  assert.ok(i >= 0 && a > i && b > a, 'window.DB cambió; ajustar el test');
+  assert.match(compararArchivo(D, dj, dj.slice(0, a) + dj.slice(b))[0], pista);
+  const ACC = 'src/data/data-accesorios.js';
+  const acc = readFileSync(FIXTURE('data-accesorios.js'), 'utf8');
+  const a2 = acc.indexOf('  amx(102, '), b2 = acc.indexOf('\n', acc.indexOf('),', a2)) + 1;
+  assert.ok(a2 > 0 && b2 > a2, 'la amx(102) cambió; ajustar el test');
+  assert.match(compararArchivo(ACC, acc, acc.slice(0, a2) + acc.slice(b2))[0], pista);
+  const PRE = 'src/data/data-precios.js';
+  const pre = readFileSync(FIXTURE('data-precios.js'), 'utf8');
+  const a3 = pre.indexOf('  {', pre.indexOf('window.AMX_MANUALES_SEED = [')), b3 = pre.indexOf('  },', a3) + 4 + (pre[pre.indexOf('  },', a3) + 4] === '\r' ? 2 : 1);
+  assert.ok(a3 > 0 && b3 > a3, 'AMX_MANUALES_SEED cambió; ajustar el test');
+  assert.match(compararArchivo(PRE, pre, pre.slice(0, a3) + pre.slice(b3))[0], pista);
+});
+
+// Edita el historial `id: [ … ],` de un renglón (registros `{ … }` sin llaves anidadas).
+function editarHistorial(real, id, fn) {
+  const m = new RegExp(`^( *${id}: \\[)(.*)(\\],\\r?)$`, 'm').exec(real);
+  assert.ok(m, `historial de ${id} no encontrado; ajustar el test`);
+  const recs = m[2].match(/\{[^{}]*\}/g) || [];
+  return real.replace(m[0], m[1] + fn(recs).join(', ') + m[3]);
+}
+
+test('ronda 1 (Minor 4): corregir historiales sigue pasando — borrar, mover y vaciar registros (municiones y precios)', () => {
+  const casos = [
+    [MUN, realMun(), 2112, 2113],
+    ['src/data/data-precios.js', readFileSync(FIXTURE('data-precios.js'), 'utf8'), 1, 4],
+  ];
+  for (const [ruta, real, de, a] of casos) {
+    let movido;
+    const borrar = editarHistorial(real, de, (r) => r.slice(0, -1));
+    assert.notEqual(borrar, real);
+    assert.deepEqual(compararArchivo(ruta, real, borrar), [], `${ruta}: borrar un registro de ${de}`);
+    const sinUno = editarHistorial(real, de, (r) => { movido = r[r.length - 1]; return r.slice(0, -1); });
+    const mover = editarHistorial(sinUno, a, (r) => [...r, movido]);
+    assert.deepEqual(compararArchivo(ruta, real, mover), [], `${ruta}: mover un registro de ${de} a ${a}`);
+    const vaciar = editarHistorial(real, de, () => []);
+    assert.deepEqual(compararArchivo(ruta, real, vaciar), [], `${ruta}: vaciar el historial de ${de}`);
+  }
+});
+
+test('ronda 1 (Minor 2): una ficha nueva con constructor lleva el número de argumentos de las existentes', () => {
+  const real = realMun();
+  const arg = /número de argumentos/;
+  const corta = '    mun(2117, "Cartucho 12 GA · Fiocchi (7.5 24 gr)"),';
+  assert.match(compararArchivo(MUN, real, conFichaMun(real, corta))[0], arg);
+  const sinSpecs = FICHA_2117().replace(', [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "24 gr"], ["Tipo", "Escopeta"]])', ')');
+  assert.notEqual(sinSpecs, FICHA_2117());
+  assert.match(compararArchivo(MUN, real, conFichaMun(real, sinSpecs))[0], arg, '{ ...mun(13 argumentos) }');
+  const deMas = FICHA_2117().replace('["Tipo", "Escopeta"]])', '["Tipo", "Escopeta"]], 1)');
+  assert.match(compararArchivo(MUN, real, conFichaMun(real, deMas))[0], arg, '{ ...mun(15 argumentos) }');
+  // Metida ANTES de una existente de su misma forma (no «ocupa» el lugar de la existente).
+  const antes = real.replace('    { ...mun(2116,', '    { ...mun(2117, "x") },\n    { ...mun(2116,');
+  assert.notEqual(antes, real);
+  assert.ok(compararArchivo(MUN, real, antes).length > 0, 'aridad mala antes de la 2116');
+  // Accesorios: amx() con menos argumentos.
+  const ACC = 'src/data/data-accesorios.js';
+  const acc = readFileSync(FIXTURE('data-accesorios.js'), 'utf8');
+  assert.match(compararArchivo(ACC, acc, acc.replace('  amx(102, ', "  amx(9999, 'Nuevo', 'M'),\n  amx(102, "))[0], arg);
+  // La ficha completa (14 argumentos) sigue pasando.
+  assert.deepEqual(compararArchivo(MUN, real, conFichaMun(real, FICHA_2117())), []);
+});
+
+test('ronda 1 (Minor 3): el rechazo por forma nueva dice qué formas acepta el arreglo', () => {
+  const real = realMun();
+  const r = compararArchivo(MUN, real, conFichaMun(real, FICHA_2117(', extra: 1')));
+  assert.equal(r.length, 1);
+  assert.match(r[0], /usa una de: /);
+  for (const f of ['C:mun', 'O{...C:mun}', 'O{...C:mun,priceManualId}']) assert.ok(r[0].includes(f), `${f} en «${r[0]}»`);
+});
+
+test('ronda 1 (Minor 1): parámetros de métodos, `with` y `eval` también descartan una constante de la IIFE', () => {
+  const envolver = (extra) => `(function () {\n  var A = 'x';\n  window.L = [\n    { p: 1, q: A },\n  ];\n  ${extra}\n})();\n`;
+  const alta = (b) => b.replace('  ];', '    { p: 2, q: "y" },\n  ];');
+  for (const [nombre, extra] of [
+    ['parámetro de método de objeto', 'var o = { f(A) { return A; } };'],
+    ['parámetro de método de clase', 'var K = class { m(A) { return A; } };'],
+    ['parámetro de método privado', 'var K2 = class { #m(A) { return A; } };'],
+    ['with', 'with (location) { g(A); }'],
+    ['eval', 'eval(location.hash);'],
+  ]) {
+    const b = envolver(extra);
+    assert.ok(compararArchivo(MUN, b, alta(b)).length > 0, nombre);
+  }
+  const b = envolver('var o = { f(B) { return B; } };');
+  assert.deepEqual(compararArchivo(MUN, b, alta(b)), [], 'un método con OTRO parámetro no estorba');
+});
