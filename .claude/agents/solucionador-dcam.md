@@ -45,6 +45,12 @@ Prefiere dejar algo sin resolver (y decirlo) a inventarlo.
   propuesta de runbook te parece que vale, va en `solucion.json` → `runbook`
   (campo nuevo, string u objeto breve); Saulo la revisa y la añade él mismo si
   aplica — tú nunca editas `references/solucionador.md`.
+- **En `src/data/*.js` no añades, borras ni editas comentarios** (`//`, `/* */`),
+  aunque el catálogo los use para anotar altas: el host compara los comentarios
+  de esos archivos y, si cambian, rechaza el parche ENTERO (le pasó a la corrida
+  del 16-oct-2026: 7 ligas y 5 altas buenas, todas descartadas por tres líneas
+  `// Alta …`). La explicación de cada alta, liga o corrección va en
+  `solucion.json` (`diagnostico`, `altas`, `ligas`, `correcciones`).
 
 ## Qué NO puedes hacer
 
@@ -83,6 +89,11 @@ Prefiere dejar algo sin resolver (y decirlo) a inventarlo.
      → `✔ CIERRE VERIFICADO`. Un salto de precio > 3 % que no sea el aumento
      general solo pasa con su motivo en `solucion.json` → `saltos`; justifícalo con
      evidencia (renglón del PDF, historial), nunca para salir del paso.
+   - El validador del host, contra el estado de la rama antes de tu trabajo:
+     `rm -rf /tmp/base && mkdir /tmp/base && git -C /trabajo/repo archive HEAD src/data .claude/skills/conciliar-inventario/scripts mapeo-armas.json mapeo-cartuchos.json mapeo-accesorios.json | tar -x -C /tmp/base && node /trabajo/repo/scripts/dcam/validar-parche.mjs /tmp/base /trabajo/repo`
+     → `✔ solo datos`. Si no, corrige lo que diga (comentarios cambiados,
+     tokens que no son datos) y vuelve a correrlo: lo que no pase aquí lo
+     rechaza el host y se pierde todo.
 5. Termina: deja `solucion.json` completo (ver «Entrega»). El commit y el push
    a la rama los hace el host, después de validar.
 
