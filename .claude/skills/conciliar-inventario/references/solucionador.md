@@ -60,6 +60,12 @@ Lo que sobrevive es alta nueva.
 
 ## C. Fallos registrados
 
+> **Límite del host (accesorios):** en `data-accesorios.js` los registros de historial
+> escritos con constantes (`_h(S25, 613.96, S25d, 4)`) no se pueden borrar, mover ni
+> vaciar: el validador rechaza el parche entero. Si una receta de abajo (C2, C11, C13)
+> te pide corregir uno de esos, no lo toques: `ok: false` y la corrección en `pendiente`.
+> Municiones, armas y los registros literales `{ manualId: … }` sí se corrigen.
+
 ### C1. Factor espurio en el paso 1 (02-oct-2026)
 - **Síntoma**: `⚠ factor fuera de rango` en el log; decenas de sinFicha; precios
   de cartuchos +10–15 %.
@@ -84,8 +90,12 @@ Lo que sobrevive es alta nueva.
 ### C3. Ficha duplicada (25-sep)
 - **Síntoma**: dos fichas con el mismo texto DCAM.
 - **Causa**: un alta creada por un agente sin buscar en el catálogo (2104 = 2074).
-- **Arreglo**: mueve el historial al original, borra el `mun()`/`mk()` duplicado y
-  su línea de historial (no hay bandera «oculta»). Anótalo en `correcciones`.
+- **Arreglo**: **no la borras** (decisión de Saulo, 16-oct-2026; el validador del
+  host rechaza cualquier ficha borrada: «no se borran fichas: reporta el duplicado en
+  pendiente»). Pon `ok: false` y en `pendiente` las dos fichas (ids y `dcamRef`), la
+  evidencia de que son el mismo producto y la propuesta de fusión (cuál queda y qué
+  historial se mueve). La fusión la hace Saulo: necesita redirección 301, ligas y
+  resembrar D1.
 
 ### C4. Variante representativa equivocada (29/30-sep)
 - **Síntoma**: salto grande en una ficha con varios renglones (acabados).
@@ -132,7 +142,8 @@ Lo que sobrevive es alta nueva.
 ## D. Altas: cómo crear una ficha
 
 - **Armas**: `mk(<siguiente id>, …)` antes del `];` de `window.DB` (data.js), con
-  capacidad/peso/longitud del modelo hermano si existe (dilo en un comentario),
+  capacidad/peso/longitud del modelo hermano si existe (dilo en `solucion.json` →
+  `altas[].motivo`; en `src/data` no se escriben comentarios),
   `avail` por calibre (9mm/.40/5.56/7.62 = ejército; .380 cañón largo = seguridad;
   resto civil), imagen `''`. «Riel Picatinny» en el texto → `ARMAS_CON_RIEL`.
 - **Cartuchos**: `{ ...mun(<id>, …) }` en data-municiones.js con el formato de sus

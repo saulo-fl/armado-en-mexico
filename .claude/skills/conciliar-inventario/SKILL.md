@@ -132,7 +132,8 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
 - **(16-sep-2026) Tramo de los cargadores.** Al dar de alta un cargador, añade su entrada en
   `ACC_TRAMO` (`data-accesorios.js`): `[tipo de arma, calibre]` con los valores de
   `ACC_TRAMO_ARMAS` y `ACC_TRAMO_CALIBRES` (un calibre nuevo se añade ahí, en su orden). Si el
-  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente junto a la tabla.
+  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente en el motivo del
+  alta (`solucion.json` → `altas[].motivo`), no en un comentario de `src/data`.
   `auditar.js` falla si falta.
 
 ## 4) Verificar (obligatorio antes de commitear)
@@ -272,7 +273,8 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   - Erratas: el accesorio 104 y el OTCA de la Retay 106 NO se marcan.
   - **Duplicado DCAM del mismo cartucho** (2025/2029: mismo calibre, bala, grano y precio al
     centavo, distinta redacción) → se fusiona. Queda la ficha con la bala correcta y la otra
-    desaparece, con las existencias sumadas.
+    desaparece, con las existencias sumadas. La fusión la hace Saulo (301, ligas, D1); el
+    solucionador solo la propone en `pendiente` con `ok: false` (runbook C3).
   - **La URL de una munición sale de calibre+marca+bala+grano**: corregir la bala (Cor-Bon
     2026 FMJ → JHP) cambia la URL y la vieja da 404 (no hay `_redirects`). Si una ficha de id
     menor ya ocupa el slug, sale `-2`. Antes de tocar bala o grano, calcula las URLs de las

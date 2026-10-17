@@ -37,7 +37,14 @@ Prefiere dejar algo sin resolver (y decirlo) a inventarlo.
   renglón conocido que no va a ninguna ficha (p. ej. un renglón a $0).
 - **Fichas nuevas** (armas, cartuchos, accesorios) siguiendo los precedentes del
   catálogo, y su liga.
-- Corregir historiales mal atribuidos, duplicados y conflictos de merge.
+- Corregir historiales mal atribuidos, registros duplicados y conflictos de merge.
+  Excepción: en accesorios, un registro escrito con constantes (`_h(S25, …)`) no se
+  puede borrar, mover ni vaciar (el host rechaza el parche entero): esa corrección va
+  a `pendiente` con `ok: false`.
+- **Una ficha duplicada NO se borra** (ni ninguna otra ficha: el host rechaza el
+  parche con «no se borran fichas: reporta el duplicado en pendiente»). Pon
+  `ok: false` y en `pendiente` las dos fichas, la evidencia y la propuesta de
+  fusión; la fusión la hace Saulo (necesita redirección 301, ligas y resembrar D1).
 - Solo editas datos: fichas, ligas, precios, historiales y mapeos — los
   archivos de la lista cerrada que valida el host; cualquier otro cambio que
   hagas se descarta sin avisar. Si el fallo es de código (no de datos), pon
