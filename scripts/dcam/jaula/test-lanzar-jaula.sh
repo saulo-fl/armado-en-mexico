@@ -318,7 +318,7 @@ git init -q --bare "$T/cuelga.git"; rm -f "$T/cuelga.git/packed-refs"; mkfifo "$
 nuevo_id; preparar "$id" >/dev/null; publicar "$id"; : > "$STUB_LOG"; S0=$SECONDS
 DCAM_GITHUB_URL="file://$T/cuelga.git" DCAM_TIEMPO_GIT=3 timeout 30 bash "$LANZADOR" 2>>"$T/lanzador.err"
 if [ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ $((SECONDS - S0)) -lt 25 ] \
-   && tail -3 "$T/lanzador.err" | grep -q 'rc=124' && limpio; then
+   && grep -q 'rc=124; 124 = más de 3s' "$T/lanzador.err" && limpio; then
   bien "GitHub que no contesta → corta a los DCAM_TIEMPO_GIT s, rc=6 ($((SECONDS - S0)) s)"
 else
   mal "GitHub que no contesta: rc=$(leer "$id" rc) en $((SECONDS - S0)) s"
