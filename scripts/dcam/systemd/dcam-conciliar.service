@@ -33,7 +33,8 @@ RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
 BindReadOnlyPaths=/etc/dcam/resolv.conf:/etc/resolv.conf
 # dcam no usa Docker: aunque el socket cambiara de permisos, la unidad no lo ve.
 InaccessiblePaths=-/run/docker.sock -/var/run/docker.sock
-IPAddressDeny=localhost link-local multicast 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 fc00::/7
+# ::/0: nada de IPv6 (si el ISP diera IPv6 público, la LAN quedaría a la vista); gob.mx, GitHub y Telegram van por IPv4.
+IPAddressDeny=localhost link-local multicast 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 fc00::/7 ::/0
 CapabilityBoundingSet=
 RestrictSUIDSGID=yes
 ProtectKernelTunables=yes
