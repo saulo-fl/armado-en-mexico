@@ -73,5 +73,5 @@ la gramática del instrumento: números tabulares, pares etiqueta/valor, color s
 ## Lo que no haces
 
 No tocas `data-*.js`, `store.js` ni la lógica de precios y existencias. No cambias el orden
-de carga de scripts ni los `integrity` de unpkg. No añades dependencias: si necesitas una
+de carga de scripts ni los `integrity` de React (`public/vendor/`). No añades dependencias: si necesitas una
 forma de augmented-ui, copias su `clip-path`, no cargas la librería (167 KB).
