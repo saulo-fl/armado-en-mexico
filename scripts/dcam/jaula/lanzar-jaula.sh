@@ -55,13 +55,16 @@
 # Este script no lo comprueba.
 # Toma UNA solicitud por corrida (la más vieja); si quedan más, dcam-jaula.path
 # vuelve a disparar. Sin PrivateTmp a propósito: Docker monta /tmp/dcam-* del host.
+# Las corridas (run-<ID>) viven en $DCAM_IPC/en-curso (dcam-jaula 700), en el MISMO
+# montaje que solicitud/: la toma tiene que ser un rename(), nunca copiar+borrar.
 set -uo pipefail
 umask 027   # resultado/ es setgid dcam: lo que se escribe ahí lo lee el grupo dcam
 
 IPC="${DCAM_IPC:-/srv/dcam-ipc}"
 GITHUB="${DCAM_GITHUB_URL:-https://github.com/saulo-fl/armado-en-mexico.git}"   # público, sin credenciales
 MAIN="${DCAM_MAIN:-/usr/local/lib/dcam/main}"
-ESTADO="${DCAM_ESTADO:-/var/lib/dcam-jaula}"
+ESTADO="${DCAM_ESTADO:-/var/lib/dcam-jaula}"   # lock y HOME
+EN_CURSO="${DCAM_EN_CURSO:-$IPC/en-curso}"    # run-<ID>
 # Regex y globs en C, sin depender del locale de la unidad. Git sin config del
 # sistema ni global ajena (HOME propio), sin preguntar nada (GitHub público: un
 # 401 falla en vez de pedir usuario) y sin lazy fetch (defensa en profundidad:
@@ -126,7 +129,7 @@ barrer_jaulas() {
 exec 9>"$ESTADO/lanzar.lock" || exit 1
 flock -n 9 || { log "otro lanzador en curso, salgo"; exit 0; }
 barrer_jaulas            # en cada disparo, valga o no la solicitud: un agente huérfano gasta
-rm -rf "$ESTADO"/run-*   # corridas muertas a medias (bajo el lock: ninguna está viva)
+rm -rf "$EN_CURSO"/run-*   # corridas muertas a medias (bajo el lock: ninguna está viva)
 
 # ── Elegir UNA solicitud. Las .tmp-<ID> se están escribiendo: se esperan hasta
 # $ESPERA_TMP s; una que siga ahí después se da por abandonada y se rechaza (si
@@ -146,7 +149,7 @@ done
 
 NOMBRE="${ENTRADA##*/}" ID="" RES="" JAULA_REPO=""
 [[ "$NOMBRE" =~ ^[0-9]{8}T[0-9]{6}-[0-9a-f]{8}$ ]] && ID="$NOMBRE"
-RUN="$ESTADO/run-${ID:-sin-id-$$}"
+RUN="$EN_CURSO/run-${ID:-sin-id-$$}"
 SOL="$RUN/solicitud" W="$RUN/w" CLON="$RUN/repo"
 
 copiar_salidas() {  # lo que dejó la jaula: regular, sin enlaces y acotado, antes y después de copiar
@@ -175,7 +178,7 @@ cierre() {
 rechazar() {  # $1 = motivo fijo (nunca texto de la solicitud)
   log "solicitud ${ID:-sin id} rechazada: $1"
   if [ -e "$SOL" ] || [ -L "$SOL" ]; then
-    mv -T -- "$SOL" "$RECH/${ID:-sin-id}-$(date +%Y%m%dT%H%M%S)-$$" \
+    mv -T --no-copy -- "$SOL" "$RECH/${ID:-sin-id}-$(date +%Y%m%dT%H%M%S)-$$" \
       || log "no pude moverla a rechazadas/; se borra con run-<ID>"
   fi
   [ -z "$RES" ] || printf '%s\n' "$1" > "$RES/rechazo"
@@ -188,16 +191,19 @@ trap 'terminar 143 143' TERM INT HUP
 # El resultado se reserva con mkdir (atómico): un <ID> repetido nunca pisa uno anterior.
 [ -n "$ID" ] && mkdir "$IPC/resultado/$ID" 2>/dev/null && RES="$IPC/resultado/$ID"
 mkdir -m 700 "$RUN" "$W" || terminar 6
-# Con solicitud/ y $ESTADO en sistemas de archivos distintos, el mv de abajo sería
-# copiar+borrar: la carpeta de `dcam` entera, sin tope, antes de validar nada.
-if [ "$(stat -c %d -- "$SOLS")" != "$(stat -c %d -- "$ESTADO")" ]; then
-  log "$SOLS y $ESTADO están en sistemas de archivos distintos: no se toma la solicitud (arregla el despliegue)"
-  terminar 6
-fi
 
 # ── Tomarla: a una carpeta 700 de dcam-jaula. Desde aquí `dcam` ya no la alcanza
 # por ruta, y todo lo que se mira se mira DESPUÉS del mv.
-if ! mv -T -- "$ENTRADA" "$SOL"; then
+# --no-copy: entre montajes distintos (otro disco, o dos ReadWritePaths= de la
+# unidad: cada uno es su propio bind mount, con el mismo st_dev) un mv normal
+# copiaría la carpeta de `dcam` entera, sin tope y antes de validar. Así falla
+# con EXDEV y no se copia nada.
+if ! ERR_MV="$(mv -T --no-copy -- "$ENTRADA" "$SOL" 2>&1)"; then
+  log "$ERR_MV"
+  if [[ "$ERR_MV" == *": Invalid cross-device link" ]]; then
+    log "$SOLS y $EN_CURSO están en montajes distintos: no se toma la solicitud (arregla el despliegue)"
+    terminar 6
+  fi
   # Sin permiso para moverla (la carpeta no es g+w): no se puede apartar y se
   # quedará en solicitud/. Con <ID> válido, al menos el pipeline no espera.
   [ -z "$RES" ] || printf 'no se pudo tomar la solicitud\n' > "$RES/rechazo"

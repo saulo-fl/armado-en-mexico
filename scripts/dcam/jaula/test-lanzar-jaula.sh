@@ -49,8 +49,9 @@ if [ "${1:-}" = "--real" ]; then
   [ -e "$R/hecho" ] || { echo "sin hecho tras ${ESPERA}s"; exit 1; }
   ls -l "$R"
   echo "rc=$(cat "$R/rc")"
-  [ "$(cat "$R/rc")" = 0 ]
-  exit
+  # 3, 4 y 5 son resultados del agente, no fallos del despliegue (paso 15).
+  case "$(cat "$R/rc")" in 2|6|143) exit 1 ;; esac
+  exit 0
 fi
 
 LANZADOR="${LANZADOR:-$AQUI/lanzar-jaula.sh}"
@@ -65,9 +66,10 @@ export HOME="$T/home"
 export DCAM_IPC="$T/ipc" DCAM_GITHUB_URL="file://$T/github.git" DCAM_MAIN="$T/main" \
        DCAM_ESTADO="$T/estado" DCAM_TMP="$T/tmp" DCAM_ESPERA_TMP=2 \
        STUB_LOG="$T/stub.log" DOCKER_LOG="$T/docker.log" T_VISTO="$T/visto"
-mkdir -p "$HOME" "$DCAM_IPC"/{solicitud,resultado,rechazadas} "$DCAM_ESTADO" "$DCAM_TMP" \
+mkdir -p "$HOME" "$DCAM_IPC"/{solicitud,resultado,rechazadas,en-curso} "$DCAM_ESTADO" "$DCAM_TMP" \
          "$T/bin" "$T_VISTO" "$DCAM_MAIN/scripts/dcam/jaula"
 SOLS="$DCAM_IPC/solicitud" RESS="$DCAM_IPC/resultado" RECH="$DCAM_IPC/rechazadas"
+EN_CURSO="$DCAM_IPC/en-curso"   # el valor por defecto del lanzador (no se exporta: se prueba ese)
 
 # docker de mentira: solo anota que lo llamaron.
 printf '#!/usr/bin/env bash\necho "docker $*" >> "$DOCKER_LOG"\n' > "$T/bin/docker"
@@ -131,8 +133,9 @@ preparar(){
 publicar(){ mv -T "$SOLS/.tmp-$1" "$SOLS/$1"; }
 correr(){ : > "$STUB_LOG"; : > "$DOCKER_LOG"; rm -rf "$T_VISTO"/*; bash "$LANZADOR" 2>>"$T/lanzador.err"; }
 leer(){ cat "$RESS/$1/$2" 2>/dev/null; }
-limpio(){  # sin restos de la corrida en estado/ ni en tmp/
-  ! compgen -G "$DCAM_ESTADO/run-*" >/dev/null && ! compgen -G "$DCAM_TMP/dcam-jaula-*" >/dev/null
+limpio(){  # sin restos de la corrida en en-curso/, estado/ ni tmp/
+  ! compgen -G "$EN_CURSO/run-*" >/dev/null && ! compgen -G "$DCAM_ESTADO/run-*" >/dev/null \
+    && ! compgen -G "$DCAM_TMP/dcam-jaula-*" >/dev/null
 }
 
 # $1 = nombre del caso, $2 = ID, $3 = motivo de rechazo esperado (texto fijo del lanzador)
@@ -279,22 +282,25 @@ echo "— salidas de la jaula y resultado"
 nuevo_id; preparar "$id" >/dev/null; publicar "$id"; STUB_SALIDA_ENLACE=1 correr
 [ "$(leer "$id" rc)" = 0 ] && [ ! -e "$RESS/$id/solucion.json" ] && [ ! -L "$RESS/$id/solucion.json" ] && [ -f "$RESS/$id/agente.json" ] \
   && bien "solucion.json-enlace en la salida → no llega al resultado" || mal "salida-enlace: «$(ls -lA "$RESS/$id" | tr '\n' ' ')»"
-# $ESTADO donde no se puede crear run-<ID>: el resultado tiene que cerrarse igual.
+# en-curso/ donde no se puede crear run-<ID>: el resultado tiene que cerrarse igual.
 nuevo_id; preparar "$id" >/dev/null; publicar "$id"
-: > "$DCAM_ESTADO/lanzar.lock"; chmod 555 "$DCAM_ESTADO"; correr; chmod 755 "$DCAM_ESTADO"
+chmod 555 "$EN_CURSO"; correr; chmod 755 "$EN_CURSO"
 [ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ ! -s "$STUB_LOG" ] \
   && bien "no se pudo crear run-<ID> → rc=6 y hecho (el pipeline no espera)" || mal "sin run-<ID>: rc=$(leer "$id" rc) hecho=$([ -e "$RESS/$id/hecho" ] && echo sí || echo no)"
 rm -rf "${SOLS:?}/$id"
 
-echo "— solicitud/ y el estado en sistemas de archivos distintos"
+echo "— solicitud/ y en-curso/ en sistemas de archivos distintos"
+# La toma no puede volverse copiar+borrar: rc=6, la solicitud sigue entera en
+# solicitud/ y a en-curso/ no llega nada.
 SHM="$(mktemp -d -p /dev/shm 2>/dev/null)" || SHM=""
 if [ -n "$SHM" ] && [ "$(stat -c %d "$SHM")" != "$(stat -c %d "$SOLS")" ]; then
-  nuevo_id; preparar "$id" >/dev/null; publicar "$id"; DCAM_ESTADO="$SHM" correr
-  if [ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ -d "$SOLS/$id" ] && [ ! -s "$STUB_LOG" ] \
-     && grep -q 'sistemas de archivos distintos' "$T/lanzador.err"; then
-    bien "otro sistema de archivos → rc=6, hecho, la solicitud ni se mueve"
+  nuevo_id; preparar "$id" >/dev/null; publicar "$id"; DCAM_EN_CURSO="$SHM" correr
+  if [ "$(leer "$id" rc)" = 6 ] && [ -e "$RESS/$id/hecho" ] && [ ! -s "$STUB_LOG" ] \
+     && [ "$(ls -A "$SOLS/$id" | tr '\n' ' ')" = "armas.json armas.tsv mapeo-armas.json motivo.txt solicitud.json " ] \
+     && [ -z "$(ls -A "$SHM")" ] && grep -q 'montajes distintos' "$T/lanzador.err"; then
+    bien "otro sistema de archivos → rc=6, hecho, la solicitud sigue entera y no se copió nada"
   else
-    mal "otro sistema de archivos: rc=$(leer "$id" rc) en-solicitud=$([ -d "$SOLS/$id" ] && echo sí || echo no)"
+    mal "otro sistema de archivos: rc=$(leer "$id" rc) solicitud=«$(ls -A "$SOLS/$id" 2>&1 | tr '\n' ' ')» en-curso=«$(ls -A "$SHM")»"
   fi
   rm -rf "${SOLS:?}/$id"
 else
