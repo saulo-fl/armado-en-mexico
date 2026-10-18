@@ -228,7 +228,7 @@ la segunda = se perdieron las vars de Access. Ambos son 503 y ambos son silencio
 
 ## Conciliar inventarios y precios (tarea recurrente)
 
-Fase 4 (al desplegarla): el clon vivo del bot pasa de `~/apps/armadomx/dcam-bot/repo` a `/srv/dcam/repo` (dueño `dcam`, grupo `dcam`; saulo en el grupo); el viejo deja de ser el bueno.
+Fase 4 (al desplegarla): el clon vivo del bot pasa de `~/apps/armadomx/dcam-bot/repo` a `/srv/dcam/repo` (dueño `dcam`, grupo `dcam`). Saulo y los agentes NUNCA corren git dentro de ese clon como saulo: `dcam` controla su `.git/config` y sus hooks, así que git ejecutaría comandos elegidos por `dcam` con los privilegios de quien lo corra (y el vigía descarta a las 20:00 lo no commiteado ahí). Las ramas se arreglan en un clon propio: fetch de la rama desde GitHub, arreglo, push. El grupo `dcam` es solo para leer logs y PDFs.
 
 Los precios oficiales se alimentan desde los **PDFs de existencias de la DCAM**.
 Toda la conciliación vive en **código versionado**, no en `localStorage`. Desde el

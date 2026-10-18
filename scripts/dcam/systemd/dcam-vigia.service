@@ -29,7 +29,11 @@ PrivateTmp=yes
 PrivateDevices=yes
 ReadWritePaths=/srv/dcam
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
-IPAddressDeny=100.64.0.0/10 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
+# DNS público propio (root 644, lo instala el despliegue): dcam no llega al router ni a Tailscale.
+BindReadOnlyPaths=/etc/dcam/resolv.conf:/etc/resolv.conf
+# dcam no usa Docker: aunque el socket cambiara de permisos, la unidad no lo ve.
+InaccessiblePaths=-/run/docker.sock -/var/run/docker.sock
+IPAddressDeny=localhost link-local multicast 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 fc00::/7
 CapabilityBoundingSet=
 RestrictSUIDSGID=yes
 ProtectKernelTunables=yes
