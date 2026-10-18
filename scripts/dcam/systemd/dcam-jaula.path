@@ -1,0 +1,10 @@
+[Unit]
+Description=Observa las solicitudes de la jaula DCAM
+
+[Path]
+# dcam deja una carpeta por solicitud aquí; el lanzador las toma (y las mueve) una a una.
+DirectoryNotEmpty=/srv/dcam-ipc/solicitud
+Unit=dcam-jaula.service
+
+[Install]
+WantedBy=multi-user.target

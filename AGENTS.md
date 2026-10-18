@@ -228,6 +228,8 @@ la segunda = se perdieron las vars de Access. Ambos son 503 y ambos son silencio
 
 ## Conciliar inventarios y precios (tarea recurrente)
 
+Fase 4 (al desplegarla): el clon vivo del bot pasa de `~/apps/armadomx/dcam-bot/repo` a `/srv/dcam/repo` (dueño `dcam`, grupo `dcam`; saulo en el grupo); el viejo deja de ser el bueno.
+
 Los precios oficiales se alimentan desde los **PDFs de existencias de la DCAM**.
 Toda la conciliación vive en **código versionado**, no en `localStorage`. Desde el
 14-sep-2026 hay además un **bot que concilia y publica solo** lo que ya está catalogado y
