@@ -36,6 +36,10 @@
 # Sin esto, un deploy tarda 4 h en llegar a quien ya visitó el sitio. Las
 # respuestas son 304 de unos cientos de bytes gracias al ETag, no descargas.
 # El HTML no hace falta: Pages ya lo sirve con max-age=0, must-revalidate.
+/vendor/react.production.min.js
+  Cache-Control: public, max-age=0, must-revalidate
+/vendor/react-dom.production.min.js
+  Cache-Control: public, max-age=0, must-revalidate
 /app.js
   Cache-Control: public, max-age=0, must-revalidate
 /admin.js
