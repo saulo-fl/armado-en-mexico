@@ -5,13 +5,38 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=saulo
-Group=saulo
-WorkingDirectory=/home/saulo/apps/dcam-bot/repo
-Environment=DCAM_DIR=/home/saulo/apps/dcam-bot
-Environment=DCAM_TG_ENV=/home/saulo/apps/dcam-bot/telegram.env
-# Ruta ESTABLE fuera del árbol que el propio script resetea con git reset --hard.
-# repo/scripts/dcam/conciliar.sh es la fuente de verdad; esta copia es la que corre.
-ExecStart=/usr/bin/env bash /home/saulo/apps/dcam-bot/infra/conciliar.sh
+User=dcam
+Group=dcam
+UMask=0002
+WorkingDirectory=/srv/dcam/repo
+Environment=HOME=/srv/dcam DCAM_DIR=/srv/dcam DCAM_WORKDIR_BASE=/srv/dcam/trabajo
+Environment=DCAM_IPC=/srv/dcam-ipc DCAM_MAIN=/usr/local/lib/dcam/main
+# Pide el solucionador a la jaula (dcam-jaula.service) en vez de correr Docker aquí.
+Environment=DCAM_SOLUCIONADOR=jaula
+# GH_TOKEN (root 600, lo entrega systemd). Telegram por credencial: %d = carpeta de credenciales.
+EnvironmentFile=/etc/dcam/gh.env
+LoadCredential=telegram.env:/etc/dcam/telegram.env
+Environment=DCAM_TG_ENV=%d/telegram.env
+# Ruta de root, fuera del repo de dcam (D-3a): lo que dcam pueda escribir no se ejecuta con privilegios.
+ExecStart=/usr/bin/env bash /usr/local/lib/dcam/conciliar-pipeline.sh
 Nice=10
-TimeoutStartSec=90min
+# La espera de «hecho» de la jaula es de 140 min.
+TimeoutStartSec=3h
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ReadWritePaths=/srv/dcam /srv/dcam-ipc/solicitud
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+# DNS público propio (root 644, lo instala el despliegue): dcam no llega al router ni a Tailscale.
+BindReadOnlyPaths=/etc/dcam/resolv.conf:/etc/resolv.conf
+# dcam no usa Docker: aunque el socket cambiara de permisos, la unidad no lo ve.
+InaccessiblePaths=-/run/docker.sock -/var/run/docker.sock
+# ::/0: nada de IPv6 (si el ISP diera IPv6 público, la LAN quedaría a la vista); gob.mx, GitHub y Telegram van por IPv4.
+IPAddressDeny=localhost link-local multicast 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 fc00::/7 ::/0
+CapabilityBoundingSet=
+RestrictSUIDSGID=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+LockPersonality=yes

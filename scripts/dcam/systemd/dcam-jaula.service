@@ -1,0 +1,27 @@
+[Unit]
+Description=Lanzador de la jaula DCAM (único que habla con Docker)
+After=docker.service
+Wants=docker.service
+
+[Service]
+Type=oneshot
+User=dcam-jaula
+Group=dcam-jaula
+# /var/lib/dcam-jaula: lock y HOME del lanzador. Las corridas van en /srv/dcam-ipc/en-curso.
+StateDirectory=dcam-jaula
+StateDirectoryMode=0700
+Environment=HOME=/var/lib/dcam-jaula DCAM_IPC=/srv/dcam-ipc DCAM_MAIN=/usr/local/lib/dcam/main
+# Fijo y sin argumentos: código de root que no sale del repo de dcam. Sin EnvironmentFile.
+ExecStart=/usr/local/lib/dcam/lanzar-jaula.sh
+# Tope de una corrida completa (solucionador + compuertas).
+TimeoutStartSec=2h
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+# PrivateTmp=no A PROPÓSITO: Docker monta /tmp/dcam-* del host; con PrivateTmp la jaula arranca vacía.
+# Sin IPAddressDeny: el lanzador baja la rama de github.com por HTTPS.
+# /srv/dcam-ipc ENTERA, en una sola entrada: solicitud/ -> en-curso/ -> rechazadas/ tienen que
+# ser rename() en el mismo montaje. Cada ruta de ReadWritePaths= es su propio bind mount, y
+# entre dos de ellos rename() da EXDEV (el lanzador sale con rc=6). Lo que puede escribir
+# dentro lo limitan los permisos: /srv/dcam-ipc es root 755 y solo tiene esas 4 carpetas.
+ReadWritePaths=/tmp /srv/dcam-ipc

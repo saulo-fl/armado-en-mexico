@@ -5,18 +5,38 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=saulo
-Group=saulo
-WorkingDirectory=/home/saulo/apps/dcam-bot/repo
-Environment=PYTHONPATH=/home/saulo/apps/quiron/lib
-Environment=DCAM_DIR=/home/saulo/apps/dcam-bot
-Environment=DCAM_TG_ENV=/home/saulo/apps/dcam-bot/telegram.env
+User=dcam
+Group=dcam
+UMask=0002
+WorkingDirectory=/srv/dcam/repo
+# quiron_telegram vive en la home de saulo: se monta solo lectura en la misma ruta.
+Environment=HOME=/srv/dcam DCAM_DIR=/srv/dcam PYTHONPATH=/home/saulo/apps/quiron/lib
+Environment=DCAM_TG_ENV=%d/telegram.env
+LoadCredential=telegram.env:/etc/dcam/telegram.env
 # El guion inicial «-»: si no hay red para el pull, corre igual con el código que ya tiene
-# (y si tampoco hay red para gob.mx, el propio vigía avisa que está roto).
-ExecStartPre=-/usr/bin/flock -n /home/saulo/apps/dcam-bot/conciliar.lock /usr/bin/git -C /home/saulo/apps/dcam-bot/repo switch --force main --quiet
-ExecStartPre=-/usr/bin/flock -n /home/saulo/apps/dcam-bot/conciliar.lock /usr/bin/git -C /home/saulo/apps/dcam-bot/repo pull --ff-only origin main --quiet
+# (y si tampoco hay red para gob.mx, el propio vigía avisa que está roto). Sin token: el repo es público.
+ExecStartPre=-/usr/bin/flock -n /srv/dcam/conciliar.lock /usr/bin/git -C /srv/dcam/repo switch --force main --quiet
+ExecStartPre=-/usr/bin/flock -n /srv/dcam/conciliar.lock /usr/bin/git -C /srv/dcam/repo pull --ff-only origin main --quiet
 ExecStart=/usr/bin/python3 scripts/dcam/vigia.py
 Nice=10
-# Una corrida colgada no debe bloquear el disparo del timer del día siguiente;
-# 3 h cubren la espera del preview y de producción más claude -p en la revisión de lo dudoso.
-TimeoutStartSec=3h
+# Una corrida colgada no debe bloquear el disparo del timer del día siguiente.
+TimeoutStartSec=1h
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=tmpfs
+BindReadOnlyPaths=/home/saulo/apps/quiron/lib
+PrivateTmp=yes
+PrivateDevices=yes
+ReadWritePaths=/srv/dcam
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+# DNS público propio (root 644, lo instala el despliegue): dcam no llega al router ni a Tailscale.
+BindReadOnlyPaths=/etc/dcam/resolv.conf:/etc/resolv.conf
+# dcam no usa Docker: aunque el socket cambiara de permisos, la unidad no lo ve.
+InaccessiblePaths=-/run/docker.sock -/var/run/docker.sock
+# ::/0: nada de IPv6 (si el ISP diera IPv6 público, la LAN quedaría a la vista); gob.mx, GitHub y Telegram van por IPv4.
+IPAddressDeny=localhost link-local multicast 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 fc00::/7 ::/0
+CapabilityBoundingSet=
+RestrictSUIDSGID=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+LockPersonality=yes
