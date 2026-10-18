@@ -65,6 +65,12 @@
 <!-- ?v= obligatorio: sin cambiar la URL, un navegador con estilo.css ya en caché
      sigue pintando el tema anterior sobre el HTML nuevo. Lo vigila build-prerender.mjs. -->
 <link rel="stylesheet" href="estilo.css?v=20260926a">
+<!-- El sello gastado es el LCP de la primera visita (tarjeta del recorrido) y sin esto
+     solo se descubre cuando React pinta: ~10 s en 4G lenta. crossorigin es OBLIGATORIO:
+     estilo.css lo usa como mask-image, que se pide en modo CORS; sin él la precarga no
+     coincide y el sello se descarga dos veces. Sin fetchpriority=high a propósito: en
+     red lenta le quitaría ancho de banda al CSS y al JS. -->
+<link rel="preload" as="image" href="imagenes/sello-desgaste.webp" crossorigin="anonymous">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; }
@@ -250,9 +256,12 @@
 })();
 </script>
 
-<!-- React pinned (los .jsx se precompilan a .js en el build — ver package.json) -->
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<!-- React 18.3.1 pinned, servido desde el propio sitio (public/vendor/, copia exacta de
+     unpkg: el integrity es el mismo hash). Antes venía de unpkg.com: si unpkg caía, el
+     sitio salía en blanco, y costaba una conexión extra. Los .jsx se precompilan a .js
+     en el build — ver package.json -->
+<script src="vendor/react.production.min.js?v=18.3.1" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="vendor/react-dom.production.min.js?v=18.3.1" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
 
 <!-- Data + Store + UI + screens + app.
      TODO src local lleva ?v=: el rediseño entero vive en estos archivos y sin cambiar

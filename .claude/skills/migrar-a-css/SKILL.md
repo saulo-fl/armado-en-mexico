@@ -102,4 +102,4 @@ Y a ojo, en este orden:
   `scripts/copiar-estaticos.mjs`, que copia `estilo.css` **por nombre** a `out/`.
 - **El prerender no estorba.** `emitir()` usa `index.html` como shell y solo sustituye seis
   marcas; un `<link>` viaja solo a las 321 páginas. No hay que tocar el script para eso.
-- **No toques** el orden de carga de scripts ni los `integrity` de unpkg.
+- **No toques** el orden de carga de scripts ni los `integrity` de React (`public/vendor/`).

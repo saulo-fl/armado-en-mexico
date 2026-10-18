@@ -20,7 +20,7 @@ Dos frentes:
    - Que respete decisiones tomadas: arsenal como HUB, filtros desplegables + barra de
      precio min/máx, tarjetas sin etiqueta de tipo, encabezados sin "Por", precio de
      ficha desde el historial.
-   - Que no rompa: orden de carga de scripts, `integrity` de unpkg, cache-busting `?v=`
+   - Que no rompa: orden de carga de scripts, `integrity` de React (`public/vendor/`), cache-busting `?v=`
      si cambió data-*.js, áreas táctiles y contraste.
    - Que cada `.jsx` tocado compile: `npm run build:js` (Babel CLI; corre en Cloudflare
      Pages en cada deploy — los `.js` no se versionan).

@@ -74,7 +74,7 @@ a CSS, la skill `migrar-a-css`.
   los `.js` no se versionan). Cada `.jsx` DEBE compilar: `npm run build:js` o skill
   `verificar-app`. *(Lo de «transpilación en el navegador con Babel standalone» que decía
   el viejo handoff dejó de ser cierto; no hay limitación técnica para escribir buen CSS.)*
-- No cambies el orden de carga de scripts en `index.html` ni los `integrity` de unpkg.
+- No cambies el orden de carga de scripts en `index.html` ni los `integrity` de React (`public/vendor/`).
 - Si tocas `data-*.js`, sube el cache-busting `?v=` (ver skill `publicar`).
 - Mobile-first (hay `BottomNav` y `useViewport`); áreas táctiles ≥40px; contraste ok.
 - Mantén el rendimiento (las tarjetas usan `contentVisibility`).
