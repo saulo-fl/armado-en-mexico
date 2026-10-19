@@ -44,8 +44,9 @@ const POR_ARMA = {
   18:  [v('vRJfSbzc4F4', 'armasms')],   // SIG Sauer P322
   5:   [v('FUqd3FG8Q4U', 'armasms')],   // Ruger LCP
   8:   [v('q2O2KIIRODU', 'armasms')],   // CZ P-07
-  // Mendoza RM22: el mismo rifle con otra culata o acabado.
-  50: RM22, 51: RM22, 52: RM22, 53: RM22, 54: RM22, 55: RM22, 179: RM22, 262: RM22, 263: RM22, 264: RM22,
+  // Mendoza RM22: el mismo rifle con otra culata o acabado. Las Camo 262 y 263 no van:
+  // se fundieron en la 179 y la 52 (#370) y en producción no existen.
+  50: RM22, 51: RM22, 52: RM22, 53: RM22, 54: RM22, 55: RM22, 179: RM22, 264: RM22,
   // Tippmann M4-22: Elite, Redline y OD-Green.
   80: TIPPMANN, 81: TIPPMANN, 82: TIPPMANN,
 };
