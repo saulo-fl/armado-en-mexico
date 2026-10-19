@@ -157,7 +157,7 @@ opaco se lee como un error y hace falta el alfa.
 - **Cartuchos (19):** completos en `imagenes/cartuchos/` (PNG vertical, escala real).
 - **Armas traumáticas (3):** usan fotos reales del CDN de Shopify (HDP 50, Secure 68P,
   HDX 68). No requieren diseño local.
-- **Logos y autor:** `logo-main.png`, `logo-armado-mx.webp`, `saulo-flores.webp` ya
+- **Logos y autor:** `logo-main.png`, `logo-armado-mx-v2.webp`, `saulo-flores.webp` ya
   presentes. (`logo.png` sigue siendo borrador reemplazable.)
 
 ---

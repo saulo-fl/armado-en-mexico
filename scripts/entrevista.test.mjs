@@ -383,7 +383,7 @@ test('la hoja que se comparte invita a hacer el test y firma con la marca', () =
     'la advertencia de que esto no es un trámite no puede desaparecer');
   // La dirección ya sale dos veces arriba: el pie firma con el isotipo y el
   // logotipo, no con un tercer «armado.mx» suelto.
-  assert.match(hoja, /isotipo-armado\.webp/, 'el pie debe firmar con el isotipo');
+  assert.match(hoja, /isotipo-armado-v2.webp/, 'el pie debe firmar con el isotipo');
   assert.doesNotMatch(hoja, /fillText\('armado\.mx'/,
     'sobra el armado.mx suelto del pie: lo sustituye la marca');
 });

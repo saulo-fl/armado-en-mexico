@@ -203,7 +203,7 @@ Cloudflare reconstruye `main` al mergear (~1-2 min). Comprueba **estados HTTP**,
 lo que ve un crawler — no basta con que se vea bien en el navegador:
 
 ```bash
-for u in / /pistolas /pistolas/glock-19 /municiones/12-ga-rio-perdigon-7-5-28-gr          /sitemap.xml /robots.txt /app.js /imagenes/favicon.png /noexiste-xyz; do
+for u in / /pistolas /pistolas/glock-19 /municiones/12-ga-rio-perdigon-7-5-28-gr          /sitemap.xml /robots.txt /app.js /imagenes/favicon-v2.png /noexiste-xyz; do
   echo "$(curl -s -o /dev/null -w '%{http_code}' https://armado.mx$u)  $u"
 done
 # Esperado: 200 en todas menos /noexiste-xyz -> 404
@@ -415,13 +415,17 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
 - React 18.3.1 se sirve desde `public/vendor/` (copia exacta de unpkg) con su hash `integrity` fijado — no cambies la versión ni el archivo sin recalcular el hash.
 - La barra "◉ DEBUG" (abajo-izquierda) es una herramienta de desarrollo intencional; no la quites.
 - `public/logo.png` **no** es el logo del header: es el borrador de 256 px sin alfa que
-  queda como valor de fábrica del admin (`store.js`). El header lo pinta `LogoMarca` en
-  SVG (`src/components/ui.jsx`). No confundir con los iconos de `imagenes/`.
-- **Los iconos están separados por uso a propósito** — no los unifiques: `favicon.png`
-  (48px, 2 KB) es lo que pide todo navegador en cada visita; `apple-touch-icon.png`
-  (180px) solo lo pide Safari al añadir a inicio; `logo-armado-mx.webp` (512px) es el
+  queda como valor de fábrica del admin (`store.js`). El header lo pinta `LogoMarca`
+  (`src/components/ui.jsx`) con `isotipo-armado-v2.webp` y el texto al lado. No confundir con los iconos de `imagenes/`.
+- **Los iconos están separados por uso a propósito** — no los unifiques: `favicon-v2.png`
+  (48px, 2 KB) es lo que pide todo navegador en cada visita; `apple-touch-icon-v2.png`
+  (180px) solo lo pide Safari al añadir a inicio; `logo-armado-mx-v2.webp` (512px) es el
   icono PWA del manifest y el que sale en el tutorial. Servir el de 512 como favicon
   costaba 324 KB por visita.
+- **El logo se deriva del SVG maestro de Saulo** (`Assets del Sitio/marca/`, fuera del repo;
+  logo definitivo del 18-oct-2026). Las imágenes llevan `-v2` en el nombre porque armado.mx
+  las cachea un año: sustituir el archivo con el mismo nombre no le llega a nadie. Si cambia
+  el logo otra vez, nombre nuevo (`-v3`) y actualiza todas las referencias.
 
 ## Backend compartido (Cloudflare Pages Functions + D1)
 

@@ -63,7 +63,7 @@ armado.mx ya sirve los `?v=` nuevos) y entrega la salida real, no «pasó».
 ```bash
 # 1. Estados HTTP: es lo que ve un crawler, no basta con que se vea bien
 for u in / /pistolas /pistolas/glock-19 /municiones/12-ga-rio-perdigon-7-5-28-gr \
-         /sitemap.xml /robots.txt /app.js /imagenes/favicon.png /noexiste-xyz; do
+         /sitemap.xml /robots.txt /app.js /imagenes/favicon-v2.png /noexiste-xyz; do
   echo "$(curl -s -o /dev/null -w '%{http_code}' https://armado.mx$u)  $u"
 done   # 200 en todas menos la última, que va a 404
 

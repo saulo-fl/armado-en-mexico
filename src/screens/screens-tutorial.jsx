@@ -83,7 +83,7 @@
         visual: (
           <figure className="tut-copia" style={{ width: copiaAncho, margin: '0 auto' }}>
             <div className="tut-copia-foto">
-              <img src="imagenes/logo-armado-mx.webp" alt="Armado en México" />
+              <img src="imagenes/logo-armado-mx-v2.webp" alt="Armado en México" />
             </div>
           </figure>
         ),
@@ -282,13 +282,11 @@
             left: 3.14%; top: 3.76%; width: 93.62%; height: 92.49%;
             background: var(--copia-placa);
           }
-          /* El logotipo es una insignia de esquinas redondeadas, y el .webp trae
-             color fuera de esas esquinas: sin recortar, asoman cuatro picos
-             tostados sobre la placa blanca. En porcentaje para que el recorte
-             siga a la insignia en los dos anchos de la copia. */
+          /* El logotipo trae transparentes las esquinas de la insignia: no hay
+             picos que recortar con border-radius (el .webp anterior sí los traía). */
           .tut-copia-foto img {
             position: absolute; inset: 0; margin: auto;
-            height: 90%; aspect-ratio: 1 / 1; border-radius: 9%;
+            height: 90%; aspect-ratio: 1 / 1;
           }
 
           /* EL FOLDER: 9-slice de \`folder-manila.webp\` (1000×720), la misma
