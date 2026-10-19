@@ -58,6 +58,31 @@
 <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Armado en México — Enciclopedia táctica</title>
+<script>
+  /* Precarga de las imágenes del TUTORIAL de bienvenida, que es el LCP de la primera
+     visita: sin esto solo se descubren cuando React lo pinta (~6 s en 4G lenta).
+     SOLO si el tutorial se va a abrir —portada y sin `amx_onboarded_v1`, la misma
+     condición que app.jsx—: en las fichas prerenderizadas o para quien ya lo vio
+     serían bytes de más compitiendo con el CSS y el JS.
+     Va ANTES de cualquier <link rel="stylesheet">: un script inline posterior espera
+     a que baje la hoja de estilo y la precarga saldría tarde.
+     crossorigin SOLO en el sello: estilo.css lo usa como mask-image, que se pide en
+     modo CORS. El marco (background) y el logo (<img>) se piden sin CORS; si la
+     precarga no coincide en modo, el navegador la tira y descarga dos veces. */
+  (function () {
+    var visto = false;
+    try { visto = !!localStorage.getItem('amx_onboarded_v1'); } catch (e) {}
+    if (visto || location.pathname !== window.APP_BASE) return;
+    [['imagenes/sello-desgaste.webp', 'anonymous'],
+     ['imagenes/foto-marco.webp'],
+     ['imagenes/logo-armado-mx.webp']].forEach(function (p) {
+      var l = document.createElement('link');
+      l.rel = 'preload'; l.as = 'image'; l.href = p[0];
+      if (p[1]) l.crossOrigin = p[1];
+      document.head.appendChild(l);
+    });
+  })();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -65,12 +90,6 @@
 <!-- ?v= obligatorio: sin cambiar la URL, un navegador con estilo.css ya en caché
      sigue pintando el tema anterior sobre el HTML nuevo. Lo vigila build-prerender.mjs. -->
 <link rel="stylesheet" href="estilo.css?v=20260926a">
-<!-- El sello gastado es el LCP de la primera visita (tarjeta del recorrido) y sin esto
-     solo se descubre cuando React pinta: ~10 s en 4G lenta. crossorigin es OBLIGATORIO:
-     estilo.css lo usa como mask-image, que se pide en modo CORS; sin él la precarga no
-     coincide y el sello se descarga dos veces. Sin fetchpriority=high a propósito: en
-     red lenta le quitaría ancho de banda al CSS y al JS. -->
-<link rel="preload" as="image" href="imagenes/sello-desgaste.webp" crossorigin="anonymous">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; }
