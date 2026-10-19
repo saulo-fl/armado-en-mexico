@@ -488,6 +488,26 @@ llevaban siete semanas invisibles —, «DCAM Monterrey» en 117 armas y 113 pre
 viejos. **Publicar no es desplegar.** Después de tocar `data.js` o `DEFAULT_PAGES`,
 resiembra D1 y compruébalo como visitante, no por la API.
 
+## Videos de la tele antigua
+
+Las fichas de arma, de munición y de calibre, y la portada de la Guía de calibres, muestran
+videos de YouTube dentro de una tele antigua **solo si tienen video**: sin video no se monta
+nada. Los elige Saulo **a mano** (18-oct-2026): reviews de Armas M&S, videos de calibre de
+M&S Army y, en el futuro, de creadores que lo hayan autorizado.
+
+- **Se editan en `src/data/data-videos.js`**: por id de arma, por calibre (sirve a la ficha
+  del calibre y a las municiones de ese calibre) y la lista de la guía. Las variantes que solo
+  cambian de acabado comparten video. Todos empiezan desde el principio. Un calibre o un arma
+  sin ficha no lleva video. Al tocarlo, sube su `?v=` en `src/pages/index.html`.
+- **No van en D1 ni en el admin**: la app hidrata las armas desde D1 y el resembrado pisa lo
+  que se meta por el admin. El campo `youtube` del admin sigue funcionando, detrás de los fijos.
+- `scripts/videos.test.mjs` falla si un video apunta a una ficha que ya no existe: si una
+  conciliación borra o renombra una ficha con video, hay que moverlo o quitarlo.
+- La tele es `public/imagenes/tele-antigua.webp` (1482x1131), una fotografía con la pantalla
+  recortada; el video va detrás, en el hueco (`TELE_HUECO` en `TeleVideo`, `ui.jsx`). La
+  fuente y los recortes están en `Assets del Sitio/tele/`, fuera del repo. Si cambia la foto,
+  hay que volver a medir el hueco y la perilla (`.amx-tele-perilla` en `estilo.css`).
+
 ## Mejoras futuras opcionales (NO hacer ahora)
 
 - **Prefiltro de reseñas con IA.** Hoy toda reseña espera revisión humana en
@@ -511,50 +531,6 @@ resiembra D1 y compruébalo como visitante, no por la API.
   de tocar D1 — mismo sitio donde ya se valida el mínimo de caracteres. Pedido
   explícito de Saulo (26-ago-2026) al rediseñar el bloque de opinión.
 
-- **Videos de YouTube en las fichas, dentro de una tele antigua.** Un reproductor
-  de YouTube en la ficha de arma, de munición y de calibre, solo en las que tienen video. **No es
-  automático**: Saulo elige cada video a mano y queda fijado por su enlace de YouTube.
-  Entran las reviews del canal principal (Armas M&S) y las de otros creadores que
-  hayan **autorizado** que su video se ponga en la página. El marco es una **televisión
-  antigua** (caja de madera, perilla y antenas) para seguir el lenguaje de objetos del
-  sitio; referencia: `Documentos de Proyecto/referencias/tv-antigua-marco-video.png`,
-  fuera del repo. **El marco solo aparece en las fichas que sí tienen video**: sin
-  video no hay tele vacía ni hueco. Pedido explícito de Saulo (18-oct-2026).
-  Videos con ficha al 18-oct-2026, todos del canal Armas M&S (confirmado por Saulo:
-  cada video va en las fichas de estos ids de `data.js`; las variantes que solo cambian
-  de acabado comparten video). Todos empiezan desde el principio: los `&t=` que traían
-  algunos enlaces fueron un error al copiarlos (Saulo, 18-oct-2026).
-  - Huglu Atrox (id 99): https://www.youtube.com/watch?v=_VW1O5u8FxM
-  - Ruger 10/22 (id 151), armarlo a tu gusto: https://www.youtube.com/watch?v=oxX8cb6TnFI
-  - Beretta 80X Cheetah (id 13; también existe la Bronce, 218): https://www.youtube.com/watch?v=-yr5-D4lid0
-  - Beretta 92FS .22 LR (id 134), «la .22 LR más cara»: https://www.youtube.com/watch?v=njThIuPZUnM
-  - CZ P-10 C (id 9): https://www.youtube.com/watch?v=HDqC7Gf9hEQ
-  - CZ 457 Jaguar XII (id 256): https://www.youtube.com/watch?v=d1svvgM1ZPQ
-  - Mendoza RM22, todas sus variantes (mismo rifle, otra culata o acabado: ids 50, 51,
-    52, 53, 54, 55, 179, 262, 263, 264): https://www.youtube.com/watch?v=9RIekKHX-58
-  - Browning Buck Mark (id 17): https://www.youtube.com/watch?v=kZKXxltWaX4
-  - Glock 25 (id 11): https://www.youtube.com/watch?v=DWBfKTXJL8w
-  - Tippmann M4-22, todas sus variantes (ids 80, 81, 82): https://www.youtube.com/watch?v=XPexSruOCYg
-  - Ruger 10/22 (id 151), prueba: https://www.youtube.com/watch?v=DrFCGoNxJwE
-  - SIG Sauer P322 (id 18): https://www.youtube.com/watch?v=vRJfSbzc4F4
-  - Ruger LCP (id 5): https://www.youtube.com/watch?v=FUqd3FG8Q4U
-  - CZ P-07 (id 8): https://www.youtube.com/watch?v=q2O2KIIRODU
-  Videos de calibre, todos del canal M&S Army. Cada uno va en la ficha del calibre y en
-  las fichas de munición de ese calibre. Los calibres sin ficha (4.6x30, .25 ACP, .357 SIG,
-  .22 Short, .44 Magnum) se quedan fuera hasta que la tengan.
-  - .380 ACP (calibre y sus 3 municiones): https://www.youtube.com/watch?v=s_YZ4H1axCY · https://www.youtube.com/watch?v=-OinJl5azFk
-  - .32 ACP (calibre): https://www.youtube.com/watch?v=hmN9gMZRT_Q · https://www.youtube.com/watch?v=pPt81-e7Ky4
-  - .40 S&W (calibre y sus 3 municiones): https://www.youtube.com/watch?v=7BnaBTeerIQ · https://www.youtube.com/watch?v=ujpykirYDIk
-  - .45 ACP (calibre): https://www.youtube.com/watch?v=-IX-faii6qQ · https://www.youtube.com/watch?v=KggHg8UyzI0
-  - .38 Super (calibre y sus 3 municiones): https://www.youtube.com/watch?v=fYizFugZx3w · https://www.youtube.com/watch?v=YctSyZZxZFI
-  - .38 Special (calibre y su munición): https://www.youtube.com/watch?v=-u9rTNgpiYw · https://www.youtube.com/watch?v=glq9UJ5eI6o
-  - .357 Magnum (calibre): https://www.youtube.com/watch?v=ZitAhiLiLRY
-  - .22 WMR (calibre): https://www.youtube.com/watch?v=FWNecLbZQQY
-  - Percusión anular, por qué solo queda en .22 (calibres .22 LR y .22 WMR): https://www.youtube.com/watch?v=5XqMkye6-qc
-  - .17 HMR (sus 2 municiones; no tiene ficha de calibre): https://www.youtube.com/watch?v=4oID4UPCJEE
-  - .30 Carbine (su munición; no tiene ficha de calibre): https://www.youtube.com/watch?v=uQjZlQNpm0k
-  - Todos los cartuchos .38 / 9 mm / .357, del más débil al más poderoso (fichas por
-    confirmar con Saulo): https://www.youtube.com/watch?v=wUS4_ASpRjI
 - **Engrosar la sección «Historia» de cada arma con investigación real.** Hoy
   `arma.historia` sale del builder de `data.js` y mide 58/118/982 caracteres
   (mín/media/máx): en la mayoría son dos frases. Es el contenido con más valor

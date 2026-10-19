@@ -241,7 +241,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
         </section>}
 
       {/* ── LA TELE — el video del modelo (solo si hay) ───────────────── */}
-      <YouTubeBlock arma={arma} padX={PAD} gap={SEC} />
+      <window.SeccionVideo videos={window.amxVideos('arma', arma)} titulo={arma.nombre} padX={PAD} gap={SEC} />
 
       {/* ── LA TARJETA DE COMENTARIOS ─────────────────────────────────── */}
       <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-opiniones">
@@ -450,62 +450,6 @@ function OpinionBlock({ tipo, entidadId, entidadNombre, nombreTipo, onNav, onRep
 
 }
 window.OpinionBlock = OpinionBlock;
-
-// ════════════════════════════════════════════════════════════════
-// YOUTUBE BLOCK — el video de Armas M&S, en una tele de los 80 (si existe)
-// La pantalla es un botón: el iframe no se pide hasta que el visitante la toca,
-// así la ficha no carga YouTube para nadie que no lo quiera ver.
-// ════════════════════════════════════════════════════════════════
-function YouTubeBlock({ arma, padX = 16, gap = 34 }) {
-  const [loaded, setLoaded] = useState2(false);
-  const vid = window.youtubeId(arma.youtube);
-  useEffect(() => { setLoaded(false); }, [vid]);
-  if (!vid) return null; // si no hay video, no se renderiza nada
-
-  const thumb = `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`;
-  const embed = `https://www.youtube-nocookie.com/embed/${vid}?rel=0&autoplay=1&modestbranding=1`;
-
-  return (
-    <section style={{ padding: `${gap}px ${padX}px 0` }} aria-labelledby="ficha-video">
-      <window.CintaDymo id="ficha-video">Video</window.CintaDymo>
-      <div className="amx-tele">
-        <div className="amx-tele-marco">
-          {loaded ?
-            <div className="amx-tele-pantalla" style={{ cursor: 'default' }}>
-              <iframe
-                src={embed}
-                title={'Video: ' + arma.nombre}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen />
-            </div> :
-            <button type="button" className="amx-tele-pantalla" onClick={() => setLoaded(true)}
-              aria-label={'Reproducir el video de ' + arma.nombre}>
-              <img src={thumb} alt="" loading="lazy"
-                onError={(e) => {
-                  // fallback: thumbnail "0" if hqdefault not available
-                  if (!e.target.dataset.fb) {
-                    e.target.dataset.fb = '1';
-                    e.target.src = `https://i.ytimg.com/vi/${vid}/0.jpg`;
-                  } else {
-                    e.target.style.display = 'none';
-                  }
-                }} />
-              <span className="amx-tele-sello" aria-hidden="true"><span className="amx-sello">▶ Ver video</span></span>
-            </button>}
-        </div>
-        <div className="amx-tele-panel" aria-hidden="true">
-          <span className="amx-tele-perilla" />
-          <span className="amx-tele-bocina" />
-          <span className="amx-tele-perilla" />
-        </div>
-      </div>
-      <a className="amx-tele-canal" href={`https://youtube.com/watch?v=${vid}`} target="_blank" rel="noopener noreferrer">
-        @ArmasMS en YouTube ↗
-      </a>
-    </section>);
-
-}
-window.YouTubeBlock = YouTubeBlock;
 
 function sfld(label, k, f, set, p = {}) {
   return (
