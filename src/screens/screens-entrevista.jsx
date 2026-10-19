@@ -198,7 +198,7 @@ async function amxEntrevistaCrearHoja(d) {
   // sitio. Sustituye al «armado.mx» suelto que repetía la dirección por
   // tercera vez. Si el isotipo no carga, se cae a solo el logotipo: una hoja
   // sin pie de marca sería peor que una sin dibujo.
-  const isotipo = await amxEntrevistaCargarImagen('imagenes/isotipo-armado.webp');
+  const isotipo = await amxEntrevistaCargarImagen('imagenes/isotipo-armado-v2.webp');
   const LADO = 76;
   const SEPARACION = 26;
   const ESPACIADO = 3;

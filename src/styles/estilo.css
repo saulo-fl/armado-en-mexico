@@ -4947,7 +4947,7 @@
   gap: 6px;
   min-width: 0;
 }
-.amx-v2 .amx-gafete-marca img { width: 22px; height: 22px; border-radius: 4px; display: block; flex-shrink: 0; }
+.amx-v2 .amx-gafete-marca img { width: 22px; height: 22px; display: block; flex-shrink: 0; }
 .amx-v2 .amx-gafete-marca span {
   font-family: var(--mono);
   font-size: 9.5px;
@@ -5038,7 +5038,6 @@
 .amx-v2 .amx-acerca-logo {
   width: 56px; height: auto;
   flex-shrink: 0;
-  border-radius: 8px;
   display: block;
 }
 @media (min-width: 1024px) { .amx-v2 .amx-acerca-logo { width: 76px; } }
@@ -5092,7 +5091,7 @@
   gap: var(--e3);
   margin-bottom: var(--e3);
 }
-.amx-v2 .amx-acerca-duo-cab img { width: 40px; height: 40px; border-radius: 7px; display: block; }
+.amx-v2 .amx-acerca-duo-cab img { width: 40px; height: 40px; display: block; }
 .amx-v2 .amx-acerca-duo-cab .amx-oficio-tit { margin: 0; }
 /* El logo de Armas M&S es un PNG pensado sobre blanco: su placa se queda
    blanca, igual que el área de imagen de una copia. */
