@@ -196,7 +196,7 @@ Todo va dentro del **folder manila** (`.amx-carpeta`, la foto de la Home en 9-sl
   un flag `approved` filtrado en cliente publicaría el texto sin moderar en una URL
   abierta — ver el comentario de `functions/api/state.js`. El mínimo de 100
   caracteres se valida **también en el servidor** (`mergeAppend`), porque
-  `/api/append/*` es público; hay test en `functions/api/_lib.test.mjs`.
+  `/api/append/*` es público; hay test en `scripts/functions-lib.test.mjs` (corre en `npm test`).
 - **Los pulgares son SVG de trazo** (`window.ThumbIcon`), como los iconos del
   `BottomNav`. Nunca emoji: renderizan distinto por plataforma y son un tell de UI
   generada.

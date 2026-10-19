@@ -4,8 +4,8 @@
 // (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 // Comprobación de los topes anti-abuso de la API pública.
-// Correr con:  node functions/api/_lib.test.mjs
-// (El prefijo "_" impide que Pages lo convierta en una ruta.)
+// Corre en `npm test`. Vive en scripts/ y no junto a functions/api/_lib.js para que
+// la prueba no viaje dentro de functions/, que es lo que despliega Pages.
 //
 // Existe porque estos límites protegen contra algo que NO se nota: un item
 // descomunal no da error, se guarda, y a partir de ahí /api/state lo sirve
@@ -15,7 +15,7 @@ import assert from 'node:assert/strict';
 import {
   mergeAppend, APPEND_DOMAINS, RESENA_MIN, RESENA_MAX,
   normalizeReport, REPORT_MIN, REPORT_MAX,
-} from './_lib.js';
+} from '../functions/api/_lib.js';
 
 const pesa = (v) => JSON.stringify(v).length;
 let n = 0;
