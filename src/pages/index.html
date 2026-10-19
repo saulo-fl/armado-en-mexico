@@ -58,6 +58,30 @@
 <link rel="apple-touch-icon" href="imagenes/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Armado en México — Enciclopedia táctica</title>
+<script>
+  /* Precarga del sello del TUTORIAL de bienvenida, que es el LCP de la primera
+     visita: sin esto solo se descubre cuando React lo pinta (~6 s en 4G lenta).
+     SOLO si el tutorial se va a abrir —portada y sin `amx_onboarded_v1`, la misma
+     condición que app.jsx—: en las fichas prerenderizadas o para quien ya lo vio
+     serían bytes de más compitiendo con el CSS y el JS.
+     Va ANTES de cualquier <link rel="stylesheet">: un script inline posterior espera
+     a que baje la hoja de estilo y la precarga saldría tarde.
+     crossorigin es OBLIGATORIO: estilo.css usa el sello como mask-image, que se pide
+     en modo CORS; sin él la precarga no coincide y se descarga dos veces.
+     NO precargues foto-marco.webp ni logo-armado-mx.webp (18-oct-2026): medido en
+     el preview de Cloudflare, precargar el marco hace que Chrome registre el LCP de
+     la copia a ~15 s en vez de ~8 s, aunque la imagen ya esté en el teléfono a los
+     2 s. En local con python http.server salía al revés: mide en el preview. */
+  (function () {
+    var visto = false;
+    try { visto = !!localStorage.getItem('amx_onboarded_v1'); } catch (e) {}
+    if (visto || location.pathname !== window.APP_BASE) return;
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = 'imagenes/sello-desgaste.webp';
+    l.crossOrigin = 'anonymous';
+    document.head.appendChild(l);
+  })();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -250,9 +274,12 @@
 })();
 </script>
 
-<!-- React pinned (los .jsx se precompilan a .js en el build — ver package.json) -->
-<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
-<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
+<!-- React 18.3.1 pinned, servido desde el propio sitio (public/vendor/, copia exacta de
+     unpkg: el integrity es el mismo hash). Antes venía de unpkg.com: si unpkg caía, el
+     sitio salía en blanco, y costaba una conexión extra. Los .jsx se precompilan a .js
+     en el build — ver package.json -->
+<script src="vendor/react.production.min.js?v=18.3.1" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
+<script src="vendor/react-dom.production.min.js?v=18.3.1" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
 
 <!-- Data + Store + UI + screens + app.
      TODO src local lleva ?v=: el rediseño entero vive en estos archivos y sin cambiar

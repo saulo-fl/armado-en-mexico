@@ -1,1 +1,4 @@
 public/documentos-legales/*.pdf -diff -text
+# React vendorizado: byte a byte igual que en unpkg o el integrity sha384 falla y el sitio sale en blanco.
+# Sin esto, core.autocrlf de Windows lo reescribe con CRLF al hacer checkout.
+public/vendor/* -text

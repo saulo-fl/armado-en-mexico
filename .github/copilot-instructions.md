@@ -23,7 +23,7 @@ Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.
 ## Cómo está construido (lo que sorprende)
 
 - **No hay módulos ES ni bundler.** Babel precompila `.jsx` a `.js` con
-  `runtime: "classic"` (React se carga como global UMD desde unpkg). Los archivos se
+  `runtime: "classic"` (React se carga como global UMD desde `public/vendor/`). Los archivos se
   comunican por `window.*` y **el orden de los `<script>` en el HTML importa**:
   `data-precios.js` antes que `store.js`.
 - **Fuente estructurada, salida plana.** `src/styles/estilo.css` se sirve como

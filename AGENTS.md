@@ -412,7 +412,7 @@ cabecera de **`app.jsx`** (`amxSlug`, `amxSlugIndex`, `amxBuildPath`, `amxParseP
 - **No cambies las rutas SERVIDAS.** La fuente vive en `src/`, pero el build la **aplana** en `out/`: `src/styles/estilo.css` se sirve como `/estilo.css`, y `src/screens/screens-1.jsx` como `/screens-1.js`. Eso no es un detalle cosmético: las páginas cargan esas URLs planas y las 20 reglas de `_headers` las listan **una por una con ruta literal** (los comodines no matchean en Pages), así que aplanar es lo que las mantiene válidas. Si mueves algo dentro de `src/`, ajusta `scripts/copiar-estaticos.mjs`, no el HTML. `data-precios.js` debe seguir cargándose antes que `store.js`, y los PDFs viven en `public/inventarios/`.
 - `.nojekyll` es un resto de la época de GitHub Pages; en Cloudflare no hace nada. Es inofensivo: déjalo.
 - **Los `.jsx` se precompilan** con `npm run build` (Babel CLI, `babel.config.json` con `runtime: "classic"` — obligatorio: React se carga como global UMD, y el runtime `automatic` que Babel 8 trae por defecto emite `import` y rompe la app). Tras editar un `.jsx`, recompila antes de probar.
-- Los scripts de React/Babel vienen de unpkg con hashes `integrity` fijados — no cambies las versiones.
+- React 18.3.1 se sirve desde `public/vendor/` (copia exacta de unpkg) con su hash `integrity` fijado — no cambies la versión ni el archivo sin recalcular el hash.
 - La barra "◉ DEBUG" (abajo-izquierda) es una herramienta de desarrollo intencional; no la quites.
 - `public/logo.png` **no** es el logo del header: es el borrador de 256 px sin alfa que
   queda como valor de fábrica del admin (`store.js`). El header lo pinta `LogoMarca` en
