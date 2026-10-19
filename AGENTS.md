@@ -491,6 +491,26 @@ llevaban siete semanas invisibles —, «DCAM Monterrey» en 117 armas y 113 pre
 viejos. **Publicar no es desplegar.** Después de tocar `data.js` o `DEFAULT_PAGES`,
 resiembra D1 y compruébalo como visitante, no por la API.
 
+## Videos de la tele antigua
+
+Las fichas de arma, de munición y de calibre, y la portada de la Guía de calibres, muestran
+videos de YouTube dentro de una tele antigua **solo si tienen video**: sin video no se monta
+nada. Los elige Saulo **a mano** (18-oct-2026): reviews de Armas M&S, videos de calibre de
+M&S Army y, en el futuro, de creadores que lo hayan autorizado.
+
+- **Se editan en `src/data/data-videos.js`**: por id de arma, por calibre (sirve a la ficha
+  del calibre y a las municiones de ese calibre) y la lista de la guía. Las variantes que solo
+  cambian de acabado comparten video. Todos empiezan desde el principio. Un calibre o un arma
+  sin ficha no lleva video. Al tocarlo, sube su `?v=` en `src/pages/index.html`.
+- **No van en D1 ni en el admin**: la app hidrata las armas desde D1 y el resembrado pisa lo
+  que se meta por el admin. El campo `youtube` del admin sigue funcionando, detrás de los fijos.
+- `scripts/videos.test.mjs` falla si un video apunta a una ficha que ya no existe: si una
+  conciliación borra o renombra una ficha con video, hay que moverlo o quitarlo.
+- La tele es `public/imagenes/tele-antigua.webp` (1482x1131), una fotografía con la pantalla
+  recortada; el video va detrás, en el hueco (`TELE_HUECO` en `TeleVideo`, `ui.jsx`). La
+  fuente y los recortes están en `Assets del Sitio/tele/`, fuera del repo. Si cambia la foto,
+  hay que volver a medir el hueco y la perilla (`.amx-tele-perilla` en `estilo.css`).
+
 ## Mejoras futuras opcionales (NO hacer ahora)
 
 - **Prefiltro de reseñas con IA.** Hoy toda reseña espera revisión humana en
