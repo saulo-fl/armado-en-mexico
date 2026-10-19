@@ -16,101 +16,10 @@ const ADMIN_PALETTE = window.PALETTE || {
 };
 const P = ADMIN_PALETTE;
 
-// ════════════════════════════════════════════════════════════════
-// LOGIN
-// ════════════════════════════════════════════════════════════════
-function AdminLogin({ onLogin }) {
-  const [pw, setPw] = useState('');
-  const [err, setErr] = useState('');
-  const submit = (e) => {
-    e.preventDefault();
-    if (window.Store.login(pw)) onLogin();
-    else { setErr('Contraseña incorrecta'); setPw(''); }
-  };
-  return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      padding: 20,
-      background: `radial-gradient(ellipse at top, ${P.bgElev} 0%, ${P.bg} 60%)`,
-    }}>
-      <form onSubmit={submit} style={{
-        width: '100%', maxWidth: 380,
-        background: P.bgCard,
-        border: `1px solid ${P.border}`,
-        padding: 28,
-        position: 'relative',
-      }}>
-        <TC color={P.amber} />
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 10, color: P.amber,
-          letterSpacing: '0.25em', textTransform: 'uppercase',
-          marginBottom: 8,
-        }}>◆ ACCESO RESTRINGIDO</div>
-        <div style={{
-          fontFamily: 'Oswald, sans-serif',
-          fontWeight: 700, fontSize: 26,
-          color: P.text, textTransform: 'uppercase',
-          letterSpacing: '0.04em', lineHeight: 1,
-          marginBottom: 6,
-        }}>ARMADO·MX<br/><span style={{ color: P.amber }}>ADMIN</span></div>
-        <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 11, color: P.textDim,
-          marginBottom: 22, lineHeight: 1.5,
-        }}>Panel de gestión del catálogo. Curado por Saulo Flores · Armas M&amp;S.</div>
-
-        <label style={{
-          display: 'block',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 9, color: P.textMuted,
-          letterSpacing: '0.15em', textTransform: 'uppercase',
-          marginBottom: 6,
-        }}>Contraseña</label>
-        <input type="password" autoFocus value={pw} onChange={(e) => setPw(e.target.value)} style={{
-          width: '100%',
-          background: P.bg,
-          border: `1px solid ${err ? P.red : P.border}`,
-          color: P.text,
-          padding: '10px 12px',
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 13,
-          letterSpacing: '0.2em',
-          outline: 'none',
-          marginBottom: 12,
-        }} />
-        {err && <div style={{
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 10, color: P.red,
-          marginBottom: 12,
-          letterSpacing: '0.1em',
-        }}>▲ {err}</div>}
-        <button type="submit" style={{
-          width: '100%',
-          background: P.amber, color: '#000', border: 'none',
-          padding: '12px',
-          fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 13,
-          letterSpacing: '0.2em', textTransform: 'uppercase',
-          cursor: 'pointer',
-        }}>Iniciar Sesión</button>
-
-        <div style={{
-          marginTop: 18,
-          fontFamily: 'JetBrains Mono, monospace',
-          fontSize: 9, color: P.textMuted,
-          letterSpacing: '0.1em',
-          padding: 10,
-          border: `1px dashed ${P.border}`,
-          lineHeight: 1.5,
-        }}>
-          <b style={{ color: P.amber }}>Demo:</b> contraseña inicial <code style={{ color: P.amber }}>armado2026</code> · Puedes cambiarla en Configuración.
-        </div>
-      </form>
-    </div>
-  );
-}
-window.AdminLogin = AdminLogin;
+// LOGIN: no hay. /admin lo cierra Cloudflare Access (política «Solo Admins»)
+// y el servidor verifica el JWT en cada escritura. La contraseña local que
+// había aquí se retiró el 19-oct-2026: vivía en el código público y no
+// protegía nada que Access no protegiera ya.
 
 // ════════════════════════════════════════════════════════════════
 // SHELL — header + tabs
@@ -795,10 +704,9 @@ function AboutEditor() {
 }
 
 // ════════════════════════════════════════════════════════════════
-// SETTINGS — Export, Import, Password, Reset
+// SETTINGS — Export, Import, Reset
 // ════════════════════════════════════════════════════════════════
 function SettingsTab() {
-  const [newPw, setNewPw] = useState('');
   const [importText, setImportText] = useState('');
   const fileRef = useRef(null);
   const [remote, setRemote] = useState(window.Store.remoteStatus());
@@ -857,13 +765,6 @@ function SettingsTab() {
     }
   };
 
-  const changePw = () => {
-    if (!newPw || newPw.length < 4) { alert('La contraseña debe tener al menos 4 caracteres.'); return; }
-    window.Store.setPassword(newPw);
-    setNewPw('');
-    alert('✓ Contraseña actualizada.');
-  };
-
   return (
     <div>
       <SectionHead title="Configuración" sub="Backup, restauración y administración del sistema" />
@@ -884,12 +785,6 @@ function SettingsTab() {
           <button onClick={doImport} disabled={!importText} style={Object.assign({}, btnPrimary, { marginTop: 8, opacity: importText ? 1 : 0.5 })}>
             ⬆ Importar
           </button>
-        </Card>
-
-        <Card title="Cambiar contraseña">
-          <p style={txtMuted}>Mínimo 4 caracteres. Se guarda solo en este navegador.</p>
-          <input type="password" value={newPw} onChange={(e) => setNewPw(e.target.value)} placeholder="Nueva contraseña" style={inpStyle()} />
-          <button onClick={changePw} style={Object.assign({}, btnPrimary, { marginTop: 8 })}>🔒 Actualizar</button>
         </Card>
 
         <Card title="Acerca del sistema">
@@ -1076,7 +971,6 @@ const txtMuted = {
 // ADMIN APP
 // ════════════════════════════════════════════════════════════════
 function AdminApp() {
-  const [authed, setAuthed] = useState(window.Store.isLoggedIn());
   const [tab, setTab] = useState('reviews');
   const [editing, setEditing] = useState(null);
   const leerStats = () => ({
@@ -1088,11 +982,10 @@ function AdminApp() {
 
   useEffect(() => window.Store.onChange(() => setStats(leerStats())), []);
 
-  if (!authed) return <AdminLogin onLogin={() => setAuthed(true)} />;
-
   return (
     <AdminShell
-      onLogout={() => { window.Store.logout(); setAuthed(false); }}
+      // Cierra la sesión de Cloudflare Access (borra la cookie CF_Authorization).
+      onLogout={() => { window.location.href = '/cdn-cgi/access/logout'; }}
       tab={tab} setTab={setTab} stats={stats}
     >
       {tab === 'reviews'  && <ReviewsTab />}
