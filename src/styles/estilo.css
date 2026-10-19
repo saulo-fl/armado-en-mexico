@@ -2092,65 +2092,6 @@
   line-height: 1;
 }
 
-/* El mismo talón, fijo abajo en móvil. Aparece solo cuando el de la ficha sale
-   de la pantalla (IntersectionObserver en ProductScreen) y sube desde abajo:
-   es la respuesta a un gesto del visitante, no una animación de entrada. */
-.amx-v2 .amx-talon--fijo {
-  position: fixed;
-  z-index: 55;
-  left: 10px; right: 10px;
-  bottom: calc(var(--amx-nav-h, env(safe-area-inset-bottom, 0px)) + 8px);
-  width: auto;
-  margin: 0;
-  transform: none;
-  animation: amx-talon-sube .22s ease-out both;
-}
-@keyframes amx-talon-sube {
-  from { transform: translateY(130%); }
-  to   { transform: none; }
-}
-.amx-v2 .amx-talon--fijo .amx-talon-papel {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--e3);
-  padding: 6px 14px 11px;
-}
-/* Base 0 y no auto: con flex-wrap (por la nota de errata) el ancho natural del
-   rótulo en nowrap mandaba la casilla al renglón de abajo. */
-.amx-v2 .amx-talon-resumen { flex: 1 1 0; min-width: 0; }
-.amx-v2 .amx-talon-mini {
-  display: block;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--talon-rojo);
-}
-.amx-v2 .amx-talon--fijo .amx-talon-cifra { margin: 1px 0 0; font-size: 20px; white-space: nowrap; }
-/* A 360px la fecha partía el rótulo en dos renglones y el talón crecía: en los
-   teléfonos más estrechos se queda la fuente, que es lo que respalda la cifra. */
-.amx-v2 .amx-talon-mini { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 399px) { .amx-v2 .amx-talon-mini-fecha { display: none; } }
-.amx-v2 .amx-talon--fijo .amx-talon-casilla {
-  flex: 0 0 auto;
-  width: auto;
-  margin: 0;
-  padding: 0 0 0 var(--e3);
-  border-top: 0;
-  border-left: 1px dashed var(--talon-filo);
-}
-/* La nota de errata en la barra: renglón propio a todo el ancho, al piso de 12px
-   para que la barra crezca lo menos posible (3 renglones a 360px). */
-.amx-v2 .amx-talon--fijo .amx-errata {
-  flex: 1 0 100%;
-  margin: 2px 0 0;
-  font-size: 12px;
-  line-height: 1.35;
-}
-@media (min-width: 1024px) {
-  .amx-v2 .amx-talon--fijo { display: none; }
-}
 
 /* ── Los papeles de la solapa derecha: sombra y giro comunes ──────────────
    `.amx-papel` es el envoltorio que lleva la sombra; el papel de dentro puede

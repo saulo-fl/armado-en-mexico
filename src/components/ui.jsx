@@ -2490,65 +2490,11 @@ window.FichaTabs = FichaTabs;
 window.FichaPanel = FichaPanel;
 
 // ──────────────────────────────────────────────────────────────
-// TALÓN FIJO — cuándo se ve el talón de abajo en móvil
-// Sale de ProductScreen (15-sep-2026) porque la ficha de accesorio hace lo
-// mismo. `talonRef` va en el talón del folder y `fichaRef` en el contenedor de
-// la ficha; `mostrar` es true cuando ese talón ya salió por arriba y el pie del
-// sitio no asoma. `clave` (el id de la ficha) lo reinicia al cambiar de ficha.
-//
-// IntersectionObserver con la raíz implícita: recorta por los `overflow` de
-// los ancestros, así que funciona igual si hace scroll la página que si lo
-// hace el contenedor interno del shell móvil. Nada de escuchar el scroll.
-// El margen de arriba descuenta la barra superior (64px), que tapa lo que
-// pasa por debajo de ella.
-//
-// NO BASTA OBSERVAR EL TALÓN. En móvil va debajo de la ficha técnica, fuera
-// de la pantalla al cargar, y un salto de scroll lo lleva de «debajo» a
-// «encima» sin cruzar nunca la ventana: su estado no cambia y el observer no
-// dispara. Por eso se observan también las celdas del folder y las secciones
-// de la ficha, que cubren la página entera: cualquier salto cambia la
-// visibilidad de alguna, y en cada aviso se mide dónde quedó el talón.
-//
-// Se observa el pie del sitio por su CLASE y no un centinela ni la etiqueta:
-// un salto de scroll cruza un centinela sin que el observer dispare, y cada
-// opinión publicada lleva su propio <footer> antes que el del sitio (revisión
-// del PR #152).
-// ──────────────────────────────────────────────────────────────
-function useTalonFijo(clave) {
-  const [talonFuera, setTalonFuera] = React.useState(false);
-  const [pieVisible, setPieVisible] = React.useState(false);
-  const talonRef = React.useRef(null);
-  const fichaRef = React.useRef(null);
-
-  React.useEffect(() => {
-    setTalonFuera(false);
-    setPieVisible(false);
-    const el = talonRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const revisar = () => setTalonFuera(el.getBoundingClientRect().bottom < 64);
-    const io = new IntersectionObserver(revisar, { rootMargin: '-64px 0px 0px 0px' });
-    io.observe(el);
-    const ficha = fichaRef.current;
-    if (ficha) {
-      Array.from(ficha.children).forEach((c) => io.observe(c));
-      ficha.querySelectorAll('.amx-carpeta-grid > *').forEach((c) => io.observe(c));
-    }
-    const pie = document.querySelector('.amx-pie-sitio');
-    const ioPie = pie && new IntersectionObserver(([e]) => setPieVisible(e.isIntersecting));
-    if (ioPie) ioPie.observe(pie);
-    return () => { io.disconnect(); if (ioPie) ioPie.disconnect(); };
-  }, [clave]);
-
-  return { talonRef, fichaRef, mostrar: talonFuera && !pieVisible };
-}
-window.useTalonFijo = useTalonFijo;
-
-// ──────────────────────────────────────────────────────────────
 // TALÓN DE COMPROBANTE — el precio, en papel autocopiante rosa
-// En la ficha va bajo la copia; con `fijo` es la barra de abajo en móvil. La
-// casilla de Comparar se tacha con una X: el estado lo dicen la X y el texto.
-// `historial` es solo para la nota de errata (ver NotaErrata); en el fijo va en
-// un renglón propio bajo la cifra y la casilla.
+// Va en la ficha, bajo la copia. La casilla de Comparar se tacha con una X:
+// el estado lo dicen la X y el texto. `historial` es solo para la nota de
+// errata (ver NotaErrata). Ya no hay talón fijo abajo en móvil: Saulo lo retiró
+// el 18-oct-2026 («estorba y no es vital, no somos una tienda»).
 //
 // `ultimoConocido`: el precio viene de un inventario ANTERIOR al último de su
 // sucursal, es decir, el arma ya no aparece en el más reciente. El talón lleva
@@ -2560,35 +2506,25 @@ window.useTalonFijo = useTalonFijo;
 // Sin `onComparar` no hay casilla: la ficha de accesorio no tiene comparador
 // (15-sep-2026).
 // ──────────────────────────────────────────────────────────────
-function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, fijo = false, talonRef, ultimoConocido = false, historial, unidad }) {
+function TalonComprobante({ precio, fuente, fecha, enComparacion, onComparar, ultimoConocido = false, historial, unidad }) {
   return (
-    <div ref={talonRef} className={'amx-talon' + (fijo ? ' amx-talon--fijo' : '')}>
+    <div className="amx-talon">
       <div className="amx-talon-papel">
-        {fijo ? (
-          <div className="amx-talon-resumen">
-            <span className="amx-talon-mini">{ultimoConocido ? 'Último precio' : 'Precio'} {fuente}{fecha && <span className="amx-talon-mini-fecha"> · {fecha}</span>}</span>
-            <span className="amx-talon-cifra">{String(precio || '').replace(' MXN', '')}{unidad && <small> / {unidad}</small>}</span>
-          </div>
-        ) : (
-          <React.Fragment>
-            <div className="amx-talon-cab"><span>Comprobante de precio</span><span>{unidad ? `Por ${unidad} · con IVA` : 'Con IVA'}</span></div>
-            <span className="amx-talon-cifra">{precio}</span>
-            <NotaErrata historial={historial} />
-            {ultimoConocido &&
-              <span className="amx-sello amx-sello--restr amx-talon-sello">Último precio conocido</span>}
-            <dl className="amx-talon-datos">
-              <dt>Fuente</dt><dd>{fuente}</dd>
-              {fecha && <React.Fragment><dt>Fecha</dt><dd>{fecha}</dd></React.Fragment>}
-            </dl>
-          </React.Fragment>
-        )}
+        <div className="amx-talon-cab"><span>Comprobante de precio</span><span>{unidad ? `Por ${unidad} · con IVA` : 'Con IVA'}</span></div>
+        <span className="amx-talon-cifra">{precio}</span>
+        <NotaErrata historial={historial} />
+        {ultimoConocido &&
+          <span className="amx-sello amx-sello--restr amx-talon-sello">Último precio conocido</span>}
+        <dl className="amx-talon-datos">
+          <dt>Fuente</dt><dd>{fuente}</dd>
+          {fecha && <React.Fragment><dt>Fecha</dt><dd>{fecha}</dd></React.Fragment>}
+        </dl>
         {onComparar && (
           <button type="button" className="amx-talon-casilla" aria-pressed={!!enComparacion} onClick={onComparar}>
             <span className="amx-talon-caja" aria-hidden="true">{enComparacion ? 'X' : ''}</span>
             {enComparacion ? 'En comparación' : 'Comparar'}
           </button>
         )}
-        {fijo && <NotaErrata historial={historial} />}
       </div>
     </div>
   );

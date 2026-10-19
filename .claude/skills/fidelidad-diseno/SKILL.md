@@ -108,10 +108,9 @@ a CSS, la skill `migrar-a-css`.
 - **Tarjetas de arma:** muestran existencias por sucursal (`● 36 DCAM · 18 OTCA` /
   `✕ AGOTADO`) y precio exacto compacto bajo la escala $$$$$ (solo lectura de
   getArmaExistencias/getArmaExistenciasOTCA — sin tocar store).
-- **Ficha móvil:** desde el 13-sep-2026 la barra fija es el **talón de comprobante**
-  (`.amx-talon--fijo`), que flota 8px sobre `var(--amx-nav-h)` y solo aparece cuando
-  el talón de la ficha sale de pantalla (ver «Ficha de arma — estructura vigente»).
-  La barra soldada al nav que había antes usaba `calc(var(--amx-nav-h, 74px) - 1px)`.
+- **Ficha móvil: NADA FIJO abajo.** El talón fijo (`.amx-talon--fijo`, precio y Comparar
+  pegados sobre el nav) lo retiró Saulo el 18-oct-2026: «estorba y no es vital ya que no
+  somos una tienda». No reintroducir una barra de precio ni de conversión.
   **`--amx-nav-h` la publica `BottomNav` midiéndose con `ResizeObserver`** (y ya
   incluye el safe-area en su propio padding — no lo sumes otra vez). Antes eran dos
   literales `76px` a mano contra un nav que mide ~74: quedaba una rendija de 2px por
@@ -155,11 +154,10 @@ Todo va dentro del **folder manila** (`.amx-carpeta`, la foto de la Home en 9-sl
   ni encoge al cambiar de pestaña, que mareaba.
 - **Fuera del folder**, cada sección con su **`CintaDymo`**: vitrina con dos repisas
   (`Repisa` + `RepisaArticulo`; filas de 6 en escritorio, tira con scroll en móvil)
-  → tele de los 80 (`YouTubeBlock`, solo si hay video) → tarjeta de comentarios
+  → tele antigua (`SeccionVideo`/`TeleVideo` en ui.jsx, solo si hay video) → tarjeta de comentarios
   (`OpinionBlock`) → armas similares (`ArmaExpediente`).
-- **Móvil (<1024px)**: el mismo orden en pila. El **talón fijo** abajo aparece
-  cuando el talón de la ficha sale por arriba y se retira al asomar el `<footer>` o
-  con una comparación activa. IntersectionObserver sin escuchar el scroll, pero
+- **Móvil (<1024px)**: el mismo orden en pila, sin talón fijo (retirado el 18-oct-2026).
+  Lo que sigue es historia de cuando existía. IntersectionObserver sin escuchar el scroll, pero
   observando también las celdas y las secciones (ver la bitácora: un salto de
   scroll no dispara el observer del objetivo si este no cruza la ventana).
 - **Vitrina**: la cubierta de la repisa sube el 34 % del alto de la foto por detrás

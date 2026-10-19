@@ -32,8 +32,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
   }, [arma?.id]);
   useEffect(() => { setTab(0); }, [armaId]);
 
-  // El talón fijo de abajo (móvil): ver useTalonFijo en ui.jsx.
-  const talon = window.useTalonFijo(armaId);
 
   if (!arma) return <div style={{ padding: 40, color: PALETTE.text }}>Arma no encontrada</div>;
 
@@ -83,7 +81,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
 
   return (
     <div style={{ paddingBottom: 90 }}>
-     <div ref={talon.fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+     <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
       {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
       <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
@@ -130,7 +128,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             </div>
 
             <div className="amx-carpeta-talon">
-              <window.TalonComprobante talonRef={talon.talonRef}
+              <window.TalonComprobante
                 precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
                 ultimoConocido={ultimoConocido} historial={priceHistory}
                 enComparacion={inCmp} onComparar={comparar} />
@@ -276,14 +274,6 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
           </div>
         </section>}
      </div>
-
-      {/* El talón fijo (móvil): el mismo comprobante, en la zona del pulgar.
-          Se oculta si el flotante de comparación está activo (mismo hueco). */}
-      {!ancho && talon.mostrar && compareIds.length === 0 &&
-        <window.TalonComprobante fijo
-          precio={precioActual} fuente={curSigla} fecha={fechaPrecio}
-          ultimoConocido={ultimoConocido} historial={priceHistory}
-          enComparacion={inCmp} onComparar={comparar} />}
 
       <window.ReportarError tipo="arma" titulo={arma.nombre} ruta={'/' + (window.amxSlugIndex().slugPorA[arma.id] || 'arsenal')} />
     </div>);
