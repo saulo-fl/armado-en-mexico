@@ -1,7 +1,7 @@
 <div align="center">
   <a href="https://armado.mx"><img src="docs/capturas/readme/portada.webp" alt="Armado en México: la Glock 25 frente a la Glock 28 en el comparador de escritorio y la ficha de la Glock 25 en el teléfono"></a>
   <p><strong>Enciclopedia divulgativa de armas legales en México</strong><br>Inventario oficial DCAM y OTCA · por Armas M&amp;S</p>
-  <p><a href="https://armado.mx"><strong>armado.mx</strong></a> · <a href="#ficha-de-arma">Qué hace</a> · <a href="#colaborar-con-reportes">Colaborar</a> · <a href="#licencia">Licencia</a></p>
+  <p><a href="https://armado.mx"><strong>armado.mx</strong></a> · <a href="#ficha-de-arma">Cómo usarlo</a> · <a href="#colaborar-con-reportes">Colaborar</a> · <a href="#licencia">Licencia</a></p>
 </div>
 
 ## ¿Qué es Armado en México?
@@ -30,11 +30,11 @@ quien la está considerando:
   de su inventario. Si el arma ya no aparece en el inventario más reciente, lleva el sello
   **ÚLTIMO PRECIO CONOCIDO**. La casilla **Comparar** la manda al comparador.
 - **Existencias por armería.** La tarjeta de almacén da cuántas piezas marcó el último inventario
-  de la DCAM y el de la OTCA —o AGOTADO—, con la descripción literal del inventario y el enlace al
+  de la DCAM y el de la OTCA (o AGOTADO), con la descripción literal del inventario y el enlace al
   PDF oficial. Es un dato histórico, no un stock en tiempo real, y la ficha lo advierte.
 - **Calibre y ficha técnica.** Calibre, capacidad, mecanismo, longitud, peso, origen y año,
   mecanografiados en una ficha de fichero.
-- **Clasificación legal.** El sello de la foto —CIVIL, SEGURIDAD o EXCLUSIVO— y la hoja de oficio
+- **Clasificación legal.** El sello de la foto (CIVIL, SEGURIDAD o EXCLUSIVO) y la hoja de oficio
   que explica qué permiso hace falta, dónde se consigue y un enlace a la guía legal. Sus
   separadores guardan también los usos del arma y su historia.
 - **Historial de precios.** Cada inventario oficial en el que aparece el arma deja un punto en el
@@ -55,7 +55,7 @@ de ese calibre y, en la vitrina, a las demás municiones del mismo calibre.
 
 <p align="center"><img src="docs/capturas/readme/ficha-accesorio.gif" alt="Recorrido por la ficha de la mira Meprolight MEPRO MOR: precio, existencias, ficha técnica, armas compatibles e historial" width="640"></p>
 
-Los accesorios —cargadores, ópticas, empuñaduras y demás— siguen la misma lógica que las armas:
+Los accesorios (cargadores, ópticas, empuñaduras y demás) siguen la misma lógica que las armas:
 foto con su sello de clasificación, ficha técnica, comprobante de precio y tarjeta de almacén.
 Cada uno dice con qué armas es compatible, y cada arma lista los suyos.
 
@@ -70,16 +70,18 @@ de cualquier tarjeta o con la casilla **Comparar** de la ficha; si se añade una
 la primera que entró, y cada comparación tiene su propia URL para compartirla.
 
 Sirve para decidir entre candidatas con datos y no con fotos. El recorrido enseña el caso típico: la
-**Ruger LCP** y la **Ruger LCP MAX** parecen la misma pistola en dos versiones —misma marca,
-calibre, mecanismo y origen, las dos de uso civil—, pero fila por fila la diferencia salta.
+**Ruger LCP** y la **Ruger LCP MAX** parecen la misma pistola en dos versiones: misma marca,
+calibre, mecanismo y origen, y las dos de uso civil. Fila por fila, la diferencia salta.
 
 ## Apartado legal
 
 <p align="center"><img src="docs/capturas/readme/legalidad.gif" alt="Recorrido por Legalidad: la entrevista, el mapa del trámite, los folders «Lo que permite la ley», «En tu estado» y «Trámites y costos», y las fuentes al pie" width="640"></p>
 
-Una sola página en lenguaje llano, con la entrevista arriba, el mapa del trámite y tres folders
-desplegables. **Toda afirmación lleva su nota numerada**, y al pie van las fuentes oficiales con la
-fecha en que se consultaron:
+Aquí podrás encontrar todo lo referente a la legalidad de las armas en México, explicado sin
+tecnicismos: qué te permite la ley, qué cambia según tu estado, qué trámites tienes que hacer ante
+la Secretaría de la Defensa y cuánto cuesta cada uno. Arriba está la entrevista para saber si
+cumples los requisitos y el mapa del trámite, paso a paso. Cada dato lleva su nota, y al pie están
+las fuentes oficiales de donde sale.
 
 - **Lo que permite la ley**: qué armas están permitidas, dónde pueden estar y cuándo es delito.
 - **En tu estado**: lo que de verdad cambia por estado. Lo que no está verificado **se declara** en
@@ -92,19 +94,19 @@ fecha en que se consultaron:
 - **Fuentes**: las citadas, en el orden de sus notas, y plegados debajo los demás documentos
   oficiales de consulta.
 
-Escrita sobre la Ley Federal de Armas de Fuego y Explosivos **reformada el 29 de mayo de 2025**.
+Información actualizada al 19 de septiembre de 2026. Esta página no constituye ni reemplaza una consulta legal.
 
 ## Entrevista de documentos
 
 <p align="center"><img src="docs/capturas/readme/entrevista.gif" alt="La entrevista «¿Puedo comprar un arma?» contestada de principio a fin: los documentos aparecen sobre la mesa hasta el dictamen" width="400"></p>
 
-**«¿Puedo comprar un arma?»** es un autodiagnóstico: preguntas sobre tu situación —ninguna pide
-un dato personal, todas las respuestas son categorías— y, con cada respuesta, el documento que te
+**«¿Puedo comprar un arma?»** es un autodiagnóstico: preguntas sobre tu situación (ninguna pide
+un dato personal; todas las respuestas son categorías) y, con cada respuesta, el documento que te
 toca cae sobre la mesa: acta de nacimiento, CURP, identificación, cartilla, comprobante de
 ingresos, constancia de antecedentes, comprobante de domicilio, certificado médico-psicológico.
 
-Distingue los escenarios que el formato distingue y casi nadie cuenta —asalariado, independiente,
-pensionado, ejidatario, comunero, jornalero, coleccionista, socio de club y militar— y al final da
+Distingue los escenarios que el formato distingue y casi nadie cuenta: asalariado, independiente,
+pensionado, ejidatario, comunero, jornalero, coleccionista, socio de club y militar. Al final da
 el dictamen con la lista de documentos que te corresponden, que se puede guardar como imagen.
 Cuando algo no procede lo dice sin rodeos y sin ofrecer un remedio que no existe. Y cuando reúnes
 todo, tampoco promete nada: la autorización la decide la autoridad, no un cuestionario.
@@ -113,15 +115,14 @@ todo, tampoco promete nada: la autorización la decide la autoridad, no un cuest
 
 <p align="center"><img src="docs/capturas/readme/calibres.gif" alt="Recorrido por la Guía de calibres: los cartuchos a escala, las fichas, los fundamentos y la ficha del .380 ACP con su tamaño real junto a un bolígrafo y los calibres con los que se compara" width="640"></p>
 
-Treinta cartuchos: qué son, qué tan fuerte pega cada uno y cuáles puede comprar un civil en
-México. La vitrina los pone **a su tamaño real, de menor a mayor**, y un filtro separa los de uso
-civil, por tipo de arma y Rimfire de percusión central. Cada calibre tiene su ficha, en el mismo
-folder que las armas: sistema, uso típico, velocidad y energía aproximadas, retroceso, su
-clasificación legal, su tamaño real junto a un bolígrafo de 15 cm, las armas del catálogo que lo
-usan y las municiones de ese calibre en el inventario oficial.
+Sirve para elegir el calibre antes que el arma. Las cifras son divulgativas y cada ficha dice de
+dónde salen.
 
-Sirve para elegir el calibre antes que el arma. Las cifras son divulgativas —de una carga
-comercial corriente— y cada ficha dice de dónde salen.
+La vitrina los pone a su tamaño real, de menor a mayor, y un filtro separa los de uso civil, por
+tipo de arma y Rimfire de percusión central. Cada calibre tiene su ficha, en el mismo folder que las
+armas: sistema, uso típico, velocidad y energía aproximadas, retroceso, su clasificación legal, su
+tamaño real junto a un bolígrafo de 15 cm, las armas del catálogo que lo usan y las municiones de
+ese calibre en el inventario oficial.
 
 ## Arsenal por sucursal y por disponibilidad
 
@@ -144,36 +145,34 @@ buscador, tipo, calibre, armería, disponibilidad, rango de precio, uso, marca, 
 
 ![El aviso «¿Encontraste un dato incorrecto?» al pie de la ficha de la Glock 25](docs/capturas/readme/reportes.webp)
 
-La enciclopedia se corrige con ayuda de quien la usa. Al pie de cada ficha de arma, munición,
-accesorio y calibre, y de las páginas de Legalidad y Preguntas frecuentes, está el aviso
-**¿Encontraste un dato incorrecto?** Su botón **Repórtalo** abre el
-[formulario público de corrección](https://github.com/saulo-fl/armado-en-mexico/issues/new?template=correccion.yml)
-en GitHub con la página, el tipo de contenido y el nombre de la ficha ya puestos. Pide:
+**¿Viste un precio viejo, un calibre mal puesto o un trámite que ya cambió? Ayúdanos a corregirlo.**
 
-1. La página exacta y el tipo de contenido.
-2. El dato actual, tal como aparece.
-3. La corrección propuesta y por qué.
-4. Las fuentes: DOF, Cámara de Diputados, DEFENSA, inventarios DCAM/OTCA, el fabricante o un
-   manual oficial.
+Armado en México se hace entre todos, y cada corrección vuelve más confiable la información para la
+siguiente persona que la consulte. No necesitas saber programar: al pie de cada ficha y de las
+páginas de Legalidad y Preguntas frecuentes está el botón **Repórtalo**. Te lleva a un formulario de
+GitHub con la página ya puesta; solo cuéntanos qué está mal, cuál es el dato correcto y dónde lo
+comprobaste (el DOF, la Defensa, los inventarios DCAM y OTCA o el fabricante).
 
-Cada aportación se revisa con sus fuentes antes de tocar la web. El formulario es público: no
-incluyas datos personales. Si además quieres proponer el cambio en código, el proceso está en
-[`CONTRIBUTING.md`](CONTRIBUTING.md).
+Revisamos cada reporte con sus fuentes antes de cambiar la web. El formulario es público: no pongas
+datos personales.
+
+**[Reportar un dato incorrecto](https://github.com/saulo-fl/armado-en-mexico/issues/new?template=correccion.yml)**
+· Si sabes programar, también puedes proponer el cambio en código: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Sistema de recomendaciones
 
 ![La tarjeta de comentarios «¿Recomiendas esta arma?» con el formulario abierto](docs/capturas/readme/recomendaciones.webp)
 
-Sin estrellas: cada ficha pregunta **«¿Recomiendas esta arma?»** y se contesta con uno de dos
-sellos, **Sí la recomiendo** o **No la recomiendo**. Un voto sin reseña no existe: al elegir sello
-se abre el formulario, y la reseña pide al menos 100 caracteres, un nombre o apodo y un correo que
-nunca se publica.
+¿Ya tienes o has usado un arma del catálogo? Tu experiencia le sirve a quien está por elegir la suya.
 
-Nada sale al público sin moderación. Toda reseña entra en una cola privada, una persona del
-equipo decide si cumple las [normas](#soporte-y-normas) y, al aprobarla, el correo se borra. Con
-las aprobadas, la ficha resume el sentir de la comunidad —**Extremadamente positivas**,
-**Mayormente positivas**, **Variadas**, **Mayormente negativas**— y deja leer cada opinión. La
-misma tarjeta está en las fichas de munición y de accesorio.
+1. Abre la ficha del arma y baja hasta **«¿Recomiendas esta arma?»**.
+2. Elige **Sí la recomiendo** o **No la recomiendo**.
+3. Cuenta tu experiencia: para qué la usas, qué te gustó y qué no.
+
+Tu opinión se suma a las de los demás en un resumen que va de **Extremadamente positivas** a
+**Mayormente negativas**, y cualquiera puede leerlas una por una. Así, quien está por comprar elige
+con la experiencia de quienes ya la usan, no solo con la ficha técnica. También puedes opinar sobre
+municiones y accesorios.
 
 ## Soporte y normas
 
@@ -193,8 +192,8 @@ las aportaciones:
   corregir datos por el formulario público declarando su relación.
 - **Autenticidad**: nada de reseñas copiadas, pagadas o coordinadas.
 
-Explica también **cómo se modera** —cola privada, revisión humana, las opiniones negativas
-fundadas con el mismo trato que las positivas— y trae el formulario para **denunciar una reseña**,
+Explica también **cómo se modera** (cola privada, revisión humana, y las opiniones negativas
+fundadas con el mismo trato que las positivas) y trae el formulario para **denunciar una reseña**,
 de forma anónima si se quiere.
 
 ## Licencia
