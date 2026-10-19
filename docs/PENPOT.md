@@ -19,10 +19,9 @@ Nunca al revés. Si un token cambia en Penpot, se cambia en `estilo.css`, se reg
 JSON y se vuelve a importar. `scripts/tokens.test.mjs` falla en CI si el JSON y el CSS se
 separan.
 
-**Penpot manda solo sobre lo nuevo** (una pantalla que aún no existe, el rediseño de
-Legalidad) y solo hasta que se mergea el PR que lo implementa. Después, el board pasa a
-histórico y la captura del build real ocupa su lugar. El juez visual sigue siendo el
-navegador con el build (`npm run smoke`, Chrome DevTools), no Penpot.
+**Penpot manda solo sobre lo nuevo** (una pantalla que aún no existe) y solo hasta que se
+mergea el PR que lo implementa. Después, el board pasa a histórico y la captura del build
+real ocupa su lugar. El juez visual sigue siendo el navegador con el build (`npm run smoke`, Chrome DevTools), no Penpot.
 
 ## Mapa del archivo
 
@@ -36,7 +35,7 @@ navegador con el build (`npm run smoke`, Chrome DevTools), no Penpot.
 
 Reglas de nombre: Penpot normaliza `a/b` a `a / b`. Prefijos `docs`, `tokens`, `components`,
 `screens`, `real`. Hojas en español y kebab-case, iguales a la ruta del sitio
-(`/legalidad/requisitos` → `legalidad-requisitos`). Capas por función (`fondo`, `titulo`,
+(`/legalidad/federal` → `legalidad-federal`). Capas por función (`fondo`, `titulo`,
 `cinta`, `sello`), máximo 3-4 niveles, flex en casi todos los contenedores, **cero
 valores duros**: todo color, espacio y radio sale de un token; todo texto, de una
 tipografía `tipo/*`.
@@ -147,7 +146,7 @@ librerías, borrar boards ajenos, poner valores duros.
 ```
 npm run tokens      # regenera docs/penpot/tokens.json desde estilo.css
 npm test            # scripts/tokens.test.mjs: el JSON coincide con el CSS
-npm run capturas    # 20 pantallas a 360 px en docs/capturas/movil/ (contra armado.mx)
+npm run capturas    # las pantallas de RUTAS a 360 px en docs/capturas/movil/ (contra armado.mx)
 ```
 
 Lado Penpot: importar `tokens.json` en el panel de Tokens (un clic) o volcar por MCP con el

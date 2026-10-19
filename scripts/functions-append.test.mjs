@@ -1,6 +1,8 @@
+// Prueba de functions/api/append/[domain].js. Corre en `npm test`; vive en scripts/ para
+// no viajar dentro de functions/, que es lo que despliega Pages.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { onRequestPost } from './[domain].js';
+import { onRequestPost } from '../functions/api/append/[domain].js';
 
 const request = (body) => new Request('https://armado.mx/api/append/reports', {
   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),

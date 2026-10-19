@@ -215,7 +215,10 @@ def _leer_pagina(bajar, pagina: str, url: str, reintento_seg: float) -> dict:
 
 
 def _codigo_viejo() -> str:
-    """Cola del latido si correr.sh no pudo actualizar el clon (DCAM_CODIGO_VIEJO = fecha del commit)."""
+    """Cola del latido si el clon no se pudo actualizar (DCAM_CODIGO_VIEJO = fecha del commit).
+
+    La exportaba correr.sh, del diseño de papel que nunca se desplegó (salió del repo el
+    18-oct-2026). Ninguna unidad vigente la define, así que hoy la cola no aparece."""
     viejo = os.environ.get("DCAM_CODIGO_VIEJO")
     return f" · ⚠️ corriendo con código de {viejo}" if viejo else ""
 
@@ -320,7 +323,7 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
                           f" · existencias: {exist} · {n_img} imágenes"})
 
     # Señal para el conciliador: existencias nuevas/cambiadas con PDF ya en disco.
-    # Solo escribe la bandera; el .path unit la observa y dispara conciliar.sh.
+    # Solo escribe la bandera; el .path unit la observa y dispara conciliar-pipeline.sh.
     exist_nuevas = [u for u in cambios["nuevos"] + cambios["cambiados"]
                     if actuales[u]["tipo"] == "existencias" and u in archivos]
     if exist_nuevas:

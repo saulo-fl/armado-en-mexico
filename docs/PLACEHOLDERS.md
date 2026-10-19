@@ -105,45 +105,28 @@ fotos dedicadas con persona/contexto.
 
 ---
 
-## 🔴 PRIORIDAD ALTA — fotos de arma
+## Fotos de arma
 
-> ### Aquí NO van las cifras. Las imprime el censo:
-> ```bash
-> uv run .claude/skills/fotos-producto/scripts/fotos.py pendientes
-> uv run .claude/skills/fotos-producto/scripts/fotos.py pendientes --web --json   # el input del buscador
-> ```
-> Este documento dijo «111 fotos reales, ya cubierto» cuando faltaban 81, y luego
-> «192 armas» cuando ya eran 253. **Dos veces mandó a trabajar con números falsos.**
-> Un documento con cifras caduca; el comando las mide contra `data.js` y contra el
-> disco cada vez que se corre. Si vienes a saber cuánto falta, córrelo.
->
-> Lo que el censo distingue, y es lo que decide el trabajo: **`RECORTABLE`** se
-> arregla sin salir del disco (su original externo ya está aquí), mientras
-> **`SIN_FOTO`** y **`RESUSTITUIR`** hay que ir a buscarlas a la web.
+Las cifras no van aquí: las mide el censo contra `data.js` y contra el disco cada vez
+que se corre. Si vienes a saber cuánto falta, córrelo:
 
-Lo que no caduca son los **motivos de rechazo**, que ninguna métrica ve y
-conviene tener presentes al buscar sustitutas: fotos de escena o con una persona
-sosteniendo el arma, tintes de color (la Ruger LCP salía azul y la CZ P-10 C
-dorada), el arma cortada por el borde del encuadre, un cargador suelto flotando
-al lado, y dos «Retay Masai Mara» que en realidad son la culata y el guardamanos
-sueltos, no el arma.
+```bash
+uv run .claude/skills/fotos-producto/scripts/fotos.py pendientes
+uv run .claude/skills/fotos-producto/scripts/fotos.py pendientes --web --json   # el input del buscador
+```
 
-El grueso de las que faltan son las altas del inventario de OTCA Monterrey. Hoy su
-ficha dibuja la **silueta de su tipo** (`imagenes/silueta-<tipo>.webp`, vía
-`armaPlaceholder` en `data.js`), no un marcador rayado: los SVG inline se retiraron
-el 8-sep-2026. `fotos.py pendientes` da el desglose por marca al día, y está muy
-concentrado — seis marcas cubren más de la mitad, así que conviene trabajar por
-marca y no por arma: el patrón de URL del sitio de un fabricante se descubre una
-vez y sirve para sus 30 piezas.
+El censo distingue lo que decide el trabajo: **`RECORTABLE`** se arregla sin salir del
+disco (su original externo ya está aquí), mientras **`SIN_FOTO`** y **`RESUSTITUIR`** hay
+que ir a buscarlas a la web. Un arma sin foto propia dibuja la **silueta de su tipo**
+(`imagenes/silueta-<tipo>.webp`, vía `armaPlaceholder` en `data.js`).
 
-**«No publica foto» no es lo mismo que «no publica foto grande».** Medido el
-22-sep: CZ —la marca con más huecos— publica su catálogo entero a 750×750, por
-debajo del mínimo de 900, y sus tres dominios (`czub.cz`, `cz-usa.com`,
-`czfirearms.com`) son el mismo sitio. Para esa marca el fabricante no es una vía, y
-descubrirlo cuesta una comprobación o treinta búsquedas inútiles.
-
-El arma larga es el caso donde el semáforo estaba mal calibrado hasta el 31-ago
-(ver la bitácora de la skill `fotos-producto`).
+Lo que no caduca son los **motivos de rechazo**, que ninguna métrica ve y conviene tener
+presentes al buscar sustitutas: fotos de escena o con una persona sosteniendo el arma,
+tintes de color (la Ruger LCP salía azul y la CZ P-10 C dorada), el arma cortada por el
+borde del encuadre, un cargador suelto flotando al lado, y dos «Retay Masai Mara» que en
+realidad son la culata y el guardamanos sueltos, no el arma. Y **«no publica foto» no es
+lo mismo que «no publica foto grande»**: CZ publica su catálogo entero a 750×750, por
+debajo del mínimo de 900 (medido el 22-sep-2026).
 
 Estándar: **lateral sobre lienzo 1:1 con alfa**, cañón a la derecha salvo que el
 fabricante solo publique del otro lado. Alto máx. en ficha: 240px escritorio /

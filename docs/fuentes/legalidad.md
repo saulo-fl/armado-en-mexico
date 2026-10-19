@@ -5,14 +5,8 @@ investigacion con fuentes oficiales, y se conserva esta hoja para poder auditar 
 afirmacion. El juez de estos datos es **`scripts/check-legal.mjs`**: ninguna entrada pasa sin
 su fundamento y su fuente, o sin ir marcada como hueco.
 
-| Tabla | Entradas |
-|---|---|
-| `fuentes` | 26 |
-| `normas` | 9 |
-| `articulos` | 33 |
-| `tramites` | 6 |
-| `requisitos` | 33 |
-| `entidades` | 32 |
+Las cifras de cada tabla (fuentes, normas, articulos, tramites, requisitos, entidades) no se
+copian aqui porque caducan: las da el juez, `node scripts/check-legal.mjs`.
 
 ## Las dos reglas del archivo
 

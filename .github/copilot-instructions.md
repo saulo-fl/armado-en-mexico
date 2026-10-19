@@ -27,7 +27,7 @@ Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.
   comunican por `window.*` y **el orden de los `<script>` en el HTML importa**:
   `data-precios.js` antes que `store.js`.
 - **Fuente estructurada, salida plana.** `src/styles/estilo.css` se sirve como
-  `/estilo.css`; `src/screens/screens-1.jsx` como `/screens-1.js`. Las 20 reglas de
+  `/estilo.css`; `src/screens/screens-1.jsx` como `/screens-1.js`. Las reglas de
   `public/_headers` listan esas rutas planas **una por una** (los comodines no funcionan
   en Pages). Si mueves algo dentro de `src/`, ajusta `scripts/copiar-estaticos.mjs`, no el HTML.
 - **`out/` no se commitea.** Lo genera el build en cada deploy.
