@@ -1,0 +1,227 @@
+#!/usr/bin/env bash
+# Ponytail check de solucionar.sh SIN Docker/APOLO real: un `docker` falso al
+# frente del PATH simula el `docker run` y así se prueba el contrato de stdout
+# y la validación de argumentos en HEFESTO/Windows. No se añade a npm test (es
+# infra, no Node); se corre a mano: bash scripts/dcam/jaula/test-solucionar-smoke.sh
+set -euo pipefail
+cd "$(dirname "$0")/../../.."
+SCRIPT="$(pwd)/scripts/dcam/jaula/solucionar.sh"
+
+FAIL=0
+ok()  { echo "OK   $1"; }
+mal() { echo "FALLA $1"; FAIL=1; }
+
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+# --- repo falso que hace de $DCAM_DIR/repo, con la rama que solucionar.sh clona ---
+export DCAM_DIR="$TMP/dcam"
+mkdir -p "$DCAM_DIR"
+git init --quiet "$DCAM_DIR/repo"
+git -C "$DCAM_DIR/repo" -c user.email=t@t -c user.name=t commit --quiet --allow-empty -m init
+git -C "$DCAM_DIR/repo" branch --quiet "auto/inventario-13-OCT-2026"
+
+# --- MAIN falso: las rutas -v existen y la lib exporta un PERMITIDOS mínimo
+# (solucionar.sh lo lee en el host para el extractor) ---
+MAIN="$TMP/main"
+mkdir -p "$MAIN/scripts/dcam/jaula" "$MAIN/.claude/agents"
+: > "$MAIN/scripts/dcam/jaula/dentro.sh"
+: > "$MAIN/scripts/dcam/jaula/extraer.sh"
+: > "$MAIN/.claude/agents/solucionador-dcam.md"
+echo 'export const PERMITIDOS = new Set(["src/data/data.js"]);' > "$MAIN/scripts/dcam/validar-parche-lib.mjs"
+
+# --- W con la entrada mínima que solucionar.sh copia a la jaula ---
+W="$TMP/w"
+mkdir -p "$W"
+echo "motivo de prueba" > "$W/motivo.txt"
+echo "prompt de prueba" > "$W/prompt.txt"
+
+FAKEBIN="$TMP/bin"
+mkdir -p "$FAKEBIN"
+
+# (a) fecha inválida -> exit 2, sin tocar nada. El regex de solucionar.sh solo
+# exige el FORMATO YYYY-MM-DD (no valida que el mes/día exista); una fecha con
+# formato roto de verdad es "2026/10/13".
+set +e
+OUT="$(bash "$SCRIPT" "2026/10/13" "auto/inventario-13-OCT-2026" "$W" "$MAIN" 2>"$TMP/err-a")"
+RC=$?
+set -e
+[ "$RC" -eq 2 ] && [ -z "$OUT" ] && ok "(a) fecha inválida -> exit 2, stdout vacío" \
+  || mal "(a) fecha inválida: RC=$RC OUT='$OUT'"
+
+# (b) rama inválida -> exit 2
+set +e
+OUT="$(bash "$SCRIPT" "2026-10-13" "ramaCualquiera" "$W" "$MAIN" 2>"$TMP/err-b")"
+RC=$?
+set -e
+[ "$RC" -eq 2 ] && [ -z "$OUT" ] && ok "(b) rama inválida -> exit 2, stdout vacío" \
+  || mal "(b) rama inválida: RC=$RC OUT='$OUT'"
+
+# (c) docker falso que simula éxito: el contenedor extractor monta $W/salida
+# como "<ruta>:/x/salida" (ronda de arreglo 4/5) — ahí escribe agente.json.
+# volume create/rm, el ancla y el resto salen 0 sin hacer nada.
+cat > "$FAKEBIN/docker" <<'EOF'
+#!/usr/bin/env bash
+# `container inspect`/`volume inspect` = "ya no existe" (el agente murió y el
+# volumen se borró), como en el camino real.
+case "$1 $2" in "container inspect"|"volume inspect") exit 1 ;; esac
+for a in "$@"; do
+  case "$a" in
+    *:/x/salida) echo '{"ok":true}' > "${a%%:/x/salida}/agente.json" ;;
+  esac
+done
+exit 0
+EOF
+chmod +x "$FAKEBIN/docker"
+
+JAULA_ANTES="$(find /tmp -maxdepth 1 -name 'dcam-jaula-*' 2>/dev/null | wc -l)"
+set +e
+OUT="$(PATH="$FAKEBIN:$PATH" bash "$SCRIPT" "2026-10-13" "auto/inventario-13-OCT-2026" "$W" "$MAIN" 2>"$TMP/err-c")"
+RC=$?
+set -e
+if [ "$RC" -eq 0 ] && [ -n "$OUT" ] && [ "$(printf '%s\n' "$OUT" | wc -l)" -eq 1 ] && [ -d "$OUT" ] && [[ "$OUT" == */repo ]]; then
+  ok "(c) éxito -> stdout es exactamente la ruta de \$JAULA/repo ($OUT)"
+else
+  mal "(c) éxito: RC=$RC OUT='$OUT'"
+fi
+# $JAULA no debe haber sido tocado/borrado por ningún trap de limpieza.
+if [ -n "${OUT:-}" ] && [ -d "$OUT" ]; then
+  ok "(c) \$JAULA/repo sigue existiendo tras la corrida (ningún trap lo borró)"
+else
+  mal "(c) \$JAULA/repo ya no existe tras la corrida"
+fi
+JAULA_RUTA_C="$OUT"
+
+# (d) docker falso que simula fallo (rc != 0, no escribe agente.json) -> exit 1, stdout vacío
+rm -f "$W/salida/agente.json"   # limpia el agente.json de éxito que dejó (c)
+cat > "$FAKEBIN/docker" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$FAKEBIN/docker"
+set +e
+OUT="$(PATH="$FAKEBIN:$PATH" bash "$SCRIPT" "2026-10-13" "auto/inventario-13-OCT-2026" "$W" "$MAIN" 2>"$TMP/err-d")"
+RC=$?
+set -e
+[ "$RC" -eq 1 ] && [ -z "$OUT" ] && ok "(d) docker run falla -> exit 1, stdout vacío" \
+  || mal "(d) docker run falla: RC=$RC OUT='$OUT'"
+
+# (d2) docker falso con rc=0 pero SIN escribir agente.json (o vacío) -> también exit 1
+rm -f "$W/salida/agente.json"
+cat > "$FAKEBIN/docker" <<'EOF'
+#!/usr/bin/env bash
+# `container inspect`/`volume inspect` = "ya no existe" (el agente murió y el
+# volumen se borró), como en el camino real.
+case "$1 $2" in "container inspect"|"volume inspect") exit 1 ;; esac
+exit 0
+EOF
+chmod +x "$FAKEBIN/docker"
+set +e
+OUT="$(PATH="$FAKEBIN:$PATH" bash "$SCRIPT" "2026-10-13" "auto/inventario-13-OCT-2026" "$W" "$MAIN" 2>"$TMP/err-d2")"
+RC=$?
+set -e
+[ "$RC" -eq 1 ] && [ -z "$OUT" ] && ok "(d2) rc=0 pero agente.json vacío/ausente -> exit 1, stdout vacío" \
+  || mal "(d2) rc=0 sin agente.json: RC=$RC OUT='$OUT'"
+
+# --- Fase 3c, menores de la re-revisión 4 (docker falso; $FAKEBIN/registro anota
+#     cada llamada para ver qué se ejecutó y qué no) ---
+falso_docker() {  # $1 = cuerpo del case para "$1 $2" (antes del comportamiento de éxito)
+  cat > "$FAKEBIN/docker" <<EOF
+#!/usr/bin/env bash
+echo "\$*" >> "$FAKEBIN/registro"
+case "\$1 \$2" in
+$1
+esac
+for a in "\$@"; do
+  case "\$a" in
+    *:/x/salida) echo '{"ok":true}' > "\${a%%:/x/salida}/agente.json" ;;
+  esac
+done
+exit 0
+EOF
+  chmod +x "$FAKEBIN/docker"
+  : > "$FAKEBIN/registro"
+}
+correr_falso() {  # $1 = sufijo del stderr; el resto, variables de entorno
+  local suf="$1"; shift
+  set +e
+  OUT="$(env "$@" PATH="$FAKEBIN:$PATH" bash "$SCRIPT" "2026-10-13" "auto/inventario-13-OCT-2026" "$W" "$MAIN" 2>"$TMP/err-$suf")"
+  RC=$?
+  set -e
+}
+INSPECT_NO='  "container inspect"|"volume inspect") exit 1 ;;'
+
+# (e) menor 3: falla la copia previa -> exit 1 y stderr nombra docker-prep.log
+falso_docker "$INSPECT_NO
+  \"run --rm\") case \"\$*\" in *-prep*) exit 128 ;; esac ;;"
+correr_falso e
+if [ "$RC" -eq 1 ] && [ -z "$OUT" ] && grep -q "docker-prep.log" "$TMP/err-e" && ! grep -q "^run .*--name dcam-solucionador-" "$FAKEBIN/registro"; then
+  ok "(e) copia previa fallida -> exit 1, stderr: $(cat "$TMP/err-e")"
+else
+  mal "(e) copia previa fallida: RC=$RC stderr='$(cat "$TMP/err-e")'"
+fi
+
+# (f) menor 2: el contenedor del agente sigue existiendo tras rm -f -> no se extrae
+falso_docker '  "container inspect") exit 0 ;;
+  "volume inspect") exit 1 ;;'
+correr_falso f
+if [ "$RC" -eq 1 ] && [ -z "$OUT" ] && grep -q "sigue existiendo" "$TMP/err-f" && ! grep -q "extraer.sh" "$FAKEBIN/registro"; then
+  ok "(f) agente aún vivo -> exit 1 sin lanzar el extractor, stderr: $(cat "$TMP/err-f")"
+else
+  mal "(f) agente aún vivo: RC=$RC stderr='$(cat "$TMP/err-f")' (¿se lanzó el extractor? $(grep -c extraer.sh "$FAKEBIN/registro"))"
+fi
+
+# (g) menor 4: el volumen no se deja borrar -> AVISO en stderr
+falso_docker '  "container inspect") exit 1 ;;
+  "volume rm") exit 1 ;;
+  "volume inspect") exit 0 ;;'
+correr_falso g
+if grep -q "AVISO: el volumen dcam-jaula-.* sigue vivo" "$TMP/err-g"; then
+  ok "(g) volumen que no se borra -> $(grep AVISO "$TMP/err-g")"
+else
+  mal "(g) volumen que no se borra: sin AVISO en stderr ('$(cat "$TMP/err-g")')"
+fi
+[ -n "$OUT" ] && rm -rf "$(dirname "$OUT")"
+
+# (h) menor 1 (3c) + menor de la revisión de 3c (3d): el ancla duerme copia
+# previa (300+10) + agente (timeout + kill-after) + extracción (300+10) + 300,
+# no `infinity`; y "08m" se lee en decimal (sin `10#`, bash lo tomaba por octal).
+falso_docker "$INSPECT_NO"
+for caso in "3s:60:983" "08m:60:1460" "45m:90:3710"; do
+  IFS=: read -r t k esperado <<< "$caso"
+  : > "$FAKEBIN/registro"
+  correr_falso h SOLUCIONADOR_TIMEOUT="$t" SOLUCIONADOR_KILL_AFTER="$k"
+  ANCLA_CMD="$(grep -- '-ancla' "$FAKEBIN/registro" | head -1 || true)"
+  if [ "$RC" -eq 0 ] && [[ "$ANCLA_CMD" == *" sleep $esperado" ]]; then
+    ok "(h) ancla con SOLUCIONADOR_TIMEOUT=$t KILL_AFTER=$k: ...${ANCLA_CMD: -40}"
+  else
+    mal "(h) ancla con $t/$k: RC=$RC cmd='$ANCLA_CMD' (esperaba sleep $esperado)"
+  fi
+  if [ -n "$OUT" ]; then rm -rf "$(dirname "$OUT")"; fi
+done
+for t in 45x 0 0m 121m 3h 1234567; do
+  correr_falso h2 SOLUCIONADOR_TIMEOUT="$t"
+  [ "$RC" -eq 2 ] && ok "(h) SOLUCIONADOR_TIMEOUT=$t -> exit 2: $(cat "$TMP/err-h2")" || mal "(h) SOLUCIONADOR_TIMEOUT=$t: RC=$RC"
+done
+for k in 0 601 abc; do
+  correr_falso h3 SOLUCIONADOR_KILL_AFTER="$k"
+  [ "$RC" -eq 2 ] && ok "(h) SOLUCIONADOR_KILL_AFTER=$k -> exit 2: $(cat "$TMP/err-h3")" || mal "(h) SOLUCIONADOR_KILL_AFTER=$k: RC=$RC"
+done
+
+# Limpieza SOLO de la $JAULA que este test sí creó (ronda de arreglo 1/5, punto
+# 14): un `find /tmp -name 'dcam-jaula-*' ... -exec rm -rf` barría CUALQUIER
+# carpeta con ese prefijo — si esto se corre en APOLO mientras un pipeline real
+# está en medio de una corrida de verdad, le borraba la suya. Los únicos $JAULA
+# reales de este test son el de (c) (éxito, se queda y hay que limpiarlo a
+# mano) — los de (d)/(d2) ya los limpia el propio `solucionar.sh` en su camino
+# de fallo (ver el fix de huérfanos en ese script), así que no hay nada más que
+# rastrear ni borrar aquí.
+# Ronda de arreglo 3/5 (re-revisión de la 2/5, "9-comprobación"): $JAULA_RUTA_C
+# es "$JAULA/repo" (lo que imprime solucionar.sh en éxito), NO "$JAULA" — borrar
+# solo esa ruta deja "$JAULA/entrada" huérfano en /tmp en CADA corrida de este
+# test. Hay que borrar la carpeta del propio `mktemp` completa: su dirname.
+# Ronda de arreglo 4/5 (minor): sin la guardia, con (c) fallido y la variable
+# vacía, esto sería `rm -rf .`.
+rm -rf "$(dirname "${JAULA_RUTA_C:?(c) no dejó ruta de JAULA}")" 2>/dev/null || true
+
+exit $FAIL

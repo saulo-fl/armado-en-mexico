@@ -33,6 +33,13 @@ Antes de crear una ficha, descarta en este orden:
    `regresosRechazados` del mapeo, que dice por qué (dcamRef compartido, precio
    que no cuadra, sin registro previo). Ese «no cuadra» es la pista de un
    registro ajeno en el historial (C13) o de una variante.
+   También liga solo (15-oct-2026) dos casos más: el **gemelo** (segundo renglón
+   con el mismo nombre exacto y precio ±0.005 que uno ya ligado; solo si todos los
+   ligados con ese nombre van a la misma ficha; campo `gemelos`, suma qty sin tocar
+   el precio) y el **regreso renombrado** (el PDF cambió la notación del calibre:
+   `0.22`/`.22`/`CAL22`/`CAL 22`; solo si apunta a UNA ficha sin renglón y el precio
+   cuadra igual). Un renombre que no cuadra sale en `regresosRechazados` con
+   `fichaId` y «posible renombre de …»: esa es la ficha a revisar.
    A mano: busca su texto en el catálogo y en los PDFs archivados
    (`pdftotext -layout $DCAM_DIR/archivo/<fecha>/*ARMAS*.pdf - | grep -i …`).
    Comprueba: su precio de hoy / su último precio ≈ el aumento acumulado de las
@@ -52,6 +59,12 @@ Antes de crear una ficha, descarta en este orden:
 Lo que sobrevive es alta nueva.
 
 ## C. Fallos registrados
+
+> **Límite del host (accesorios):** en `data-accesorios.js` los registros de historial
+> escritos con constantes (`_h(S25, 613.96, S25d, 4)`) no se pueden borrar, mover ni
+> vaciar: el validador rechaza el parche entero. Si una receta de abajo (C2, C11, C13)
+> te pide corregir uno de esos, no lo toques: `ok: false` y la corrección en `pendiente`.
+> Municiones, armas y los registros literales `{ manualId: … }` sí se corrigen.
 
 ### C1. Factor espurio en el paso 1 (02-oct-2026)
 - **Síntoma**: `⚠ factor fuera de rango` en el log; decenas de sinFicha; precios
@@ -77,8 +90,12 @@ Lo que sobrevive es alta nueva.
 ### C3. Ficha duplicada (25-sep)
 - **Síntoma**: dos fichas con el mismo texto DCAM.
 - **Causa**: un alta creada por un agente sin buscar en el catálogo (2104 = 2074).
-- **Arreglo**: mueve el historial al original, borra el `mun()`/`mk()` duplicado y
-  su línea de historial (no hay bandera «oculta»). Anótalo en `correcciones`.
+- **Arreglo**: **no la borras** (decisión de Saulo, 16-oct-2026; el validador del
+  host rechaza cualquier ficha borrada: «no se borran fichas: reporta el duplicado en
+  pendiente»). Pon `ok: false` y en `pendiente` las dos fichas (ids y `dcamRef`), la
+  evidencia de que son el mismo producto y la propuesta de fusión (cuál queda y qué
+  historial se mueve). La fusión la hace Saulo: necesita redirección 301, ligas y
+  resembrar D1.
 
 ### C4. Variante representativa equivocada (29/30-sep)
 - **Síntoma**: salto grande en una ficha con varios renglones (acabados).
@@ -125,7 +142,8 @@ Lo que sobrevive es alta nueva.
 ## D. Altas: cómo crear una ficha
 
 - **Armas**: `mk(<siguiente id>, …)` antes del `];` de `window.DB` (data.js), con
-  capacidad/peso/longitud del modelo hermano si existe (dilo en un comentario),
+  capacidad/peso/longitud del modelo hermano si existe (dilo en `solucion.json` →
+  `altas[].motivo`; en `src/data` no se escriben comentarios),
   `avail` por calibre (9mm/.40/5.56/7.62 = ejército; .380 cañón largo = seguridad;
   resto civil), imagen `''`. «Riel Picatinny» en el texto → `ARMAS_CON_RIEL`.
 - **Cartuchos**: `{ ...mun(<id>, …) }` en data-municiones.js con el formato de sus
@@ -170,3 +188,17 @@ Lo que sobrevive es alta nueva.
   acumulado; un regreso de semanas acabaría en `revisarPrecio` con el precio
   viejo. Si se automatiza, la guardia debe usar el factor acumulado desde el
   último registro de la ficha.
+
+### C13. Regresos de cartuchos + registro ajeno destapado al encadenar (09-oct-2026)
+- **Síntoma**: 3 cartuchos en `sinFicha` (Federal .380 → 2093, Águila 1330 M7.5 →
+  2075, Saga Sporting 28 M7.5 → 2079), los tres con `dcamRef` idéntico al renglón.
+- **Causa**: §B.1 / C12 en cartuchos. Al comprobar la cadena, la 2079 tenía
+  `_mh25(9.54, 3000)` aunque su renglón **no** viene en el PDF del 25-sep: ese
+  9.54 × 3000 era de «CART CAL. 12 EG DEL SUR TRAP 28 GR M. 8», renglón que solo
+  vino ese día y no tiene ficha (C11 sin receptora).
+- **Arreglo**: ligas; el registro ajeno se **borra** (no hay ficha a la que
+  moverlo; un renglón de un solo día no justifica alta). Sin él, 9.63/9.40 =
+  1.02447 = Saga 2061/2072 desde el 22-sep; con él, el factor no cuadraba.
+- **Ojo con el archivo**: las carpetas `archivo/2026-09-15` y `2026-09-16` guardan
+  los PDFs del 14 y 15-sep (la carpeta es la fecha de recepción). Mira el nombre
+  del PDF, no la carpeta, antes de declarar un registro ajeno.

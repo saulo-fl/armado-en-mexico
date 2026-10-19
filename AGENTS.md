@@ -228,12 +228,15 @@ la segunda = se perdieron las vars de Access. Ambos son 503 y ambos son silencio
 
 ## Conciliar inventarios y precios (tarea recurrente)
 
+Desde la Fase 4 (desplegada el 18-oct-2026) el vigía y el pipeline corren como el usuario `dcam` en `/srv/dcam`, y el clon vivo del bot es `/srv/dcam/repo` (dueño `dcam`, grupo `dcam`). El resembrado de D1 (`armado-resembrar-d1`) sigue en `/home/saulo/apps/armadomx/dcam-bot`, con su `cloudflare.env` y su `telegram.env`. Saulo y los agentes NUNCA corren git dentro de ese clon como saulo: `dcam` controla su `.git/config` y sus hooks, así que git ejecutaría comandos elegidos por `dcam` con los privilegios de quien lo corra (y el vigía descarta a las 20:00 lo no commiteado ahí). Las ramas se arreglan en un clon propio: fetch de la rama desde GitHub, arreglo, push. El grupo `dcam` es solo para leer logs y PDFs.
+
 Los precios oficiales se alimentan desde los **PDFs de existencias de la DCAM**.
-Toda la conciliación vive en **código versionado**, no en `localStorage`. Desde el
-14-sep-2026 hay además un **bot que concilia y publica solo** lo que ya está catalogado y
-cambió de forma predecible (pieza 2 del bot DCAM): diseño completo en
-`scripts/dcam/DISENO.md`. Lo de abajo es el flujo manual/heredado, que sigue aplicando a lo
-que el bot manda a PR por dudoso:
+Toda la conciliación vive en **código versionado**, no en `localStorage`. Hay además un
+**bot que concilia** cada inventario DCAM nuevo (pieza 2): el pipeline concilia lo ya
+catalogado, el solucionador en jaula resuelve los renglones sin ficha y el bot abre el PR del
+día, que **mergea Saulo**; nada se publica solo. Estado vigente y diseño en
+`scripts/dcam/DISENO.md`. Lo de abajo es el flujo manual, que sigue aplicando a lo que el
+bot no cubre y a la revisión de sus PR:
 
 - Los PDFs van en la carpeta **`public/inventarios/`** con nombre `dcam-existencias-AAAA-MM-DD.pdf`.
   Desde el 11-sep-2026 la DCAM los publica por separado: armas → `dcam-existencias-`, cartuchos →
@@ -578,6 +581,6 @@ ya no es la única barrera —Access va delante— pero sigue ahí.
 ## Convenciones de contribución
 
 - **Estilo:** conserva la sangría existente de dos espacios, punto y coma, comillas simples, `camelCase` para funciones y variables, y `UPPER_SNAKE_CASE` para constantes. Los comentarios y textos visibles van en español.
-- **Pruebas:** usa `node:test` y `node:assert/strict`; nombra los archivos `*.test.mjs`. Las pruebas del navegador viven en `scripts/` y las de Functions junto a sus helpers privados. Antes de abrir un PR corre `npm run build`, `npm test`, `npm run smoke`, `node --test functions/api/_lib.test.mjs` y la auditoría indicada arriba. El smoke no es opcional si tocaste un `.jsx`: ni las pruebas ni el build ejecutan los componentes, y es ahí donde se esconden los fallos que dejan la pantalla en blanco.
+- **Pruebas:** usa `node:test` y `node:assert/strict`; nombra los archivos `*.test.mjs`. Las pruebas viven en `scripts/`, también las de Functions (`scripts/functions-*.test.mjs`): dentro de `functions/` viajarían con lo que despliega Pages. Antes de abrir un PR corre `npm run build`, `npm test`, `npm run smoke` y la auditoría indicada arriba. El smoke no es opcional si tocaste un `.jsx`: ni las pruebas ni el build ejecutan los componentes, y es ahí donde se esconden los fallos que dejan la pantalla en blanco.
 - **Commits:** usa asuntos breves en español y enfocados en un solo cambio. El historial admite el formato convencional cuando ayuda, por ejemplo `fix: corregir menú móvil` o `feat(traumaticas): rediseñar cotización`.
 - **Pull requests:** explica el cambio visible, enumera la verificación ejecutada, enlaza el issue si existe y adjunta capturas antes/después para cambios de UI. Trabaja en una rama de tarea; nunca hagas push directo a `main` o `develop`. Los merges, despliegues de producción y escrituras remotas en D1 requieren aprobación explícita.

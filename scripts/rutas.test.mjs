@@ -131,10 +131,11 @@ test('las rutas viejas de Requisitos y Permisos llevan a Trámites, en el servid
   }
   const redirects = readFileSync(new URL('../public/_redirects', import.meta.url), 'utf8');
   const reglas = redirects.split('\n').filter((l) => l.trim() && !l.startsWith('#'));
-  assert.deepEqual(reglas.map((l) => l.split(/\s+/)), [
-    ['/legalidad/requisitos', '/legalidad/tramites', '301'],
-    ['/legalidad/permisos', '/legalidad/tramites', '301'],
-  ], 'solo las dos reglas literales; un comodín se comería sitemap.xml y app.js');
+  const partes = reglas.map((l) => l.trim().split(/\s+/));
+  for (const r of [['/legalidad/requisitos', '/legalidad/tramites', '301'], ['/legalidad/permisos', '/legalidad/tramites', '301']]) {
+    assert.ok(partes.some((p) => p.join(' ') === r.join(' ')), r[0] + ' no redirige a Trámites');
+  }
+  assert.ok(reglas.every((l) => !l.includes('*') && !l.includes(':')), 'solo reglas literales; un comodín se comería sitemap.xml y app.js');
 });
 
 // Las rutas de Legalidad son de DOS segmentos. La búsqueda de PATH_TO_SCREEN exige

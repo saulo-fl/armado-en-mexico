@@ -1,5 +1,10 @@
 node_modules
 
+# Directorio desechable del test de symlink/junction de validar-parche.test.mjs: vive DENTRO
+# del repo (necesita node_modules resoluble) y se borra solo al terminar el test; por si un
+# crash lo deja a medias, que nunca se commitee.
+/scripts/dcam/.tmp-enlace-*/
+
 # ── Generado por `npm run build` — NO se commitea ───────────────────────────
 # La fuente vive en src/ y public/. El build deja TODO lo publicable en out/:
 # los .js que Babel saca de los .jsx, las 321 páginas del prerender, el sitemap

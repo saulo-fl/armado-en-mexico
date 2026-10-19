@@ -28,11 +28,13 @@ nuevos los compara arma por arma contra `/api/state`:
 - ids que existen **solo en D1** o **cualquier otro campo** → no escribe, avisa una
   vez por versión del código. Eso se resiembra a mano con este script.
 
-Nunca toca `pages`. Token: `~/apps/dcam-bot/cloudflare.env` (D1 · Edit). Estado y
-bitácora: `~/apps/dcam-bot/resembrar-vigia.{json,log}`. Probar sin escribir:
+Nunca toca `pages`. Corre en `/home/saulo/apps/armadomx/dcam-bot` (`DCAM_DIR` de la unidad;
+`/home/saulo/apps/dcam-bot` es un enlace a esa misma carpeta), no en `/srv/dcam` del
+pipeline. Token: `cloudflare.env` (D1 · Edit) y avisos: `telegram.env`, los dos en esa
+carpeta. Estado y bitácora: `resembrar-vigia.{json,log}`, también ahí. Probar sin escribir:
 `node scripts/dcam/resembrar-vigia.mjs --simular` (con `VIGIA_CODIGO_DIR=<dir>`
 simula otro código publicado). Unidades en `scripts/dcam/systemd/armado-resembrar-d1.*`;
-la copia que corre vive en `~/apps/dcam-bot/infra/` (como el pipeline): al cambiar la del
+la copia que corre vive en `/home/saulo/apps/armadomx/dcam-bot/infra/`: al cambiar la del
 repo, cópiala allí.
 
 ## Uso

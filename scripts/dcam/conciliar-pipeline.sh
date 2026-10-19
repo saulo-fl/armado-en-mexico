@@ -16,16 +16,22 @@
 #   4. CIERRE — compuertas (auditar.js, npm test, verificar-cierre.py),
 #               actualiza referencias, marca el PR listo
 #
-# Si falla cualquier paso del 1 al 4, se lanza UNA vez el SOLUCIONADOR: un agente
-# de Claude Code (Opus, agente `solucionador-dcam`) que diagnostica y repara la
-# rama con el runbook de fallos conocidos. Después se repite el paso 4: lo que
-# dice el agente no cuenta, cuentan las compuertas. Mergear y resembrar D1 siguen
-# siendo de Saulo (el guardia del repo lo impone).
+# Si falla cualquier paso del 1 al 4 y DCAM_SOLUCIONADOR no vale «jaula» (lo
+# normal), se avisa y la rama queda para revisión a mano. Con
+# DCAM_SOLUCIONADOR=jaula el pipeline PIDE una vez el SOLUCIONADOR (agente
+# `solucionador-dcam`) y espera: deja una solicitud (solo datos) en
+# $DCAM_IPC/solicitud/<ID>/ y espera $DCAM_IPC/resultado/<ID>/hecho. La jaula la
+# corre otro usuario (dcam-jaula, scripts/dcam/jaula/lanzar-jaula.sh, código de
+# root); este script no toca contenedores. Lo que vuelve es un bundle con UN
+# commit hijo de la rama empujada, que solo entra si lo acepta verificar_bundle
+# y aplica con merge --ff-only; lo que dice el agente no cuenta, cuentan las
+# compuertas. Mergear y resembrar D1 siguen siendo de Saulo (el guardia del
+# repo lo impone).
 #
 # Cada paso commitea y pushea: si algo falla, lo anterior ya está en el PR.
 set -uo pipefail
 
-DCAM_DIR="${DCAM_DIR:-/home/saulo/apps/dcam-bot}"
+export DCAM_DIR="${DCAM_DIR:-/home/saulo/apps/dcam-bot}"
 REPO="$DCAM_DIR/repo"
 SENAL="$DCAM_DIR/pendiente-conciliar.json"
 LOCK="$DCAM_DIR/conciliar.lock"
@@ -33,8 +39,6 @@ LOG="$DCAM_DIR/conciliar.log"
 TG_ENV="${DCAM_TG_ENV:-$DCAM_DIR/telegram.env}"
 VENV="$DCAM_DIR/.venv/bin/python"
 SCRIPTS=".claude/skills/conciliar-inventario/scripts"
-CLAUDE_BIN="${DCAM_CLAUDE_BIN:-/home/saulo/.local/bin/claude}"
-SOLUCIONADOR_MIN="${DCAM_SOLUCIONADOR_MIN:-45}"
 MOTIVO=""
 PR_URL=""
 
@@ -55,7 +59,7 @@ avisar_error(){
   telegram "⚠️ Pipeline DCAM falló en paso $STEP: ${1}. Inventario NO conciliado — revisar conciliar.log."
 }
 
-# Mismo contrato que conciliar.sh: la señal fallida se aparta para no re-disparar
+# La señal fallida se aparta para no re-disparar
 # en bucle; Saulo la re-crea tras arreglar.
 falla(){
   avisar_error "$1"
@@ -89,7 +93,11 @@ fecha_a_iso() {
 }
 FECHA_ISO="$(fecha_a_iso "$FECHA")" || { STEP="senal"; falla "fecha ilegible en la señal: $FECHA"; }
 RAMA="auto/inventario-${FECHA}"
-WORKDIR="${DCAM_WORKDIR_BASE:-/tmp}/dcam-pipeline-${FECHA}"
+# Fuera de /tmp (/srv/dcam/trabajo) para que, con PrivateTmp, la ruta que da el
+# aviso de borrador siga existiendo; /tmp si esa carpeta no está (antes de la Fase 4).
+WB="${DCAM_WORKDIR_BASE:-/srv/dcam/trabajo}"
+[ -n "${DCAM_WORKDIR_BASE:-}" ] || [ -d "$WB" ] || WB=/tmp
+WORKDIR="$WB/dcam-pipeline-${FECHA}"
 STEP="init"
 
 mkdir -p "$WORKDIR"
@@ -282,6 +290,57 @@ step_altas() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# CIERRE DE ÉXITO — común a los dos caminos: el cierre normal (step_audit, tras
+# auditar.js/npm test/verificar-cierre.py en el host) y el de la jaula (tras
+# compuertas.sh, que ya corrió las mismas compuertas dentro del contenedor). Ronda
+# de arreglo 1/5 (C1): antes el camino de la jaula solo hacía push+aviso+borrar
+# señal, sin esta cola — ni actualizaba referencia-*.json, ni corría `gh pr ready`.
+# Esta función NUNCA vuelve a correr auditar.js/npm test: eso ya pasó (en el host
+# para el camino normal, dentro del contenedor para el de la jaula).
+# Revisión final (I1): con `cerrar_exito jaula` NO corre aquí el `--update-ref`.
+# Ese paso evalúa con `node` los data-*.js, y en el camino de la jaula esos datos
+# los escribió el agente: nada suyo se ejecuta en el host. Las referencias ya las
+# actualizó compuertas.sh en un contenedor sin red y las volvió a pasar por el
+# validador de main; llegan aquí dentro de su commit.
+# ═══════════════════════════════════════════════════════════════════════════════
+cerrar_exito() {
+  if [ "${1:-}" != "jaula" ]; then
+    if [ -f "$WORKDIR/armas.json" ]; then
+      $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
+        --ligas "$SCRIPTS/ligas-armas.json" --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+    fi
+    if [ -f "$WORKDIR/cartuchos.json" ]; then
+      $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
+        --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
+        --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+    fi
+    if [ -f "$WORKDIR/accesorios.json" ]; then
+      $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
+        --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
+        --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
+    fi
+  fi
+
+  git add -A
+  git commit -m "audit: ✔✔ + refs actualizadas $FECHA" --quiet 2>>"$LOG" || true
+  # Se revisa el código de salida (a diferencia de los pasos 0-2): aquí hay un
+  # commit real — de datos resueltos por la jaula, o de referencias actualizadas
+  # — que nadie más va a reintentar solo si el push se pierde en silencio.
+  git push origin "$RAMA" --quiet 2>>"$LOG" || falla "cerrar_exito: el push de la rama falló"
+
+  # Mark PR ready
+  PR_URL="$(gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[0].url' 2>/dev/null)"
+  if [ -n "$PR_URL" ] && [ "${2:-}" = "borrador" ]; then
+    log "  PR se queda en borrador (solucion.json sin ok:true): $PR_URL"
+  elif [ -n "$PR_URL" ]; then
+    gh pr ready "$PR_URL" --repo "$GH_REPO" 2>>"$LOG" || true
+    log "  PR marcado ready: $PR_URL"
+  fi
+
+  rm -f "$SENAL"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # STEP 4: AUDIT + CLOSE
 # ═══════════════════════════════════════════════════════════════════════════════
 step_audit() {
@@ -327,85 +386,8 @@ step_audit() {
   fi
   log "  cierre verificado ✔"
 
-  # Update references
-  if [ -f "$WORKDIR/armas.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/armas.json" \
-      --ligas "$SCRIPTS/ligas-armas.json" --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-  if [ -f "$WORKDIR/cartuchos.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/cartuchos.json" \
-      --ref "$SCRIPTS/referencia-cartuchos.json" --ligas "$SCRIPTS/ligas-cartuchos.json" \
-      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-  if [ -f "$WORKDIR/accesorios.json" ]; then
-    $VENV "$SCRIPTS/mapear-existencias.py" "$WORKDIR/accesorios.json" \
-      --ref "$SCRIPTS/referencia-accesorios.json" --ligas "$SCRIPTS/ligas-accesorios.json" \
-      --regresos src/data --antes-de "$FECHA_ISO" --update-ref >/dev/null 2>>"$LOG"
-  fi
-
-  git add -A
-  git commit -m "audit: ✔✔ + refs actualizadas $FECHA" --quiet 2>>"$LOG" || true
-  git push origin "$RAMA" --quiet 2>>"$LOG"
-
-  # Mark PR ready
-  PR_URL="$(gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[0].url' 2>/dev/null)"
-  if [ -n "$PR_URL" ]; then
-    gh pr ready "$PR_URL" --repo "$GH_REPO" 2>>"$LOG" || true
-    log "  PR marcado ready: $PR_URL"
-  fi
-
-  rm -f "$SENAL"
+  cerrar_exito
   log "paso 4 OK — pipeline completo"
-}
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# SOLUCIONADOR — agente que repara la rama cuando falla un paso 1–4
-# ═══════════════════════════════════════════════════════════════════════════════
-step_solucionador() {
-  local fallo="$STEP" motivo="$1"
-  STEP="solucionador"
-  log "solucionador: paso $fallo falló ($motivo) — lanzo agente (máx ${SOLUCIONADOR_MIN} min)"
-  [ -x "$CLAUDE_BIN" ] || { log "  sin claude en $CLAUDE_BIN"; MOTIVO="sin claude"; return 1; }
-
-  git add -A
-  git commit -m "pipeline: estado al fallar el paso $fallo $FECHA" --quiet 2>>"$LOG" || true
-  git push origin "$RAMA" --quiet 2>>"$LOG" || true
-  rm -f "$WORKDIR/solucion.json"
-
-  local pr_url
-  pr_url="$(gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[0].url' 2>/dev/null)"
-  local prompt
-  prompt="Conciliación DCAM del ${FECHA} (ISO ${FECHA_ISO}) — falló el paso ${fallo}: ${motivo}.
-
-Rama: ${RAMA} (ya en el checkout; los pasos que terminaron están commiteados). PR: ${pr_url:-sin PR}.
-Carpeta de trabajo (W): ${WORKDIR} — PDFs parseados (<cat>.json/.tsv), mapeo-<cat>.json de esta corrida.
-Log de la corrida: ${LOG} (lee desde la línea «arranco pipeline fecha=${FECHA}»).
-PDFs archivados de días anteriores: ${DCAM_DIR}/archivo/<AAAA-MM-DD>/.
-Python con dependencias: ${VENV}.
-
-Repara la rama hasta que pasen las compuertas, escribe ${WORKDIR}/solucion.json y haz push a ${RAMA}.
-No marques el PR listo ni mergees: el pipeline vuelve a correr las compuertas y lo marca él."
-
-  timeout --kill-after=60 "$((SOLUCIONADOR_MIN * 60))" \
-    "$CLAUDE_BIN" -p "$prompt" --agent solucionador-dcam --model opus \
-      --permission-mode bypassPermissions --add-dir "$WORKDIR" --add-dir "$DCAM_DIR/archivo" \
-      --output-format json > "$WORKDIR/solucionador-salida.json" 2>>"$LOG"
-  local rc=$?
-  log "  agente terminó rc=$rc costo=\$$(jq -r '.total_cost_usd // "?"' "$WORKDIR/solucionador-salida.json" 2>/dev/null) turnos=$(jq -r '.num_turns // "?"' "$WORKDIR/solucionador-salida.json" 2>/dev/null)"
-  jq -r '.result // empty' "$WORKDIR/solucionador-salida.json" 2>/dev/null | head -40 >>"$LOG"
-
-  # Lo que el agente haya dejado sin commitear, que no se pierda
-  git add -A
-  git commit -m "solucionador: cambios sin commitear $FECHA" --quiet 2>>"$LOG" || true
-  git push origin "$RAMA" --quiet 2>>"$LOG" || true
-  return 0
-}
-
-resumen_solucion() {
-  [ -f "$WORKDIR/solucion.json" ] || { echo "(el agente no dejó solucion.json)"; return; }
-  jq -r '"Diagnóstico: \(.diagnostico // "—")\nLigas: \((.ligas // []) | length) · Altas: \((.altas // []) | length) · Correcciones: \((.correcciones // []) | length)" +
-         (if (.pendiente // []) | length > 0 then "\nPendiente: " + ((.pendiente) | join("; ")) else "" end)' \
-    "$WORKDIR/solucion.json" 2>/dev/null | cut -c1-900
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -420,13 +402,157 @@ if step_mapeo && step_mecanico && step_altas && step_audit; then
   exit 0
 fi
 
-# Algún paso 1–4 falló: una oportunidad al solucionador y vuelta a las compuertas
-FALLO_PASO="$STEP"; FALLO_MOTIVO="${MOTIVO:-paso $STEP falló}"
-step_solucionador "$FALLO_MOTIVO"
-if step_audit; then
-  log "pipeline completo $FECHA (reparado por el solucionador)"
-  telegram "🛠️ Inventario DCAM $FECHA: el paso $FALLO_PASO falló ($FALLO_MOTIVO) y el solucionador lo reparó. Compuertas ✔. PR listo para revisar: $PR_URL
-$(resumen_solucion)"
-  exit 0
+# Algún paso 1–4 falló. Con DCAM_SOLUCIONADOR=jaula se intenta resolver en la
+# jaula aislada (sin red); en cualquier otro caso, el solucionador sigue
+# apagado y la rama queda para revisión a mano (plan 2026-10-14).
+if [ "${DCAM_SOLUCIONADOR:-}" != "jaula" ]; then
+  falla "paso $STEP: ${MOTIVO:-falló}. Solucionador apagado: revisa la rama $RAMA a mano."
 fi
-falla "paso $FALLO_PASO: $FALLO_MOTIVO; el solucionador no lo resolvió (${MOTIVO:-compuertas}). $(resumen_solucion)"
+
+log "paso $STEP falló (${MOTIVO:-sin motivo}) — intento solucionador (jaula)"
+
+# Fase 3d: el agente habla con la API de Anthropic (suscripción de Saulo) por
+# dcam-puente. Si la API falla, el agente falla, la jaula devuelve rc≠0 y la rama
+# queda para revisión a mano.
+
+# Ronda de arreglo 2/5 (minor "índice de $REPO"): si el paso que falló dejó
+# $REPO con cambios sin commitear (p. ej. aplicar-mecanico.py escribió algo en
+# src/data/ antes de reventar, sin llegar al `git commit` de step_mecanico),
+# ese estado se commitea AQUÍ, de una vez, como hacía el `step_solucionador`
+# antiguo — es trabajo del HOST, de confianza, antes de pedir la jaula. Así la
+# rama que el lanzador baja de GitHub trae ese estado (si no se commiteara, se
+# perdería silenciosamente), y el `git add -A` de `cerrar_exito` más abajo no
+# recoge una mezcla con esto. Si el repo no queda limpio tras el intento, no se
+# pide la jaula sobre un estado a medias.
+if [ -n "$(git status --porcelain)" ]; then
+  git add -A
+  git commit --quiet -m "pipeline: estado al fallar el paso $STEP $FECHA" 2>>"$LOG" || true
+fi
+if [ -n "$(git status --porcelain)" ]; then
+  falla "solucionador (jaula): el repo de trabajo no quedó limpio antes de lanzar la jaula"
+fi
+
+# Fase 4: el lanzador baja la rama de GitHub y exige que su punta sea `base`, así
+# que antes se empuja. Si el push no sale, no se pide nada.
+git push origin "$RAMA" --quiet 2>>"$LOG" || falla "solucionador (jaula): el push de la rama falló; no se pide la jaula"
+BASE="$(git rev-parse HEAD)"
+
+# ── Solicitud: solo DATOS (contrato en scripts/dcam/jaula/lanzar-jaula.sh). Se
+# escribe en .tmp-<ID> y se publica con un mv. Carpeta g+w (umask 0002): el
+# lanzador tiene que poder moverla. El motivo es dato para el agente, nunca
+# instrucción; el prompt lo arma el lanzador.
+IPC="${DCAM_IPC:-/srv/dcam-ipc}"
+ID="$(date +%Y%m%dT%H%M%S)-$(od -An -N4 -tx1 /dev/urandom | tr -d ' \n')"
+SOL_TMP="$IPC/solicitud/.tmp-$ID"
+RES="$IPC/resultado/$ID"
+if ! (
+  umask 0002
+  mkdir -- "$SOL_TMP" || exit 1
+  jq -n --arg i "$FECHA_ISO" --arg r "$RAMA" --arg f "$FECHA" --arg b "$BASE" \
+    '{fecha_iso: $i, rama: $r, fecha_dcam: $f, base: $b}' > "$SOL_TMP/solicitud.json" || exit 1
+  printf '%s\n' "${MOTIVO:-paso $STEP falló sin motivo}" > "$SOL_TMP/motivo.txt" || exit 1
+  for n in armas cartuchos accesorios; do
+    for f in "$n.json" "$n.tsv" "mapeo-$n.json"; do
+      [ ! -f "$WORKDIR/$f" ] || cp -- "$WORKDIR/$f" "$SOL_TMP/$f" || exit 1
+    done
+  done
+  mv -T -- "$SOL_TMP" "$IPC/solicitud/$ID"
+) 2>>"$LOG"; then
+  rm -rf -- "$SOL_TMP"
+  falla "solucionador (jaula): no pude publicar la solicitud"
+fi
+log "solicitud $ID publicada (base $BASE); espero $RES/hecho"
+
+# Tope de la espera: mayor que el TimeoutStartSec del lanzador (2 h) más los
+# 120 s que espera una .tmp- más margen. El lanzador SIEMPRE deja `hecho` (salvo SIGKILL).
+ESPERA="${DCAM_ESPERA_JAULA:-8400}"
+[[ "$ESPERA" =~ ^[0-9]+$ ]] || ESPERA=8400
+FIN=$((SECONDS + ESPERA))
+until [ -e "$RES/hecho" ]; do
+  [ "$SECONDS" -lt "$FIN" ] || falla "solucionador (jaula): la jaula no contestó en $ESPERA s; detalle: journalctl -u dcam-jaula"
+  sleep 2
+done
+
+# Recordatorio del lanzador: el main fijado se quedó atrás. Texto FIJO del host;
+# lo que diga el archivo no se reenvía.
+[ ! -e "$RES/aviso" ] || telegram "⚠️ Jaula DCAM: el main fijado difiere del main de GitHub en las rutas de la jaula. Revisa qué cambió en main antes de actualizarlo."
+
+# rc se compara con una lista cerrada; su texto nunca se reenvía. El stderr de la
+# jaula va al journal de dcam-jaula, no a conciliar.log.
+J="; detalle: journalctl -u dcam-jaula"
+case "$(head -c 8 "$RES/rc" 2>/dev/null | tr -d '[:space:]')" in
+  0) ;;
+  3) falla "solucionador (jaula): la jaula no produjo cambios" ;;
+  2) falla "solucionador (jaula): el lanzador rechazó la solicitud (rc=2)$J" ;;
+  4) falla "solucionador (jaula): el agente no produjo resultado (rc=4)$J" ;;
+  5) falla "solucionador (jaula): no pasó validación/compuertas (rc=5)$J" ;;
+  6) falla "solucionador (jaula): error del lanzador (rc=6)$J" ;;
+  143) falla "solucionador (jaula): el lanzador murió (rc=143)$J" ;;
+  *) falla "solucionador (jaula): la jaula terminó con un rc desconocido$J" ;;
+esac
+
+# ── Vuelta. verificar_bundle sale del árbol FIJADO de root, nunca de la rama: acepta
+# solo UN commit cuyo único padre es BASE y deja sus objetos en $REPO (es el
+# `git fetch` del bundle); después, merge --ff-only a ese commit.
+# shellcheck source=jaula/verificar-bundle.sh
+. "${DCAM_MAIN:-/usr/local/lib/dcam/main}/scripts/dcam/jaula/verificar-bundle.sh" \
+  || falla "solucionador (jaula): no pude cargar verificar-bundle.sh del main fijado"
+TIP="$(verificar_bundle "$REPO" "$RES/rama.bundle" "$RAMA" "$BASE")" \
+  || falla "solucionador (jaula): bundle inválido (no es un solo commit hijo de la rama empujada)"
+git merge --ff-only --quiet "$TIP" 2>>"$LOG" || falla "solucionador (jaula): merge --ff-only del bundle falló"
+
+# solucion.json del resultado (el lanzador solo copia ahí archivos regulares de
+# ≤ 1 MiB) a $WORKDIR/salida, que es la ruta que da el aviso de borrador. cp -P no
+# sigue enlaces; resumen_seguro y solucion_ok vuelven a mirar la copia.
+rm -rf "$WORKDIR/salida"
+mkdir -p "$WORKDIR/salida"
+if [ -f "$RES/solucion.json" ] && [ ! -L "$RES/solucion.json" ]; then
+  timeout 60 cp -P -- "$RES/solucion.json" "$WORKDIR/salida/solucion.json" 2>>"$LOG" \
+    || rm -f "$WORKDIR/salida/solucion.json"
+fi
+
+# Aviso con SOLO contadores: nunca texto libre del agente ni URLs. solucion.json lo
+# escribió el agente dentro de la jaula: nunca se lee si no es un archivo REGULAR y
+# sin enlaces y de tamaño razonable.
+resumen_seguro() {
+  local f="$WORKDIR/salida/solucion.json" tam
+  if [ ! -f "$f" ] || [ -L "$f" ]; then
+    echo "(sin solucion.json)"; return
+  fi
+  tam="$(stat -c%s "$f" 2>/dev/null || echo 0)"
+  if [ "$tam" -gt 1048576 ]; then
+    echo "(sin solucion.json)"; return
+  fi
+  jq -r '"Ligas: \((.ligas // [])|length) · Altas: \((.altas // [])|length) · Pendientes: \((.pendiente // [])|length)"' \
+    "$f" 2>/dev/null || echo "(sin solucion.json)"
+}
+RESUMEN="$(resumen_seguro)"
+
+# ok:true solo si solucion.json es regular, sin enlaces, razonable y trae `ok` == true.
+# Cualquier otra cosa (ok:false, "true" como texto, ausente, ilegible) deja el PR en borrador.
+# Límite: con claves `ok` repetidas jq se queda con la última; el agente ya controla todo el
+# archivo, así que duplicar no gana nada que un `"ok":true` directo no gane.
+solucion_ok() {
+  local f="$WORKDIR/salida/solucion.json"
+  [ -f "$f" ] && [ ! -L "$f" ] && [ "$(stat -c%s "$f" 2>/dev/null || echo 0)" -le 1048576 ] \
+    && jq -e '.ok == true' "$f" >/dev/null 2>&1
+}
+
+# El merge --ff-only dejó en $REPO el commit de datos y referencias que hizo
+# compuertas.sh en la jaula (sin push).
+# La cola de éxito es la del cierre normal SIN el update-ref (push + gh pr ready
+# + borrar señal): nunca se vuelve a correr auditar.js/npm test ni se evalúan
+# los data-*.js en el host; eso ya pasó dentro del contenedor (I1).
+if solucion_ok; then
+  cerrar_exito jaula
+  telegram "🔧 Solucionador (jaula) resolvió $FECHA: $RESUMEN. Revisa la rama $RAMA."
+  log "solucionador (jaula) OK: $RESUMEN"
+else
+  # Se commitea y empuja igual (los datos validados no se pierden), pero sin `gh pr ready`.
+  cerrar_exito jaula borrador
+  # La ruta la pone el host (WORKDIR), nunca texto del agente: ahí está la lista de pendientes.
+  telegram "⚠️ Solucionador (jaula) resolvió en parte $FECHA: $RESUMEN. El PR queda en borrador: revisa los pendientes en $WORKDIR/salida/solucion.json (APOLO)."
+  log "solucionador (jaula) EN PARTE (PR en borrador): $RESUMEN"
+fi
+log "paso 4 OK — pipeline completo (jaula)"
+exit 0

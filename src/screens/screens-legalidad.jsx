@@ -4,7 +4,8 @@
 // (§7 c, e) de TERMINOS-ADICIONALES.md, en la raíz del repositorio.
 
 // Legalidad v2 (22-sep-2026): las ocho decisiones de Saulo, tomadas en los hilos
-// de Penpot, están en docs/superpowers/specs/2026-09-22-legalidad-v2-design.md.
+// de Penpot, están en la spec 2026-09-22-legalidad-v2-design.md, fuera del repo
+// (Documentos de Proyecto/archivo-repo-2026-10-18/docs/superpowers/specs/).
 // Y una novena, del mismo día: TODO EN UNA SOLA PÁGINA, con desplegables. Las
 // secciones viven dentro del hub como folders del cajón (el mismo de la FAQ); las
 // rutas /legalidad/federal, /estatal, /tramites y /documentos siguen existiendo
