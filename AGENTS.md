@@ -520,25 +520,25 @@ resiembra D1 y compruébalo como visitante, no por la API.
   sitio; referencia: `Documentos de Proyecto/referencias/tv-antigua-marco-video.png`,
   fuera del repo. **El marco solo aparece en las fichas que sí tienen video**: sin
   video no hay tele vacía ni hueco. Pedido explícito de Saulo (18-oct-2026).
-  Videos al 18-oct-2026, todos del canal Armas M&S (el arma sale del título y el
-  id de `data.js`; falta confirmar las variantes marcadas). Se conserva el `&t=` cuando lo trae: es el segundo en
+  Videos con ficha al 18-oct-2026, todos del canal Armas M&S (confirmado por Saulo:
+  cada video va en las fichas de estos ids de `data.js`; las variantes que solo cambian
+  de acabado comparten video). Se conserva el `&t=` cuando lo trae: es el segundo en
   que debe arrancar.
   - Huglu Atrox (id 99): https://www.youtube.com/watch?v=_VW1O5u8FxM
   - Ruger 10/22 (id 151), armarlo a tu gusto: https://www.youtube.com/watch?v=oxX8cb6TnFI
   - Beretta 80X Cheetah (id 13; también existe la Bronce, 218): https://www.youtube.com/watch?v=-yr5-D4lid0
-  - «La .22 LR más cara» (arma por identificar): https://www.youtube.com/watch?v=njThIuPZUnM
-  - CZ P-10 (ids 9, 28, 29, 30: ver cuál sale en el video): https://www.youtube.com/watch?v=HDqC7Gf9hEQ&t=77s
+  - Beretta 92FS .22 LR (id 134), «la .22 LR más cara»: https://www.youtube.com/watch?v=njThIuPZUnM
+  - CZ P-10 C (id 9): https://www.youtube.com/watch?v=HDqC7Gf9hEQ&t=77s
   - CZ 457 Jaguar XII (id 256): https://www.youtube.com/watch?v=d1svvgM1ZPQ
-  - Mendoza RM22 (ids 50, 51, 179, 264: ver cuál sale en el video): https://www.youtube.com/watch?v=9RIekKHX-58&t=6s
+  - Mendoza RM22, todas sus variantes (mismo rifle, otra culata o acabado: ids 50, 51,
+    52, 53, 54, 55, 179, 262, 263, 264): https://www.youtube.com/watch?v=9RIekKHX-58&t=6s
   - Browning Buck Mark (id 17): https://www.youtube.com/watch?v=kZKXxltWaX4
   - Glock 25 (id 11): https://www.youtube.com/watch?v=DWBfKTXJL8w
-  - Tippmann M4-22 (ids 80, 81, 82: ver cuál sale en el video): https://www.youtube.com/watch?v=XPexSruOCYg&t=18s
+  - Tippmann M4-22, todas sus variantes (ids 80, 81, 82): https://www.youtube.com/watch?v=XPexSruOCYg&t=18s
   - Ruger 10/22 (id 151), prueba: https://www.youtube.com/watch?v=DrFCGoNxJwE&t=45s
-  - Rifle AR-10 .308 Win («Phanter» en el título; no está en el catálogo): https://www.youtube.com/watch?v=jY0XpqNmij0
   - SIG Sauer P322 (id 18): https://www.youtube.com/watch?v=vRJfSbzc4F4
   - Ruger LCP (id 5): https://www.youtube.com/watch?v=FUqd3FG8Q4U&t=332s
   - CZ P-07 (id 8): https://www.youtube.com/watch?v=q2O2KIIRODU
-  - Star Modelo F .22 LR (no está en el catálogo): https://www.youtube.com/watch?v=-z7v8nSEAoQ
 - **Engrosar la sección «Historia» de cada arma con investigación real.** Hoy
   `arma.historia` sale del builder de `data.js` y mide 58/118/982 caracteres
   (mín/media/máx): en la mayoría son dos frases. Es el contenido con más valor
