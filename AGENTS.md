@@ -573,10 +573,12 @@ Search Console con el sitemap enviado. Las vars de Access viven en `wrangler.tom
 
 **Fuera del código — pendiente:** decidir si se abre el `robots.txt` gestionado de
 Cloudflare a GPTBot/ClaudeBot (hoy bloquea el **entrenamiento**; los bots de citación
-sí pasan, que son los que importan para GEO). Ver `docs/SEO.md`. Y cambiar la contraseña
-por defecto del admin (`armado2026`, en claro en `store.js`, que armado.mx sirve público
-aunque el repo sea privado):
-ya no es la única barrera —Access va delante— pero sigue ahí.
+sí pasan, que son los que importan para GEO). Ver `docs/SEO.md`.
+
+**Admin sin contraseña local (19-oct-2026).** La contraseña de demo que vivía en `store.js`
+se retiró: la única puerta de `/admin` es Cloudflare Access y el servidor verifica el JWT en
+cada escritura. «Salir» va a `/cdn-cgi/access/logout`. No reintroduzcas un login local: el
+código se sirve público y no protegería nada.
 
 ## Convenciones de contribución
 

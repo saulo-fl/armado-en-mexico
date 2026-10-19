@@ -11,7 +11,6 @@
   const K = {
     armas:       'amx_armas_v2',
     pages:       'amx_pages_v4',
-    admin:       'amx_admin_v2',
     rejected:    'amx_rejected_v2',
     visits:      'amx_visits_v2',
     priceHist:   'amx_priceHist_v2',
@@ -33,12 +32,12 @@
   // limpia versiones anteriores para evitar que un catálogo viejo (con URLs rotas) se quede atascado.
   // Las colas de «Proponer arma» y «Sugerir cambios» (_v2) se retiraron el 13-sep-2026.
   try {
+    // amx_admin_v2 guardaba la contraseña local del admin, retirada el
+    // 19-oct-2026: se borra para que no quede en ningún navegador.
     ['amx_armas_v1','amx_pending_v1','amx_pages_v1','amx_admin_v1','amx_rejected_v1','amx_visits_v1','amx_priceHist_v1','amx_promos_v1','amx_suggestions_v1',
-     'amx_pending_v2','amx_suggestions_v2']
+     'amx_pending_v2','amx_suggestions_v2','amx_admin_v2']
       .forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
   } catch(e) {}
-
-  const DEFAULT_PW = 'armado2026';
 
   const DEFAULT_PROMOS = [
     {
@@ -261,7 +260,6 @@
       if (!localStorage.getItem(K.visits)) write(K.visits, {});
       if (!localStorage.getItem(K.priceHist)) write(K.priceHist, {});
       if (!localStorage.getItem(K.promos)) write(K.promos, DEFAULT_PROMOS);
-      if (!localStorage.getItem(K.admin)) write(K.admin, { password: DEFAULT_PW, loggedIn: false });
       if (!localStorage.getItem(K.favorites)) write(K.favorites, []);
       if (!localStorage.getItem(K.reviews)) write(K.reviews, []);
       if (!localStorage.getItem(K.reviewsQueue)) write(K.reviewsQueue, []);
@@ -585,31 +583,9 @@
     },
 
     // ─── AUTH ─────────────────────────────────────────────
-    isLoggedIn() {
-      const v = read(K.admin, {});
-      return !!v.loggedIn;
-    },
-    checkPassword(pw) {
-      const v = read(K.admin, { password: DEFAULT_PW });
-      return pw === v.password;
-    },
-    login(pw) {
-      if (!this.checkPassword(pw)) return false;
-      const v = read(K.admin, {});
-      v.loggedIn = true;
-      write(K.admin, v);
-      return true;
-    },
-    logout() {
-      const v = read(K.admin, {});
-      v.loggedIn = false;
-      write(K.admin, v);
-    },
-    setPassword(newPw) {
-      const v = read(K.admin, {});
-      v.password = newPw;
-      write(K.admin, v);
-    },
+    // No hay contraseña local (retirada el 19-oct-2026). La única puerta de
+    // /admin es Cloudflare Access, y toda escritura la verifica el servidor
+    // (requireAdmin en functions/api/_lib.js).
 
     // ─── JSON IO ──────────────────────────────────────────
     exportAll() {
