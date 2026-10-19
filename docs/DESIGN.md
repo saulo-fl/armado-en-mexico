@@ -1109,7 +1109,7 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   ficha de fichero (ficha técnica); la tarjeta de almacén (existencias por sucursal); el papel
   milimétrico con su registro y los anexos grapados (historial y PDFs); los separadores con la
   hoja de oficio (Legalidad · Usos · Antecedentes). Fuera del folder: la vitrina con dos repisas
-  (munición y accesorios), la tele de los 80 (video), la tarjeta de comentarios y los expedientes
+  (munición y accesorios), la tele antigua (videos; una fotografía con la pantalla recortada, solo en las fichas que tienen video), la tarjeta de comentarios y los expedientes
   de armas similares. Los títulos de sección fuera del folder van en **cinta Dymo** negra. Las letras van
   alineadas: Saulo retiró los saltos por letra de todas las cintas el 16-sep-2026.
 - **Intensidad: papelería física, sin texturas.** Se permiten clips, grapas, cinta canela,

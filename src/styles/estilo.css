@@ -234,10 +234,6 @@
   /* El rotulador rojo del comparador: circula el valor que gana (14-sep-2026).
      Es trazo, no texto: el mínimo es 3:1 (WCAG 1.4.11) sobre el fichero. */
   --rotulador:      #C63A32;
-  /* El televisor de los 80. */
-  --tele-mueble:    #5E3F26;
-  --tele-marco:     #26221E;
-  --tele-perilla:   #BDB6A6;
 
   /* ── MARCA ──────────────────────────────────────────────────────────────
      El verde #173A32 es el color de marca y NO se toca: en oscuro sigue
@@ -2885,61 +2881,45 @@
 }
 .amx-v2 .amx-etiqueta-precio small { font-weight: 400; font-size: 11px; color: var(--etiqueta-tinta-2); }
 
-/* ── LA TELE DE LOS 80 — el video del modelo ───────────────────────────────
-   Mueble de madera, pantalla de tubo con sus esquinas redondas y el panel con
-   dos perillas y la bocina. La pantalla es el <button> que carga el video; el
-   iframe no se pide hasta que el visitante lo toca. */
-.amx-v2 .amx-tele {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--e3);
-  max-width: 860px;
-  padding: 12px;
-  background: linear-gradient(180deg, #6C4B30 0%, var(--tele-mueble) 60%, #4A311D 100%);
-  border-radius: 14px;
-  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .14), inset 0 -3px 0 rgba(0, 0, 0, .35), var(--sombra);
-}
-@media (min-width: 720px) {
-  .amx-v2 .amx-tele { grid-template-columns: minmax(0, 1fr) 92px; gap: 18px; padding: 18px; border-radius: 18px; }
-}
-.amx-v2 .amx-tele :focus-visible { outline-color: var(--crema); }
-.amx-v2 .amx-tele-marco {
-  padding: 12px;
-  background: var(--tele-marco);
-  border-radius: 20px;
-  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .06);
+/* ── LA TELE ANTIGUA — videos de YouTube (TeleVideo en ui.jsx) ──────────────
+   La tele es una FOTOGRAFÍA con la pantalla recortada en transparente
+   (tele-antigua.webp, 1482x1131). El video va DETRÁS, en el hueco que TeleVideo
+   coloca en porcentajes; la foto va encima y deja pasar los clics. */
+.amx-v2 .amx-tele { max-width: 640px; margin: 0 auto; }
+.amx-v2 .amx-tele-caja { position: relative; aspect-ratio: 1482 / 1131; }
+.amx-v2 .amx-tele-mueble {
+  position: absolute; inset: 0; z-index: 2;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, .35));
 }
 .amx-v2 .amx-tele-pantalla {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  padding: 0;
+  position: absolute; z-index: 1;
   overflow: hidden;
   background: #0B0C0C;
-  border: 0;
-  border-radius: 18px / 26px;
-  cursor: pointer;
 }
-.amx-v2 .amx-tele-pantalla img,
-.amx-v2 .amx-tele-pantalla iframe {
+.amx-v2 .amx-tele-pantalla iframe,
+.amx-v2 .amx-tele-boton,
+.amx-v2 .amx-tele-boton img {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  object-fit: cover;
   border: 0;
 }
+.amx-v2 .amx-tele-boton img { object-fit: cover; }
+.amx-v2 .amx-tele-boton { display: block; padding: 0; background: none; cursor: pointer; }
+/* El anillo de foco va por dentro: por fuera lo taparía el bisel de la foto. */
+.amx-v2 .amx-tele-boton:focus-visible { outline: 3px solid var(--crema); outline-offset: -8px; }
 /* El cristal del tubo: un brillo arriba y el borde que se oscurece. */
 .amx-v2 .amx-tele-pantalla::after {
   content: '';
   position: absolute; inset: 0;
-  border-radius: inherit;
-  background: radial-gradient(ellipse at 30% 12%, rgba(255, 255, 255, .16), transparent 45%);
+  background: radial-gradient(ellipse at 30% 12%, rgba(255, 255, 255, .14), transparent 45%);
   box-shadow: inset 0 0 36px rgba(0, 0, 0, .65);
   pointer-events: none;
 }
 /* Velo sobre la miniatura: el sello va en tinta clara y una miniatura clara lo
    borraría. Sin `filter` en la foto: es una capa encima. */
-.amx-v2 button.amx-tele-pantalla::before {
+.amx-v2 .amx-tele-boton::before {
   content: '';
   position: absolute; inset: 0; z-index: 1;
   background: rgba(8, 9, 9, .42);
@@ -2951,55 +2931,38 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
-.amx-v2 .amx-tele-sello .amx-sello { color: var(--dymo-letra); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; }
-.amx-v2 .amx-tele-panel {
+.amx-v2 .amx-tele-sello .amx-sello { color: var(--dymo-letra); font-size: 17px; padding: 7px 14px 8px; border-width: 3px; white-space: nowrap; }
+/* La perilla de canales de la foto (centro medido en tele-antigua.webp). */
+.amx-v2 .amx-tele-perilla {
+  position: absolute; z-index: 3;
+  left: 84.28%; top: 62.35%;
+  width: 9.67%; aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.amx-v2 .amx-tele-pie {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--e3);
-  padding: 0 var(--e2);
+  gap: 0 var(--e3);
+  margin-top: var(--e2);
 }
-@media (min-width: 720px) {
-  .amx-v2 .amx-tele-panel { flex-direction: column; padding: var(--e2) 0; }
-}
-.amx-v2 .amx-tele-perilla {
-  position: relative;
-  flex: 0 0 auto;
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #E6E0D2, var(--tele-perilla) 45%, #7C7568 100%);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, .45), inset 0 -2px 2px rgba(0, 0, 0, .25);
-}
-.amx-v2 .amx-tele-perilla::after {
-  content: '';
-  position: absolute;
-  top: 5px; left: 50%;
-  width: 3px; height: 11px;
-  margin-left: -1.5px;
-  border-radius: 2px;
-  background: #3B3630;
-}
-.amx-v2 .amx-tele-perilla + .amx-tele-perilla { transform: rotate(120deg); }
-.amx-v2 .amx-tele-bocina {
-  flex: 1 1 auto;
-  align-self: stretch;
-  min-height: 14px;
-  border-radius: 4px;
-  background: repeating-linear-gradient(90deg, #2B241E 0 3px, transparent 3px 7px);
-}
-@media (min-width: 720px) {
-  .amx-v2 .amx-tele-bocina { width: 100%; background: repeating-linear-gradient(180deg, #2B241E 0 3px, transparent 3px 7px); }
-}
-.amx-v2 .amx-tele-canal {
+.amx-v2 .amx-tele-canal,
+.amx-v2 .amx-tele-cambiar {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  margin-top: var(--e2);
   font-family: var(--mono);
   font-size: 13px;
   letter-spacing: .08em;
   color: var(--tinta-2);
 }
+.amx-v2 .amx-tele-cambiar { padding: 0; border: 0; background: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
 /* ── LA TARJETA DE COMENTARIOS — ¿Recomiendas esta arma? ───────────────────
    Tarjeta de buzón con su renglón rojo. El voto son dos sellos de goma: sin

@@ -502,6 +502,8 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
         </section>}
 
       {/* ── LA TARJETA DE COMENTARIOS ─────────────────────────────────── */}
+      <window.SeccionVideo videos={window.amxVideos('municion', mun)} titulo={mun.nombre} padX={PAD} gap={SEC} />
+
       <section style={{ padding: `${SEC}px ${PAD}px 0` }} aria-labelledby="ficha-opiniones">
         <window.CintaDymo id="ficha-opiniones">Opiniones</window.CintaDymo>
         <div className="amx-comentarios-marco">
