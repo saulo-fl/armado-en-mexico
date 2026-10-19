@@ -59,7 +59,7 @@ avisar_error(){
   telegram "⚠️ Pipeline DCAM falló en paso $STEP: ${1}. Inventario NO conciliado — revisar conciliar.log."
 }
 
-# Mismo contrato que conciliar.sh: la señal fallida se aparta para no re-disparar
+# La señal fallida se aparta para no re-disparar
 # en bucle; Saulo la re-crea tras arreglar.
 falla(){
   avisar_error "$1"
