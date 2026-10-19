@@ -515,7 +515,7 @@ resiembra D1 y compruébalo como visitante, no por la API.
   explícito de Saulo (26-ago-2026) al rediseñar el bloque de opinión.
 
 - **Videos de YouTube en las fichas, dentro de una tele antigua.** Un reproductor
-  de YouTube en la ficha de arma y de munición, solo en las que tienen video. **No es
+  de YouTube en la ficha de arma, de munición y de calibre, solo en las que tienen video. **No es
   automático**: Saulo elige cada video a mano y queda fijado por su enlace de YouTube.
   Entran las reviews del canal principal (Armas M&S) y las de otros creadores que
   hayan **autorizado** que su video se ponga en la página. El marco es una **televisión
@@ -525,23 +525,39 @@ resiembra D1 y compruébalo como visitante, no por la API.
   video no hay tele vacía ni hueco. Pedido explícito de Saulo (18-oct-2026).
   Videos con ficha al 18-oct-2026, todos del canal Armas M&S (confirmado por Saulo:
   cada video va en las fichas de estos ids de `data.js`; las variantes que solo cambian
-  de acabado comparten video). Se conserva el `&t=` cuando lo trae: es el segundo en
-  que debe arrancar.
+  de acabado comparten video). Todos empiezan desde el principio: los `&t=` que traían
+  algunos enlaces fueron un error al copiarlos (Saulo, 18-oct-2026).
   - Huglu Atrox (id 99): https://www.youtube.com/watch?v=_VW1O5u8FxM
   - Ruger 10/22 (id 151), armarlo a tu gusto: https://www.youtube.com/watch?v=oxX8cb6TnFI
   - Beretta 80X Cheetah (id 13; también existe la Bronce, 218): https://www.youtube.com/watch?v=-yr5-D4lid0
   - Beretta 92FS .22 LR (id 134), «la .22 LR más cara»: https://www.youtube.com/watch?v=njThIuPZUnM
-  - CZ P-10 C (id 9): https://www.youtube.com/watch?v=HDqC7Gf9hEQ&t=77s
+  - CZ P-10 C (id 9): https://www.youtube.com/watch?v=HDqC7Gf9hEQ
   - CZ 457 Jaguar XII (id 256): https://www.youtube.com/watch?v=d1svvgM1ZPQ
   - Mendoza RM22, todas sus variantes (mismo rifle, otra culata o acabado: ids 50, 51,
-    52, 53, 54, 55, 179, 262, 263, 264): https://www.youtube.com/watch?v=9RIekKHX-58&t=6s
+    52, 53, 54, 55, 179, 262, 263, 264): https://www.youtube.com/watch?v=9RIekKHX-58
   - Browning Buck Mark (id 17): https://www.youtube.com/watch?v=kZKXxltWaX4
   - Glock 25 (id 11): https://www.youtube.com/watch?v=DWBfKTXJL8w
-  - Tippmann M4-22, todas sus variantes (ids 80, 81, 82): https://www.youtube.com/watch?v=XPexSruOCYg&t=18s
-  - Ruger 10/22 (id 151), prueba: https://www.youtube.com/watch?v=DrFCGoNxJwE&t=45s
+  - Tippmann M4-22, todas sus variantes (ids 80, 81, 82): https://www.youtube.com/watch?v=XPexSruOCYg
+  - Ruger 10/22 (id 151), prueba: https://www.youtube.com/watch?v=DrFCGoNxJwE
   - SIG Sauer P322 (id 18): https://www.youtube.com/watch?v=vRJfSbzc4F4
-  - Ruger LCP (id 5): https://www.youtube.com/watch?v=FUqd3FG8Q4U&t=332s
+  - Ruger LCP (id 5): https://www.youtube.com/watch?v=FUqd3FG8Q4U
   - CZ P-07 (id 8): https://www.youtube.com/watch?v=q2O2KIIRODU
+  Videos de calibre, todos del canal M&S Army. Cada uno va en la ficha del calibre y en
+  las fichas de munición de ese calibre. Los calibres sin ficha (4.6x30, .25 ACP, .357 SIG,
+  .22 Short, .44 Magnum) se quedan fuera hasta que la tengan.
+  - .380 ACP (calibre y sus 3 municiones): https://www.youtube.com/watch?v=s_YZ4H1axCY · https://www.youtube.com/watch?v=-OinJl5azFk
+  - .32 ACP (calibre): https://www.youtube.com/watch?v=hmN9gMZRT_Q · https://www.youtube.com/watch?v=pPt81-e7Ky4
+  - .40 S&W (calibre y sus 3 municiones): https://www.youtube.com/watch?v=7BnaBTeerIQ · https://www.youtube.com/watch?v=ujpykirYDIk
+  - .45 ACP (calibre): https://www.youtube.com/watch?v=-IX-faii6qQ · https://www.youtube.com/watch?v=KggHg8UyzI0
+  - .38 Super (calibre y sus 3 municiones): https://www.youtube.com/watch?v=fYizFugZx3w · https://www.youtube.com/watch?v=YctSyZZxZFI
+  - .38 Special (calibre y su munición): https://www.youtube.com/watch?v=-u9rTNgpiYw · https://www.youtube.com/watch?v=glq9UJ5eI6o
+  - .357 Magnum (calibre): https://www.youtube.com/watch?v=ZitAhiLiLRY
+  - .22 WMR (calibre): https://www.youtube.com/watch?v=FWNecLbZQQY
+  - Percusión anular, por qué solo queda en .22 (calibres .22 LR y .22 WMR): https://www.youtube.com/watch?v=5XqMkye6-qc
+  - .17 HMR (sus 2 municiones; no tiene ficha de calibre): https://www.youtube.com/watch?v=4oID4UPCJEE
+  - .30 Carbine (su munición; no tiene ficha de calibre): https://www.youtube.com/watch?v=uQjZlQNpm0k
+  - Todos los cartuchos .38 / 9 mm / .357, del más débil al más poderoso (fichas por
+    confirmar con Saulo): https://www.youtube.com/watch?v=wUS4_ASpRjI
 - **Engrosar la sección «Historia» de cada arma con investigación real.** Hoy
   `arma.historia` sale del builder de `data.js` y mide 58/118/982 caracteres
   (mín/media/máx): en la mayoría son dos frases. Es el contenido con más valor
