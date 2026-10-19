@@ -629,7 +629,7 @@ function AboutScreen() {
             áreas lo reparten sin reordenarlo. */}
         <div className="amx-acerca-grid">
           <header className="amx-carpeta-cab amx-acerca-cab">
-            <img className="amx-acerca-logo" src="imagenes/logo-armado-mx.webp" alt="" />
+            <img className="amx-acerca-logo" src="imagenes/logo-armado-mx-v2.webp" alt="" />
             <h1 id="acerca-titulo" className="t-titulo">{title}</h1>
           </header>
 
@@ -673,7 +673,7 @@ function AboutScreen() {
         <div className="amx-acerca-duo">
           <article className="amx-oficio">
             <div className="amx-acerca-duo-cab">
-              <img src="imagenes/logo-armado-mx.webp" alt="" />
+              <img src="imagenes/logo-armado-mx-v2.webp" alt="" />
               <h3 className="amx-oficio-tit">Armado en México</h3>
             </div>
             <p className="amx-oficio-texto">Una <b>enciclopedia libre</b> que busca dar transparencia a toda la parte legal que las instituciones mantienen opaca para tener al pueblo desarmado e ignorante de sus derechos.</p>
@@ -1000,7 +1000,7 @@ function MenuScreen({ onNav, onTutorial }) {
     { id: 'legal', glyph: '§', title: 'Legalidad', desc: 'Trámite SEDENA y categorías legales' },
     { id: 'soporte', glyph: '◈', title: 'Soporte y normas', desc: 'Normas de la comunidad, denuncias y moderación' },
     { id: 'faq', glyph: '?', title: 'Preguntas frecuentes', desc: 'Dudas comunes sobre armas y trámites' },
-    { id: 'about', img: 'imagenes/isotipo-armado.webp', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
+    { id: 'about', img: 'imagenes/isotipo-armado-v2.webp', title: 'Acerca de', desc: 'Sobre Armado en México y M&S' },
     { sep: true },
     { id: 'tutorial', action: 'tutorial', glyph: '▶', title: 'Ver tutorial', desc: 'Reproduce la introducción de bienvenida' },
   ];
