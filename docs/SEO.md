@@ -176,7 +176,7 @@ de respuesta directa al principio de cada ficha (los LLM citan párrafos autocon
 
 ```bash
 for u in / /pistolas /pistolas/glock-19 /municiones/12-ga-rio-perdigon-7-5-28-gr \
-         /sitemap.xml /robots.txt /app.js /imagenes/favicon.png /noexiste-xyz; do
+         /sitemap.xml /robots.txt /app.js /imagenes/favicon-v2.png /noexiste-xyz; do
   echo "$(curl -s -o /dev/null -w '%{http_code}' https://armado.mx$u)  $u"
 done
 # Esperado: 200 en todas menos /noexiste-xyz -> 404

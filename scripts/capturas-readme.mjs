@@ -20,7 +20,7 @@ import puppeteer from 'puppeteer-core';
 const RAIZ = process.argv[2] || 'https://armado.mx';
 const SOLO = process.argv[3];
 const OUT = fileURLToPath(new URL('../docs/capturas/readme/', import.meta.url));
-const LOGO = fileURLToPath(new URL('../public/imagenes/logo-armado-mx.webp', import.meta.url));
+const LOGO = fileURLToPath(new URL('../public/imagenes/logo-armado-mx-v2.webp', import.meta.url));
 
 const ESCRITORIO = { width: 1440, height: 900, deviceScaleFactor: 1 };
 const MOVIL = { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
@@ -256,7 +256,7 @@ const TRABAJOS = {
     const logo = dataUri(readFileSync(LOGO), 'webp');
     await montar('portada', 1600, 900, `
       <div style="position:absolute;left:80px;top:170px;width:580px">
-        <img src="${logo}" style="width:120px;border-radius:22px;box-shadow:0 12px 30px -12px rgba(0,0,0,.5)">
+        <img src="${logo}" style="width:120px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.35))">
         <h1 style="font:800 88px/.92 Archivo;font-stretch:75%;letter-spacing:-.01em;margin:34px 0 26px">ARMADO<br>EN MÉXICO</h1>
         <span class="dymo">ENCICLOPEDIA DE ARMAS LEGALES</span>
         <p style="font:400 25px/1.45 Archivo;margin-top:30px;max-width:540px">Conoce tus derechos, los trámites necesarios, precios y disponibilidad de las armas

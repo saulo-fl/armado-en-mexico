@@ -251,13 +251,14 @@ function LogoMarca({ size = 28, conTexto = false, src = null }) {
       {/* El ISOTIPO REAL de la marca, no un dibujo. Aquí había una pistola en
           SVG hecha a mano —20 coordenadas inventadas dentro de un recuadro— que
           no era el logotipo de Armado en México sino un sustituto genérico.
-          `imagenes/isotipo-armado.webp` sale del propio `logo-armado-mx.webp`:
-          es su recuadro y su pistola, recortados del archivo original y sin las
-          palabras, que ahora van al lado. Nada dibujado de nuevo — §6b manda
-          usar los logotipos tal cual. */}
-      <img src="imagenes/isotipo-armado.webp"
+          `imagenes/isotipo-armado-v2.webp` sale del logo definitivo (SVG de
+          Saulo, 18-oct-2026): su pistola tal cual, sin las palabras —que van al
+          lado—, centrada en el marco de la insignia con fondo crema. El marco va
+          más grueso que en la insignia porque a 28-38 px su línea desaparecería.
+          Trae las esquinas transparentes: no lleva borderRadius que recortar. */}
+      <img src="imagenes/isotipo-armado-v2.webp"
         width={size} height={size}
-        style={{ display: 'block', flexShrink: 0, borderRadius: Math.round(size * 0.22) }}
+        style={{ display: 'block', flexShrink: 0 }}
         role={conTexto ? 'presentation' : 'img'}
         alt={conTexto ? '' : 'Armado en México'} />
       {conTexto && (
@@ -2873,7 +2874,7 @@ window.RepisaArticulo = RepisaArticulo;
 // es de un proyecto privado, con su propio logo: no imita una credencial
 // oficial de ninguna dependencia.
 // ──────────────────────────────────────────────────────────────
-function Gafete({ foto, nombre, cargos = [], marca = 'Armado en México', logo = 'imagenes/logo-armado-mx.webp' }) {
+function Gafete({ foto, nombre, cargos = [], marca = 'Armado en México', logo = 'imagenes/logo-armado-mx-v2.webp' }) {
   // Cubre los dos casos, igual que ArmaPolaroid: la foto que nunca existió y
   // el .webp que está en el dato pero no llega.
   const [falloCarga, setFalloCarga] = React.useState(false);
