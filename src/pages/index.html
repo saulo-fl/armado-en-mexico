@@ -59,28 +59,27 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>Armado en México — Enciclopedia táctica</title>
 <script>
-  /* Precarga de las imágenes del TUTORIAL de bienvenida, que es el LCP de la primera
-     visita: sin esto solo se descubren cuando React lo pinta (~6 s en 4G lenta).
+  /* Precarga del sello del TUTORIAL de bienvenida, que es el LCP de la primera
+     visita: sin esto solo se descubre cuando React lo pinta (~6 s en 4G lenta).
      SOLO si el tutorial se va a abrir —portada y sin `amx_onboarded_v1`, la misma
      condición que app.jsx—: en las fichas prerenderizadas o para quien ya lo vio
      serían bytes de más compitiendo con el CSS y el JS.
      Va ANTES de cualquier <link rel="stylesheet">: un script inline posterior espera
      a que baje la hoja de estilo y la precarga saldría tarde.
-     crossorigin SOLO en el sello: estilo.css lo usa como mask-image, que se pide en
-     modo CORS. El marco (background) y el logo (<img>) se piden sin CORS; si la
-     precarga no coincide en modo, el navegador la tira y descarga dos veces. */
+     crossorigin es OBLIGATORIO: estilo.css usa el sello como mask-image, que se pide
+     en modo CORS; sin él la precarga no coincide y se descarga dos veces.
+     NO precargues foto-marco.webp ni logo-armado-mx.webp (18-oct-2026): medido en
+     el preview de Cloudflare, precargar el marco hace que Chrome registre el LCP de
+     la copia a ~15 s en vez de ~8 s, aunque la imagen ya esté en el teléfono a los
+     2 s. En local con python http.server salía al revés: mide en el preview. */
   (function () {
     var visto = false;
     try { visto = !!localStorage.getItem('amx_onboarded_v1'); } catch (e) {}
     if (visto || location.pathname !== window.APP_BASE) return;
-    [['imagenes/sello-desgaste.webp', 'anonymous'],
-     ['imagenes/foto-marco.webp'],
-     ['imagenes/logo-armado-mx.webp']].forEach(function (p) {
-      var l = document.createElement('link');
-      l.rel = 'preload'; l.as = 'image'; l.href = p[0];
-      if (p[1]) l.crossOrigin = p[1];
-      document.head.appendChild(l);
-    });
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = 'imagenes/sello-desgaste.webp';
+    l.crossOrigin = 'anonymous';
+    document.head.appendChild(l);
   })();
 </script>
 
