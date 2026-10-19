@@ -85,6 +85,36 @@ export async function readDomain(db, domain, fallback) {
   try { return JSON.parse(row.data); } catch { return fallback; }
 }
 
+// Escritura condicional (compare-and-swap) para el append público. Solo escribe
+// si la fila sigue como se leyó: si otro envío la cambió entretanto, devuelve
+// false y el llamador reintenta sobre el estado nuevo. Sin esto, dos envíos
+// simultáneos leían lo mismo y el último pisaba al primero: una reseña o una
+// denuncia se perdía sin error.
+// `prevUpdatedAt` es el updated_at leído (null si la fila no existía). El nuevo
+// es estrictamente mayor que el anterior, para que dos escrituras en el mismo
+// milisegundo no dejen la fila con el mismo sello (y un CAS viejo no acierte).
+export async function readDomainVersion(db, domain) {
+  const row = await db.prepare('SELECT data, updated_at FROM state WHERE domain = ?').bind(domain).first();
+  if (!row) return { data: undefined, updatedAt: null };
+  let data;
+  try { data = row.data == null ? undefined : JSON.parse(row.data); } catch { data = undefined; }
+  return { data, updatedAt: row.updated_at };
+}
+
+export async function writeDomainIf(db, domain, value, prevUpdatedAt) {
+  const body = JSON.stringify(value);
+  const prevMs = prevUpdatedAt ? Date.parse(prevUpdatedAt) : NaN;
+  const nowIso = new Date(Math.max(Date.now(), Number.isFinite(prevMs) ? prevMs + 1 : 0)).toISOString();
+  const res = prevUpdatedAt == null
+    ? await db.prepare(
+      'INSERT INTO state (domain, data, updated_at) VALUES (?, ?, ?) ON CONFLICT(domain) DO NOTHING'
+    ).bind(domain, body, nowIso).run()
+    : await db.prepare(
+      'UPDATE state SET data = ?, updated_at = ? WHERE domain = ? AND updated_at = ?'
+    ).bind(body, nowIso, domain, prevUpdatedAt).run();
+  return !!(res && res.meta && res.meta.changes === 1);
+}
+
 export async function writeDomain(db, domain, value) {
   const body = typeof value === 'string' ? value : JSON.stringify(value);
   await db.prepare(
@@ -112,7 +142,9 @@ export function mergeAppend(domain, current, item) {
       email: String(item.email || '').slice(0, 160),
       entidadNombre: String(item.entidadNombre || '').slice(0, 120),
     });
-    clean.id = 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    // UUID y no Date.now()+random(1000): con mil valores, dos envíos en el mismo
+    // milisegundo podían compartir id, y aprobar/rechazar filtra por id.
+    clean.id = 'r_' + crypto.randomUUID();
     clean.submittedAt = new Date().toISOString();
     clean.status = 'pending';
     arr.unshift(clean);
@@ -123,7 +155,7 @@ export function mergeAppend(domain, current, item) {
     const normalized = normalizeReport(item);
     if (!normalized.ok) return arr;
     const clean = normalized.value;
-    clean.id = 'd_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+    clean.id = 'd_' + crypto.randomUUID();
     clean.submittedAt = new Date().toISOString();
     clean.status = 'pending';
     arr.unshift(clean);
@@ -135,21 +167,46 @@ export function mergeAppend(domain, current, item) {
   }
   if (domain === 'visits') {
     const out = (current && typeof current === 'object') ? { ...current } : {};
-    const armaId = String(parseInt(item.armaId, 10));
-    if (!armaId || armaId === 'NaN') return out;
-    const ts = Number(item.ts) || Date.now();
-    const cutoff = Date.now() - 60 * 24 * 60 * 60 * 1000;
-    const list = (Array.isArray(out[armaId]) ? out[armaId] : []).concat([ts]).filter((t) => t > cutoff);
+    const n = parseInt(item.armaId, 10);
+    if (!Number.isInteger(n) || n < 1 || n > VISITS_MAX_ID) return out;
+    const armaId = String(n);
+    // La marca la pone el SERVIDOR. Antes se aceptaba `item.ts` del cliente, y
+    // con curl se podían fechar visitas en el futuro (nunca caducan) o meter
+    // cientos de golpe para colocar un arma en «Más visitadas».
+    const now = Date.now();
+    const ts = now;
+    const cutoff = now - 60 * 24 * 60 * 60 * 1000;
+    const list = (Array.isArray(out[armaId]) ? out[armaId] : []).concat([ts]).filter((t) => t > cutoff && t <= now);
     // ponytail: 500 marcas por arma acota la fila a ~1.2 MB con las 179 armas,
     // bajo el límite de 2 MB de D1. Con 5000 el techo eran ~12 MB y la escritura
     // habría empezado a fallar en silencio. Si algún día hace falta el conteo
     // exacto, la salida es una tabla fila-por-visita agregada con COUNT, no
     // subir este número.
-    out[armaId] = list.slice(-500);
+    out[armaId] = list.slice(-VISITS_POR_ARMA);
+    // Tope de CLAVES: sin él, un bucle de curl con armaId distintos inflaba la
+    // fila hasta pasar los 2 MB de D1, y a partir de ahí toda escritura de
+    // visitas fallaba (y /api/state servía el blob inflado a cada visitante).
+    // Si se pasa, sale la clave con menos marcas: un id inventado con 1 visita
+    // cede su sitio ante un arma real.
+    const claves = Object.keys(out);
+    if (claves.length > VISITS_MAX_CLAVES) {
+      claves.sort((a, b) => (out[a] || []).length - (out[b] || []).length);
+      for (const k of claves.slice(0, claves.length - VISITS_MAX_CLAVES)) {
+        if (k !== armaId) delete out[k];
+      }
+    }
     return out;
   }
   return current;
 }
+
+// visits: peor caso 330 claves × 400 marcas × 14 bytes (13 dígitos + coma)
+// ≈ 1.85 MB, bajo los 2 MB por fila de D1 (functions-lib.test.mjs lo mide).
+// El catálogo tiene hoy 261 armas (id máx. 264): si pasa de 330, sube
+// VISITS_MAX_CLAVES y baja VISITS_POR_ARMA en la misma proporción.
+export const VISITS_MAX_ID = 99999;
+export const VISITS_MAX_CLAVES = 330;
+export const VISITS_POR_ARMA = 400;
 
 // Tipos de entidad que aceptan reseña. Cerrado a propósito: un `tipo` libre
 // dejaría crear cubos arbitrarios en el mismo blob.
@@ -208,8 +265,10 @@ function recortarPorBytes(arr, maxBytes) {
 let _jwksCache = { url: null, keys: null, at: 0 };
 
 export async function requireAdmin(request, env) {
-  // Escape hatch SOLO para desarrollo local (wrangler pages dev).
-  if (env.ALLOW_INSECURE_ADMIN === '1') return null;
+  // Escape hatch SOLO para desarrollo local (wrangler pages dev). Se ata además
+  // a localhost: si la variable se colara por error en el proyecto de Pages,
+  // en armado.mx no abriría nada.
+  if (env.ALLOW_INSECURE_ADMIN === '1' && esLocal(request)) return null;
 
   const team = env.CF_ACCESS_TEAM_DOMAIN; // p.ej. "tu-equipo.cloudflareaccess.com"
   const aud = env.CF_ACCESS_AUD;          // Application Audience (AUD) tag
@@ -229,6 +288,13 @@ export async function requireAdmin(request, env) {
   }
 }
 
+function esLocal(request) {
+  try {
+    const h = new URL(request.url).hostname;
+    return h === 'localhost' || h === '127.0.0.1' || h === '[::1]';
+  } catch { return false; }
+}
+
 function cookie(request, name) {
   const raw = request.headers.get('Cookie') || '';
   const m = raw.match(new RegExp('(?:^|;\\s*)' + name + '=([^;]+)'));
@@ -240,13 +306,18 @@ async function verifyAccessJwt(token, team, aud) {
   if (!h || !p || !s) return false;
   const header = JSON.parse(b64urlToString(h));
   const payload = JSON.parse(b64urlToString(p));
+  // Access firma con RS256; cualquier otro alg se rechaza antes de buscar llave.
+  if (header.alg !== 'RS256') return false;
 
   // Validar audiencia y expiración antes de la firma (barato).
   const auds = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
   if (!auds.includes(aud)) return false;
-  if (payload.exp && Date.now() / 1000 > payload.exp) return false;
+  // exp es obligatorio: un token sin caducidad no se acepta. nbf con 60 s de holgura.
+  const ahora = Date.now() / 1000;
+  if (typeof payload.exp !== 'number' || ahora > payload.exp) return false;
+  if (typeof payload.nbf === 'number' && ahora + 60 < payload.nbf) return false;
   const iss = 'https://' + team;
-  if (payload.iss && payload.iss !== iss) return false;
+  if (payload.iss !== iss) return false;
 
   const jwk = await getKey(team, header.kid);
   if (!jwk) return false;

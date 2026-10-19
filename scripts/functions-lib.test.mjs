@@ -15,6 +15,7 @@ import assert from 'node:assert/strict';
 import {
   mergeAppend, APPEND_DOMAINS, RESENA_MIN, RESENA_MAX,
   normalizeReport, REPORT_MIN, REPORT_MAX,
+  VISITS_MAX_CLAVES, VISITS_POR_ARMA, requireAdmin,
 } from '../functions/api/_lib.js';
 
 const pesa = (v) => JSON.stringify(v).length;
@@ -75,15 +76,48 @@ ok('denuncias inválidas no modifican el dominio');
 {
   let v = {};
   for (let i = 0; i < 600; i++) v = mergeAppend('visits', v, { armaId: 1, ts: Date.now() - i });
-  assert.equal(v['1'].length, 500, 'maximo 500 marcas por arma');
+  assert.equal(v['1'].length, VISITS_POR_ARMA, `maximo ${VISITS_POR_ARMA} marcas por arma`);
 
   let full = {};
-  for (let id = 1; id <= 179; id++) {
-    for (let i = 0; i < 600; i++) full = mergeAppend('visits', full, { armaId: id, ts: Date.now() - i });
+  // Peor caso construido directamente (mergeAppend con la marca del servidor
+  // tardaría demasiado): el tope de claves lleno, cada una con su tope de marcas.
+  const ahora = Date.now();
+  for (let id = 1; id <= VISITS_MAX_CLAVES; id++) {
+    full[String(id)] = Array.from({ length: VISITS_POR_ARMA }, (_, i) => ahora - i);
   }
+  full = mergeAppend('visits', full, { armaId: 1 });
   const bytes = pesa(full);
-  assert.ok(bytes < 2_000_000, `179 armas saturadas deben caber en la fila de 2 MB de D1, miden ${bytes}`);
-  ok(`visits saturado en las 179 armas = ${bytes} bytes, bajo el limite de 2 MB`);
+  assert.ok(bytes < 2_000_000, `visits saturado debe caber en la fila de 2 MB de D1, mide ${bytes}`);
+  ok(`visits saturado (${VISITS_MAX_CLAVES} claves) = ${bytes} bytes, bajo el limite de 2 MB`);
+}
+
+// ── visits: el cliente no elige la marca ni infla la fila con ids ───────────
+{
+  const antes = Date.now();
+  const futuro = antes + 10 * 365 * 24 * 3600 * 1000;
+  const v = mergeAppend('visits', {}, { armaId: 7, ts: futuro });
+  assert.equal(v['7'].length, 1);
+  assert.ok(v['7'][0] >= antes && v['7'][0] <= Date.now(), 'la marca es la hora del servidor, no la enviada');
+  ok('visits ignora el ts del cliente');
+
+  for (const malo of [0, -3, 100000, 'abc', null]) {
+    assert.deepEqual(mergeAppend('visits', {}, { armaId: malo }), {}, `armaId ${malo} rechazado`);
+  }
+  ok('visits rechaza ids fuera de rango');
+
+  let lleno = {};
+  for (let id = 1; id <= VISITS_MAX_CLAVES + 50; id++) lleno = mergeAppend('visits', lleno, { armaId: id });
+  assert.ok(Object.keys(lleno).length <= VISITS_MAX_CLAVES, 'tope de claves respetado');
+  ok(`visits nunca pasa de ${VISITS_MAX_CLAVES} claves`);
+}
+
+// ── ids de reseña/denuncia: sin colisiones ──────────────────────────────────
+{
+  const base = { tipo: 'arma', entidadId: 47, recomienda: true, autor: 'Ana', texto: 'x'.repeat(RESENA_MIN) };
+  let cola = [];
+  for (let i = 0; i < 200; i++) cola = mergeAppend('reviewsQueue', cola, base);
+  assert.equal(new Set(cola.map((r) => r.id)).size, cola.length, 'ids únicos');
+  ok('200 reseñas en ráfaga, 200 ids distintos');
 }
 
 // ── Reseñas: el mínimo de texto se impone en el SERVIDOR ─────────────
@@ -111,6 +145,40 @@ ok('denuncias inválidas no modifican el dominio');
   assert.equal(out[0].status, 'pending', 'el status lo fija el servidor, no el cliente');
   assert.notEqual(out[0].id, 'falso', 'el id lo fija el servidor');
   ok('una resena valida entra siempre como pendiente');
+}
+
+// ── ALLOW_INSECURE_ADMIN solo abre en localhost ─────────────────────────────
+// Si la variable se colara en el proyecto de Pages, en armado.mx no debe abrir.
+{
+  const env = { ALLOW_INSECURE_ADMIN: '1' };
+  const prod = await requireAdmin(new Request('https://armado.mx/api/admin/state/pages'), env);
+  assert.ok(prod, 'en armado.mx no abre');
+  assert.equal(prod.status, 503, 'sin vars de Access cae al fail-closed');
+  const prodConVars = await requireAdmin(new Request('https://armado.mx/api/admin/state/pages'),
+    { ...env, CF_ACCESS_TEAM_DOMAIN: 'x.cloudflareaccess.com', CF_ACCESS_AUD: 'aud' });
+  assert.equal(prodConVars.status, 401, 'con vars de Access exige token');
+  const local = await requireAdmin(new Request('http://localhost:8788/api/admin/state/pages'), env);
+  assert.equal(local, null, 'en localhost sí abre (wrangler pages dev)');
+  ok('ALLOW_INSECURE_ADMIN atado a localhost');
+}
+
+// ── JWT: alg distinto de RS256 y token sin exp se rechazan sin red ──────────
+{
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const env = { CF_ACCESS_TEAM_DOMAIN: 'x.cloudflareaccess.com', CF_ACCESS_AUD: 'aud' };
+  const futuro = Math.floor(Date.now() / 1000) + 3600;
+  const casos = [
+    ['alg none', { alg: 'none', kid: 'k' }, { aud: 'aud', iss: 'https://x.cloudflareaccess.com', exp: futuro }],
+    ['alg HS256', { alg: 'HS256', kid: 'k' }, { aud: 'aud', iss: 'https://x.cloudflareaccess.com', exp: futuro }],
+    ['sin exp', { alg: 'RS256', kid: 'k' }, { aud: 'aud', iss: 'https://x.cloudflareaccess.com' }],
+    ['sin iss', { alg: 'RS256', kid: 'k' }, { aud: 'aud', exp: futuro }],
+  ];
+  for (const [nombre, h, p] of casos) {
+    const tok = `${b64(h)}.${b64(p)}.AAAA`;
+    const res = await requireAdmin(new Request('https://armado.mx/x', { headers: { 'Cf-Access-Jwt-Assertion': tok } }), env);
+    assert.equal(res && res.status, 403, nombre);
+  }
+  ok('JWT con alg ajeno, sin exp o sin iss rechazado');
 }
 
 console.log(`\n✔ ${n} comprobaciones OK`);
