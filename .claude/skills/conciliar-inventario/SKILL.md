@@ -132,7 +132,8 @@ Guiado por las reglas de `AGENTS.md` y `data-precios.js`:
 - **(16-sep-2026) Tramo de los cargadores.** Al dar de alta un cargador, añade su entrada en
   `ACC_TRAMO` (`data-accesorios.js`): `[tipo de arma, calibre]` con los valores de
   `ACC_TRAMO_ARMAS` y `ACC_TRAMO_CALIBRES` (un calibre nuevo se añade ahí, en su orden). Si el
-  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente junto a la tabla.
+  renglón del PDF no trae calibre, búscalo en los inventarios y anota la fuente en el motivo del
+  alta (`solucion.json` → `altas[].motivo`), no en un comentario de `src/data`.
   `auditar.js` falla si falta.
 
 ## 4) Verificar (obligatorio antes de commitear)
@@ -272,7 +273,8 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   - Erratas: el accesorio 104 y el OTCA de la Retay 106 NO se marcan.
   - **Duplicado DCAM del mismo cartucho** (2025/2029: mismo calibre, bala, grano y precio al
     centavo, distinta redacción) → se fusiona. Queda la ficha con la bala correcta y la otra
-    desaparece, con las existencias sumadas.
+    desaparece, con las existencias sumadas. La fusión la hace Saulo (301, ligas, D1); el
+    solucionador solo la propone en `pendiente` con `ok: false` (runbook C3).
   - **La URL de una munición sale de calibre+marca+bala+grano**: corregir la bala (Cor-Bon
     2026 FMJ → JHP) cambia la URL y la vieja da 404 (no hay `_redirects`). Si una ficha de id
     menor ya ocupa el slug, sale `-2`. Antes de tocar bala o grano, calcula las URLs de las
@@ -292,7 +294,9 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   bot DCAM, `scripts/dcam/`): sola publica lo ya catalogado que cambia de forma predecible
   y manda a PR investigado lo que pide criterio (altas, agotados, variantes, erratas, % fuera
   de grupo); esta skill sigue aplicando a esos PR y a lo que el bot no cubre (OTCA, altas por
-  mano). El mapeo renglón del PDF ↔ ficha vive versionado en `scripts/dcam/mapeo-dcam.json`.
+  mano). El mapeo renglón del PDF ↔ ficha vive versionado en los `ligas-*.json` y `referencia-*.json`
+  de `scripts/` de esta skill. Hoy nada se publica solo: el pipeline abre el PR y lo mergea
+  Saulo (`scripts/dcam/DISENO.md`, «Estado vigente»).
   Diseño completo: `scripts/dcam/DISENO.md`.
 - 2026-09-14 (#180, existencias «clase B»; Saulo aceptó las seis recomendaciones):
   - **Jerarquía de fuentes para las specs de un alta: 1) fabricante, 2) Wikipedia, 3) SEDENA**
@@ -395,7 +399,7 @@ explícito. El método para resolverlo: **price chain + name similarity**.
 ### Uso desde el conciliador headless
 
 ```bash
-VENV=/home/saulo/apps/dcam-bot/.venv/bin/python
+VENV="$DCAM_DIR/.venv/bin/python"   # en APOLO, DCAM_DIR=/srv/dcam (usuario dcam); dentro de la jaula: /opt/venv/bin/python
 SCRIPTS=.claude/skills/conciliar-inventario/scripts
 
 # Armas

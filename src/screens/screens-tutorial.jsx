@@ -575,7 +575,8 @@
 
   // ── EL RECORRIDO POR EL SITIO ─────────────────────────────────────────
   // Se ofrece al cerrar el aviso (27-sep-2026, decidido con Saulo en cinco
-  // rondas; spec en docs/superpowers/specs/2026-09-27-tour-bienvenida-design.md).
+  // rondas; spec 2026-09-27-tour-bienvenida-design.md, fuera del repo, en
+  // Documentos de Proyecto/archivo-repo-2026-10-18/docs/superpowers/specs/).
   // Doce paradas por páginas DE VERDAD: atenúa la página, rodea un apartado con
   // el marco rojo de los GIF del README y deja una nota en papel de oficio con su
   // cinta Dymo. `sel`: el apartado; si son varios, el marco abarca a todos. Los
