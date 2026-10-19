@@ -141,6 +141,11 @@ function CalibresScreen({ onNav, onAbrirCalibre }) {
         {lista.map((c) => <CaliberMiniCard key={c.id} cal={c} onClick={() => abrir(c.id)} />)}
       </div>
 
+      {window.amxVideos('guia-calibres').length > 0 && <React.Fragment>
+        <window.CintaDymo chica>{window.amxVideos('guia-calibres').length > 1 ? 'Videos' : 'Video'}</window.CintaDymo>
+        <window.TeleVideo videos={window.amxVideos('guia-calibres')} titulo="Todos los cartuchos .38, 9 mm y .357" />
+      </React.Fragment>}
+
       <window.CintaDymo chica>Para empezar</window.CintaDymo>
       <div className="amx-cal-lecciones">
         {(window.LECCIONES_CALIBRE || []).map((l) => (
@@ -340,6 +345,8 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
               Ver las {armas.length} en el Arsenal
             </button>}
         </section>}
+
+      <window.SeccionVideo videos={window.amxVideos('calibre', cal)} titulo={cal.id} padX={PAD} gap={SEC} />
 
       {/* Viene del rediseño de soporte (#242): la corrección apunta a la ficha. */}
       <div style={{ padding: `${SEC}px ${PAD}px 0` }}>

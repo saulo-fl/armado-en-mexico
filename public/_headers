@@ -90,6 +90,8 @@
   Cache-Control: public, max-age=0, must-revalidate
 /data-municiones.js
   Cache-Control: public, max-age=0, must-revalidate
+/data-videos.js
+  Cache-Control: public, max-age=0, must-revalidate
 /data-legal.js
   Cache-Control: public, max-age=0, must-revalidate
 /data-entrevista.js

@@ -2804,6 +2804,77 @@ function HistorialPrecios({ historial, manualById, movil }) {
 window.HistorialPrecios = HistorialPrecios;
 
 // ──────────────────────────────────────────────────────────────
+// LA TELE ANTIGUA — videos de YouTube elegidos a mano (data-videos.js)
+// ──────────────────────────────────────────────────────────────
+// La tele es una fotografía (tele-antigua.webp) con la pantalla recortada en
+// transparente; el video va DETRÁS, en el hueco. El iframe no se pide hasta que
+// el visitante toca la pantalla: la ficha no carga YouTube para quien no lo vea.
+// Con más de un video, la perilla de canales y el botón del pie cambian de
+// canal. Sin videos no se monta nada: nunca hay una tele vacía.
+// Hueco de la pantalla en % de la foto (medido en el recorte de 1482x1131, 18-oct-2026),
+// con medio punto de más por lado para que el bisel tape el canto del video.
+const TELE_HUECO = { left: 11.61 - 0.5, top: 26.26 - 0.6, width: 58.77 + 1.0, height: 53.49 + 1.2 };
+function TeleVideo({ videos, titulo }) {
+  const [canal, setCanal] = React.useState(0);
+  const [encendida, setEncendida] = React.useState(false);
+  const clave = videos.map((x) => x.id).join(',');
+  React.useEffect(() => { setCanal(0); setEncendida(false); }, [clave]);
+  if (!videos.length) return null;
+  const vid = videos[Math.min(canal, videos.length - 1)];
+  const varios = videos.length > 1;
+  const cambiar = () => setCanal((c) => (c + 1) % videos.length);
+  const hueco = {
+    left: TELE_HUECO.left + '%', top: TELE_HUECO.top + '%',
+    width: TELE_HUECO.width + '%', height: TELE_HUECO.height + '%',
+  };
+  return (
+    <figure className="amx-tele">
+      <div className="amx-tele-caja">
+        <div className="amx-tele-pantalla" style={hueco}>
+          {encendida ?
+            <iframe key={vid.id}
+              src={`https://www.youtube-nocookie.com/embed/${vid.id}?rel=0&autoplay=1&modestbranding=1`}
+              title={'Video: ' + titulo}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen /> :
+            <button type="button" className="amx-tele-boton" onClick={() => setEncendida(true)}
+              aria-label={'Reproducir el video: ' + titulo}>
+              <img key={vid.id} src={`https://i.ytimg.com/vi/${vid.id}/hqdefault.jpg`} alt="" loading="lazy" />
+              <span className="amx-tele-sello" aria-hidden="true"><span className="amx-sello">▶ Ver video</span></span>
+            </button>}
+        </div>
+        <img className="amx-tele-mueble" src="imagenes/tele-antigua.webp" alt=""
+          width="1482" height="1131" loading="lazy" decoding="async" />
+        {/* La perilla de la foto. Duplica al botón del pie, que es el accesible:
+            a ~25 px en móvil no llega al blanco táctil de 44 px. */}
+        {varios && <button type="button" className="amx-tele-perilla" onClick={cambiar}
+          tabIndex={-1} aria-hidden="true" title="Cambiar de canal" />}
+      </div>
+      <figcaption className="amx-tele-pie">
+        <a className="amx-tele-canal" href={'https://www.youtube.com/watch?v=' + vid.id}
+          target="_blank" rel="noopener noreferrer">{vid.canal.nombre} en YouTube ↗</a>
+        {varios && <button type="button" className="amx-tele-cambiar" onClick={cambiar}>
+          Canal {canal + 1} de {videos.length} · Cambiar ›
+        </button>}
+      </figcaption>
+    </figure>
+  );
+}
+window.TeleVideo = TeleVideo;
+
+// La sección «Video» de una ficha: la cinta y la tele, o nada si no hay videos.
+function SeccionVideo({ videos, titulo, padX, gap }) {
+  if (!videos || !videos.length) return null;
+  return (
+    <section style={{ padding: `${gap}px ${padX}px 0` }} aria-labelledby="ficha-video">
+      <window.CintaDymo id="ficha-video">{videos.length > 1 ? 'Videos' : 'Video'}</window.CintaDymo>
+      <TeleVideo videos={videos} titulo={titulo} />
+    </section>
+  );
+}
+window.SeccionVideo = SeccionVideo;
+
+// ──────────────────────────────────────────────────────────────
 // REPISA — una fila de la vitrina (munición, accesorios)
 // `porFila` reparte los artículos en filas de N, cada una con su tabla
 // (escritorio); sin él va todo en una tira que hace scroll de lado (móvil).
