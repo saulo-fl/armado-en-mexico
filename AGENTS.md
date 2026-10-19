@@ -228,14 +228,15 @@ la segunda = se perdieron las vars de Access. Ambos son 503 y ambos son silencio
 
 ## Conciliar inventarios y precios (tarea recurrente)
 
-Fase 4 (al desplegarla): el clon vivo del bot pasa de `~/apps/armadomx/dcam-bot/repo` a `/srv/dcam/repo` (dueño `dcam`, grupo `dcam`). Saulo y los agentes NUNCA corren git dentro de ese clon como saulo: `dcam` controla su `.git/config` y sus hooks, así que git ejecutaría comandos elegidos por `dcam` con los privilegios de quien lo corra (y el vigía descarta a las 20:00 lo no commiteado ahí). Las ramas se arreglan en un clon propio: fetch de la rama desde GitHub, arreglo, push. El grupo `dcam` es solo para leer logs y PDFs.
+Desde la Fase 4 (desplegada el 18-oct-2026) el vigía y el pipeline corren como el usuario `dcam` en `/srv/dcam`, y el clon vivo del bot es `/srv/dcam/repo` (dueño `dcam`, grupo `dcam`). El resembrado de D1 (`armado-resembrar-d1`) sigue en `/home/saulo/apps/armadomx/dcam-bot`, con su `cloudflare.env` y su `telegram.env`. Saulo y los agentes NUNCA corren git dentro de ese clon como saulo: `dcam` controla su `.git/config` y sus hooks, así que git ejecutaría comandos elegidos por `dcam` con los privilegios de quien lo corra (y el vigía descarta a las 20:00 lo no commiteado ahí). Las ramas se arreglan en un clon propio: fetch de la rama desde GitHub, arreglo, push. El grupo `dcam` es solo para leer logs y PDFs.
 
 Los precios oficiales se alimentan desde los **PDFs de existencias de la DCAM**.
-Toda la conciliación vive en **código versionado**, no en `localStorage`. Desde el
-14-sep-2026 hay además un **bot que concilia y publica solo** lo que ya está catalogado y
-cambió de forma predecible (pieza 2 del bot DCAM): diseño completo en
-`scripts/dcam/DISENO.md`. Lo de abajo es el flujo manual/heredado, que sigue aplicando a lo
-que el bot manda a PR por dudoso:
+Toda la conciliación vive en **código versionado**, no en `localStorage`. Hay además un
+**bot que concilia** cada inventario DCAM nuevo (pieza 2): el pipeline concilia lo ya
+catalogado, el solucionador en jaula resuelve los renglones sin ficha y el bot abre el PR del
+día, que **mergea Saulo**; nada se publica solo. Estado vigente y diseño en
+`scripts/dcam/DISENO.md`. Lo de abajo es el flujo manual, que sigue aplicando a lo que el
+bot no cubre y a la revisión de sus PR:
 
 - Los PDFs van en la carpeta **`public/inventarios/`** con nombre `dcam-existencias-AAAA-MM-DD.pdf`.
   Desde el 11-sep-2026 la DCAM los publica por separado: armas → `dcam-existencias-`, cartuchos →

@@ -294,7 +294,9 @@ cualquier `data-*.js`, sube el sufijo `?v=` de cache-busting en los HTML.
   bot DCAM, `scripts/dcam/`): sola publica lo ya catalogado que cambia de forma predecible
   y manda a PR investigado lo que pide criterio (altas, agotados, variantes, erratas, % fuera
   de grupo); esta skill sigue aplicando a esos PR y a lo que el bot no cubre (OTCA, altas por
-  mano). El mapeo renglón del PDF ↔ ficha vive versionado en `scripts/dcam/mapeo-dcam.json`.
+  mano). El mapeo renglón del PDF ↔ ficha vive versionado en los `ligas-*.json` y `referencia-*.json`
+  de `scripts/` de esta skill. Hoy nada se publica solo: el pipeline abre el PR y lo mergea
+  Saulo (`scripts/dcam/DISENO.md`, «Estado vigente»).
   Diseño completo: `scripts/dcam/DISENO.md`.
 - 2026-09-14 (#180, existencias «clase B»; Saulo aceptó las seis recomendaciones):
   - **Jerarquía de fuentes para las specs de un alta: 1) fabricante, 2) Wikipedia, 3) SEDENA**
@@ -397,7 +399,7 @@ explícito. El método para resolverlo: **price chain + name similarity**.
 ### Uso desde el conciliador headless
 
 ```bash
-VENV=/home/saulo/apps/dcam-bot/.venv/bin/python
+VENV="$DCAM_DIR/.venv/bin/python"   # en APOLO, DCAM_DIR=/srv/dcam (usuario dcam); dentro de la jaula: /opt/venv/bin/python
 SCRIPTS=.claude/skills/conciliar-inventario/scripts
 
 # Armas

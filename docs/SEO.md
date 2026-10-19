@@ -5,51 +5,37 @@ aplica a este sitio; las fuentes primarias están al final.
 
 ---
 
-## 1. El bloqueante: las URLs devuelven 404
+## 1. URLs profundas: resuelto con el prerender (opción B)
 
-Verificado en producción:
+Antes del prerender, las URLs profundas (`/pistolas/glock-19`) devolvían **404** y las
+resolvía el truco SPA de `404.html`. Con 404 Google no encola el render de JS
+(*"queues all pages with a 200 HTTP status code for rendering"*) y los crawlers de IA no
+ven nada. `scripts/build-prerender.mjs`, que corre en `npm run build` y en la CI, emite un
+`.html` real por URL: cada ruta responde **200** con su `<head>` y su contenido en HTML
+crudo. `src/pages/404.html` (el truco SPA) sigue en el repo, pero ya solo lo alcanzan las
+URLs que no tienen `.html` propio.
 
-```
-200  /
-404  /pistolas
-404  /pistolas/glock-19
-404  /municiones/<slug>
-```
-
-El deep-linking se resuelve con el truco de `404.html` (redirige a `/?/<ruta>` y
-`index.html` restaura con `replaceState`). **Eso funciona para navegadores y no
-para crawlers**, porque el crawler juzga por el status code:
-
-- Google: *"Google doesn't use the content from URLs that return 4xx status codes"*
-  y *"queues all pages with a 200 HTTP status code for rendering"* → con 404 **ni
-  siquiera se encola el render de JS**.
-- Estudio Vercel/MERJ: *"Pages with other 3xx, 4xx, and 5xx errors were not rendered."*
-
-**Consecuencia:** un `sitemap.xml` que liste estas URLs solo llena Search Console
-de «Not found (404)». Hay que arreglar el estado HTTP **antes** del sitemap.
-
-### Las tres salidas
+Por qué B y no las otras dos salidas:
 
 | | Qué es | Veredicto |
 |---|---|---|
-| **B. Prerender estático** | Emitir un `.html` real por URL en el build | ✅ **La buena.** Arregla 404 + indexación JS + IA + `<head>` por página |
-| **A. `_redirects` con 200** | Rewrite de cada prefijo a `/index.html` | ⚠️ Parche. Deja 285 URLs con HTML idéntico → duplicados |
-| **C. Borrar `404.html`** | Pages entra en modo SPA nativo | ❌ Soft 404 masivos, no arregla nada más |
+| **B. Prerender estático** | Emitir un `.html` real por URL en el build | ✅ **La vigente.** 200 + indexación + IA + `<head>` por página |
+| **A. `_redirects` con 200** | Rewrite de cada prefijo a `/index.html` | ⚠️ Parche: HTML idéntico en todas las URLs → duplicados |
+| **C. Borrar `404.html`** | Pages entra en modo SPA nativo | ❌ Soft 404 masivos |
 
-**Gotcha de Pages a favor de B:** Pages sirve `/x.html` también en `/x` (redirige
-`.html` → sin extensión). Verificado aquí: `/pistolas.html` → 308 → `/pistolas`.
-→ Emitir `pistolas/glock-19.html` da `/pistolas/glock-19` con **200 y sin slash**,
-que es justo el esquema actual. **No emitir `pistolas/glock-19/index.html`**: eso
-produce URL *con* slash y obliga a decidir canonicals.
+Gotchas que siguen vigentes:
 
-**🚨 Gotcha grande si se usa A:** en Cloudflare Pages *"Redirects are always followed,
-regardless of whether or not an asset matches the incoming request"*. Un catch-all
-`/* /index.html 200` **se come `/sitemap.xml`, `/robots.txt`, `/app.js`, `/imagenes/*`**
-y rompe el sitio. (En Netlify no pasa; por eso circula tanto consejo equivocado.)
-Si se usa A, hay que listar prefijos explícitos, estáticos primero.
-
-Notas de convivencia: `_redirects` **no** aplica a Pages Functions (`/api/*` a salvo)
-y se evalúa **antes** que `_headers`.
+- **Pages sirve `/x.html` también en `/x`** (redirige `.html` → sin extensión;
+  `/pistolas.html` → 308 → `/pistolas`). Por eso se emite `pistolas/glock-19.html`, que da
+  `/pistolas/glock-19` con **200 y sin slash**. **No emitir `pistolas/glock-19/index.html`**:
+  produce la URL *con* slash y obliga a decidir canonicals.
+- **🚨 Nada de catch-all en `_redirects`.** En Cloudflare Pages *"Redirects are always
+  followed, regardless of whether or not an asset matches the incoming request"*: un
+  `/* /index.html 200` **se come `/sitemap.xml`, `/robots.txt`, `/app.js`, `/imagenes/*`** y
+  rompe el sitio. (En Netlify no pasa; por eso circula tanto consejo equivocado.) Solo
+  reglas literales.
+- `_redirects` **no** aplica a Pages Functions (`/api/*` a salvo) y se evalúa **antes** que
+  `_headers`.
 
 ---
 
@@ -66,10 +52,10 @@ para ChatGPT y Claude este sitio está vacío.** Es el argumento decisivo para e
 prerender, más aún que el SEO.
 
 Retraso de la segunda oleada de Googlebot (Vercel/MERJ, 37 000 pares): mediana 10 s,
-p75 26 s, p90 ~3 h, p99 ~18 h. No es el problema aquí; el 404 sí.
+p75 26 s, p90 ~3 h, p99 ~18 h. Con el prerender no afecta: el contenido ya va en el HTML.
 
 Google ya **no** recomienda dynamic rendering: *"a workaround and not a long-term
-solution"*. Recomienda static rendering — que es exactamente la opción B.
+solution"*. Recomienda static rendering — que es exactamente la opción B, la vigente.
 
 `llms.txt`: ningún motor grande ha confirmado usarlo. No perder tiempo.
 

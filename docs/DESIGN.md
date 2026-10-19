@@ -1289,8 +1289,9 @@ Decidido con Saulo (rama `Opus-5/RED-ficha-municion`). Reglas en `src/lib/cotejo
 
 ### 5.12 La ficha de calibre — el mismo expediente (27-sep-2026)
 
-Decidido con Saulo en cinco rondas (rama `Opus-5/RED-ficha-calibre`; spec en
-`docs/superpowers/specs/2026-09-28-ficha-calibre-design.md`). Pantalla en `CalibreScreen` (`screens-3.jsx`);
+Decidido con Saulo en cinco rondas (rama `Opus-5/RED-ficha-calibre`; spec
+`2026-09-28-ficha-calibre-design.md`, fuera del repo, en
+`Documentos de Proyecto/archivo-repo-2026-10-18/docs/superpowers/specs/`). Pantalla en `CalibreScreen` (`screens-3.jsx`);
 cruce de munición en `amxMismoCalibre` (`src/lib/calibres.js`, con prueba); primitivas de §5.5.
 
 - **Réplica de la ficha de munición (§5.11) sin talón ni tarjeta de almacén:** un calibre no tiene precio ni
