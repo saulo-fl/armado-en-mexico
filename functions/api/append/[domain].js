@@ -6,8 +6,14 @@
 // POST /api/append/:domain — escritura PÚBLICA por "append".
 // Sirve para: enviar una reseña a moderación (reviewsQueue), denunciar
 // (reports) y registrar visita (visits). El servidor hace el read-modify-write
-// para que envíos concurrentes no se pisen.
-import { json, APPEND_DOMAINS, MAX_BODY, normalizeReport, readDomain, writeDomain, mergeAppend } from '../_lib.js';
+// con escritura condicional (writeDomainIf) y reintenta si otro envío se le
+// adelantó: así dos envíos simultáneos no se pisan.
+import { json, APPEND_DOMAINS, MAX_BODY, normalizeReport, readDomainVersion, writeDomainIf, mergeAppend } from '../_lib.js';
+
+// Con 8 intentos y espera aleatoria creciente, una ráfaga de 20 envíos en el
+// mismo instante entra entera en la prueba (functions-append.test.mjs).
+const INTENTOS = 8;
+const espera = (i) => new Promise((r) => setTimeout(r, Math.random() * 10 * (i + 1)));
 
 export async function onRequestPost({ request, env, params }) {
   const domain = params.domain;
@@ -26,8 +32,13 @@ export async function onRequestPost({ request, env, params }) {
   }
 
   const defaults = { visits: {} };
-  const current = await readDomain(env.DB, domain, defaults[domain]);
-  const next = mergeAppend(domain, current, item);
-  await writeDomain(env.DB, domain, next);
-  return json({ ok: true, domain });
+  for (let i = 0; i < INTENTOS; i++) {
+    const { data, updatedAt } = await readDomainVersion(env.DB, domain);
+    const current = data === undefined ? defaults[domain] : data;
+    const next = mergeAppend(domain, current, item);
+    if (await writeDomainIf(env.DB, domain, next, updatedAt)) return json({ ok: true, domain });
+    await espera(i);
+  }
+  // Contención sostenida: mejor un error visible que perder el envío en silencio.
+  return json({ error: 'ocupado_reintenta' }, 503, { 'Retry-After': '1' });
 }
