@@ -98,6 +98,8 @@ del proyecto de Saulo) y las unidades de `scripts/dcam/systemd/`.
 
 ## Pieza 1 — Vigía
 
+> **Rutas y usuario de esta sección = HISTÓRICOS (septiembre de 2026).** Hoy el vigía corre como `dcam` desde `/srv/dcam` (clon `/srv/dcam/repo`, `estado.json` y `archivo/` en `/srv/dcam`, Telegram por `/etc/dcam/telegram.env`). Lo que sigue describe el comportamiento del vigía, que no cambió; donde diga `saulo` o `~/apps/dcam-bot`, manda «Estado vigente».
+
 ### Arquitectura
 
 ```
@@ -288,15 +290,7 @@ Cadena real: `vigia.py` escribe `pendiente-conciliar.json` → `dcam-conciliar.p
 
 Requisitos en APOLO: `openclaw`, `jq`, `flock`, `curl`, `gh`, `node` y el `.venv` con PyMuPDF.
 
-El repo es la **fuente**; `/etc/systemd/system` e `infra/` son **copias** (de root y de usuario).
-Tras cada merge que toque `scripts/dcam/` hay que reinstalar a mano:
-
-    R=/home/saulo/apps/dcam-bot/repo/scripts/dcam
-    install -m0755 $R/conciliar.sh /home/saulo/apps/dcam-bot/infra/conciliar.sh
-    sudo install -m0644 $R/systemd/dcam-vigia.service $R/systemd/dcam-vigia.timer                         $R/systemd/dcam-conciliar.path $R/systemd/dcam-conciliar.service                         /etc/systemd/system/
-    sudo systemctl daemon-reload
-    # si cambió la unit .path, además: sudo systemctl restart dcam-conciliar.path
-    # (para rearmar el watch de inotify)
+(Aquí iba el procedimiento de reinstalación a mano de esta época —`infra/conciliar.sh` y unidades copiadas desde `~/apps/dcam-bot/repo`—. **Ya no aplica y no debe ejecutarse**: `conciliar.sh` se retiró del repo y las unidades vigentes se instalan con el runbook de la Fase 4; ver «Estado vigente».)
 
 Recuperar una conciliación fallida (la señal `.fallida` es terminal por diseño): mira el motivo
 en `conciliar.log` y vuelve a crear el archivo, lo que re-dispara el `.path`:
