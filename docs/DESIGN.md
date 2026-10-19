@@ -253,8 +253,9 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   comprobante | tarjeta de almacén a la vista al abrir, y al bajar, Legalidad · Usos · Antecedentes |
   historial. **Nada se queda fijo al hacer scroll** en el folder: hubo una columna izquierda fija y
   Saulo la retiró porque rompía la estética diegética (un papel no persigue a quien lee). Por
-  debajo de 1024px: pila en ese mismo orden y talón fijo abajo —ese sí, es la barra del pulgar—, que
-  aparece cuando el talón de la ficha sale de pantalla y se retira al asomar el pie.
+  debajo de 1024px: pila en ese mismo orden, sin nada fijo. Hubo un talón fijo abajo (la barra del
+  pulgar con precio y Comparar) y Saulo lo retiró el 18-oct-2026: estorbaba sobre el contenido y no es
+  vital, porque no somos una tienda que busque maximizar conversiones. No reintroducirlo.
 - **Último precio conocido** (13-sep-2026). Si el inventario de donde sale el precio es anterior al
   último de la misma sucursal, el arma ya no aparece en este y la tarjeta de almacén dice AGOTADO.
   Los dos datos son ciertos, pero juntos parecían contradecirse. El talón lleva entonces el sello

@@ -131,7 +131,6 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportRe
   // llegar y al pasar de un accesorio a otro.
   const [tab, setTab] = useStateAcc(0);
   React.useEffect(() => { setTab(0); }, [accesorioId]);
-  const talon = window.useTalonFijo(accesorioId);
   const acc = window.getAccesorioById(accesorioId);
 
   if (!acc) {
@@ -171,7 +170,7 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportRe
 
   return (
     <div style={{ paddingBottom: 90 }}>
-     <div ref={talon.fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+     <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
       {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
       <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
@@ -205,7 +204,7 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportRe
             </div>
 
             <div className="amx-carpeta-talon">
-              <window.TalonComprobante talonRef={talon.talonRef}
+              <window.TalonComprobante
                 precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
                 ultimoConocido={inv.ultimoConocido} historial={priceHistory} />
               {etOpin.hay &&
@@ -273,12 +272,6 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportRe
       </section>
      </div>
 
-      {/* El talón fijo (móvil), sin casilla. Se oculta con la barra de
-          comparación, que ocupa el mismo hueco. */}
-      {!ancho && talon.mostrar && (compareIds || []).length === 0 &&
-        <window.TalonComprobante fijo
-          precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
-          ultimoConocido={inv.ultimoConocido} historial={priceHistory} />}
       <window.ReportarError tipo="accesorio" titulo={acc.nombre} ruta={'/' + (window.amxSlugIndex().slugPorC[acc.id] || 'accesorios')} />    </div>
   );
 }

@@ -367,7 +367,6 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
   // La hoja abierta vuelve a la primera al pasar de una munición a otra.
   const [tab, setTab] = useStateMun(0);
   React.useEffect(() => { setTab(0); }, [municionId]);
-  const talon = window.useTalonFijo(municionId);
   const mun = window.getMunicionById(municionId);
 
   if (!mun) {
@@ -406,7 +405,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
 
   return (
     <div style={{ paddingBottom: 90 }}>
-     <div ref={talon.fichaRef} style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
+     <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%' }}>
 
       {/* ── EL EXPEDIENTE — el folder manila abierto ───────────────────── */}
       <div style={{ padding: `${ancho ? 26 : 14}px ${PAD}px 0` }}>
@@ -434,7 +433,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
             </div>
 
             <div className="amx-carpeta-talon">
-              <window.TalonComprobante talonRef={talon.talonRef} unidad={unidad}
+              <window.TalonComprobante unidad={unidad}
                 precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
                 ultimoConocido={inv.ultimoConocido} historial={priceHistory} />
               {etOpin.hay &&
@@ -513,11 +512,6 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
       </section>
      </div>
 
-      {/* Talón fijo (móvil), sin casilla; cede el hueco a la barra de comparación. */}
-      {!ancho && talon.mostrar && (compareIds || []).length === 0 &&
-        <window.TalonComprobante fijo unidad={unidad}
-          precio={inv.precio} fuente={inv.sigla} fecha={fechaPrecio}
-          ultimoConocido={inv.ultimoConocido} historial={priceHistory} />}
       <window.ReportarError tipo="municion" titulo={mun.nombre} ruta={'/municiones/' + (window.amxSlugIndex().slugPorM[mun.id] || '')} />
     </div>
   );
