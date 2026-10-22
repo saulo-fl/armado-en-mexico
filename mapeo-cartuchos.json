@@ -8,54 +8,107 @@
     "2028": 20,
     "2029": 100,
     "2030": 1300,
-    "2033": 2820,
-    "2034": 5900,
+    "2033": 1820,
+    "2034": 5700,
     "2035": 7900,
-    "2042": 14600,
-    "2043": 8020,
+    "2042": 14400,
+    "2043": 7820,
     "2044": 35,
     "2050": 4050,
     "2051": 1310,
+    "2061": 2000,
+    "2063": 2750,
+    "2074": 2000,
+    "2075": 3000,
     "2092": 500,
-    "2103": 7100
+    "2103": 7100,
+    "2115": 3000
   },
   "precios": {
     "2004": 8.96,
     "2019": 8.96,
-    "2021": 25.86,
+    "2021": 25.85,
     "2024": 23.72,
-    "2026": 50.87,
+    "2026": 50.85,
     "2028": 23.72,
-    "2029": 25.86,
+    "2029": 25.85,
     "2030": 28.16,
     "2033": 14.53,
     "2034": 11.11,
     "2035": 12.09,
-    "2042": 24.37,
-    "2043": 31.85,
+    "2042": 24.36,
+    "2043": 31.84,
     "2044": 11.54,
-    "2050": 25.86,
-    "2051": 25.86,
+    "2050": 25.85,
+    "2051": 25.85,
+    "2061": 10.3,
+    "2063": 8.12,
+    "2074": 10.3,
+    "2075": 11.75,
     "2092": 30.56,
-    "2103": 8.96
+    "2103": 8.96,
+    "2115": 10.78
   },
   "factores": [
-    0.996148,
     1.0
   ],
-  "sinFicha": [],
-  "sinPrecio": [
+  "sinFicha": [
     {
-      "fichaId": 2117,
-      "refName": "CART.MAR.FIOCCHI,CAL. 12 GA, 7.5, 24 GR.",
-      "refPrice": 10.73
+      "idx": 0,
+      "name": "CARTS.CAL.12.GB.GB.CLUB.32GR.P6.",
+      "priceN": 10.3,
+      "qty": 1150,
+      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB CLUB, 32 GRAMOS, PERDIGON 6"
+    },
+    {
+      "idx": 12,
+      "name": "CART. CAL. 12 EXCOPESA T5 PICH 36GR M7.5",
+      "priceN": 13.89,
+      "qty": 2500,
+      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 T5 PICHON MUN. 7.5 36GR CATALOGO 150 - 75"
+    },
+    {
+      "idx": 21,
+      "name": "CARTS CAL.5.7X28 mm HERSTAL TIPO BALL,",
+      "priceN": 0.72,
+      "qty": 3974,
+      "desc": "CARTUCHO CAL. 5.7 X 28 MM. MARCA FN HERSTAL, BALL SS 190, EN CAJA M2A1, CODIGO 4800000157"
     }
   ],
+  "sinPrecio": [],
   "revisarPrecio": [],
-  "totalPdf": 72423,
-  "totalMapped": 72423,
+  "totalPdf": 91197,
+  "totalMapped": 83573,
   "excluidos": [],
-  "regresos": [],
-  "regresosRechazados": [],
+  "regresos": [
+    {
+      "idx": 9,
+      "name": "CART.AGUILA.CAL12.TRP.AMER.1350M#7.5,24G",
+      "priceN": 8.12,
+      "fichaId": 2063,
+      "fechaAntes": "2026-10-09",
+      "antes": 7.98,
+      "razon": 1.017544,
+      "motivo": "aumento general",
+      "apoyos": 20,
+      "general": 1.016856,
+      "tramo": 0
+    }
+  ],
+  "regresosRechazados": [
+    {
+      "idx": 0,
+      "name": "CARTS.CAL.12.GB.GB.CLUB.32GR.P6.",
+      "priceN": 10.3,
+      "fichaId": 2059,
+      "fechaAntes": "2026-07-06",
+      "antes": 9.97,
+      "razon": 1.033099,
+      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
+      "apoyos": 13,
+      "general": 1.053886,
+      "tramo": 1
+    }
+  ],
   "gemelos": []
 }
