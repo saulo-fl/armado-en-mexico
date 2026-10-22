@@ -139,4 +139,41 @@ assert res["existencias"][92] == 2 and res["gemelos"] == [], (res["existencias"]
 assert [x["idx"] for x in res["sinFicha"]] == [7], res["sinFicha"]
 assert "compartido" in res["regresosRechazados"][0]["motivo"], res["regresosRechazados"]
 
-print("✔ regresos: 7 casos + gemelos, renombres e integración")
+# --- 21-oct-2026 (C14) ---
+# (a) Precio caro que NO cambió con un factor del día ≠ 1: antes un prefiltro de
+# ±2 MXN absolutos lo dejaba sin pareja (HM-7: 18,648.29 con x0.999712 → 5.37 MXN).
+REF = [{"name": f"OTRA {i}", "priceN": 1000.0 * i, "fichaId": i} for i in range(1, 7)]
+REF.append({"name": "PISTOLA HM-7", "priceN": 18648.29, "fichaId": 15})
+NUEVOS = [fila(f"OTRA {i}", round(1000.0 * i * 0.999712, 2)) for i in range(1, 7)]
+NUEVOS.append(fila("PISTOLA HM-7", 18648.29, 2))
+mt, sin = m.match_rows(REF, NUEVOS, m.find_factors(REF, NUEVOS))
+assert 6 in {ni for ni, _, _ in mt} and 6 not in sin, (mt, sin)
+
+# (b) Renglón que encadena con un renglón de la referencia SIN fichaId: antes se
+# perdía en silencio. Ahora pasa por regresos (dcamRef exacto + aumento general)
+# y, si nadie lo liga, sale en sinDueno (no en sinFicha: no es nuevo).
+h5 = {str(i): {"dcamRef": f"OTRA {i}", "regs": [["2026-09-15", 10.0]]} for i in range(1, 7)}
+h5["223"] = {"dcamRef": "BERETTA DT11 BLACKTRAP", "regs": [["2026-09-15", 200.0]]}
+with tempfile.TemporaryDirectory() as td:
+    ref = os.path.join(td, "referencia-armas.json")
+    json.dump({"pdfDate": "2026-10-02", "pdfFile": "armas",
+               "rows": [{"name": f"OTRA {i}", "priceN": 10.0, "fichaId": i} for i in range(1, 7)]
+               + [{"name": "BERETTA DT11 BLACKTRAP", "priceN": 200.0, "fichaId": None},
+                  {"name": "AYA CENTENARY", "priceN": 400.0, "fichaId": None}]}, open(ref, "w"))
+    nuevos = [fila(f"OTRA {i}", 10.574) for i in range(1, 7)] + [
+        fila("BERETTA DT11 BLACKTRAP", 211.48, 1), fila("AYA CENTENARY", 422.96, 2)]
+    res = m.map_existencias(ref, nuevos, historial=h5)
+    assert res["existencias"].get(223) == 1, res["existencias"]
+    assert [r["fichaId"] for r in res["regresos"]] == [223], res["regresos"]
+    assert [s["name"] for s in res["sinDueno"]] == ["AYA CENTENARY"], res["sinDueno"]
+    assert res["sinFicha"] == [], res["sinFicha"]
+    # (c) --update-ref: el regreso queda ligado, el sin dueño sigue en null, y
+    # pdfDate pasa a la fecha del inventario (antes se copiaba la vieja).
+    m.update_ref(ref, nuevos, res, os.path.join(td, "armas.json"), "2026-10-21")
+    nueva = json.load(open(ref))
+    assert nueva["pdfDate"] == "2026-10-21", nueva["pdfDate"]
+    por_nombre = {r["name"]: r["fichaId"] for r in nueva["rows"]}
+    assert por_nombre["BERETTA DT11 BLACKTRAP"] == 223 and por_nombre["AYA CENTENARY"] is None, por_nombre
+    assert len(nueva["rows"]) == len(nuevos), len(nueva["rows"])
+
+print("✔ regresos: 7 casos + gemelos, renombres, integración y C14 (prefiltro, sin dueño, pdfDate)")

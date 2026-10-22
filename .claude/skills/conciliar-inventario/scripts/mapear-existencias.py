@@ -148,15 +148,16 @@ def match_rows(ref_rows, new_rows, factors, tolerance=0.005):
       matched: [(new_idx, ref_idx, factor_used)]
       unmatched_new: [new_idx]
     """
-    # Construir índice de precios de referencia
-    ref_by_price = defaultdict(list)
-    for i, r in enumerate(ref_rows):
-        ref_by_price[round(r["priceN"], 2)].append(i)
-
     # Paso 1: para cada renglón nuevo, acumular TODOS los candidatos viables
     # con su score (price_diff, name_similarity)
     candidates = []  # (score, new_idx, ref_idx, factor)
 
+    # Sin prefiltro en pesos: el único criterio es la razón de precios
+    # (tolerancia relativa). Hasta el 21-oct-2026 había un `> 2` MXN absoluto
+    # antes de comparar la razón; con un factor ≠ 1 y un precio que no cambió,
+    # todo renglón de más de ~7,000 MXN se quedaba sin pareja (HM-7 a 18,648.29
+    # con x0.999712: 5.37 MXN de diferencia → «sin ficha»). ~200×200 renglones:
+    # recorrerlos todos no cuesta nada.
     for ni, nr in enumerate(new_rows):
         np_ = nr["priceN"]
         if np_ <= 0:
@@ -165,21 +166,17 @@ def match_rows(ref_rows, new_rows, factors, tolerance=0.005):
         for factor, _count in factors:
             if factor <= 0:
                 continue
-            expected_ref_price = np_ / factor
-            for rp_round, ref_indices in ref_by_price.items():
-                if abs(rp_round - round(expected_ref_price, 2)) > 2:
+            for ri, rr in enumerate(ref_rows):
+                rp = rr["priceN"]
+                if rp <= 0:
                     continue
-                for ri in ref_indices:
-                    rp = ref_rows[ri]["priceN"]
-                    if rp <= 0:
-                        continue
-                    price_diff = abs(np_ / rp - factor)
-                    if price_diff < tolerance:
-                        sim = _name_sim(nr.get("name", ""), ref_rows[ri].get("name", ""))
-                        # Score: priorizar similitud de nombre, luego menor diff de precio
-                        # Más alto = mejor match
-                        score = sim * 1000 - price_diff * 100
-                        candidates.append((score, ni, ri, factor))
+                price_diff = abs(np_ / rp - factor)
+                if price_diff < tolerance:
+                    sim = _name_sim(nr.get("name", ""), rr.get("name", ""))
+                    # Score: priorizar similitud de nombre, luego menor diff de precio
+                    # Más alto = mejor match
+                    score = sim * 1000 - price_diff * 100
+                    candidates.append((score, ni, ri, factor))
 
     # Paso 2: asignar de mayor score a menor (greedy óptimo para 1:1)
     candidates.sort(key=lambda x: -x[0])
@@ -471,6 +468,18 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
         print(f"\nEmparejados: {len(matched)} / {len(new_items)}", file=sys.stderr)
         print(f"Sin emparejar (nuevos): {len(unmatched_new)}", file=sys.stderr)
 
+    # 2c) Huérfanos: renglones que la cadena empareja con un renglón de la
+    # referencia SIN fichaId. Antes se quedaban en `matched` con fid None y no
+    # salían en ningún sitio: ni sinFicha ni aviso (21-oct-2026: la DT11 223,
+    # seis Breda, la 193, 256, 257 y los accesorios 104 y 402 llevaban congelados
+    # desde el 25/29-sep). Ahora pasan por los mismos regresos y gemelos que los
+    # sinFicha; lo que sobra sale en `sinDueno` (visible, no bloquea el cierre:
+    # son productos conocidos que aún nadie decidió ligar o dar de alta).
+    huerfanos = [ni for ni, ri, _ in matched if ref_rows[ri]["fichaId"] is None]
+    matched = [(ni, ri, f) for ni, ri, f in matched if ref_rows[ri]["fichaId"] is not None]
+    if verbose and huerfanos:
+        print(f"Emparejados con renglón sin dueño en la referencia: {len(huerfanos)}", file=sys.stderr)
+
     # 3) Transferir fichaId de la referencia y sumar qty
     existencias = defaultdict(int)
     ficha_rows = defaultdict(list)  # fichaId → [new_rows]
@@ -547,7 +556,7 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
     # registro. Se tratan como una liga (también sobreviven en --update-ref).
     regresos, regresos_rechazados = [], []
     if historial:
-        cands = [ni for ni in unmatched_new if id(new_items[ni]) not in consumidos]
+        cands = [ni for ni in unmatched_new + huerfanos if id(new_items[ni]) not in consumidos]
         aceptados, regresos, regresos_rechazados = detectar_regresos(
             new_items, cands, ficha_prices, historial)
         for ni, fid in aceptados.items():
@@ -558,6 +567,7 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
             ficha_prices[fid] = nr["priceN"]
             forzados[ni] = fid
         unmatched_new = [ni for ni in unmatched_new if ni not in aceptados]
+        huerfanos = [ni for ni in huerfanos if ni not in aceptados]
         if verbose and (regresos or regresos_rechazados):
             print(f"Regresos tras agotarse ligados: {len(regresos)}", file=sys.stderr)
             for r in regresos:
@@ -565,7 +575,7 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
                       f"{r['priceN']}  x{r['razon']:.6f}: {r['motivo']}", file=sys.stderr)
 
     # 3d) Gemelos: segundo renglón del mismo producto (no cambia el precio de la ficha).
-    cands = [ni for ni in unmatched_new if id(new_items[ni]) not in consumidos]
+    cands = [ni for ni in unmatched_new + huerfanos if id(new_items[ni]) not in consumidos]
     ligados = defaultdict(list)   # fichaId → renglones ligados, sin filtrar por qty
     for ni, ri, _ in matched:
         if ref_rows[ri]["fichaId"] is not None:
@@ -589,6 +599,7 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
         forzados[ni] = fid
         gemelos.append({"idx": ni, "name": nr["name"], "qty": nr["qty"], "fichaId": fid})
     unmatched_new = [ni for ni in unmatched_new if ni not in forzados]
+    huerfanos = [ni for ni in huerfanos if ni not in forzados]
     regresos_rechazados = [r for r in regresos_rechazados if r["idx"] not in forzados]
     if verbose:
         for r in regresos_rechazados:
@@ -611,6 +622,12 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
             "qty": nr["qty"],
             "desc": nr.get("desc", "")[:120],
         })
+
+    # 4b) Sin dueño: emparejados por la cadena con un renglón de la referencia
+    # que nunca tuvo ficha, y que ni regresos ni gemelos pudieron ligar.
+    sin_dueno = [{"idx": ni, "name": new_items[ni]["name"], "priceN": new_items[ni]["priceN"],
+                  "qty": new_items[ni]["qty"]} for ni in sorted(huerfanos)
+                 if id(new_items[ni]) not in consumidos]
 
     # 5) Renglones de referencia sin emparejar (posibles agotados)
     ref_matched = {ri for _, ri, _ in matched}
@@ -640,6 +657,11 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
             for s in sin_ficha:
                 print(f"  [{s['idx']:3}] {s['name'][:50]} qty={s['qty']} p={s['priceN']:.2f}", file=sys.stderr)
 
+        if sin_dueno:
+            print(f"\nRenglones SIN DUEÑO (conocidos, sin ficha ni liga):", file=sys.stderr)
+            for s in sin_dueno:
+                print(f"  [{s['idx']:3}] {s['name'][:50]} qty={s['qty']} p={s['priceN']:.2f}", file=sys.stderr)
+
         if sin_precio:
             print(f"\nFichas SIN renglón en el nuevo PDF (posibles agotadas):", file=sys.stderr)
             for s in sin_precio:
@@ -666,13 +688,14 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
         "regresos": regresos,
         "regresosRechazados": regresos_rechazados,
         "gemelos": gemelos,
+        "sinDueno": sin_dueno,
         "_matched": matched,          # internal: for --update-ref
-        "_unmatched_new": unmatched_new,
+        "_unmatched_new": unmatched_new + huerfanos,
         "_forzados": forzados,
     }
 
 
-def update_ref(ref_path, new_items, result, new_path):
+def update_ref(ref_path, new_items, result, new_path, pdf_date=None):
     """Sobreescribe la referencia con el snapshot del PDF nuevo.
 
     Los renglones emparejados heredan el fichaId de la referencia.
@@ -726,8 +749,11 @@ def update_ref(ref_path, new_items, result, new_path):
     # Derive pdfFile from new_path if it looks like a filename
     pdf_file = Path(new_path).stem if new_path else old_ref.get("pdfFile", "")
 
+    # pdfDate = fecha del PDF del que sale este snapshot (AAAA-MM-DD). Antes se
+    # copiaba la vieja y la referencia decía 2026-10-02 aunque se regenerara cada
+    # día. Se toma de --antes-de (la fecha ISO del inventario que se concilia).
     new_ref = {
-        "pdfDate": old_ref.get("pdfDate", ""),
+        "pdfDate": pdf_date or old_ref.get("pdfDate", ""),
         "pdfFile": pdf_file,
         "totalRows": len(new_rows),
         "rows": new_rows,
@@ -795,7 +821,8 @@ def main():
     print(json.dumps(output, indent=2, ensure_ascii=False))
 
     if do_update:
-        update_ref(ref_path, pdf_data["items"], result, new_path)
+        antes = sys.argv[sys.argv.index("--antes-de") + 1] if "--antes-de" in sys.argv else None
+        update_ref(ref_path, pdf_data["items"], result, new_path, antes)
 
 
 if __name__ == "__main__":

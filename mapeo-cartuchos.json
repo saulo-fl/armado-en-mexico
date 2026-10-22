@@ -1,31 +1,23 @@
 {
   "existencias": {
-    "2004": 566,
-    "2019": 12350,
+    "2004": 316,
+    "2019": 12200,
     "2021": 3000,
     "2024": 1460,
     "2026": 1792,
     "2028": 20,
-    "2029": 300,
+    "2029": 100,
     "2030": 1300,
-    "2033": 3920,
-    "2034": 6100,
+    "2033": 2820,
+    "2034": 5900,
     "2035": 7900,
     "2042": 14600,
-    "2043": 8220,
+    "2043": 8020,
     "2044": 35,
     "2050": 4050,
     "2051": 1310,
-    "2061": 3250,
-    "2074": 3000,
-    "2075": 3000,
     "2092": 500,
-    "2103": 7100,
-    "2113": 3000,
-    "2117": 3000,
-    "2118": 3000,
-    "2119": 3000,
-    "2120": 3000
+    "2103": 7100
   },
   "precios": {
     "2004": 8.96,
@@ -44,98 +36,26 @@
     "2044": 11.54,
     "2050": 25.86,
     "2051": 25.86,
-    "2061": 10.31,
-    "2074": 10.31,
-    "2075": 11.76,
     "2092": 30.56,
-    "2103": 8.96,
-    "2113": 10.07,
-    "2117": 10.69,
-    "2118": 10.69,
-    "2119": 10.69,
-    "2120": 16.54
+    "2103": 8.96
   },
   "factores": [
-    1.009368,
+    0.996148,
     1.0
   ],
   "sinFicha": [],
   "sinPrecio": [
     {
-      "fichaId": 2095,
-      "refName": "CAR.AGUI. CAL.12G SKEET 9,24G",
-      "refPrice": 8.05
-    },
-    {
-      "fichaId": 2077,
-      "refName": "CART. CAL12 SAGA KING PIGEON CD 36GR M9",
-      "refPrice": 12.78
-    },
-    {
-      "fichaId": 2100,
-      "refName": "CART CAL12 SPRINT N7.5 24GR. T2",
-      "refPrice": 8.99
-    },
-    {
-      "fichaId": 2116,
-      "refName": "CART. CAL. 12 EXCOPESA 24GR M8 110-80",
-      "refPrice": 9.94
-    },
-    {
-      "fichaId": 2111,
-      "refName": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
-      "refPrice": 8.99
-    },
-    {
-      "fichaId": 2087,
-      "refName": "CART.BULLETT-4C.CAL.12MUN8 36GR.C0072-08",
-      "refPrice": 11.83
-    },
-    {
-      "fichaId": 2089,
-      "refName": "CARTBULLETT-5P1400F.CL.12MN.8-36,0078-80",
-      "refPrice": 13.72
-    },
-    {
-      "fichaId": 2069,
-      "refName": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
-      "refPrice": 9.23
-    },
-    {
-      "fichaId": 2070,
+      "fichaId": 2117,
       "refName": "CART.MAR.FIOCCHI,CAL. 12 GA, 7.5, 24 GR.",
-      "refPrice": 10.59
-    },
-    {
-      "fichaId": 2036,
-      "refName": "CARTS CAL.308\" W REMINGTON UMC FMJ 150GR",
-      "refPrice": 14.82
-    },
-    {
-      "fichaId": 2018,
-      "refName": "CARTS CAL.38\" SUP. AGUILA F.M.J. 130 GN",
-      "refPrice": 18.18
+      "refPrice": 10.73
     }
   ],
   "revisarPrecio": [],
-  "totalPdf": 98773,
-  "totalMapped": 98773,
+  "totalPdf": 72423,
+  "totalMapped": 72423,
   "excluidos": [],
-  "regresos": [
-    {
-      "idx": 4,
-      "name": "CART.CAL.243WIN100GR,B.T.",
-      "priceN": 25.86,
-      "fichaId": 2021,
-      "fechaAntes": "2026-10-09",
-      "antes": 25.42,
-      "razon": 1.017309,
-      "motivo": "aumento general",
-      "apoyos": 23,
-      "general": 1.017127,
-      "tramo": 0
-    }
-  ],
+  "regresos": [],
   "regresosRechazados": [],
   "gemelos": []
 }
