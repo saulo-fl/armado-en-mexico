@@ -51,9 +51,14 @@
     "81": 12,
     "83": 1,
     "85": 4,
+    "86": 2,
+    "87": 1,
+    "89": 1,
+    "90": 1,
     "91": 9,
     "92": 3,
     "94": 5,
+    "95": 6,
     "99": 19,
     "102": 1,
     "103": 6,
@@ -72,14 +77,17 @@
     "140": 22,
     "142": 5,
     "143": 14,
+    "144": 1,
     "145": 4,
     "146": 3,
     "148": 5,
     "149": 10,
     "150": 5,
+    "162": 3,
     "165": 4,
     "166": 8,
     "167": 1,
+    "169": 2,
     "178": 13,
     "179": 3,
     "180": 8,
@@ -91,7 +99,7 @@
     "193": 5,
     "196": 13,
     "197": 13,
-    "198": 5,
+    "198": 17,
     "199": 7,
     "200": 6,
     "201": 7,
@@ -199,9 +207,14 @@
     "81": 28044.45,
     "83": 39208.81,
     "85": 5538.05,
+    "86": 398559.85,
+    "87": 660015.59,
+    "89": 412719.29,
+    "90": 671630.52,
     "91": 10290.44,
     "92": 11666.49,
     "94": 29112.81,
+    "95": 26043.79,
     "99": 13461.34,
     "102": 24828.69,
     "103": 14657.9,
@@ -220,14 +233,17 @@
     "140": 9786.18,
     "142": 10147.07,
     "143": 23056.72,
+    "144": 28259.01,
     "145": 13760.48,
     "146": 17649.31,
     "148": 40063.5,
     "149": 30982.44,
     "150": 30715.35,
+    "162": 36820.54,
     "165": 18845.87,
     "166": 20939.86,
     "167": 23931.26,
+    "169": 422927.26,
     "178": 17110.85,
     "179": 10687.93,
     "180": 15087.44,
@@ -296,85 +312,77 @@
     "271": 30181.17
   },
   "factores": [
-    0.999712,
-    0.998776
+    1.0
   ],
   "sinFicha": [],
-  "sinPrecio": [
-    {
-      "fichaId": 228,
-      "refName": "RIFLE CESKA CZ 457 SYNTHETIC SET CAL. 22",
-      "refPrice": 24766.37
-    },
-    {
-      "fichaId": 154,
-      "refName": "ESCOPETA 12 BERETTA 687 S. PIGEON V 30\"",
-      "refPrice": 82423.22
-    },
-    {
-      "fichaId": 203,
-      "refName": "RIFLE CESKA CZ 600 ALPHA CAL.223REM",
-      "refPrice": 20197.81
-    }
-  ],
+  "sinPrecio": [],
   "revisarPrecio": [],
   "totalPdf": 1408,
-  "totalMapped": 1345,
+  "totalMapped": 1374,
   "excluidos": [],
-  "regresos": [
-    {
-      "idx": 64,
-      "name": "MODELO RM22-3000 SQUAD",
-      "priceN": 11863.1,
-      "fichaId": 264,
-      "fechaAntes": "2026-10-20",
-      "antes": 11863.1,
-      "razon": 1.0,
-      "motivo": "aumento general",
-      "apoyos": 121,
-      "general": 0.999712,
-      "tramo": 0
-    },
-    {
-      "idx": 100,
-      "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/STE",
-      "priceN": 31192.68,
-      "fichaId": 198,
-      "fechaAntes": "2026-09-29",
-      "antes": 30657.52,
-      "razon": 1.017456,
-      "motivo": "aumento general",
-      "apoyos": 117,
-      "general": 1.032436,
-      "tramo": 0
-    },
-    {
-      "idx": 122,
-      "name": "RIFLE CESKA CZ 600 AMERICAN CSL. 223 REM",
-      "priceN": 23824.43,
-      "fichaId": 209,
-      "fechaAntes": "2026-10-15",
-      "antes": 23913.41,
-      "razon": 0.996279,
-      "motivo": "aumento general",
-      "apoyos": 120,
-      "general": 0.996279,
-      "tramo": 0
-    },
-    {
-      "idx": 161,
-      "name": "PISTOLA CAL. 22\" L.R. TREJO MOD. 2GT",
-      "priceN": 12369.47,
-      "fichaId": 216,
-      "fechaAntes": "2026-10-20",
-      "antes": 12369.47,
-      "razon": 1.0,
-      "motivo": "aumento general",
-      "apoyos": 121,
-      "general": 0.999712,
-      "tramo": 0
-    }
-  ],
+  "regresos": [],
   "regresosRechazados": [],
-  "gemelos": []
+  "gemelos": [],
+  "sinDueno": [
+    {
+      "idx": 21,
+      "name": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
+      "priceN": 30174.88,
+      "qty": 1
+    },
+    {
+      "idx": 22,
+      "name": "PISTOLA 380 ACP G. P., MOD. STRIBOG SP",
+      "priceN": 35874.58,
+      "qty": 4
+    },
+    {
+      "idx": 24,
+      "name": "ESCOPETA 12 STOEGER M3000 PERE CAMO MAX7",
+      "priceN": 15959.16,
+      "qty": 1
+    },
+    {
+      "idx": 29,
+      "name": "ESCOPETA BOM 12 STOEGER P3500 CAMO MAX5",
+      "priceN": 11768.2,
+      "qty": 6
+    },
+    {
+      "idx": 30,
+      "name": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
+      "priceN": 26618.55,
+      "qty": 1
+    },
+    {
+      "idx": 41,
+      "name": "ESC.SEMI.MOD.AST.CAMO.CAL.12.71CM.28\"",
+      "priceN": 26492.82,
+      "qty": 6
+    },
+    {
+      "idx": 72,
+      "name": "RIF.CAÑ.COR.CAL.223WYLDEMOD.FOL.TENEP",
+      "priceN": 178683.21,
+      "qty": 3
+    },
+    {
+      "idx": 73,
+      "name": "RIF.CAÑ.COR.CAL.223 WYLDE.FOL.MOFLDR1F",
+      "priceN": 178683.21,
+      "qty": 2
+    },
+    {
+      "idx": 94,
+      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 LIN/SP",
+      "priceN": 25235.54,
+      "qty": 2
+    },
+    {
+      "idx": 95,
+      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3CA/OP/",
+      "priceN": 20954.78,
+      "qty": 8
+    }
+  ]
 }
