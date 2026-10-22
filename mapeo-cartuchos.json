@@ -16,6 +16,8 @@
     "2044": 35,
     "2050": 4050,
     "2051": 1310,
+    "2057": 2500,
+    "2059": 1150,
     "2061": 2000,
     "2063": 2750,
     "2074": 2000,
@@ -41,6 +43,8 @@
     "2044": 11.54,
     "2050": 25.85,
     "2051": 25.85,
+    "2057": 13.89,
+    "2059": 10.3,
     "2061": 10.3,
     "2063": 8.12,
     "2074": 10.3,
@@ -52,34 +56,19 @@
   "factores": [
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 0,
-      "name": "CARTS.CAL.12.GB.GB.CLUB.32GR.P6.",
-      "priceN": 10.3,
-      "qty": 1150,
-      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB CLUB, 32 GRAMOS, PERDIGON 6"
-    },
-    {
-      "idx": 12,
-      "name": "CART. CAL. 12 EXCOPESA T5 PICH 36GR M7.5",
-      "priceN": 13.89,
-      "qty": 2500,
-      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 T5 PICHON MUN. 7.5 36GR CATALOGO 150 - 75"
-    },
+  "sinFicha": [],
+  "sinPrecio": [],
+  "revisarPrecio": [],
+  "totalPdf": 91197,
+  "totalMapped": 87223,
+  "excluidos": [
     {
       "idx": 21,
       "name": "CARTS CAL.5.7X28 mm HERSTAL TIPO BALL,",
       "priceN": 0.72,
-      "qty": 3974,
-      "desc": "CARTUCHO CAL. 5.7 X 28 MM. MARCA FN HERSTAL, BALL SS 190, EN CAJA M2A1, CODIGO 4800000157"
+      "qty": 3974
     }
   ],
-  "sinPrecio": [],
-  "revisarPrecio": [],
-  "totalPdf": 91197,
-  "totalMapped": 83573,
-  "excluidos": [],
   "regresos": [
     {
       "idx": 9,
@@ -90,25 +79,11 @@
       "antes": 7.98,
       "razon": 1.017544,
       "motivo": "aumento general",
-      "apoyos": 20,
-      "general": 1.016856,
+      "apoyos": 21,
+      "general": 1.016916,
       "tramo": 0
     }
   ],
-  "regresosRechazados": [
-    {
-      "idx": 0,
-      "name": "CARTS.CAL.12.GB.GB.CLUB.32GR.P6.",
-      "priceN": 10.3,
-      "fichaId": 2059,
-      "fechaAntes": "2026-07-06",
-      "antes": 9.97,
-      "razon": 1.033099,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 13,
-      "general": 1.053886,
-      "tramo": 1
-    }
-  ],
+  "regresosRechazados": [],
   "gemelos": []
 }

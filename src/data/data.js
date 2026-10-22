@@ -647,6 +647,13 @@ window.DB = [
   // catalogado (54); año sin verificar. Las 262 y 263 de ese día eran la 179 y la 52
   // con otro nombre en el PDF: se fundieron en ellas (ligas-armas.json).
   mk(264, "Mendoza RM22-3000 Squad", "Mendoza", "rifle", "México", ".22 LR", "17", "2850g", "1020mm", "Semi-auto", null, "dcam", "MODELO RM22-3000 SQUAD", "", "Rifle semiautomático Mendoza RM22-3000 en .22 LR, presentación Squad con riel Picatinny. Calibre de libre adquisición civil."),
+  mk(265, "Tippmann M4-22 Elite-L FDE", "Tippmann", "rifle", "EE.UU.", ".22 LR", "25", "2800g", "850mm", "Semi-auto, réplica AR-15", null, "dcam", "RIF.CAL.22 LR.TIPPM. ARMS, MO.M4-22,ELI", "", "Réplica .22 LR del M4, versión Elite-L en acabado FDE, con miras abatibles y cargador de 25 tiros. Calibre de libre adquisición civil."),
+  mk(266, "Tippmann M4-22 WMR Magnum Elite", "Tippmann", "rifle", "EE.UU.", ".22 WMR", "15", "", "", "Semi-auto, réplica AR-15", null, "dcam", "RIF.CAL.22 WMR.TIPP.ARMS, M4-22WMR MAGNU", "", "Réplica del M4 en calibre .22 WMR (Magnum), versión Elite, con miras abatibles y cargador de 15 tiros. Calibre de libre adquisición civil."),
+  mk(267, "Tippmann M4-22 LTE Accents Wolf Grey", "Tippmann", "rifle", "EE.UU.", ".22 LR", "25", "2800g", "850mm", "Semi-auto, réplica AR-15", null, "dcam", "RIF.CAL.22 LR MAR.TIP.ARMS,M4-22VER.LTEA", "", "Réplica .22 LR del M4, versión LTE con acentos Wolf Grey, miras abatibles y cargador de 25 tiros. Calibre de libre adquisición civil."),
+  mk(268, "Mendoza RM22-3000 Nogal", "Mendoza", "rifle", "México", ".22 LR", "17", "2850g", "1020mm", "Semi-auto", null, "dcam", "MODELO RM22-3000 NOGAL", "", "Rifle semiautomático Mendoza RM22-3000 en .22 LR, presentación Nogal con riel Picatinny. Calibre de libre adquisición civil."),
+  mk(269, "Browning Maxus Black Gold", "Browning", "escopeta", "Bélgica/EE.UU.", "12 GA", "4+1", "3200g", "1270mm", "Semi-auto, gas-operada", null, "dcam", "ESCOP.SEMI.BROWNING.MAXUS.B.G.CAL12.LC71", "", "Versión Black Gold (segunda generación) de la semiautomática Browning Maxus calibre 12, con culata y guardamano de madera, cañón de 71 cm y boquillas intercambiables. Adquisición civil."),
+  mk(270, "Browning Maxus Camo", "Browning", "escopeta", "Bélgica/EE.UU.", "12 GA", "4+1", "3200g", "1270mm", "Semi-auto, gas-operada", null, "dcam", "ESCOPETA BROWNING MAXUS CAMO2 28\"", "", "Versión camuflaje (segunda generación) de la semiautomática Browning Maxus calibre 12, con culata y guardamano camo, cañón de 71 cm y boquillas intercambiables. Adquisición civil."),
+  mk(271, "Winchester SX4 Silver Performance", "Winchester", "escopeta", "Italia", "12 GA", "4+1", "3200g", "1240mm", "Semi-auto, gas-operada", null, "dcam", "ESCOPETA 12 WINCHESTER SX4 SILVER", "", "Versión Silver Performance de la semiautomática Winchester SX4 calibre 12, con culata y guardamano sintéticos, cañón de 71 cm y boquillas intercambiables. Adquisición civil."),
 ];
 
 // ──────────────────────────────────────────────────────────────
@@ -682,7 +689,7 @@ const ARMAS_CON_RIEL = [50, 51, 52, 53, 54, 58, 69, 70, 71, 72, 74, 75, 76, 77, 
   112, 113, 114, 128, 143, 150, 151, 162, 174, 179, 190, 191, 202, 203, 221,
   231, // MR1 16": PDF «riel Picatinny» + Benelli «Scope mounting rail», mismas fuentes que la 143 (#161)
   239, 240, // CZ 457 LRP Black y MDT Chassis: «Picatinny mounting rail with 25 MOA inclination» (czfirearms.com, #180)
-  264]; // Mendoza RM22-3000 Squad (01-oct-2026): el PDF dice «riel Picatinny», igual que sus hermanos 50-54
+  264, 268]; // Mendoza RM22-3000 Squad (01-oct-2026): el PDF dice «riel Picatinny», igual que sus hermanos 50-54
 window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 
 // `fotoIlustrativa`: la foto es del modelo pero no del acabado que dice el registro

@@ -8,6 +8,7 @@
     "9": 22,
     "10": 27,
     "11": 3,
+    "15": 2,
     "19": 26,
     "20": 10,
     "21": 13,
@@ -32,6 +33,7 @@
     "50": 5,
     "52": 5,
     "53": 3,
+    "54": 9,
     "55": 6,
     "57": 13,
     "59": 3,
@@ -45,11 +47,13 @@
     "76": 7,
     "78": 1,
     "79": 2,
-    "81": 7,
+    "80": 5,
+    "81": 12,
     "83": 1,
     "85": 4,
     "91": 9,
     "92": 3,
+    "94": 5,
     "99": 19,
     "102": 1,
     "103": 6,
@@ -70,6 +74,7 @@
     "143": 14,
     "145": 4,
     "146": 3,
+    "148": 5,
     "149": 10,
     "150": 5,
     "165": 4,
@@ -83,6 +88,7 @@
     "184": 1,
     "191": 1,
     "192": 16,
+    "193": 5,
     "196": 13,
     "197": 13,
     "198": 5,
@@ -104,6 +110,7 @@
     "217": 29,
     "220": 13,
     "221": 13,
+    "223": 2,
     "226": 5,
     "227": 5,
     "229": 4,
@@ -118,12 +125,27 @@
     "242": 4,
     "243": 7,
     "244": 12,
+    "245": 5,
+    "246": 9,
+    "247": 5,
+    "248": 7,
     "249": 4,
+    "250": 5,
+    "251": 7,
     "252": 2,
     "253": 1,
+    "256": 7,
+    "257": 6,
     "260": 3,
     "261": 1,
-    "264": 5
+    "264": 5,
+    "265": 5,
+    "266": 5,
+    "267": 5,
+    "268": 7,
+    "269": 4,
+    "270": 5,
+    "271": 5
   },
   "precios": {
     "1": 10774.41,
@@ -134,6 +156,7 @@
     "9": 12526.52,
     "10": 34694.99,
     "11": 11618.42,
+    "15": 18648.29,
     "19": 10326.55,
     "20": 9937.67,
     "21": 11493.2,
@@ -158,6 +181,7 @@
     "50": 9142.09,
     "52": 10687.93,
     "53": 10687.93,
+    "54": 11863.1,
     "55": 6532.42,
     "57": 13861.97,
     "59": 23824.43,
@@ -171,11 +195,13 @@
     "76": 51307.99,
     "78": 45939.48,
     "79": 45405.3,
+    "80": 30715.35,
     "81": 28044.45,
     "83": 39208.81,
     "85": 5538.05,
     "91": 10290.44,
     "92": 11666.49,
+    "94": 29112.81,
     "99": 13461.34,
     "102": 24828.69,
     "103": 14657.9,
@@ -196,6 +222,7 @@
     "143": 23056.72,
     "145": 13760.48,
     "146": 17649.31,
+    "148": 40063.5,
     "149": 30982.44,
     "150": 30715.35,
     "165": 18845.87,
@@ -209,6 +236,7 @@
     "184": 15918.56,
     "191": 27343.39,
     "192": 6874.9,
+    "193": 15690.94,
     "196": 24786.51,
     "197": 20326.13,
     "198": 31192.68,
@@ -230,6 +258,7 @@
     "217": 11484.87,
     "220": 11177.82,
     "221": 53818.64,
+    "223": 221791.34,
     "226": 18995.44,
     "227": 20726.18,
     "229": 15330.97,
@@ -244,130 +273,34 @@
     "242": 24011.39,
     "243": 13621.59,
     "244": 20356.07,
+    "245": 26043.79,
+    "246": 32180.55,
+    "247": 35024.41,
+    "248": 33976.67,
     "249": 46399.86,
+    "250": 41610.2,
+    "251": 44903.09,
     "252": 178683.21,
     "253": 10320.36,
+    "256": 18669.59,
+    "257": 17721.75,
     "260": 125309.56,
     "261": 147192.34,
-    "264": 11863.1
+    "264": 11863.1,
+    "265": 24038.1,
+    "266": 34721.7,
+    "267": 16559.58,
+    "268": 10139.41,
+    "269": 42467.31,
+    "270": 41666.04,
+    "271": 30181.17
   },
   "factores": [
     0.999712,
     0.998776
   ],
-  "sinFicha": [
-    {
-      "idx": 15,
-      "name": "PISTOLA C/LARGO 380\" MENDOZA HM-7-BULLDO",
-      "priceN": 18648.29,
-      "qty": 2,
-      "desc": "PISTOLA DE CAÑON LARGO, CALIBRE 0.380\" MARCA MENDOZA MODELO HM-7-BULLDOG, SEMIAUTOMÁTICA ALIMENTADA POR CARGADORES DE 20"
-    },
-    {
-      "idx": 16,
-      "name": "RIF.CAL.22 LR.TIPPM. ARMS, MO.M4-22,ELI",
-      "priceN": 24038.1,
-      "qty": 5,
-      "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN ELITE L-FDE, INCLUYE: UNA CAJA DE CARTÓN CORRUGADO, UN CARGA"
-    },
-    {
-      "idx": 17,
-      "name": "RIF.CAL.22 WMR.TIPP.ARMS, M4-22WMR MAGNU",
-      "priceN": 34721.7,
-      "qty": 5,
-      "desc": "RIFLE CAL. 22 WMR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN WMR MAGNUM ELITE, INCLUYE: UNA CAJA DE CARTÓN CORRUGADO, UN"
-    },
-    {
-      "idx": 18,
-      "name": "RIF.CAL.22LR TIPP. ARMS,M4-22 VER.EL-L",
-      "priceN": 30715.35,
-      "qty": 5,
-      "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN ELITE-L CON MIRA TELESCÓPICA, INCLUYE: UN ESTUCHE DE PLÁSTIC"
-    },
-    {
-      "idx": 19,
-      "name": "RIF.CAL.22 LR MAR.TIP. ARMS,M4-22.VERRED",
-      "priceN": 28044.45,
-      "qty": 5,
-      "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN REDLINE INCLUYE: UN ESTUCHE DE PLÁSTICO RÍGIDO, UN CARGADOR "
-    },
-    {
-      "idx": 20,
-      "name": "RIF.CAL.22 LR MAR.TIP.ARMS,M4-22VER.LTEA",
-      "priceN": 16559.58,
-      "qty": 5,
-      "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN LTE ACCENTS-WOLF GREY, INCLUYE: UN ESTUCHE DE PLÁSTICO RÍGID"
-    },
-    {
-      "idx": 34,
-      "name": "ESCOPETA 12 BERETTA DT11 PRO BLACK EDITI",
-      "priceN": 221791.34,
-      "qty": 1,
-      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO DT11 (BLACK DLC PRO), TIPO SPORTING, CULATA TIPO TSK, CAL. 12 GA, CAÑÓN DE 32\""
-    },
-    {
-      "idx": 53,
-      "name": "RIF.,SEMI.AU.MAR.BROW.MO.BAR.MK4.CAL.308",
-      "priceN": 40063.5,
-      "qty": 5,
-      "desc": "RIFLE SEMIAUTOMÁTICO DE UN CAÑÓN MARCA BROWNING, MODELO BAR MK4, VERSIÓN CULATA Y GUARDAMANO SINTÉTICOS, CALIBRE 0.308\" "
-    },
-    {
-      "idx": 62,
-      "name": "MODELO RM22-3000 NOGAL",
-      "priceN": 10139.41,
-      "qty": 7,
-      "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 NOGAL RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y L"
-    },
-    {
-      "idx": 63,
-      "name": "MODELO RM22-3000 SAFARI",
-      "priceN": 11863.1,
-      "qty": 6,
-      "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 SAFARI RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y "
-    },
-    {
-      "idx": 65,
-      "name": "RM22-3000 COMMANDER",
-      "priceN": 11863.1,
-      "qty": 3,
-      "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 COMMANDER RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS"
-    },
-    {
-      "idx": 66,
-      "name": "ESCOPETA BROWNING MAXUS CAMO2 28\"",
-      "priceN": 41666.04,
-      "qty": 5,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION CAMO, (GENERACIÓN 2), CULATA Y GUARDAMANO CAM"
-    },
-    {
-      "idx": 67,
-      "name": "ESCOP.SEMI.BROWNING.MAXUS.B.G.CAL12.LC71",
-      "priceN": 42467.31,
-      "qty": 4,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION BLACK GOLD, (GENERACIÓN 2), CULATA Y GUARDAMA"
-    },
-    {
-      "idx": 68,
-      "name": "ESCOPETA 12 WINCHESTER SX4 SINTETICA",
-      "priceN": 29112.81,
-      "qty": 5,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4, VERSION SINTETICA, CULATA Y GUARDAMANO SINTETICOS, CA"
-    },
-    {
-      "idx": 69,
-      "name": "ESCOPETA 12 WINCHESTER SX4 SILVER",
-      "priceN": 30181.17,
-      "qty": 5,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4 SILVER PERFORMANCE, VERSION CULATA Y GUARDAMANO SINTET"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
-    {
-      "fichaId": 15,
-      "refName": "PISTOLA C/LARGO 380\" MENDOZA HM-7-BULLDO",
-      "refPrice": 18648.29
-    },
     {
       "fichaId": 228,
       "refName": "RIFLE CESKA CZ 457 SYNTHETIC SET CAL. 22",
@@ -386,7 +319,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 1408,
-  "totalMapped": 1220,
+  "totalMapped": 1345,
   "excluidos": [],
   "regresos": [
     {
@@ -398,7 +331,7 @@
       "antes": 11863.1,
       "razon": 1.0,
       "motivo": "aumento general",
-      "apoyos": 120,
+      "apoyos": 121,
       "general": 0.999712,
       "tramo": 0
     },
@@ -411,7 +344,7 @@
       "antes": 30657.52,
       "razon": 1.017456,
       "motivo": "aumento general",
-      "apoyos": 108,
+      "apoyos": 117,
       "general": 1.032436,
       "tramo": 0
     },
@@ -424,7 +357,7 @@
       "antes": 23913.41,
       "razon": 0.996279,
       "motivo": "aumento general",
-      "apoyos": 118,
+      "apoyos": 120,
       "general": 0.996279,
       "tramo": 0
     },
@@ -437,7 +370,7 @@
       "antes": 12369.47,
       "razon": 1.0,
       "motivo": "aumento general",
-      "apoyos": 120,
+      "apoyos": 121,
       "general": 0.999712,
       "tramo": 0
     }
