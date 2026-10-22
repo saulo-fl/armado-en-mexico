@@ -554,6 +554,17 @@ test('mapeo (#375): gemelos con una clave extra o un tipo malo se rechaza', () =
   assert.ok(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, gemelos: {} })).length > 0);
 });
 
+test('mapeo (C14, 21-oct-2026): sinDueno válido pasa; con clave extra o tipo malo se rechaza', () => {
+  const r = 'mapeo-armas.json';
+  const s = { idx: 40, name: 'ESCOPETA CAL12 YUXTAPUESTA AYA CENTENARY', priceN: 398559.85, qty: 2 };
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, sinDueno: [s] })), []);
+  assert.deepEqual(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, sinDueno: [] })), []);
+  for (const malo of [{ ...s, fichaId: 1 }, { ...s, priceN: -1 }, { ...s, qty: '2' }, { idx: 40, name: 'X', qty: 1 }]) {
+    assert.ok(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, sinDueno: [malo] })).length > 0, JSON.stringify(malo));
+  }
+  assert.ok(compararArchivo(r, '{}', JSON.stringify({ ...MAPEO_VACIO, sinDueno: {} })).length > 0);
+});
+
 test('mapeo (#375): los rechazos y regresos «renombre» caben aunque el dcamRef sea el más largo real (120)', () => {
   const r = 'mapeo-armas.json';
   const ref = 'X'.repeat(120);
