@@ -568,6 +568,9 @@ const ESQ_REGRESOS_RECHAZADOS_OPC = { fichaId: esEnteroNoNeg, fechaAntes: (v) =>
 // gemelos (#375, ligar_gemelos): segundo renglón del mismo producto ligado a la misma ficha.
 // Clave OPCIONAL del mapeo: los mapeos anteriores a #375 no la traen.
 const ESQ_GEMELOS = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), qty: esEnteroNoNeg, fichaId: esEnteroNoNeg };
+// sinDueno (21-oct-2026): renglón emparejado por la cadena con un renglón de la referencia
+// sin fichaId, que ni regresos ni gemelos ligaron. Clave OPCIONAL (mapeos anteriores no la traen).
+const ESQ_SIN_DUENO = { idx: esEnteroNoNeg, name: (v) => esStringLimpio(v), priceN: esNumeroNoNeg, qty: esEnteroNoNeg };
 
 function jsonMalo(ruta, texto) {
   let j; try { j = JSON.parse(texto); } catch { return [`${ruta}: JSON inválido`]; }
@@ -597,7 +600,10 @@ function jsonMalo(ruta, texto) {
       regresos: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_REGRESOS)),
       regresosRechazados: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_REGRESOS_RECHAZADOS_REQ, ESQ_REGRESOS_RECHAZADOS_OPC)),
     };
-    const opc = { gemelos: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_GEMELOS)) };
+    const opc = {
+      gemelos: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_GEMELOS)),
+      sinDueno: (v) => Array.isArray(v) && v.every((x) => objetoCerrado(x, ESQ_SIN_DUENO)),
+    };
     return objetoCerrado(j, req, opc) ? [] : [`${ruta}: no cumple el esquema exacto de mapeo-*`];
   }
 

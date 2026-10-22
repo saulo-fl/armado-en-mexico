@@ -202,3 +202,18 @@ Lo que sobrevive es alta nueva.
 - **Ojo con el archivo**: las carpetas `archivo/2026-09-15` y `2026-09-16` guardan
   los PDFs del 14 y 15-sep (la carpeta es la fecha de recepción). Mira el nombre
   del PDF, no la carpeta, antes de declarar un registro ajeno.
+
+### C14. Renglones caros que no cambian de precio + renglones sin dueño (21-oct-2026)
+- **Síntoma**: la HM-7 (15) en `sinFicha` con el mismo nombre y precio que ayer;
+  y, sin aviso, 9 armas y 2 accesorios congelados desde el 25/29-sep (DT11 223,
+  Breda 245-251, 193, 256, 257, accesorios 104 y 402).
+- **Causa (código, ya corregida)**: (1) `match_rows` tenía un prefiltro de ±2 MXN
+  absolutos antes de comparar la razón; con factor ≠ 1 y precio sin cambio, todo
+  renglón de más de ~7,000 MXN quedaba sin pareja. (2) Un renglón que encadenaba
+  con un renglón de la referencia con `fichaId` null se daba por emparejado y no
+  salía en ningún sitio.
+- **Desde la corrección**: no hay prefiltro en pesos; los renglones así pasan por
+  regresos y gemelos, y lo que sobra sale en **`sinDueno`** del mapeo (productos
+  conocidos sin ficha ni liga). `sinDueno` no bloquea el cierre: decide Saulo si
+  son ligas o altas; si lo decide, va en `ligas-<cat>.json` como siempre.
+  `referencia-*.json` lleva ahora en `pdfDate` la fecha del último inventario.
