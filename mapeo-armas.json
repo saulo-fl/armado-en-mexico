@@ -21,7 +21,7 @@
     "29": 1,
     "31": 13,
     "36": 38,
-    "37": 5,
+    "37": 6,
     "38": 16,
     "40": 27,
     "41": 23,
@@ -57,7 +57,7 @@
     "90": 1,
     "91": 8,
     "92": 3,
-    "94": 5,
+    "94": 10,
     "95": 5,
     "99": 18,
     "102": 1,
@@ -154,7 +154,9 @@
     "270": 5,
     "271": 3,
     "272": 5,
-    "273": 5
+    "273": 5,
+    "274": 5,
+    "275": 5
   },
   "precios": {
     "1": 10938.48,
@@ -311,42 +313,15 @@
     "270": 42300.53,
     "271": 30640.77,
     "272": 32945.61,
-    "273": 41622.64
+    "273": 41622.64,
+    "274": 49079.46,
+    "275": 49757.36
   },
   "factores": [
     1.015228,
     1.01582
   ],
-  "sinFicha": [
-    {
-      "idx": 64,
-      "name": "ESC.MOD.MAX.VER.SIN.SC.CAL.12.71CM",
-      "priceN": 49079.46,
-      "qty": 5,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION SINTETICA SC, (GENERACIÓN 2), CULATA Y GUARDA"
-    },
-    {
-      "idx": 65,
-      "name": "ESCOPETA 12 BROWNING MAXUS ULTIMATE G2",
-      "priceN": 49757.36,
-      "qty": 5,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION ULTIMATE, (GENERACIÓN 2), CULATA Y GUARDAMANO"
-    },
-    {
-      "idx": 69,
-      "name": "ESC.SEMI.SX4.CAL.12 SINT VER.",
-      "priceN": 29556.14,
-      "qty": 5,
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4, VERSION SINTETICA VERDE, CULATA Y GUARDAMANO SINTETIC"
-    },
-    {
-      "idx": 164,
-      "name": "PISTOLA 9MM MCA. IWI MOD. MASADA FULL",
-      "priceN": 12039.38,
-      "qty": 1,
-      "desc": "PISTOLA CALIBRE 9 X 19 mm MARCA I.W.I. MODELO MASADA, CAÑON DE 4.1\" CODIGO: MASADAFULL9X19. INCLUYE: 3 (TRES) CARGADORES"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 69,
@@ -371,7 +346,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 1562,
-  "totalMapped": 1508,
+  "totalMapped": 1524,
   "excluidos": [
     {
       "idx": 72,

@@ -211,7 +211,7 @@
       'CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO TRAP COMPETICIÓN (COMPETITION) 24 GRAMOS, MUNICIÓN DEL 7.5, EMPAC',
       'Cartucho de escopeta en calibre 12 GA, marca Trust (Perdigón 7.5, 24 g). Precio de referencia por cartucho del inventario OTCA (Monterrey).',
       ['Armas calibre 12 GA'], [['Calibre', '12 GA'], ['Bala', 'Perdigón 7.5'], ['Peso', '24 g'], ['Tipo', 'Escopeta']]),
-    mun(2007, 'Cartucho 12 GA · GB', 'GB', 'España', '12 GA', 'escopeta', 'Perdigón 7.5', '28 g', 'dcam', 10.08,
+    mun(2007, 'Cartucho 12 GA · GB', 'GB', 'España', '12 GA', 'escopeta', 'Perdigón 7.5', '28 g', 'dcam', 9.49,
       'CARTUCHO CAL. 12, MARCA GB, GB SPORTING PLUS 28, 28 GRAMOS, PERDIGON 7.5',
       'Cartucho de escopeta en calibre 12 GA, marca GB (Perdigón 7.5, 28 g). Precio de referencia por cartucho del inventario OTCA (Monterrey).',
       ['Armas calibre 12 GA'], [['Calibre', '12 GA'], ['Bala', 'Perdigón 7.5'], ['Peso', '28 g'], ['Tipo', 'Escopeta']]),
@@ -466,6 +466,16 @@
       "Cartucho de escopeta en calibre 12 GA, marca Fiocchi (Perdigón 7.5, 32 gr). Precio de referencia por cartucho del inventario DCAM (9-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]) },
     { ...mun(2120, "Cartucho 12 GA · Trust (Blue Line 00 Buck)", "Trust", "España", "12 GA", "escopeta", "Postas 00 Buck (9)", "35 gr", "dcam", 16.54, "CART.ESCP.TRUST.CAL12.C.L.A00BUCK35.9POS",
       "Cartucho de escopeta en calibre 12 GA, marca Trust, línea Caza Blue Line (Munición 00 Buck, 9 postas, 35 gr). Precio de referencia por cartucho del inventario DCAM (16-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Postas 00 Buck (9)"], ["Peso", "35 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2121, "Cartucho 12 GA · Saga (Sporting 28 M8)", "Saga", "España", "12 GA", "escopeta", "Perdigón 8", "28 gr", "dcam", 9.97, "CARTUCHO CAL. 12 SAGA SPORTING 28 M8",
+      "Cartucho de escopeta en calibre 12 GA, marca Saga, línea Sporting 28 (Perdigón 8, 28 gr). Precio de referencia por cartucho del inventario DCAM (23-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 8"], ["Peso", "28 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2122, "Cartucho 12 GA · Rio (Star Team 32)", "Rio", "España", "12 GA", "escopeta", "Perdigón 7.5", "32 gr", "dcam", 10.95, "CART. CAL. 12 RIO STAR TEAM 32GR P7.5",
+      "Cartucho de escopeta en calibre 12 GA, marca Rio, línea Star Team 32 HV (Perdigón 7.5, 32 gr). Precio de referencia por cartucho del inventario DCAM (23-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "32 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2123, "Cartucho 12 GA · Eley (Olympic Blues 28)", "Eley", "Reino Unido", "12 GA", "escopeta", "Perdigón 7.5", "28 gr", "dcam", 10.22, "CART. CAL. 12 ELEY EOB 28GR 7.5",
+      "Cartucho de escopeta en calibre 12 GA, marca Eley, línea Olympic Blues (Perdigón 7.5, 28 gr). Precio de referencia por cartucho del inventario DCAM (23-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 7.5"], ["Peso", "28 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2124, "Cartucho 12 GA · EG del Sur (SH 29 M8)", "EG del Sur", "México", "12 GA", "escopeta", "Perdigón 8", "29 gr", "dcam", 10.46, "CART CAL. 12 EG DEL SUR (SH) 29 GR M. 8",
+      "Cartucho de escopeta en calibre 12 GA, marca EG del Sur, Special Hunter (Perdigón 8, 29 gr). Precio de referencia por cartucho del inventario DCAM (23-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 8"], ["Peso", "29 gr"], ["Tipo", "Escopeta"]]) },
+    { ...mun(2125, "Cartucho 12 GA · EG del Sur (Trap 28 M8)", "EG del Sur", "México", "12 GA", "escopeta", "Perdigón 8", "28 gr", "dcam", 9.97, "CART CAL. 12 EG DEL SUR TRAP 28 GR M. 8",
+      "Cartucho de escopeta en calibre 12 GA, marca EG del Sur, línea Trap (Perdigón 8, 28 gr). Precio de referencia por cartucho del inventario DCAM (23-oct-2026).", ["Armas calibre 12 GA"], [["Calibre", "12 GA"], ["Bala", "Perdigón 8"], ["Peso", "28 gr"], ["Tipo", "Escopeta"]]) },
   ];
 
   function _mh(price, qty) { return { manualId: OTCA, price: _mFmt(price), date: OTCAd, qty: (qty == null ? null : qty) }; }
@@ -485,7 +495,7 @@
     2004: [_mh(9.16, 10750), _mh18s(8.96, 966), _mh22(8.96, 866), _mh25(8.96, 666), { manualId: 'man_mun_dcam_2026_09_29', price: '$8.96 MXN', date: '2026-09-29', qty: 666 }, { manualId: 'man_mun_dcam_2026_10_01', price: '$8.96 MXN', date: '2026-10-01', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_02', price: '$8.96 MXN', date: '2026-10-02', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_05', price: '$8.96 MXN', date: '2026-10-05', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_06', price: '$8.96 MXN', date: '2026-10-06', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_07', price: '$8.96 MXN', date: '2026-10-07', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_09', price: '$8.96 MXN', date: '2026-10-09', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_13', price: '$8.96 MXN', date: '2026-10-13', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_15', price: '$8.96 MXN', date: '2026-10-15', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_16', price: '$8.96 MXN', date: '2026-10-16', qty: 566 }, { manualId: 'man_mun_dcam_2026_10_19', price: '$8.96 MXN', date: '2026-10-19', qty: 316 }, { manualId: 'man_mun_dcam_2026_10_20', price: '$8.96 MXN', date: '2026-10-20', qty: 316 }, { manualId: 'man_mun_dcam_2026_10_21', price: '$8.96 MXN', date: '2026-10-21', qty: 316 }, { manualId: 'man_mun_dcam_2026_10_23', price: '$8.96 MXN', date: '2026-10-23', qty: 316 }],
     2005: [_mh(8.88, 17950), _mh18(7.97, 19350)],
     2006: [_mh(10.08, 1500)],
-    2007: [_mh(10.08, 22000)],
+    2007: [_mh(10.08, 22000), { manualId: 'man_mun_dcam_2026_10_23', price: '$9.49 MXN', date: '2026-10-23', qty: 3000 }],
     2008: [_mh(11.11, 28000), _mh18(9.94, 2800), { manualId: 'man_mun_dcam_2026_10_01', price: '$9.52 MXN', date: '2026-10-01', qty: 1750 }, { manualId: 'man_mun_dcam_2026_10_02', price: '$9.63 MXN', date: '2026-10-02', qty: 500 }],
     2009: [_mh(9.82, 1050)],
     2010: [_mh(11.11, 78100), _mh18(9.94, 8700)],
@@ -600,6 +610,11 @@
     2118: [{ manualId: 'man_mun_dcam_2026_10_09', price: '$10.51 MXN', date: '2026-10-09', qty: 2875 }, { manualId: 'man_mun_dcam_2026_10_15', price: '$10.72 MXN', date: '2026-10-15', qty: 250 }, { manualId: 'man_mun_dcam_2026_10_16', price: '$10.69 MXN', date: '2026-10-16', qty: 3000 }],
     2119: [{ manualId: 'man_mun_dcam_2026_10_09', price: '$10.51 MXN', date: '2026-10-09', qty: 375 }, { manualId: 'man_mun_dcam_2026_10_16', price: '$10.69 MXN', date: '2026-10-16', qty: 3000 }],
     2120: [{ manualId: 'man_mun_dcam_2026_10_16', price: '$16.54 MXN', date: '2026-10-16', qty: 3000 }],
+    2121: [{ manualId: 'man_mun_dcam_2026_10_23', price: '$9.97 MXN', date: '2026-10-23', qty: 3000 }],
+    2122: [{ manualId: 'man_mun_dcam_2026_10_23', price: '$10.95 MXN', date: '2026-10-23', qty: 3000 }],
+    2123: [{ manualId: 'man_mun_dcam_2026_10_23', price: '$10.22 MXN', date: '2026-10-23', qty: 3000 }],
+    2124: [{ manualId: 'man_mun_dcam_2026_10_23', price: '$10.46 MXN', date: '2026-10-23', qty: 3000 }],
+    2125: [{ manualId: 'man_mun_dcam_2026_10_23', price: '$9.97 MXN', date: '2026-10-23', qty: 3000 }],
   };
 
   window.getMunicionById = function (id) { var n = Number(id); return (window.MUNICIONES || []).find(function (m) { return m.id === n; }) || null; };

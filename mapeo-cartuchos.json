@@ -1,6 +1,7 @@
 {
   "existencias": {
     "2004": 316,
+    "2007": 3000,
     "2019": 12200,
     "2021": 3000,
     "2024": 1260,
@@ -33,10 +34,16 @@
     "2108": 6000,
     "2109": 3000,
     "2110": 3000,
-    "2115": 550
+    "2115": 550,
+    "2121": 3000,
+    "2122": 3000,
+    "2123": 3000,
+    "2124": 3000,
+    "2125": 3000
   },
   "precios": {
     "2004": 8.96,
+    "2007": 9.49,
     "2019": 8.96,
     "2021": 26.25,
     "2024": 24.08,
@@ -69,56 +76,18 @@
     "2108": 10.7,
     "2109": 9.49,
     "2110": 10.46,
-    "2115": 10.95
+    "2115": 10.95,
+    "2121": 9.97,
+    "2122": 10.95,
+    "2123": 10.22,
+    "2124": 10.46,
+    "2125": 9.97
   },
   "factores": [
     1.015474,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 1,
-      "name": "CARTUCHO CAL. 12 SAGA SPORTING 28 M8",
-      "priceN": 9.97,
-      "qty": 3000,
-      "desc": "CARTUCHO CAL. 12 G.A., MARCA SAGA SPORTING 28, 28 GRAMOS, MUNICION 8, CODIGO SPORT28MX8."
-    },
-    {
-      "idx": 3,
-      "name": "CARTS. CAL. 12 GB SPORTINGPLUS 28 GR 7.5",
-      "priceN": 9.49,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA GB, GB SPORTING PLUS 28, 28 GRAMOS, PERDIGON 7.5"
-    },
-    {
-      "idx": 7,
-      "name": "CART. CAL. 12 RIO STAR TEAM 32GR P7.5",
-      "priceN": 10.95,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA RIO, STAR TEAM 32 HV 1300 FPS, (STAR TEAM EVO) 32 GR, PERDIGON 7.5"
-    },
-    {
-      "idx": 10,
-      "name": "CART. CAL. 12 ELEY EOB 28GR 7.5",
-      "priceN": 10.22,
-      "qty": 3000,
-      "desc": "CARTUCHO CALIBRE 12, MARCA ELEY, ELEY OLYMPIC BLUES 28, 28 GRAMOS, MUNICIÓN 7.5"
-    },
-    {
-      "idx": 14,
-      "name": "CART CAL. 12 EG DEL SUR (SH) 29 GR M. 8",
-      "priceN": 10.46,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 29 GRAMOS, MUN. 8"
-    },
-    {
-      "idx": 15,
-      "name": "CART CAL. 12 EG DEL SUR TRAP 28 GR M. 8",
-      "priceN": 9.97,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA TRAP. 28 GRAMOS MUN. 8"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2075,
@@ -138,7 +107,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 131502,
-  "totalMapped": 111328,
+  "totalMapped": 129328,
   "excluidos": [
     {
       "idx": 37,
