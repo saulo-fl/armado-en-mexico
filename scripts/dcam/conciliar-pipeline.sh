@@ -44,6 +44,17 @@ PR_URL=""
 
 log(){ printf '%s %s\n' "$(date -Is)" "$*" >>"$LOG"; }
 
+# Commit + push de un paso (0-2). Sin cambios no es error; un commit o un push
+# fallido sí: el 23-oct-2026 el commit del paso 1 falló («no es posible crear un
+# archivo temporal») y el log dijo «paso 1 OK». Argumentos extra van al push.
+commitear(){
+  git add -A
+  if ! git diff --cached --quiet; then
+    git commit -m "$1" --quiet 2>>"$LOG" || { log "  git commit falló: $1"; return 1; }
+  fi
+  git push origin "$RAMA" "${@:2}" --quiet 2>>"$LOG" || { log "  git push falló: $1"; return 1; }
+}
+
 telegram(){
   [ -f "$TG_ENV" ] || { log "sin telegram.env, no aviso"; return; }
   # shellcheck disable=SC1090
@@ -149,9 +160,7 @@ step_prep() {
     cp "$pdf" "$target"
   done
 
-  git add -A
-  git commit -m "prep: PDFs parseados $FECHA" --quiet 2>>"$LOG"
-  git push origin "$RAMA" --force --quiet 2>>"$LOG"
+  commitear "prep: PDFs parseados $FECHA" --force || return 1
 
   # Create draft PR
   if ! gh pr list --repo "$GH_REPO" --head "$RAMA" --state open --json url --jq '.[].url' 2>/dev/null | grep -q .; then
@@ -221,9 +230,7 @@ step_mapeo() {
   # Copy mapeos to repo for reference
   cp "$WORKDIR"/mapeo-*.json . 2>/dev/null || true
 
-  git add -A
-  git commit -m "mapeo: factores verificados $FECHA" --quiet 2>>"$LOG"
-  git push origin "$RAMA" --quiet 2>>"$LOG"
+  commitear "mapeo: factores verificados $FECHA" || return 1
 
   log "paso 1 OK"
 }
@@ -256,9 +263,7 @@ step_mecanico() {
     --data-dir src/data/ 2>>"$LOG" \
     || { log "  aplicar-mecanico.py falló (ver traza arriba)"; return 1; }
 
-  git add -A
-  git commit -m "mecánico: precios + existencias $FECHA" --quiet 2>>"$LOG"
-  git push origin "$RAMA" --quiet 2>>"$LOG"
+  commitear "mecánico: precios + existencias $FECHA" || return 1
 
   log "paso 2 OK"
 }

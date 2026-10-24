@@ -507,6 +507,22 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
         if fid not in ficha_prices and nr["priceN"] > 0:
             ficha_prices[fid] = nr["priceN"]
 
+    # 3a) Variante representativa SIN catálogo (cartuchos y accesorios, 23-oct-2026):
+    # regla 1 de elegir_representante con el dcamRef del historial. Si una ficha
+    # tiene varios renglones hoy y uno se llama exactamente como ella, ese fija el
+    # precio. Antes mandaba el primero que se procesaba, así que una liga de
+    # variante con otro precio le robaba el precio al renglón bueno (2108 Eley
+    # Olympic Blues 32: 9.97 de «CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5» en vez de
+    # 10.70 de «CART. CAL. 12 ELEY EOB 32GR 7.5», su dcamRef).
+    if not catalogo and historial:
+        for fid, rows in ficha_rows.items():
+            if len(rows) < 2:
+                continue
+            dref = _norm_nombre((historial.get(str(fid)) or {}).get("dcamRef"))
+            exactos = [r for r in rows if dref and r["priceN"] > 0 and _norm_nombre(r["name"]) == dref]
+            if exactos:
+                ficha_prices[fid] = exactos[0]["priceN"]
+
     # 3b) Variante representativa (regla 01-oct-2026). Candidatos: los renglones
     # mapeados a la ficha + los que se llaman exactamente como ella y no tienen
     # dueño (referencia con fichaId null). Si el renglón exacto no estaba
