@@ -217,3 +217,29 @@ Lo que sobrevive es alta nueva.
   conocidos sin ficha ni liga). `sinDueno` no bloquea el cierre: decide Saulo si
   son ligas o altas; si lo decide, va en `ligas-<cat>.json` como siempre.
   `referencia-*.json` lleva ahora en `pdfDate` la fecha del último inventario.
+
+### C15. Variantes con nombre corto distinto del `dcamRef` + decisiones de Saulo (23-oct-2026)
+- **Síntoma**: 15 renglones en `sinFicha` (8 armas, 7 cartuchos). La jaula rechazó el
+  parche entero porque su validador fijado no conocía la clave `sinDueno` (main fijado
+  viejo; se actualizó el árbol de root, no es cosa tuya).
+- **Decidido por Saulo y ya en `main`** (no lo vuelvas a decidir):
+  - La **222** es la **SX4 Field** (su `dcamRef` «SX4 V C» es versión campo): liga
+    «ESCOPETA 12 WINCHESTER SX4 FIELD» → 222, renombrada y sin la foto camo. La Camo es
+    alta nueva, la **272**. La **273** es la Maxus G2 Hunter de madera.
+  - «RIFLE.WINCHESTER.XPR.V.THUMB.L.CAL.243W» → `null` (el PDF se contradice: nombre de
+    thumbhole .243, descripción de sintético .270; queda fuera hasta que se aclare).
+  - Eley Olympic Blues 32 (2108): los dos renglones («CART. CAL. 12 ELEY EOB 32GR 7.5» y
+    «CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5») van a la 2108; el precio lo fija el que se
+    llama como la ficha (10.70) y las existencias se suman.
+- **Salto de la 222 que `verificar-cierre` va a marcar** (25,689.39 del 16-jun → 30,776.35,
+  x1.198): justifícalo en `saltos` como `armas:222`. Contra su registro del 03-oct-2025
+  (28,556.62) la 222 sube x1.0777 y la SX4 sintética 94 x1.0768 (27,447.62 → 29,556.14):
+  es la familia SX4 entera, y el registro del 16-jun (−10 %) es el que se salió de la
+  línea. Comprueba esas dos razones antes de escribirlo.
+- **Código (ya corregido)**: sin `--catalogo` (cartuchos, accesorios) el precio de una
+  ficha con varios renglones era el del primero procesado; una liga de variante le robaba
+  el precio al renglón bueno. Ahora, si un renglón se llama como el `dcamRef`, manda ese.
+- **Para lo demás**: compara la DESCRIPCIÓN larga del PDF con el `dcamRef` y el texto del
+  catálogo (la GB Sporting Plus 28 → 2007 solo se reconoce así). Un `dcamRef` abreviado
+  («SX4 V C») no prueba el acabado: contrástalo con la razón de precio frente a la ficha
+  hermana antes de ligar.

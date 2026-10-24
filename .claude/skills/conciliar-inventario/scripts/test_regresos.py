@@ -176,4 +176,22 @@ with tempfile.TemporaryDirectory() as td:
     assert por_nombre["BERETTA DT11 BLACKTRAP"] == 223 and por_nombre["AYA CENTENARY"] is None, por_nombre
     assert len(nueva["rows"]) == len(nuevos), len(nueva["rows"])
 
-print("✔ regresos: 7 casos + gemelos, renombres, integración y C14 (prefiltro, sin dueño, pdfDate)")
+# --- 23-oct-2026: variante representativa sin catálogo (cartuchos) ---
+# Dos renglones del mismo producto ligados a la 2108: manda el que se llama como la
+# ficha (su dcamRef) aunque la otra liga se procese antes, y las existencias se suman.
+EOB, OLY = "CART. CAL. 12 ELEY EOB 32GR 7.5", "CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5"
+h6 = {str(i): {"dcamRef": f"OTRA {i}", "regs": [["2026-09-15", 10.0]]} for i in range(1, 7)}
+h6["2108"] = {"dcamRef": EOB, "regs": [["2026-10-01", 10.37]]}
+with tempfile.TemporaryDirectory() as td:
+    ref = os.path.join(td, "referencia-cartuchos.json")
+    json.dump({"rows": [{"name": f"OTRA {i}", "priceN": 10.0, "fichaId": i} for i in range(1, 7)]}, open(ref, "w"))
+    nuevos = [fila(f"OTRA {i}", 10.574) for i in range(1, 7)] + [fila(OLY, 9.97, 3000), fila(EOB, 10.70, 3000)]
+    res = m.map_existencias(ref, nuevos, ligas={OLY: 2108, EOB: 2108}, historial=h6)
+    assert res["precios"][2108] == 10.70, res["precios"]
+    assert res["existencias"][2108] == 6000, res["existencias"]
+    # Sin renglón con el nombre exacto no cambia nada: manda el primero, como antes.
+    res = m.map_existencias(ref, nuevos[:7], ligas={OLY: 2108}, historial=h6)
+    assert res["precios"][2108] == 9.97, res["precios"]
+
+print("✔ regresos: 7 casos + gemelos, renombres, integración, C14 (prefiltro, sin dueño, pdfDate)"
+      " y representante sin catálogo")
