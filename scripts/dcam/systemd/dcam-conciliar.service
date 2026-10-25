@@ -20,8 +20,9 @@ Environment=DCAM_TG_ENV=%d/telegram.env
 # Ruta de root, fuera del repo de dcam (D-3a): lo que dcam pueda escribir no se ejecuta con privilegios.
 ExecStart=/usr/bin/env bash /usr/local/lib/dcam/conciliar-pipeline.sh
 Nice=10
-# La espera de «hecho» de la jaula es de 140 min.
-TimeoutStartSec=3h
+# Hasta 12 h esperando a que se cierre el PR de inventario previo (DCAM_ESPERA_MAX)
+# + 140 min de espera de «hecho» de la jaula + margen.
+TimeoutStartSec=15h
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes

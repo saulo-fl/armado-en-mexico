@@ -39,6 +39,14 @@ del proyecto de Saulo) y las unidades de `scripts/dcam/systemd/`.
 - **Operación.** Las ramas del bot se arreglan en un clon propio, **nunca** corriendo git como
   saulo dentro de `/srv/dcam/repo` (`dcam` controla su config y sus hooks). Re-disparar una
   conciliación fallida: recrear `/srv/dcam/pendiente-conciliar.json` (con `sudo`).
+- **Un inventario a la vez.** Antes de cortar `auto/inventario-<FECHA>` de `origin/main`, el
+  pipeline revisa con `gh pr list` si sigue abierto otro PR `auto/inventario-*` (el de su misma
+  rama no cuenta). Si lo hay, avisa «⏸️ Inventario DCAM <FECHA> en espera: el PR #N (<fecha>)
+  sigue abierto…», revisa cada 10 min con el lock tomado y, cuando se fusiona o cierra, avisa
+  «▶️ … reanudo» y hace `git fetch` antes de cortar la rama. Si gh falla (red, token) reintenta
+  en la misma espera; a las 12 h falla por la vía normal (`.fallida` + Telegram). Ajustables con
+  `DCAM_ESPERA_INTERVALO`/`DCAM_ESPERA_MAX` (s); por eso `TimeoutStartSec=15h` en la unidad.
+  Motivo: el 23-oct el #415 se cortó con el #414 abierto y chocó al fusionarse este.
 - PRs de este estado: #372, #375, #376, #379, #380 y #381.
 
 ## Decisiones del sistema
