@@ -372,6 +372,12 @@ vigía `scripts/dcam/resembrar-vigia.mjs` (timer de APOLO, cada 15 min) resiembr
 solo cuando armado.mx sirve el código nuevo y las diferencias son de inventario. Si avisa
 por Telegram «NO resembré», se resiembra a mano con la skill `sincronizar-d1`.
 
+Antes del paso 0 el pipeline **espera** si sigue abierto otro PR `auto/inventario-*` (no el
+de su misma rama): avisa «⏸️ … en espera» por Telegram, revisa cada 10 min
+(`DCAM_ESPERA_INTERVALO`) y, al fusionarse o cerrarse, avisa «▶️ … reanudo», hace `fetch` y
+corta la rama del main ya actualizado. A las 12 h (`DCAM_ESPERA_MAX`) falla por la vía normal
+(señal `.fallida`). Así no se repite el choque del 23-oct (C9).
+
 ## Atribución de existencias (mapear-existencias.py)
 
 La atribución de stock por ficha NO es uniforme: 33 fichas suman variantes de varias
