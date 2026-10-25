@@ -11,10 +11,15 @@
 //      (estado en resembrar-vigia.json), no toca nada: cualquier diferencia con D1
 //      es una edición hecha desde el admin y es de Saulo.
 //   3. Si el código publicado es NUEVO, compara arma por arma contra /api/state.
-//      Solo resiembra si las diferencias son de inventario: priceExact, priceLvl y
-//      armas nuevas. Ids que existen solo en D1 o cualquier otro campo → NO escribe,
-//      avisa por Telegram una vez y espera a Saulo.
-//   4. Tras escribir, relee /api/state y exige que coincida con el código.
+//      Resiembra si las diferencias son de inventario (priceExact, priceLvl, armas
+//      nuevas). Otros campos (nombre, img, historia…) también se resiembran, pero
+//      SOLO si D1 no se tocó desde el panel: para cada (ficha, campo) que difiere,
+//      D1 debe tener exactamente lo que escribimos la última vez (la foto guardada en
+//      resembrar-vigia-base.json). Si algún campo difiere de esa foto (edición del
+//      panel), no hay foto, o hay ids que existen solo en D1 → NO escribe, avisa por
+//      Telegram una vez y espera a Saulo.
+//   4. Tras escribir, relee /api/state y exige que coincida con el código, y guarda
+//      lo escrito como la nueva foto base.
 //
 // Solo el dominio `armas`. `pages` NUNCA (D1 tiene una página `legal` que el código no).
 // Misma transformación que .claude/skills/sincronizar-d1/scripts/resembrar.js.
@@ -22,7 +27,8 @@
 // Uso:  resembrar-vigia.mjs            (lo que corre el timer)
 //       resembrar-vigia.mjs --simular  (dice qué haría; no escribe ni guarda estado)
 //       resembrar-vigia.mjs --base     (marca el código publicado actual como ya
-//                                       resembrado, sin escribir en D1)
+//                                       resembrado y guarda su foto base, sin
+//                                       escribir en D1)
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -34,6 +40,7 @@ const SITIO = 'https://armado.mx';
 const CUENTA = '093b05ab8c36ac3d4c79e73b7e4b5d5b';   // no es secreto
 const BASE_D1 = '0b044863-4127-44c5-a6b9-0f72607a0c08'; // wrangler.toml → database_id
 const ESTADO = path.join(DIR, 'resembrar-vigia.json');
+const FOTO = path.join(DIR, 'resembrar-vigia-base.json'); // armas que escribimos la última vez
 const LOG = path.join(DIR, 'resembrar-vigia.log');
 const CAMPOS_INVENTARIO = new Set(['priceExact', 'priceLvl']);
 const simular = process.argv.includes('--simular');
@@ -47,6 +54,19 @@ const leerEnv = (f) => Object.fromEntries(
     .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1).replace(/^["']|["']$/g, '')]));
 const leerEstado = () => { try { return JSON.parse(fs.readFileSync(ESTADO, 'utf8')); } catch { return {}; } };
 const guardarEstado = (e) => { if (!simular) fs.writeFileSync(ESTADO, JSON.stringify(e, null, 2) + '\n'); };
+// La foto solo vale si es del mismo código que el estado dice haber resembrado.
+const leerFoto = (huella) => {
+  try {
+    const f = JSON.parse(fs.readFileSync(FOTO, 'utf8'));
+    return f && f.huella === huella && Array.isArray(f.armas) ? f.armas : null;
+  } catch { return null; }
+};
+const guardarFoto = (huella, armas) => {
+  if (simular) return;
+  const tmp = FOTO + '.tmp';
+  fs.writeFileSync(tmp, JSON.stringify({ huella, fecha: ahora(), armas }) + '\n');
+  fs.renameSync(tmp, FOTO);
+};
 const sha = (s) => crypto.createHash('sha256').update(s).digest('hex').slice(0, 16);
 
 async function bajar(ruta) {
@@ -89,6 +109,11 @@ export function armasDelCodigo(precios, datos) {
   })));
 }
 
+// Igualdad profunda sin depender del orden de las claves.
+const canon = (v) => JSON.stringify(v, (_k, x) => (x && typeof x === 'object' && !Array.isArray(x)
+  ? Object.fromEntries(Object.keys(x).sort().map((k) => [k, x[k]])) : x));
+const igual = (a, b) => canon(a) === canon(b);
+
 export function comparar(codigo, d1) {
   const enD1 = new Map(d1.map((a) => [a.id, a]));
   const ids = new Set(codigo.map((a) => a.id));
@@ -96,6 +121,7 @@ export function comparar(codigo, d1) {
   const soloD1 = d1.filter((a) => !ids.has(a.id)).map((a) => `${a.id} ${a.nombre || a.name || ''}`.trim());
   let precios = 0;
   const otros = {};
+  const cambiosFicha = [];   // [{ id, nombre, campo }] de campos que no son de inventario
   for (const a of codigo) {
     const p = enD1.get(a.id);
     if (!p) continue;
@@ -103,19 +129,35 @@ export function comparar(codigo, d1) {
     for (const k of new Set([...Object.keys(a), ...Object.keys(p)])) {
       if (JSON.stringify(a[k]) === JSON.stringify(p[k])) continue;
       if (CAMPOS_INVENTARIO.has(k)) cambioPrecio = true;
-      else (otros[k] ||= []).push(a.nombre || a.name || a.id);
+      else {
+        (otros[k] ||= []).push(a.nombre || a.name || a.id);
+        cambiosFicha.push({ id: a.id, nombre: a.nombre || a.name || String(a.id), campo: k });
+      }
     }
     if (cambioPrecio) precios++;
   }
-  return { nuevas, soloD1, precios, otros };
+  return { nuevas, soloD1, precios, otros, cambiosFicha };
 }
 
 // Qué hacer con un código publicado nuevo: 'nada' | 'resembrar' | 'avisar'.
-export function decidir(codigo, d1) {
+// `base` = las armas que escribimos en D1 la última vez (foto), o null si no hay.
+// Un campo que no es de inventario se resiembra solo si D1 sigue teniendo el valor de
+// la foto: así sabemos que el cambio viene del código y no de una edición del panel.
+export function decidir(codigo, d1, base = null) {
   if (JSON.stringify(codigo) === JSON.stringify(d1)) return { accion: 'nada' };
   const c = comparar(codigo, d1);
-  if (c.soloD1.length || Object.keys(c.otros).length) return { accion: 'avisar', ...c };
-  return { accion: 'resembrar', ...c };
+  if (c.soloD1.length) return { accion: 'avisar', ...c, fichas: [] };
+  if (!c.cambiosFicha.length) return { accion: 'resembrar', ...c, fichas: [] };
+  if (!Array.isArray(base)) return { accion: 'avisar', ...c, fichas: [] };
+  const enD1 = new Map(d1.map((a) => [a.id, a]));
+  const enBase = new Map(base.map((a) => [a.id, a]));
+  const editadoEnPanel = c.cambiosFicha.some(({ id, campo }) => {
+    const b = enBase.get(id);
+    return !b || !igual(enD1.get(id)?.[campo], b[campo]);
+  });
+  if (editadoEnPanel) return { accion: 'avisar', ...c, fichas: [] };
+  const fichas = [...new Map(c.cambiosFicha.map((x) => [x.id, x.nombre])).values()];
+  return { accion: 'resembrar', ...c, fichas };
 }
 
 async function escribirD1(token, armas) {
@@ -139,8 +181,9 @@ async function main() {
   const codigo = armasDelCodigo(precios, datos);
 
   if (soloBase) {
+    guardarFoto(huella, codigo);
     guardarEstado({ ...estado, codigoResembrado: huella, fecha: ahora(), alertado: null });
-    log(`base marcada: código publicado ${huella} (${codigo.length} armas), sin escribir en D1`);
+    log(`${simular ? "[simulado] " : ""}base marcada: código publicado ${huella} (${codigo.length} armas) y foto base guardada, sin escribir en D1`);
     return;
   }
   if (estado.codigoResembrado === huella) return; // nada nuevo publicado: silencio
@@ -148,8 +191,9 @@ async function main() {
   const st = JSON.parse(await bajar('/api/state'));
   if (!Array.isArray(st.armas)) throw new Error('/api/state no trae armas (¿se perdió el binding D1?)');
   const json = JSON.stringify(codigo);
-  const c = decidir(codigo, st.armas);
+  const c = decidir(codigo, st.armas, leerFoto(estado.codigoResembrado));
   if (c.accion === 'nada') {
+    guardarFoto(huella, codigo);
     guardarEstado({ ...estado, codigoResembrado: huella, fecha: ahora(), alertado: null });
     log(`código nuevo ${huella}, D1 ya coincidía — nada que escribir`);
     return;
@@ -160,14 +204,16 @@ async function main() {
     const lineas = ['⚠️ Armado MX: hay código nuevo publicado pero NO resembré D1.', ''];
     if (c.soloD1.length) lineas.push(`Armas que existen solo en D1 (se borrarían): ${c.soloD1.slice(0, 10).join(', ')}${c.soloD1.length > 10 ? '…' : ''}`);
     for (const k of raros) lineas.push(`Cambia «${k}» en ${c.otros[k].length}: ${c.otros[k].slice(0, 5).join(', ')}${c.otros[k].length > 5 ? '…' : ''}`);
-    lineas.push('', 'No son cambios de inventario (pueden ser ediciones del panel o un PR de fotos/datos). Pide a tu agente revisarlo y resembrar a mano.');
+    lineas.push('', 'No son cambios de inventario y D1 no coincide con lo último que resembré (o no tengo foto base): puede haber ediciones del panel. Pide a tu agente revisarlo y resembrar a mano.');
     await telegram(lineas.join('\n'));
     guardarEstado({ ...estado, alertado: huella });
     log(`NO resembrado ${huella}: soloD1=${c.soloD1.length} otrosCampos=${raros.join(',')}`);
     return;
   }
 
-  const resumen = `${c.precios} precios${c.nuevas.length ? ` y ${c.nuevas.length} armas nuevas` : ''}`;
+  const nf = c.fichas.length;
+  const resumen = `${c.precios} precios${c.nuevas.length ? ` y ${c.nuevas.length} armas nuevas` : ''}` +
+    (nf ? ` y ${nf} ficha${nf === 1 ? '' : 's'} con nombre/foto/texto: ${c.fichas.slice(0, 5).join(', ')}${nf > 5 ? '…' : ''}` : '');
   if (simular) { console.log(`[simulado] resembraría D1: ${resumen}`); return; }
 
   const { CLOUDFLARE_API_TOKEN } = leerEnv('cloudflare.env');
@@ -175,6 +221,7 @@ async function main() {
   const tras = JSON.parse(await bajar('/api/state')).armas;
   if (JSON.stringify(tras) !== json) throw new Error('escribí en D1 pero /api/state no coincide con el código');
 
+  guardarFoto(huella, codigo);
   guardarEstado({ codigoResembrado: huella, fecha: ahora(), alertado: null });
   log(`resembrado ${huella}: ${resumen} (${codigo.length} armas)`);
   await telegram(`✅ Armado MX: D1 resembrado solo — ${resumen}.\n${codigo.length} armas; comprobado en armado.mx/api/state.` +
