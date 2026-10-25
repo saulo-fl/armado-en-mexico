@@ -25,13 +25,22 @@ nuevos los compara arma por arma contra `/api/state`:
 
 - solo `priceExact`, `priceLvl` o armas nuevas → resiembra `armas`, relee
   `/api/state`, exige que coincida y avisa por Telegram;
-- ids que existen **solo en D1** o **cualquier otro campo** → no escribe, avisa una
-  vez por versión del código. Eso se resiembra a mano con este script.
+- otros campos (nombre, foto, historia…) → también resiembra, **solo si D1 no se
+  editó en el panel**: cada campo que difiere debe valer en D1 lo mismo que en la
+  foto de lo último que escribió (`resembrar-vigia-base.json`). El aviso de éxito
+  nombra esas fichas («y 1 ficha con nombre/foto/texto: …»);
+- ids que existen **solo en D1**, un campo distinto de esa foto (edición del panel)
+  o **no hay foto** → no escribe, avisa una vez por versión del código. Eso se
+  resiembra a mano con este script y luego `node resembrar-vigia.mjs --base` (en la
+  copia de `infra/`) para que la foto quede al día.
 
 Nunca toca `pages`. Corre en `/home/saulo/apps/armadomx/dcam-bot` (`DCAM_DIR` de la unidad;
 `/home/saulo/apps/dcam-bot` es un enlace a esa misma carpeta), no en `/srv/dcam` del
 pipeline. Token: `cloudflare.env` (D1 · Edit) y avisos: `telegram.env`, los dos en esa
-carpeta. Estado y bitácora: `resembrar-vigia.{json,log}`, también ahí. Probar sin escribir:
+carpeta. Estado, foto base y bitácora: `resembrar-vigia.json`,
+`resembrar-vigia-base.json` y `resembrar-vigia.log`, también ahí. `--base` marca el
+código publicado como resembrado y guarda su foto (sin tocar D1): úsalo solo si D1 ya
+coincide con ese código. Probar sin escribir:
 `node scripts/dcam/resembrar-vigia.mjs --simular` (con `VIGIA_CODIGO_DIR=<dir>`
 simula otro código publicado). Unidades en `scripts/dcam/systemd/armado-resembrar-d1.*`;
 la copia que corre vive en `/home/saulo/apps/armadomx/dcam-bot/infra/`: al cambiar la del
