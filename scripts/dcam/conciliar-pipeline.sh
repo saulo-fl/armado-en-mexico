@@ -9,6 +9,8 @@
 # altas (sinFicha), que es la única parte que requiere criterio humano/agente.
 #
 # Pasos:
+#   (antes) ESPERA — si sigue abierto otro PR auto/inventario-*, espera a que
+#               se fusione o cierre (aviso por Telegram; tope 12 h)
 #   0. PREP   — parsea PDFs, copia a public/inventarios/, commit
 #   1. MAPEO  — mapea existencias con price chain, verifica factores, commit
 #   2. MECÁNICO — aplica precios/historial/existencias a data-*.js, commit
@@ -79,6 +81,51 @@ falla(){
   exit 1
 }
 
+# ── Espera al PR de inventario previo ──
+# El 23-oct-2026 la corrida del 23 cortó su rama de origin/main con el PR del 22
+# (#414) aún abierto: al fusionarse #414, el #415 chocó en mapeos/referencias, y
+# sus saltos de precio y su cadena de referencias se habían calculado contra el
+# día 21. Mientras haya otro PR abierto con rama auto/inventario-* (distinta de
+# la nuestra: relanzar el mismo día no se bloquea a sí mismo), se espera con el
+# lock tomado: un aviso al entrar, otro al reanudar. Si gh falla (red, token) no
+# se arranca a ciegas ni se espera para siempre: se reintenta dentro de la misma
+# espera. Al vencer el tope deja MOTIVO y devuelve 1. Intervalo y tope en
+# segundos, sobrescribibles para pruebas.
+esperar_pr_previo(){
+  local intervalo="${DCAM_ESPERA_INTERVALO:-600}" max="${DCAM_ESPERA_MAX:-43200}"
+  [[ "$intervalo" =~ ^[0-9]+$ ]] && [ "$intervalo" -gt 0 ] || intervalo=600
+  [[ "$max" =~ ^[0-9]+$ ]] || max=43200
+  local tope="$((max / 3600)) h" fin=$((SECONDS + max)) avisado="" salida previo num fecha
+  [ "$max" -ge 3600 ] || tope="$max s"
+  while :; do
+    if salida="$(gh pr list --repo "$GH_REPO" --state open --limit 100 \
+                   --json number,headRefName,url 2>>"$LOG")" \
+       && previo="$(jq -r --arg r "$RAMA" '[.[] | select((.headRefName | startswith("auto/inventario-")) and .headRefName != $r)]
+                      | sort_by(.number) | first // empty
+                      | "\(.number) \(.headRefName | ltrimstr("auto/inventario-"))"' <<<"$salida")"; then
+      if [ -z "$previo" ]; then
+        if [ -n "$avisado" ]; then
+          log "PR de inventario previo cerrado: reanudo"
+          telegram "▶️ Inventario DCAM $FECHA: el PR previo ya se fusionó o cerró, reanudo."
+        fi
+        return 0
+      fi
+      num="${previo%% *}"; fecha="${previo#* }"
+      if [ -z "$avisado" ]; then
+        log "en espera: el PR #$num ($fecha) sigue abierto; reviso cada ${intervalo}s, tope $tope"
+        telegram "⏸️ Inventario DCAM $FECHA en espera: el PR #$num ($fecha) sigue abierto. Arranco solo en cuanto lo fusiones o cierres."
+        avisado=1
+      fi
+      MOTIVO="PR previo #$num sigue abierto tras $tope"
+    else
+      log "gh pr list falló (red o token); reintento en ${intervalo}s"
+      MOTIVO="no pude consultar los PRs abiertos con gh durante $tope (red o token)"
+    fi
+    [ "$SECONDS" -lt "$fin" ] || return 1
+    sleep "$intervalo"
+  done
+}
+
 # ── Lock ──
 exec 9>"$LOCK"
 if ! flock -n 9; then log "otro pipeline en curso, salgo"; exit 0; fi
@@ -115,11 +162,17 @@ mkdir -p "$WORKDIR"
 log "arranco pipeline fecha=$FECHA rama=$RAMA"
 
 cd "$REPO" || falla "no cd al repo"
-git fetch origin --quiet 2>>"$LOG"
 
 # slug owner/repo
 GH_REPO="$(git remote get-url origin 2>/dev/null \
            | sed -E 's#(git@|https://)github\.com[:/]##; s#\.git$##')"
+
+# Antes de cortar la rama: esperar a que no quede otro PR de inventario abierto.
+# El fetch va DESPUÉS de la espera, para que step_prep parta del main que ya
+# trae el inventario previo; si no sale, no se corta la rama sobre un main viejo.
+STEP="0-espera"
+esperar_pr_previo || falla "$MOTIVO"
+git fetch origin --quiet 2>>"$LOG" || falla "git fetch origin falló; no corto la rama sobre un main viejo"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # STEP 0: PREP — Parse PDFs + copy
