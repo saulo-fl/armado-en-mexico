@@ -369,7 +369,8 @@ El veredicto no lo da el agente: lo dan las compuertas —
 ningún salto de precio > 3 % sin explicar)—. Si pasan, el pipeline marca el PR listo
 y avisa a Saulo; mergear sigue siendo suyo. **Resembrar D1 ya no**: tras el merge, el
 vigía `scripts/dcam/resembrar-vigia.mjs` (timer de APOLO, cada 15 min) resiembra `armas`
-solo cuando armado.mx sirve el código nuevo y las diferencias son de inventario. Si avisa
+solo cuando armado.mx sirve el código nuevo y las diferencias son de inventario (o de
+fichas que nadie editó en el panel). Si avisa
 por Telegram «NO resembré», se resiembra a mano con la skill `sincronizar-d1`.
 
 Antes del paso 0 el pipeline **espera** si sigue abierto otro PR `auto/inventario-*` (no el

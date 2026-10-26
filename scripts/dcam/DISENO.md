@@ -65,7 +65,7 @@ del proyecto de Saulo) y las unidades de `scripts/dcam/systemd/`.
 | Avisos por Telegram | Publicación automática · bot roto · cambios en avisos/requisitos · latido diario · PR por revisar |
 | Anti-bots (Akamai) | Petición HTTP **honesta**, sin navegador ni camuflaje. Si aparece la verificación o un CAPTCHA: se detiene y avisa; no se escala a navegador sin preguntar |
 | PDFs oficiales | Se siguen **alojando** en `public/inventarios/` |
-| D1 | Token de API de Cloudflare (D1:Edit) **en APOLO**, archivo 600. Si resembrar borraría ids que solo existen en D1, no aplica y avisa |
+| D1 | Token de API de Cloudflare (D1:Edit) **en APOLO**, archivo 600. Si resembrar borraría ids que solo existen en D1, no aplica y avisa. El vigía (`resembrar-vigia.mjs`) resiembra inventario y, desde 25-oct-2026, también cambios de ficha (nombre/foto/texto) si D1 sigue igual a la foto de su último resembrado (`resembrar-vigia-base.json`); si el panel editó algo, avisa |
 | Info legal sincronizada | Avisos de la DCAM · requisitos de compra · costos de derechos · dirección, horario y contacto |
 | Publicación legal | El **dato oficial literal** se publica solo (con fecha y enlace a gob.mx) en un bloque nuevo de Legalidad; la **redacción propia** (FAQ, pasos) va por PR |
 | Dónde vive el código | En este repo, `scripts/dcam/`. Estado, archivo y credenciales, solo en APOLO |

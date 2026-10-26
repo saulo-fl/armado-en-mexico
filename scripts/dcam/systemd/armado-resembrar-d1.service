@@ -6,7 +6,8 @@ After=network-online.target
 # ~/apps/dcam-bot/infra/ y no la del clon del bot, porque ese clon cambia de rama en cada
 # conciliación. Instalar: copiar este .service y el .timer a ~/.config/systemd/user/,
 # `systemctl --user daemon-reload && systemctl --user enable --now armado-resembrar-d1.timer`.
-# Primera vez (D1 ya al día): `node resembrar-vigia.mjs --base`.
+# Primera vez (D1 ya al día): `node resembrar-vigia.mjs --base` (marca el código y guarda
+# la foto base resembrar-vigia-base.json, necesaria para resembrar cambios de ficha).
 
 [Service]
 Type=oneshot
