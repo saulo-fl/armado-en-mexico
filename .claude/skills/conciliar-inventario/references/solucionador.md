@@ -133,6 +133,9 @@ Lo que sobrevive es alta nueva.
 - **Arreglo**: `git merge origin/main`, quédate con los de la rama (`--ours`),
   comprueba que son iguales a los de `$W`, `jq -e .` cada uno, `auditar.js`. Sin
   push forzado.
+- **Prevención (desde oct-2026)**: el pipeline ya no corta la rama mientras siga
+  abierto otro PR `auto/inventario-*`; espera hasta 12 h y avisa por Telegram. Si aun
+  así ves C9, el PR previo se fusionó tras el tope o se relanzó a mano.
 
 ### C10. Historial editado fuera de su bloque
 - **Síntoma**: `ACC_TRAMO` u otro mapa con registros de precio dentro.
