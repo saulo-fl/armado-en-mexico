@@ -42,6 +42,9 @@ function correr(respuestas, { intervalo = '1', max = '30' } = {}) {
 LOG="$T/log"; GH_REPO=x/y; RAMA=${RAMA}; FECHA=23-OCT-2026; MOTIVO=""
 log(){ echo "$*" >>"$LOG"; }
 telegram(){ echo "$*" >>"$T/tg"; }
+# gh como función que lo corre con bash: no necesita permiso de ejecución en
+# $T (en la jaula /tmp va montado noexec y el falso no corría).
+gh(){ bash "$T/gh" "$@"; }
 ${fn}
 declare -F esperar_pr_previo >/dev/null || { echo "SIN_FUNCION"; exit 99; }
 esperar_pr_previo; rc=$?
