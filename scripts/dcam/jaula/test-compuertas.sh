@@ -623,6 +623,36 @@ else
 fi
 rm -rf "$J" "$DCAM_Q" "$FUERA_Q" "$TMP/fuera-q-antes.js"
 
+# --- (r) Solo justificación (27-oct-2026): el agente no cambia ningún dato (todo
+#     se resolvió con `saltos` en solucion.json) y las compuertas pasan. Debe
+#     haber commit con SOLO las referencias del día (lo que faltaba del cierre
+#     normal), no un "sin cambios" que el pipeline trata como fallo (rc=3).
+#     armas.json = renglones de la referencia de la rama menos el primero, para
+#     que --update-ref escriba una referencia distinta de la ya commiteada. ---
+W_R="$TMP/w-r"
+mkdir -p "$W_R"
+node -e '
+  const r = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+  console.log(JSON.stringify({ items: r.rows.slice(1).map(({ fichaId, ...x }) => x) }));
+' "$DCAM_DIR/repo/.claude/skills/conciliar-inventario/scripts/referencia-armas.json" > "$W_R/armas.json"
+ANTES="$(sha_head)"
+J="$(jaula_desde_rama)"
+"$COMPUERTAS" "$FECHA_ISO" "$RAMA" "$W_R" "$J" "$MAIN" >"$TMP/log-r.txt" 2>&1 && RC_R=0 || RC_R=$?
+DESPUES="$(sha_head)"
+CAMBIADOS_R="$(git -C "$DCAM_DIR/repo" diff --name-only "$ANTES" "$DESPUES" | tr '\n' ' ')"
+echo "    (r) compuertas.sh RC=$RC_R; commit: $CAMBIADOS_R"
+if [ "$RC_R" -ne 0 ]; then
+  mal "(r) solo justificación: compuertas.sh falló (ver $TMP/log-r.txt)"
+  tail -20 "$TMP/log-r.txt"
+elif [ "$CAMBIADOS_R" != ".claude/skills/conciliar-inventario/scripts/referencia-armas.json " ]; then
+  mal "(r) solo justificación: se esperaba un commit con solo referencia-armas.json, hubo: '$CAMBIADOS_R'"
+elif ! git -C "$DCAM_DIR/repo" log -1 --format=%s | grep -q "saltos justificados"; then
+  mal "(r) solo justificación: el commit no lleva el mensaje de justificación"
+else
+  ok "(r) solo justificación: compuertas pasó y commiteó solo las referencias del día"
+fi
+rm -rf "$J" "$W_R"
+
 echo "=================================================="
 if [ "$FALLOS" -eq 0 ]; then
   echo "test-compuertas.sh: TODO OK"
