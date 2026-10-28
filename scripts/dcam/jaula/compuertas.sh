@@ -214,18 +214,20 @@ if [ "$RC_COMPUERTAS" -ne 0 ]; then
   exit 1
 fi
 
-# Si el agente no cambió ninguna ruta permitida, no hay nada que commitear (ni
-# referencias que actualizar): mismo resultado que el paso 9 sin cambios.
+# Si el agente no cambió ninguna ruta permitida pero las compuertas pasaron, la
+# solución es SOLO de justificación (p. ej. `saltos` en solucion.json, que
+# verificar-cierre acaba de aceptar): los datos del día ya son buenos y lo único
+# que falta del cierre normal son las referencias. Se sigue al 8b igual que con
+# cambios; si tampoco cambian las referencias (sin $W/<cat>.json), el paso 9 sale
+# "sin cambios" como antes. Antes aquí se salía 0 sin commit y el pipeline lo
+# trataba como fallo (rc=3) con las compuertas en verde (27-oct-2026).
 CAMBIO_AGENTE=0
 for ruta in "${RUTAS[@]}"; do
   [ -n "$ruta" ] || continue
   [ -e "$LIMPIO/base/$ruta" ] || [ -e "$VALIDADO/$ruta" ] || continue
   cmp -s "$LIMPIO/base/$ruta" "$VALIDADO/$ruta" || { CAMBIO_AGENTE=1; break; }
 done
-if [ "$CAMBIO_AGENTE" -eq 0 ]; then
-  echo "compuertas: las compuertas pasaron, pero no hubo cambios que commitear"
-  exit 0
-fi
+[ "$CAMBIO_AGENTE" -eq 1 ] || echo "compuertas: el agente no cambió datos (solo justificación); actualizo referencias"
 
 # --- 8b: referencia-*.json (revisión final, I1). Antes las actualizaba el
 # pipeline en el HOST con `mapear-existencias.py --update-ref`, que evalúa con
@@ -350,4 +352,9 @@ if [ -n "$FUERA_DE_PERMITIDOS" ]; then
   exit 1
 fi
 
-git -C "$REPO" commit --quiet -m "solucionador (jaula): datos validados $FECHA_ISO"
+if [ "$CAMBIO_AGENTE" -eq 1 ]; then
+  MENSAJE="solucionador (jaula): datos validados $FECHA_ISO"
+else
+  MENSAJE="solucionador (jaula): saltos justificados + refs $FECHA_ISO"
+fi
+git -C "$REPO" commit --quiet -m "$MENSAJE"
