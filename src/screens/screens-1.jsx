@@ -181,14 +181,16 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         </div>
       </div>
 
+      {/* 1.2 ▸ Las 4 reglas de seguridad, lo primero tras el buscador (Saulo,
+          29-oct-2026). */}
+      <ReglasSeguridad />
+
       {/* 1.5 ▸ ARMAS DESTACADAS — DESIGN.md §5.1 y tablero del 8-sep-2026.
           Ya no es una tarjeta verde con dos botones debajo: es el mismo folder
           del resto del sitio, abierto, con las especificaciones mecanografiadas
           a la izquierda y la copia a la derecha. El rótulo «ARMA DESTACADA» que
           iba suelto sobre el lienzo ahora es la pestaña del folder, que es
           donde se rotula un expediente. */}
-      {window.HomeEntrevistaBloque &&
-        <window.HomeEntrevistaBloque onNav={onNav} />}
       {destacadas.length > 0 &&
       <div style={{ ...containerMax, padding: `16px ${PAD}px 4px` }}>
         <div className="amx-dest-lista">
@@ -220,10 +222,12 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         } />
       
 
-      {/* 4 ▸ Las 4 reglas de seguridad (Saulo, 29-oct-2026). Sustituyen a «Las
-          más nuevas»: un arma recién llegada a la armería aún no tiene datos ni
-          foto fiables, y la portada no debe enseñar fichas a medio hacer. */}
-      <ReglasSeguridad />
+      {/* 4 ▸ Cuestionario de requisitos. Cambió de sitio con las reglas de
+          seguridad (Saulo, 29-oct-2026): las placas suben tras el buscador y el
+          cuestionario baja al hueco de la fila de altas recientes, que salió porque
+          un arma recién llegada aún no tiene datos ni foto fiables. */}
+      {window.HomeEntrevistaBloque &&
+        <window.HomeEntrevistaBloque onNav={onNav} />}
 
       {/* 5 ▸ Calibres · guía enciclopédica */}
       <CarouselSection
