@@ -1,8 +1,9 @@
 [Unit]
-Description=Dispara el vigía DCAM todos los días a las 20:00
+Description=Despierta al vigía DCAM cada 30 min (lee 10:00, 15:00 y 20:00; reintenta si gob.mx falla)
 
 [Timer]
-OnCalendar=*-*-* 20:00:00
+# vigia.py decide si lee: ranura pendiente o falla abierta. Si no, sale sin tocar la red.
+OnCalendar=*-*-* *:00,30:00
 Persistent=true
 Unit=dcam-vigia.service
 
