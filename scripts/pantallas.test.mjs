@@ -488,3 +488,32 @@ test('los nueve Favoritos de Armas M&S existen en el catálogo (si un id cambia,
   );
   for (const id of ids) assert.ok(ctx.DB.some((a) => a.id === id), 'no existe en data.js el arma ' + id);
 });
+
+test('la portada enseña las 4 reglas de seguridad arriba y el cuestionario baja a donde estaba «Las más nuevas» (Saulo, 29-oct-2026)', () => {
+  const f = 'src/screens/screens-1.jsx';
+  const fuente = readFileSync(raiz(f), 'utf8');
+  const js = transformSync(fuente, { presets: [['@babel/preset-react', { runtime: 'classic' }]], filename: f }).code;
+  const win = {};
+  const ctx = vm.createContext({ window: win, console, React: reactDeMentira() });
+  vm.runInContext(js, ctx, { filename: f });
+  const reglas = vm.runInContext('REGLAS_SEGURIDAD', ctx);
+  assert.equal(reglas.length, 4, 'son cuatro reglas');
+  const arbol = win.ReglasSeguridad();
+  const t = texto(arbol);
+  assert.match(t, /Reglas de seguridad/);
+  reglas.forEach((r, i) => {
+    assert.ok(t.includes(r.titulo), 'no pinta el título de la regla ' + (i + 1));
+    assert.ok(t.includes(r.texto), 'no pinta la descripción de la regla ' + (i + 1));
+  });
+  assert.doesNotMatch(t, /\b0[1-4]\b/, 'el número de la placa volvió (Saulo lo quitó)');
+  assert.equal(contar(arbol, 'ol'), 1, 'las reglas van en una lista numerada');
+  assert.equal(contar(arbol, 'li'), 4, 'una placa por regla');
+  // Acotado a HomeScreen: las placas van justo tras el buscador, antes de todo lo
+  // demás, y el cuestionario baja entre «Las más visitadas» y «Calibres».
+  const home = fuente.slice(fuente.indexOf('function HomeScreen('), fuente.indexOf('window.HomeScreen ='));
+  const pos = (s) => home.indexOf(s);
+  assert.ok(pos('<ReglasSeguridad') > pos('amx-buscador'), 'las reglas no van tras el buscador');
+  assert.ok(pos('<ReglasSeguridad') < pos('HomeEntrevistaBloque') && pos('<ReglasSeguridad') < pos('destacadas.map'), 'las reglas no van primero');
+  assert.ok(pos('HomeEntrevistaBloque') > pos('title="Las más visitadas"') && pos('HomeEntrevistaBloque') < pos('title="Calibres"'), 'el cuestionario no va entre «Las más visitadas» y «Calibres»');
+  assert.ok(!home.includes('Las más nuevas'), '«Las más nuevas» volvió a la portada');
+});
