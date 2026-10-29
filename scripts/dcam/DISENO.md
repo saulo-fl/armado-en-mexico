@@ -14,7 +14,7 @@ Gran parte de lo de abajo es el diseño de septiembre y quedó como **historia**
 manda esta sección. Fuente operativa: el runbook de la Fase 4 (fuera del repo, en la carpeta
 del proyecto de Saulo) y las unidades de `scripts/dcam/systemd/`.
 
-- **Quién corre qué.** El vigía (`dcam-vigia.timer`, 20:00) y el pipeline
+- **Quién corre qué.** El vigía (`dcam-vigia.timer`: lee a las 10:00, 15:00 y 20:00 y reintenta cada 30 min si gob.mx falla) y el pipeline
   (`dcam-conciliar.path` → `.service`, que ejecuta `/usr/local/lib/dcam/conciliar-pipeline.sh`)
   corren como el usuario **`dcam`**: sin sudo, sin Docker, sin ver `/home`, sin red local,
   privada, Tailscale ni IPv6, con DNS público propio. Su carpeta es **`/srv/dcam`**
@@ -61,7 +61,7 @@ del proyecto de Saulo) y las unidades de `scripts/dcam/systemd/`.
 | Municiones raras | Perdigón o gramaje que el fabricante no publica: se publica **tal cual el PDF**, sin nota |
 | Compatibilidad de accesorios | **Lista explícita por modelo** (de la descripción del PDF, verificada con el fabricante). Sin lista, no se muestra compatibilidad |
 | Motor de conciliación | **Script fijo** para lo ya catalogado. **Actualizado (16-oct-2026):** los renglones sin ficha los resuelve el solucionador en jaula (ligas, altas, historiales); el host valida que sea solo datos y Saulo revisa el PR antes de publicar |
-| Frecuencia | **Una vez al día, 20:00** (America/Mexico_City) |
+| Frecuencia | **Tres lecturas al día: 10:00, 15:00 y 20:00** (America/Mexico_City). Si gob.mx falla, reintentos cada 30 min hasta las 08:00 siguientes (decisión de Saulo, 28-oct-2026; antes: una vez a las 20:00) |
 | Avisos por Telegram | Publicación automática · bot roto · cambios en avisos/requisitos · latido diario · PR por revisar |
 | Anti-bots (Akamai) | Petición HTTP **honesta**, sin navegador ni camuflaje. Si aparece la verificación o un CAPTCHA: se detiene y avisa; no se escala a navegador sin preguntar |
 | PDFs oficiales | Se siguen **alojando** en `public/inventarios/` |
@@ -111,7 +111,7 @@ del proyecto de Saulo) y las unidades de `scripts/dcam/systemd/`.
 ### Arquitectura
 
 ```
-APOLO · 20:00 diario (systemd timer, Persistent=true)
+APOLO · timer cada 30 min (Persistent=true); vigilar() decide si lee (ranuras 10/15/20 h o reintento)
   └─ dcam-vigia.service  (User=saulo, Type=oneshot)
        ├─ ExecStartPre: git -C ~/apps/dcam-bot/repo pull --ff-only
        └─ python3 scripts/dcam/vigia.py        ← solo biblioteca estándar
@@ -134,8 +134,9 @@ APOLO · 20:00 diario (systemd timer, Persistent=true)
 ### Flujo de una corrida
 
 1. **Leer** «comercialización» (la única obligatoria). Es **lectura válida** si no contiene
-   «Challenge Validation» y trae los 3 enlaces «Existencias de…». Si no: un reintento a los
-   10 min; si sigue mal → «⚠️ DCAM vigía roto: …» y **no se toca el estado** (salida 1).
+   «Challenge Validation» y trae los 3 enlaces «Existencias de…». Si no: un reintento al
+   minuto; si sigue mal, **no se toca el estado** y la falla pasa a `vigilar()` (ver
+   «Calendario, reintentos y avisos»).
    Leer «costos» **no bloquea**: si falla (tras su propio reintento), el vigía sigue con
    comercialización, manda un aviso aparte y conserva el texto anterior de costos en el
    estado, sin comparar su diff ese día (ver «Comportamientos añadidos» abajo).
@@ -193,15 +194,41 @@ cambios.
 
 ### Errores
 
-- Documento que no baja (o Akamai se lo sirve): su estado no se actualiza (reintento natural
-  al día siguiente); se menciona en el latido («no se pudieron bajar: N»).
+- Documento que no baja (o Akamai se lo sirve): su estado no se actualiza; se menciona en el
+  latido («no se pudieron bajar: N»). Si es un PDF de **existencias**, `vigilar()` lo trata
+  como falla y reintenta cada 30 min (un inventario nuevo no espera a la siguiente ranura).
+
+### Calendario, reintentos y avisos (28-oct-2026)
+
+Motivo: el 28-oct-2026 gob.mx puso la sección `/defensa` en redirección en bucle (308 a sí
+misma, y 404 para urllib) y un navegador real se quedaba en «Challenge Validation»; a las
+23:21 ya respondía normal. Con una sola lectura diaria, eso costaba un día de inventario.
+Seguimos sin navegador ni camuflaje: la defensa es **insistir con calma**, no evadir.
+
+`dcam-vigia.timer` despierta cada 30 min; `vigilar()` decide con `vigia-salud.json`
+(junto a `estado.json`):
+
+- **Lee** si toca ranura (10:00, 15:00, 20:00; la más reciente que no se haya leído, así una
+  ranura perdida por un apagón se lee al volver APOLO) o si hay una falla abierta y no pasó su
+  límite (las 08:00 siguientes a la última ranura fallida). Si no, sale 0 sin tocar la red
+  («nada que hacer» en el journal). `--forzar` lee ya.
+- **Falla pasajera** (red, 404, bucle de redirecciones, «Challenge Validation», PDF de
+  existencias que no baja): silencio; sale 0 y anota «falla #N» en el journal.
+- **Aviso** «⚠️ … sigue fallando desde …» solo si la falla sigue a las **23:00** (uno por
+  noche, mientras dure).
+- **Página cambiada de forma** (cargó pero sin `article-body` o sin los 3 «Existencias de…»):
+  aviso **inmediato** (una vez), porque esperar no lo arregla; los reintentos siguen.
+- **Recuperación**: «✅ DCAM vigía recuperado …» solo si antes hubo aviso.
+- **Resumen** «✅ DCAM vigía · …»: una vez por jornada (de 20:00 a 19:59), en la primera
+  lectura buena desde las 20:00; las lecturas de 10:00/15:00 sin cambios van calladas. Los
+  cambios (inventario nuevo, texto cambiado) se mandan al momento, con su resumen.
 - Excepción no prevista: capturada arriba del todo → «⚠️ bot roto» con traceback resumido y
   salida ≠ 0 (queda en `journalctl -u dcam-vigia`).
 - Envío a Telegram falló: `enviar()` lo detecta (ver arriba) y `main()` sale con código 1.
 
 ### Pruebas
 
-`python3 scripts/dcam/test_vigia.py` (asserts, sin framework; 22 pruebas), sobre fixtures
+`python3 scripts/dcam/test_vigia.py` (asserts, sin framework; 34 pruebas), sobre fixtures
 guardados:
 
 - página real → 3 existencias, 2 requisitos, 3 documentos y 8 imágenes; texto de la
