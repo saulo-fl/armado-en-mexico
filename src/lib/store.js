@@ -173,6 +173,10 @@
     reviews: K.reviews, reviewsQueue: K.reviewsQueue, reports: K.reports,
   };
   const SYNCABLE = Object.keys(DOMAIN_K);
+  // Dominios que el servidor escribe (público por /append, admin por /admin/moderar).
+  // El navegador nunca los sube ni los ignora vacíos: manda el servidor.
+  // Espejo de DOMINIOS_MODERADOS en functions/api/_lib.js (lo vigila store-moderar.test.mjs).
+  const DEL_SERVIDOR = ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits'];
 
   const _putTimers = {};
   // Empuje de admin: reemplaza el blob completo del dominio (debounced).
@@ -214,7 +218,9 @@
         // visitantes: write() cachearía el vacío y, en la carga siguiente, init()
         // vería la clave presente y volvería a leer []. No se recupera solo — hay
         // que borrar localStorage a mano. Ante la duda, conserva el seed.
-        if (Array.isArray(val) && val.length === 0) return;
+        // Excepción: los dominios del servidor SÍ pueden estar vacíos (cola vaciada,
+        // reseña retirada); si no, el navegador seguiría mostrando lo ya borrado.
+        if (Array.isArray(val) && val.length === 0 && !DEL_SERVIDOR.includes(domain)) return;
         if (domain === 'armas' && Array.isArray(val)) {
           // Reparar ANTES de cachear: getArmas() lee de localStorage, no de
           // window.DB, así que escribir primero dejaba el cache (y de ahí el
@@ -361,46 +367,28 @@
       return true;
     },
     getReviewQueue() { return read(K.reviewsQueue, []); },
-    // Moderación (admin). Publicar RETIRA el correo: nunca cruza al dominio
-    // público.
-    approveReview(id) {
-      const cola = read(K.reviewsQueue, []);
-      const rev = cola.find((r) => r.id === id);
-      if (!rev) return false;
-      write(K.reviewsQueue, cola.filter((r) => r.id !== id));
-      adminSync('reviewsQueue');
-      const { email, status, ...publica } = rev;
-      publica.approvedAt = new Date().toISOString();
-      const pub = read(K.reviews, []);
-      pub.unshift(publica);
-      write(K.reviews, pub);
-      adminSync('reviews');
+    // Moderación (admin): el servidor mueve UNA reseña o denuncia con escritura
+    // condicional (POST /api/admin/moderar) y el navegador solo se re-hidrata. No toca
+    // el caché antes de la respuesta, así un fallo (sesión de Access caducada, red) no
+    // deja una copia local distinta del servidor. Publicar RETIRA el correo (lo hace el servidor).
+    // accion: 'aprobar' | 'rechazar' | 'retirar' | 'resolver'.
+    async moderar(accion, id, motivo) {
+      if (!REMOTE.enabled) return { ok: false, status: 0, error: 'sin_backend' };
+      let res;
+      try {
+        res = await fetch(REMOTE.base + '/admin/moderar', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accion, id, motivo }), credentials: 'include',
+        });
+      } catch (e) { return { ok: false, status: 0, error: 'sin_conexion_o_sesion' }; }
+      if (!res.ok) {
+        let cuerpo = null;
+        try { cuerpo = await res.json(); } catch (e) {}
+        return { ok: false, status: res.status, error: (cuerpo && cuerpo.error) || 'http_' + res.status };
+      }
+      await hydrate();
       Store._notify();
-      return true;
-    },
-    rejectReview(id, motivo) {
-      const cola = read(K.reviewsQueue, []);
-      const rev = cola.find((r) => r.id === id);
-      if (!rev) return false;
-      write(K.reviewsQueue, cola.filter((r) => r.id !== id));
-      adminSync('reviewsQueue');
-      const rej = read(K.rejected, []);
-      rej.unshift(Object.assign({}, rev, {
-        status: 'rejected', rejectionReason: motivo || '', rejectedAt: new Date().toISOString(),
-      }));
-      write(K.rejected, rej);
-      adminSync('rejected');
-      Store._notify();
-      return true;
-    },
-    // Retira una reseña YA publicada (p. ej. tras una denuncia fundada).
-    unpublishReview(id) {
-      const pub = read(K.reviews, []);
-      if (!pub.some((r) => r.id === id)) return false;
-      write(K.reviews, pub.filter((r) => r.id !== id));
-      adminSync('reviews');
-      Store._notify();
-      return true;
+      return { ok: true };
     },
 
     // ─── DENUNCIAS DE CONTENIDO ────────────────────────────
@@ -423,13 +411,6 @@
       return result;
     },
     getReports() { return read(K.reports, []); },
-    resolveReport(id) {
-      const arr = read(K.reports, []);
-      write(K.reports, arr.filter((r) => r.id !== id));
-      adminSync('reports');
-      Store._notify();
-      return true;
-    },
 
     // ─── APP CONFIG (logo y branding) ───────────────────────
     getAppConfig() {
@@ -723,6 +704,7 @@
       if (!REMOTE.enabled) throw new Error('Sin backend: ejecuta en el dominio con Functions (no file://).');
       const results = {};
       for (const domain of SYNCABLE) {
+        if (DEL_SERVIDOR.includes(domain)) continue; // el servidor manda (el PUT respondería 409)
         const body = localStorage.getItem(DOMAIN_K[domain]);
         if (body == null) { results[domain] = 'vacío'; continue; }
         try {

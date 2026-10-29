@@ -8,12 +8,7 @@
 // (reports) y registrar visita (visits). El servidor hace el read-modify-write
 // con escritura condicional (writeDomainIf) y reintenta si otro envío se le
 // adelantó: así dos envíos simultáneos no se pisan.
-import { json, APPEND_DOMAINS, MAX_BODY, normalizeReport, readDomainVersion, writeDomainIf, mergeAppend } from '../_lib.js';
-
-// Con 8 intentos y espera aleatoria creciente, una ráfaga de 20 envíos en el
-// mismo instante entra entera en la prueba (functions-append.test.mjs).
-const INTENTOS = 8;
-const espera = (i) => new Promise((r) => setTimeout(r, Math.random() * 10 * (i + 1)));
+import { json, APPEND_DOMAINS, MAX_BODY, normalizeReport, actualizarDominio, mergeAppend } from '../_lib.js';
 
 export async function onRequestPost({ request, env, params }) {
   const domain = params.domain;
@@ -32,13 +27,8 @@ export async function onRequestPost({ request, env, params }) {
   }
 
   const defaults = { visits: {} };
-  for (let i = 0; i < INTENTOS; i++) {
-    const { data, updatedAt } = await readDomainVersion(env.DB, domain);
-    const current = data === undefined ? defaults[domain] : data;
-    const next = mergeAppend(domain, current, item);
-    if (await writeDomainIf(env.DB, domain, next, updatedAt)) return json({ ok: true, domain });
-    await espera(i);
-  }
+  const res = await actualizarDominio(env.DB, domain, (actual) => mergeAppend(domain, actual, item), defaults[domain]);
+  if (res === 'ok') return json({ ok: true, domain });
   // Contención sostenida: mejor un error visible que perder el envío en silencio.
   return json({ error: 'ocupado_reintenta' }, 503, { 'Retry-After': '1' });
 }
