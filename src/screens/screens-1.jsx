@@ -55,14 +55,18 @@ const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^
 // Benelli MR1, CZ P-07 y Taurus PT59 (Saulo, 27-sep-2026).
 const FAVORITOS_MS = [12, 9, 133, 11, 218, 151, 143, 8, 3];
 
-// Las cuatro reglas universales del manejo seguro: solo el título, sin
-// descripción ni fuentes al pie (Saulo, 29-oct-2026). Van en el código y no en
-// D1: el preview las muestra tal cual.
+// Las cuatro reglas universales del manejo seguro: título y una descripción
+// breve, sin número ni fuentes al pie (Saulo, 29-oct-2026). Van en el código y
+// no en D1: el preview las muestra tal cual.
 const REGLAS_SEGURIDAD = [
-  'Trata toda arma como si estuviera cargada',
-  'Nunca apuntes a nada que no estés dispuesto a destruir',
-  'Mantén el dedo fuera del gatillo',
-  'Conoce tu blanco y lo que hay detrás',
+  { titulo: 'Trata toda arma como si estuviera cargada',
+    texto: 'Aunque acabes de revisarla y sepas que está vacía.' },
+  { titulo: 'Nunca apuntes a nada que no estés dispuesto a destruir',
+    texto: 'El cañón siempre hacia una dirección segura, donde un disparo accidental no lastime a nadie ni dañe nada.' },
+  { titulo: 'Mantén el dedo fuera del gatillo',
+    texto: 'Extendido a lo largo del armazón hasta el momento exacto en que decidas disparar.' },
+  { titulo: 'Conoce tu blanco y lo que hay detrás',
+    texto: 'Identifícalo bien antes de disparar: una bala puede atravesarlo o rebotar.' },
 ];
 
 function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
@@ -359,8 +363,8 @@ window.VisitedCard = VisitedCard;
 
 // Las cuatro reglas como placas de advertencia esmaltadas, en cuadrícula: 2×2 en
 // móvil para que se vean las cuatro sin deslizar, en fila en escritorio (Saulo,
-// 29-oct-2026). Es el único elemento de metal pintado del sitio, a propósito. El
-// <ol> ya numera para el lector de pantalla; el «01» pintado es decoración.
+// 29-oct-2026). Es el único elemento de metal pintado del sitio, a propósito. Sin
+// número a la vista; el <ol> ya numera para el lector de pantalla.
 function ReglasSeguridad() {
   return (
     <section className="amx-reglas" aria-labelledby="reglas-seguridad-tit">
@@ -368,8 +372,8 @@ function ReglasSeguridad() {
       <ol className="amx-reglas-lista">
         {REGLAS_SEGURIDAD.map((regla, i) =>
           <li key={i} className="amx-placa">
-            <span className="amx-placa-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-            <span className="amx-placa-tit">{regla}</span>
+            <span className="amx-placa-tit">{regla.titulo}</span>
+            <span className="amx-placa-texto">{regla.texto}</span>
           </li>)}
       </ol>
     </section>);

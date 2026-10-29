@@ -5957,10 +5957,11 @@
    Placas de advertencia esmaltadas (Saulo, 29-oct-2026): rojo de marca, franja
    de peligro amarilla y negra, filete crema por dentro y dos remaches abajo.
    Cuadrícula 2×2 en móvil —las cuatro a la vista sin deslizar— y en fila desde
-   900px. Texto centrado para que cada placa sea simétrica. La placa es igual en
-   los dos temas, como el papel: no lleva variables de tema.
-   Contraste: crema sobre #A3341F ≈ 5.9:1; el número amarillo ≈ 4.2:1, que basta
-   para texto grande (34px negrita). */
+   900px. Título y descripción breve, centrados para que cada placa sea
+   simétrica; sin número a la vista. La placa es igual en los dos temas, como el
+   papel: no lleva variables de tema.
+   Contraste: crema sobre #A3341F ≈ 5.9:1, que pasa también para el texto
+   normal de la descripción. */
 .amx-v2 .amx-reglas {
   max-width: 1280px;
   margin: 0 auto 20px;
@@ -6014,14 +6015,11 @@
   background: repeating-linear-gradient(-45deg, #F2C230 0 9px, #161616 9px 18px);
   border-bottom: 2px solid #161616;
 }
-.amx-v2 .amx-placa-num {
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 34px;
-  line-height: 1;
-  color: #F2C230;
-  text-shadow: 0 2px 0 rgba(0,0,0,.25);
-  margin-bottom: 8px;
+.amx-v2 .amx-placa-texto {
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.35;
+  margin-top: 8px;
 }
 .amx-v2 .amx-placa-tit {
   font-family: var(--sans);
