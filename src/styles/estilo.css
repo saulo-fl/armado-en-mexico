@@ -5952,6 +5952,86 @@
   color: var(--ficha-tinta);
   margin: 8px 0 0;
 }
+
+/* ── LAS 4 REGLAS DE SEGURIDAD (portada) ────────────────────────────────────
+   Placas de advertencia esmaltadas (Saulo, 29-oct-2026): rojo de marca, franja
+   de peligro amarilla y negra, filete crema por dentro y dos remaches abajo.
+   Cuadrícula 2×2 en móvil —las cuatro a la vista sin deslizar— y en fila desde
+   900px. Texto centrado para que cada placa sea simétrica. La placa es igual en
+   los dos temas, como el papel: no lleva variables de tema.
+   Contraste: crema sobre #A3341F ≈ 5.9:1; el número amarillo ≈ 4.2:1, que basta
+   para texto grande (34px negrita). */
+.amx-v2 .amx-reglas {
+  max-width: 1280px;
+  margin: 0 auto 20px;
+  padding: 0 16px;
+}
+.amx-v2 .amx-reglas-tit {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 21px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--tinta);
+  margin: 25px 0 12px;
+}
+.amx-v2 .amx-reglas-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;   /* las dos filas miden lo mismo: la placa 2 es la más larga */
+  gap: 10px;
+}
+@media (min-width: 900px) {
+  .amx-v2 .amx-reglas-lista { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+}
+.amx-v2 .amx-placa {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 150px;
+  padding: 30px 14px 20px;
+  border-radius: 6px;
+  color: #F3EFE4;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,0) 45%),
+    radial-gradient(circle at 10px calc(100% - 10px), #F3EFE4 0 2.5px, rgba(0,0,0,.35) 3px 3.5px, transparent 4px),
+    radial-gradient(circle at calc(100% - 10px) calc(100% - 10px), #F3EFE4 0 2.5px, rgba(0,0,0,.35) 3px 3.5px, transparent 4px),
+    #A3341F;
+  box-shadow: inset 0 0 0 4px #A3341F, inset 0 0 0 5.5px rgba(243,239,228,.9), 0 3px 8px rgba(0,0,0,.3);
+}
+.amx-v2 .amx-placa::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 16px;
+  background: repeating-linear-gradient(-45deg, #F2C230 0 9px, #161616 9px 18px);
+  border-bottom: 2px solid #161616;
+}
+.amx-v2 .amx-placa-num {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 34px;
+  line-height: 1;
+  color: #F2C230;
+  text-shadow: 0 2px 0 rgba(0,0,0,.25);
+  margin-bottom: 8px;
+}
+.amx-v2 .amx-placa-tit {
+  font-family: var(--sans);
+  font-stretch: 75%;
+  font-weight: 700;
+  font-size: 16.5px;
+  line-height: 1.12;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
 /* El clip va a la ESQUINA, no al centro (hilo 9 de Penpot, 22-sep-2026): en su
    sitio de origen —la copia de la ficha, donde pisa el canto de una foto— el
    22 % cae en papel vacío; aquí caía justo sobre el rótulo AVISO DE
