@@ -35,13 +35,13 @@ test('aprobar, rechazar y retirar son async, esperan Store.moderar, avisan y ref
 });
 
 test('aprobar y retirar conservan su confirm y rechazar su prompt (antes de moderar)', () => {
-  assert.match(reseñas, /confirm\(`¿Publicar la reseña de[\s\S]*?window\.Store\.moderar\('aprobar'/);
+  assert.match(reseñas, /if \(!confirm\(`¿Publicar la reseña de[^\n]*\)\) return;[\s\S]*?window\.Store\.moderar\('aprobar'/);
   assert.match(reseñas, /prompt\('Motivo del rechazo[\s\S]*?motivo === null\) return;[\s\S]*?window\.Store\.moderar\('rechazar'/);
-  assert.match(reseñas, /confirm\('¿Retirar esta reseña ya publicada\?'\)[\s\S]*?window\.Store\.moderar\('retirar'/);
+  assert.match(reseñas, /if \(!confirm\('¿Retirar esta reseña ya publicada\?'\)\) return;[\s\S]*?window\.Store\.moderar\('retirar'/);
 });
 
 test('«Marcar resuelta» modera por id, espera, avisa y refresca', () => {
-  assert.match(denuncias, /onClick=\{async \(\) => \{[\s\S]*?await window\.Store\.moderar\('resolver', d\.id\)[\s\S]*?avisarModeracion\(res\)[\s\S]*?\}\}[^>]*>Marcar resuelta/);
+  assert.match(denuncias, /onClick=\{async \(\) => \{[\s\S]*?await window\.Store\.moderar\('resolver', d\.id\)[\s\S]*?avisarModeracion\(res\)[\s\S]*?refresh\(\)[\s\S]*?\}\}[^>]*>Marcar resuelta/);
 });
 
 test('el confirm de «Sincronizar todo» avisa que reseñas, denuncias y visitas no se suben', () => {
