@@ -438,7 +438,9 @@ Lo editado en el admin ya puede compartirse entre visitantes mediante un backend
   `GET /api/state` (snapshot público), `POST /api/append/:domain` (escritura pública de
   `reviewsQueue`/`reports`/`visits` con merge atómico y
   **validación** en el server) y
-  `PUT /api/admin/state/:domain` (reemplazo de un dominio, **solo admin**).
+  `PUT /api/admin/state/:domain` (reemplazo de un dominio, **solo admin**; responde 409 en
+  `reviews`/`reviewsQueue`/`rejected`/`reports`/`visits`) y `POST /api/admin/moderar`
+  (aprobar/rechazar/retirar una reseña o resolver una denuncia, **de una en una**).
 - **D1** guarda un *document store* por dominio: una fila `state(domain, data, updated_at)`
   con el mismo JSON que `localStorage` (esquema en `scripts/sql/schema.sql`, binding `env.DB` en `wrangler.toml`).
 - `store.js` **hidrata** al arrancar (`GET /api/state`) y empuja cada cambio. El render sigue
@@ -452,7 +454,8 @@ Lo editado en el admin ya puede compartirse entre visitantes mediante un backend
 **No** toques el orden de carga ni conviertas store.js en async: la capa de backend es aditiva y
 tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se sincroniza nunca.
 
-**Limitación restante:** "última escritura gana" en los `PUT` de admin (sin versionado) y el
+**Limitación restante:** "última escritura gana" en los `PUT` de admin (sin versionado; ya no
+aplica a reseñas, denuncias ni visitas, que solo cambian por `/append` y `/admin/moderar`) y el
 *append* hace read-modify-write por petición (suficiente para este tráfico). Migrar
 `reviews`/`visits`/colas a tablas fila-por-item es la evolución natural si crece el volumen.
 

@@ -22,6 +22,7 @@ functions/
     state.js                    GET  /api/state                 → snapshot público (read)
     append/[domain].js          POST /api/append/:domain         → escritura pública (merge atómico)
     admin/state/[domain].js     PUT  /api/admin/state/:domain    → reemplazo de dominio (solo admin)
+    admin/moderar.js            POST /api/admin/moderar          → mueve UNA reseña o denuncia (solo admin)
 scripts/sql/schema.sql          tabla `state(domain, data, updated_at)` — un blob JSON por dominio
 wrangler.toml                   binding D1 (env.DB) + config de Pages
 ```
@@ -33,8 +34,18 @@ lista canónica en `ALL_DOMAINS` de `functions/api/_lib.js`) es **una fila** con
 con el mismo shape que en `localStorage`. La contraseña/sesión (`admin`) **nunca** viaja.
 
 - **Escritura admin** (`PUT /api/admin/state/:domain`): reemplaza el blob del dominio.
-  La usa todo el panel (editar páginas/promos/catálogo/favoritos/branding/inventarios y
-  moderar reseñas y denuncias).
+  La usa el panel para editar páginas/promos/catálogo/favoritos/branding/inventarios.
+  **Los dominios que alimenta el público** (`DOMINIOS_MODERADOS` en `_lib.js`: `reviews`,
+  `reviewsQueue`, `rejected`, `reports`, `visits`) **responden 409 `dominio_moderado`**: un
+  reemplazo con la copia del navegador borraría lo que llegó después de abrir el panel.
+- **Moderación admin** (`POST /api/admin/moderar`, cuerpo `{accion, id, motivo?}` con `accion` =
+  `aprobar` | `rechazar` | `retirar` | `resolver`): el servidor lee de D1 lo vigente y mueve ese
+  único elemento con la misma escritura condicional (`actualizarDominio`, con reintentos) del
+  formulario público. Primero añade al destino y luego quita del origen, así un corte a medias
+  deja un duplicado, nunca una pérdida, y repetir la acción lo termina. Aprobar quita el correo.
+  Errores: 400 cuerpo/acción/id inválidos, 404 `no_encontrada`, 503 `ocupado_reintenta`
+  (con `Retry-After`). El navegador la llama con `Store.moderar` y se re-hidrata; si falla
+  (sesión de Access caducada, red) el panel avisa y no cambia su copia local.
 - **Escritura pública** (`POST /api/append/:domain`, solo `visits`/`reviewsQueue`/`reports`):
   manda **un item**; el servidor hace el *read-modify-write* para que reseñas y denuncias
   concurrentes no se pisen.
@@ -104,5 +115,6 @@ Sin `wrangler` (solo estático, ej. `python3 -m http.server`): la app corre en m
   (`RESENA_MIN`/`RESENA_MAX`) que esperan moderación en `reviewsQueue`.
 - Concurrencia: el *append* hace read-modify-write por petición (suficiente para este tráfico).
   Para volumen alto, migrar `reviews`/`visits`/colas a tablas fila-por-item es la evolución natural.
-- "Última escritura gana" en los `PUT` de admin (sin control de versiones). El admin re-hidrata
+- "Última escritura gana" en los `PUT` de admin (sin control de versiones) **para los demás
+  dominios**: reseñas, denuncias y visitas ya no (ver arriba). El admin re-hidrata
   al enfocar la pestaña.
