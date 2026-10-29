@@ -23,7 +23,7 @@ import tempfile
 import time
 import traceback
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import unquote, urljoin, urlparse
@@ -185,7 +185,12 @@ def fecha(dt: datetime) -> str:
 
 
 class LecturaInvalida(Exception):
-    pass
+    """estructural=True: la página cargó pero cambió de forma (esperar no lo arregla).
+    estructural=False: falla pasajera (red, 404, redirección en bucle, verificación de Akamai)."""
+
+    def __init__(self, motivo: str, estructural: bool = False):
+        super().__init__(motivo)
+        self.estructural = estructural
 
 
 def bajar_http(url: str) -> bytes:
@@ -196,7 +201,7 @@ def bajar_http(url: str) -> bytes:
 
 def _leer_pagina(bajar, pagina: str, url: str, reintento_seg: float) -> dict:
     """Cuerpo de una lectura válida; un reintento y luego LecturaInvalida."""
-    motivo = None
+    motivo, estructural = None, False
     for intento in range(2):
         if intento:
             time.sleep(reintento_seg)
@@ -205,13 +210,14 @@ def _leer_pagina(bajar, pagina: str, url: str, reintento_seg: float) -> dict:
         except (OSError, http.client.HTTPException, ValueError) as e:
             # OSError: URLError, HTTPError y timeouts. HTTPException: IncompleteRead, InvalidURL.
             # ValueError: UnicodeEncodeError (URL con caracteres raros) hereda de ValueError.
-            motivo = f"error de red al leer «{pagina}»: {e}"
+            motivo, estructural = f"error de red al leer «{pagina}»: {e}", False
             continue
         cuerpo = leer_cuerpo(html)
         motivo = validar(html, pagina, cuerpo)
         if motivo is None:
             return cuerpo
-    raise LecturaInvalida(motivo)
+        estructural = "Challenge Validation" not in html
+    raise LecturaInvalida(motivo, estructural)
 
 
 def _codigo_viejo() -> str:
@@ -231,14 +237,17 @@ _TITULOS = {
 }
 
 
-def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -> tuple[int, list[dict]]:
+def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 60) -> tuple[int, list[dict]]:
+    """Una lectura completa. Cada mensaje lleva «clase»: roto | estructural | aviso | cambio | latido
+    (vigilar() decide cuáles se mandan). El latido lleva «reintentar» si no bajó un PDF de existencias."""
     ruta_estado = dir_base / "estado.json"
     previo = cargar_estado(ruta_estado)
 
     try:
         cuerpo_com = _leer_pagina(bajar, "comercializacion", PAGINAS["comercializacion"], reintento_seg)
     except LecturaInvalida as e:
-        return 1, [{"texto": f"⚠️ DCAM vigía roto: {e}"}]   # el estado no se toca
+        return 1, [{"texto": f"⚠️ DCAM vigía roto: {e}", "motivo": str(e),
+                    "clase": "estructural" if e.estructural else "roto"}]   # el estado no se toca
 
     # «costos» es secundaria: si falla no detiene el vigía (gob.mx puede romper esa URL);
     # se avisa aparte y se conserva el texto anterior en el estado, sin comparar el diff.
@@ -252,7 +261,8 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
     prev_docs = previo["documentos"] if previo else {}
     carpeta = dir_base / "archivo" / ahora.strftime("%Y-%m-%d")
     actuales, fallidos, archivos = {}, set(), {}
-    for url, info in documentos(cuerpo_com).items():
+    docs_com = documentos(cuerpo_com)
+    for url, info in docs_com.items():
         try:
             datos = bajar(url)
         except (OSError, http.client.HTTPException, ValueError):
@@ -285,19 +295,21 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
             msg += " · costos sin leer"
         msg += _codigo_viejo()
         guardar_estado(ruta_estado, nuevo_estado)
-        msgs = [{"texto": msg}]
+        msgs = [{"texto": msg, "clase": "latido"}]
+        if any(docs_com[u]["tipo"] == "existencias" for u in fallidos):
+            msgs[-1]["reintentar"] = True
         if aviso_costos:
-            msgs.insert(0, {"texto": aviso_costos})
+            msgs.insert(0, {"texto": aviso_costos, "clase": "aviso"})
         return 0, msgs
 
     cambios = comparar(prev_docs, actuales, fallidos)
     msgs = []
     if aviso_costos:
-        msgs.append({"texto": aviso_costos})
+        msgs.append({"texto": aviso_costos, "clase": "aviso"})
     for url in cambios["nuevos"] + cambios["cambiados"]:
         verbo = "nuevo" if url in cambios["nuevos"] else "cambiado"
         titulo = _TITULOS[actuales[url]["tipo"]].format(verbo=verbo, etiqueta=actuales[url]["etiqueta"])
-        msgs.append({"texto": f"{titulo}\n{url}", "archivo": str(archivos[url])})
+        msgs.append({"texto": f"{titulo}\n{url}", "archivo": str(archivos[url]), "clase": "cambio"})
     diffs = {p: diff_texto(previo["textos"].get(p, ""), t) for p, t in textos.items()}
     for p, lineas in diffs.items():
         if lineas:
@@ -305,7 +317,8 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
             # 3500: límite de Telegram (4096) menos la cabecera del mensaje (título + URL + margen)
             if len(cuerpo_diff) > 3500:
                 cuerpo_diff = cuerpo_diff[:3500] + "\n…(truncado)"
-            msgs.append({"texto": f"✏️ Cambió el texto de la página «{p}»\n{PAGINAS[p]}\n\n" + cuerpo_diff})
+            msgs.append({"texto": f"✏️ Cambió el texto de la página «{p}»\n{PAGINAS[p]}\n\n" + cuerpo_diff,
+                         "clase": "cambio"})
 
     partes = [f"{k}: {len(v)}" for k, v in cambios.items() if v]
     if cambios["retirados"]:
@@ -320,7 +333,9 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
     exist = ", ".join(nombre_archivo(u).split("_", 1)[1] for u, d in actuales.items() if d["tipo"] == "existencias")
     n_img = sum(1 for d in actuales.values() if d["tipo"] == "imagen")
     msgs.append({"texto": f"✅ DCAM vigía · {fecha(ahora)} · {' · '.join(partes) or 'sin cambios'}"
-                          f" · existencias: {exist} · {n_img} imágenes"})
+                          f" · existencias: {exist} · {n_img} imágenes", "clase": "latido"})
+    if any(docs_com[u]["tipo"] == "existencias" for u in fallidos):
+        msgs[-1]["reintentar"] = True
 
     # Señal para el conciliador: existencias nuevas/cambiadas con PDF ya en disco.
     # Solo escribe la bandera; el .path unit la observa y dispara conciliar-pipeline.sh.
@@ -339,6 +354,108 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 600) -
 
     guardar_estado(ruta_estado, nuevo_estado)
     return 0, msgs
+
+# ── Cuándo leer y cuándo avisar (decisión de Saulo, 28-oct-2026) ──────────────────────────
+# El timer despierta cada 30 min; vigilar() decide. Lee en las ranuras de 10:00, 15:00 y 20:00
+# (una ranura perdida por un apagón se lee al volver). Si gob.mx falla, reintenta cada 30 min en
+# silencio hasta las 08:00 siguientes. Avisa solo si sigue fallando a las 23:00 (uno por noche),
+# al instante si la página cargó pero cambió de forma, y otra vez cuando se recupera.
+# El resumen «✅ DCAM vigía» sale una vez al día (desde las 20:00) o cuando hay cambios.
+RANURAS = (10, 15, 20)
+HORA_AVISO = 23
+HORA_LIMITE = 8
+
+
+def ranura_actual(ahora: datetime) -> datetime:
+    """La ranura programada más reciente que ya pasó (puede ser la de ayer a las 20:00)."""
+    for h in sorted(RANURAS, reverse=True):
+        r = ahora.replace(hour=h, minute=0, second=0, microsecond=0)
+        if r <= ahora:
+            return r
+    return (ahora - timedelta(days=1)).replace(hour=max(RANURAS), minute=0, second=0, microsecond=0)
+
+
+def siguiente(desde: datetime, hora: int) -> datetime:
+    """La próxima vez que el reloj marca <hora>:00 estrictamente después de «desde»."""
+    t = desde.replace(hour=hora, minute=0, second=0, microsecond=0)
+    return t if t > desde else t + timedelta(days=1)
+
+
+def jornada_latido(ahora: datetime) -> str:
+    """Día al que pertenece el resumen: de las 20:00 a las 19:59 del día siguiente."""
+    return (ahora - timedelta(hours=max(RANURAS))).date().isoformat()
+
+
+def _cuando(iso: str) -> str:
+    dt = datetime.fromisoformat(iso)
+    return f"{dt:%H:%M} del {fecha(dt)}"
+
+
+def vigilar(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 60,
+            forzar: bool = False) -> tuple[int, list[dict], str]:
+    """Envuelve correr() con el calendario de lecturas, los reintentos y los avisos.
+    Devuelve (código, mensajes a mandar, nota para el journal)."""
+    ruta = dir_base / "vigia-salud.json"
+    salud = cargar_estado(ruta) or {}
+    ranura = ranura_actual(ahora).isoformat(timespec="minutes")
+    falla = salud.get("falla")
+    programada = salud.get("ultima_ranura") != ranura
+    reintento = falla is not None and ahora < datetime.fromisoformat(falla["limite"])
+    if not (forzar or programada or reintento):
+        return 0, [], f"nada que hacer (ranura {ranura} ya leída, sin fallas pendientes)"
+
+    codigo, msgs = correr(bajar, dir_base, ahora, reintento_seg)
+    salud["ultima_ranura"] = ranura
+    roto = bool(msgs) and msgs[0].get("clase") in ("roto", "estructural")
+    pendiente_pdf = not roto and any(m.get("reintentar") for m in msgs)
+    salida = []
+
+    if not roto:
+        cambios = [m for m in msgs if m.get("clase") == "cambio"]
+        latido_toca = salud.get("ultimo_latido") != jornada_latido(ahora)
+        if latido_toca or cambios:
+            salida = msgs
+        if latido_toca:
+            salud["ultimo_latido"] = jornada_latido(ahora)
+
+    if roto or pendiente_pdf:
+        motivo = msgs[0]["motivo"] if roto else "no se pudo bajar un PDF de existencias"
+        if falla is None:
+            falla = {"desde": ahora.isoformat(timespec="minutes"), "intentos": 0, "avisos": 0,
+                     "proximo_aviso": siguiente(ahora, HORA_AVISO).isoformat(timespec="minutes")}
+        falla["intentos"] += 1
+        falla["motivo"] = motivo
+        if programada or "limite" not in falla:
+            falla["limite"] = siguiente(ahora, HORA_LIMITE).isoformat(timespec="minutes")
+        aviso = None
+        if roto and msgs[0]["clase"] == "estructural" and not falla.get("estructural_avisado"):
+            falla["estructural_avisado"] = True
+            falla["proximo_aviso"] = (siguiente(ahora, HORA_AVISO) + timedelta(days=1)).isoformat(timespec="minutes")
+            aviso = (f"⚠️ DCAM vigía: la página de DCAM cargó pero cambió de forma: {motivo}. "
+                     "Esto no se arregla esperando; hay que ajustar el vigía. Sigo reintentando por si es pasajero.")
+        elif ahora >= datetime.fromisoformat(falla["proximo_aviso"]):
+            falla["proximo_aviso"] = siguiente(ahora, HORA_AVISO).isoformat(timespec="minutes")
+            aviso = (f"⚠️ DCAM vigía: gob.mx sigue fallando desde las {_cuando(falla['desde'])} "
+                     f"({falla['intentos']} intentos). Último error: {motivo}. "
+                     f"Sigo reintentando cada 30 min hasta las {_cuando(falla['limite'])}.")
+        if aviso:
+            falla["avisos"] += 1
+            salida = [{"texto": aviso, "clase": "aviso"}] + salida
+        salud["falla"] = falla
+        nota = f"falla #{falla['intentos']} ({motivo}); reintento cada 30 min hasta {falla['limite']}"
+        codigo = 0   # falla atendida: el reintento ya quedó programado
+    else:
+        nota = "lectura OK"
+        if falla is not None:
+            nota += f" tras {falla['intentos']} intentos fallidos desde {falla['desde']}"
+            if falla["avisos"]:
+                salida = [{"texto": f"✅ DCAM vigía recuperado: gob.mx volvió a responder (fallaba desde las "
+                                    f"{_cuando(falla['desde'])}, {falla['intentos']} intentos).",
+                           "clase": "aviso"}] + salida
+        salud.pop("falla", None)
+
+    guardar_estado(ruta, salud)
+    return codigo, salida, nota
 
 
 def enviar(msgs: list[dict], bot) -> bool:
@@ -369,6 +486,7 @@ def dir_trabajo(sin_telegram: bool, entorno: dict) -> Path:
 def main() -> int:
     ap = argparse.ArgumentParser(description="Vigía DCAM (gob.mx → Telegram)")
     ap.add_argument("--sin-telegram", action="store_true", help="imprime los mensajes en vez de mandarlos")
+    ap.add_argument("--forzar", action="store_true", help="lee ya, aunque no toque ranura ni reintento")
     args = ap.parse_args()
     dir_base = dir_trabajo(args.sin_telegram, os.environ)
     if args.sin_telegram and "DCAM_DIR" not in os.environ:
@@ -379,7 +497,9 @@ def main() -> int:
         from quiron_telegram import Bot
         bot = Bot.desde_env(os.environ["DCAM_TG_ENV"])
     try:
-        codigo, msgs = correr(bajar_http, dir_base, datetime.now(), float(os.environ.get("DCAM_REINTENTO_SEG", "600")))
+        codigo, msgs, nota = vigilar(bajar_http, dir_base, datetime.now(),
+                                     float(os.environ.get("DCAM_REINTENTO_SEG", "60")), args.forzar)
+        print(f"vigía: {nota}", flush=True)
     except Exception:
         traceback.print_exc()
         codigo = 1
