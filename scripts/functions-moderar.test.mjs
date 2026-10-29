@@ -42,6 +42,11 @@ test('valida la petición', async () => {
   res = await moderar(DB, '{');
   assert.equal(res.status, 400);
   assert.equal((await res.json()).error, 'json_invalido');
+  for (const raw of ['null', '[]', '5']) {
+    res = await moderar(DB, raw);
+    assert.equal(res.status, 400);
+    assert.equal((await res.json()).error, 'json_invalido');
+  }
   assert.equal(DB.filas.size, 0);
 });
 
@@ -143,10 +148,43 @@ test('aprobar concurrente con 10 envíos no pierde ninguno', async () => {
   const enviosOk = res.filter((x, i) => i !== 5 && x.status === 200).length;
   const cola = leer(DB, 'reviewsQueue');
   assert.ok(enviosOk >= 1);
-  assert.equal(cola.length, enviosOk);
+  // res[k] con k<5 es el envío k; con k>5 es el envío k-1.
+  const aceptados = res.flatMap((x, k) => (k !== 5 && x.status === 200 ? [k < 5 ? k : k - 1] : []));
+  assert.deepEqual(
+    cola.map((x) => Number(x.texto.match(/^envío (\d+) /)[1])).sort((a, b) => a - b),
+    aceptados,
+  );
   assert.ok(!cola.some((x) => x.id === 'r1'));
   assert.deepEqual(leer(DB, 'reviews').map((x) => x.id), ['r1']);
 });
+
+// Bloquea solo las escrituras al dominio `dom`: run() dice que no cambió nada.
+function bloquearEscrituras(DB, dom) {
+  const prepare = DB.prepare.bind(DB);
+  DB.prepare = (sql) => {
+    const st = prepare(sql);
+    return {
+      bind: (...a) => {
+        const d = sql.startsWith('UPDATE') ? a[2] : a[0];
+        if (!sql.startsWith('SELECT') && d === dom) return { run: async () => ({ meta: { changes: 0 } }) };
+        return st.bind(...a);
+      },
+    };
+  };
+}
+
+// El orden es la garantía: si el destino no acepta la escritura, la reseña sigue en la cola.
+for (const [accion, destino] of [['aprobar', 'reviews'], ['rechazar', 'rejected']]) {
+  test(`${accion} con el destino ocupado responde 503 y la reseña sigue en la cola`, async () => {
+    const DB = d1EnMemoria();
+    siembra(DB, 'reviewsQueue', [r1]);
+    bloquearEscrituras(DB, destino);
+    const res = await moderar(DB, { accion, id: 'r1' });
+    assert.equal(res.status, 503);
+    assert.equal((await res.json()).error, 'ocupado_reintenta');
+    assert.ok(leer(DB, 'reviewsQueue').some((x) => x.id === 'r1'));
+  });
+}
 
 test('retirar y resolver quitan solo ese id', async () => {
   const DB = d1EnMemoria();
