@@ -35,7 +35,8 @@ con el mismo shape que en `localStorage`. La contraseña/sesión (`admin`) **nun
 
 - **Escritura admin** (`PUT /api/admin/state/:domain`): reemplaza el blob del dominio.
   La usa el panel para editar páginas/promos/catálogo/favoritos/branding/inventarios.
-  **Los dominios que alimenta el público** (`DOMINIOS_MODERADOS` en `_lib.js`: `reviews`,
+  **Los dominios que escribe el servidor** (el público por `/append`, la moderación por
+  `/admin/moderar`; `DOMINIOS_MODERADOS` en `_lib.js`: `reviews`,
   `reviewsQueue`, `rejected`, `reports`, `visits`) **responden 409 `dominio_moderado`**: un
   reemplazo con la copia del navegador borraría lo que llegó después de abrir el panel.
 - **Moderación admin** (`POST /api/admin/moderar`, cuerpo `{accion, id, motivo?}` con `accion` =
@@ -90,7 +91,8 @@ La D1 arranca vacía → `GET /api/state` devuelve `{}` → la app usa sus _seed
 contenido ya editado en un navegador (el del admin) por primera vez:
 
 - Abre **`/admin.html` → Configuración → Backend compartido → «Sincronizar todo al servidor»**.
-  Sube todos los dominios locales a D1 de una vez. A partir de ahí, cada cambio se sincroniza solo.
+  Sube a D1 de una vez los dominios de contenido locales; se salta reseñas, cola, rechazadas,
+  denuncias y visitas, que solo escribe el servidor. A partir de ahí, cada cambio se sincroniza solo.
 
 ## Desarrollo local
 
