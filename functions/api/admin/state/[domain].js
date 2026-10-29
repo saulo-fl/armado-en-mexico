@@ -5,13 +5,13 @@
 
 // PUT /api/admin/state/:domain — reemplazo COMPLETO de un dominio (solo admin).
 // Lo usa el panel para persistir cualquier edición (páginas, promos, catálogo,
-// favoritos, branding, inventarios, historial de precios, y la moderación de
-// reseñas y denuncias).
+// favoritos, branding, inventarios, historial de precios). Los dominios de
+// DOMINIOS_MODERADOS (reseñas, denuncias, visitas) no pasan por aquí.
 //
 // SEGURIDAD: esta ruta vive bajo /api/admin/* y debe estar cubierta por una
 // política de Cloudflare Access (igual que /admin.html). Además, la Function
 // verifica el JWT de Access (requireAdmin) como defensa en profundidad.
-import { json, ALL_DOMAINS, MAX_BODY, writeDomain, requireAdmin } from '../../_lib.js';
+import { json, ALL_DOMAINS, DOMINIOS_MODERADOS, MAX_BODY, writeDomain, requireAdmin } from '../../_lib.js';
 
 export async function onRequestPut({ request, env, params }) {
   const denied = await requireAdmin(request, env);
@@ -19,6 +19,9 @@ export async function onRequestPut({ request, env, params }) {
 
   const domain = params.domain;
   if (!ALL_DOMAINS.includes(domain)) return json({ error: 'dominio_invalido' }, 400);
+  // Estos dominios solo cambian por /api/append y /api/admin/moderar: un reemplazo
+  // completo con la copia del navegador borraría lo que llegó después.
+  if (DOMINIOS_MODERADOS.includes(domain)) return json({ error: 'dominio_moderado' }, 409);
   if (!env.DB) return json({ error: 'sin_backend' }, 503);
 
   const raw = await request.text();

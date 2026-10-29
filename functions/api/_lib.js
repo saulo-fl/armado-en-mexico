@@ -115,6 +115,33 @@ export async function writeDomainIf(db, domain, value, prevUpdatedAt) {
   return !!(res && res.meta && res.meta.changes === 1);
 }
 
+// Dominios que escribe el público (o que se moderan elemento por elemento).
+// El PUT de admin los rechaza: reemplazarlos con la copia del navegador borra lo
+// que llegó después de abrir el panel. Solo cambian por /api/append y por
+// /api/admin/moderar.
+export const DOMINIOS_MODERADOS = ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits'];
+
+// Con 8 intentos y espera aleatoria creciente, una ráfaga de 20 envíos en el
+// mismo instante entra entera en la prueba (functions-append.test.mjs).
+const INTENTOS = 8;
+const espera = (i) => new Promise((r) => setTimeout(r, Math.random() * 10 * (i + 1)));
+
+// Lee-modifica-escribe un dominio con escritura condicional y reintentos.
+// `cambiar(actual)` devuelve el valor nuevo, o undefined si no hay nada que
+// escribir. `actual` es lo guardado, o `vacio` si la fila no existe.
+// Devuelve 'ok', 'sin_cambio' o 'ocupado' (contención sostenida: mejor un error
+// visible que perder la escritura en silencio).
+export async function actualizarDominio(db, domain, cambiar, vacio) {
+  for (let i = 0; i < INTENTOS; i++) {
+    const { data, updatedAt } = await readDomainVersion(db, domain);
+    const next = cambiar(data === undefined ? vacio : data);
+    if (next === undefined) return 'sin_cambio';
+    if (await writeDomainIf(db, domain, next, updatedAt)) return 'ok';
+    await espera(i);
+  }
+  return 'ocupado';
+}
+
 export async function writeDomain(db, domain, value) {
   const body = typeof value === 'string' ? value : JSON.stringify(value);
   await db.prepare(
