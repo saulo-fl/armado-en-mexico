@@ -720,7 +720,7 @@ function SettingsTab() {
   }, []);
 
   const pushAll = async () => {
-    if (!confirm('Subirás TODO el contenido editado en este navegador al servidor compartido, sobrescribiendo lo que haya allí. ¿Continuar?')) return;
+    if (!confirm('Subirás TODO el contenido editado en este navegador al servidor compartido, sobrescribiendo lo que haya allí. Las reseñas, denuncias y visitas no se suben: las guarda el servidor. ¿Continuar?')) return;
     setSyncing(true); setSyncMsg('');
     try {
       const res = await window.Store.pushAllToServer();
@@ -1012,11 +1012,15 @@ window.AdminApp = AdminApp;
 
 // ════════════════════════════════════════════════════════════════
 // RESEÑAS — moderación previa. NADA se publica sin pasar por aquí.
-// Aprobar mueve la reseña al dominio público `reviews` RETIRANDO el correo
-// (lo hace Store.approveReview); rechazar la archiva en `rejected` con su
-// motivo — no se borra, para poder revisar una
-// apelación después.
+// Aprobar mueve la reseña al dominio público `reviews` RETIRANDO el correo;
+// rechazar la archiva en `rejected` con su motivo — no se borra, para poder
+// revisar una apelación después. Todo lo hace el servidor (POST /admin/moderar,
+// vía Store.moderar): el panel solo manda {accion, id}, nunca la lista entera.
 // ════════════════════════════════════════════════════════════════
+const avisarModeracion = (res) => {
+  if (!res.ok) alert('No se guardó (' + res.error + '). Recarga la página e inténtalo de nuevo.');
+};
+
 function ReviewsTab() {
   const [cola, setCola] = useState(window.Store.getReviewQueue());
   const [publicadas, setPublicadas] = useState(window.Store.getReviews());
@@ -1024,18 +1028,24 @@ function ReviewsTab() {
   const refresh = () => { setCola(window.Store.getReviewQueue()); setPublicadas(window.Store.getReviews()); };
   useEffect(() => window.Store.onChange(refresh), []);
 
-  const aprobar = (r) => {
+  const aprobar = async (r) => {
     if (!confirm(`¿Publicar la reseña de ${r.autor || 'anónimo'}?`)) return;
-    window.Store.approveReview(r.id); refresh();
+    const res = await window.Store.moderar('aprobar', r.id);
+    avisarModeracion(res);
+    refresh();
   };
-  const rechazar = (r) => {
+  const rechazar = async (r) => {
     const motivo = prompt('Motivo del rechazo (se guarda en el archivo):', '');
     if (motivo === null) return;
-    window.Store.rejectReview(r.id, motivo); refresh();
+    const res = await window.Store.moderar('rechazar', r.id, motivo);
+    avisarModeracion(res);
+    refresh();
   };
-  const retirar = (r) => {
+  const retirar = async (r) => {
     if (!confirm('¿Retirar esta reseña ya publicada?')) return;
-    window.Store.unpublishReview(r.id); refresh();
+    const res = await window.Store.moderar('retirar', r.id);
+    avisarModeracion(res);
+    refresh();
   };
 
   const Pulgar = ({ ok }) => (
@@ -1159,7 +1169,11 @@ function ReportsTab() {
                   {d.email || 'sin correo de contacto'}
                 </span>
                 <span style={{ flex: 1 }} />
-                <button onClick={() => window.Store.resolveReport(d.id)} style={btnSecondary}>Marcar resuelta</button>
+                <button onClick={async () => {
+                  const res = await window.Store.moderar('resolver', d.id);
+                  avisarModeracion(res);
+                  refresh();
+                }} style={btnSecondary}>Marcar resuelta</button>
               </div>
             </div>)}
     </div>
