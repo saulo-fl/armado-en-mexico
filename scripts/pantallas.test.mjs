@@ -502,9 +502,10 @@ test('la portada enseña las 4 reglas de seguridad donde estaba «Las más nueva
   const t = texto(arbol);
   assert.match(t, /Reglas de seguridad/);
   reglas.forEach((r, i) => {
-    assert.ok(t.includes(r), 'no pinta la regla ' + (i + 1));
-    assert.ok(t.includes('0' + (i + 1)), 'no pinta el número 0' + (i + 1));
+    assert.ok(t.includes(r.titulo), 'no pinta el título de la regla ' + (i + 1));
+    assert.ok(t.includes(r.texto), 'no pinta la descripción de la regla ' + (i + 1));
   });
+  assert.doesNotMatch(t, /\b0[1-4]\b/, 'el número de la placa volvió (Saulo lo quitó)');
   assert.equal(contar(arbol, 'ol'), 1, 'las reglas van en una lista numerada');
   assert.equal(contar(arbol, 'li'), 4, 'una placa por regla');
   // Acotado a HomeScreen: las placas van entre «Las más visitadas» y «Calibres».
