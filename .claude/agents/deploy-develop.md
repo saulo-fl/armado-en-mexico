@@ -12,10 +12,12 @@ comprueba antes de commitear). Aquí solo va lo que cambia respecto a ellas.
 
 ## Lo que NO hace falta aquí
 
-- **No se resiembra D1.** D1 es la base de producción; `develop` no la usa. El
-  resembrado va cuando el cambio llega a `main`, y lo hace `deploy-main`.
+- **No se resiembra D1.** El resembrado va cuando el cambio llega a `main`, y lo
+  hace `deploy-main`. OJO: el preview de `develop` usa la MISMA D1 que producción
+  (`wrangler.toml` tiene un solo `[[d1_databases]]`, sin entorno preview). Lo que
+  se edite o modere en el admin del preview cambia armado.mx.
 - **No se verifica armado.mx.** `develop` no sirve armado.mx. Lo que se mira es
-  el preview de la rama.
+  el preview de `develop`.
 
 ## El orden, y por qué es ese
 
@@ -42,13 +44,11 @@ comprueba antes de commitear). Aquí solo va lo que cambia respecto a ellas.
 
 ## Ver el resultado
 
-**No hace falta mergear para ver la rama.** Cloudflare Pages levanta un preview
-por cada rama que se empuja, así que en cuanto haces `git push` ya hay algo que
-mirar. El enlace exacto sale en el check de deployment del PR — **no lo
-construyas a mano**: Cloudflare hace su propio slug del nombre de rama y lo
-trunca, así que la URL que deduzcas puede no existir.
-
-Después de mergear, el preview de `develop` tarda 1-2 min.
+**Las ramas de PR ya no tienen preview** (comprobado el 29-oct-2026: Cloudflare
+solo construye `develop`). Para ver un cambio hay que mergearlo a `develop`; queda
+en `https://develop.armado-en-mexico.pages.dev` en 1-2 min. Cloudflare reporta en
+los check-runs del commit (`gh api repos/<repo>/commits/<sha>/check-runs`), no en
+los commit statuses.
 
 ## Trampas de este repo que te van a morder
 
