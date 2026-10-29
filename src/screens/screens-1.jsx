@@ -55,6 +55,16 @@ const parsePrice = (a) => parseFloat(String(a && a.priceExact || '').replace(/[^
 // Benelli MR1, CZ P-07 y Taurus PT59 (Saulo, 27-sep-2026).
 const FAVORITOS_MS = [12, 9, 133, 11, 218, 151, 143, 8, 3];
 
+// Las cuatro reglas universales del manejo seguro: solo el título, sin
+// descripción ni fuentes al pie (Saulo, 29-oct-2026). Van en el código y no en
+// D1: el preview las muestra tal cual.
+const REGLAS_SEGURIDAD = [
+  'Trata toda arma como si estuviera cargada',
+  'Nunca apuntes a nada que no estés dispuesto a destruir',
+  'Mantén el dedo fuera del gatillo',
+  'Conoce tu blanco y lo que hay detrás',
+];
+
 function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   const vp = window.useViewport();
   const [promoIdx, setPromoIdx] = useState(0);
@@ -118,9 +128,6 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
     return ordenFavoritos.map((id) => armas.find((a) => String(a.id) === String(id))).filter(Boolean);
   }, [cambios, ordenFavoritos]);
   const masVisitadas = useMemo(() => window.Store ? window.Store.getTopPopular(10, 30) : [], [cambios]);
-  const masNuevas = useMemo(() => window.amxMasNuevas && window.Store
-    ? window.amxMasNuevas(window.Store.getArmas(), window.AMX_PRICE_HISTORY_SEED || {}, window.AMX_MANUALES_SEED || [], 10)
-    : [], [cambios]);
 
   const PAD = 16;
   const containerMax = { maxWidth: 1280, margin: '0 auto', width: '100%' };
@@ -209,15 +216,10 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
         } />
       
 
-      {/* 4 ▸ Carrusel: Las más nuevas — armas que nunca habían salido en un
-          inventario (Saulo, 27-sep-2026; regla en amxMasNuevas). Sin distintivo:
-          el título ya lo dice. */}
-      <CarouselSection
-        title="Las más nuevas"
-        items={masNuevas}
-        renderItem={(a) =>
-        <window.ArmaExpediente arma={a} onClick={() => onOpenArma(a.id)} />
-        } />
+      {/* 4 ▸ Las 4 reglas de seguridad (Saulo, 29-oct-2026). Sustituyen a «Las
+          más nuevas»: un arma recién llegada a la armería aún no tiene datos ni
+          foto fiables, y la portada no debe enseñar fichas a medio hacer. */}
+      <ReglasSeguridad />
 
       {/* 5 ▸ Calibres · guía enciclopédica */}
       <CarouselSection
@@ -354,6 +356,25 @@ function VisitedCard({ arma, onClick }) {
   return <window.ArmaExpediente arma={arma} onClick={onClick} />;
 }
 window.VisitedCard = VisitedCard;
+
+// Las cuatro reglas como placas de advertencia esmaltadas, en cuadrícula: 2×2 en
+// móvil para que se vean las cuatro sin deslizar, en fila en escritorio (Saulo,
+// 29-oct-2026). Es el único elemento de metal pintado del sitio, a propósito. El
+// <ol> ya numera para el lector de pantalla; el «01» pintado es decoración.
+function ReglasSeguridad() {
+  return (
+    <section className="amx-reglas" aria-labelledby="reglas-seguridad-tit">
+      <h2 id="reglas-seguridad-tit" className="amx-reglas-tit">Reglas de seguridad</h2>
+      <ol className="amx-reglas-lista">
+        {REGLAS_SEGURIDAD.map((regla, i) =>
+          <li key={i} className="amx-placa">
+            <span className="amx-placa-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <span className="amx-placa-tit">{regla}</span>
+          </li>)}
+      </ol>
+    </section>);
+}
+window.ReglasSeguridad = ReglasSeguridad;
 
 
 // ════════════════════════════════════════════════════════════════
