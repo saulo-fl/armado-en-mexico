@@ -45,8 +45,14 @@ const ok = (cuerpo) => ({ ok: true, status: 200, json: async () => cuerpo });
 const plano = (x) => JSON.parse(JSON.stringify(x));
 
 test('moderar manda solo accion e id y re-hidrata', async () => {
-  const { Store, llamadas } = cargar((url) => (url.endsWith('/state') ? ok({ reviewsQueue: [COLA[1]] }) : ok({ ok: true })));
+  // /state devuelve {} hasta que el POST de moderar ocurre: solo la re-hidratación (esperada con await) trae [r2].
+  let moderado = false;
+  const { Store, llamadas } = cargar((url) => {
+    if (url.endsWith('/admin/moderar')) { moderado = true; return ok({ ok: true }); }
+    return ok(moderado ? { reviewsQueue: [COLA[1]] } : {});
+  });
   await asentar();
+  assert.deepEqual(plano(Store.getReviewQueue()).map((r) => r.id), ['r1', 'r2']);
   llamadas.length = 0;
   const res = await Store.moderar('aprobar', 'r1');
   assert.deepEqual(plano(res), { ok: true });
@@ -90,7 +96,9 @@ test('moderar cuando fetch lanza devuelve sin_conexion_o_sesion', async () => {
 });
 
 test('hydrate acepta una cola vacía del servidor', async () => {
-  const { Store } = cargar((url) => ok({ reviewsQueue: [], reviews: [] }));
+  // Se siembra una reseña publicada en caché: si 'reviews' dejara de ser excepción de hydrate(), seguiría visible.
+  const publicada = { id: 'p1', texto: 'publicada', tipo: 'arma', entidadId: 47, recomienda: true };
+  const { Store } = cargar((url) => ok({ reviewsQueue: [], reviews: [] }), { previo: { amx_reviews_v1: [publicada] } });
   await asentar();
   assert.equal(Store.getReviewQueue().length, 0);
   assert.equal(Store.getReviews().length, 0);
