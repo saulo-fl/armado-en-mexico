@@ -76,6 +76,8 @@
     "142": 5,
     "143": 14,
     "144": 1,
+    "145": 4,
+    "146": 3,
     "149": 14,
     "150": 5,
     "165": 4,
@@ -225,6 +227,8 @@
     "142": 10364.55,
     "143": 23412.31,
     "144": 28694.84,
+    "145": 14055.41,
+    "146": 18027.59,
     "149": 31646.49,
     "150": 31373.68,
     "165": 19249.8,
@@ -301,22 +305,7 @@
     1.012648,
     1.007899
   ],
-  "sinFicha": [
-    {
-      "idx": 45,
-      "name": "RIFLE CAL. 22\"L.R. WINCHESTER XPERT V.S.",
-      "priceN": 14055.41,
-      "qty": 4,
-      "desc": "RIFLE DE ACCIÓN DE CERROJO, CALIBRE 0.22\" L.R., DE UN CAÑÓN, MARCA WINCHESTER, MODELO XPERT, VERSIÓN SINTÉTICO, CULATA Y"
-    },
-    {
-      "idx": 47,
-      "name": "RIFLE CAL.22\"LR WINCHESTER MODELO RANGER",
-      "priceN": 18027.59,
-      "qty": 3,
-      "desc": "RIFLE DE ACCIÓN DE PALANCA DE UN CAÑÓN, MARCA WINCHESTER, MODELO RANGER, VERSIÓN MADERA, CULATA Y GUARDAMANO MADERA, CAL"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 223,
@@ -356,7 +345,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 1530,
-  "totalMapped": 1493,
+  "totalMapped": 1500,
   "excluidos": [],
   "regresos": [],
   "regresosRechazados": [],

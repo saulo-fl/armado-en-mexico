@@ -19,6 +19,7 @@
     "2051": 1310,
     "2057": 5300,
     "2061": 1750,
+    "2064": 2050,
     "2072": 325,
     "2079": 2000,
     "2088": 2750,
@@ -58,6 +59,7 @@
     "2051": 26.41,
     "2057": 14.1,
     "2061": 10.46,
+    "2064": 10.21,
     "2072": 11.67,
     "2079": 9.97,
     "2088": 14.1,
@@ -81,15 +83,7 @@
     1.012653,
     1.007863
   ],
-  "sinFicha": [
-    {
-      "idx": 16,
-      "name": "CART.CAL.12.GA.SAGA.EXPORT28.MUN8,28GRS",
-      "priceN": 10.21,
-      "qty": 2050,
-      "desc": "CARTUCHO CAL. 12 G.A., MARCA SAGA EXPORT 28, 28 GRAMOS, MUNICION 8, CODIGO SEXPO28MX8"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2121,
@@ -109,7 +103,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 111477,
-  "totalMapped": 107853,
+  "totalMapped": 109903,
   "excluidos": [
     {
       "idx": 35,
@@ -146,21 +140,7 @@
       "tramo": 0
     }
   ],
-  "regresosRechazados": [
-    {
-      "idx": 16,
-      "name": "CART.CAL.12.GA.SAGA.EXPORT28.MUN8,28GRS",
-      "priceN": 10.21,
-      "fichaId": 2064,
-      "fechaAntes": "2026-07-06",
-      "antes": 9.74,
-      "razon": 1.048255,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 12,
-      "general": 1.076533,
-      "tramo": 0
-    }
-  ],
+  "regresosRechazados": [],
   "gemelos": [],
   "sinDueno": []
 }
