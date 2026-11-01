@@ -13,6 +13,7 @@ Trae fotos de producto de la web del fabricante a `Catalogo de Armas/fotos-fuent
     uv run traer.py listar https://benelli.it/en/arma/vinci-black
     uv run traer.py bajar  115 https://benelli.it/uploads/abc123.png
     uv run traer.py manifiesto procedencia-2026-09-22.json [--carpeta ../accesorios-fuente]
+    uv run traer.py hoja procedencia.json        # elegir.html junto al manifiesto
 
 `listar` descarga la pagina, saca TODAS las imagenes candidatas, las mide y las
 ordena por tamano: la foto de producto casi siempre es la mas grande y la mas
@@ -172,6 +173,37 @@ def manifiesto(ruta, carpeta=None):
     print(f"procedencia actualizada: {p}")
 
 
+def hoja(ruta):
+    """`elegir.html` junto al manifiesto: las candidatas de cada arma, para que Saulo
+    elija una. Las imágenes se enlazan por `archivo`, relativo a la carpeta del
+    manifiesto (la `--carpeta` con la que se corrió `manifiesto`)."""
+    from html import escape as e
+    p = Path(ruta)
+    regs = json.loads(p.read_text("utf-8"))
+    grupos = {}
+    for r in regs:
+        grupos.setdefault(str(r["id"]), []).append(r)
+    css = ("body{font-family:system-ui;background:#1e1e1e;color:#eee;margin:16px}h2{color:#ffd54a;margin:28px 0 8px}"
+           ".f{display:flex;flex-wrap:wrap;gap:12px}.c{background:#fff;width:300px;padding:8px;color:#222;"
+           "border-radius:6px;font-size:13px}.c img{width:100%;height:200px;object-fit:contain;"
+           "background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/16px 16px}.c b{font-size:16px}")
+    out = [f'<!doctype html><meta charset="utf-8"><title>Candidatas {e(p.parent.name)}</title>'
+           f"<style>{css}</style><h1>Candidatas — elige una por arma</h1>"]
+    for clave, rs in grupos.items():
+        out.append(f"<h2>#{e(clave)} · {e(rs[0].get('nombre', ''))}</h2><div class=\"f\">")
+        bajadas = [r for r in rs if r.get("archivo")]
+        for r in bajadas:
+            a = e(r["archivo"])
+            out.append(f'<div class="c"><img src="{a}"><b>{a}</b> · {e(r.get("px", ""))} · {e(r.get("estado", ""))}'
+                       f'<br><a href="{e(r.get("pagina", ""))}">{e(r.get("fuente", ""))}</a>'
+                       f'<br><small>{e(r.get("nota", ""))}</small></div>')
+        if not bajadas:
+            out.append(f'<p>Sin candidata. {e(rs[0].get("nota", ""))}</p>')
+        out.append("</div>")
+    (p.parent / "elegir.html").write_text("\n".join(out), "utf-8")
+    print(f"hoja: {p.parent / 'elegir.html'}  ({len(grupos)} armas)")
+
+
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "listar":
         listar(sys.argv[2])
@@ -180,5 +212,7 @@ if __name__ == "__main__":
     elif len(sys.argv) >= 3 and sys.argv[1] == "manifiesto":
         carpeta = sys.argv[sys.argv.index("--carpeta") + 1] if "--carpeta" in sys.argv else None
         manifiesto(sys.argv[2], carpeta)
+    elif len(sys.argv) >= 3 and sys.argv[1] == "hoja":
+        hoja(sys.argv[2])
     else:
         sys.exit(__doc__)
