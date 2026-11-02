@@ -42,12 +42,16 @@ RUIDO = re.compile(r"(logo|bandierin|flag|icon|sprite|favicon|banner|footer|head
 
 
 def _curl(url, destino=None):
+    # La URL sale de páginas web (manifiestos escritos por agentes): solo http(s), y tras
+    # «--» para que una que empiece por «-» no se lea como opción de curl.
+    if urlparse(url).scheme not in ("http", "https"):
+        raise ValueError(f"esquema no permitido: {url[:80]}")
     cmd = ["curl", "-s", "-L", "--compressed", "--max-time", "30", "-A", UA,
            "-H", "Accept-Language: en-US,en;q=0.9"]
     if destino:
-        subprocess.run(cmd + ["-o", str(destino), url], check=True)
+        subprocess.run(cmd + ["-o", str(destino), "--", url], check=True)
         return destino
-    return subprocess.run(cmd + [url], capture_output=True, check=True).stdout.decode("utf-8", "replace")
+    return subprocess.run(cmd + ["--", url], capture_output=True, check=True).stdout.decode("utf-8", "replace")
 
 
 def listar(url):
@@ -191,11 +195,16 @@ def hoja(ruta):
            f"<style>{css}</style><h1>Candidatas — elige una por arma</h1>"]
     for clave, rs in grupos.items():
         out.append(f"<h2>#{e(clave)} · {e(rs[0].get('nombre', ''))}</h2><div class=\"f\">")
-        bajadas = [r for r in rs if r.get("archivo")]
+        # `archivo` solo como nombre suelto de la carpeta; `pagina` solo http(s): el
+        # manifiesto lo escriben agentes con texto de la web.
+        bajadas = [r for r in rs if r.get("archivo") and Path(r["archivo"]).name == r["archivo"]]
         for r in bajadas:
             a = e(r["archivo"])
+            pag = r.get("pagina") or ""
+            fuente = e(r.get("fuente", ""))
+            enlace = f'<a href="{e(pag)}">{fuente}</a>' if urlparse(pag).scheme in ("http", "https") else fuente
             out.append(f'<div class="c"><img src="{a}"><b>{a}</b> · {e(r.get("px", ""))} · {e(r.get("estado", ""))}'
-                       f'<br><a href="{e(r.get("pagina", ""))}">{e(r.get("fuente", ""))}</a>'
+                       f'<br>{enlace}'
                        f'<br><small>{e(r.get("nota", ""))}</small></div>')
         if not bajadas:
             out.append(f'<p>Sin candidata. {e(rs[0].get("nota", ""))}</p>')
