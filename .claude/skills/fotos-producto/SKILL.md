@@ -60,6 +60,16 @@ uv run $R/traer.py manifiesto ".../fotos-fuente/procedencia-2026-09-22.json"
 uv run $R/traer.py manifiesto ".../accesorios-fuente/proc.json" --carpeta ".../accesorios-fuente"
 ```
 
+**La búsqueda en tanda la hace el workflow `buscar-fotos-armas`** (`.claude/workflows/`),
+con `args: {fecha: "AAAA-MM-DD", ids?: [...]}` (sin `ids`, todas las `SIN_FOTO` del censo).
+Un buscador por marca, un revisor escéptico que abre cada candidata y la tumba si no es la
+variante de `dcamRef`, y una segunda vuelta para lo que quede sin nada. Deja en
+`galeria-fuente/armas/tanda-<fecha>/` las aceptadas, su `procedencia.json` y `elegir.html`.
+**No toca `fotos-fuente/` ni el repo**: Saulo elige en la hoja; la elegida se copia a
+`fotos-fuente/<id>.<ext>`, las demás se mueven a `galeria-fuente/armas/<id>/`, y de ahí
+sigue `preparar --solo` → hoja de contactos → `aplicar` → D1. Sin navegador y sin rodear
+anti-bot (`curl_cffi` sigue pendiente de Saulo): lo bloqueado sale como `SIN_FOTO` con el porqué.
+
 `traer.py listar` es además **el juez de si una marca es accesible**: mide cada
 candidata con Pillow, así que un «ninguna descargable» significa que esa marca va por
 Chrome o por otra fuente. No te fíes de un grep sobre el HTML (ver bitácora, 22-sep).
@@ -407,6 +417,14 @@ imitando a Chrome (Meprolight, Chiappa, B&H, Beretta); falta decidir si esas fue
   `aplicar`, verifica siempre que ninguna del lote siga con `silueta-`. Además, lo que
   hay en `fotos-fuente/<id>.*` gana sobre el WebP servido aunque sea más chico (es una
   elección), y `preparar --min-lado N` deja pasar fotos elegidas a mano bajo 900 px.
+- **2026-11-01 — primera corrida de `buscar-fotos-armas`** (altas 264-275): 11/11 con foto,
+  9 de reserva, 21 min. Dos fallos del propio workflow, ya corregidos: (1) el reintento bajaba
+  con los mismos nombres `<id>_<n>` y **pisaba** los archivos de la primera vuelta, así que el
+  revisor juzgó fotos que no eran las de la URL (#264, #267) — ahora el reintento usa `_r<n>`;
+  (2) el revisor tumbaba fotos buenas que solo perdían contra otra mejor (otro lado, otra
+  toma), contra la decisión de la galería — ahora hay `reserva`. El aviso «apunta a la
+  izquierda» de `fotos.py` dio falso positivo en un AR con guardamanos largo (#267, cañón a la
+  derecha). «Squad» en Mendoza es el acabado camuflado (Saulo, 1-nov).
 - **Pendiente**: censo de las 61 pistolas con el estándar lateral derecha, y
   adquisición para las que no cumplan. BiRefNet infiere a 1024², así que los
   panorámicos de rifle (1920×500) habrá que recortarlos antes de inferir.
