@@ -13,6 +13,7 @@ Trae fotos de producto de la web del fabricante a `Catalogo de Armas/fotos-fuent
     uv run traer.py listar https://benelli.it/en/arma/vinci-black
     uv run traer.py bajar  115 https://benelli.it/uploads/abc123.png
     uv run traer.py manifiesto procedencia-2026-09-22.json [--carpeta ../accesorios-fuente]
+    uv run traer.py hoja procedencia.json        # elegir.html junto al manifiesto
 
 `listar` descarga la pagina, saca TODAS las imagenes candidatas, las mide y las
 ordena por tamano: la foto de producto casi siempre es la mas grande y la mas
@@ -23,7 +24,7 @@ Por que curl y no la herramienta de fetch: benelli.it y otras devuelven 403 al
 user-agent por defecto y 200 a uno de navegador. No se salta ningun muro de pago
 ni ninguna autenticacion — es la misma pagina publica que sirve a cualquiera.
 """
-import json, re, subprocess, sys, io
+import ipaddress, os, tempfile, json, re, socket, subprocess, sys, io
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -40,13 +41,49 @@ EXT = (".jpg", ".jpeg", ".png", ".webp")
 RUIDO = re.compile(r"(logo|bandierin|flag|icon|sprite|favicon|banner|footer|header|avatar)", re.I)
 
 
-def _curl(url, destino=None):
-    cmd = ["curl", "-s", "-L", "--compressed", "--max-time", "30", "-A", UA,
-           "-H", "Accept-Language: en-US,en;q=0.9"]
+def _publica(url):
+    """(urlparse, ip) si la URL es http(s) y su host resuelve SOLO a IPs públicas."""
+    u = urlparse(url)
+    if u.scheme not in ("http", "https") or not u.hostname:
+        raise ValueError(f"esquema no permitido: {url[:80]}")
+    ips = [ipaddress.ip_address(sa[0]) for *_, sa in socket.getaddrinfo(u.hostname, None)]
+    for ip in ips:
+        if not ip.is_global:
+            raise ValueError(f"destino no público ({ip}): {url[:80]}")
+    return u, ips[0]
+
+
+def _curl(url, destino=None, saltos=5):
+    # La URL sale de páginas web (manifiestos escritos por agentes): solo http(s), y tras
+    # «--» para que una que empiece por «-» no se lea como opción de curl.
+    # Y nada que resuelva a la red de casa (router, APOLO, Tailscale): una URL de página
+    # web no tiene por qué apuntar ahí. Las redirecciones se siguen aquí y no con -L, para
+    # validar cada salto; --resolve fija la IP ya validada (sin re-resolver el DNS).
+    cmd = ["curl", "-s", "--compressed", "--max-time", "30", "-A", UA,
+           "--proto", "=http,https", "--max-filesize", "60000000",
+           "-H", "Accept-Language: en-US,en;q=0.9", "-w", "%{http_code} %{redirect_url}"]
     if destino:
-        subprocess.run(cmd + ["-o", str(destino), url], check=True)
-        return destino
-    return subprocess.run(cmd + [url], capture_output=True, check=True).stdout.decode("utf-8", "replace")
+        salida = Path(destino)
+    else:
+        fd, nombre = tempfile.mkstemp(suffix=".html")
+        os.close(fd)                                   # en Windows, abierto no se borra
+        salida = Path(nombre)
+    try:
+        for _ in range(saltos + 1):
+            u, ip = _publica(url)
+            puerto = u.port or (443 if u.scheme == "https" else 80)
+            fija = f"{u.hostname}:{puerto}:{f'[{ip}]' if ip.version == 6 else ip}"
+            r = subprocess.run(cmd + ["--resolve", fija, "-o", str(salida), "--", url],
+                               capture_output=True, check=True)
+            codigo, _, siguiente = r.stdout.decode("utf-8", "replace").partition(" ")
+            if codigo.startswith("3") and siguiente.strip():
+                url = siguiente.strip()
+                continue
+            return destino if destino else salida.read_text("utf-8", "replace")
+        raise ValueError(f"más de {saltos} redirecciones: {url[:80]}")
+    finally:
+        if not destino:
+            salida.unlink(missing_ok=True)
 
 
 def listar(url):
@@ -172,6 +209,42 @@ def manifiesto(ruta, carpeta=None):
     print(f"procedencia actualizada: {p}")
 
 
+def hoja(ruta):
+    """`elegir.html` junto al manifiesto: las candidatas de cada arma, para que Saulo
+    elija una. Las imágenes se enlazan por `archivo`, relativo a la carpeta del
+    manifiesto (la `--carpeta` con la que se corrió `manifiesto`)."""
+    from html import escape as e
+    p = Path(ruta)
+    regs = json.loads(p.read_text("utf-8"))
+    grupos = {}
+    for r in regs:
+        grupos.setdefault(str(r["id"]), []).append(r)
+    css = ("body{font-family:system-ui;background:#1e1e1e;color:#eee;margin:16px}h2{color:#ffd54a;margin:28px 0 8px}"
+           ".f{display:flex;flex-wrap:wrap;gap:12px}.c{background:#fff;width:300px;padding:8px;color:#222;"
+           "border-radius:6px;font-size:13px}.c img{width:100%;height:200px;object-fit:contain;"
+           "background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/16px 16px}.c b{font-size:16px}")
+    out = [f'<!doctype html><meta charset="utf-8"><title>Candidatas {e(p.parent.name)}</title>'
+           f"<style>{css}</style><h1>Candidatas — elige una por arma</h1>"]
+    for clave, rs in grupos.items():
+        out.append(f"<h2>#{e(clave)} · {e(rs[0].get('nombre', ''))}</h2><div class=\"f\">")
+        # `archivo` solo como nombre suelto de la carpeta; `pagina` solo http(s): el
+        # manifiesto lo escriben agentes con texto de la web.
+        bajadas = [r for r in rs if r.get("archivo") and Path(r["archivo"]).name == r["archivo"]]
+        for r in bajadas:
+            a = e(r["archivo"])
+            pag = r.get("pagina") or ""
+            fuente = e(r.get("fuente", ""))
+            enlace = f'<a href="{e(pag)}">{fuente}</a>' if urlparse(pag).scheme in ("http", "https") else fuente
+            out.append(f'<div class="c"><img src="{a}"><b>{a}</b> · {e(r.get("px", ""))} · {e(r.get("estado", ""))}'
+                       f'<br>{enlace}'
+                       f'<br><small>{e(r.get("nota", ""))}</small></div>')
+        if not bajadas:
+            out.append(f'<p>Sin candidata. {e(rs[0].get("nota", ""))}</p>')
+        out.append("</div>")
+    (p.parent / "elegir.html").write_text("\n".join(out), "utf-8")
+    print(f"hoja: {p.parent / 'elegir.html'}  ({len(grupos)} armas)")
+
+
 if __name__ == "__main__":
     if len(sys.argv) >= 3 and sys.argv[1] == "listar":
         listar(sys.argv[2])
@@ -180,5 +253,7 @@ if __name__ == "__main__":
     elif len(sys.argv) >= 3 and sys.argv[1] == "manifiesto":
         carpeta = sys.argv[sys.argv.index("--carpeta") + 1] if "--carpeta" in sys.argv else None
         manifiesto(sys.argv[2], carpeta)
+    elif len(sys.argv) >= 3 and sys.argv[1] == "hoja":
+        hoja(sys.argv[2])
     else:
         sys.exit(__doc__)
