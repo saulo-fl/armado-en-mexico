@@ -25,8 +25,8 @@ test('una réplica de arma de uso exclusivo no es civil (art. 9o, último párra
 });
 
 test('escopetas con cañón menor de 635 mm son exclusivas (art. 11 e)', () => {
-  // largo del cañón según la descripción DCAM/OTCA: 18½", 14", 18.5", 20", 18.5", 13"
-  for (const id of [85, 162, 165, 166, 167, 232]) assert.equal(arma(id).avail, 'ejercito', arma(id).nombre);
+  // largo del cañón según la descripción DCAM/OTCA: 18½", 14", 18.5", 20", 18.5", 14", 13"
+  for (const id of [85, 162, 165, 166, 167, 168, 232]) assert.equal(arma(id).avail, 'ejercito', arma(id).nombre);
 });
 
 test('Benelli MR1: .223 Rem como en el registro; culata fija civil, estándar exclusiva', () => {

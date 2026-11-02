@@ -83,9 +83,9 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   // el panel de admin sigue editándolo.
   const promos = useMemo(() => window.Store ? window.Store.getPromos() : [], [cambios]);
 
-  // Armas destacadas (DESIGN.md §5.1). La PRIMERA es fija en la CZ P-09 (id 31,
-  // imagenes/077_CZ_P-09.webp): es la pieza que la portada del mockup enseña, y
-  // no debe cambiar según los favoritos que tenga el visitante.
+  // Armas destacadas (DESIGN.md §5.1). La PRIMERA es fija en la CZ Shadow 2
+  // (id 10): Saulo la puso el 1-nov-2026 en lugar de la CZ P-09 (id 31) del
+  // mockup. No debe cambiar según los favoritos que tenga el visitante.
   //
   // La SEGUNDA existe desde el tablero del 8-sep-2026 —«en el sitio de
   // escritorio caben al menos dos armas destacadas para no desaprovechar el
@@ -96,7 +96,7 @@ function HomeScreen({ onNav, onOpenArma, onOpenAccesorio, onOpenMunicion }) {
   //
   // Si un id desapareciera del catálogo se rellena con las primeras armas que
   // queden, para no dejar el hueco.
-  const IDS_DESTACADAS = [31, 55];
+  const IDS_DESTACADAS = [10, 55];
   const destacadas = useMemo(() => {
     const db = window.DB || [];
     const elegidas = IDS_DESTACADAS
