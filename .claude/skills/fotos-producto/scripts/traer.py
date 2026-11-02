@@ -24,7 +24,7 @@ Por que curl y no la herramienta de fetch: benelli.it y otras devuelven 403 al
 user-agent por defecto y 200 a uno de navegador. No se salta ningun muro de pago
 ni ninguna autenticacion — es la misma pagina publica que sirve a cualquiera.
 """
-import ipaddress, json, re, socket, subprocess, sys, io
+import ipaddress, os, tempfile, json, re, socket, subprocess, sys, io
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -41,25 +41,49 @@ EXT = (".jpg", ".jpeg", ".png", ".webp")
 RUIDO = re.compile(r"(logo|bandierin|flag|icon|sprite|favicon|banner|footer|header|avatar)", re.I)
 
 
-def _curl(url, destino=None):
-    # La URL sale de páginas web (manifiestos escritos por agentes): solo http(s), y tras
-    # «--» para que una que empiece por «-» no se lea como opción de curl.
-    # Y nada que resuelva a la red de casa (router, APOLO, Tailscale): una URL de página
-    # web no tiene por qué apuntar ahí. Las redirecciones las acota --proto-redir.
+def _publica(url):
+    """(urlparse, ip) si la URL es http(s) y su host resuelve SOLO a IPs públicas."""
     u = urlparse(url)
     if u.scheme not in ("http", "https") or not u.hostname:
         raise ValueError(f"esquema no permitido: {url[:80]}")
-    for *_, sa in socket.getaddrinfo(u.hostname, None):
-        ip = ipaddress.ip_address(sa[0])
+    ips = [ipaddress.ip_address(sa[0]) for *_, sa in socket.getaddrinfo(u.hostname, None)]
+    for ip in ips:
         if not ip.is_global:
             raise ValueError(f"destino no público ({ip}): {url[:80]}")
-    cmd = ["curl", "-s", "-L", "--compressed", "--max-time", "30", "-A", UA,
-           "--proto", "=http,https", "--proto-redir", "=http,https", "--max-redirs", "5",
-           "--max-filesize", "60000000", "-H", "Accept-Language: en-US,en;q=0.9"]
+    return u, ips[0]
+
+
+def _curl(url, destino=None, saltos=5):
+    # La URL sale de páginas web (manifiestos escritos por agentes): solo http(s), y tras
+    # «--» para que una que empiece por «-» no se lea como opción de curl.
+    # Y nada que resuelva a la red de casa (router, APOLO, Tailscale): una URL de página
+    # web no tiene por qué apuntar ahí. Las redirecciones se siguen aquí y no con -L, para
+    # validar cada salto; --resolve fija la IP ya validada (sin re-resolver el DNS).
+    cmd = ["curl", "-s", "--compressed", "--max-time", "30", "-A", UA,
+           "--proto", "=http,https", "--max-filesize", "60000000",
+           "-H", "Accept-Language: en-US,en;q=0.9", "-w", "%{http_code} %{redirect_url}"]
     if destino:
-        subprocess.run(cmd + ["-o", str(destino), "--", url], check=True)
-        return destino
-    return subprocess.run(cmd + ["--", url], capture_output=True, check=True).stdout.decode("utf-8", "replace")
+        salida = Path(destino)
+    else:
+        fd, nombre = tempfile.mkstemp(suffix=".html")
+        os.close(fd)                                   # en Windows, abierto no se borra
+        salida = Path(nombre)
+    try:
+        for _ in range(saltos + 1):
+            u, ip = _publica(url)
+            puerto = u.port or (443 if u.scheme == "https" else 80)
+            fija = f"{u.hostname}:{puerto}:{f'[{ip}]' if ip.version == 6 else ip}"
+            r = subprocess.run(cmd + ["--resolve", fija, "-o", str(salida), "--", url],
+                               capture_output=True, check=True)
+            codigo, _, siguiente = r.stdout.decode("utf-8", "replace").partition(" ")
+            if codigo.startswith("3") and siguiente.strip():
+                url = siguiente.strip()
+                continue
+            return destino if destino else salida.read_text("utf-8", "replace")
+        raise ValueError(f"más de {saltos} redirecciones: {url[:80]}")
+    finally:
+        if not destino:
+            salida.unlink(missing_ok=True)
 
 
 def listar(url):
