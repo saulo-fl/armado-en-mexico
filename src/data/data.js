@@ -235,7 +235,7 @@ window.DB = [
 
   mk(30, "CZ P-10 F", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "19+1", "800g", "204mm", "Semi-auto, striker-fired full-size", 2018, "ejercito", "PISTOLA 9mm CESKA CZ P-10 F", "imagenes/076_CZ_P-10_F.webp?v=3", "Versión full-size de la P-10. Mayor capacidad. Calibre 9mm: restringido a Fuerzas Armadas."),
 
-  mk(31, "CZ P-09", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "19+1", "870g", "207mm", "Semi-auto, DA/SA Omega", 2013, "ejercito", "PISTOLA 9mm CESKA CZ P-09", "imagenes/077_CZ_P-09.webp", "Pistola de servicio checa de alta capacidad. Calibre 9mm: restringido en México."),
+  mk(31, "CZ P-09", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "19+1", "870g", "207mm", "Semi-auto, DA/SA Omega", 2013, "ejercito", "PISTOLA 9mm CESKA CZ P-09", "imagenes/077_CZ_P-09.webp?v=2", "Pistola de servicio checa de alta capacidad. Calibre 9mm: restringido en México."),
 
   mk(32, "CZ P-07 9mm", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "15+1", "800g", "185mm", "Semi-auto, DA/SA Omega", 2012, "ejercito", "PISTOLA 9mm CESKA CZ P-07", "imagenes/078_CZ_P-07_9mm.webp", "Compact DA/SA con gatillo Omega intercambiable. Calibre 9mm: restringido a Fuerzas Armadas."),
 
@@ -608,7 +608,7 @@ window.DB = [
   //    salvo LRP Black y MDT, que traen riel Picatinny de 25 MOA. Años: catálogos y noticias de CZ
   //    (Lux/Premium/Varmint 2019, Thumbhole 2020, AT-ONE global 2021, LRP Black y MDT 2022,
   //    Varmint Synthetic 2023); Training Rifle XII sin fecha publicada. Premium y Varmint suman su LH.
-  mk(233, "CZ P-09 F Nocturne", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "19+1", "830g", "208mm", "Semi-auto, DA/SA Omega", 2024, "ejercito", "PISTOLA CESKA CZ P-09F NOC CAL. 9MM 115", "imagenes/CZ_P-09_F_Nocturne.webp", "Serie Nocturne (2024) de la CZ P-09 en tamaño completo: corredera lista para mira réflex, miras luminiscentes de tres puntos, nueva textura de empuñadura y seguro y desamartillador rediseñados, con el mismo cañón de 115 mm y cargador de 19 cartuchos. Calibre 9mm: restringido en México."),
+  mk(233, "CZ P-09 F Nocturne", "Ceska Zbrojovka", "pistola", "Rep. Checa", "9mm Parabellum", "19+1", "830g", "208mm", "Semi-auto, DA/SA Omega", 2024, "ejercito", "PISTOLA CESKA CZ P-09F NOC CAL. 9MM 115", "imagenes/CZ_P-09_F_Nocturne.webp?v=2", "Serie Nocturne (2024) de la CZ P-09 en tamaño completo: corredera lista para mira réflex, miras luminiscentes de tres puntos, nueva textura de empuñadura y seguro y desamartillador rediseñados, con el mismo cañón de 115 mm y cargador de 19 cartuchos. Calibre 9mm: restringido en México."),
   mk(234, "Winchester Xpert Thumbhole .22", "Winchester", "rifle", "", ".22 LR", "10+1", "2.49–3.00 kg", "", "Cerrojo, culata thumbhole laminada", null, "dcam", "RIFLE CAL. 22\"LR WINCHESTER XPERT THUMBH", "imagenes/Winchester_Xpert_Thumbhole_.22.webp", "Versión thumbhole del rifle de cerrojo Winchester Xpert en .22 LR: culata de madera laminada con carrillera ajustable, cañón pesado roscado para supresor y disparador ajustable Rimfire M.O.A. Adquisición civil."),
   mk(235, "CZ 457 Lux", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "2.9 kg", "1088mm", "Cerrojo, miras abiertas", 2019, "dcam", "RIFLE CESKA Z. CZ 457 LUX CAL. 0.22 LR", "imagenes/CZ_457_Lux.webp", "Versión clásica de la serie CZ 457: culata de nogal turco barnizado de estilo europeo con carrillera, miras abiertas de serie y cañón ligero de 630 mm. Adquisición civil."),
   mk(236, "CZ 457 Premium", "Ceska Zbrojovka", "rifle", "Rep. Checa", ".22 LR", "5", "3.2 kg", "1085mm", "Cerrojo, alza tangente", 2019, "dcam", "RIFLE CESKA Z.,CZ 457 PREMIUM, C. 22 LR", "imagenes/CZ_457_Premium.webp", "Versión de lujo de la serie CZ 457: culata de nogal selecto con acabado al aceite y carrillera, alza tangente, guion de fibra óptica y cañón de 630 mm roscado. También se vende para zurdos (Premium LH). Adquisición civil."),
@@ -700,7 +700,7 @@ window.DB.forEach(a => { a.riel = ARMAS_CON_RIEL.includes(a.id); });
 // (camuflaje, madera o color distintos). La ficha lo avisa bajo la foto. Es un sitio
 // divulgativo, no una tienda: la comunidad irá afinando estas fotos (Saulo, 26-sep-2026).
 // Va por id y no como campo del arma: D1 pisa window.DB al hidratar y el campo se perdería.
-window.ARMAS_FOTO_ILUSTRATIVA = [42, 51, 52, 53, 126, 179, 180, 181, 196, 197];
+window.ARMAS_FOTO_ILUSTRATIVA = [31, 42, 51, 52, 53, 126, 179, 180, 181, 196, 197];
 
 // helper de búsqueda usado por screens / admin
 window.findArma = function(id) {
