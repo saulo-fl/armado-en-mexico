@@ -24,7 +24,7 @@ Por que curl y no la herramienta de fetch: benelli.it y otras devuelven 403 al
 user-agent por defecto y 200 a uno de navegador. No se salta ningun muro de pago
 ni ninguna autenticacion — es la misma pagina publica que sirve a cualquiera.
 """
-import json, re, subprocess, sys, io
+import ipaddress, json, re, socket, subprocess, sys, io
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -44,10 +44,18 @@ RUIDO = re.compile(r"(logo|bandierin|flag|icon|sprite|favicon|banner|footer|head
 def _curl(url, destino=None):
     # La URL sale de páginas web (manifiestos escritos por agentes): solo http(s), y tras
     # «--» para que una que empiece por «-» no se lea como opción de curl.
-    if urlparse(url).scheme not in ("http", "https"):
+    # Y nada que resuelva a la red de casa (router, APOLO, Tailscale): una URL de página
+    # web no tiene por qué apuntar ahí. Las redirecciones las acota --proto-redir.
+    u = urlparse(url)
+    if u.scheme not in ("http", "https") or not u.hostname:
         raise ValueError(f"esquema no permitido: {url[:80]}")
+    for *_, sa in socket.getaddrinfo(u.hostname, None):
+        ip = ipaddress.ip_address(sa[0])
+        if not ip.is_global:
+            raise ValueError(f"destino no público ({ip}): {url[:80]}")
     cmd = ["curl", "-s", "-L", "--compressed", "--max-time", "30", "-A", UA,
-           "-H", "Accept-Language: en-US,en;q=0.9"]
+           "--proto", "=http,https", "--proto-redir", "=http,https", "--max-redirs", "5",
+           "--max-filesize", "60000000", "-H", "Accept-Language: en-US,en;q=0.9"]
     if destino:
         subprocess.run(cmd + ["-o", str(destino), "--", url], check=True)
         return destino
