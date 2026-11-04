@@ -246,3 +246,15 @@ Lo que sobrevive es alta nueva.
   catálogo (la GB Sporting Plus 28 → 2007 solo se reconoce así). Un `dcamRef` abreviado
   («SX4 V C») no prueba el acabado: contrástalo con la razón de precio frente a la ficha
   hermana antes de ligar.
+
+### C16. PDF con nombre abreviado: «ARM3nov26», «CARTS…», «ACC…» (03-nov-2026)
+
+- **Síntoma (antes del arreglo)**: «paso 2-mecanico falló sin motivo», `/trabajo/entrada`
+  sin `armas|cartuchos|accesorios.json`, rama con solo el commit de prep. El paso 0
+  reconocía la categoría solo por el nombre (ARMAS|CARTUCHO|ACCESORIO).
+- **Ya corregido en código**: `categoria_pdf` lee el encabezado de la 1.ª página
+  («EXISTENCIA DE ARMAS/MUNICIONES/ACCESORIOS», solo en su renglón) y usa el nombre solo de
+  respaldo (también ARM, CARTS, ACC). Si un PDF no se reconoce, el paso 0 falla con motivo
+  y no llega a la jaula; los pasos 1 y 2 fallan con motivo si no hay nada que mapear/aplicar.
+- **Si vuelve a pasar**: no es trabajo de datos. Cuenta los PDFs de la señal (`.pdfs`) y
+  mira el encabezado con `pdftotext -l 1`; reporta el nombre/encabezado nuevo en `pendiente`.
