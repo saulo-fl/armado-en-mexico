@@ -177,6 +177,33 @@ git fetch origin --quiet 2>>"$LOG" || falla "git fetch origin falló; no corto l
 # ═══════════════════════════════════════════════════════════════════════════════
 # STEP 0: PREP — Parse PDFs + copy
 # ═══════════════════════════════════════════════════════════════════════════════
+# Categoría de un PDF del DCAM → armas | cartuchos | accesorios (nada si no la
+# reconoce). Manda el encabezado de la 1.ª página («EXISTENCIA DE ARMAS /
+# MUNICIONES / ACCESORIOS», sola en su renglón: el PDF O.T.C.A. dice «EXISTENCIAS
+# DE ARMAS, MUNICIONES Y ACCESORIOS» y no es ninguna); el nombre es solo respaldo. El 14-oct y
+# el 03-nov-2026 el DCAM subió «ARM3nov26», «CARTS…», «ACC…» en vez de
+# «ARMAS_…»: detectando solo por nombre, el pipeline siguió sin datos.
+categoria_pdf() {
+  local pdf="$1" enc base
+  enc="$(pdftotext -l 1 "$pdf" - 2>/dev/null | tr '[:lower:]' '[:upper:]' \
+         | grep -oE '^[[:space:]]*EXISTENCIAS? DE (ARMAS|MUNICIONES|CARTUCHOS|ACCESORIOS)[[:space:]]*$' \
+         | head -1 | sed 's/[[:space:]]*$//')"
+  case "$enc" in
+    *ARMAS) echo armas; return 0 ;;
+    *MUNICIONES|*CARTUCHOS) echo cartuchos; return 0 ;;
+    *ACCESORIOS) echo accesorios; return 0 ;;
+  esac
+  base="$(basename "$pdf" .pdf | tr '[:lower:]' '[:upper:]')"
+  if echo "$base" | grep -qE '(^|[^A-Z])ARM(AS)?([^A-Z]|$)'; then
+    echo armas
+  elif echo "$base" | grep -qE '(^|[^A-Z])(CART(S|UCHOS?)?|MUNICION(ES)?)([^A-Z]|$)'; then
+    echo cartuchos
+  elif echo "$base" | grep -qE '(^|[^A-Z])ACC(ESORIOS?)?([^A-Z]|$)'; then
+    echo accesorios
+  fi
+  return 0
+}
+
 step_prep() {
   STEP="0-prep"
   log "paso 0: prep"
@@ -184,18 +211,21 @@ step_prep() {
   git checkout -B "$RAMA" origin/main --quiet 2>>"$LOG"
 
   # Parse each PDF
+  local vistos=" "
   for pdf in $PDFS; do
-    base="$(basename "$pdf" .pdf)"
-    # Detect type from filename
-    if echo "$base" | grep -qi "ARMAS"; then
-      tag="armas"
-    elif echo "$base" | grep -qi "CARTUCHO\|MUNICION"; then
-      tag="cartuchos"
-    elif echo "$base" | grep -qi "ACCESORIO"; then
-      tag="accesorios"
-    else
-      tag="$(echo "$base" | tr '[:upper:]' '[:lower:]')"
+    tag="$(categoria_pdf "$pdf")"
+    if [ -z "$tag" ]; then
+      MOTIVO="PDF $(basename "$pdf") sin categoría reconocible (ni por encabezado ni por nombre)"
+      log "  $MOTIVO"
+      return 1
     fi
+    case "$vistos" in
+      *" $tag "*)
+        MOTIVO="dos PDFs de $tag en la señal (el último es $(basename "$pdf"))"
+        log "  $MOTIVO"
+        return 1 ;;
+    esac
+    vistos="$vistos$tag "
 
     $VENV "$SCRIPTS/parse_pdf.py" "$pdf" \
       --tsv "$WORKDIR/${tag}.tsv" \
@@ -262,6 +292,14 @@ step_mapeo() {
     log "  mapeo accesorios: $(jq '.totalMapped' "$WORKDIR/mapeo-accesorios.json") mapeados"
   fi
 
+  # Sin ningún mapeo no hay nada que aplicar: fallar aquí con motivo y no
+  # dar «paso 1 OK» vacío (03-nov-2026).
+  if ! ls "$WORKDIR"/mapeo-*.json >/dev/null 2>&1; then
+    MOTIVO="paso 1 sin ningún mapeo: no hay armas/cartuchos/accesorios.json en $WORKDIR"
+    log "  $MOTIVO"
+    return 1
+  fi
+
   # Factores fuera de [0.90, 1.10] = emparejamiento equivocado: el paso 2
   # publicaría precios ajenos (02-oct-2026). Antes solo se avisaba en el log.
   local fuera=""
@@ -309,12 +347,18 @@ step_mecanico() {
     MECANICO_ARGS="$MECANICO_ARGS --accesorios $WORKDIR/mapeo-accesorios.json"
   fi
 
+  if [ -z "$MECANICO_ARGS" ]; then
+    MOTIVO="paso 2 sin mapeos que aplicar"
+    log "  $MOTIVO"
+    return 1
+  fi
+
   # shellcheck disable=SC2086
   $VENV "$SCRIPTS/aplicar-mecanico.py" \
     $MECANICO_ARGS \
     --fecha "$FECHA_ISO" \
     --data-dir src/data/ 2>>"$LOG" \
-    || { log "  aplicar-mecanico.py falló (ver traza arriba)"; return 1; }
+    || { MOTIVO="aplicar-mecanico.py falló (traza en el log)"; log "  $MOTIVO"; return 1; }
 
   commitear "mecánico: precios + existencias $FECHA" || return 1
 
@@ -452,7 +496,7 @@ step_audit() {
 # Run pipeline
 # ═══════════════════════════════════════════════════════════════════════════════
 
-step_prep || falla "prep falló"
+step_prep || falla "paso 0-prep: ${MOTIVO:-prep falló}"
 
 if step_mapeo && step_mecanico && step_altas && step_audit; then
   log "pipeline completo $FECHA"
