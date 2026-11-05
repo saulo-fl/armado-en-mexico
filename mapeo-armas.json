@@ -309,15 +309,7 @@
     0.998032,
     0.996787
   ],
-  "sinFicha": [
-    {
-      "idx": 72,
-      "name": "RIFLE.WINCHESTER.XPR.V.THUMB.L.CAL.270W",
-      "priceN": 22440.69,
-      "qty": 5,
-      "desc": "RIFLE DE ACCION DE CERROJO DE UN CAÑÓN, MARCA WINCHESTER, MODELO XPR, VERSION SINTETICO, BASTIDOR SINTETICO, CALIBRE 0.2"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 195,
@@ -348,7 +340,14 @@
   "revisarPrecio": [],
   "totalPdf": 1537,
   "totalMapped": 1503,
-  "excluidos": [],
+  "excluidos": [
+    {
+      "idx": 72,
+      "name": "RIFLE.WINCHESTER.XPR.V.THUMB.L.CAL.270W",
+      "priceN": 22440.69,
+      "qty": 5
+    }
+  ],
   "regresos": [
     {
       "idx": 45,
