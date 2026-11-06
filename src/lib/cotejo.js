@@ -23,40 +23,64 @@
   //   o.autoridad       window.manualAutoridad
   // Existencias: SOLO cuenta el último inventario de cada sucursal; si el arma
   // estuvo alguna vez en esa sucursal y no aparece en él, está AGOTADA ahí.
+  // PRECIO PRINCIPAL (regla de Saulo, 05-nov-2026; la misma que fija los datos
+  // .claude/skills/conciliar-inventario/scripts/precio-principal.py y revisa auditar.js):
+  //   1. hay existencias en DCAM          → precio DCAM (aunque también haya en OTCA)
+  //   2. no hay en DCAM, sí en OTCA       → precio OTCA
+  //   3. no hay en ninguna                → precio del último inventario («último precio conocido»)
+  // Cada sucursal lleva además SU precio: el de su último inventario si viene en
+  // él; si está agotada, el último que tuvo ahí.
   function amxInventarioArma(arma, o) {
-    const priceHistory = (o && o.priceHistory) || [];
-    const manuales = (o && o.manuales) || [];
+    const priceHistory = ((o && o.priceHistory) || []).slice()
+      .sort((a, b) => texto(a.date).localeCompare(texto(b.date)));
+    const manuales = ((o && o.manuales) || []).slice()
+      .sort((a, b) => texto(b.fecha).localeCompare(texto(a.fecha)));
     const autoridad = (o && o.autoridad) || (() => null);
     const manualById = (id) => (id ? manuales.find((m) => m.id === id) : null) || null;
-    const ultimo = priceHistory.length ? priceHistory[priceHistory.length - 1] : null;
-    const manual = manualById(arma.priceManualId) ||
-      (ultimo ? manualById(ultimo.manualId) : null) ||
-      manuales.find((m) => m.primary) || manuales[0] || null;
-    const aut = autoridad(manual);
-    const sigla = aut ? aut.sigla : 'DCAM';
-    const precio = ultimo ? ultimo.price : arma.priceExact;
-
     const autOf = (m) => (m && (m.autoridad || (autoridad(m) ? autoridad(m).sigla : 'DCAM'))) || 'DCAM';
     const ultimoDe = (s) => manuales.find((m) => autOf(m) === s) || null;
-    const estuvoEn = (s) => priceHistory.some((h) => autOf(manualById(h.manualId)) === s);
+    const deSuc = (s) => priceHistory.filter((h) => autOf(manualById(h.manualId)) === s);
 
     const sucursales = [];
     const dcam = ultimoDe('DCAM');
+    const recDcam = dcam ? priceHistory.find((h) => h.manualId === dcam.id) : null;
     const qtyDcam = o && o.existenciasDCAM != null ? o.existenciasDCAM : null;
-    if (qtyDcam != null) sucursales.push({ sigla: 'DCAM', qty: qtyDcam, manual: dcam, agotado: false });
-    else if (estuvoEn('DCAM') && dcam) sucursales.push({ sigla: 'DCAM', qty: null, manual: dcam, agotado: true });
+    const histDcam = deSuc('DCAM');
+    const ultDcam = histDcam.length ? histDcam[histDcam.length - 1] : null;
+    if (qtyDcam != null) {
+      sucursales.push({ sigla: 'DCAM', qty: qtyDcam, manual: dcam, agotado: false,
+        precio: recDcam ? recDcam.price : (ultDcam ? ultDcam.price : arma.priceExact) });
+    } else if (ultDcam && dcam) {
+      sucursales.push({ sigla: 'DCAM', qty: null, manual: dcam, agotado: true, precio: ultDcam.price });
+    }
     const otca = ultimoDe('OTCA');
+    const recOtca = otca ? priceHistory.find((h) => h.manualId === otca.id) : null;
+    const histOtca = deSuc('OTCA');
     if (otca) {
-      const rec = priceHistory.find((h) => h.manualId === otca.id);
-      if (rec && rec.qty != null) sucursales.push({ sigla: 'OTCA', qty: rec.qty, manual: otca, agotado: false });
-      else if (estuvoEn('OTCA')) sucursales.push({ sigla: 'OTCA', qty: null, manual: otca, agotado: true });
+      if (recOtca && recOtca.qty != null) {
+        sucursales.push({ sigla: 'OTCA', qty: recOtca.qty, manual: otca, agotado: false, precio: recOtca.price });
+      } else if (histOtca.length) {
+        sucursales.push({ sigla: 'OTCA', qty: null, manual: otca, agotado: true, precio: histOtca[histOtca.length - 1].price });
+      }
     }
 
-    // ¿Hay un inventario de la MISMA sucursal más reciente que el del precio? Si
-    // lo hay, el arma ya no aparece en él y el precio es el último conocido.
-    // Fechas AAAA-MM-DD, comparables como texto.
-    const ultimoSuc = ultimoDe(sigla);
-    const ultimoConocido = !!(manual && ultimoSuc && String(ultimoSuc.fecha || '') > String(manual.fecha || ''));
+    const ultimo = priceHistory.length ? priceHistory[priceHistory.length - 1] : null;
+    let precio, manual, ultimoConocido = false;
+    if (qtyDcam != null && qtyDcam > 0) {
+      precio = recDcam ? recDcam.price : arma.priceExact; manual = dcam;
+    } else if (recOtca && recOtca.qty > 0) {
+      precio = recOtca.price; manual = otca;
+    } else {
+      precio = ultimo ? ultimo.price : arma.priceExact;
+      manual = (ultimo ? manualById(ultimo.manualId) : null) || manualById(arma.priceManualId) ||
+        manuales.find((m) => m.primary) || manuales[0] || null;
+      // Agotada en todas: si hay un inventario más reciente de su sucursal, es el
+      // último precio conocido (fechas AAAA-MM-DD, comparables como texto).
+      const suc = ultimoDe(autOf(manual));
+      ultimoConocido = !!(manual && suc && texto(suc.fecha) > texto(manual.fecha));
+    }
+    const aut = autoridad(manual);
+    const sigla = aut ? aut.sigla : autOf(manual);
     return { precio, manual, sigla, ultimoConocido, sucursales };
   }
 
