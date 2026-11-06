@@ -592,6 +592,10 @@ window.ACCESORIOS = [
   { ...amx(135, "Cargador .22 LR · CZ P-07 Kadet (10 cart.)", "Česká Zbrojovka", "Rep. Checa", 'cargadores', "dcam", 535.91,
     "CARGADOR CALIBRE .22 LR, MARCA CESKA ZBROJOVKA PARA PISTOLA MODELO CZ P-07 KADET, CON CAPACIDAD DE 10 CARTUCHOS.", [], [["Calibre", ".22 LR"], ["Capacidad", "10 cartuchos"], ["Plataforma", "CZ P-07 Kadet"]],
     "Cargador de 10 cartuchos para el kit de conversión .22 LR de la pistola Česká Zbrojovka CZ P-07 Kadet. Existencia y precio del inventario DCAM (18-sep-2026)."), priceManualId: 'man_acc_2026_09_18' },
+  // ── ALTA del inventario DCAM 05-nov-2026 (Saulo: va en Cargadores, tramo «Rifles · 40 mm») ──
+  amx(136, "Lanzagranadas 40 mm · Colt M203", "Colt", "EUA", 'cargadores', "ejercito", 4051.70,
+    "LANZA GRANADAS CAL.40 mm COLT MOD M203", ["Carabina M4", "Rifle M15"], [["Calibre", "40 mm"], ["Plataforma", "M4 / M15"], ["Código", "RO810"]],
+    "Lanzagranadas de 40 mm de un solo tiro que se monta bajo el cañón de la carabina M4 o el rifle M15. La DCAM lo publica en su inventario de accesorios. Uso exclusivo de las Fuerzas Armadas."),
 ];
 
 // ── COMPATIBILIDAD ACCESORIO ↔ ARMA (14-sep-2026) ────────────────────────────
@@ -643,6 +647,7 @@ const ACC_COMPAT = {
   133: { armas: [] },                  // Galil ACE 21/22: la ACE 21N del catálogo usa STANAG
   134: { armas: [8] },                 // CZ P-07 .380
   135: { armas: [217] },               // CZ P-07 Kadet .22 LR
+  136: { armas: [] },                  // Colt M203: para M4 / M15; no hay ficha
   201: { tipos: ['carabina','rifle','escopeta'], riel: true }, // MEPRO MOR: óptica de riel Picatinny, solo armas con `riel` (data.js)
   202: { armas: [] },                  // MEPRO GLS: mira de lanzagranadas 40 mm; no hay ficha
   301: { armas: [100, 223] },          // Culata TSK para DT11/DT10
@@ -673,7 +678,7 @@ const ACC_CORTO = {
   125: 'Browning 1911-22',     126: 'OPT VM G2 12 GA',     127: 'OPT VM G2 20 GA',
   128: 'Beretta PX4',          129: 'Taurus PT58',         130: 'Browning Buck Mark',
   131: 'CZ 457',               132: 'Tanfoglio FT-9',      133: 'IWI Galil ACE',
-  134: 'CZ P-07',              135: 'CZ P-07 Kadet',
+  134: 'CZ P-07',              135: 'CZ P-07 Kadet',        136: 'Colt M203',
   201: 'Mepro MOR',            202: 'Mepro GLS',
   301: 'Culata DT11',
   401: 'Mossberg 500',         402: 'Clips Rhino .38',
@@ -691,7 +696,7 @@ window.ACCESORIOS.forEach(a => { a.corto = ACC_CORTO[a.id] || ''; });
 //                               (dcam-existencias-2026-09-11.pdf); la línea del cargador no lo dice.
 // Al dar de alta un cargador, añade aquí su tramo: auditar.js falla si falta.
 const ACC_TRAMO_ARMAS = [['pistola', 'Pistolas'], ['rifle', 'Rifles'], ['escopeta', 'Escopetas']];
-const ACC_TRAMO_CALIBRES = ['.22 LR', '.380 ACP', '9mm', '.40 S&W', '.223 Rem', '5.56', '12 GA', '20 GA'];
+const ACC_TRAMO_CALIBRES = ['.22 LR', '.380 ACP', '9mm', '.40 S&W', '.223 Rem', '5.56', '40 mm', '12 GA', '20 GA'];
 const ACC_TRAMO = {
   101: ['rifle', '.22 LR'],      102: ['rifle', '.22 LR'],      103: ['rifle', '5.56'],
   104: ['rifle', '.223 Rem'],    105: ['pistola', '.380 ACP'],  106: ['pistola', '9mm'],
@@ -706,6 +711,7 @@ const ACC_TRAMO = {
   131: ['rifle', '.22 LR'],      132: ['pistola', '.380 ACP'],  133: ['rifle', '5.56'],
   134: ['pistola', '.380 ACP'],
   135: ['pistola', '.22 LR'],
+  136: ['rifle', '40 mm'],
 };
 window.ACCESORIOS.forEach((a) => {
   const t = ACC_TRAMO[a.id];
@@ -772,6 +778,7 @@ const ACC_FOTO = {
   133: 'imagenes/accesorios/133.webp?v=98cf239a',
   134: 'imagenes/accesorios/134.webp?v=7856567c',
   135: 'imagenes/accesorios/135.webp?v=4bd1689a',
+  136: 'imagenes/accesorios/136.webp?v=ad4597ec',
   201: 'imagenes/accesorios/201.webp?v=4b9973e6',
   202: 'imagenes/accesorios/202.webp?v=86025915',
   301: 'imagenes/accesorios/301.webp?v=a2b71673',
@@ -892,6 +899,7 @@ window.ACCESORIOS_PRICE_HISTORY = {
   134: [_h(SEP, 666.1, SEPd, 35)],
   135: [_h(S18, 535.91, S18d, 20), _h(S22, 536.94, S22d, 16), _h(S25, 550.11, S25d, 3)],
   132: [{ manualId: 'man_acc_2026_10_01', price: '$2.72 MXN', date: '2026-10-01', qty: 1 }, { manualId: 'man_acc_2026_10_02', price: '$2.77 MXN', date: '2026-10-02', qty: 1 }, { manualId: 'man_acc_2026_10_05', price: '$2.74 MXN', date: '2026-10-05', qty: 1 }, { manualId: 'man_acc_2026_10_06', price: '$2.73 MXN', date: '2026-10-06', qty: 1 }, { manualId: 'man_acc_2026_10_07', price: '$2.71 MXN', date: '2026-10-07', qty: 1 }, { manualId: 'man_acc_2026_10_09', price: '$2.73 MXN', date: '2026-10-09', qty: 1 }, { manualId: 'man_acc_2026_10_13', price: '$2.75 MXN', date: '2026-10-13', qty: 1 }, { manualId: 'man_acc_2026_10_15', price: '$2.79 MXN', date: '2026-10-15', qty: 1 }, { manualId: 'man_acc_2026_10_16', price: '$2.78 MXN', date: '2026-10-16', qty: 1 }, { manualId: 'man_acc_2026_10_19', price: '$2.79 MXN', date: '2026-10-19', qty: 1 }, { manualId: 'man_acc_2026_10_20', price: '$2.78 MXN', date: '2026-10-20', qty: 1 }, { manualId: 'man_acc_2026_10_21', price: '$2.78 MXN', date: '2026-10-21', qty: 1 }, { manualId: 'man_acc_2026_10_22', price: '$2.81 MXN', date: '2026-10-22', qty: 1 }, { manualId: 'man_acc_2026_10_23', price: '$2.82 MXN', date: '2026-10-23', qty: 1 }, { manualId: 'man_acc_2026_10_26', price: '$2.81 MXN', date: '2026-10-26', qty: 1 }, { manualId: 'man_acc_2026_10_27', price: '$2.80 MXN', date: '2026-10-27', qty: 1 }, { manualId: 'man_acc_2026_10_31', price: '$2.84 MXN', date: '2026-10-31', qty: 1 }, { manualId: 'man_acc_2026_11_03', price: '$2.83 MXN', date: '2026-11-03', qty: 1 }, { manualId: 'man_acc_2026_11_04', price: '$2.83 MXN', date: '2026-11-04', qty: 1 }, { manualId: 'man_acc_2026_11_05', price: '$2.81 MXN', date: '2026-11-05', qty: 1 }],
+  136: [{ manualId: 'man_acc_2026_11_05', price: '$4,051.70 MXN', date: '2026-11-05', qty: 1 }],
 };
 
 // ── Helpers (auto-contenidos; no tocan el store de armas) ────────────────────

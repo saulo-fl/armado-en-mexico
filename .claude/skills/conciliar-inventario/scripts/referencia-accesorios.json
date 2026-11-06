@@ -1,7 +1,7 @@
 {
   "pdfDate": "2026-11-05",
   "pdfFile": "accesorios",
-  "totalRows": 30,
+  "totalRows": 31,
   "rows": [
     {
       "idx": 1,
@@ -218,6 +218,14 @@
       "priceN": 0.0,
       "qty": 1,
       "fichaId": null
+    },
+    {
+      "idx": 28,
+      "name": "LANZA GRANADAS CAL.40 mm COLT MOD M203",
+      "desc": "LANZAGRANADAS CAL. 40 MM. MARCA COLT MODELO M203, PARA USO CON CARABINA M4 Y RIFLE M15, COD. RO810, CON LEYENDA S.D.N. MEXICO D.F. MATRICULA: GL51067.",
+      "priceN": 4051.7,
+      "qty": 1,
+      "fichaId": 136
     },
     {
       "idx": 29,
