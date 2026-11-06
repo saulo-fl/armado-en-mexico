@@ -761,9 +761,14 @@
           .rec-capa { position: fixed; inset: 0; z-index: 1200; touch-action: none; }
           /* EL MARCO — el de los GIF del README: filo rojo de sello y una sombra
              enorme que atenúa todo lo demás. El anillo de papel entre los dos
-             separa el rojo del fondo atenuado en el tema oscuro. */
+             separa el rojo del fondo atenuado en el tema oscuro.
+             Anclado en 0,0 y movido con transform, NO con left/top (6-nov-2026): se
+             recoloca en cada frame del scroll suave hacia la parada, y cada cambio
+             de left/top cuenta como salto de diseño. Era el 96 % del CLS medido en
+             visitantes reales (p75 0.9-1.66 en /arsenal, la ficha de la Glock 25,
+             /legalidad y el comparador). Cambiar transform, width o height no cuenta. */
           .rec-marco {
-            position: fixed; box-sizing: border-box; pointer-events: none;
+            position: fixed; left: 0; top: 0; box-sizing: border-box; pointer-events: none;
             border: 4px solid var(--sello-restr); border-radius: 6px;
             box-shadow: 0 0 0 2px var(--oficio), 0 0 0 4000px rgba(23, 27, 25, .5);
           }
@@ -825,14 +830,16 @@
 
         {marco && (
           <div className="rec-marco" aria-hidden="true"
-            style={{ left: marco.x, top: marco.y, width: marco.w, height: marco.h }} />
+            style={{ transform: `translate(${marco.x}px, ${marco.y}px)`, width: marco.w, height: marco.h }} />
         )}
         <p className="amx-sr" aria-live="polite">
           {listo ? 'Recorrido terminado' : `Parada ${paso + 1} de ${total}: ${p.cinta}`}
         </p>
 
         {listo ? (
-          <div ref={notaRef} className="rec-hoja" role="dialog" aria-modal="true" aria-labelledby="rec-cinta" tabIndex={-1}>
+          // `key` distinta de la nota: sin ella React reutiliza el mismo <div>, lo
+          // «mueve» de abajo al centro y el navegador lo cuenta como salto de diseño.
+          <div key="hoja" ref={notaRef} className="rec-hoja" role="dialog" aria-modal="true" aria-labelledby="rec-cinta" tabIndex={-1}>
             <window.CintaDymo nivel={2} id="rec-cinta">Listo</window.CintaDymo>
             <p className="rec-texto">Ya conoces el sitio. Puedes repetir este recorrido desde Más → Ver tutorial.</p>
             <div className="rec-aprobado"><span className="amx-sello amx-sello--civil">Aprobado</span></div>
@@ -844,9 +851,9 @@
             </div>
           </div>
         ) : (
-          <div ref={notaRef} className={'rec-nota rec-nota--' + (geo ? geo.lado : 'movil')}
+          <div key="nota" ref={notaRef} className={'rec-nota rec-nota--' + (geo ? geo.lado : 'movil')}
             role="dialog" aria-modal="true" aria-labelledby="rec-cinta" tabIndex={-1}
-            style={geo && geo.nota ? { left: geo.nota.x, top: geo.nota.y } : undefined}>
+            style={geo && geo.nota ? { left: 0, top: 0, transform: `translate(${geo.nota.x}px, ${geo.nota.y}px)` } : undefined}>
             {geo && geo.nota && <span className="rec-flecha" aria-hidden="true" style={{ '--rec-flecha': geo.flecha + 'px' }} />}
             <div className="rec-cabeza">
               <window.CintaDymo nivel={2} chica id="rec-cinta">{p.cinta}</window.CintaDymo>
