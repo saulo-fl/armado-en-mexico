@@ -566,6 +566,36 @@ function promoBtnStyle() {
 // ════════════════════════════════════════════════════════════════
 // Los filtros son la tira de chips de TiraFiltros (ui.jsx, docs/DESIGN.md
 // §5.10): aquí solo vive el estado de cada filtro y la regla de qué arma pasa.
+// La rejilla va aparte y memorizada (fase 4.3 de velocidad, 6-nov-2026): al teclear
+// en el buscador, el cuadro de texto se repinta al instante pero las 272 tarjetas no,
+// hasta que llega el resultado diferido. Antes cada tecla repintaba todas: borrar una
+// letra costaba 272 ms con un Android medio (CPU 4x).
+// Cada tarjeta también va memorizada, con callbacks estables: marcar «comparar»
+// repintaba las 272 (las funciones de app.jsx son nuevas en cada render); ahora
+// solo la que cambió.
+const TarjetaRejilla = React.memo(function TarjetaRejilla({ arma, inCompare, abrir, comparar }) {
+  return <ArmaCard arma={arma} onClick={() => abrir(arma.id)} onCompare={() => comparar(arma.id)} inCompare={inCompare} />;
+});
+const RejillaCatalogo = React.memo(function RejillaCatalogo({ armas, compareIds, onOpenArma, toggleCompare }) {
+  const ultimos = React.useRef(null);
+  ultimos.current = { onOpenArma, toggleCompare };
+  const abrir = React.useCallback((id) => ultimos.current.onOpenArma(id), []);
+  const comparar = React.useCallback((id) => ultimos.current.toggleCompare(id), []);
+  return (
+    <div className="amx-catalogo-grid">
+      {armas.map((a) =>
+        <TarjetaRejilla key={a.id} arma={a} inCompare={compareIds.includes(a.id)}
+          abrir={abrir} comparar={comparar} />
+      )}
+      {!armas.length && (
+        <div className="amx-catalogo-vacio">
+          <span aria-hidden="true">◯</span>
+          Sin resultados.<br />Ajusta los filtros.
+        </div>
+      )}
+    </div>);
+});
+
 function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare }) {
   const [query, setQuery] = useState(initialFilter?.mode === 'search' ? initialFilter.value : '');
   const buscadorRef = React.useRef(null);
@@ -579,8 +609,15 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
   const [mecanismo, setMecanismo] = useState('all');
   const [disponible, setDisponible] = useState(initialFilter?.mode === 'disponible' ? 'si' : 'all'); // 'all' | 'si' | 'no'
 
+  // Los criterios van DIFERIDOS (useDeferredValue): el texto y los chips cambian
+  // en el mismo cuadro del toque y la lista se recalcula después, sin bloquearlo.
+  const criterios = React.useDeferredValue(useMemo(
+    () => ({ query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo }),
+    [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo]));
+
   // Conjunto filtrado por TODO excepto el precio (base para los límites dinámicos)
   const baseFiltered = useMemo(() => {
+    const { query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo } = criterios;
     return window.DB.filter((a) => {
       if (tipo !== 'all' && a.tipo !== tipo) return false;
       if (avail !== 'all' && a.avail !== avail) return false;
@@ -617,7 +654,7 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
       }
       return true;
     });
-  }, [query, tipo, avail, sucursal, disponible, calibre, uso, marca, era, mecanismo]);
+  }, [criterios]);
 
   // Límites de precio DINÁMICOS según lo filtrado; paso $1,000 y tope $100,000 («$100,000+»).
   const precios = useMemo(() => baseFiltered.map(parsePrice), [baseFiltered]);
@@ -686,20 +723,8 @@ function CatalogScreen({ initialFilter, onOpenArma, compareIds, toggleCompare })
         activos={activeCount} hayTexto={!!query} onLimpiar={clearAll} />
 
       {/* Grid de armas — ya vintage (ArmaCard = expediente) */}
-      <div className="amx-catalogo-grid">
-        {filtered.map((a) =>
-          <ArmaCard key={a.id} arma={a}
-            onClick={() => onOpenArma(a.id)}
-            onCompare={() => toggleCompare(a.id)}
-            inCompare={compareIds.includes(a.id)} />
-        )}
-        {!filtered.length && (
-          <div className="amx-catalogo-vacio">
-            <span aria-hidden="true">◯</span>
-            Sin resultados.<br />Ajusta los filtros.
-          </div>
-        )}
-      </div>
+      <RejillaCatalogo armas={filtered} compareIds={compareIds}
+        onOpenArma={onOpenArma} toggleCompare={toggleCompare} />
     </div>);
 
 }

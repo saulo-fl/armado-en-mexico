@@ -231,6 +231,12 @@ function App() {
   // Navegación — estado inicial leído de la URL (deep-links)
   const _init = amxParsePath(window.location.pathname);
   const [screen, setScreen] = useStateApp(_init.screen);
+  // Cambiar de pantalla es una TRANSICIÓN (fase 4.3 de velocidad, 6-nov-2026).
+  // Sin ella, tocar una tarjeta construía la ficha entera dentro del propio
+  // toque: con un Android medio (CPU 4x) eran 560 ms sin respuesta (INP); en
+  // visitantes reales, p75 de 400 ms en los listados. Con startTransition el
+  // toque se atiende al instante y React arma la pantalla nueva en trozos.
+  const enTransicion = React.startTransition || ((f) => f());
   const [productId, setProductId] = useStateApp(_init.productId);
   const [accesorioId, setAccesorioId] = useStateApp(_init.accesorioId);
   const [municionId, setMunicionId] = useStateApp(_init.municionId);
@@ -282,14 +288,16 @@ function App() {
     const onPop = () => {
       const s = amxParsePath(window.location.pathname);
       skipPush.current = true;
-      setHistory([]);
-      setScreen(s.screen);
-      setProductId(s.productId);
-      setAccesorioId(s.accesorioId);
-      setMunicionId(s.municionId);
-      setCalibreId(s.calibreId);
-      setCatalogFilter(s.catalogFilter);
-      setReportContext(null);
+      enTransicion(() => {
+        setHistory([]);
+        setScreen(s.screen);
+        setProductId(s.productId);
+        setAccesorioId(s.accesorioId);
+        setMunicionId(s.municionId);
+        setCalibreId(s.calibreId);
+        setCatalogFilter(s.catalogFilter);
+        setReportContext(null);
+      });
       // En el comparador manda la selección EN MEMORIA, no la de la dirección:
       // la entrada del historial guarda las armas de cuando se escribió, y al
       // volver con «atrás» pisaba lo marcado después en otra ficha (se veía el
@@ -357,7 +365,10 @@ function App() {
   const [navVisible, setNavVisible] = useStateApp(true);
   const lastScrollY = useRefApp(0);
 
-  useEffectApp(() => {
+  // useLayoutEffect y no useEffect: con la navegación en transición, el efecto
+  // corría después de pintar y se veía un cuadro de la pantalla nueva a la
+  // altura de scroll de la anterior.
+  React.useLayoutEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
     window.scrollTo(0, 0);
     setNavVisible(true);
@@ -398,7 +409,7 @@ function App() {
     };
   }, [vp.isMobile]);
 
-  const navigate = (target, filter) => {
+  const navigate = (target, filter) => enTransicion(() => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     if (target === 'category') {
       setCatalogFilter(filter);
@@ -407,33 +418,33 @@ function App() {
       setCatalogFilter(filter || null);
       setScreen(target);
     }
-  };
+  });
 
-  const openArma = (id) => {
+  const openArma = (id) => enTransicion(() => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     setProductId(id);
     setScreen('product');
-  };
+  });
 
-  const openAccesorio = (id) => {
+  const openAccesorio = (id) => enTransicion(() => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     setAccesorioId(id);
     setScreen('accesorio');
-  };
+  });
 
-  const openMunicion = (id) => {
+  const openMunicion = (id) => enTransicion(() => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     setMunicionId(id);
     setScreen('municion');
-  };
+  });
 
-  const openCalibre = (id) => {
+  const openCalibre = (id) => enTransicion(() => {
     setHistory(h => [...h, { screen, productId, catalogFilter }]);
     setCalibreId(id);
     setScreen('calibre');
-  };
+  });
 
-  const goBack = () => {
+  const goBack = () => enTransicion(() => {
     setHistory(h => {
       if (!h.length) { setScreen('home'); return []; }
       const last = h[h.length - 1];
@@ -442,9 +453,9 @@ function App() {
       setCatalogFilter(last.catalogFilter);
       return h.slice(0, -1);
     });
-  };
+  });
 
-  const navTab = (id) => {
+  const navTab = (id) => enTransicion(() => {
     setHistory([]);
     if (id === 'menu') setScreen('menu');
     else if (id === 'legal') setScreen('legal');
@@ -460,7 +471,7 @@ function App() {
     else if (id === 'experiencias') setScreen('experiencias');
     else if (id === 'traumaticas') setScreen('traumaticas');
     else if (id === 'home') setScreen('home');
-  };
+  });
 
   const toggleCompare = (id) => {
     setCompareIds(ids => {
