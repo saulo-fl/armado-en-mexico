@@ -124,3 +124,19 @@ test('sin Cache API (p. ej. local) funciona igual, armando cada vez', async () =
   assert.equal(r.headers.get('x-amx-cache'), 'MISS');
   assert.deepEqual(Object.keys(await r.json()).sort(), ['armas', 'masVisitadas', 'reviews']);
 });
+
+test('al reconstruir solo se lee de D1 lo que cambió: armas sale de su propia copia', async () => {
+  const DB = sembrado();
+  await (await pedir(DB)).text(); // MISS: guarda el snapshot y cada pieza
+  DB.sembrar('reviews', [{ id: 'r1' }, { id: 'r9' }], '2026-11-07T10:00:00.000Z');
+  for (const k of cache.guardado.keys()) if (k.includes('__version')) cache.guardado.delete(k);
+  DB.consultas.length = 0;
+  const r = await pedir(DB);
+  assert.equal(r.headers.get('x-amx-cache'), 'MISS');
+  const cuerpo = await r.json();
+  assert.equal(cuerpo.reviews.length, 2);
+  assert.equal(cuerpo.armas[0].nombre, 'Uno');
+  const lecturas = DB.consultas.filter((q) => q.startsWith('SELECT domain, data'));
+  assert.equal(lecturas.length, 1, 'una sola lectura de datos');
+  assert.match(lecturas[0], /IN \(\?\)$/, 'y solo de la fila que cambió (reviews)');
+});

@@ -79,6 +79,11 @@ console.log('\nGET /api/state');
   const etag = r0.headers.get('etag');
   await cpu('con caché caliente (copia guardada)', async () => { const c = ctx(get(), DB); await sinLeer(await onRequestGet(c)); await Promise.all(c.pendientes); });
   if (etag) await cpu('navegador con la misma versión (304)', async () => { const c = ctx(get({ 'If-None-Match': etag }), DB); await sinLeer(await onRequestGet(c)); await Promise.all(c.pendientes); });
+  // Reconstrucción tras un cambio pequeño (reseña, ranking del día): la versión y la copia del
+  // snapshot caducan, pero las piezas de cada dominio siguen en caché (si el código las tiene).
+  const cacheBanco = globalThis.caches.default;
+  const caducar = () => { for (const k of [...cacheBanco.guardado.keys()]) if (/__version|__snapshot/.test(k)) cacheBanco.guardado.delete(k); };
+  await cpu('reconstruir tras un cambio pequeño', async () => { caducar(); const c = ctx(get(), DB); await sinLeer(await onRequestGet(c)); await Promise.all(c.pendientes); });
   delete globalThis.caches;
 }
 
