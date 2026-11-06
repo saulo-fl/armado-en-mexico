@@ -49,6 +49,35 @@ del proyecto de Saulo) y las unidades de `scripts/dcam/systemd/`.
   Motivo: el 23-oct el #415 se cortó con el #414 abierto y chocó al fusionarse este.
 - PRs de este estado: #372, #375, #376, #379, #380 y #381.
 
+## Inventario OTCA (Monterrey) — desde el 06-nov-2026
+
+La OTCA publica en la página de comercialización un solo PDF («Existencias OTCA.»,
+`EXISTENCIAS_O.T.C.A._<fecha>.pdf`) con armas, municiones y accesorios. Va por su propio camino:
+
+- **Vigía:** tipo `otca` (`es_otca`). Si el PDF es nuevo o cambió y ya está en disco, escribe
+  `pendiente-otca.json` (`{fecha, pdf, url, sha256}`) y avisa «📦 Inventario nuevo OTCA (Monterrey)».
+  No toca la señal de la DCAM. Si falla su descarga, pide reintento como las existencias.
+- **`dcam-otca.path` → `dcam-otca.service`** (usuario dcam, sin jaula ni Docker) ejecuta el
+  fijo de root `/usr/local/lib/dcam/otca-pipeline.sh`: `parse_otca.py` → `mapear-otca.py
+  --update-ref` → `aplicar-otca.py` (incluye el precio principal DCAM > OTCA > último) →
+  compuertas (`auditar.js` ✔✔, `npm test` sin fallos, `test_otca.py`) → PR a **main** en la rama
+  `auto/inventario-otca-<fecha del PDF>`.
+- **PR listo** si todos los renglones tienen ficha; **en borrador** si alguno no la tiene (no se
+  carga; va en el cuerpo del PR y en el aviso de Telegram). El solucionador para OTCA está pendiente
+  (otro PR, Saulo 06-nov-2026); mientras, los renglones sin ficha se resuelven a mano con
+  `ligas-otca.json`.
+- **Convivencia con la DCAM:** la rama empieza con `auto/inventario-` para que los dos pipelines se
+  esperen el PR abierto del otro. Comparte `conciliar.lock` con la DCAM, pero espera a que se libere
+  (hasta 15 h) en vez de salir, y al terminar re-dispara una señal DCAM que se hubiera quedado sin
+  atender. Si el PDF ya estaba cargado (nada cambia en `src/` ni `public/`), no hace PR y solo avisa.
+- **Develop** se iguala con el sync de siempre (`sync/main-a-develop-<fecha>`).
+- **Instalación (root):** `install -m 755 scripts/dcam/otca-pipeline.sh /usr/local/lib/dcam/`;
+  `cp scripts/dcam/systemd/dcam-otca.{path,service} /etc/systemd/system/`; `systemctl
+  daemon-reload && systemctl enable --now dcam-otca.path`. El vigía no se instala: corre desde
+  `/srv/dcam/repo` al día con main.
+- **Prueba local sin GitHub:** `DCAM_DIR=<dir> DCAM_REPO=<clon> DCAM_VENV=<python con PyMuPDF>
+  OTCA_SIN_GH=1 bash scripts/dcam/otca-pipeline.sh` con un `pendiente-otca.json` en `<dir>`.
+
 ## Decisiones del sistema
 
 | Tema | Decisión |
