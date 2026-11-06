@@ -1,6 +1,7 @@
 // Armado en México — Copyright (C) 2026 Saulo Flores León
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Pruebas de Store.moderar, hydrate() con colas vacías y pushAllToServer() sin dominios moderados.
+// Desde nov-2026, también: hydrate() que no reprocesa la misma versión (ETag) y el ranking del servidor.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -114,9 +115,10 @@ test('hydrate sigue ignorando armas vacías', async () => {
 test('pushAllToServer no manda dominios moderados', async () => {
   const { Store, llamadas, localStorage } = cargar(() => ok({}));
   await asentar();
-  for (const d of ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits', 'pages']) {
+  for (const d of ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits', 'masVisitadas', 'pages']) {
     localStorage.setItem({ reviews: 'amx_reviews_v1', reviewsQueue: 'amx_reviewsq_v1', rejected: 'amx_rejected_v2',
-      reports: 'amx_reports_v1', visits: 'amx_visits_v2', pages: 'amx_pages_v4' }[d], '[]');
+      reports: 'amx_reports_v1', visits: 'amx_visits_v3', masVisitadas: 'amx_masvisitadas_v1',
+      pages: 'amx_pages_v4' }[d], '[]');
   }
   llamadas.length = 0;
   const results = await Store.pushAllToServer();
@@ -126,4 +128,54 @@ test('pushAllToServer no manda dominios moderados', async () => {
     assert.ok(!puts.includes(d), d + ' no debe subirse');
     assert.ok(!(d in results), d + ' no debe aparecer en results');
   }
+});
+
+const conEtag = (cuerpo, etag, contador) => ({
+  ok: true, status: 200,
+  headers: { get: (h) => (String(h).toLowerCase() === 'etag' ? etag : null) },
+  json: async () => { contador.n++; return cuerpo; },
+});
+
+test('hydrate no reprocesa un snapshot con el mismo ETag, y sí uno nuevo', async () => {
+  const contador = { n: 0 };
+  let etag = '"v1"';
+  let nombre = 'Prueba';
+  const { Store, localStorage } = cargar(() => conEtag({ armas: [{ id: 1, nombre, img: 'x.jpg' }] }, etag, contador));
+  await asentar();
+  assert.equal(contador.n, 1);
+  assert.equal(localStorage.getItem('amx_state_etag_v1'), '"v1"');
+  nombre = 'Cambio que no debe verse';
+  assert.equal(await Store.hydrate(), true);
+  assert.equal(contador.n, 1, 'misma versión: ni se parsea ni se reescribe');
+  assert.equal(Store.getArmas()[0].nombre, 'Prueba');
+  etag = '"v2"';
+  await Store.hydrate();
+  assert.equal(contador.n, 2);
+  assert.equal(Store.getArmas()[0].nombre, 'Cambio que no debe verse');
+});
+
+test('hydrate sin ETag (admin) siempre aplica y olvida la versión guardada', async () => {
+  const contador = { n: 0 };
+  let etag = '"v1"';
+  const { Store, localStorage } = cargar(() => conEtag({ armas: [{ id: 1, nombre: 'A', img: 'x.jpg' }] }, etag, contador));
+  await asentar();
+  etag = null;
+  await Store.hydrate();
+  await Store.hydrate();
+  assert.equal(contador.n, 3);
+  assert.equal(localStorage.getItem('amx_state_etag_v1'), null);
+});
+
+test('getTopPopular usa el ranking del servidor y completa con el catálogo', async () => {
+  const armas = [1, 2, 3, 4].map((id) => ({ id, nombre: 'A' + id, img: 'x.jpg' }));
+  const { Store } = cargar(() => ok({ armas, masVisitadas: { dia: '2026-11-06', dias: 30, top: [[3, 9], [99, 5], [1, 2]] } }));
+  await asentar();
+  assert.deepEqual(plano(Store.getTopPopular(3).map((a) => a.id)), [3, 1, 2], 'el id 99 ya no existe y se salta');
+  assert.deepEqual(plano(Store.getTopPopular(2).map((a) => a.id)), [3, 1]);
+});
+
+test('el blob viejo de visitas (amx_visits_v2) se borra del navegador', async () => {
+  const { localStorage } = cargar(() => ok({}), { previo: { amx_visits_v2: { 1: [1, 2, 3] } } });
+  await asentar();
+  assert.equal(localStorage.getItem('amx_visits_v2'), null);
 });

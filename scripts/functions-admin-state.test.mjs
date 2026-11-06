@@ -11,7 +11,7 @@ const put = (domain, body) => new Request('http://localhost/api/admin/state/' + 
 });
 
 test('el PUT de admin rechaza con 409 cada dominio moderado sin tocar D1', async () => {
-  assert.deepEqual(DOMINIOS_MODERADOS, ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits']);
+  assert.deepEqual(DOMINIOS_MODERADOS, ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits', 'masVisitadas']);
   for (const d of DOMINIOS_MODERADOS) {
     let calls = 0;
     const DB = { prepare() { calls++; throw new Error('D1 no debe tocarse'); } };

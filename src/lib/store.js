@@ -12,7 +12,11 @@
     armas:       'amx_armas_v2',
     pages:       'amx_pages_v4',
     rejected:    'amx_rejected_v2',
-    visits:      'amx_visits_v2',
+    // v3 desde nov-2026: la v2 guardaba el blob de visitas de TODO el sitio que mandaba el
+    // servidor (~500 KB que se parseaban en cada ficha abierta). Ahora solo las de este
+    // navegador, como respaldo sin backend; el ranking real llega en masVisitadas.
+    visits:      'amx_visits_v3',
+    masVisitadas:'amx_masvisitadas_v1',
     priceHist:   'amx_priceHist_v2',
     promos:      'amx_promos_v2',
     favorites:   'amx_favorites_v2',
@@ -35,7 +39,7 @@
     // amx_admin_v2 guardaba la contraseña local del admin, retirada el
     // 19-oct-2026: se borra para que no quede en ningún navegador.
     ['amx_armas_v1','amx_pending_v1','amx_pages_v1','amx_admin_v1','amx_rejected_v1','amx_visits_v1','amx_priceHist_v1','amx_promos_v1','amx_suggestions_v1',
-     'amx_pending_v2','amx_suggestions_v2','amx_admin_v2']
+     'amx_pending_v2','amx_suggestions_v2','amx_admin_v2','amx_visits_v2']
       .forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
   } catch(e) {}
 
@@ -110,8 +114,8 @@
     }
   }
   function write(k, v) {
-    try { localStorage.setItem(k, JSON.stringify(v)); }
-    catch (e) { console.warn('[Store] error writing', k, e); }
+    try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+    catch (e) { console.warn('[Store] error writing', k, e); return false; }
   }
 
   // ── Rutas de imagen del seed (data.js) ───────────────────────────────
@@ -169,14 +173,18 @@
     armas: K.armas, pages: K.pages, promos: K.promos, favorites: K.favorites,
     appConfig: K.appConfig, manuales: K.manuales, priceHist: K.priceHist,
     rejected: K.rejected,
-    visits: K.visits,
+    visits: K.visits, masVisitadas: K.masVisitadas,
     reviews: K.reviews, reviewsQueue: K.reviewsQueue, reports: K.reports,
   };
   const SYNCABLE = Object.keys(DOMAIN_K);
   // Dominios que el servidor escribe (público por /append, admin por /admin/moderar).
   // El navegador nunca los sube ni los ignora vacíos: manda el servidor.
   // Espejo de DOMINIOS_MODERADOS en functions/api/_lib.js (lo vigila store-moderar.test.mjs).
-  const DEL_SERVIDOR = ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits'];
+  const DEL_SERVIDOR = ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits', 'masVisitadas'];
+  // Versión (ETag) del último snapshot público aplicado entero. Si /api/state responde con la
+  // misma, no se vuelve a parsear ni a reescribir localStorage (~360 KB en cada carga). El
+  // snapshot del admin no trae ETag: siempre se aplica y borra esta marca.
+  const K_STATE_ETAG = 'amx_state_etag_v1';
 
   const _putTimers = {};
   // Empuje de admin: reemplaza el blob completo del dominio (debounced).
@@ -206,8 +214,15 @@
     try {
       const res = await fetch(REMOTE.base + '/state', { credentials: 'include' });
       if (!res.ok) return false;            // 404 (sin Functions) → modo offline
+      const etag = (res.headers && typeof res.headers.get === 'function') ? res.headers.get('ETag') : null;
+      // Misma versión que la última aplicada (y el catálogo sigue en caché) → nada que hacer.
+      if (etag && etag === localStorage.getItem(K_STATE_ETAG) && localStorage.getItem(K.armas)) {
+        REMOTE.ok = true;
+        return true;
+      }
       const data = await res.json();
       REMOTE.ok = true;                     // backend vivo (aunque venga {})
+      let todoEscrito = true;
       Object.keys(data || {}).forEach((domain) => {
         const k = DOMAIN_K[domain]; if (!k) return;
         const val = data[domain];
@@ -229,8 +244,14 @@
           window.DB.length = 0;
           val.forEach((a) => window.DB.push(a));
         }
-        write(k, val);
+        if (!write(k, val)) todoEscrito = false;
       });
+      // Solo se recuerda la versión si TODO quedó guardado (p. ej. sin cuota llena); si no,
+      // la siguiente carga vuelve a aplicar el snapshot completo.
+      try {
+        if (etag && todoEscrito) localStorage.setItem(K_STATE_ETAG, etag);
+        else localStorage.removeItem(K_STATE_ETAG);
+      } catch (e) {}
       Store._notify();
       return true;
     } catch (e) { return false; }           // offline
@@ -439,6 +460,21 @@
     },
     getVisits() { return read(K.visits, {}); },
     getTopPopular(n = 5, days = 30) {
+      // 1) Ranking del servidor (tabla visitas_dia, recalculado una vez al día, 30 días):
+      //    `top` = [[armaId, visitas], ...] de mayor a menor. Se completa con el catálogo si
+      //    hay menos de n armas con visitas (o si alguna ya no existe).
+      const mv = read(K.masVisitadas, null);
+      if (mv && Array.isArray(mv.top) && mv.top.length) {
+        const armas = this.getArmas();
+        const porId = new Map(armas.map(a => [Number(a.id), a]));
+        const out = [];
+        const usados = new Set();
+        const meter = (a) => { if (a && !usados.has(a.id) && out.length < n) { usados.add(a.id); out.push(a); } };
+        mv.top.forEach(par => meter(porId.get(Number(Array.isArray(par) ? par[0] : NaN))));
+        armas.forEach(meter);
+        return out;
+      }
+      // 2) Sin backend (file://, sin D1): las visitas de este navegador.
       const v = read(K.visits, {});
       const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
       const counts = {};

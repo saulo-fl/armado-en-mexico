@@ -38,3 +38,6 @@ node_modules
 
 # cajas.py importa fotos.py como modulo hermano: Python deja su cache al lado
 __pycache__/
+
+# Estado local de `wrangler pages dev` / `d1 execute --local` (D1 local, caché).
+.wrangler/
