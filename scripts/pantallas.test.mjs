@@ -31,6 +31,9 @@ function reactDeMentira() {
     useRef: (v) => ({ current: v }),
     useMemo: (f) => f(),
     useCallback: (f) => f,
+    // memo y useDeferredValue: la rejilla del catálogo (fase 4.3 de velocidad).
+    memo: (c) => c,
+    useDeferredValue: (v) => v,
   };
 }
 
