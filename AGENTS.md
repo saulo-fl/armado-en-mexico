@@ -165,6 +165,7 @@ npx serve out               # o cualquier servidor HTTP sobre out/: no carga des
 node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada commit
 npm test                     # las suites de node:test (scripts/*.test.mjs)
 npm run smoke                # abre out/ en un Chrome real: una página por forma de ruta
+npm run bench:api            # CPU de las Functions públicas (límite del plan gratis: 10 ms)
 node --test scripts/faq.test.mjs   # una sola suite
 ```
 
@@ -454,10 +455,18 @@ Lo editado en el admin ya puede compartirse entre visitantes mediante un backend
 **No** toques el orden de carga ni conviertas store.js en async: la capa de backend es aditiva y
 tolera la ausencia de red. El dominio `admin` (contraseña/sesión) **no** se sincroniza nunca.
 
+**Límite de CPU (nov-2026):** Cloudflare corta cada petición a una Function a los **10 ms de
+CPU** en el plan gratis, sin error en el build: el sitio solo empieza a fallar a ratos (Error 1102).
+Pasó con el blob `visits`, que viajaba en cada `GET /api/state` y se reescribía en cada visita.
+Hoy las visitas son la tabla `visitas_dia` (`functions/api/_visitas.js`) y el snapshot público
+sale de la caché de Cloudflare hasta que cambia alguna fila (versión por `updated_at`, ≤ 1 min en
+propagarse, 304 con ETag). Detalle y sondas en `docs/BACKEND.md` §Rendimiento. **Antes de añadir
+datos a `/api/state` o trabajo por petición a una Function, corre `npm run bench:api`.**
+
 **Limitación restante:** "última escritura gana" en los `PUT` de admin (sin versionado; ya no
 aplica a reseñas, denuncias ni visitas, que solo cambian por `/append` y `/admin/moderar`) y el
-*append* hace read-modify-write por petición (suficiente para este tráfico). Migrar
-`reviews`/`visits`/colas a tablas fila-por-item es la evolución natural si crece el volumen.
+*append* de reseñas y denuncias hace read-modify-write por petición (suficiente para este
+tráfico). Migrar `reviews`/colas a tablas fila-por-item es la evolución natural si crece.
 
 ## RESUELTO (27-ago-2026) — «DCAM Monterrey» y por qué tardó dos días
 

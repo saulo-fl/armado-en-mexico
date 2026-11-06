@@ -15,7 +15,7 @@ import assert from 'node:assert/strict';
 import {
   mergeAppend, APPEND_DOMAINS, RESENA_MIN, RESENA_MAX,
   normalizeReport, REPORT_MIN, REPORT_MAX,
-  VISITS_MAX_CLAVES, VISITS_POR_ARMA, requireAdmin,
+  requireAdmin,
 } from '../functions/api/_lib.js';
 
 const pesa = (v) => JSON.stringify(v).length;
@@ -72,44 +72,7 @@ ok('denuncias inválidas no modifican el dominio');
   ok('pending y suggestions retirados de la escritura publica');
 }
 
-// ── visits: tope por arma, y la fila entera cabe en D1 ──────────────────────
-{
-  let v = {};
-  for (let i = 0; i < 600; i++) v = mergeAppend('visits', v, { armaId: 1, ts: Date.now() - i });
-  assert.equal(v['1'].length, VISITS_POR_ARMA, `maximo ${VISITS_POR_ARMA} marcas por arma`);
-
-  let full = {};
-  // Peor caso construido directamente (mergeAppend con la marca del servidor
-  // tardaría demasiado): el tope de claves lleno, cada una con su tope de marcas.
-  const ahora = Date.now();
-  for (let id = 1; id <= VISITS_MAX_CLAVES; id++) {
-    full[String(id)] = Array.from({ length: VISITS_POR_ARMA }, (_, i) => ahora - i);
-  }
-  full = mergeAppend('visits', full, { armaId: 1 });
-  const bytes = pesa(full);
-  assert.ok(bytes < 2_000_000, `visits saturado debe caber en la fila de 2 MB de D1, mide ${bytes}`);
-  ok(`visits saturado (${VISITS_MAX_CLAVES} claves) = ${bytes} bytes, bajo el limite de 2 MB`);
-}
-
-// ── visits: el cliente no elige la marca ni infla la fila con ids ───────────
-{
-  const antes = Date.now();
-  const futuro = antes + 10 * 365 * 24 * 3600 * 1000;
-  const v = mergeAppend('visits', {}, { armaId: 7, ts: futuro });
-  assert.equal(v['7'].length, 1);
-  assert.ok(v['7'][0] >= antes && v['7'][0] <= Date.now(), 'la marca es la hora del servidor, no la enviada');
-  ok('visits ignora el ts del cliente');
-
-  for (const malo of [0, -3, 100000, 'abc', null]) {
-    assert.deepEqual(mergeAppend('visits', {}, { armaId: malo }), {}, `armaId ${malo} rechazado`);
-  }
-  ok('visits rechaza ids fuera de rango');
-
-  let lleno = {};
-  for (let id = 1; id <= VISITS_MAX_CLAVES + 50; id++) lleno = mergeAppend('visits', lleno, { armaId: id });
-  assert.ok(Object.keys(lleno).length <= VISITS_MAX_CLAVES, 'tope de claves respetado');
-  ok(`visits nunca pasa de ${VISITS_MAX_CLAVES} claves`);
-}
+// (las visitas ya no pasan por mergeAppend: ver functions-visitas.test.mjs)
 
 // ── ids de reseña/denuncia: sin colisiones ──────────────────────────────────
 {
