@@ -393,6 +393,13 @@ explícito. El método para resolverlo: **price chain + name similarity**.
    decisiones de criterio que la cadena de precios no reconstruye: regresos de agotados,
    variantes, altas, renglones a $0 (`null`). Son permanentes y ganan sobre la cadena.
    Pásalas siempre con `--ligas`, también en `--update-ref`.
+   `traslados-armas.json` (`{"<cat origen>": ["<nombre exacto>", …]}`) lista renglones que la
+   DCAM publica en otro PDF pero que en el catálogo son armas (05-nov-2026: el lanzagranadas
+   Colt M203 llegó en accesorios → ficha de arma 276). `mapear-existencias.py` los añade al
+   mapear `armas.json` (los lee de `<cat origen>.json` del mismo directorio) y los quita al
+   mapear la categoría de origen; su ficha se fija con una liga normal en `ligas-armas.json`.
+   Solo actúa cuando el archivo se llama `<cat>.json` (como en el workdir del pipeline).
+   Prueba: `python3 scripts/test_traslados.py`.
 2. `mapear-existencias.py` empareja el PDF nuevo contra la referencia:
    - Detecta los factores de precio (1-2 dominantes) SOLO entre renglones con el mismo
      nombre en ambos PDFs, dentro de [0.90, 1.10] y con apoyo suficiente. Comparar todos

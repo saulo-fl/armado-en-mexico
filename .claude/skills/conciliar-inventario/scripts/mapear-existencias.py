@@ -43,6 +43,49 @@ DEFAULT_REF = SCRIPT_DIR / "referencia-armas.json"
 
 FACTOR_MIN, FACTOR_MAX = 0.90, 1.10
 
+# Renglones que la DCAM publica en otro PDF pero que en el catálogo son armas
+# (p. ej. el lanzagranadas Colt M203 viene en el de accesorios). Formato:
+# {"<cat origen>": ["<nombre exacto del PDF>", ...]}. Al mapear armas se
+# añaden desde <workdir>/<cat origen>.json; al mapear la categoría de origen
+# se quitan, así ese renglón cuenta solo como arma (precio + existencias).
+TRASLADOS_ARMAS = SCRIPT_DIR / "traslados-armas.json"
+
+
+def aplicar_traslados(new_path, items, traslados):
+    """Devuelve `items` con los traslados a armas aplicados.
+
+    La categoría sale del nombre del archivo (`armas.json`, `accesorios.json`,
+    …: así los escribe el paso 0). Un archivo con otro nombre no se toca.
+    """
+    if not traslados:
+        return items
+    p = Path(new_path)
+    cat = p.stem
+    if cat == "armas":
+        sig = max((r.get("idx", 0) for r in items), default=0) + 1
+        extra = []
+        for origen, nombres in traslados.items():
+            fuente = p.with_name(f"{origen}.json")
+            if not fuente.exists():
+                continue
+            with open(fuente) as f:
+                for r in json.load(f).get("items", []):
+                    if r["name"] in nombres:
+                        extra.append({**r, "idx": sig})
+                        sig += 1
+        if extra:
+            print(f"traslados: {len(extra)} renglón(es) de otro PDF mapeados como armas",
+                  file=sys.stderr)
+        return items + extra
+    if cat in traslados:
+        quitar = set(traslados[cat])
+        fuera = [r for r in items if r["name"] in quitar]
+        if fuera:
+            print(f"traslados: {len(fuera)} renglón(es) de {cat} se mapean como armas",
+                  file=sys.stderr)
+        return [r for r in items if r["name"] not in quitar]
+    return items
+
 
 def clave_liga(row, ligas):
     """Clave de `row` en el archivo de ligas, o None.
@@ -798,6 +841,10 @@ def main():
 
     with open(new_path) as f:
         pdf_data = json.load(f)
+
+    if TRASLADOS_ARMAS.exists():
+        with open(TRASLADOS_ARMAS) as f:
+            pdf_data["items"] = aplicar_traslados(new_path, pdf_data["items"], json.load(f))
 
     # --catalogo <src/data> [--antes-de AAAA-MM-DD]: activa la variante
     # representativa (solo armas; cartuchos y accesorios no usan dcamRef).
