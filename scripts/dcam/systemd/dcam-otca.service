@@ -1,0 +1,42 @@
+[Unit]
+Description=Pipeline OTCA — carga el inventario de Monterrey y abre PR a main
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=dcam
+Group=dcam
+UMask=0002
+WorkingDirectory=/srv/dcam/repo
+Environment=HOME=/srv/dcam DCAM_DIR=/srv/dcam DCAM_WORKDIR_BASE=/srv/dcam/trabajo
+# GH_TOKEN (root 600, lo entrega systemd). Telegram por credencial: %d = carpeta de credenciales.
+EnvironmentFile=/etc/dcam/gh.env
+LoadCredential=telegram.env:/etc/dcam/telegram.env
+Environment=DCAM_TG_ENV=%d/telegram.env
+# 30 s de gracia: si el vigía dejó a la vez la señal DCAM, que el pipeline DCAM tome el lock primero.
+ExecStartPre=/usr/bin/sleep 30
+# Ruta de root, fuera del repo de dcam (D-3a): lo que dcam pueda escribir no se ejecuta con privilegios.
+ExecStart=/usr/bin/env bash /usr/local/lib/dcam/otca-pipeline.sh
+Nice=10
+# Hasta 24 h esperando a que se cierre el PR de inventario previo (OTCA_ESPERA_MAX)
+# + hasta 15 h esperando el lock del pipeline DCAM + margen.
+TimeoutStartSec=40h
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ReadWritePaths=/srv/dcam
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+# DNS público propio (root 644, lo instala el despliegue): dcam no llega al router ni a Tailscale.
+BindReadOnlyPaths=/etc/dcam/resolv.conf:/etc/resolv.conf
+# dcam no usa Docker: aunque el socket cambiara de permisos, la unidad no lo ve.
+InaccessiblePaths=-/run/docker.sock -/var/run/docker.sock
+# ::/0: nada de IPv6 (si el ISP diera IPv6 público, la LAN quedaría a la vista); gob.mx, GitHub y Telegram van por IPv4.
+IPAddressDeny=localhost link-local multicast 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 100.64.0.0/10 fc00::/7 ::/0
+CapabilityBoundingSet=
+RestrictSUIDSGID=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+LockPersonality=yes

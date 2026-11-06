@@ -1,0 +1,10 @@
+[Unit]
+Description=Observa la señal OTCA del vigía y dispara el pipeline OTCA
+
+[Path]
+# El vigía escribe pendiente-otca.json cuando baja un PDF de la OTCA nuevo o cambiado.
+PathModified=/srv/dcam/pendiente-otca.json
+Unit=dcam-otca.service
+
+[Install]
+WantedBy=multi-user.target
