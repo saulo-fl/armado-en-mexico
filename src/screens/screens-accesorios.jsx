@@ -191,7 +191,7 @@ function AccesorioFicha({ accesorioId, onOpenArma, onNav, compareIds, onReportRe
             <div className="amx-carpeta-foto">
               <div className="amx-copia">
                 <span className="amx-copia-clip" aria-hidden="true" />
-                <window.ArmaPolaroid arma={acc} pie="procedencia" silueta={silueta} />
+                <window.ArmaPolaroid arma={acc} pie="procedencia" silueta={silueta} prioridad sizes={window.SIZES_COPIA_FICHA} />
                 <span className="amx-copia-sello">
                   <window.SelloLegal key={acc.id} avail={acc.avail} etiqueta={disp ? disp.label : ''}
                     className="amx-sello--estampa" />

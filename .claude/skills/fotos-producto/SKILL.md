@@ -129,7 +129,13 @@ script: el script solo lo marca en ámbar.
    ```
    Comprueba que `session.inner_session.get_providers()` empiece por `CUDAExecutionProvider`.
 
-## Al integrar: dos pasos que no son opcionales
+## Al integrar: tres pasos que no son opcionales
+
+- **Miniaturas** (desde el 6-nov-2026): `uv run scripts/miniaturas.py`. Las tarjetas,
+  el catálogo y las cartas piden `imagenes/400/<ruta>` (y `800/` si el original pasa de
+  1300 px) por `srcset`. Sin este paso, `npm test` falla en `miniaturas.test.mjs`; si
+  se publicara así, la tarjeta reintenta con el original (lento) o muestra la miniatura
+  vieja. Las miniaturas y `scripts/miniaturas.json` van en el mismo commit que la foto.
 
 - **`?v=` en la ruta.** `_headers` da `max-age=31536000` a `imagenes/*`: el mismo
   nombre de archivo no lo vuelve a pedir nadie que ya haya entrado. Lo hace

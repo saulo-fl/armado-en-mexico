@@ -30,6 +30,9 @@ Este repo tiene **skills y agentes** propios que se **autoinvocan** por su
   `develop`, cache-busting `?v=` si cambian los `data-*.js`.
 - **`fotos-producto`** — preparar fotos de producto: quitar fondo con alfa, encuadrar a
   1:1, control de calidad y hoja de aprobación humana. Agente: **`preparador-imagenes`**.
+  **Toda imagen nueva o reemplazada en `public/imagenes/` necesita
+  `uv run scripts/miniaturas.py`** (genera `imagenes/400/` y `800/` para el `srcset`;
+  `miniaturas.test.mjs` lo exige).
 - **`sincronizar-d1`** — resembrar D1 desde el código tras publicar datos. **No basta con
   desplegar**: los dominios de D1 pisan a los seeds. Desde el 7-oct-2026 el dominio `armas`
   lo resiembra solo un vigía en APOLO (`scripts/dcam/resembrar-vigia.mjs`) cuando lo que

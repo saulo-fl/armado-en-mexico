@@ -21,7 +21,7 @@ function TraumaFicha({ p, indice = 1 }) {
       <div className="amx-cotiz-partida">
         <figure className="amx-polaroid">
           <span className="amx-polaroid-pozo">
-            <img src={p.img} alt={p.nombre} loading="lazy" />
+            <img {...window.imgResponsiva(p.img, 'auto, 50vw')} alt={p.nombre} loading="lazy" />
           </span>
           <dl className="amx-cotiz-specs amx-cotiz-specs--polaroid">
             {p.specs.map(([k, v]) => (
@@ -272,7 +272,7 @@ function TraumaTierCard({ p, vp, onNav, indice }) {
         <figure className="amx-polaroid amx-polaroid--apaisada trauma-copia"
           style={{ '--giro': (window.GIROS_COPIA || [])[indice % 3] }}>
           <div className="amx-polaroid-pozo">
-            <img src={p.img} alt={p.nombre} loading="lazy" />
+            <img {...window.imgResponsiva(p.img, 'auto, 50vw')} alt={p.nombre} loading="lazy" />
           </div>
         </figure>
         <p className="trauma-tagline">{p.tagline}</p>

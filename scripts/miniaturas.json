@@ -1,0 +1,3661 @@
+{
+ "001_Taurus_TH380.webp": {
+  "alto": 1026,
+  "ancho": 1026,
+  "huella": "db83ad5f855aa582",
+  "miniaturas": [
+   400
+  ]
+ },
+ "002_Taurus_PT58_Plus.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "0e178a3054d64c5e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "003_Taurus_PT59.webp": {
+  "alto": 477,
+  "ancho": 700,
+  "huella": "43e4acaf3586af31",
+  "miniaturas": [
+   400
+  ]
+ },
+ "004_Bersa_Thunder_380.webp": {
+  "alto": 959,
+  "ancho": 959,
+  "huella": "b261760e33882c9d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "005_Ruger_LCP.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "917318784260adfe",
+  "miniaturas": [
+   400
+  ]
+ },
+ "006_Ruger_LCP_Max.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "19899547701bceb4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "007_SIG_Sauer_P365.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3732afb03de1d078",
+  "miniaturas": [
+   400
+  ]
+ },
+ "008_CZ_P-07.webp": {
+  "alto": 876,
+  "ancho": 876,
+  "huella": "1469186c999a0eb7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "009_CZ_P-10_C.webp": {
+  "alto": 462,
+  "ancho": 462,
+  "huella": "2e3427382f9a06a9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "010_CZ_Shadow_2.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "7ba6b1863e4ecf34",
+  "miniaturas": [
+   400
+  ]
+ },
+ "011_Glock_25.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "93b2ab85d4ef3c0b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "012_Glock_28.webp": {
+  "alto": 500,
+  "ancho": 800,
+  "huella": "edcc957deb796307",
+  "miniaturas": [
+   400
+  ]
+ },
+ "013_Beretta_80x_Cheetah.webp": {
+  "alto": 736,
+  "ancho": 736,
+  "huella": "f94b04ca526e6676",
+  "miniaturas": [
+   400
+  ]
+ },
+ "014_Browning_1911-380.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "4f0928572d3a0714",
+  "miniaturas": [
+   400
+  ]
+ },
+ "015_Browning_1911-22.webp": {
+  "alto": 1106,
+  "ancho": 1106,
+  "huella": "a20475ec718f17f7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "016_Browning_Buck_Mark.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3fa27c18008664f7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "017_SIG_Sauer_P322.webp": {
+  "alto": 1163,
+  "ancho": 1163,
+  "huella": "27c061a3f986e9a1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "018_Taurus_856_Acero_Inox.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "b3d0bf3679258336",
+  "miniaturas": [
+   400
+  ]
+ },
+ "019_Taurus_856_Pavon_Mate.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d0738b655ef71f38",
+  "miniaturas": [
+   400
+  ]
+ },
+ "020_Taurus_856_Tungsten.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "f4b368ae0cf1e873",
+  "miniaturas": [
+   400
+  ]
+ },
+ "021_Ruger_Wrangler.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3e392bb5e44402fb",
+  "miniaturas": [
+   400
+  ]
+ },
+ "022_Mendoza_HM-7.webp": {
+  "alto": 869,
+  "ancho": 869,
+  "huella": "9dfb09206caf2fab",
+  "miniaturas": [
+   400
+  ]
+ },
+ "023_Mendoza_RM22-6000_Nogal.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "2603b529a4c8e2df",
+  "miniaturas": [
+   400
+  ]
+ },
+ "024_Mendoza_RM22-6000_Black.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "2603b529a4c8e2df",
+  "miniaturas": [
+   400
+  ]
+ },
+ "025_Mendoza_RM22-6000_Squad.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "2603b529a4c8e2df",
+  "miniaturas": [
+   400
+  ]
+ },
+ "026_Mendoza_RM22-6000_Safari.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "209069d33c5ec8e1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "027_Mendoza_RM22-3000_Ergonomico.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "eac50674b0a6141b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "028_Mendoza_RM22-1000.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "af622c04479ac608",
+  "miniaturas": [
+   400
+  ]
+ },
+ "029_Mendoza_Centenario.webp": {
+  "alto": 1200,
+  "ancho": 889,
+  "huella": "230e12c9f1a464f4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "030_CZ_457.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c3f107cfa9491050",
+  "miniaturas": [
+   400
+  ]
+ },
+ "031_CZ_600_Alpha_.243.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "8890314830e9b374",
+  "miniaturas": [
+   400
+  ]
+ },
+ "032_CZ_600_American.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c786d57bcf89d8b5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "033_Franchi_Horizon_Elite.webp": {
+  "alto": 365,
+  "ancho": 1400,
+  "huella": "57fa8926bfabce60",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "034_Weatherby_Vanguard_.243.webp": {
+  "alto": 700,
+  "ancho": 1400,
+  "huella": "5557f67562d8a28b",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "035_Weatherby_Vanguard_.300.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "aba6d1f7026449c1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "036_Weatherby_Vanguard_7mm.webp": {
+  "alto": 700,
+  "ancho": 1400,
+  "huella": "5557f67562d8a28b",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "037_Weatherby_Vanguard_6.5_PRC.webp": {
+  "alto": 700,
+  "ancho": 1400,
+  "huella": "5557f67562d8a28b",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "038_Winchester_XPR_Thumb_.243.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "316659a8a266dbcd",
+  "miniaturas": [
+   400
+  ]
+ },
+ "039_Winchester_XPR_Sintetico_.270.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "bf984bbe8eb5b389",
+  "miniaturas": [
+   400
+  ]
+ },
+ "040_Winchester_XPR_Sintetico_.308.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "bf984bbe8eb5b389",
+  "miniaturas": [
+   400
+  ]
+ },
+ "041_Winchester_XPR_Sintetico_.30-06.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "bf984bbe8eb5b389",
+  "miniaturas": [
+   400
+  ]
+ },
+ "042_Stoeger_SP312.webp": {
+  "alto": 89,
+  "ancho": 448,
+  "huella": "7d96c7e5d7f9d794",
+  "miniaturas": [
+   400
+  ]
+ },
+ "043_AYA_Yuxtapuesta_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "bb5c1809b082880d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "044_AYA_Yuxtapuesta_cal_20.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "070401f53f7f6814",
+  "miniaturas": [
+   400
+  ]
+ },
+ "045_AYA_Sobre_Legend_cal_20.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "84b3f2b834b4901b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "046_AYA_Sobre_cal_12.webp": {
+  "alto": 1159,
+  "ancho": 1159,
+  "huella": "f0161005d1e89d14",
+  "miniaturas": [
+   400
+  ]
+ },
+ "047_AYA_Senax_DL_C32.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1e1968403d48bbd2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "048_Armsan_P612_ASN.webp": {
+  "alto": 1001,
+  "ancho": 1001,
+  "huella": "42161e2c98b2c489",
+  "miniaturas": [
+   400
+  ]
+ },
+ "049_Armsan_P612_AC.webp": {
+  "alto": 911,
+  "ancho": 911,
+  "huella": "1948acbad9a7a30b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "050_Browning_Maxus.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "754efff61fc25ebd",
+  "miniaturas": [
+   400
+  ]
+ },
+ "051_Winchester_SX4.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "fa81d922edf490c4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "052_Breda_Astro_cal_20.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "cf135b2304aabf83",
+  "miniaturas": [
+   400
+  ]
+ },
+ "053_Breda_cal_12_28.webp": {
+  "alto": 798,
+  "ancho": 798,
+  "huella": "db2d87d156041dff",
+  "miniaturas": [
+   400
+  ]
+ },
+ "054_Benelli_M2_cal_20.webp": {
+  "alto": 639,
+  "ancho": 1200,
+  "huella": "83f69c910e4acd27",
+  "miniaturas": [
+   400
+  ]
+ },
+ "055_Benelli_Executive_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "f2310800fd65f6bc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "056_Huglu_Atrox_cal_12_Bomba.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "b7d2b29faad355d7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "057_Beretta_DT11_Sport.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "38409c26e7251bc1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "058_Derya_MR-S1.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c9706b6347175e55",
+  "miniaturas": [
+   400
+  ]
+ },
+ "059_Derya_MR-100_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "17b6444f8f09e896",
+  "miniaturas": [
+   400
+  ]
+ },
+ "060_Derya_AG410_cal_.410.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "cb30a95c02f77d13",
+  "miniaturas": [
+   400
+  ]
+ },
+ "061_Derya_AG20_cal_20.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "accdbb8568eafe63",
+  "miniaturas": [
+   400
+  ]
+ },
+ "062_Derya_CR-101_Bomba.webp": {
+  "alto": 326,
+  "ancho": 1200,
+  "huella": "ebc5963c286346a4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "063_Retay_Masai_Mara_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "5ee42d28e746ffb0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "064_Retay_Masai_Mara_cal_20.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "643b460365898773",
+  "miniaturas": [
+   400
+  ]
+ },
+ "065_Retay_Gordion_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "49f752c5dd140366",
+  "miniaturas": [
+   400
+  ]
+ },
+ "066_Retay_GPSX_Bomba.webp": {
+  "alto": 682,
+  "ancho": 1024,
+  "huella": "7d5b95a3c2433026",
+  "miniaturas": [
+   400
+  ]
+ },
+ "067_Fair_Lincoln_G..webp": {
+  "alto": 892,
+  "ancho": 892,
+  "huella": "fc633e69120b5bcb",
+  "miniaturas": [
+   400
+  ]
+ },
+ "068_Fair_SLX800P.webp": {
+  "alto": 1081,
+  "ancho": 1081,
+  "huella": "9e57fea56288c33b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "069_Taurus_TS9.webp": {
+  "alto": 927,
+  "ancho": 927,
+  "huella": "865c5f0731b14f55",
+  "miniaturas": [
+   400
+  ]
+ },
+ "070_Taurus_GX4.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "7a43c45a01eab2b5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "071_Taurus_GX4_XL.webp": {
+  "alto": 893,
+  "ancho": 893,
+  "huella": "e0d647829d027caa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "072_Taurus_GX4_Carry.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c332bcd389951e5a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "073_Taurus_PT92.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "985b99f001f371fa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "074_CZ_P-10_S.webp": {
+  "alto": 881,
+  "ancho": 881,
+  "huella": "d3aeb84eb63d38c6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "075_CZ_P-10_C_9mm.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "7265f40c09a13a3a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "076_CZ_P-10_F.webp": {
+  "alto": 1007,
+  "ancho": 1007,
+  "huella": "dfb695873e20ffaa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "077_CZ_P-09.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "fbb3418f637e38cf",
+  "miniaturas": [
+   400
+  ]
+ },
+ "078_CZ_P-07_9mm.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "4bbb7091ca911613",
+  "miniaturas": [
+   400
+  ]
+ },
+ "079_Canik_METE_SFX.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c58db539afb2b30b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "080_Canik_TP9_SF.webp": {
+  "alto": 700,
+  "ancho": 700,
+  "huella": "236e5aac0ad69308",
+  "miniaturas": [
+   400
+  ]
+ },
+ "081_Canik_SFX_Rival.webp": {
+  "alto": 1400,
+  "ancho": 1400,
+  "huella": "c964a6f94e8f73f4",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "082_Springfield_XD-M.webp": {
+  "alto": 1053,
+  "ancho": 1400,
+  "huella": "bc6162013b5e1a99",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "083_IWI_Masada.webp": {
+  "alto": 755,
+  "ancho": 1024,
+  "huella": "bebdfb0aabe24537",
+  "miniaturas": [
+   400
+  ]
+ },
+ "084_IWI_Jericho_II_Polymer.webp": {
+  "alto": 418,
+  "ancho": 418,
+  "huella": "59ee4015ef4605a6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "085_IWI_Jericho_F_acero.webp": {
+  "alto": 379,
+  "ancho": 379,
+  "huella": "08ede5969c9abf94",
+  "miniaturas": [
+   400
+  ]
+ },
+ "086_Glock_19.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "34f6140c3cbbccd3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "087_SIG_P320_Full_Size.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "988f69b49fb0745a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "088_SIG_P320_Carry.webp": {
+  "alto": 997,
+  "ancho": 997,
+  "huella": "1d41e220a5fd43b8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "089_SIG_P320_X-Five_FS.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "5dd070d50746fed5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "090_SIG_P320_Coyote.webp": {
+  "alto": 1141,
+  "ancho": 1141,
+  "huella": "611c0248e7e69987",
+  "miniaturas": [
+   400
+  ]
+ },
+ "091_Beretta_PX4_Storm_9mm.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "a1e0a149115d5c12",
+  "miniaturas": [
+   400
+  ]
+ },
+ "092_System_Defence_9mm.webp": {
+  "alto": 1115,
+  "ancho": 1115,
+  "huella": "7cdd52b7da5f34a4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "093_Glock_22.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "347163553c4fc7a0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "094_Beretta_PX4_.40.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "917265605ec63fc8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "095_Colt_Government_.38_Super.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9ac18925c9da2292",
+  "miniaturas": [
+   400
+  ]
+ },
+ "096_Tippmann_M4-22_Elite.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d64581a68d388359",
+  "miniaturas": [
+   400
+  ]
+ },
+ "097_Tippmann_M4-22_Redline.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "b22870affdd94a8c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "098_Tippmann_M4-22_OD-Green.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "92ce1b61d019c3d4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "099_Ruger_AR-556.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "893f5675581cf1d3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "100_SIG_MCX.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "5cc29987a5617cac",
+  "miniaturas": [
+   400
+  ]
+ },
+ "101_SIG_M400.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "63d492d5aaeba859",
+  "miniaturas": [
+   400
+  ]
+ },
+ "102_SIG_516.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1e8da982124c3c9b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "103_Rock_River_Arms_LAR-15.webp": {
+  "alto": 265,
+  "ancho": 265,
+  "huella": "8f7f533a73ac5f89",
+  "miniaturas": [
+   400
+  ]
+ },
+ "104_IWI_Galil_ACE_52.webp": {
+  "alto": 1040,
+  "ancho": 1040,
+  "huella": "eeaf3f33e4f4a935",
+  "miniaturas": [
+   400
+  ]
+ },
+ "105_IWI_Galil_ACE_31.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "80137ee3bc404592",
+  "miniaturas": [
+   400
+  ]
+ },
+ "106_IWI_X95.webp": {
+  "alto": 772,
+  "ancho": 1400,
+  "huella": "a0853c50ba08a50c",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "107_CZ_BREN_2.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9f2d10af094e2e3d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "108_IWI_ARAD_5.56.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "fa08bc0060ead3a6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "109_IWI_ARAD_7.webp": {
+  "alto": 559,
+  "ancho": 1280,
+  "huella": "d6e6ee0ec64deccc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "110_Emtan_MZ-9S.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "4af470e5185c56b2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "111_IWI_UZI_Pro.webp": {
+  "alto": 941,
+  "ancho": 941,
+  "huella": "ab7b1af34d640760",
+  "miniaturas": [
+   400
+  ]
+ },
+ "AYA_Sena_32.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "af3f7e8c7da19f53",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Arex_Delta_L.webp": {
+  "alto": 1172,
+  "ancho": 1172,
+  "huella": "6c72afa4263d0166",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Armsan_A612.webp": {
+  "alto": 715,
+  "ancho": 715,
+  "huella": "d0cbac30f46c9966",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Armsan_A616.webp": {
+  "alto": 1151,
+  "ancho": 1151,
+  "huella": "879f4e0efba47b78",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Armsan_A620.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "ff9a1b01b44429d0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Armsan_A636.webp": {
+  "alto": 1151,
+  "ancho": 1151,
+  "huella": "879f4e0efba47b78",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Armsan_Phenoma.webp": {
+  "alto": 1019,
+  "ancho": 1019,
+  "huella": "1b7739eaf4261ca8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_828U.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3cbdbf40fd14d5b5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_Argo-E.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "690fe2423ca8c0b5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_M2_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "6c1213feb26ed8de",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_M4.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "8771dffb04ee8f95",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_MR1.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d0c8835030c6249b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_MR1_16_culata_fija.webp": {
+  "alto": 672,
+  "ancho": 672,
+  "huella": "6ba1e1e2e5a36ebd",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_Nova.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "0b400680aebc200c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_Super_Black_Eagle_3.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d0e9e152e1143635",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_Super_Nova.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "0af0dc55a1794174",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_Super_Vinci.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "b59de655972d31d4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Benelli_Vinci.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "08f13f744e42e6c8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_686_Silver_Pigeon_I.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "60a7199dc70ddf16",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_687_EELL_Diamond_Pigeon.webp": {
+  "alto": 451,
+  "ancho": 451,
+  "huella": "acea73bbf6fe399e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_687_Silver_Pigeon_III.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "712d3716076a6ec8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_687_Silver_Pigeon_V.webp": {
+  "alto": 424,
+  "ancho": 424,
+  "huella": "b9c2bcc3be35cb5c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_688_Black.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "70ce5f474fe7c1f6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_694_Pro_30_TSK.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9c805a9c40d328a1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_694_Sporting.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9912b368a5a84fe4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_80x_Cheetah.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "99ddaf5aa6dc2da0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_92A1.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "435858906faaabac",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_92FS.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "849de8ce131b95cc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_92FS_.22_LR.webp": {
+  "alto": 876,
+  "ancho": 876,
+  "huella": "0545204b07971533",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_A400_Lite.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9c02b50fa65fc7e4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_A400_Upland.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3ab2d3a1fc80d4f5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_A400_Xtreme_Plus.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d465346c72560df2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_DT11_Black_DLC_Pro.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "500158e34db67445",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Beretta_Ultraleggero.webp": {
+  "alto": 922,
+  "ancho": 922,
+  "huella": "b8470166f7f53657",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_930i_Sporting_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "8f0eb1923ea0cc53",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_Astro_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c8314510f4f34af0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_B12iS_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "5a40d7f7cd68bb57",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_B12iT4_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "b187ede2007ee324",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_EVO_cal_12.webp": {
+  "alto": 993,
+  "ancho": 993,
+  "huella": "7e0dfbbfe7d28331",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_Echo_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "cb856ac683d8ba04",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_Titano_L_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "b9b93970ef67904a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Breda_Titano_cal_12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "e355e41ba54f082f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_825_Sporter.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "61b753cb41bace9a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_B5.25S_Sporter.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "69067584b2c8aeee",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_B525_Sporter.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "26d6630c6b11c387",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_BAR_MK4.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "fc5d93dd6c2ce8f6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_Maxus_Black_Gold.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "10bee3863defb1fa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_Maxus_Camo.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "30ed28473bfb9873",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_Maxus_G2_Hunter.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1d1fccfdcc02aa5b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_Maxus_G2_Sintetica_SC.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "dcc92855416f1a5c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Browning_Maxus_G2_Ultimate.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d1ce7986ecf68cea",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_AT-ONE.webp": {
+  "alto": 965,
+  "ancho": 965,
+  "huella": "ec635c7136b92d74",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Jaguar_XII.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "5a69e18a9eeffe87",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_LRP_Black.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "e415fa6e9e056da1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Lux.webp": {
+  "alto": 482,
+  "ancho": 482,
+  "huella": "39776319ab0a948c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_MDT_Chassis.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d915ad2a2dbd2b39",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Premium.webp": {
+  "alto": 496,
+  "ancho": 496,
+  "huella": "d6277039826cb6a8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Stainless.webp": {
+  "alto": 653,
+  "ancho": 653,
+  "huella": "ad8cdc5f20db02f5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Synthetic.webp": {
+  "alto": 596,
+  "ancho": 596,
+  "huella": "888845e39ee6698b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Thumbhole.webp": {
+  "alto": 992,
+  "ancho": 992,
+  "huella": "1db213e0d03bcc35",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Training_Rifle_XII.webp": {
+  "alto": 507,
+  "ancho": 507,
+  "huella": "483dd3f93628dadc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Varmint.webp": {
+  "alto": 434,
+  "ancho": 434,
+  "huella": "1982fc231ba2aa5e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Varmint_MTR.webp": {
+  "alto": 937,
+  "ancho": 937,
+  "huella": "f1038f917e7c7429",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_457_Varmint_Synthetic.webp": {
+  "alto": 938,
+  "ancho": 938,
+  "huella": "106cd08351a4bede",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Alpha_.223.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "73d180c54efc8f2f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Alpha_.270.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "73d180c54efc8f2f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Alpha_.308.webp": {
+  "alto": 459,
+  "ancho": 459,
+  "huella": "4c546d1e830f4dc2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_American_.223.webp": {
+  "alto": 1027,
+  "ancho": 1027,
+  "huella": "adc9635123f1c249",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_American_.243.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c786d57bcf89d8b5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_American_.270.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c786d57bcf89d8b5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Ergo_.223.webp": {
+  "alto": 527,
+  "ancho": 527,
+  "huella": "dd1640b61f07d7a5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Ergo_.308.webp": {
+  "alto": 482,
+  "ancho": 482,
+  "huella": "0c8b09a375c569ad",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Lux_.223.webp": {
+  "alto": 1027,
+  "ancho": 1027,
+  "huella": "76497c8f670014c5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Lux_.308.webp": {
+  "alto": 502,
+  "ancho": 502,
+  "huella": "73ed8cce61636b80",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_600_Range_.308.webp": {
+  "alto": 547,
+  "ancho": 547,
+  "huella": "d1632202d6112aab",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_BREN_2_fusil_automatico.webp": {
+  "alto": 1062,
+  "ancho": 1062,
+  "huella": "ba25373a17740820",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_P-07_Kadet.webp": {
+  "alto": 518,
+  "ancho": 518,
+  "huella": "2ef7fbb7942f0418",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_P-09_F_Nocturne.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "fbb3418f637e38cf",
+  "miniaturas": [
+   400
+  ]
+ },
+ "CZ_Scorpion_EVO_3_A1.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "7f4a2f6b4bb30f9a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Caesar_Guerini_Invictus.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "56ec9042ded14e87",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Caesar_Guerini_Invictus_III_Ascent_Sporting.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "ab1f8a61d9cf8b32",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Caesar_Guerini_Invictus_I_Ascent_Sporting.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "11b356f4727af29f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Caesar_Guerini_Summit_Black_Ascent.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "ffcb98551e6eddfd",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Caesar_Guerini_Summit_Sporting.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "538d7cb6890a55a5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Derya_AG12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "86b23d5a7a13cbfb",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Derya_MR-300.webp": {
+  "alto": 970,
+  "ancho": 970,
+  "huella": "3cfac552d09c6d6f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Foldar_Mobetta_CCR.webp": {
+  "alto": 1147,
+  "ancho": 1147,
+  "huella": "2d9c5bfaaa1a6d59",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Foldar_Mobetta_FLDR15F.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "369a460b7019f4f2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Affinity_3.5.webp": {
+  "alto": 433,
+  "ancho": 433,
+  "huella": "84bd30839993611a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Affinity_3.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "36f9c2b762b8292f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Feeling.webp": {
+  "alto": 1103,
+  "ancho": 1103,
+  "huella": "e8f41c313ae08118",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Horizon_.223.webp": {
+  "alto": 895,
+  "ancho": 895,
+  "huella": "87b711e021612754",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Horizon_.243.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "ce2e60b18c9d496b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Horizon_.270.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "ce2e60b18c9d496b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Horizon_.308.webp": {
+  "alto": 1194,
+  "ancho": 1194,
+  "huella": "80d074553ab835a3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Franchi_Horizon_Elite_.300_Win_Mag.webp": {
+  "alto": 217,
+  "ancho": 217,
+  "huella": "2bf63ac907236619",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Glock_17.webp": {
+  "alto": 940,
+  "ancho": 940,
+  "huella": "16621253443d08f4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Glock_19X.webp": {
+  "alto": 592,
+  "ancho": 592,
+  "huella": "04fc79e634f4fdf8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Glock_27.webp": {
+  "alto": 577,
+  "ancho": 577,
+  "huella": "419f3d407d129821",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Glock_44.webp": {
+  "alto": 520,
+  "ancho": 520,
+  "huella": "170f945003b9dd9c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Grand_Power_LP380.webp": {
+  "alto": 485,
+  "ancho": 485,
+  "huella": "bb199a04a1f47871",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Grand_Power_Stribog_SP380.webp": {
+  "alto": 878,
+  "ancho": 878,
+  "huella": "3fb713c9e00f6c41",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Huglu_Renova.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "983693a0b394b3eb",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Huglu_Renova_Camo.webp": {
+  "alto": 382,
+  "ancho": 382,
+  "huella": "5d98ea627fc17d92",
+  "miniaturas": [
+   400
+  ]
+ },
+ "IWI_ARAD_7_DMR.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "bc2d601adb0b67fd",
+  "miniaturas": [
+   400
+  ]
+ },
+ "IWI_Galil_ACE_21N.webp": {
+  "alto": 506,
+  "ancho": 506,
+  "huella": "f254589d33669bc1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "IWI_US_Z-15.webp": {
+  "alto": 308,
+  "ancho": 308,
+  "huella": "d56d29d5031315db",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Mendoza_RM22-3000_Nogal.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "382dbda8ee9f3070",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Mendoza_RM22-3000_Squad.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "a7506e11421f1a16",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Mendoza_RM22-6000_Commander.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c5b7b8168bd3b5e8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Optimum_Arms_LRT-12.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "aa36ca4a25542b12",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Optimum_Arms_OPT-100.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "4d41f0d554e6a14f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Optimum_Arms_OPT-200_Pro.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "f5df2c737dab6023",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Optimum_Arms_OPT_VM_G2.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3aedd6b3bfc2d55f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Optimum_Arms_OPT_VM_G2_cal._20.webp": {
+  "alto": 637,
+  "ancho": 637,
+  "huella": "00d5dd8d786f32d5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Reximex_TRX9.webp": {
+  "alto": 938,
+  "ancho": 938,
+  "huella": "3c8e1fb359e037ec",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Ruger_10_22.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3a8aeffa69000269",
+  "miniaturas": [
+   400
+  ]
+ },
+ "SIG_MPX.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "55bb57e17ff67c3a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Springfield_Echelon.webp": {
+  "alto": 1167,
+  "ancho": 1167,
+  "huella": "fec7978b65548244",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Stoeger_M3000.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "65fdf13e4478e855",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Stoeger_M3500.webp": {
+  "alto": 634,
+  "ancho": 634,
+  "huella": "03bcef80143fd335",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Stoeger_P3500.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "326e05df88e59fcd",
+  "miniaturas": [
+   400
+  ]
+ },
+ "System_Defence_C9_Compact.webp": {
+  "alto": 406,
+  "ancho": 406,
+  "huella": "1dd125f994661ffb",
+  "miniaturas": [
+   400
+  ]
+ },
+ "System_Defence_SD-15_Combat.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "33549b20ce939a5e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "System_Defence_SD-15_Tactical.webp": {
+  "alto": 399,
+  "ancho": 399,
+  "huella": "70d3f69f16925f18",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_82S.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "de60668b13755d6e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_838.webp": {
+  "alto": 1028,
+  "ancho": 1028,
+  "huella": "6887f6ceecc69196",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_85S.webp": {
+  "alto": 478,
+  "ancho": 478,
+  "huella": "8a26f32827271316",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_889.webp": {
+  "alto": 1060,
+  "ancho": 1060,
+  "huella": "9e1f128dcb6236c5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_G3.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "afc75b0177c3ca4c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_G3C.webp": {
+  "alto": 801,
+  "ancho": 801,
+  "huella": "04cdba13afa1d340",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_G3_Tactical.webp": {
+  "alto": 303,
+  "ancho": 303,
+  "huella": "71b76394e0639683",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_GX2.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9ecda95094b000a0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Taurus_TH9.webp": {
+  "alto": 736,
+  "ancho": 736,
+  "huella": "afa6d12a7bc493a9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Tippmann_M4-22_Elite-L_FDE.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "3151a041cf22b8d8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Tippmann_M4-22_LTE_Accents_Wolf_Grey.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1e25ee6d91c4d548",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Tippmann_M4-22_WMR_Magnum_Elite.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "a846bfb5c3d6a41e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Trejo_2GT.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "74d17f1de9589316",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_307_Range_XP_.30-06.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "615d86ab9ef7c500",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_307_Range_XP_.300_Win_Mag.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "615d86ab9ef7c500",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_307_Range_XP_.308.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "615d86ab9ef7c500",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_307_Range_XP_6.5_Creedmoor.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "615d86ab9ef7c500",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_Element.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "309884a876f89ae4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_Orion.webp": {
+  "alto": 1144,
+  "ancho": 1144,
+  "huella": "7aa61538badb15ab",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_Vanguard_.22-250.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9850106129f7cfb3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_Vanguard_.223.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9850106129f7cfb3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_Vanguard_.30-06.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9850106129f7cfb3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_Vanguard_.308.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9850106129f7cfb3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Weatherby_Vanguard_Outfitter_.243.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "c18cdc5a93717833",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_Ranger_.22.webp": {
+  "alto": 855,
+  "ancho": 855,
+  "huella": "c601c8734b186dae",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_SX4_Camo.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1517c99e0c81e5c0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_SX4_Silver_Performance.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9381561cd4eb8cf5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_SXP.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "edef569460e053c2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_SXP_Camo.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "dbe25d18187f8042",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_SXR2_Pump.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "f1087aa276ee0e94",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_XPERT_.22.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "619020b7b81c19d9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_XPR_6.5_Creedmoor.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "9cf343fe3ab8319c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_XPR_Thumbhole_.30-06.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1a02e714eca49f1c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_XPR_Thumbhole_.308.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1a02e714eca49f1c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "Winchester_Xpert_Thumbhole_.22.webp": {
+  "alto": 913,
+  "ancho": 913,
+  "huella": "be00f4d0420b849e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/101.webp": {
+  "alto": 1135,
+  "ancho": 1135,
+  "huella": "0c674694740a9073",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/102.webp": {
+  "alto": 1049,
+  "ancho": 1049,
+  "huella": "255981507e8d46b0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/103.webp": {
+  "alto": 979,
+  "ancho": 979,
+  "huella": "03c1001c11d70893",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/104.webp": {
+  "alto": 1173,
+  "ancho": 1173,
+  "huella": "19141ccea6878230",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/105.webp": {
+  "alto": 630,
+  "ancho": 630,
+  "huella": "f68e18b844b6a317",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/106.webp": {
+  "alto": 1086,
+  "ancho": 1086,
+  "huella": "d00f5ab87edf3cd3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/107.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "84757d6dca4d3433",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/108.webp": {
+  "alto": 1150,
+  "ancho": 1150,
+  "huella": "f5b346bc26db5ed0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/109.webp": {
+  "alto": 952,
+  "ancho": 952,
+  "huella": "3d67f3f208b05f44",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/110.webp": {
+  "alto": 483,
+  "ancho": 483,
+  "huella": "116d0ca8fab72529",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/111.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "eb35ec9635a9a41c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/112.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1c0191fd5cee3359",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/113.webp": {
+  "alto": 1161,
+  "ancho": 1161,
+  "huella": "5fe3eb2313bff0ab",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/114.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "21caae5900606830",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/115.webp": {
+  "alto": 1111,
+  "ancho": 1111,
+  "huella": "563f98cde92eadce",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/116.webp": {
+  "alto": 1015,
+  "ancho": 1015,
+  "huella": "81d1ac67f8cf504a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/117.webp": {
+  "alto": 1009,
+  "ancho": 1009,
+  "huella": "77fe7615751b337f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/118.webp": {
+  "alto": 1071,
+  "ancho": 1071,
+  "huella": "ae30ea711e36178d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/119.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "02a4f338126892b0",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/120.webp": {
+  "alto": 946,
+  "ancho": 946,
+  "huella": "7c267a6317af71f7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/121.webp": {
+  "alto": 1036,
+  "ancho": 1036,
+  "huella": "9505e060c1c66c7e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/122.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "d606e1de425eebda",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/123.webp": {
+  "alto": 964,
+  "ancho": 964,
+  "huella": "f3d976b09a18fc9f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/124.webp": {
+  "alto": 1181,
+  "ancho": 1181,
+  "huella": "cc74997175ac268a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/125.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "94c5786151a003ea",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/126.webp": {
+  "alto": 481,
+  "ancho": 481,
+  "huella": "0b566ca19f4962df",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/127.webp": {
+  "alto": 481,
+  "ancho": 481,
+  "huella": "0b566ca19f4962df",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/128.webp": {
+  "alto": 992,
+  "ancho": 992,
+  "huella": "e25a04c2b32628dd",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/129.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "fbff15f4f86190fa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/130.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "5a6c58400c2c77db",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/131.webp": {
+  "alto": 972,
+  "ancho": 972,
+  "huella": "b42699778519507a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/132.webp": {
+  "alto": 581,
+  "ancho": 581,
+  "huella": "236a9f2198722cf2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/133.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "1d1d2d006e26b91a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/134.webp": {
+  "alto": 690,
+  "ancho": 690,
+  "huella": "fa867f7c657dde19",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/135.webp": {
+  "alto": 1005,
+  "ancho": 1005,
+  "huella": "ccd67d287c583b96",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/136.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "aacbb098e847f02e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/201.webp": {
+  "alto": 1020,
+  "ancho": 1020,
+  "huella": "a1b2b3fb47f5ac8c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/202.webp": {
+  "alto": 514,
+  "ancho": 514,
+  "huella": "92fae6c117c8af3e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/301.webp": {
+  "alto": 906,
+  "ancho": 906,
+  "huella": "7eca3f602571e7b8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/401.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "dd1f96f2ee3128dc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "accesorios/402.webp": {
+  "alto": 1200,
+  "ancho": 1200,
+  "huella": "e4460dc1235e9fe5",
+  "miniaturas": [
+   400
+  ]
+ },
+ "apple-touch-icon-v2.png": {
+  "alto": 180,
+  "ancho": 180,
+  "huella": "9d077f6d3cffe921",
+  "miniaturas": [
+   400
+  ]
+ },
+ "armeria-dcam.webp": {
+  "alto": 382,
+  "ancho": 680,
+  "huella": "f187fadca1c85ad6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "armeria-otca.webp": {
+  "alto": 510,
+  "ancho": 680,
+  "huella": "de441762672d2fab",
+  "miniaturas": [
+   400
+  ]
+ },
+ "boligrafo-15cm.webp": {
+  "alto": 1487,
+  "ancho": 140,
+  "huella": "488da3361811773d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "carta-carabina.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "9735d62184b56d2d",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-cargadores.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "d70ee5ff21ba15d8",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-empunaduras.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "d586be389a0bacc9",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-escopeta.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "02aa332121a30fb1",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-opticas.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "bf06aa1d5f259e3a",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-pistola.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "979526e55b983044",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-refacciones.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "6cffed95c58968b6",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-revolver.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "e38eff96a3c40bf4",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "carta-rifle.webp": {
+  "alto": 2318,
+  "ancho": 1500,
+  "huella": "01ee6367da94c9b8",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "cartuchos/12ga.webp": {
+  "alto": 500,
+  "ancho": 198,
+  "huella": "e95a33c5ec6e61e3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/16ga.webp": {
+  "alto": 500,
+  "ancho": 166,
+  "huella": "4278289051c0ca5b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/20ga.webp": {
+  "alto": 500,
+  "ancho": 157,
+  "huella": "ea9d5acfe9e09cad",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/22250rem.webp": {
+  "alto": 500,
+  "ancho": 199,
+  "huella": "a22e75ee6011bd47",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/223rem.webp": {
+  "alto": 500,
+  "ancho": 84,
+  "huella": "5021d5468dca31d6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/22lr.webp": {
+  "alto": 500,
+  "ancho": 142,
+  "huella": "faec51a05308bae1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/22wmr.webp": {
+  "alto": 500,
+  "ancho": 108,
+  "huella": "c0abe29603514345",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/243win.webp": {
+  "alto": 500,
+  "ancho": 94,
+  "huella": "21ff526752be5d67",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/270win.webp": {
+  "alto": 500,
+  "ancho": 77,
+  "huella": "89dc9dae323c51c8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/3006.webp": {
+  "alto": 500,
+  "ancho": 78,
+  "huella": "74ff0e7e839e372f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/300wm.webp": {
+  "alto": 500,
+  "ancho": 76,
+  "huella": "1083888b007394ac",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/3030win.webp": {
+  "alto": 500,
+  "ancho": 99,
+  "huella": "e9762dc8a59cc7dc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/308win.webp": {
+  "alto": 500,
+  "ancho": 89,
+  "huella": "33f397ba36b42bd9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/32acp.webp": {
+  "alto": 500,
+  "ancho": 182,
+  "huella": "e1b0e909cb40b1de",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/357mag.webp": {
+  "alto": 500,
+  "ancho": 127,
+  "huella": "f843f9b70ff4938f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/380acp.webp": {
+  "alto": 500,
+  "ancho": 194,
+  "huella": "19bfcb36d651c944",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/38special.webp": {
+  "alto": 500,
+  "ancho": 141,
+  "huella": "e78ca923301f04c2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/38super.webp": {
+  "alto": 500,
+  "ancho": 164,
+  "huella": "86e19fc93d94b907",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/38sw.webp": {
+  "alto": 500,
+  "ancho": 176,
+  "huella": "ad043f4e5df27412",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/40sw.webp": {
+  "alto": 500,
+  "ancho": 190,
+  "huella": "7d0e5d8c13d65a9d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/410.webp": {
+  "alto": 500,
+  "ancho": 120,
+  "huella": "9796741614d8e3f9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/45acp.webp": {
+  "alto": 500,
+  "ancho": 194,
+  "huella": "141e76b1fa3449a6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/556.webp": {
+  "alto": 500,
+  "ancho": 89,
+  "huella": "0e66e29e6c81007d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/57x28.webp": {
+  "alto": 500,
+  "ancho": 106,
+  "huella": "ad3da6a8427604f7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/65creedmoor.webp": {
+  "alto": 500,
+  "ancho": 87,
+  "huella": "6c8f8af11aa4a600",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/65prc.webp": {
+  "alto": 500,
+  "ancho": 92,
+  "huella": "6f87b7e6fda69250",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/762x39.webp": {
+  "alto": 500,
+  "ancho": 112,
+  "huella": "a50dd7716e55b00b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/762x51.webp": {
+  "alto": 500,
+  "ancho": 91,
+  "huella": "2c52287d55a39ad4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/7mmrem.webp": {
+  "alto": 500,
+  "ancho": 89,
+  "huella": "1bf194b71d479fac",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/9mm.webp": {
+  "alto": 500,
+  "ancho": 158,
+  "huella": "145eac49b54e21f4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "cartuchos/silueta-vertical.webp": {
+  "alto": 900,
+  "ancho": 208,
+  "huella": "aa455ea16ef829d6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/acta-nacimiento.webp": {
+  "alto": 469,
+  "ancho": 366,
+  "huella": "e7b2e37fb0c240f9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/antecedentes-no-penales.webp": {
+  "alto": 478,
+  "ancho": 356,
+  "huella": "b3a939fe58639942",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/cartilla-militar.webp": {
+  "alto": 519,
+  "ancho": 516,
+  "huella": "ccae4574dc619a07",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/certificados-medicos.webp": {
+  "alto": 900,
+  "ancho": 600,
+  "huella": "0762b550b06fffed",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/comprobante-domicilio.webp": {
+  "alto": 547,
+  "ancho": 353,
+  "huella": "d5bede4b9ea0601b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/constancia-club-cinegetico.webp": {
+  "alto": 900,
+  "ancho": 600,
+  "huella": "da1c07d00ca759ea",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/constancia-ingresos.webp": {
+  "alto": 493,
+  "ancho": 381,
+  "huella": "956b5999cfdb19ab",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/curp.webp": {
+  "alto": 225,
+  "ancho": 438,
+  "huella": "49a5d020dd685cd1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/ine.webp": {
+  "alto": 356,
+  "ancho": 434,
+  "huella": "007ca1cf84d9244d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/licencia-club-tiro.webp": {
+  "alto": 400,
+  "ancho": 600,
+  "huella": "74d81b0176257cf7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/permiso-coleccionista.webp": {
+  "alto": 900,
+  "ancho": 600,
+  "huella": "9178f38b3d52d29f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "entrevista/tarjeta-residente.webp": {
+  "alto": 400,
+  "ancho": 600,
+  "huella": "133d4ee4d4b873c6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "favicon-v2.png": {
+  "alto": 48,
+  "ancho": 48,
+  "huella": "44ed42163ff814cc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "ficha-biblioteca.webp": {
+  "alto": 663,
+  "ancho": 1100,
+  "huella": "607807ba6216c30d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "folder-manila.webp": {
+  "alto": 720,
+  "ancho": 1000,
+  "huella": "64c74944890ed4be",
+  "miniaturas": [
+   400
+  ]
+ },
+ "foto-marco.webp": {
+  "alto": 510,
+  "ancho": 600,
+  "huella": "56f42136ac8d7650",
+  "miniaturas": [
+   400
+  ]
+ },
+ "hero-carabina.webp": {
+  "alto": 520,
+  "ancho": 520,
+  "huella": "3504599ce277a224",
+  "miniaturas": [
+   400
+  ]
+ },
+ "hero-escopeta.webp": {
+  "alto": 333,
+  "ancho": 533,
+  "huella": "4ea63989a48ec677",
+  "miniaturas": [
+   400
+  ]
+ },
+ "hero-pistola.webp": {
+  "alto": 1050,
+  "ancho": 1400,
+  "huella": "7962b98915e2e50b",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "hero-revolver.webp": {
+  "alto": 400,
+  "ancho": 400,
+  "huella": "23a519890cc6c245",
+  "miniaturas": [
+   400
+  ]
+ },
+ "hero-rifle.webp": {
+  "alto": 788,
+  "ancho": 1400,
+  "huella": "f16d25d383b3c6c1",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "isotipo-armado-v2.webp": {
+  "alto": 512,
+  "ancho": 512,
+  "huella": "087f92c199d0a600",
+  "miniaturas": [
+   400
+  ]
+ },
+ "letrero-mercado.webp": {
+  "alto": 747,
+  "ancho": 900,
+  "huella": "64507ff3b2646462",
+  "miniaturas": [
+   400
+  ]
+ },
+ "logo-armado-mx-v2.webp": {
+  "alto": 512,
+  "ancho": 512,
+  "huella": "f1647a90fa92c8b2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "logo-main.png": {
+  "alto": 288,
+  "ancho": 512,
+  "huella": "657d3dd7e42fcff4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/2055.webp": {
+  "alto": 374,
+  "ancho": 328,
+  "huella": "5234254bee986986",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/2068.webp": {
+  "alto": 292,
+  "ancho": 402,
+  "huella": "5a47482ef699c386",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/2100.webp": {
+  "alto": 522,
+  "ancho": 594,
+  "huella": "2e45b65f249a9465",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/__243win.webp": {
+  "alto": 345,
+  "ancho": 900,
+  "huella": "f7342e1b9c5724eb",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/__270win.webp": {
+  "alto": 395,
+  "ancho": 900,
+  "huella": "79046d377a9b8399",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__12ga.webp": {
+  "alto": 900,
+  "ancho": 897,
+  "huella": "2ae9cccbc7e12f76",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__20ga.webp": {
+  "alto": 900,
+  "ancho": 897,
+  "huella": "66712369e9bd57b8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__22250rem.webp": {
+  "alto": 555,
+  "ancho": 709,
+  "huella": "ee8639d47b0d4711",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__243win.webp": {
+  "alto": 555,
+  "ancho": 709,
+  "huella": "1cf54e72b802ae57",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__270win.webp": {
+  "alto": 703,
+  "ancho": 873,
+  "huella": "9131ff2a7cb39805",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__3006sprg.webp": {
+  "alto": 703,
+  "ancho": 873,
+  "huella": "1cd7e41678f77fec",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__300winmag.webp": {
+  "alto": 702,
+  "ancho": 872,
+  "huella": "f30c1f104049e154",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__3030win.webp": {
+  "alto": 555,
+  "ancho": 709,
+  "huella": "647433e21b40a39f",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__308win.webp": {
+  "alto": 556,
+  "ancho": 709,
+  "huella": "ea3369c9fabc56e3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__30carbine.webp": {
+  "alto": 546,
+  "ancho": 900,
+  "huella": "146df265ca254b62",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__38special.webp": {
+  "alto": 598,
+  "ancho": 900,
+  "huella": "7f8d463597205965",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__38super.webp": {
+  "alto": 589,
+  "ancho": 900,
+  "huella": "d0c0c8a3c29d80e6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__40sw.webp": {
+  "alto": 581,
+  "ancho": 900,
+  "huella": "f2d6885c5ea7768a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__556x45mm.webp": {
+  "alto": 608,
+  "ancho": 900,
+  "huella": "b51e7ce5087759fa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/aguila__762x51mm.webp": {
+  "alto": 558,
+  "ancho": 900,
+  "huella": "27e2106932f93efb",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/bornaghi__12ga.webp": {
+  "alto": 900,
+  "ancho": 877,
+  "huella": "0aa6f2285a4b59a6",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/bornaghi__20ga.webp": {
+  "alto": 900,
+  "ancho": 720,
+  "huella": "e987baea181331c4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/bornaghi__28ga.webp": {
+  "alto": 900,
+  "ancho": 594,
+  "huella": "7e8d19c5c823f97e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/ccispeer__9mmparabellum.webp": {
+  "alto": 417,
+  "ancho": 900,
+  "huella": "262a2b5d95729f00",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/corbon__38super.webp": {
+  "alto": 571,
+  "ancho": 866,
+  "huella": "a0c28bcf76ee25ed",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/egdelsur__12ga.webp": {
+  "alto": 276,
+  "ancho": 168,
+  "huella": "b7df435f055759e9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/egdelsur__20ga.webp": {
+  "alto": 243,
+  "ancho": 173,
+  "huella": "0347e4b104ad9fbf",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/eley__12ga.webp": {
+  "alto": 667,
+  "ancho": 900,
+  "huella": "dbad79f79b1121be",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/federal__380acp.webp": {
+  "alto": 413,
+  "ancho": 900,
+  "huella": "1cba4c1582421543",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/federal__556x45mm.webp": {
+  "alto": 600,
+  "ancho": 900,
+  "huella": "28d29c90f047c74b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/fiocchi__308win.webp": {
+  "alto": 621,
+  "ancho": 900,
+  "huella": "96f4082738d42f30",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/gb__12ga.webp": {
+  "alto": 341,
+  "ancho": 400,
+  "huella": "86beacb5e66828ca",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/hornady__17hmr.webp": {
+  "alto": 500,
+  "ancho": 317,
+  "huella": "673ee0fd20680528",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/hornady__22250rem.webp": {
+  "alto": 291,
+  "ancho": 261,
+  "huella": "d6c9b321bd29991e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/hornady__6mmrem.webp": {
+  "alto": 434,
+  "ancho": 600,
+  "huella": "e55ab855ac9a5daa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/jgexcopesa__12ga.webp": {
+  "alto": 374,
+  "ancho": 328,
+  "huella": "5234254bee986986",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/partizan__300winmag.webp": {
+  "alto": 657,
+  "ancho": 900,
+  "huella": "08c9cff26e0f87a9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/pmc__223rem.webp": {
+  "alto": 481,
+  "ancho": 900,
+  "huella": "0b3348e53f7a23c4",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/pmc__308win.webp": {
+  "alto": 243,
+  "ancho": 401,
+  "huella": "1f07e32ae019e880",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/pmc__380acp.webp": {
+  "alto": 260,
+  "ancho": 433,
+  "huella": "f94585ff4c5592c8",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/pmc__556x45mm.webp": {
+  "alto": 241,
+  "ancho": 400,
+  "huella": "9ab076613fca74f9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/pmc__762x51mm.webp": {
+  "alto": 538,
+  "ancho": 900,
+  "huella": "fa77691b18c41cf3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/pmc__9mmparabellum.webp": {
+  "alto": 253,
+  "ancho": 405,
+  "huella": "52482f3d7743f725",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/remington__308win.webp": {
+  "alto": 525,
+  "ancho": 900,
+  "huella": "3ccd795246cac11b",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/rio__12ga.webp": {
+  "alto": 574,
+  "ancho": 591,
+  "huella": "8bfbd5d78ea6bb6a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/rio__20ga.webp": {
+  "alto": 594,
+  "ancho": 623,
+  "huella": "c64afb443f3150c1",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/saga__12ga.webp": {
+  "alto": 187,
+  "ancho": 222,
+  "huella": "38c7f088cf1a05ea",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/saga__20ga.webp": {
+  "alto": 183,
+  "ancho": 211,
+  "huella": "0cd69f3acd211d11",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/sagasporting__12ga.webp": {
+  "alto": 169,
+  "ancho": 193,
+  "huella": "d5ecb5de1b653975",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/sb__9x18makarov.webp": {
+  "alto": 562,
+  "ancho": 900,
+  "huella": "92691fa4fa659f7e",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/sprint__12ga.webp": {
+  "alto": 396,
+  "ancho": 430,
+  "huella": "8d18b72ad8b8f49d",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/sterling__12ga.webp": {
+  "alto": 741,
+  "ancho": 900,
+  "huella": "ee32f285ebfc0a90",
+  "miniaturas": [
+   400
+  ]
+ },
+ "municiones/trust__12ga.webp": {
+  "alto": 420,
+  "ancho": 351,
+  "huella": "14796ee17f6c7cb2",
+  "miniaturas": [
+   400
+  ]
+ },
+ "proximamente-campo-1.webp": {
+  "alto": 320,
+  "ancho": 480,
+  "huella": "5116e851aad157f7",
+  "miniaturas": [
+   400
+  ]
+ },
+ "proximamente-campo-2.webp": {
+  "alto": 251,
+  "ancho": 480,
+  "huella": "130a0b645b703c1c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "proximamente-campo-3.webp": {
+  "alto": 640,
+  "ancho": 480,
+  "huella": "ce83c565146e5736",
+  "miniaturas": [
+   400
+  ]
+ },
+ "proximamente-campo-4.webp": {
+  "alto": 369,
+  "ancho": 480,
+  "huella": "6d04e70063e93188",
+  "miniaturas": [
+   400
+  ]
+ },
+ "proximamente-exp-1.webp": {
+  "alto": 270,
+  "ancho": 480,
+  "huella": "6a7229db390d3ac3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "proximamente-exp-2.webp": {
+  "alto": 269,
+  "ancho": 480,
+  "huella": "128f6b28813a484a",
+  "miniaturas": [
+   400
+  ]
+ },
+ "proximamente-exp-3.webp": {
+  "alto": 267,
+  "ancho": 480,
+  "huella": "e88316a7cf00be6c",
+  "miniaturas": [
+   400
+  ]
+ },
+ "saulo-flores.webp": {
+  "alto": 400,
+  "ancho": 400,
+  "huella": "c0b635f34b5b2473",
+  "miniaturas": [
+   400
+  ]
+ },
+ "sello-desgaste.webp": {
+  "alto": 256,
+  "ancho": 768,
+  "huella": "b5666dad1ebd42fa",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-carabina.webp": {
+  "alto": 278,
+  "ancho": 900,
+  "huella": "8c2a9f50265f29bc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-cargador.webp": {
+  "alto": 260,
+  "ancho": 900,
+  "huella": "301c81a6b13dff26",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-escopeta.webp": {
+  "alto": 198,
+  "ancho": 900,
+  "huella": "d7bae55bd539f9fc",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-municion.webp": {
+  "alto": 208,
+  "ancho": 900,
+  "huella": "af93829d5f93b3b9",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-optica.webp": {
+  "alto": 211,
+  "ancho": 900,
+  "huella": "b2640361398ca866",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-pistola.webp": {
+  "alto": 591,
+  "ancho": 900,
+  "huella": "a829c7ec8278ecc3",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-revolver.webp": {
+  "alto": 537,
+  "ancho": 900,
+  "huella": "cfe672aa44b58e56",
+  "miniaturas": [
+   400
+  ]
+ },
+ "silueta-rifle.webp": {
+  "alto": 232,
+  "ancho": 900,
+  "huella": "b32f2768efc50655",
+  "miniaturas": [
+   400
+  ]
+ },
+ "tele-antigua.webp": {
+  "alto": 1131,
+  "ancho": 1482,
+  "huella": "40d5565e32c2a4a5",
+  "miniaturas": [
+   400,
+   800
+  ]
+ },
+ "usos/caza.webp": {
+  "alto": 720,
+  "ancho": 1280,
+  "huella": "04928fcf0427f000",
+  "miniaturas": [
+   400
+  ]
+ },
+ "usos/club.webp": {
+  "alto": 720,
+  "ancho": 1280,
+  "huella": "2474e3c854ccf028",
+  "miniaturas": [
+   400
+  ]
+ },
+ "usos/domicilio.webp": {
+  "alto": 720,
+  "ancho": 1280,
+  "huella": "234fa510310d39b2",
+  "miniaturas": [
+   400
+  ]
+ }
+}

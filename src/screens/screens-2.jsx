@@ -111,7 +111,7 @@ function ProductScreen({ armaId, onOpenArma, onOpenAccesorio, onOpenMunicion, on
             <div className="amx-carpeta-foto">
               <div className="amx-copia">
                 <span className="amx-copia-clip" aria-hidden="true" />
-                <window.ArmaPolaroid arma={arma} selloSinFoto />
+                <window.ArmaPolaroid arma={arma} selloSinFoto prioridad sizes={window.SIZES_COPIA_FICHA} />
                 {/* El sello se estampa al llegar. La `key` lo vuelve a estampar
                     al pasar de un arma a otra desde «Armas similares». */}
                 <span className="amx-copia-sello">
