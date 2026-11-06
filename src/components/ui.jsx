@@ -2589,7 +2589,7 @@ function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio, movil }) {
             role={movil ? 'region' : undefined} aria-label={movil ? 'Existencias por sucursal' : undefined}>
             <table className="amx-kardex-tabla">
               <thead>
-                <tr><th scope="col">Sucursal</th><th scope="col" className="num">Exist.</th><th scope="col">Inventario</th><th scope="col"><span className="amx-sr">Documento</span></th></tr>
+                <tr><th scope="col">Sucursal</th><th scope="col" className="num">Exist.</th><th scope="col" className="num">Precio</th><th scope="col">Inventario</th><th scope="col"><span className="amx-sr">Documento</span></th></tr>
               </thead>
               <tbody>
                 {filas.map((b, i) => {
@@ -2601,6 +2601,10 @@ function TarjetaAlmacen({ filas, referencia, sigla, nivelPrecio, movil }) {
                         {b.agotado
                           ? <span className="amx-sello amx-sello--restr">Agotado</span>
                           : Number(b.qty).toLocaleString('es-MX')}
+                      </td>
+                      <td className={'num' + (b.agotado ? ' amx-kardex-ultimo' : '')}
+                        title={b.agotado ? 'Último precio que tuvo en esta sucursal' : undefined}>
+                        {b.precio ? String(b.precio).replace(/\s*MXN\s*$/, '') : '—'}
                       </td>
                       <td className="amx-kardex-fecha">{b.manual ? amxFmtManualDate(b.manual.fecha, movil) : '—'}</td>
                       <td>{b.manual && b.manual.url
@@ -2643,22 +2647,29 @@ const TINTAS_MILIMETRICO = {
   eje: '#8FB2C4', fondo: '#F6F9F5', texto: '#171B19', texto2: '#4E5B63',
 };
 
-function HistorialPrecios({ historial, manualById, movil }) {
+// Una tabla de rastreo por armería (Saulo, 05-nov-2026): DCAM y OTCA tienen
+// precios propios, y mezclarlos en una sola tabla hacía que la variación saltara
+// de una armería a otra. Cada armería lleva su gráfica (con dos fechas o más),
+// su registro con la variación contra SU registro anterior y su variación total.
+const ARMERIAS_HISTORIAL = {
+  DCAM: 'DCAM · Naucalpan, Edo. Méx.',
+  OTCA: 'OTCA · Monterrey, N.L.',
+};
+
+function RegistroArmeria({ hist, sigla, manualById, movil }) {
   const [verTodo, setVerTodo] = React.useState(false);
-  const hist = historial || [];
   const fechas = [];
   hist.forEach((h) => { if (fechas.indexOf(h.date) < 0) fechas.push(h.date); });
   const hayGrafica = fechas.length >= 2;
   const plegado = hayGrafica && movil;
 
-  // Variación de cada registro contra el anterior (el orden ya es cronológico).
+  // Variación de cada registro contra el anterior DE ESTA ARMERÍA (orden cronológico).
   const filas = hist.map((h, i) => {
     const man = manualById(h.manualId);
-    const aut = window.manualAutoridad ? window.manualAutoridad(man) : null;
     const v = amxPrecioNum(h.price);
     const prev = i > 0 ? amxPrecioNum(hist[i - 1].price) : null;
     const delta = (v != null && prev) ? ((v - prev) / prev) * 100 : null;
-    return { h: h, sigla: aut ? aut.sigla : '—', url: man && man.url, delta: delta, actual: i === hist.length - 1 };
+    return { h: h, url: man && man.url, delta: delta, actual: i === hist.length - 1 };
   }).reverse();
 
   // Con el vigía de gob.mx entra un inventario tras otro: a la vista, solo los
@@ -2671,18 +2682,17 @@ function HistorialPrecios({ historial, manualById, movil }) {
   const pFin = hist.length ? amxPrecioNum(hist[hist.length - 1].price) : null;
   const total = (hayGrafica && pIni && pFin != null) ? ((pFin - pIni) / pIni) * 100 : null;
   const fmtDelta = (d) => (d > 0 ? '▲ +' : d < 0 ? '▼ −' : '= ') + Math.abs(d).toFixed(1) + ' %';
+  const idTit = 'amx-historial-' + sigla.toLowerCase();
 
-  // La fuente de cada fila abre el PDF de su inventario (antes eran hojas
-  // grapadas aparte, una por inventario, que no escalaban).
-  // En teléfono no cabe entera ni con la fecha corta (a 360 px sobran ~50 px):
-  // se desliza de lado dentro del papel, y con teclado se enfoca para deslizarla.
+  // La fecha de cada fila abre el PDF de su inventario. En teléfono la tabla se
+  // desliza de lado dentro del papel, y con teclado se enfoca para deslizarla.
   const registro = (
     <div>
       <div className="amx-registro-desliza" tabIndex={movil ? 0 : undefined}
-        role={movil ? 'region' : undefined} aria-label={movil ? 'Registro de precios' : undefined}>
-        <table className="amx-registro">
+        role={movil ? 'region' : undefined} aria-label={movil ? 'Registro de precios ' + sigla : undefined}>
+        <table className="amx-registro" aria-labelledby={idTit}>
           <thead>
-            <tr><th scope="col">Fecha</th><th scope="col">Fuente</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
+            <tr><th scope="col">Fecha</th><th scope="col">Inventario</th><th scope="col" className="num">Precio</th><th scope="col" className="num">Var.</th></tr>
           </thead>
           <tbody>
             {visibles.map((f, i) => {
@@ -2693,8 +2703,8 @@ function HistorialPrecios({ historial, manualById, movil }) {
                   <td>
                     {f.url
                       ? <a href={f.url} target="_blank" rel="noopener"
-                          aria-label={'Inventario ' + f.sigla + ' del ' + fecha + ' (PDF, abre en otra pestaña)'}>{f.sigla} ↗</a>
-                      : f.sigla}
+                          aria-label={'Inventario ' + sigla + ' del ' + fecha + ' (PDF, abre en otra pestaña)'}>PDF ↗</a>
+                      : '—'}
                   </td>
                   <td className="num">{String(f.h.price).replace(' MXN', '')}</td>
                   <td className={'num' + (f.delta < 0 ? ' amx-baja' : f.delta > 0 ? ' amx-sube' : '')}>
@@ -2714,24 +2724,53 @@ function HistorialPrecios({ historial, manualById, movil }) {
   );
 
   return (
+    <div className="amx-historial-armeria">
+      <h3 className="amx-historial-sub" id={idTit}>
+        {ARMERIAS_HISTORIAL[sigla] || sigla}
+        <small>{fechas.length} {fechas.length === 1 ? 'inventario' : 'inventarios'}</small>
+      </h3>
+      <div className={'amx-historial-cuerpo' + (hayGrafica ? ' amx-historial-cuerpo--doble' : '')}>
+        {hayGrafica && <PriceChart history={hist} height={170} tintas={TINTAS_MILIMETRICO} />}
+        {plegado
+          ? <details className="amx-plegable"><summary>Ver el registro ({hist.length})</summary>{registro}</details>
+          : registro}
+      </div>
+      {total != null &&
+        <p className="amx-historial-variacion">
+          Variación total {sigla}
+          <b className={total < 0 ? 'amx-baja' : total > 0 ? 'amx-sube' : undefined}>{fmtDelta(total)}</b>
+        </p>}
+    </div>
+  );
+}
+
+function HistorialPrecios({ historial, manualById, movil }) {
+  const hist = historial || [];
+  const siglaDe = (h) => {
+    const aut = window.manualAutoridad ? window.manualAutoridad(manualById(h.manualId)) : null;
+    return aut ? aut.sigla : 'DCAM';
+  };
+  // DCAM primero, luego OTCA, luego cualquier otra; cada una en orden cronológico.
+  const grupos = {};
+  hist.forEach((h) => { const s = siglaDe(h); (grupos[s] = grupos[s] || []).push(h); });
+  const orden = Object.keys(grupos).sort((a, b) => {
+    const r = (s) => (s === 'DCAM' ? 0 : s === 'OTCA' ? 1 : 2);
+    return r(a) - r(b) || a.localeCompare(b);
+  });
+  const fechas = [];
+  hist.forEach((h) => { if (fechas.indexOf(h.date) < 0) fechas.push(h.date); });
+
+  return (
     <section className="amx-historial" aria-labelledby="amx-historial-tit">
       <div className="amx-papel" style={{ '--giro-papel': '.3deg' }}>
         <div className="amx-milimetrico">
           <div className="amx-historial-cab">
             <h2 className="amx-papel-tit" id="amx-historial-tit">Historial de precios</h2>
-            <small>{fechas.length} {fechas.length === 1 ? 'inventario oficial' : 'inventarios oficiales'} DCAM / OTCA</small>
+            <small>{fechas.length} {fechas.length === 1 ? 'inventario oficial' : 'inventarios oficiales'} {orden.join(' / ')}</small>
           </div>
-          <div className={'amx-historial-cuerpo' + (hayGrafica ? ' amx-historial-cuerpo--doble' : '')}>
-            {hayGrafica && <PriceChart history={hist} height={170} tintas={TINTAS_MILIMETRICO} />}
-            {plegado
-              ? <details className="amx-plegable"><summary>Ver el registro ({hist.length})</summary>{registro}</details>
-              : registro}
-          </div>
-          {total != null &&
-            <p className="amx-historial-variacion">
-              Variación total
-              <b className={total < 0 ? 'amx-baja' : total > 0 ? 'amx-sube' : undefined}>{fmtDelta(total)}</b>
-            </p>}
+          {orden.map((s) => (
+            <RegistroArmeria key={s} sigla={s} hist={grupos[s]} manualById={manualById} movil={movil} />
+          ))}
         </div>
       </div>
     </section>

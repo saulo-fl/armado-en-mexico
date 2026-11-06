@@ -639,6 +639,14 @@ def process_accesorios(mapeo, fecha, data_dir, dry_run, rehacer=False):
     eprint(f"  fichas con stock: {len([v for v in existencias.values() if int(v) > 0])}")
 
 
+def _recalcular_precio_principal(data_dir, dry_run):
+    """Regla del precio principal (precio-principal.py): DCAM > OTCA > último."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("precio_principal", Path(__file__).parent / "precio-principal.py")
+    m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+    m.recalcular(str(data_dir), dry_run)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Aplicador mecánico DCAM")
     parser.add_argument("--armas", help="Mapeo armas JSON")
@@ -681,6 +689,7 @@ def main():
             mapeo = load_mapeo(args.accesorios)
             process_accesorios(mapeo, fecha, str(data_dir), args.dry_run, args.rehacer)
 
+        _recalcular_precio_principal(data_dir, args.dry_run)
         eprint("\n═══ Aplicador mecánico finalizado ═══")
         sys.exit(0)
 

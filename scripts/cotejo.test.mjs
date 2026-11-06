@@ -74,6 +74,67 @@ test('inventario: sin historial usa priceExact y el inventario principal', () =>
   assert.deepEqual(i.sucursales, []);
 });
 
+// ── Regla del precio principal (Saulo, 05-nov-2026) ──
+const MAN_R = [
+  { id: 'd2', fecha: '2026-11-05', autoridad: 'DCAM', primary: true },
+  { id: 'o2', fecha: '2026-10-30', autoridad: 'OTCA' },
+  { id: 'd1', fecha: '2026-10-01', autoridad: 'DCAM' },
+  { id: 'o1', fecha: '2026-06-18', autoridad: 'OTCA' },
+];
+const invR = (hist, qD = null) => window.amxInventarioArma({ id: 1, priceExact: '$1.00 MXN' },
+  { priceHistory: hist, manuales: MAN_R, existenciasDCAM: qD, autoridad: AUTORIDAD });
+const precios = (s) => s.map((x) => [x.sigla, x.agotado ? 'AGOTADO' : x.qty, x.precio]);
+
+test('regla 1: con existencias en DCAM y en OTCA manda DCAM; cada sucursal lleva su precio', () => {
+  const i = invR([
+    { manualId: 'o2', price: '$120.00 MXN', date: '2026-10-30', qty: 4 },
+    { manualId: 'd2', price: '$100.00 MXN', date: '2026-11-05' },
+  ], 7);
+  assert.equal(i.precio, '$100.00 MXN');
+  assert.equal(i.sigla, 'DCAM');
+  assert.deepEqual(precios(i.sucursales), [['DCAM', 7, '$100.00 MXN'], ['OTCA', 4, '$120.00 MXN']]);
+});
+
+test('regla 1 aunque OTCA sea más reciente que DCAM', () => {
+  const man = [{ id: 'o3', fecha: '2026-11-20', autoridad: 'OTCA' }].concat(MAN_R);
+  const i = window.amxInventarioArma({ id: 1 }, { priceHistory: [
+    { manualId: 'd2', price: '$100.00 MXN', date: '2026-11-05' },
+    { manualId: 'o3', price: '$130.00 MXN', date: '2026-11-20', qty: 2 },
+  ], manuales: man, existenciasDCAM: 3, autoridad: AUTORIDAD });
+  assert.equal(i.precio, '$100.00 MXN');
+  assert.equal(i.sigla, 'DCAM');
+});
+
+test('regla 2: agotada en DCAM y con existencias en OTCA manda OTCA', () => {
+  const i = invR([
+    { manualId: 'd1', price: '$90.00 MXN', date: '2026-10-01' },
+    { manualId: 'o2', price: '$120.00 MXN', date: '2026-10-30', qty: 4 },
+  ]);
+  assert.equal(i.precio, '$120.00 MXN');
+  assert.equal(i.sigla, 'OTCA');
+  assert.equal(i.ultimoConocido, false);
+  assert.deepEqual(precios(i.sucursales), [['DCAM', 'AGOTADO', '$90.00 MXN'], ['OTCA', 4, '$120.00 MXN']]);
+});
+
+test('regla 3: agotada en las dos, precio del último inventario y «último precio conocido»', () => {
+  const i = invR([
+    { manualId: 'o1', price: '$80.00 MXN', date: '2026-06-18', qty: 1 },
+    { manualId: 'd1', price: '$90.00 MXN', date: '2026-10-01' },
+  ]);
+  assert.equal(i.precio, '$90.00 MXN');
+  assert.equal(i.sigla, 'DCAM');
+  assert.equal(i.ultimoConocido, true);
+  assert.deepEqual(precios(i.sucursales), [['DCAM', 'AGOTADO', '$90.00 MXN'], ['OTCA', 'AGOTADO', '$80.00 MXN']]);
+});
+
+test('el historial puede llegar desordenado (municiones)', () => {
+  const i = invR([
+    { manualId: 'd2', price: '$100.00 MXN', date: '2026-11-05', qty: 5 },
+    { manualId: 'o1', price: '$80.00 MXN', date: '2026-06-18', qty: 1 },
+  ], 5);
+  assert.equal(i.precio, '$100.00 MXN');
+});
+
 test('números: solo compiten valores únicos y exactos', () => {
   const N = window.amxCotejoNum;
   assert.equal(N.capacidad('6+1'), 7);
