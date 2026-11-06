@@ -8,13 +8,17 @@
 
 // Dominios de contenido editable que se sincronizan (mismo nombre que las claves de store.js).
 // NOTA: el dominio 'admin' (contraseña/sesión) NUNCA viaja al servidor.
+// 'visits' es el blob histórico de marcas de tiempo: desde nov-2026 las visitas viven en la
+// tabla `visitas_dia` (ver _visitas.js) y el blob ya no viaja en ningún snapshot (state.js).
+// 'masVisitadas' es el ranking que el servidor recalcula una vez al día a partir de esa tabla.
 export const ALL_DOMAINS = [
   'armas', 'pages', 'promos', 'favorites', 'appConfig', 'manuales',
-  'priceHist', 'rejected', 'visits',
+  'priceHist', 'rejected', 'visits', 'masVisitadas',
   'reviews', 'reviewsQueue', 'reports',
 ];
 
-// Dominios con escritura PÚBLICA por "append" (el servidor hace el merge atómico).
+// Dominios con escritura PÚBLICA por "append" (el servidor hace el merge atómico;
+// 'visits' no hace merge: suma un contador en `visitas_dia`, ver _visitas.js).
 // 'reviews' NO está: las reseñas aprobadas solo las escribe el admin al moderar.
 // Si estuviera aquí, cualquiera publicaría texto sin pasar por la cola.
 // 'suggestions' y 'pending' (Sugerir cambios / Proponer arma) salieron el
@@ -115,11 +119,11 @@ export async function writeDomainIf(db, domain, value, prevUpdatedAt) {
   return !!(res && res.meta && res.meta.changes === 1);
 }
 
-// Dominios que escribe el público (o que se moderan elemento por elemento).
-// El PUT de admin los rechaza: reemplazarlos con la copia del navegador borra lo
-// que llegó después de abrir el panel. Solo cambian por /api/append y por
-// /api/admin/moderar.
-export const DOMINIOS_MODERADOS = ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits'];
+// Dominios que escribe el público (o que se moderan elemento por elemento), más el
+// ranking que calcula el propio servidor. El PUT de admin los rechaza: reemplazarlos con
+// la copia del navegador borra lo que llegó después de abrir el panel. Solo cambian por
+// /api/append, /api/admin/moderar y el mantenimiento diario de _visitas.js.
+export const DOMINIOS_MODERADOS = ['reviews', 'reviewsQueue', 'rejected', 'reports', 'visits', 'masVisitadas'];
 
 // Con 8 intentos y espera aleatoria creciente, una ráfaga de 20 envíos en el
 // mismo instante entra entera en la prueba (functions-append.test.mjs).
@@ -192,48 +196,8 @@ export function mergeAppend(domain, current, item) {
     // descarta los más viejos.
     return recortarPorBytes(arr.slice(0, 1000), MAX_DOMINIO);
   }
-  if (domain === 'visits') {
-    const out = (current && typeof current === 'object') ? { ...current } : {};
-    const n = parseInt(item.armaId, 10);
-    if (!Number.isInteger(n) || n < 1 || n > VISITS_MAX_ID) return out;
-    const armaId = String(n);
-    // La marca la pone el SERVIDOR. Antes se aceptaba `item.ts` del cliente, y
-    // con curl se podían fechar visitas en el futuro (nunca caducan) o meter
-    // cientos de golpe para colocar un arma en «Más visitadas».
-    const now = Date.now();
-    const ts = now;
-    const cutoff = now - 60 * 24 * 60 * 60 * 1000;
-    const list = (Array.isArray(out[armaId]) ? out[armaId] : []).concat([ts]).filter((t) => t > cutoff && t <= now);
-    // ponytail: 500 marcas por arma acota la fila a ~1.2 MB con las 179 armas,
-    // bajo el límite de 2 MB de D1. Con 5000 el techo eran ~12 MB y la escritura
-    // habría empezado a fallar en silencio. Si algún día hace falta el conteo
-    // exacto, la salida es una tabla fila-por-visita agregada con COUNT, no
-    // subir este número.
-    out[armaId] = list.slice(-VISITS_POR_ARMA);
-    // Tope de CLAVES: sin él, un bucle de curl con armaId distintos inflaba la
-    // fila hasta pasar los 2 MB de D1, y a partir de ahí toda escritura de
-    // visitas fallaba (y /api/state servía el blob inflado a cada visitante).
-    // Si se pasa, sale la clave con menos marcas: un id inventado con 1 visita
-    // cede su sitio ante un arma real.
-    const claves = Object.keys(out);
-    if (claves.length > VISITS_MAX_CLAVES) {
-      claves.sort((a, b) => (out[a] || []).length - (out[b] || []).length);
-      for (const k of claves.slice(0, claves.length - VISITS_MAX_CLAVES)) {
-        if (k !== armaId) delete out[k];
-      }
-    }
-    return out;
-  }
   return current;
 }
-
-// visits: peor caso 330 claves × 400 marcas × 14 bytes (13 dígitos + coma)
-// ≈ 1.85 MB, bajo los 2 MB por fila de D1 (functions-lib.test.mjs lo mide).
-// El catálogo tiene hoy 261 armas (id máx. 264): si pasa de 330, sube
-// VISITS_MAX_CLAVES y baja VISITS_POR_ARMA en la misma proporción.
-export const VISITS_MAX_ID = 99999;
-export const VISITS_MAX_CLAVES = 330;
-export const VISITS_POR_ARMA = 400;
 
 // Tipos de entidad que aceptan reseña. Cerrado a propósito: un `tipo` libre
 // dejaría crear cubos arbitrarios en el mismo blob.
