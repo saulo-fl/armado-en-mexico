@@ -28,6 +28,11 @@
 //      purgas. La versión misma se recuerda 60 s por centro de datos: cada uno consulta D1 como
 //      mucho una vez por minuto y el resto de peticiones no toca D1.
 //   4. ETag = versión: el navegador que ya la tiene recibe un 304 sin cuerpo.
+//   5. Al reconstruir (MISS), cada dominio sale de su PROPIA copia en caché, con clave por su
+//      updated_at, y de D1 solo se leen los que cambiaron. Medido con `wrangler tail` el 6-nov:
+//      un MISS que leía los ~360 KB de D1 gastaba 11-14 ms de CPU (HIT y 304: 1 ms). Así, una
+//      reseña aprobada o el ranking diario solo leen su fila; `armas` (335 KB) se relee solo
+//      cuando cambia el catálogo (resembrado de las 20:00 o el panel).
 // El admin no pasa por la caché: recibe siempre lo último de D1 (no-store).
 import { json, ALL_DOMAINS, requireAdmin } from './_lib.js';
 
@@ -42,7 +47,7 @@ export const DOMINIOS_SNAPSHOT_ADMIN = ALL_DOMAINS.filter((d) => !FUERA_DEL_SNAP
 export const DOMINIOS_SNAPSHOT_PUBLICO = DOMINIOS_SNAPSHOT_ADMIN.filter((d) => !SOLO_ADMIN.includes(d));
 
 // Cambia este valor si cambia la FORMA del snapshot: invalida todas las copias guardadas.
-const FORMATO = 'state-v2';
+const FORMATO = 'state-v3';
 const VERSION_TTL_S = 60;           // cada centro de datos re-consulta la versión a lo mucho 1/min
 const COPIA_TTL_S = 7 * 24 * 3600;  // red de seguridad; al cambiar la versión cambia la clave
 
@@ -76,21 +81,23 @@ async function snapshotPublico(context) {
   const despues = (p) => (typeof context.waitUntil === 'function' ? context.waitUntil(p) : p);
   const origen = new URL(request.url).origin;
 
-  // 1) Versión vigente: de la caché del centro de datos (≤ 60 s) o de D1.
+  // 1) Versión vigente (y el updated_at de cada fila): de la caché del centro de datos
+  //    (≤ 60 s) o de D1.
   const claveVersion = new Request(`${origen}/api/state/__version?f=${FORMATO}`);
-  let version = null;
+  let info = null;
   if (cache) {
     const r = await cache.match(claveVersion);
-    if (r) version = await r.text();
+    if (r) { try { info = await r.json(); } catch { info = null; } }
   }
-  if (!version) {
-    version = await leerVersion(env.DB);
+  if (!info || typeof info.v !== 'string' || !Array.isArray(info.filas)) {
+    info = await leerVersion(env.DB);
     if (cache) {
-      await despues(cache.put(claveVersion, new Response(version, {
+      await despues(cache.put(claveVersion, new Response(JSON.stringify(info), {
         headers: { 'Cache-Control': `public, max-age=${VERSION_TTL_S}` },
       })));
     }
   }
+  const version = info.v;
 
   const cabeceras = {
     'Content-Type': JSON_UTF8,
@@ -111,8 +118,8 @@ async function snapshotPublico(context) {
     if (copia) return new Response(copia.body, { headers: { ...cabeceras, 'X-Amx-Cache': 'HIT' } });
   }
 
-  // 4) Sin copia: se arma una vez y se guarda.
-  const cuerpo = await armarSnapshot(env.DB, DOMINIOS_SNAPSHOT_PUBLICO);
+  // 4) Sin copia: se arma por piezas (de D1 solo lo que cambió) y se guarda.
+  const cuerpo = await armarPorPiezas(env.DB, info.filas, cache, origen, despues);
   if (cache) {
     await despues(cache.put(claveCopia, new Response(cuerpo, {
       headers: { 'Content-Type': JSON_UTF8, 'Cache-Control': `public, max-age=${COPIA_TTL_S}` },
@@ -128,14 +135,60 @@ function cacheDisponible() {
 // Huella de las filas públicas. NO vale MAX(updated_at): el resembrado escribe
 // datetime('now') = '2026-11-06 20:00:00' y las Functions ISO = '2026-11-06T20:00:00.000Z';
 // como texto, el espacio pierde siempre contra la 'T' del mismo día y MAX no cambiaría.
+// Devuelve { v: huella, filas: [[domain, updated_at], ...] }.
 export async function leerVersion(db) {
   const marcas = DOMINIOS_SNAPSHOT_PUBLICO.map(() => '?').join(',');
   const { results } = await db.prepare(
     `SELECT domain, updated_at FROM state WHERE domain IN (${marcas}) ORDER BY domain`
   ).bind(...DOMINIOS_SNAPSHOT_PUBLICO).all();
-  const huella = FORMATO + '|' + (results || []).map((r) => r.domain + '=' + r.updated_at).join('|');
+  const filas = (results || []).map((r) => [r.domain, String(r.updated_at)]);
+  const huella = FORMATO + '|' + filas.map(([d, u]) => d + '=' + u).join('|');
   const bytes = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(huella)));
-  return Array.from(bytes.slice(0, 12), (b) => b.toString(16).padStart(2, '0')).join('');
+  return { v: Array.from(bytes.slice(0, 12), (b) => b.toString(16).padStart(2, '0')).join(''), filas };
+}
+
+// Reconstruye el snapshot público: cada dominio sale de su copia en caché (clave = su
+// updated_at) o, si no está, de D1 — en UNA consulta con solo los que faltan — y se guarda.
+async function armarPorPiezas(db, filas, cache, origen, despues) {
+  const piezas = new Map();
+  const faltan = new Map(); // domain -> clave de su copia
+  for (const [dominio, updatedAt] of filas) {
+    const clave = new Request(
+      `${origen}/api/state/__pieza/${dominio}?f=${FORMATO}&u=${encodeURIComponent(updatedAt)}`);
+    const copia = cache ? await cache.match(clave) : null;
+    if (copia) piezas.set(dominio, await copia.text());
+    else faltan.set(dominio, clave);
+  }
+  if (faltan.size) {
+    const dominios = [...faltan.keys()];
+    const { results } = await db.prepare(
+      `SELECT domain, data FROM state WHERE domain IN (${dominios.map(() => '?').join(',')})`
+    ).bind(...dominios).all();
+    for (const row of results || []) {
+      if (!faltan.has(row.domain) || !pareceJson(row.data)) continue;
+      piezas.set(row.domain, row.data);
+      if (cache) {
+        await despues(cache.put(faltan.get(row.domain), new Response(row.data, {
+          headers: { 'Content-Type': JSON_UTF8, 'Cache-Control': `public, max-age=${COPIA_TTL_S}` },
+        })));
+      }
+    }
+  }
+  const partes = [];
+  for (const [dominio] of filas) {
+    if (piezas.has(dominio)) partes.push(JSON.stringify(dominio) + ':' + piezas.get(dominio));
+  }
+  return '{' + partes.join(',') + '}';
+}
+
+// Comprobación barata de que una fila es un objeto o array JSON, sin parsearla: el JSON.parse
+// de los 335 KB de `armas` era buena parte de la CPU de un MISS. Las escrituras ya validan (el
+// PUT del admin hace JSON.parse; las Functions y el resembrado escriben con JSON.stringify).
+function pareceJson(texto) {
+  if (typeof texto !== 'string' || texto.length < 2) return false;
+  const a = texto.trimStart()[0];
+  const z = texto.trimEnd().slice(-1);
+  return (a === '{' && z === '}') || (a === '[' && z === ']');
 }
 
 // Cloudflare debilita el ETag al comprimir (W/"…"), y If-None-Match puede traer una lista.
@@ -145,8 +198,7 @@ function coincideEtag(cabecera, version) {
 }
 
 // Pega el JSON de cada fila tal como está guardado: sin JSON.parse + JSON.stringify de todo.
-// Cada fila se valida con un parse (solo al reconstruir, no en cada petición) para que una
-// fila corrupta se omita en vez de romper el snapshot entero, como antes.
+// Lo usa el admin (sin caché). Una fila que no parezca JSON se omite en vez de romper el todo.
 export async function armarSnapshot(db, dominios) {
   const marcas = dominios.map(() => '?').join(',');
   const { results } = await db.prepare(
@@ -154,8 +206,7 @@ export async function armarSnapshot(db, dominios) {
   ).bind(...dominios).all();
   const partes = [];
   for (const row of results || []) {
-    if (!dominios.includes(row.domain) || typeof row.data !== 'string') continue;
-    try { JSON.parse(row.data); } catch { continue; } // ignora fila corrupta
+    if (!dominios.includes(row.domain) || !pareceJson(row.data)) continue; // fila corrupta
     partes.push(JSON.stringify(row.domain) + ':' + row.data);
   }
   return '{' + partes.join(',') + '}';
