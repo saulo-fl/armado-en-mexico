@@ -65,8 +65,9 @@ imagen puede estar perfecta en disco y verse mal en su sitio.
 2. Las métricas de las que entraron, con su número.
 3. Qué falta por conseguir de fuera, como lista accionable.
 4. El resultado de las verificaciones, con su salida real.
-5. Los pasos que quedan para publicar: `?v=` de `data.js` en `src/pages/index.html` y
-   `src/pages/admin.html`, y el resembrado de D1.
+5. Los pasos que quedan para publicar: miniaturas (`uv run scripts/miniaturas.py`, van en el
+   mismo commit), `?v=` de `data.js` en `src/pages/index.html` y `src/pages/admin.html`, y el
+   resembrado de D1.
 6. Petición explícita de permiso para commitear y mergear.
 
 Al cerrar, aplica `mejorar-tooling`: apunta en la bitácora de `fotos-producto`

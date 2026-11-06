@@ -1106,6 +1106,37 @@ function armaSinFoto(arma) {
 window.armaSinFoto = armaSinFoto;
 
 // ──────────────────────────────────────────────────────────────
+// MINIATURAS — srcset de las fotos del repo (fase 4.2 de velocidad, 6-nov-2026)
+// `scripts/miniaturas.py` deja `imagenes/400/<ruta>` de TODA imagen de
+// `public/imagenes/` (si el original es más angosto, una copia) y
+// `imagenes/800/<ruta>` de las de más de 1300 px. `scripts/miniaturas.test.mjs`
+// falla si una foto nueva o reemplazada no tiene la suya al día.
+// Antes cada tarjeta bajaba la foto de 1200 px para verla a 77-134 px: el catálogo
+// pesaba 11.3 MB. `sizes` dice cuánto mide la foto en pantalla; con
+// `loading="lazy"` va con «auto» delante y Chrome usa la medida real
+// (los navegadores que no lo entienden usan la lista que sigue).
+// Solo toca rutas locales `imagenes/...`; una URL externa o `data:` pasa tal cual.
+// El ancho del original va como 1200w: casi todas miden eso, y si una mide
+// menos, el navegador la elige un poco más tarde, nunca con menos nitidez que hoy.
+// ──────────────────────────────────────────────────────────────
+const RE_IMG_LOCAL = /^(\/?imagenes\/)(?!400\/|800\/)([^?#]+\.(?:webp|png|jpe?g))(\?[^#]*)?$/i;
+function imgResponsiva(src, sizes, opciones) {
+  const m = RE_IMG_LOCAL.exec(String(src || ''));
+  if (!m) return { src };
+  const { ancho = 1200, con800 = false } = opciones || {};
+  const q = m[3] || '';
+  const candidatos = [m[1] + '400/' + m[2] + q + ' 400w'];
+  if (con800) candidatos.push(m[1] + '800/' + m[2] + q + ' 800w');
+  candidatos.push(src + ' ' + ancho + 'w');
+  return { src, srcSet: candidatos.join(', '), sizes };
+}
+window.imgResponsiva = imgResponsiva;
+// Medidas en pantalla (CSS px, medidas el 6-nov-2026 en móvil 412 y escritorio 1440).
+const SIZES_COPIA_TARJETA = '(max-width: 700px) 115px, 135px';   // tarjetas: 77-134
+const SIZES_COPIA_FICHA = '(max-width: 700px) 210px, 335px';     // copia de la ficha: 206-332
+window.SIZES_COPIA_FICHA = SIZES_COPIA_FICHA;
+
+// ──────────────────────────────────────────────────────────────
 // ARMA POLAROID — la foto del expediente, con su faldón
 // Sin fotografía NO desaparece: se convierte en ficha de expediente sin
 // fotografía —mismo marco, mismo faldón— con la silueta del tipo sobre el
@@ -1128,12 +1159,20 @@ window.armaSinFoto = armaSinFoto;
 // `selloSinFoto` (la ficha de arma, 13-sep-2026): sin fotografía, en vez de la
 // leyenda va el sello «FOTOGRAFÍA PENDIENTE» sobre la silueta. Por defecto no
 // cambia nada, porque las tarjetas y el destacado del Home usan la leyenda.
-function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false, silueta = null }) {
+// `sizes` (fase 4.2): cuánto mide la copia en pantalla; por defecto, la de una
+// tarjeta. `prioridad`: la copia principal de una ficha, que es el LCP y no
+// se difiere. Todas las demás van con `loading="lazy"`: en el catálogo eran
+// 254 fotos fuera de pantalla bajando a la vez, todas con prioridad alta.
+function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false, silueta = null,
+  sizes = SIZES_COPIA_TARJETA, prioridad = false }) {
   // El fallback cubre los dos casos: el arma que nunca tuvo foto y el .webp
   // que existe en `data.js` pero no llega (404, red caída, formato no
   // soportado). En ambos se ve lo mismo, que es lo que hace que el `alt` y el
   // fallback sigan teniendo sentido.
   const [falloCarga, setFalloCarga] = React.useState(false);
+  // Si falla con srcset (miniatura que no está), se reintenta con el original
+  // solo; si ese también falla, entonces sí es «sin fotografía».
+  const [sinMiniatura, setSinMiniatura] = React.useState(false);
   const sinFoto = falloCarga || armaSinFoto(arma);
   // `tipo` es un enum cerrado de data.js; el respaldo cubre un dato corrupto.
   const tipoSil = SILUETA_TIPOS.indexOf(arma.tipo) >= 0 ? arma.tipo : 'pistola';
@@ -1171,8 +1210,10 @@ function ArmaPolaroid({ arma, pie = 'rotulo', selloSinFoto = false, silueta = nu
                 : <span className="amx-polaroid-leyenda" aria-hidden="true">Sin fotografía en expediente</span>}
           </div>
         ) : (
-          <img src={arma.img} alt={arma.nombre} decoding="async" fetchpriority="high"
-            onError={() => setFalloCarga(true)} />
+          <img {...(sinMiniatura ? { src: arma.img } : imgResponsiva(arma.img, prioridad ? sizes : 'auto, ' + sizes))}
+            alt={arma.nombre} decoding="async"
+            loading={prioridad ? undefined : 'lazy'} fetchpriority={prioridad ? 'high' : undefined}
+            onError={() => (sinMiniatura ? setFalloCarga(true) : setSinMiniatura(true))} />
         )}
       </div>
       {/* El faldón lleva lo que alguien escribiría a mano en el borde blanco de
@@ -1229,7 +1270,8 @@ function CartaLoteria({ nombre, cuenta, unidad = 'piezas', forma, ilustracion, o
     <button type="button" className="amx-loteria" onClick={onClick}
       aria-label={`${nombre} — ${cuenta} ${cuenta === 1 ? unidad.replace(/s$/, '') : unidad}`}>
       {esCartaCompleta
-        ? <img src={ilustracion} alt="" className="amx-loteria-carta-img" />
+        ? <img {...imgResponsiva(ilustracion, 'auto, (max-width: 700px) 185px, 250px', { ancho: 1500, con800: true })}
+            alt="" className="amx-loteria-carta-img" loading="lazy" decoding="async" />
         : <span className="amx-loteria-lam">
             <span className="amx-loteria-num" aria-hidden="true">{cuenta}</span>
             {forma &&
@@ -1376,7 +1418,7 @@ function ArmaDestacada({ arma, onOpen }) {
             debajo y deja que se entre por la fotografia. */}
         <button type="button" className="amx-dest-copia" onClick={onOpen}
           aria-label={'Ver la ficha de ' + arma.nombre}>
-          <ArmaPolaroid arma={arma} pie="nombre" />
+          <ArmaPolaroid arma={arma} pie="nombre" sizes="(max-width: 700px) 280px, 325px" />
         </button>
       </div>
     </article>
@@ -2884,7 +2926,7 @@ function RepisaArticulo({ foto, silueta, alt, etiqueta, ariaLabel, onClick }) {
       <button type="button" className="amx-articulo" onClick={onClick} aria-label={ariaLabel}>
         <span className="amx-articulo-foto">
           {conFoto
-            ? <img src={foto} alt={alt || ''} loading="lazy" decoding="async" onError={() => setFallo(true)} />
+            ? <img {...imgResponsiva(foto, 'auto, (max-width: 700px) 140px, 170px')} alt={alt || ''} loading="lazy" decoding="async" onError={() => setFallo(true)} />
             : <span className="amx-articulo-vacio">
                 {silueta && <span className="amx-silueta-acc" aria-hidden="true" style={{ '--silueta-forma': `url(${silueta})` }} />}
                 <span className="amx-sello amx-sello--pendiente" aria-hidden="true">Foto pendiente</span>
@@ -3027,7 +3069,7 @@ function CotejoFichas({ a, b, cotejo, ancho, onAbrir, onCambiar, onQuitar, onEle
               aria-label={'Abrir la ficha de ' + arma.nombre}
               onClick={() => onAbrir(arma.id)}
               onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onAbrir(arma.id); } }}>
-              <ArmaPolaroid arma={arma} pie="ninguno" />
+              <ArmaPolaroid arma={arma} pie="ninguno" sizes="(max-width: 700px) 130px, 210px" />
               <span className="amx-grapa" aria-hidden="true" />
             </div>
             <span className="amx-cotejo-sello"><SelloLegal avail={arma.avail} etiqueta={arma.availLabel} /></span>
@@ -3254,7 +3296,7 @@ function PuestoPieza({ rotulo, foto, silueta, ariaLabel, onClick }) {
       </React.Fragment>}
       <span className="amx-puesto-luz" aria-hidden="true" />
       {conFoto
-        ? <img className="amx-puesto-caja" src={foto} alt="" loading="lazy" decoding="async" onError={() => setFallo(true)} />
+        ? <img className="amx-puesto-caja" {...imgResponsiva(foto, 'auto, 105px')} alt="" loading="lazy" decoding="async" onError={() => setFallo(true)} />
         : <span className="amx-puesto-silueta amx-silueta-acc" aria-hidden="true" style={{ '--silueta-forma': `url(${silueta})` }} />}
     </button>
   );

@@ -717,7 +717,7 @@ function HubPolaroid({ img, label, sub, onClick, style: extraStyle, pozoStyle })
     <button className="amx-polaroid amx-polaroid--hub" onClick={onClick} style={extraStyle}>
       <div className="amx-polaroid-pozo" style={pozoStyle}>
         {img && !err ? (
-          <img src={img} alt={label} loading="lazy" onError={() => setErr(true)}
+          <img {...window.imgResponsiva(img, 'auto, (max-width: 700px) 360px, 505px')} alt={label} loading="lazy" onError={() => setErr(true)}
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }} />
         ) : null}
         {/* Velo verde — mismo tratamiento que las fotos de HOME */}

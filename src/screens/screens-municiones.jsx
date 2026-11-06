@@ -236,7 +236,7 @@ function HomeMunicionesSection({ onNav }) {
               <span className="amx-puesto-luz" aria-hidden="true" />
               {/* alt vacío a propósito: el botón ya se anuncia con el calibre y
                   su cuenta, y repetir «Caja de PMC .380 ACP» detrás lo duplica. */}
-              <img className="amx-puesto-caja" src={caja.src} alt="" loading="lazy" decoding="async" />
+              <img className="amx-puesto-caja" {...window.imgResponsiva(caja.src, 'auto, 105px')} alt="" loading="lazy" decoding="async" />
             </button>
           );
         })}
@@ -420,7 +420,7 @@ function MunicionFicha({ municionId, onOpenMunicion, onOpenArma, onNav, onReport
             <div className="amx-carpeta-foto">
               <div className="amx-copia">
                 <span className="amx-copia-clip" aria-hidden="true" />
-                <window.ArmaPolaroid arma={mun} pie="procedencia" silueta={silueta} />
+                <window.ArmaPolaroid arma={mun} pie="procedencia" silueta={silueta} prioridad sizes={window.SIZES_COPIA_FICHA} />
                 <span className="amx-copia-sello">
                   <window.SelloLegal key={mun.id} avail={mun.avail} etiqueta={disp ? disp.label : ''}
                     className="amx-sello--estampa" />
