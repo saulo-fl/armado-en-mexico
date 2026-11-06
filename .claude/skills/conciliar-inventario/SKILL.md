@@ -394,8 +394,11 @@ explícito. El método para resolverlo: **price chain + name similarity**.
    variantes, altas, renglones a $0 (`null`). Son permanentes y ganan sobre la cadena.
    Pásalas siempre con `--ligas`, también en `--update-ref`.
    `traslados-armas.json` (`{"<cat origen>": ["<nombre exacto>", …]}`) lista renglones que la
-   DCAM publica en otro PDF pero que en el catálogo son armas (05-nov-2026: el lanzagranadas
-   Colt M203 llegó en accesorios → ficha de arma 276). `mapear-existencias.py` los añade al
+   DCAM publica en otro PDF pero que en el catálogo son armas. Hoy está vacío: el lanzagranadas
+   Colt M203 (accesorios, 05-nov-2026) se probó como arma 276 y Saulo lo devolvió a accesorios
+   (cargador 136, tramo «Rifles · 40 mm») porque la ficha de arma enlazaba al PDF de armas, donde
+   no viene. Antes de trasladar otro renglón, pregúntale: la ficha de arma siempre cita el
+   inventario de armas. `mapear-existencias.py` los añade al
    mapear `armas.json` (los lee de `<cat origen>.json` del mismo directorio) y los quita al
    mapear la categoría de origen; su ficha se fija con una liga normal en `ligas-armas.json`.
    Solo actúa cuando el archivo se llama `<cat>.json` (como en el workdir del pipeline).
