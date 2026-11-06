@@ -111,15 +111,16 @@ test('un cargador sin tramo válido deja la sección sin tramos y no se pierde',
   }
 });
 
-test('el catálogo real: 35 cargadores en 9 tramos; Jericho en 9mm y MR1 en .223 Rem', () => {
+test('el catálogo real: 36 cargadores en 10 tramos; Jericho en 9mm, MR1 en .223 Rem y el M203 en 40 mm', () => {
   const s = window.accesoriosVitrina('cargadores')[0];
-  assert.equal(s.piezas.length, 35);
+  assert.equal(s.piezas.length, 36);
   assert.deepEqual(s.tramos.map((t) => [t.label, t.piezas.length]), [
     ['Pistolas · .22 LR', 5], ['Pistolas · .380 ACP', 7], ['Pistolas · 9mm', 10], ['Pistolas · .40 S&W', 1],
-    ['Rifles · .22 LR', 4], ['Rifles · .223 Rem', 1], ['Rifles · 5.56', 5],
+    ['Rifles · .22 LR', 4], ['Rifles · .223 Rem', 1], ['Rifles · 5.56', 5], ['Rifles · 40 mm', 1],
     ['Escopetas · 12 GA', 1], ['Escopetas · 20 GA', 1],
   ]);
   const ids = (label) => s.tramos.find((t) => t.label === label).piezas.map((p) => p.id);
   assert.ok(ids('Pistolas · 9mm').includes(106));
   assert.deepEqual(ids('Rifles · .223 Rem'), [104]);
+  assert.deepEqual(ids('Rifles · 40 mm'), [136]);
 });
