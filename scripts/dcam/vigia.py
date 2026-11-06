@@ -126,11 +126,22 @@ def _es_upload(url: str) -> bool:
     return p.scheme == "https" and p.netloc == "www.gob.mx" and any(u in p.path for u in UPLOADS)
 
 
+def es_otca(url: str, texto: str) -> bool:
+    """El PDF de existencias de la OTCA (Monterrey): «Existencias OTCA.» y archivo
+    «EXISTENCIAS_O.T.C.A._30_OCT._2026.pdf». Un solo PDF con armas, municiones y
+    accesorios; lo procesa otro pipeline (otca-pipeline.sh, señal pendiente-otca.json)."""
+    t = texto.upper().replace(".", "")
+    n = unquote(urlparse(url).path).upper().replace(".", "")
+    return "OTCA" in t or "OTCA" in n
+
+
 def _tipo(url: str, texto: str) -> str:
     if "/cms/uploads/image/file/" in urlparse(url).path:   # por ruta, no por la etiqueta del <a>/<img>
         return "imagen"
     if texto.startswith("Existencias de"):
         return "existencias"
+    if es_otca(url, texto):
+        return "otca"
     if "requisitos" in texto.lower():
         return "requisitos"
     return "documento"
@@ -231,6 +242,7 @@ def _codigo_viejo() -> str:
 
 _TITULOS = {
     "existencias": "📦 Inventario {verbo} DCAM: {etiqueta}",
+    "otca": "📦 Inventario {verbo} OTCA (Monterrey): {etiqueta}",
     "requisitos": "📄 Requisitos · {verbo}: {etiqueta}",
     "imagen": "📢 Aviso o imagen · {verbo}: {etiqueta}",
     "documento": "📄 Documento · {verbo}: {etiqueta}",
@@ -296,7 +308,7 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 60) ->
         msg += _codigo_viejo()
         guardar_estado(ruta_estado, nuevo_estado)
         msgs = [{"texto": msg, "clase": "latido"}]
-        if any(docs_com[u]["tipo"] == "existencias" for u in fallidos):
+        if any(docs_com[u]["tipo"] in ("existencias", "otca") for u in fallidos):
             msgs[-1]["reintentar"] = True
         if aviso_costos:
             msgs.insert(0, {"texto": aviso_costos, "clase": "aviso"})
@@ -334,8 +346,18 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 60) ->
     n_img = sum(1 for d in actuales.values() if d["tipo"] == "imagen")
     msgs.append({"texto": f"✅ DCAM vigía · {fecha(ahora)} · {' · '.join(partes) or 'sin cambios'}"
                           f" · existencias: {exist} · {n_img} imágenes", "clase": "latido"})
-    if any(docs_com[u]["tipo"] == "existencias" for u in fallidos):
+    if any(docs_com[u]["tipo"] in ("existencias", "otca") for u in fallidos):
         msgs[-1]["reintentar"] = True
+
+    # Señal para el pipeline OTCA: PDF de la OTCA nuevo o cambiado, ya en disco.
+    # Va aparte de la DCAM (otro PDF, otra rama, otra unidad: dcam-otca.path).
+    otca_nuevo = [u for u in cambios["nuevos"] + cambios["cambiados"]
+                  if actuales[u]["tipo"] == "otca" and u in archivos]
+    if otca_nuevo:
+        u = otca_nuevo[-1]
+        (dir_base / "pendiente-otca.json").write_text(json.dumps({
+            "fecha": fecha(ahora), "pdf": str(archivos[u]), "url": u, "sha256": actuales[u]["sha256"],
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # Señal para el conciliador: existencias nuevas/cambiadas con PDF ya en disco.
     # Solo escribe la bandera; el .path unit la observa y dispara conciliar-pipeline.sh.
@@ -350,6 +372,8 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 60) ->
         }, ensure_ascii=False, indent=2), encoding="utf-8")
 
     msgs[-1]["texto"] += " · señal escrita" if exist_nuevas else " · sin señal"
+    if otca_nuevo:
+        msgs[-1]["texto"] += " · señal OTCA escrita"
     msgs[-1]["texto"] += _codigo_viejo()
 
     guardar_estado(ruta_estado, nuevo_estado)

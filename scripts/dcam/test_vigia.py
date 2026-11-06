@@ -464,6 +464,44 @@ def test_vigilar_pdf_de_existencias_que_no_baja_se_reintenta():
         assert (base / "pendiente-conciliar.json").exists()
 
 
+OTCA_A = '<a href="/cms/uploads/attachment/file/1113846/EXISTENCIAS_O.T.C.A._30_OCT._2026.pdf">Existencias OTCA.</a>'
+OTCA_B = '<a href="/cms/uploads/attachment/file/1120000/EXISTENCIAS_O.T.C.A._20_NOV._2026.pdf">Existencias OTCA.</a>'
+
+
+def _con_otca(html, enlace):
+    i = html.index('<div class="article-body"')
+    j = html.index(">", i) + 1
+    return html[:j] + "<p>" + enlace + "</p>" + html[j:]
+
+
+def test_otca_es_su_propio_tipo():
+    assert vigia.es_otca("https://www.gob.mx/cms/uploads/attachment/file/1113846/EXISTENCIAS_O.T.C.A._30_OCT._2026.pdf", "Existencias OTCA.")
+    assert vigia.es_otca("https://www.gob.mx/x/1/EXIST_OTCA_1.pdf", "")
+    assert not vigia.es_otca("https://www.gob.mx/x/1/ARMAS_05_NOV._2026.pdf", "Existencias de Armas.")
+    cuerpo = vigia.leer_cuerpo(_con_otca(COM, OTCA_A))
+    tipos = [d["tipo"] for d in vigia.documentos(cuerpo).values()]
+    assert tipos.count("otca") == 1 and tipos.count("existencias") == 3, tipos
+
+
+def test_otca_nuevo_escribe_su_senal_y_no_la_de_dcam():
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        com1 = _con_otca(COM, OTCA_A)
+        paginas = {vigia.PAGINAS["comercializacion"]: com1, vigia.PAGINAS["costos"]: COS}
+        vigia.correr(_bajador(paginas, _archivos_de(com1)), base, datetime(2026, 10, 31, 20), reintento_seg=0)
+        assert not (base / "pendiente-otca.json").exists()   # estado inicial: no dispara nada
+        com2 = _con_otca(COM, OTCA_B)
+        paginas[vigia.PAGINAS["comercializacion"]] = com2
+        codigo, msgs = vigia.correr(_bajador(paginas, _archivos_de(com2)), base, datetime(2026, 11, 20, 20), reintento_seg=0)
+        assert codigo == 0
+        assert any(m["texto"].startswith("📦 Inventario nuevo OTCA (Monterrey): Existencias OTCA.") for m in msgs), msgs
+        s = vigia.cargar_estado(base / "pendiente-otca.json")
+        assert s["fecha"] == "20-NOV-2026" and s["pdf"].endswith("1120000_EXISTENCIAS_O.T.C.A._20_NOV._2026.pdf"), s
+        assert Path(s["pdf"]).exists()
+        assert not (base / "pendiente-conciliar.json").exists()
+        assert "señal OTCA escrita" in msgs[-1]["texto"] and "sin señal" in msgs[-1]["texto"], msgs[-1]["texto"]
+
+
 if __name__ == "__main__":
     pruebas = [f for n, f in sorted(globals().items()) if n.startswith("test_")]
     for f in pruebas:
