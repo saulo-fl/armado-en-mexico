@@ -2265,6 +2265,7 @@
 }
 @media (min-width: 600px) { .amx-v2 .amx-kardex-suc small { display: block; } }
 .amx-v2 .amx-kardex-tabla .amx-sello { font-size: 11px; padding: 2px 6px 3px; }
+.amx-v2 .amx-kardex-tabla .amx-kardex-ultimo { color: var(--manila-tinta-2, #4E5B63); font-style: italic; }   /* agotada: el último precio que tuvo ahí */
 .amx-v2 .amx-kardex-pdf {
   display: inline-flex;
   align-items: center;
@@ -2319,6 +2320,15 @@
   letter-spacing: .08em;
 }
 .amx-v2 .amx-historial-cuerpo { display: grid; gap: var(--e4); }
+.amx-v2 .amx-historial-armeria + .amx-historial-armeria {   /* DCAM arriba, OTCA abajo: una tabla por armería */
+  margin-top: var(--e5); padding-top: var(--e4); border-top: 1px dashed var(--milimetrico-tinta-2);
+}
+.amx-v2 .amx-historial-sub {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+  margin: 0 0 var(--e3); font: 700 13px/1.3 var(--mono);
+  letter-spacing: .06em; text-transform: uppercase; color: var(--manila-tinta);
+}
+.amx-v2 .amx-historial-sub small { font-weight: 400; letter-spacing: .02em; text-transform: none; color: var(--manila-tinta-2); }
 .amx-v2 .amx-historial-cuerpo > * { min-width: 0; }   /* si no, la tabla ensancha la rejilla y no hay nada que deslizar */
 .amx-v2 .amx-registro-desliza {
   overflow-x: auto;

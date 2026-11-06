@@ -262,6 +262,13 @@ medidas, vive en `estilo.css`, bloque «LA FICHA DE ARMA»; las primitivas, al f
   rojo «ÚLTIMO PRECIO CONOCIDO» junto a la cifra, y en la barra fija del móvil el rótulo pasa a
   «Último precio OTCA» o «DCAM». Es la misma regla que el AGOTADO del kárdex, así que nunca sale
   uno sin el otro.
+- **Precio principal entre DCAM y OTCA** (Saulo, 05-nov-2026). Con existencias en DCAM manda el
+  precio DCAM (aunque también haya en OTCA); sin existencias en DCAM y con existencias en OTCA, el de
+  OTCA; sin existencias en ninguna, el del último inventario (con el sello de arriba). La regla vive en
+  `src/lib/cotejo.js` (vista), `precio-principal.py` (datos: `AMX_ARMAS_PRECIOS` y `mun()`) y
+  `auditar.js` (la revisa). La **tarjeta de almacén** lleva el precio de cada sucursal (si está
+  agotada, en cursiva, el último que tuvo ahí) y el **historial de precios** va en una tabla por
+  armería —DCAM arriba, OTCA abajo—, cada una con su gráfica, su variación y su variación total.
 - **La situación legal se dice una vez:** el sello sobre la copia y la hoja de Legalidad. Sin línea
   de texto ni enlace «§ Ver situación legal» bajo la foto.
 - **Las pestañas no mueven el fondo:** las tres hojas de oficio comparten celda y la pila mide lo
