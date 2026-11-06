@@ -274,7 +274,7 @@ function CalibreScreen({ calibreId, onOpenArma, onOpenMunicion, onNav }) {
             <div className="amx-carpeta-foto">
               <div className="amx-copia">
                 <span className="amx-copia-clip" aria-hidden="true" />
-                <window.ArmaPolaroid arma={copia} silueta={silueta} />
+                <window.ArmaPolaroid arma={copia} silueta={silueta} prioridad sizes={window.SIZES_COPIA_FICHA} />
                 {/* Sin clasificación fijada, sin sello (Saulo, 27-sep-2026). */}
                 {sello &&
                   <span className="amx-copia-sello">
