@@ -379,6 +379,30 @@ de su misma rama): avisa «⏸️ … en espera» por Telegram, revisa cada 10 m
 corta la rama del main ya actualizado. A las 12 h (`DCAM_ESPERA_MAX`) falla por la vía normal
 (señal `.fallida`). Así no se repite el choque del 23-oct (C9).
 
+## Inventario OTCA (Monterrey) — desde el 05-nov-2026
+
+La OTCA publica UN PDF con armas, municiones y accesorios juntos y sin nombre corto
+(«Existencias OTCA.» en gob.mx/defensa). Va por su propio camino, sin tocar el de la DCAM:
+
+1. `parse_otca.py <pdf> --json otca.json --tsv otca.tsv` — lee la TABLA con PyMuPDF
+   (`find_tables`); el texto plano mezcla renglones pegados. `cat` sale de la primera palabra.
+2. `mapear-otca.py otca.json --catalogo src/data` — por renglón: liga (`ligas-otca.json`,
+   `{cat: {"<descripción exacta>": id|null}}`) → misma descripción en `referencia-otca.json`
+   (último OTCA verificado) → cadena (precio/ref ≈ factor del día y descripción parecida) →
+   descripción idéntica a la DCAM. Lo demás, `sinFicha` (solucionador). Varias filas de una
+   ficha suman existencias. `--update-ref` deja la referencia en este PDF.
+3. `aplicar-otca.py --mapeo … --fecha AAAA-MM-DD --data-dir src/data/ --pdf otca.pdf` —
+   registra el inventario OTCA (`man_otca_armas_*`, `man_mun_otca_*`, `man_acc_otca_*`,
+   `primary: false`, al FINAL de cada lista), mete `{manualId, price, date, qty}` en orden de
+   fecha y copia el PDF a `public/inventarios/otca-stock-<fecha>.pdf`. Idempotente; `--rehacer`.
+4. Al final de los dos aplicadores corre `precio-principal.py`: con existencias en DCAM manda
+   DCAM; si no, con existencias en OTCA, OTCA; si no, el último inventario (regla de Saulo).
+   `auditar.js` la revisa en armas y municiones; la vista usa la misma (`cotejo.js`).
+
+Pruebas: `python3 scripts/test_otca.py` (con el python del bot, que trae PyMuPDF).
+Los precios OTCA casi siempre van a ±2 % de la DCAM; si una liga da más, revisarla
+(30-oct-2026: Scorpion EVO +28 % porque OTCA vende la automática; cargador MR1 −36 %).
+
 ## Atribución de existencias (mapear-existencias.py)
 
 La atribución de stock por ficha NO es uniforme: 33 fichas suman variantes de varias

@@ -41,9 +41,28 @@ if (DB.length) ok('DB = ' + DB.length + ' armas' + (DB.every((w, i) => w.id === 
 else bad('window.DB vacío');
 
 // 3) invariantes
+// Precio principal (regla de Saulo, 05-nov-2026; precio-principal.py y cotejo.js):
+// con existencias en DCAM → DCAM; si no, con existencias en OTCA → OTCA; si no, el
+// último inventario. «Existencias» = viene con piezas en el ÚLTIMO inventario de esa armería.
+const autDe = (m) => m.autoridad || (/(^|\b)OTCA\b/i.test(m.nombre || '') ? 'OTCA' : 'DCAM');
+const ultimoDe = (mans, s) => (mans || []).filter((m) => autDe(m) === s).sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)))[0] || null;
+const precioPrincipal = (h, mans, qDcam) => {
+  const r = (h || []).slice().sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if (!r.length) return null;
+  const oD = ultimoDe(mans, 'DCAM'), oO = ultimoDe(mans, 'OTCA');
+  const rD = oD && r.find((x) => x.manualId === oD.id), rO = oO && r.find((x) => x.manualId === oO.id);
+  const qD = qDcam != null ? qDcam : (rD && rD.qty) || 0;
+  if (qD > 0 && rD) return num(rD.price);
+  if (rO && rO.qty > 0) return num(rO.price);
+  return num(r[r.length - 1].price);
+};
 let mm = 0;
-DB.forEach((w) => { const h = H[w.id]; if (h && h.length && h[h.length - 1].price !== w.priceExact) { mm++; if (mm <= 8) console.log('     mismatch id ' + w.id + ' ' + w.priceExact + ' vs ' + h[h.length - 1].price); } });
-mm ? bad(mm + ' armas con priceExact != último registro del historial') : ok('priceExact == último registro (todas)');
+const EXD = win.AMX_ARMAS_EXISTENCIAS || {};
+DB.forEach((w) => { const esp = precioPrincipal(H[w.id], win.AMX_MANUALES_SEED, EXD[w.id] || 0); if (esp != null && Math.abs(esp - num(w.priceExact)) > 0.004) { mm++; if (mm <= 8) console.log('     mismatch id ' + w.id + ' ' + w.priceExact + ' vs ' + esp); } });
+mm ? bad(mm + ' armas con priceExact != precio principal (DCAM con existencias > OTCA con existencias > último)') : ok('priceExact == precio principal (todas las armas)');
+let mmM = 0;
+(win.MUNICIONES || []).forEach((m) => { const esp = precioPrincipal((win.MUNICIONES_PRICE_HISTORY || {})[m.id], win.MUNICIONES_MANUALES, null); if (esp != null && Math.abs(esp - num(m.priceExact)) > 0.004) { mmM++; if (mmM <= 8) console.log('     mismatch munición ' + m.id + ' ' + m.priceExact + ' vs ' + esp); } });
+mmM ? bad(mmM + ' municiones con precio != precio principal') : ok('precio de municiones == precio principal (todas)');
 
 let cron = 0;
 Object.values(H).forEach((r) => { for (let i = 1; i < r.length; i++) if (r[i].date < r[i - 1].date) cron++; });
