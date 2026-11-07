@@ -10,8 +10,8 @@
     "10": 51,
     "11": 3,
     "15": 2,
-    "19": 24,
-    "20": 9,
+    "19": 34,
+    "20": 19,
     "21": 12,
     "23": 12,
     "24": 23,
@@ -60,7 +60,7 @@
     "112": 4,
     "113": 1,
     "124": 34,
-    "126": 33,
+    "126": 43,
     "128": 1,
     "132": 40,
     "133": 37,
@@ -70,7 +70,8 @@
     "138": 13,
     "139": 10,
     "140": 21,
-    "142": 4,
+    "141": 20,
+    "142": 24,
     "143": 14,
     "144": 1,
     "145": 5,
@@ -82,6 +83,7 @@
     "166": 7,
     "167": 1,
     "169": 2,
+    "173": 30,
     "178": 15,
     "179": 6,
     "180": 3,
@@ -147,7 +149,8 @@
     "272": 4,
     "273": 5,
     "274": 6,
-    "275": 4
+    "275": 4,
+    "276": 10
   },
   "precios": {
     "1": 10946.79,
@@ -220,6 +223,7 @@
     "138": 7609.02,
     "139": 12737.79,
     "140": 9942.75,
+    "141": 14919.11,
     "142": 10309.41,
     "143": 23454.86,
     "144": 28746.99,
@@ -232,6 +236,7 @@
     "166": 21274.87,
     "167": 24314.14,
     "169": 430230.38,
+    "173": 15800.5,
     "178": 17384.61,
     "179": 10687.93,
     "180": 15347.97,
@@ -297,91 +302,14 @@
     "272": 32970.62,
     "273": 41654.24,
     "274": 49116.73,
-    "275": 49795.14
+    "275": 49795.14,
+    "276": 12518.52
   },
   "factores": [
     1.004627,
     1.001727
   ],
-  "sinFicha": [
-    {
-      "idx": 160,
-      "name": "REVL.F.C.TAURUS889,C. 4” CAL.38 SPL.",
-      "priceN": 14919.11,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 889, CAÑÓN DE 4\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR A"
-    },
-    {
-      "idx": 161,
-      "name": "REVL.F.C.TAURUS889,C.6” C.38SPL.",
-      "priceN": 14919.11,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 889, CAÑÓN DE 6\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR A"
-    },
-    {
-      "idx": 162,
-      "name": "REVL.F.C.TAURUS838,C.4” CAL .38 SPL.",
-      "priceN": 15800.5,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 838, CAÑÓN DE 4\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR A"
-    },
-    {
-      "idx": 163,
-      "name": "REVL.TAURUSMATE838,C.6.5” CAL.38 SPL.",
-      "priceN": 15800.5,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 838, CAÑÓN DE 6.5\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR"
-    },
-    {
-      "idx": 164,
-      "name": "REVL.F.C.TAURUS838,C.6.5” CAL .38 SPL.",
-      "priceN": 16013.25,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 838, CAÑÓN DE 6.5\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR"
-    },
-    {
-      "idx": 165,
-      "name": "REVL.F.C.TAURUS82S,C.4” .38 SPL.",
-      "priceN": 11423.95,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 82S, CAÑÓN DE 4\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR A"
-    },
-    {
-      "idx": 166,
-      "name": "REVL.F.C.TAURUS85S,C.2” CAL.38 SPL.",
-      "priceN": 10846.93,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 85S, CAÑÓN DE 2\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 5 CARTUCHOS, COLOR A"
-    },
-    {
-      "idx": 167,
-      "name": "REVL.F.C.TAURUS85S,CÑ.3” CAL.38 SPL.",
-      "priceN": 10634.18,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 85S, CAÑÓN DE 3\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 5 CARTUCHOS, COLOR P"
-    },
-    {
-      "idx": 168,
-      "name": "REVL.F.C.TAURUS856,CÑ.2” CAL.38 SPL.",
-      "priceN": 10421.43,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 856, CAÑÓN DE 2\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR P"
-    },
-    {
-      "idx": 169,
-      "name": "RVOL.F.C.TAURUS856,CÑ.2” CAL.38 SPL.",
-      "priceN": 10846.93,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 856, CAÑÓN DE 2\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR A"
-    },
-    {
-      "idx": 170,
-      "name": "REVL.F.A.TAURUS970T.,CÑ.6.5” CAL .22 LR",
-      "priceN": 12518.52,
-      "qty": 10,
-      "desc": "REVÓLVER DE FUEGO ANULAR MARCA TAURUS, MODELO 970 TRACKER, CAÑÓN DE 6.5\", CALIBRE .22 LR CON CAPACIDAD DE 7 CARTUCHOS, C"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 50,
@@ -391,7 +319,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 1580,
-  "totalMapped": 1444,
+  "totalMapped": 1554,
   "excluidos": [
     {
       "idx": 68,
