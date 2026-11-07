@@ -61,8 +61,11 @@ Reporta como hallazgo, con el archivo y la línea:
 - `will-change` puesto "por si acaso" en muchos elementos.
 - Filtros SVG a pantalla completa animados.
 - **`content-visibility` sin `contain-intrinsic-size`**: sin él la barra de scroll salta,
-  los enlaces profundos se rompen y Ctrl+F cae en la sección equivocada. El sitio ya usa
-  `content-visibility` en las tarjetas — verifica que lleve `contain-intrinsic-size: auto 600px`.
+  los enlaces profundos se rompen y Ctrl+F cae en la sección equivocada. Desde el 6-nov-2026
+  el sitio lo usa en la rejilla del catálogo (`.amx-catalogo-grid > .amx-exp:nth-child(n+9)`,
+  `estilo.css`): verifica que conserve `contain-intrinsic-size: auto 173px` y
+  `overflow-clip-margin` (sin él se recorta la copia girada), y que no se extienda a las
+  primeras 8 tarjetas (retrasa el LCP).
 
 ## 6 · Movimiento
 

@@ -576,14 +576,36 @@ function promoBtnStyle() {
 const TarjetaRejilla = React.memo(function TarjetaRejilla({ arma, inCompare, abrir, comparar }) {
   return <ArmaCard arma={arma} onClick={() => abrir(arma.id)} onCompare={() => comparar(arma.id)} inCompare={inCompare} />;
 });
+// RENDER PROGRESIVO (fase 4.4 de velocidad, 6-nov-2026). Al montar se pintan las
+// primeras PRIMERAS_TARJETAS y el resto llega en trozos de TROZO_TARJETAS, cada uno
+// en una transición pedida en un hueco libre del hilo. Pintar las 272 de una vez
+// era el grueso de la carga del catálogo (~1.2 s de React con CPU 4x). Con esto y
+// el `content-visibility` de estilo.css (desde la 9ª tarjeta), en un Android medio
+// con caché llena: LCP 1.52 → 0.71 s y TBT 1.05 → 0.18 s.
+// - `tope` NO se reinicia al filtrar: si ya se pintaron todas, volver a «Todas»
+//   no repite la carga por trozos. El conteo sale de `filtered.length`, no de esto.
+// - No usar IntersectionObserver para el resto: llevaría el trabajo al scroll y
+//   Ctrl+F no encontraría las tarjetas sin pintar.
+// - Safari no tiene requestIdleCallback: setTimeout de 16 ms.
+const PRIMERAS_TARJETAS = 24;
+const TROZO_TARJETAS = 24;
 const RejillaCatalogo = React.memo(function RejillaCatalogo({ armas, compareIds, onOpenArma, toggleCompare }) {
   const ultimos = React.useRef(null);
   ultimos.current = { onOpenArma, toggleCompare };
   const abrir = React.useCallback((id) => ultimos.current.onOpenArma(id), []);
   const comparar = React.useCallback((id) => ultimos.current.toggleCompare(id), []);
+  const [tope, setTope] = React.useState(PRIMERAS_TARJETAS);
+  React.useEffect(() => {
+    if (tope >= armas.length) return undefined;
+    const pedir = window.requestIdleCallback || ((f) => setTimeout(f, 16));
+    const soltar = window.cancelIdleCallback || clearTimeout;
+    const id = pedir(() => React.startTransition(() => setTope((t) => t + TROZO_TARJETAS)), { timeout: 300 });
+    return () => soltar(id);
+  }, [tope, armas.length]);
+  const visibles = tope >= armas.length ? armas : armas.slice(0, tope);
   return (
     <div className="amx-catalogo-grid">
-      {armas.map((a) =>
+      {visibles.map((a) =>
         <TarjetaRejilla key={a.id} arma={a} inCompare={compareIds.includes(a.id)}
           abrir={abrir} comparar={comparar} />
       )}
