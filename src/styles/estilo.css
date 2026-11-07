@@ -4057,6 +4057,26 @@
 @media (max-width: 719px) {
   .amx-v2 .amx-catalogo-grid { --cols-catalogo: 1fr; padding-left: 14px; padding-right: 14px; }
 }
+/* Fase 4.4 de velocidad (6-nov-2026): el navegador no calcula ni pinta las
+   tarjetas fuera de pantalla hasta que se acercan. Va junto con el render por
+   trozos de RejillaCatalogo (screens-1.jsx); sin esto, cada trozo de 24 era una
+   tarea larga (>50 ms de estilo y layout) y el TBT volvía a subir.
+   - Desde la 9ª: aplicado también a las primeras, retrasaba el LCP 130-300 ms.
+   - `contain-intrinsic-size`: alto estimado de una tarjeta hasta que se pinta; `auto`
+     recuerda el real después. El alto cambia con el ancho de columna (151-206 px):
+     173 en móvil (165 y 184 px a 412) y 180 desde 720 px, término medio de 2 y 3
+     columnas. Solo afecta a la barra de scroll; el CLS al bajar se midió en 0.
+   - `overflow-clip-margin`: content-visibility recorta como overflow:clip, y la
+     copia girada sobresale de la tarjeta (5 px a la izquierda, 9 px arriba y
+     abajo). Sin esto se veía cortada en recto. */
+.amx-v2 .amx-catalogo-grid > .amx-exp:nth-child(n+9) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 173px;
+  overflow-clip-margin: 16px;
+}
+@media (min-width: 720px) {
+  .amx-v2 .amx-catalogo-grid > .amx-exp:nth-child(n+9) { contain-intrinsic-size: auto 180px; }
+}
 
 /* ── Estado vacío — "Sin resultados" ─────────────────────────── */
 .amx-v2 .amx-catalogo-vacio {
