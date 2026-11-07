@@ -1,23 +1,24 @@
 {
- "fecha": "2026-10-30",
+ "fecha": "2026-11-06",
  "factores": {
   "armas": [
-   1.0516,
-   1.0946
+   0.9947,
+   1.0018
   ],
-  "cartuchos": [
-   1.0516
-  ],
-  "accesorios": []
+  "cartuchos": [],
+  "accesorios": [
+   0.9947,
+   1.0018
+  ]
  },
  "armas": {
   "existencias": {
    "1": 18,
    "2": 15,
    "3": 3,
-   "7": 5,
-   "8": 17,
-   "9": 5,
+   "7": 4,
+   "8": 14,
+   "9": 2,
    "25": 6,
    "29": 9,
    "30": 11,
@@ -26,15 +27,15 @@
    "36": 5,
    "37": 6,
    "38": 6,
-   "41": 16,
+   "41": 15,
    "42": 2,
    "43": 3,
-   "44": 16,
+   "44": 15,
    "47": 10,
    "48": 1,
    "67": 9,
    "74": 3,
-   "76": 3,
+   "76": 2,
    "80": 5,
    "85": 5,
    "94": 1,
@@ -43,65 +44,65 @@
    "114": 1,
    "124": 8,
    "128": 1,
-   "132": 5,
+   "132": 4,
    "143": 5,
    "145": 8,
    "146": 10,
    "149": 4,
-   "162": 2,
+   "162": 1,
    "205": 16,
-   "207": 5,
+   "207": 4,
    "216": 4,
    "221": 3,
    "237": 13,
    "265": 5,
-   "267": 5
+   "267": 4
   },
   "precios": {
-   "1": 11005.34,
-   "2": 10803.46,
-   "3": 17086.7,
-   "7": 12478.54,
-   "8": 12494.91,
-   "9": 12795.0,
-   "25": 10416.06,
-   "29": 12413.06,
-   "30": 12413.07,
-   "31": 13067.82,
-   "34": 9657.64,
-   "36": 11243.45,
-   "37": 12112.97,
-   "38": 12112.97,
-   "41": 15686.84,
-   "42": 16314.31,
-   "43": 30398.75,
-   "44": 19064.28,
-   "47": 11867.44,
-   "48": 11490.09,
-   "67": 21825.17,
-   "74": 38194.04,
-   "76": 52407.68,
-   "80": 31373.68,
-   "85": 5876.04,
-   "94": 27008.65,
-   "104": 15124.85,
-   "113": 40103.75,
-   "114": 53198.85,
-   "124": 14595.58,
-   "128": 109125.84,
-   "132": 11867.44,
-   "143": 23412.31,
-   "145": 14055.41,
-   "146": 18027.59,
-   "149": 31646.5,
-   "162": 37388.41,
-   "205": 28318.16,
-   "207": 28427.28,
+   "1": 10946.79,
+   "2": 10745.98,
+   "3": 16995.8,
+   "7": 12412.15,
+   "8": 12428.44,
+   "9": 12726.93,
+   "25": 10360.65,
+   "29": 12347.02,
+   "30": 12347.03,
+   "31": 12998.3,
+   "34": 9606.26,
+   "36": 11183.64,
+   "37": 12048.52,
+   "38": 12048.52,
+   "41": 15603.38,
+   "42": 16227.52,
+   "43": 30237.02,
+   "44": 18962.86,
+   "47": 11804.3,
+   "48": 11510.97,
+   "67": 21709.05,
+   "74": 37990.84,
+   "76": 52128.86,
+   "80": 31206.76,
+   "85": 5844.78,
+   "94": 26864.95,
+   "104": 15044.38,
+   "113": 39890.38,
+   "114": 52915.81,
+   "124": 14517.93,
+   "128": 108545.26,
+   "132": 11804.3,
+   "143": 23454.86,
+   "145": 13980.63,
+   "146": 17931.68,
+   "149": 31478.13,
+   "162": 37456.36,
+   "205": 28167.5,
+   "207": 28276.04,
    "216": 12369.47,
-   "221": 54972.14,
-   "237": 16805.38,
-   "265": 24553.31,
-   "267": 16914.51
+   "221": 54679.67,
+   "237": 16715.97,
+   "265": 24422.68,
+   "267": 16824.52
   },
   "renglones": [
    {
@@ -122,7 +123,7 @@
    {
     "idx": 4,
     "fichaId": 221,
-    "via": "cadena 1.0"
+    "via": "referencia"
    },
    {
     "idx": 5,
@@ -182,7 +183,7 @@
    {
     "idx": 16,
     "fichaId": 149,
-    "via": "dcam"
+    "via": "referencia"
    },
    {
     "idx": 17,
@@ -217,7 +218,7 @@
    {
     "idx": 23,
     "fichaId": 44,
-    "via": "cadena 0.685"
+    "via": "referencia"
    },
    {
     "idx": 24,
@@ -339,224 +340,56 @@
    "221": [
     {
      "idx": 4,
-     "priceN": 54972.14,
+     "priceN": 54679.67,
      "qty": 2
     },
     {
      "idx": 5,
-     "priceN": 54972.14,
+     "priceN": 54679.67,
      "qty": 1
     }
    ],
    "2": [
     {
      "idx": 41,
-     "priceN": 10803.46,
+     "priceN": 10745.98,
      "qty": 7
     },
     {
      "idx": 42,
-     "priceN": 10803.46,
+     "priceN": 10745.98,
      "qty": 8
     }
    ]
   },
   "sinFicha": [],
-  "sinPrecio": [
-   {
-    "fichaId": 231,
-    "desc": "RIFLE SEMIAUTOMÁTICO MARCA BENELLI CAL. .223 REM, MODELO MR1, CAÑON DE , CULATA FIJA, RIEL PICATINNY",
-    "priceN": 35495.02
-   },
-   {
-    "fichaId": 177,
-    "desc": "RIFLE DE ACCIÓN DE CERROJO DE UN CAÑÓN MARCA WINCHESTER, MODELO XPR, VERSIÓN THUMBHOLE LAMINADO, BASTIDOR LAMINADO, CALIBRE 30-06 SPFL",
-    "priceN": 24924.34
-   },
-   {
-    "fichaId": 171,
-    "desc": "ESCOPETA SEMIAUTOMÁTICA MARCA BERETTA MODELO A400 UPLAND, CON SISTEMA KICK OFF, CAL. 12 GA, CAÑÓN DE 28\"",
-    "priceN": 35321.58
-   },
-   {
-    "fichaId": 156,
-    "desc": "ESCOPETA SEMIAUTOMÁTICA MARCA BERETTA MODELO A400 XTREME PLUS SYNTHETIC, CON SISTEMA KICK OFF, CAL. 12 GA, CAÑÓN DE 28\"",
-    "priceN": 40264.3
-   },
-   {
-    "fichaId": 93,
-    "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN MARCA BROWNING, MODELO MAXUS, VERSIÓN SINTÉTICA CF NEGRA, (GENERACIÓN 2), CULATA Y GUARDAMANO SINTÉTICOS CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.)",
-    "priceN": 37511.13
-   },
-   {
-    "fichaId": 159,
-    "desc": "ESCOPETA SOBREPUESTA DE DOS CAÑONES MARCA BROWNING, MODELO 825 (SPORTER), VERSIÓN CULATA AJUSTABLE, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.)",
-    "priceN": 65182.14
-   },
-   {
-    "fichaId": 160,
-    "desc": "ESCOPETA SOBREPUESTA DE DOS CAÑONES MARCA BROWNING, MODELO B5.25SL (SPORTER LAMINADA), VERSIÓN CULATA AJUSTABLE, CULATA Y GUARDAMANO LAMINADOS, CALIBRE 12, LONGITUD DE CAÑÓN 76CM. (30 PULG.)",
-    "priceN": 51224.5
-   },
-   {
-    "fichaId": 225,
-    "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN MARCA WINCHESTER, MODELO SXP, VERSIÓN CAMO, CULATA Y GUARDAMANO SINTÉTICOS CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71CM. (28 PULG.)",
-    "priceN": 14236.79
-   },
-   {
-    "fichaId": 152,
-    "desc": "ESCOPETA SOBREPUESTA DE DOS CAÑÓNES MARCA WEATHERBY, MODELO ORION, CALIBRE 12, ACABADO MADERA, CULATA AJUSTABLE, CAÑÓN DE 30 PULGADAS",
-    "priceN": 33219.16
-   },
-   {
-    "fichaId": 172,
-    "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN MARCA WEATHERBY, MODELO ELEMENT O ELEMENT 2 WATERFOWL, CALIBRE 12, CULATA SINTÉTICA, ACABADO CAMO, CAÑÓN DE 28 PULGADAS",
-    "priceN": 21718.08
-   },
-   {
-    "fichaId": 123,
-    "desc": "ESCOPETA ACCIÓN DE BOMBA MARCA DERYA, MODELO AG12, CALIBRE 12, CAÑÓN DE 28\"",
-    "priceN": 12561.87
-   },
-   {
-    "fichaId": 105,
-    "desc": "ESCOPETA ACCIÓN DE BOMBA MARCA DERYA, MODELO CR-101, CALIBRE 12, CAÑÓN DE 28\"",
-    "priceN": 13120.17
-   },
-   {
-    "fichaId": 242,
-    "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 AT-ONE CALIBRE 22 LR",
-    "priceN": 22406.98
-   },
-   {
-    "fichaId": 229,
-    "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERRROJO, MODELO CZ 457 STAINLESS CALIBRE 22 LR",
-    "priceN": 14306.57
-   },
-   {
-    "fichaId": 238,
-    "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 VARMINT SYNTHET IC CALIBRE 22 LR",
-    "priceN": 13484.06
-   },
-   {
-    "fichaId": 239,
-    "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 LRP BLACK CALIBRE 22 LR",
-    "priceN": 26893.36
-   },
-   {
-    "fichaId": 234,
-    "desc": "RIFLE DE ACCIÓN DE CERROJO, CALIBRE 0.22\" L.R., DE UN CAÑÓN, MARCA WINCHESTER, MODELO XPERT, VERSIÓN THUMBHOLE, CULATA Y GUARDAMANO DE MADERA",
-    "priceN": 16330.43
-   },
-   {
-    "fichaId": 50,
-    "desc": "RIFLE SEMIAUTOMÁTICO CALIBRE .22\", MARCA MENDOZA, MODELO RM22-6000 ACABADO NOGAL",
-    "priceN": 8348.94
-   },
-   {
-    "fichaId": 179,
-    "desc": "RIFLE SEMIAUTOMÁTICO CALIBRE , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE COMMANDER Y LEYENDA S.D.N. MEXICO CD. MX",
-    "priceN": 9760.66
-   },
-   {
-    "fichaId": 52,
-    "desc": "RIFLE SEMIAUTOMÁTICO CALIBRE .22\", MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE SQUAD",
-    "priceN": 9760.66
-   },
-   {
-    "fichaId": 53,
-    "desc": "RIFLE SEMIAUTOMÁTICO CALIBRE , MARCA MENDOZA, MODELO RM22-6000 ACABADO SAFARI Y LEYENDA D.C.A.M. CD. MX.",
-    "priceN": 9760.66
-   },
-   {
-    "fichaId": 40,
-    "desc": "PISTOLA SEMIAUTOMÁTICA CALIBRE 9X19 MM, MARCA: GLOCK, MODELO: 19 GEN4, LONGITUD DE CAÑÓN: 102 MM",
-    "priceN": 10842.09
-   },
-   {
-    "fichaId": 45,
-    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE 9 MM. X 19, MARCA BERETTA, MODELO PX4 STORM",
-    "priceN": 10636.94
-   },
-   {
-    "fichaId": 173,
-    "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 838, CAÑÓN DE CALIBRE .38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR ACERO INOXIDABLE MATE",
-    "priceN": 13823.83
-   },
-   {
-    "fichaId": 126,
-    "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 82S, CAÑÓN DE CALIBRE .38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR ACERO INOXIDABLE",
-    "priceN": 9999.85
-   },
-   {
-    "fichaId": 10,
-    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA CESKA ZBROJOVKA MODELO CZ SHADOW 2",
-    "priceN": 32376.72
-   },
-   {
-    "fichaId": 11,
-    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: .380 AUTO, MARCA: GLOCK, MODELO 25",
-    "priceN": 10842.09
-   },
-   {
-    "fichaId": 218,
-    "desc": "PISTOLA SEMIAUTOMÁTICA CALIBRE .380 AUTO (9 SHORT), MARCA BERETTA MODELO 80X CHEETAH, COLOR BRONCE",
-    "priceN": 13932.08
-   },
-   {
-    "fichaId": 5,
-    "desc": "PISTOLA CALIBRE 0.380\" AUTO MARCA RUGER MODELO LCP, ACERO ALEADO, ACABADO NEGRO",
-    "priceN": 9110.35
-   },
-   {
-    "fichaId": 134,
-    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE .22LR, MARCA BERETTA MODELO 92 FS 22LR",
-    "priceN": 19019.32
-   },
-   {
-    "fichaId": 18,
-    "desc": "PISTOLA CALIBRE LR, MARCA SIG SAUER, MODELO P322, ACABADO NITRON NEGRO, MIRAS TRASERAS Y DELANTERA OPTICAS",
-    "priceN": 14206.87
-   },
-   {
-    "fichaId": 133,
-    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: .22 L.R., MARCA: GLOCK, MODELO 44",
-    "priceN": 7726.54
-   },
-   {
-    "fichaId": 17,
-    "desc": "PISTOLA SEMIAUTOMATICA CALIBRE 0.22\" L.R. MARCA BROWNING MODELO BUCKMARK, VERSIÓN CAMPER, ACERO INOXIDABLE",
-    "priceN": 14456.12
-   }
-  ],
+  "sinPrecio": [],
   "excluidos": []
  },
  "cartuchos": {
   "existencias": {
    "2002": 800,
    "2003": 660,
-   "2004": 1000,
-   "2010": 100,
+   "2004": 800,
+   "2010": 50,
    "2019": 1000,
    "2042": 600,
    "2047": 800,
    "2053": 400,
-   "2054": 3650,
-   "2056": 80,
-   "2077": 1000
+   "2054": 2500,
+   "2077": 950
   },
   "precios": {
-   "2002": 11.32,
-   "2003": 51.95,
+   "2002": 11.26,
+   "2003": 51.67,
    "2004": 8.96,
-   "2010": 10.46,
+   "2010": 10.48,
    "2019": 8.96,
-   "2042": 24.89,
-   "2047": 28.16,
-   "2053": 6.54,
-   "2054": 16.29,
-   "2056": 16.3,
-   "2077": 13.13
+   "2042": 24.75,
+   "2047": 28.01,
+   "2053": 6.51,
+   "2054": 16.32,
+   "2077": 13.16
   },
   "renglones": [
    {
@@ -572,7 +405,7 @@
    {
     "idx": 49,
     "fichaId": 2019,
-    "via": "dcam"
+    "via": "referencia"
    },
    {
     "idx": 50,
@@ -587,7 +420,7 @@
    {
     "idx": 52,
     "fichaId": 2042,
-    "via": "dcam"
+    "via": "referencia"
    },
    {
     "idx": 53,
@@ -608,75 +441,15 @@
     "idx": 56,
     "fichaId": 2077,
     "via": "liga"
-   },
-   {
-    "idx": 57,
-    "fichaId": 2056,
-    "via": "referencia"
    }
   ],
   "variantes": {},
   "sinFicha": [],
   "sinPrecio": [
    {
-    "fichaId": 2045,
-    "desc": "CARTUCHO CALIBRE 0.38\" SPL. MARCA AGUILA F. M. J. (ENCAMISADA) 130 GN.",
-    "priceN": 13.86
-   },
-   {
-    "fichaId": 2046,
-    "desc": "CARTUCHO MARCA PMC, CALIBRE 9*19MM LUGER, BRONZE, 115 GRAINS, FULL METAL JACKET (FMJ)",
-    "priceN": 406.19
-   },
-   {
-    "fichaId": 2005,
-    "desc": "CARTUCHO CALIBRE 0.380\" AUTO, MARCA PMC, BRONZE, 90 GRAINS, FULL METAL JACKET",
-    "priceN": 7.97
-   },
-   {
-    "fichaId": 2048,
-    "desc": "CARTUCHO CAL. 0.308\" WIN. (7.62 X 51 MM.) MARCA FIOCCHI, F.M.J. DE 150 GR",
-    "priceN": 13.55
-   },
-   {
-    "fichaId": 2049,
-    "desc": "CARTUCHO CALIBRE 243 WIN 100 GR BOAT TAIL SP MARCA ÁGUILA",
-    "priceN": 24.13
-   },
-   {
-    "fichaId": 2050,
-    "desc": "CARTUCHO CALIBRE 270 WIN 130 GR, SOFT POINT, MARCA ÁGUILA.",
-    "priceN": 24.13
-   },
-   {
-    "fichaId": 2051,
-    "desc": "CARTUCHO CALIBRE 30-06 SPGR 150 GR, SOFT POINT, MARCA ÁGUILA",
-    "priceN": 24.13
-   },
-   {
-    "fichaId": 2052,
-    "desc": "CARTUCHO CALIBRE .300 MAG. MARCA AGUILA 180 GR SOFT POINT",
-    "priceN": 31.9
-   },
-   {
-    "fichaId": 2008,
-    "desc": "CARTUCHO CAL. 12, MARCA GB, GB CLUB, 32 GRAMOS, PERDIGON 7.5",
-    "priceN": 9.94
-   },
-   {
-    "fichaId": 2055,
-    "desc": "CARTUCHO MARCA BULLET T-4 CAZA CAL. 12 MUN. 9 36 GR.",
-    "priceN": 11.56
-   },
-   {
-    "fichaId": 2057,
-    "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 T5 PICHON MUN. 7.5 36GR",
-    "priceN": 13.41
-   },
-   {
-    "fichaId": 2058,
-    "desc": "CARTUCHO MARCA BORNAGHI EXTRA CALIBRE 20 N. 7.5 28 GR. T3 CAT. CEBUL B92875",
-    "priceN": 10.18
+    "fichaId": 2056,
+    "desc": "CARTUCHO CAL. 12 POSTA 0B, MARCA BORNAGHI, 33 GRAMOS, T3 CAT. CEBUL B311/0 P1",
+    "priceN": 16.3
    }
   ],
   "excluidos": []
@@ -696,94 +469,94 @@
    "125": 1,
    "128": 13,
    "129": 8,
-   "130": 9
+   "130": 8
   },
   "precios": {
-   "104": 833.77,
-   "106": 545.63,
-   "107": 545.63,
-   "110": 611.11,
-   "111": 1036.7,
-   "118": 570.29,
-   "119": 229.16,
-   "120": 511.58,
-   "121": 511.58,
-   "122": 511.58,
-   "125": 650.92,
-   "128": 651.96,
-   "129": 570.29,
-   "130": 682.04
+   "104": 829.33,
+   "106": 542.72,
+   "107": 542.72,
+   "110": 607.86,
+   "111": 1031.18,
+   "118": 567.26,
+   "119": 227.95,
+   "120": 508.86,
+   "121": 508.86,
+   "122": 508.86,
+   "125": 652.1,
+   "128": 653.14,
+   "129": 567.26,
+   "130": 678.41
   },
   "renglones": [
    {
-    "idx": 58,
+    "idx": 57,
     "fichaId": 106,
     "via": "liga"
    },
    {
-    "idx": 59,
+    "idx": 58,
     "fichaId": 107,
     "via": "liga"
    },
    {
-    "idx": 60,
+    "idx": 59,
     "fichaId": 110,
     "via": "liga"
    },
    {
-    "idx": 61,
+    "idx": 60,
     "fichaId": 128,
-    "via": "dcam"
+    "via": "referencia"
+   },
+   {
+    "idx": 61,
+    "fichaId": 120,
+    "via": "referencia"
    },
    {
     "idx": 62,
-    "fichaId": 120,
-    "via": "dcam"
+    "fichaId": 121,
+    "via": "referencia"
    },
    {
     "idx": 63,
-    "fichaId": 121,
-    "via": "dcam"
+    "fichaId": 122,
+    "via": "referencia"
    },
    {
     "idx": 64,
-    "fichaId": 122,
-    "via": "dcam"
-   },
-   {
-    "idx": 65,
     "fichaId": 104,
     "via": "liga"
    },
    {
-    "idx": 66,
+    "idx": 65,
     "fichaId": 129,
-    "via": "dcam"
+    "via": "referencia"
    },
    {
-    "idx": 67,
+    "idx": 66,
     "fichaId": 118,
     "via": "liga"
    },
    {
-    "idx": 68,
+    "idx": 67,
     "fichaId": 111,
-    "via": "dcam"
+    "via": "referencia"
+   },
+   {
+    "idx": 68,
+    "fichaId": 125,
+    "via": "referencia"
    },
    {
     "idx": 69,
-    "fichaId": 125,
-    "via": "dcam"
+    "fichaId": 130,
+    "via": "referencia"
    },
    {
     "idx": 70,
-    "fichaId": 130,
-    "via": "dcam"
-   },
-   {
-    "idx": 71,
     "fichaId": 119,
-    "via": "dcam"
+    "via": "referencia"
    }
   ],
   "variantes": {},

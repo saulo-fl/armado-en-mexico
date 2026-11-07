@@ -1,320 +1,320 @@
 {
- "pdfDate": "2026-10-30",
- "pdfFile": "otca-stock-2026-10-30.pdf",
+ "pdfDate": "2026-11-06",
+ "pdfFile": "otca-stock-2026-11-06.pdf",
  "armas": [
   {
    "idx": 1,
    "desc": "FUSIL DE ASALTO CALIBRE 7.62 X 51 mm MARCA I.W.I. MODELO GALIL ACE 52 CON CAÑON DE 15.7\" , SEMIAUTOMATICO-AUTOMATICO.",
-   "priceN": 38194.04,
+   "priceN": 37990.84,
    "qty": 3,
    "fichaId": 74
   },
   {
    "idx": 2,
    "desc": "FUSIL DE ASALTO CALIBRE 7.62 X 51 mm MARCA I.W.I. MODELO ARAD 7 DMR, SEMIAUTOMÁTICO, CON CAÑÓN DE 16\"",
-   "priceN": 109125.84,
+   "priceN": 108545.26,
    "qty": 1,
    "fichaId": 128
   },
   {
    "idx": 3,
    "desc": "FUSIL DE ASALTO CALIBRE 5.56X45 MM. MARCA I.W.I. MODELO X95, CON CAÑON DE SEMIAUTOMATICO-AUTOMATICO",
-   "priceN": 52407.68,
-   "qty": 3,
+   "priceN": 52128.86,
+   "qty": 2,
    "fichaId": 76
   },
   {
    "idx": 4,
    "desc": "FUSIL AUTOMATICO CALIBRE 5.56X45 MM. NATO MARCA CZ, MODELO CZ BREN 2 CON LONGITUD DEL",
-   "priceN": 54972.14,
+   "priceN": 54679.67,
    "qty": 2,
    "fichaId": 221
   },
   {
    "idx": 5,
    "desc": "FUSIL AUTOMATICO CALIBRE 5.56X45 MM. NATO, MARCA CESKA ZBROJOVKA, MODELO CZ BREN 2",
-   "priceN": 54972.14,
+   "priceN": 54679.67,
    "qty": 1,
    "fichaId": 221
   },
   {
    "idx": 6,
    "desc": "SUBAMETRALLADORA AUTOMATICA CALIBRE 9X19 MM, LARGO DEL CAÑON DE MARCA CESKA ZBROJOVKA, MODE LO CZS CORPION EVO 3A1",
-   "priceN": 40103.75,
+   "priceN": 39890.38,
    "qty": 5,
    "fichaId": 113
   },
   {
    "idx": 7,
    "desc": "SUBAMETRALLADORA CALIBRE 9 X 19 mm MARCA SIGSAUER MODELO SIGMPX, STANDARD, LONGITUD DE CAÑÓN DE 8\", AUTOMÁTICO/SEMIAUTOMÁTICO",
-   "priceN": 53198.85,
+   "priceN": 52915.81,
    "qty": 1,
    "fichaId": 114
   },
   {
    "idx": 8,
    "desc": "RIFLE SEMIAUTOMATICO CAL. 0.223\" REM. MARCA BENELLI MODELO MR1 DE ASALTO, CAÑON DE 12.5\" + 2\", (Venta exclusiva para Oficiales, Jefes y Generales del Ejercito, Fuerza Aérea Mexicana y Guardia Nacional y equivalente en la Armada de México)",
-   "priceN": 23412.31,
+   "priceN": 23454.86,
    "qty": 5,
    "fichaId": 143
   },
   {
    "idx": 9,
    "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN ELITE L-FDE (Venta exclusiva para Oficiales, Jefes y Generales del Ejercito, Fuerza Aérea Mexicana y Guardia Nacional y equivalente en la Armada de México)",
-   "priceN": 24553.31,
+   "priceN": 24422.68,
    "qty": 5,
    "fichaId": 265
   },
   {
    "idx": 10,
    "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN ELITE-L CON MIRA TELESCÓPICA (Venta exclusiva para Oficiales, Jefes y Generales del Ejercito, Fuerza Aérea Mexicana y Guardia Nacional y equivalente en la Armada de México)",
-   "priceN": 31373.68,
+   "priceN": 31206.76,
    "qty": 5,
    "fichaId": 80
   },
   {
    "idx": 11,
    "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN LTE ACCENTS-WOLF GREY (Venta exclusiva para Oficiales, Jefes y Generales del Ejercito, Fuerza Aérea Mexicana y Guardia Nacional y equivalente en la Armada de México)",
-   "priceN": 16914.51,
-   "qty": 5,
+   "priceN": 16824.52,
+   "qty": 4,
    "fichaId": 267
   },
   {
    "idx": 12,
    "desc": "ESCOPETA SEMIAUTOMÁTICA, CAL. 12GA MARCA BENELLI, MODELO M4, CAÑÓN DE 14\" (Venta exclusiva para Oficiales, Jefes y Generales del Ejercito, Fuerza Aérea Mexicana y Guardia Nacional y equivalente en la Armada de México)",
-   "priceN": 37388.41,
-   "qty": 2,
+   "priceN": 37456.36,
+   "qty": 1,
    "fichaId": 162
   },
   {
    "idx": 13,
    "desc": "ESCOPETA CALIBRE 12 G.A. MARCA STOEGER MODELO SP312, DE ACCION DE BOMBA, CON CAPACIDAD DE 5 CARTUCHOS, CAÑON DE 18 1/2\", REC. DE 3\", CULATA STANDARD (Venta exclusiva para Oficiales, Jefes y Generales del Ejercito, Fuerza Aérea Mexicana y Guardia Nacional y equivalente en la Armada de México)",
-   "priceN": 5876.04,
+   "priceN": 5844.78,
    "qty": 5,
    "fichaId": 85
   },
   {
    "idx": 14,
    "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 LUX CALIBRE 223 REM, CON 1 CARGADOR DE 5 CARTUCHOS",
-   "priceN": 28318.16,
+   "priceN": 28167.5,
    "qty": 16,
    "fichaId": 205
   },
   {
    "idx": 15,
    "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 ERGO CALIBRE 308 WIN, CON 1 CARGADOR DE 5 CARTUCHOS",
-   "priceN": 28427.28,
-   "qty": 5,
+   "priceN": 28276.04,
+   "qty": 4,
    "fichaId": 207
   },
   {
    "idx": 16,
    "desc": "RIFLE DE ACCIÓN DE BOMBA DE UN CAÑON MARCA WINCHESTER, MODELO SXR2 PUMP, VERSIÓN CULATA Y GUARDAMANO SINTÉTICOS, CALIBRE 0.308\" WIN., 2 CARGADORES, ACCESORIOS, MANUAL DE USO Y EYENDA D.C.A.M. CD. MX.",
-   "priceN": 31646.5,
+   "priceN": 31478.13,
    "qty": 4,
    "fichaId": 149
   },
   {
    "idx": 17,
    "desc": "RIFLE DE ACCIÓN DE CERROJO DE UN CAÑÓN MARCA WINCHESTER, MODELO XPR, VERSIÓN SINTÉTICO, BASTIDOR SINTÉTICO, CALIBRE 0.308\" WIN., 2 CARGADORES",
-   "priceN": 21825.17,
+   "priceN": 21709.05,
    "qty": 9,
    "fichaId": 67
   },
   {
    "idx": 18,
    "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN MARCA WINCHESTER, MODELO SX4, VERSIÓN SINTÉTICA, CULATA Y GUARDAMANO SINTÉTICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.)",
-   "priceN": 27008.65,
+   "priceN": 26864.95,
    "qty": 1,
    "fichaId": 94
   },
   {
    "idx": 19,
    "desc": "ESCOPETA ACCIÓN DE BOMBA MARCA DERYA, MODELO AG20, CALIBRE 20, CAÑÓN DE 26\", RECÁMARA 3\", CAPACIDAD 5+1",
-   "priceN": 15124.85,
+   "priceN": 15044.38,
    "qty": 1,
    "fichaId": 104
   },
   {
    "idx": 20,
    "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 VARMINT LH CALIBRE 22 LR",
-   "priceN": 16805.38,
+   "priceN": 16715.97,
    "qty": 13,
    "fichaId": 237
   },
   {
    "idx": 21,
    "desc": "RIFLE DE ACCIÓN DE CERROJO, CALIBRE 0.22\" L.R., DE UN CAÑÓN, MARCA WINCHESTER, MODELO XPERT, VERSIÓN SINTÉTICO, CULATA Y GUARDAMANO SINTÉTICOS",
-   "priceN": 14055.41,
+   "priceN": 13980.63,
    "qty": 8,
    "fichaId": 145
   },
   {
    "idx": 22,
    "desc": "RIFLE DE ACCIÓN DE PALANCA DE UN CAÑÓN, MARCA WINCHESTER, MODELO RANGER, VERSIÓN MADERA, CULATA Y GUARDAMANO MADERA, CALIBRE 0.22\" L.R.",
-   "priceN": 18027.59,
+   "priceN": 17931.68,
    "qty": 10,
    "fichaId": 146
   },
   {
    "idx": 23,
    "desc": "PISTOLA SEMIAUTOMATICA, MARCA SIG SAUER, MODELO P320 M18 CARRY SIZE, CON SEGURO",
-   "priceN": 19064.28,
-   "qty": 16,
+   "priceN": 18962.86,
+   "qty": 15,
    "fichaId": 44
   },
   {
    "idx": 24,
    "desc": "PISTOLA SEMIAUTOMATICA, MARCA SIG SAUER, MODELO P320 X- FIVE, LARGO DEL CAÑON DE FULL SIZE, CALIBRE 9 X 19 MM, COLOR GRIS OXFORD",
-   "priceN": 30398.75,
+   "priceN": 30237.02,
    "qty": 3,
    "fichaId": 43
   },
   {
    "idx": 25,
    "desc": "PISTOLA SEMIAUTOMÁTICA, MARCA SIG SAUER, MODELO P320 CARRY SIZE, SEGURO MANUAL, CALIBRE 9X19 MM, ACABADO NITRON NEGRO, MIRAS DE CONTRASTE",
-   "priceN": 16314.31,
+   "priceN": 16227.52,
    "qty": 2,
    "fichaId": 42
   },
   {
    "idx": 26,
    "desc": "PISTOLA SEMIAUTOMÁTICA, MARCA SIG SAUER, MODELO P320 FULL SIZE, CALIBRE 9X19 MM, ACABADO NITRON NEGRO, MIRAS DE CONTRASTE",
-   "priceN": 15686.84,
-   "qty": 16,
+   "priceN": 15603.38,
+   "qty": 15,
    "fichaId": 41
   },
   {
    "idx": 27,
    "desc": "PISTOLA CALIBRE 9 X 19 mm MARCA I.W.I. MODELO JERICHO II, CAÑON DE 4.4\"",
-   "priceN": 12112.97,
+   "priceN": 12048.52,
    "qty": 6,
    "fichaId": 38
   },
   {
    "idx": 28,
    "desc": "H87 PISTOLA CALIBRE 9X19 mm MARCA I.W.I. MODELO MASADA, CAÑON DE 4.1\" CODIGO: MASADA FULL 9X19",
-   "priceN": 12112.97,
+   "priceN": 12048.52,
    "qty": 6,
    "fichaId": 37
   },
   {
    "idx": 29,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9X19 MM, MARCA CZ, MODELO CZ P-10 F",
-   "priceN": 12413.07,
+   "priceN": 12347.03,
    "qty": 11,
    "fichaId": 30
   },
   {
    "idx": 30,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9X19 MM, MARCA CZ, MODELO CZ P-10 C",
-   "priceN": 12413.06,
+   "priceN": 12347.02,
    "qty": 9,
    "fichaId": 29
   },
   {
    "idx": 31,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9X19 MM, MARCA CZ, MODELO CZ P-09",
-   "priceN": 13067.82,
+   "priceN": 12998.3,
    "qty": 1,
    "fichaId": 31
   },
   {
    "idx": 32,
    "desc": "PISTOLA SEMIAUTOMATICA CALIBRE 9 X 19 mm MARCA SPRINGFIELD ARMORY MODELO XD-M ELITE 4.5\"; PERCUTOR LANZADO",
-   "priceN": 11243.45,
+   "priceN": 11183.64,
    "qty": 5,
    "fichaId": 36
   },
   {
    "idx": 33,
    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: 9X19MM, MARCA: GLOCK, MODELO 19X, COLOR: COYOTE, LONGITUD DE CAÑÓN: 102 mm",
-   "priceN": 14595.58,
+   "priceN": 14517.93,
    "qty": 8,
    "fichaId": 124
   },
   {
    "idx": 34,
    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: 9X19MM, MARCA: GLOCK, MODELO 17 GEN4, LONGITUD DE CAÑÓN: 114 MM",
-   "priceN": 11867.44,
-   "qty": 5,
+   "priceN": 11804.3,
+   "qty": 4,
    "fichaId": 132
   },
   {
    "idx": 35,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9 mm MARCA TAURUS MODELO GX4XL, COLOR PAVÓN",
-   "priceN": 10416.06,
+   "priceN": 10360.65,
    "qty": 6,
    "fichaId": 25
   },
   {
    "idx": 36,
    "desc": "PISTOLA TIPO ESCUADRA MARCA CANIK, MODELO TP9SF MOD. 2, CALIBRE 9 MM LUGER (9X19)",
-   "priceN": 9657.64,
+   "priceN": 9606.26,
    "qty": 3,
    "fichaId": 34
   },
   {
    "idx": 37,
    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE 40 S & W, MARCA BERETTA, MODELO PX4 STORM",
-   "priceN": 11490.09,
+   "priceN": 11510.97,
    "qty": 1,
    "fichaId": 48
   },
   {
    "idx": 38,
    "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: 40 S&W, MARCA: GLOCK, MODELO 22 GEN 4, LONGITUD DE CAÑÓN: 114 mm",
-   "priceN": 11867.44,
+   "priceN": 11804.3,
    "qty": 10,
    "fichaId": 47
   },
   {
    "idx": 39,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA CESKA ZBROJOVKA MODELO CZ P07",
-   "priceN": 12494.91,
-   "qty": 17,
+   "priceN": 12428.44,
+   "qty": 14,
    "fichaId": 8
   },
   {
    "idx": 40,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA CESKA ZBROJOVKA MODELO CZ P-10 C",
-   "priceN": 12795.0,
-   "qty": 5,
+   "priceN": 12726.93,
+   "qty": 2,
    "fichaId": 9
   },
   {
    "idx": 41,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA TAURUS MODELO PT 58 HC PLUS, COLOR ACERO INOXIDABLE",
-   "priceN": 10803.46,
+   "priceN": 10745.98,
    "qty": 7,
    "fichaId": 2
   },
   {
    "idx": 42,
    "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE0 .380\" MARCA TAURUS MODELO PT 58 HC PLUS, COLOR PAVON",
-   "priceN": 10803.46,
+   "priceN": 10745.98,
    "qty": 8,
    "fichaId": 2
   },
   {
    "idx": 43,
    "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO PT 59, CALIBRE 0.380, COLOR PAVÓN",
-   "priceN": 17086.7,
+   "priceN": 16995.8,
    "qty": 3,
    "fichaId": 3
   },
   {
    "idx": 44,
    "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO TH380, CALIBRE 0.380, COLOR PAVÓN, CON 2 CARGADORES CON CAPACIDAD DE 18 CARTUCHOS",
-   "priceN": 11005.34,
+   "priceN": 10946.79,
    "qty": 18,
    "fichaId": 1
   },
   {
    "idx": 45,
    "desc": "PISTOLA CALIBRE 0.380\" AUTO MARCA SIG SAUER MODELO P365, ACABADO NITRON NEGRO MIRAS NOCTURNAS",
-   "priceN": 12478.54,
-   "qty": 5,
+   "priceN": 12412.15,
+   "qty": 4,
    "fichaId": 7
   },
   {
@@ -329,14 +329,14 @@
   {
    "idx": 47,
    "desc": "CARTUCHO MARCA PMC, CALIBRE 5.56*45 MM, X-TAC,55 GRAINS, FULL METAL JACKET (FMJ BOAT TAIL)",
-   "priceN": 11.32,
+   "priceN": 11.26,
    "qty": 800,
    "fichaId": 2002
   },
   {
    "idx": 48,
    "desc": "CARTUCHO MARCA CORBON CALIBRE 38 SUPER + P DE 125 GR . JHP. EN PR ESENTACIÓN EN CAJA CON 20 CARTUCHOS",
-   "priceN": 51.95,
+   "priceN": 51.67,
    "qty": 660,
    "fichaId": 2003
   },
@@ -351,155 +351,148 @@
    "idx": 50,
    "desc": "CARTUCHO CALIBRE 0.40\" S&W MARCA AGUILA FULL METAL JACKET 180 GN. PUNTA REDONDA CODIGO: 1E402111.",
    "priceN": 8.96,
-   "qty": 1000,
+   "qty": 800,
    "fichaId": 2004
   },
   {
    "idx": 51,
    "desc": "CARTUCHO CALIBRE 22-250 REM. MARCA AGUILA AMMUNITION INTERLOCK DE 60 GRS.",
-   "priceN": 28.16,
+   "priceN": 28.01,
    "qty": 800,
    "fichaId": 2047
   },
   {
    "idx": 52,
    "desc": "CARTUCHO CALIBRE 22-250 REM. MARCA AGUILA 60 GRS SOFT POINT",
-   "priceN": 24.89,
+   "priceN": 24.75,
    "qty": 600,
    "fichaId": 2042
   },
   {
    "idx": 53,
    "desc": "CARTUCHO CALIBRE 0.17 HMR MARCA HORNADY 17 GRANOS V-MAX ® CÓDIGO 83170",
-   "priceN": 6.54,
+   "priceN": 6.51,
    "qty": 400,
    "fichaId": 2053
   },
   {
    "idx": 54,
    "desc": "CARTUCHO CAL. 12, MARCA RIO, GAME LOAD-32, 32 GR, PERDIGON 7.5",
-   "priceN": 10.46,
-   "qty": 100,
+   "priceN": 10.48,
+   "qty": 50,
    "fichaId": 2010
   },
   {
    "idx": 55,
    "desc": "CARTUCHO CALIBRE 12, MARCA RIO, ROYAL BUCK 9, PERDIGON 9P (3X3)",
-   "priceN": 16.29,
-   "qty": 3650,
+   "priceN": 16.32,
+   "qty": 2500,
    "fichaId": 2054
   },
   {
    "idx": 56,
    "desc": "CARTUCHO CAL. 12 G.A. MARCA SAGA, KING PIGEON CORTA DISTANCIA, 36 GRAMOS, MUNICIÓN 9.",
-   "priceN": 13.13,
-   "qty": 1000,
+   "priceN": 13.16,
+   "qty": 950,
    "fichaId": 2077
-  },
-  {
-   "idx": 57,
-   "desc": "CARTUCHO CAL. 12 POSTA 0B, MARCA BORNAGHI, 33 GRAMOS, T3 CAT. CEBUL B311/0 P1",
-   "priceN": 16.3,
-   "qty": 80,
-   "fichaId": 2056
   }
  ],
  "accesorios": [
   {
-   "idx": 58,
+   "idx": 57,
    "desc": "CARGADOR PARA PISTOLA MARCA IWI, PARA MODELO JERICHO PL, PSL, II, IIM, CALIBRE 9X19 MM, CON CAPACIDAD PARA 17 CARTUCHOS C/U",
-   "priceN": 545.63,
+   "priceN": 542.72,
    "qty": 8,
    "fichaId": 106
   },
   {
-   "idx": 59,
+   "idx": 58,
    "desc": "CARGADOR PARA PISTOLA MARCA IWI, PARA MODELO MASADA, CALIBRE 9X19 MM, CON CAPACIDAD PARA 17 CARTUCHOS C/U",
-   "priceN": 545.63,
+   "priceN": 542.72,
    "qty": 13,
    "fichaId": 107
   },
   {
-   "idx": 60,
+   "idx": 59,
    "desc": "CARGADOR PARA PISTOLA MARCA SIG SAUER MODELO P320 FULL SIZE, CAL. 9 X 19 MM, CON CAP. DE 17 (DIECISIETE) CARTUCHOS C/U",
-   "priceN": 611.11,
+   "priceN": 607.86,
    "qty": 6,
    "fichaId": 110
   },
   {
-   "idx": 61,
+   "idx": 60,
    "desc": "CARGADOR PARA PISTOLA MARCA BERETTA MODELO PX4 CAL. 9x19MM CON CAPACIDAD DE 20 CARTUCHOS",
-   "priceN": 651.96,
+   "priceN": 653.14,
    "qty": 13,
    "fichaId": 128
   },
   {
-   "idx": 62,
+   "idx": 61,
    "desc": "CARGADOR PARA PISTOLA, CALIBRE: 9X19MM, MARCA: GLOCK, PARA MODELO: 17, CON CAPACIDAD DE 19 CARTUCHOS CADA UNO, CÓDIGO: 1105.",
-   "priceN": 511.58,
+   "priceN": 508.86,
    "qty": 10,
    "fichaId": 120
   },
   {
-   "idx": 63,
+   "idx": 62,
    "desc": "CARGADOR PARA PISTOLA, CALIBRE: 9X19MM, MARCA: GLOCK, PARA MODELO: 19, CON CAPACIDAD DE 17 CARTUCHOS CADA UNO, CÓDIGO: 1112.",
-   "priceN": 511.58,
+   "priceN": 508.86,
    "qty": 10,
    "fichaId": 121
   },
   {
-   "idx": 64,
+   "idx": 63,
    "desc": "CARGADOR PARA PISTOLA, CALIBRE: .40 S&W, MARCA: GLOCK, PARA MODELO: 22, CON CAPACIDAD DE 16 CARTUCHOS CADA UNO, CÓDIGO: 8436.",
-   "priceN": 511.58,
+   "priceN": 508.86,
    "qty": 10,
    "fichaId": 122
   },
   {
-   "idx": 65,
+   "idx": 64,
    "desc": "CARGADOR PARA RIFLE MARCA BENELLI, MODELO (MR1), CON CAPACIDAD DE 5",
-   "priceN": 833.77,
+   "priceN": 829.33,
    "qty": 6,
    "fichaId": 104
   },
   {
-   "idx": 66,
+   "idx": 65,
    "desc": "CARGADOR CALIBRE 0.380\", MARCA TAURUS, PARA PISTOLA MODELO PT 58 HC PLUS, CON CAPACIDAD DE 19 CARTUCHOS.",
-   "priceN": 570.29,
+   "priceN": 567.26,
    "qty": 8,
    "fichaId": 129
   },
   {
-   "idx": 67,
+   "idx": 66,
    "desc": "CARGADOR CALIBRE 0.380\", MARCA TAURUS, PARA PISTOLA MODELO TH380, CON CAPACIDAD DE 18 CARTUCHOS",
-   "priceN": 570.29,
+   "priceN": 567.26,
    "qty": 3,
    "fichaId": 118
   },
   {
-   "idx": 68,
+   "idx": 67,
    "desc": "CARGADOR PARA CARTUCHOS CALIBRE 22, MARCA TIPPMANN ARMS, MODELO S/N, VERSIÓN 25 CARTUCHOS, INCLUYE UN CARGADOR EN UNA BOLSA DE PLÁSTICO.",
-   "priceN": 1036.7,
+   "priceN": 1031.18,
    "qty": 4,
    "fichaId": 111
   },
   {
-   "idx": 69,
+   "idx": 68,
    "desc": "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA CALIBRE 0.22\" L.R., MARCA BROWNING, MODELO 1911-22, DE 10CARTUCHOS DE CAPACIDAD.",
-   "priceN": 650.92,
+   "priceN": 652.1,
    "qty": 1,
    "fichaId": 125
   },
   {
-   "idx": 70,
+   "idx": 69,
    "desc": "CARGADOR PARA PISTOLA SEMIAUTOMÁTICA CALIBRE 0.22\" L.R., MARCA BROWNING, MODELO BUCKMARK, DE 10 CARTUCHOS DE CAPACIDAD.",
-   "priceN": 682.04,
-   "qty": 9,
+   "priceN": 678.41,
+   "qty": 8,
    "fichaId": 130
   },
   {
-   "idx": 71,
+   "idx": 70,
    "desc": "CARGADOR P/ PISTOLA CAL. 0.22\" L.R. MARCA CESKA ZBROJOVKA MOD. CZ P-09, CAP.10 CARTS.",
-   "priceN": 229.16,
+   "priceN": 227.95,
    "qty": 13,
    "fichaId": 119
   }
