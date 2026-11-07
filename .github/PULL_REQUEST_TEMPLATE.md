@@ -23,3 +23,5 @@
 - [ ] Si toqué el `:root` de `estilo.css`: `npm run tokens` y commiteé `docs/penpot/tokens.json`
 - [ ] Si cambié una pantalla: `npm run capturas` y actualicé su board `real / movil` en Penpot
 - [ ] Tengo derecho a aportar el contenido bajo la licencia correspondiente
+
+"Solos podemos hacer muy poco; juntos podemos hacer mucho"
