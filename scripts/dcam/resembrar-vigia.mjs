@@ -80,6 +80,24 @@ async function bajar(ruta) {
   return r.text();
 }
 
+// /api/state guarda en cada centro de datos la versión vigente hasta 60 s (functions/api/state.js,
+// VERSION_TTL_S): leído justo después de escribir, puede traer la de antes aunque D1 ya cambió.
+// Se reintenta cada 10 s hasta 2 min antes de dar el aviso (Saulo, 07-nov-2026).
+// Devuelve cuántas lecturas hicieron falta, o -1 si nunca coincidió.
+const ESPERA_COINCIDA_S = Number(process.env.VIGIA_ESPERA_S ?? 120);
+const PASO_COINCIDA_S = Number(process.env.VIGIA_PASO_S ?? 10);
+export async function esperarCoincida(leer, json, { total = ESPERA_COINCIDA_S, paso = PASO_COINCIDA_S, dormir } = {}) {
+  dormir = dormir || ((s) => new Promise((r) => setTimeout(r, s * 1000)));
+  const intentos = Math.floor(total / paso) + 1;
+  for (let i = 1; i <= intentos; i++) {
+    try {
+      if (JSON.stringify(await leer()) === json) return i;
+    } catch { /* un fallo de red en medio no es la respuesta final */ }
+    if (i < intentos) await dormir(paso);
+  }
+  return -1;
+}
+
 async function telegram(texto) {
   if (simular) { console.log('[telegram simulado]\n' + texto); return; }
   try {
@@ -218,8 +236,8 @@ async function main() {
 
   const { CLOUDFLARE_API_TOKEN } = leerEnv('cloudflare.env');
   await escribirD1(CLOUDFLARE_API_TOKEN, codigo);
-  const tras = JSON.parse(await bajar('/api/state')).armas;
-  if (JSON.stringify(tras) !== json) throw new Error('escribí en D1 pero /api/state no coincide con el código');
+  const vueltas = await esperarCoincida(async () => JSON.parse(await bajar('/api/state')).armas, json);
+  if (vueltas < 0) throw new Error(`escribí en D1 pero /api/state sigue sin coincidir con el código tras ${ESPERA_COINCIDA_S} s`);
 
   guardarFoto(huella, codigo);
   guardarEstado({ codigoResembrado: huella, fecha: ahora(), alertado: null });
@@ -234,7 +252,7 @@ if (esPrincipal) main().catch(async (e) => {
   const estado = leerEstado();
   const clave = `error:${e.message}`;
   if (estado.alertado !== clave) {   // un aviso por error distinto, no cada 15 min
-    await telegram(`❌ Armado MX: falló el resembrado automático de D1.\nMotivo: ${e.message}\nLos visitantes que ya entraron siguen viendo precios viejos hasta que se arregle.`);
+    await telegram(`❌ Armado MX: falló el resembrado automático de D1.\nMotivo: ${e.message}\nSi el motivo es que /api/state no coincide, revisa D1 antes de resembrar a mano.`);
     guardarEstado({ ...estado, alertado: clave });
   }
   process.exit(1);
