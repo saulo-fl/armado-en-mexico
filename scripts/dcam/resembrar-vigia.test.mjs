@@ -8,7 +8,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { armasDelCodigo, decidir } from './resembrar-vigia.mjs';
+import { armasDelCodigo, decidir, esperarCoincida } from './resembrar-vigia.mjs';
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const precios = fs.readFileSync(path.join(RAIZ, 'src/data/data-precios.js'), 'utf8');
@@ -131,4 +131,21 @@ test('solo inventario no necesita foto base → resembrar sin fichas', () => {
     assert.equal(r.nuevas.length, 1);
     assert.deepEqual(r.fichas, []);
   }
+});
+
+test('tras escribir: /api/state con la versión de antes 2 veces y luego la nueva → coincide a la 3.ª', async () => {
+  const lecturas = [[{ id: 1, p: 'viejo' }], [{ id: 1, p: 'viejo' }], [{ id: 1, p: 'nuevo' }]];
+  const esperas = [];
+  const n = await esperarCoincida(async () => lecturas.shift(), JSON.stringify([{ id: 1, p: 'nuevo' }]),
+    { total: 120, paso: 10, dormir: async (s) => { esperas.push(s); } });
+  assert.equal(n, 3);
+  assert.deepEqual(esperas, [10, 10]);
+});
+
+test('tras escribir: nunca coincide en 2 min → -1 tras 13 lecturas; un fallo de red no corta', async () => {
+  let leidas = 0;
+  const n = await esperarCoincida(async () => { leidas++; if (leidas === 2) throw new Error('red'); return []; },
+    JSON.stringify([{ id: 1 }]), { total: 120, paso: 10, dormir: async () => {} });
+  assert.equal(n, -1);
+  assert.equal(leidas, 13);
 });
