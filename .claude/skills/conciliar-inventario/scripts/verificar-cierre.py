@@ -58,6 +58,62 @@ console.log(JSON.stringify({ armas: pick(win.AMX_PRICE_HISTORY_SEED),
     return json.loads(r.stdout)
 
 
+def es_dcam(manual_id, pref):
+    """¿El registro es de DCAM (CDMX) de la categoría? Los de OTCA-Monterrey comparten
+    prefijo en accesorios (man_acc_ ⊂ man_acc_otca_): son otra sucursal y otro precio,
+    no cuentan como «registro DCAM anterior» ni entran en la mediana general."""
+    return manual_id.startswith(pref) and "otca" not in manual_id
+
+
+def saltos_de_precio(H, fecha, justif):
+    """Compara cada ficha con registro DCAM de hoy contra su registro DCAM anterior.
+    Devuelve (hallazgos, items del informe)."""
+    hallazgos, items = [], []
+    for cat, (pref, _) in CATS.items():
+        hoy_id = pref + fecha.replace("-", "_")
+        regs = {fid: [r for r in v if es_dcam(r["m"], pref) and r["p"] > 0]
+                for fid, v in H.get(cat, {}).items()}
+        hoy = {fid: next((r for r in v if r["m"] == hoy_id), None) for fid, v in regs.items()}
+        previo = {}
+        for fid, v in regs.items():
+            ant = [r for r in v if r["d"] < fecha]
+            if hoy.get(fid) and ant:
+                previo[fid] = ant[-1]
+        # razón general hoy / fecha d, con las fichas que tienen registro en ambas
+        por_fecha = {}
+        for fid, v in regs.items():
+            if not hoy.get(fid):
+                continue
+            for r in v:
+                if r["d"] < fecha:
+                    por_fecha.setdefault(r["d"], []).append(hoy[fid]["p"] / r["p"])
+        # Aumento general hoy / fecha d: mediana de lo que se movieron las fichas
+        # presentes en ambas fechas. La mediana aguanta aunque un tercio de las
+        # fichas venga mal emparejado (02-oct: 9 de 53 cartuchos inflados); las
+        # líneas de producto suben a ritmos algo distintos, de ahí la tolerancia.
+        general = {d: statistics.median(x) for d, x in por_fecha.items() if len(x) >= 5}
+        for fid, ant in previo.items():
+            razon = hoy[fid]["p"] / ant["p"]
+            if abs(razon - 1) <= UMBRAL:
+                continue
+            g = general.get(ant["d"])
+            item = {"cat": cat, "id": fid, "antes": ant["p"], "fechaAntes": ant["d"],
+                    "hoy": hoy[fid]["p"], "razon": round(razon, 4), "general": g and round(g, 4)}
+            clave = f"{cat}:{fid}"
+            if g and abs(razon - g) <= TOL_GENERAL:
+                item["ok"] = "aumento general"
+            elif clave in justif:
+                item["ok"] = "justificado: " + str(justif[clave])
+            else:
+                item["ok"] = False
+                hallazgos.append(f"{clave}: salto {ant['p']} ({ant['d']}) → {hoy[fid]['p']} "
+                                 f"(x{razon:.4f}, general x{g:.4f})" if g else
+                                 f"{clave}: salto {ant['p']} ({ant['d']}) → {hoy[fid]['p']} (x{razon:.4f})")
+            items.append(item)
+
+    return hallazgos, items
+
+
 def remapear(workdir, cat, fecha):
     pdf = Path(workdir) / f"{cat}.json"
     if not pdf.exists():
@@ -105,48 +161,9 @@ def main():
             hallazgos.append(f"{cat}: factor fuera de rango {f}")
 
     # 2) saltos de precio
-    H = historiales("src/data")
-    for cat, (pref, _) in CATS.items():
-        hoy_id = pref + a.fecha.replace("-", "_")
-        regs = {fid: [r for r in v if r["m"].startswith(pref) and r["p"] > 0]
-                for fid, v in H.get(cat, {}).items()}
-        hoy = {fid: next((r for r in v if r["m"] == hoy_id), None) for fid, v in regs.items()}
-        previo = {}
-        for fid, v in regs.items():
-            ant = [r for r in v if r["d"] < a.fecha]
-            if hoy.get(fid) and ant:
-                previo[fid] = ant[-1]
-        # razón general hoy / fecha d, con las fichas que tienen registro en ambas
-        por_fecha = {}
-        for fid, v in regs.items():
-            if not hoy.get(fid):
-                continue
-            for r in v:
-                if r["d"] < a.fecha:
-                    por_fecha.setdefault(r["d"], []).append(hoy[fid]["p"] / r["p"])
-        # Aumento general hoy / fecha d: mediana de lo que se movieron las fichas
-        # presentes en ambas fechas. La mediana aguanta aunque un tercio de las
-        # fichas venga mal emparejado (02-oct: 9 de 53 cartuchos inflados); las
-        # líneas de producto suben a ritmos algo distintos, de ahí la tolerancia.
-        general = {d: statistics.median(x) for d, x in por_fecha.items() if len(x) >= 5}
-        for fid, ant in previo.items():
-            razon = hoy[fid]["p"] / ant["p"]
-            if abs(razon - 1) <= UMBRAL:
-                continue
-            g = general.get(ant["d"])
-            item = {"cat": cat, "id": fid, "antes": ant["p"], "fechaAntes": ant["d"],
-                    "hoy": hoy[fid]["p"], "razon": round(razon, 4), "general": g and round(g, 4)}
-            clave = f"{cat}:{fid}"
-            if g and abs(razon - g) <= TOL_GENERAL:
-                item["ok"] = "aumento general"
-            elif clave in justif:
-                item["ok"] = "justificado: " + str(justif[clave])
-            else:
-                item["ok"] = False
-                hallazgos.append(f"{clave}: salto {ant['p']} ({ant['d']}) → {hoy[fid]['p']} "
-                                 f"(x{razon:.4f}, general x{g:.4f})" if g else
-                                 f"{clave}: salto {ant['p']} ({ant['d']}) → {hoy[fid]['p']} (x{razon:.4f})")
-            informe["saltos"].append(item)
+    h2, items = saltos_de_precio(historiales("src/data"), a.fecha, justif)
+    hallazgos += h2
+    informe["saltos"] += items
 
     informe["hallazgos"] = hallazgos
     print(json.dumps(informe, ensure_ascii=False, indent=1))

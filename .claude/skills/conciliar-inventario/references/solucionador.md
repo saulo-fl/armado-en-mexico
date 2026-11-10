@@ -258,3 +258,15 @@ Lo que sobrevive es alta nueva.
   y no llega a la jaula; los pasos 1 y 2 fallan con motivo si no hay nada que mapear/aplicar.
 - **Si vuelve a pasar**: no es trabajo de datos. Cuenta los PDFs de la señal (`.pdfs`) y
   mira el encabezado con `pdftotext -l 1`; reporta el nombre/encabezado nuevo en `pendiente`.
+
+### C17. Salto falso tras una corrida OTCA (10-nov-2026)
+
+- **Síntoma (antes del arreglo)**: verificar-cierre marca `accesorios:<id>` con un «anterior»
+  de la misma fecha que una corrida OTCA y un precio ~4 % distinto (10-nov: ficha 125,
+  652.10 OTCA del 06-nov contra 675.33 de hoy, cuando el DCAM del 06-nov era 678.41 = x0.9955,
+  el aumento general).
+- **Causa**: el prefijo DCAM de accesorios `man_acc_` también casaba con `man_acc_otca_`.
+- **Ya corregido en código**: `es_dcam()` en `verificar-cierre.py` excluye todo manualId con
+  `otca` (registro anterior y mediana general); prueba en `scripts/test_verificar_cierre.py`.
+- **Si vuelve a pasar**: no es trabajo de datos; compara con el `man_acc_<fecha>` DCAM y
+  repórtalo en `pendiente`.
