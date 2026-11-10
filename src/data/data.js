@@ -404,7 +404,7 @@ window.DB = [
 
   mk(100, "Beretta DT11 Sport", "Beretta", "escopeta", "Italia", "12 GA", "2", "3900g", "1280mm", "Superpuesta competición", 2012, "dcam", "ESCOPETA CAL 12 BERETTA DT11 SPORT", "imagenes/057_Beretta_DT11_Sport.webp?v=2", "Superpuesta de competición top-tier. Estándar olímpico en trap y skeet. Pieza de tirador profesional."),
 
-  mk(101, "Derya MR-S1", "Derya", "escopeta", "Turquía", "12 GA", "4+1", "3100g", "1240mm", "Semi-auto, sintética", 2020, "dcam", "ESCOPETA CAL 12 DERYA MR-S1 C 30\"", "imagenes/058_Derya_MR-S1.webp?v=2", "Semi-automática turca con cañón 30\". Buen acabado y precio competitivo."),
+  mk(101, "Derya MR-S1", "Derya", "escopeta", "Turquía", "12 GA", "2", "3100g", "1240mm", "Superpuesta, sintética", 2020, "dcam", "ESCOPETA CAL 12 DERYA MR-S1 C 30\"", "imagenes/058_Derya_MR-S1.webp?v=2", "Superpuesta turca con cañón 30\". Buen acabado y precio competitivo."),
 
   mk(102, "Derya MR-100 cal 12", "Derya", "escopeta", "Turquía", "12 GA", "4+1", "3000g", "1200mm", "Semi-auto inercial", 2018, "dcam", "ESCOPETA CAL 12 DERYA MR-100 C 28\"", "imagenes/059_Derya_MR-100_cal_12.webp?v=2", "Semi-automática inercial de entrada de Derya. Buen valor para caza."),
 
