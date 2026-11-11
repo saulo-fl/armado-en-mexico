@@ -54,67 +54,10 @@
     "2120": 16.66
   },
   "factores": [
-    0.995432,
     1.0
   ],
   "sinFicha": [],
-  "sinPrecio": [
-    {
-      "fichaId": 2125,
-      "refName": "CART. CAL. 12 GB SPORTING PLUS 28G, P.8",
-      "refPrice": 9.99
-    },
-    {
-      "fichaId": 2061,
-      "refName": "CART.CAL.12.RIO.GAME.LOAD-32.32GR.P6",
-      "refPrice": 10.48
-    },
-    {
-      "fichaId": 2074,
-      "refName": "CART. CAL. 12GA RIO GAME LOAD-32 32GR P4",
-      "refPrice": 10.48
-    },
-    {
-      "fichaId": 2124,
-      "refName": "CART CAL. 12 EG DEL SUR (SH) 29 GR M. 8",
-      "refPrice": 10.48
-    },
-    {
-      "fichaId": 2075,
-      "refName": "CART.CAL.12.A.VEL.1330.M#7.5,36G",
-      "refPrice": 11.94
-    },
-    {
-      "fichaId": 2096,
-      "refName": "CART.CAL.12.G.A.SAGA BUCK,34GR,M9 POSTAS",
-      "refPrice": 16.08
-    },
-    {
-      "fichaId": 2112,
-      "refName": "CARTUCHO CAL 12 SAGA SPORTING 32 M7.5",
-      "refPrice": 11.94
-    },
-    {
-      "fichaId": 2064,
-      "refName": "CART.CAL.12.GA.SAGA.EXPORT28.MUN8,28GRS",
-      "refPrice": 10.23
-    },
-    {
-      "fichaId": 2080,
-      "refName": "CART.CAL. 12G.A.SAGA EXPORT 32, 32GR,M7.",
-      "refPrice": 10.23
-    },
-    {
-      "fichaId": 2123,
-      "refName": "CART.CAL.12G.A.SAGA EXPORT 32,32GR,MUN8.",
-      "refPrice": 10.23
-    },
-    {
-      "fichaId": 2029,
-      "refName": "CART.CAL.30-06 SPRG 150 GR S.P.ÁGUILA",
-      "refPrice": 26.27
-    }
-  ],
+  "sinPrecio": [],
   "revisarPrecio": [],
   "totalPdf": 71637,
   "totalMapped": 71063,
