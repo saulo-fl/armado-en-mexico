@@ -1,122 +1,130 @@
 {
-  "pdfDate": "2026-11-10",
+  "pdfDate": "2026-11-11",
   "pdfFile": "armas",
-  "totalRows": 196,
+  "totalRows": 201,
   "rows": [
     {
       "idx": 1,
+      "name": "ESCOPETA 12 BENELLI SB EAG II COMFORTECH",
+      "desc": "ESCOPETA SEMIAUTOMATICA CALIBRE 12 G.A. MARCA BENELLI MODELO SUPER BLACK EAGLE II (COMFORTECH) CAÑON DE 28\",. INCLUYE MANUAL DE INSTRUCCIONES, SET DE CHOKES, PUEDE O NO INCLUIR LLAVE PARA CHOKE Y ACCESORIOS. (SBEII BLACK 28” I.C. 3,5” HIGH RIB CONFORT USA). .",
+      "priceN": 38776.33,
+      "qty": 6,
+      "fichaId": 277
+    },
+    {
+      "idx": 2,
       "name": "ESCOPETA CAL.12 GA STOEGER SP312",
       "desc": "ESCOPETA CALIBRE 12 G.A. MARCA STOEGER MODELO SP312, DE ACCION DE BOMBA, CON CAPACIDAD DE 5 CARTUCHOS, CAÑON DE 18 1/2\", REC. DE 3\", CULATA STANDARD, CON MANUAL DE USUARIO Y GRABADA LA LEYENDA D.C.A.M. CD. MX.",
-      "priceN": 5582.68,
+      "priceN": 5617.56,
       "qty": 3,
       "fichaId": 85
     },
     {
-      "idx": 2,
+      "idx": 3,
       "name": "ECOPETA CAL20 YUXTAPUESTA AYA N1DELUXE",
       "desc": "",
-      "priceN": 665335.33,
+      "priceN": 669491.38,
       "qty": 1,
       "fichaId": 87
     },
     {
-      "idx": 3,
+      "idx": 4,
       "name": "ESCOPETA CAL12 YUXTAPUESTA AYA CENTENARY",
       "desc": "",
-      "priceN": 401772.25,
+      "priceN": 404281.94,
       "qty": 2,
       "fichaId": 86
     },
     {
-      "idx": 4,
+      "idx": 5,
       "name": "ESCOP CAL12 SOBRE AYA SENACLASSIC32 GS",
       "desc": "",
-      "priceN": 416045.82,
+      "priceN": 418644.67,
       "qty": 1,
       "fichaId": 89
     },
     {
-      "idx": 5,
+      "idx": 6,
       "name": "ESCOPETA CAL12 SOBRE AYA SENABLA32 CH/IN",
       "desc": "",
-      "priceN": 426336.06,
-      "qty": 1,
-      "fichaId": 169
-    },
-    {
-      "idx": 6,
-      "name": "ESCOP CAL12 SOBRE AYA SENABLACK32 CH/FI",
-      "desc": "",
-      "priceN": 426336.06,
+      "priceN": 428999.19,
       "qty": 1,
       "fichaId": 169
     },
     {
       "idx": 7,
+      "name": "ESCOP CAL12 SOBRE AYA SENABLACK32 CH/FI",
+      "desc": "",
+      "priceN": 428999.19,
+      "qty": 1,
+      "fichaId": 169
+    },
+    {
+      "idx": 8,
       "name": "ESCOP CAL12 SOBRE AYA SENAXDL C32",
       "desc": "ESCOPETA SOBREPUESTA CALIBRE 12 MARCA AYA MODELO SENATOR XDL, BÁSCULA DE ACERO FORJADO, PIEZAS INTERIORES LIJADAS A MANO, CAÑONES MONOBLOCK DE 32\", PLETINA CORTA, MADERA Y GRABADO SUPERIOR, DISPARADOR UNICO SELECTIVO, CHOKES FIJOS, CULATA PISTOLET, SENCILLO GRABADO ESTILO INGLÉS Y GRABADA LA LEYENDA S.D.N. MEXICO CD. MX.",
-      "priceN": 677043.88,
+      "priceN": 681273.07,
       "qty": 1,
       "fichaId": 90
     },
     {
-      "idx": 8,
+      "idx": 9,
       "name": "SUBAMETRA 9X19 MM EMTAN MZ-9S SEMIAUTO 7",
       "desc": "",
-      "priceN": 39588.34,
+      "priceN": 39736.28,
       "qty": 1,
       "fichaId": 83
     },
     {
-      "idx": 9,
+      "idx": 10,
       "name": "FUSIL 5.56X45 ROCK RIVER ARMS C 10.5\"",
       "desc": "",
-      "priceN": 37754.55,
+      "priceN": 37895.63,
       "qty": 1,
       "fichaId": 73
     },
     {
-      "idx": 10,
+      "idx": 11,
       "name": "FUSIL CAL.7.62X51 mm. GALIL I W I ACE 52",
       "desc": "FUSIL DE ASALTO CALIBRE 7.62 X 51 mm MARCA I.W.I. MODELO GALIL ACE 52 CON CAÑON DE 15.7\", SEMIAUTOMATICO-AUTOMATICO. INCLUYE 5 CARGADORES CON CAPACIDAD DE 25 CARTUCHOS C/U., 1 LLAVE DE CERREO POR 10 FUSILES, PORTAFUSIL, KIT DE LIMPIEZA Y MANTENIMIENTO PARA EL USUARIO, MANUAL DE OPERACIÓN EN ESPAÑOL Y EL GRABADO \"S.D.N. MEXICO D.F.\". CODIGO 527700000.",
-      "priceN": 37754.55,
+      "priceN": 37895.63,
       "qty": 4,
       "fichaId": 74
     },
     {
-      "idx": 11,
+      "idx": 12,
       "name": "FUSIL 5.56X45 mm IWI MOD X95 CA 13\"",
       "desc": "FUSIL DE ASALTO CALIBRE 5.56X45 MM. MARCA I.W.I. MODELO X95, CON CAÑON DE 13\", SEMIAUTOMATICO-AUTOMATICO CODIGO: 007050000A. INCLUYE MIRA REFLEX (CON TRITIO DE COMPOSICIÓN H3), MARCA MEPROLIGHT, MODELO MEPRO 21M, 5 (CINCO) CARGADORES CON CAPACIDAD DE 30 CARTUCHOS C/U, KIT DE LIMPIEZA, PORTAFUSIL Y MANUAL DE OPERACIÓN EN ESPAÑOL Y GRABADA LA LEYENDA \"S.D.N. MÉXICO, CD. MX.\".",
-      "priceN": 51804.63,
-      "qty": 3,
+      "priceN": 51998.22,
+      "qty": 2,
       "fichaId": 76
     },
     {
-      "idx": 12,
+      "idx": 13,
       "name": "RIFLE CAL.223\" REM BENELLI MR1 CARG. 30",
       "desc": "RIFLE SEMIAUTOMATICO CAL. 0.223\" REM. MARCA BENELLI MODELO MR1 DE ASALTO, CAÑON DE 12.5\" + 2\", CON 2 CARGADORES CON CAPACIDAD DE 30 CARTUCHOS, CULATA TELESCOPICA, RIEL PICATINY Y LA LEYENDA GRABADA \"S.D.N. MÉXICO CD. MX.\"",
-      "priceN": 23242.56,
+      "priceN": 23387.74,
       "qty": 14,
       "fichaId": 143
     },
     {
-      "idx": 13,
+      "idx": 14,
       "name": "SUBAMETRALLADORA CAL9 mm CESKA SCOR EVO",
       "desc": "",
-      "priceN": 31255.37,
+      "priceN": 31372.17,
       "qty": 1,
       "fichaId": 113
     },
     {
-      "idx": 14,
+      "idx": 15,
       "name": "RIFLE CAL.300 WIN BENELLI ARGO-E CONFORT",
       "desc": "",
-      "priceN": 28486.78,
+      "priceN": 28664.73,
       "qty": 1,
       "fichaId": 144
     },
     {
-      "idx": 15,
+      "idx": 16,
       "name": "PISTOLA C/LARGO 380\" MENDOZA HM-7-BULLDO",
       "desc": "PISTOLA DE CAÑON LARGO, CALIBRE 0.380\" MARCA MENDOZA MODELO HM-7-BULLDOG, SEMIAUTOMÁTICA ALIMENTADA POR CARGADORES DE 20 CARTUCHOS, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA \"S.D.N. MÉXICO CD. MX.\"",
       "priceN": 18648.29,
@@ -124,287 +132,311 @@
       "fichaId": 15
     },
     {
-      "idx": 16,
+      "idx": 17,
       "name": "RIF.CAL.22 LR.TIPPM. ARMS, MO.M4-22,ELI",
       "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN ELITE L-FDE, INCLUYE: UNA CAJA DE CARTÓN CORRUGADO, UN CARGADOR DE 25 TIROS, MANUAL DE USO EN ESPAÑOL, CANDADO Y BANDERIN DE SEGURIDAD, MIRAS ABATIBLES Y GRABADA CON LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 24270.78,
+      "priceN": 24361.48,
       "qty": 5,
       "fichaId": 265
     },
     {
-      "idx": 17,
+      "idx": 18,
       "name": "RIF.CAL.22 WMR.TIPP.ARMS, M4-22WMR MAGNU",
       "desc": "RIFLE CAL. 22 WMR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN WMR MAGNUM ELITE, INCLUYE: UNA CAJA DE CARTÓN CORRUGADO, UN CARGADOR DE 15 TIROS, MANUAL DE USO EN ESPAÑOL, CANDADO Y BANDERIN DE SEGURIDAD, MIRAS ABATIBLES Y GRABADA CON LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 35057.8,
+      "priceN": 35188.8,
       "qty": 5,
       "fichaId": 266
     },
     {
-      "idx": 18,
+      "idx": 19,
       "name": "RIF.CAL.22LR TIPP. ARMS,M4-22 VER.EL-L",
       "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN ELITE-L CON MIRA TELESCÓPICA, INCLUYE: UN ESTUCHE DE PLÁSTICO RÍGIDO, UN CARGADOR DE 25 TIROS, UNA MIRA TELESCÓPICA 3-9 X 40 (HAWKE), MANUAL DE USO EN ESPAÑOL, CANDADO Y BANDERIN DE SEGURIDAD, MIRAS ABATIBLES Y GRABADA CON LA LEYENDA \"D.C.A.M., Cd. Mx.\".",
-      "priceN": 31012.67,
+      "priceN": 31128.56,
       "qty": 5,
       "fichaId": 80
     },
     {
-      "idx": 19,
+      "idx": 20,
       "name": "RIF.CAL.22 LR MAR.TIP. ARMS,M4-22.VERRED",
       "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN REDLINE INCLUYE: UN ESTUCHE DE PLÁSTICO RÍGIDO, UN CARGADOR DE 25 TIROS, UNA MIRA TIPO REFLEX, MANUAL DE USO EN ESPAÑOL, CANDADO Y BANDERIN DE SEGURIDAD, MIRAS ABATIBLES Y GRABADA CON LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 28315.91,
+      "priceN": 28421.73,
       "qty": 4,
       "fichaId": 81
     },
     {
-      "idx": 20,
+      "idx": 21,
       "name": "RIF.CAL.22 LR MAR.TIP.ARMS,M4-22VER.LTEA",
       "desc": "RIFLE CAL. 22 LR MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN LTE ACCENTS-WOLF GREY, INCLUYE: UN ESTUCHE DE PLÁSTICO RÍGIDO, UN CARGADOR DE 25 TIROS, MANUAL DE USO EN ESPAÑOL, CANDADO Y BANDERIN DE SEGURIDAD, MIRAS ABATIBLES Y GRABADA CON LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 16719.87,
+      "priceN": 16782.35,
       "qty": 1,
       "fichaId": 267
     },
     {
-      "idx": 21,
+      "idx": 22,
       "name": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
       "desc": "PISTOLA DE CAÑÓN LARGO SEMIAUTOMÁTICA CALIBRE .380 ACP MARCA GRAND POWER – MODELO STRIBOG SP380 A2 VERSIÓN CON CAÑÓN DE 8” PULGADAS CON ROMPE FLAMAS, CULATA PLEGABLE, CON 4 CARGADORES DE 30 CARTUCHOS, ESTUCHE DE PLÁSTICO Y ACCESORIOS Y GRABADA LA LEYENDA \" D.C.A.M., Cd. Mx.\"",
-      "priceN": 30418.09,
+      "priceN": 30608.1,
       "qty": 1,
-      "fichaId": null
-    },
-    {
-      "idx": 22,
-      "name": "PISTOLA 380 ACP G. P., MOD. STRIBOG SP",
-      "desc": "PISTOLA DE CAÑÓN LARGO SEMIAUTOMÁTICA CALIBRE .380 ACP MARCA GRAND POWER – MODELO STRIBOG SP380 A2 VERSIÓN CON CAÑÓN DE 8” PULGADAS CON ROMPE FLAMAS, CULATA TELESCOPICA, CON 4 CARGADORES DE 30 CARTUCHOS, ESTUCHE DE PLÁSTICO Y ACCESORIOS.",
-      "priceN": 36163.73,
-      "qty": 4,
       "fichaId": null
     },
     {
       "idx": 23,
-      "name": "ESCOPETA 12 STOEGER M3500 LIN SYNTHE",
-      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA STOEGER, MODELO M3500, LÍNEA SYNTHETIC, CAÑÓN DE 28\" (71 CM). INCLUYE MANUAL DE USUARIO Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 15817.41,
-      "qty": 2,
-      "fichaId": 193
+      "name": "PISTOLA 380 ACP G. P., MOD. STRIBOG SP",
+      "desc": "PISTOLA DE CAÑÓN LARGO SEMIAUTOMÁTICA CALIBRE .380 ACP MARCA GRAND POWER – MODELO STRIBOG SP380 A2 VERSIÓN CON CAÑÓN DE 8” PULGADAS CON ROMPE FLAMAS, CULATA TELESCOPICA, CON 4 CARGADORES DE 30 CARTUCHOS, ESTUCHE DE PLÁSTICO Y ACCESORIOS.",
+      "priceN": 36389.63,
+      "qty": 4,
+      "fichaId": null
     },
     {
       "idx": 24,
-      "name": "ESCO.SEMIA.CAL.12GA MAR.STO.MOD.M3000,",
-      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA STOEGER MODELO M3000, LÍNEA SYNTHETIC SPORTING, CAÑÓN DE 30\" (76 CM). INCLUYE MANUAL DE USUARIO Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 15209.04,
-      "qty": 3,
-      "fichaId": 180
+      "name": "ESCOPETA 12 STOEGER M3500 LIN SYNTHE",
+      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA STOEGER, MODELO M3500, LÍNEA SYNTHETIC, CAÑÓN DE 28\" (71 CM). INCLUYE MANUAL DE USUARIO Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
+      "priceN": 15916.21,
+      "qty": 8,
+      "fichaId": 193
     },
     {
       "idx": 25,
-      "name": "ESCOPETA BOM 12 STOEGER P3500 LIN WOOD",
-      "desc": "ESCOPETA A BOMBA CAL. 12 GA MARCA STOEGER MODELO P3500, LÍNEA WOOD, CAÑÓN DE 28\" (71 CM). INCLUYE MANUAL DE USUARIOS Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 11220.89,
-      "qty": 3,
-      "fichaId": 181
+      "name": "ESCO.SEMIA.CAL.12GA MAR.STO.MOD.M3000,",
+      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA STOEGER MODELO M3000, LÍNEA SYNTHETIC SPORTING, CAÑÓN DE 30\" (76 CM). INCLUYE MANUAL DE USUARIO Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
+      "priceN": 15304.05,
+      "qty": 7,
+      "fichaId": 180
     },
     {
       "idx": 26,
-      "name": "ESCOPETA BOM 12 STOEGER P3500 LIN SYNTHE",
-      "desc": "ESCOPETA A BOMBA CAL. 12GA MARCA STOEGER MODELO P3500, LÍNEA SYNTHETIC, CAÑÓN DE 28\" (71 CM). INCLUYE MANUAL DE USUARIO Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 9936.58,
-      "qty": 1,
+      "name": "ESCOPETA BOM 12 STOEGER P3500 LIN WOOD",
+      "desc": "ESCOPETA A BOMBA CAL. 12 GA MARCA STOEGER MODELO P3500, LÍNEA WOOD, CAÑÓN DE 28\" (71 CM). INCLUYE MANUAL DE USUARIOS Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
+      "priceN": 11290.99,
+      "qty": 3,
       "fichaId": 181
     },
     {
       "idx": 27,
+      "name": "ESCOPETA BOM 12 STOEGER P3500 LIN SYNTHE",
+      "desc": "ESCOPETA A BOMBA CAL. 12GA MARCA STOEGER MODELO P3500, LÍNEA SYNTHETIC, CAÑÓN DE 28\" (71 CM). INCLUYE MANUAL DE USUARIO Y ACCESORIOS Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
+      "priceN": 9998.64,
+      "qty": 1,
+      "fichaId": 181
+    },
+    {
+      "idx": 28,
       "name": "PISTOLA CAL.380 ACP GRAND P. MOD.STRIBO",
       "desc": "PISTOLA DE CAÑON LARGO SEMIAUTOMÁTICA CALIBRE 0.380\" ACP MARCA GRAND POWER MODELO STRIBOG SP380 A2, VERSIÓN CON CAÑÓN DE 8\" PULGADAS, ROMPE FLAMAS, CULATA PLEGABLE CON 4 CARGADORES DE 30 CARTUCHOS, ESTUCHE DE PLÁSTICO, ACCESORIOS Y GRABADA LA LEYENDA \"S.D.N. MEXICO CD. MEX.\"",
-      "priceN": 26833.1,
+      "priceN": 27000.71,
       "qty": 1,
       "fichaId": null
     },
     {
-      "idx": 28,
+      "idx": 29,
       "name": "RIFLE 30-06SPRG WEATHERBY VANGUARD OBSID",
       "desc": "RIFLE DE CERROJO MARCA WEATHERBY, MODELO VANGUARD OBSIDIAN O VANGUARD, CALIBRE .30-06 SPRG, CULATA SINTÉTICA, CAÑÓN DE 22 PULGADAS, CON ACCESORIOS. Y GRABADA LA LEYENDA D.C.A.M. CD. MX.",
-      "priceN": 16072.65,
+      "priceN": 16132.71,
       "qty": 2,
       "fichaId": 182
     },
     {
-      "idx": 29,
+      "idx": 30,
       "name": "RIF.CRJ.WEATHERBY,VANGUARD,CAL.22-250 RE",
       "desc": "RIFLE DE CERROJO MARCA WEATHERBY, MODELO VANGUARD OBSIDIAN O VANGUARD, CALIBRE 22- 250 REM, CULATA SINTÉTICA, CAÑÓN DE 24 PULGADAS, CON ACCESORIOS.",
-      "priceN": 16072.65,
+      "priceN": 16132.71,
       "qty": 1,
       "fichaId": 184
     },
     {
-      "idx": 30,
+      "idx": 31,
+      "name": "ESC.SEMI.MAR.BERE.MOD.A400UPLA.12GA28\"",
+      "desc": "ESCOPETA SEMIAUTOMÁTICA MARCA BERETTA MODELO A400 UPLAND, CON SISTEMA KICK OFF, CAL. 12 GA, CAÑÓN DE 28\", INCLUYE: MANUAL DIGITAL QR, SET DE CHOKE Y ACCESORIOS Y GRABADA LA LEYENDA “ S.D.N. MÉXICO, CD. MX.” ,",
+      "priceN": 37106.24,
+      "qty": 1,
+      "fichaId": 171
+    },
+    {
+      "idx": 32,
+      "name": "ESCOPETA 12 BERETTA DT11 BLACK EDITION S",
+      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO DT11 (BLACK DLC PRO) TIPO SKEET, CULATA TIPO TSK, CAL. 12 GA, CAÑÓN DE 30\", INCLUYE MANUAL DIGITAL QR, SET DE CHOKES Y ACCESORIOS Y GRABADA LA LEYENDA “ S.D.N. MÉXICO, CD. MX.” ,",
+      "priceN": 224975.58,
+      "qty": 1,
+      "fichaId": 223
+    },
+    {
+      "idx": 33,
       "name": "FUSIL 7.62x51 MM, IWI, ARAD 7 DE 14.5\"",
       "desc": "FUSIL DE ASALTO CALIBRE 7.62 X 51 mm MARCA I.W.I. MODELO ARAD 7, SEMIAUTOMÁTICO, CON CAÑÓN DE 14.5\", INCLUYE RIEL PICATINY SUPERIOR, MIRAS AUXILIARES TIPO FLIP UP 5 (CINCO), CARGADORES CON CAPACIDAD DE 20 CARTUCHOS C/U, EMPUÑADURA DE ASALTO, 3 TAPAS DE RIEL, KIT DE LIMPIEZA, PORTAFUSIL Y MANUAL DE OPERACIÓN EN ESPAÑOL, CÓDIGO ARAD762X51CQB, Y GRABADA LA LEYENDA \"S.D.N. MEXICO CD. MX.\"",
-      "priceN": 45844.81,
+      "priceN": 46016.13,
       "qty": 2,
       "fichaId": 79
     },
     {
-      "idx": 31,
+      "idx": 34,
       "name": "FUSIL 7.62x51 MM, IWI, ARAD 7 DE 16\"",
       "desc": "FUSIL DE ASALTO CALIBRE 7.62 X 51 mm MARCA I.W.I. MODELO ARAD 7 DMR, SEMIAUTOMÁTICO, CON CAÑÓN DE 16\", INCLUYE RIEL PICATINY SUPERIOR, MIRAS AUXILIARES TIPO FLIP UP 5 (CINCO), CARGADORES CON CAPACIDAD DE 20 CARTUCHOS C/U, BIPIES, 3 TAPAS DE RIEL, KIT DE LIMPIEZA, CAJA DE PORTACIÓN TIPO PELICAN, PORTAFUSIL Y MANUAL DE OPERACIÓN EN ESPAÑOL, CÓDIGO ARAD762X51DMR Y GRABADA LA LEYENDA \"S.D.N. MEXICO CD. MX.\"",
-      "priceN": 107870.14,
+      "priceN": 108273.24,
       "qty": 1,
       "fichaId": 128
     },
     {
-      "idx": 32,
+      "idx": 35,
       "name": "ESC.SEMI.MOD.EVO.CAL.12.71CM(28\")",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO EVO, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO SINTETICO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 20520.14,
+      "priceN": 20648.32,
       "qty": 9,
       "fichaId": 244
     },
     {
-      "idx": 33,
+      "idx": 36,
       "name": "ESC.SEMI.MOD.EVO.CAMO.CAL.12.CAÑ.71CM28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO EVO, VERSION BASCULA CAMO, CULATA Y GUARDAMANO SINTETICOS CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 21123.67,
+      "priceN": 21255.62,
       "qty": 7,
       "fichaId": 244
     },
     {
-      "idx": 34,
+      "idx": 37,
       "name": "ESC.SEMI.MOD.AST.CAL.12.CAÑ.71CM.28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ASTRO, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 26253.71,
-      "qty": 2,
+      "priceN": 26417.7,
+      "qty": 5,
       "fichaId": 245
     },
     {
-      "idx": 35,
+      "idx": 38,
       "name": "ESC.SEMI.MOD.AST.CAMO.CAL.12.71CM.28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ASTRO, VERSION BASCULA CAMO, CULATA Y GUARDAMANO SINTETICOS CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 26706.36,
+      "priceN": 26873.18,
       "qty": 6,
       "fichaId": null
     },
     {
-      "idx": 36,
+      "idx": 39,
       "name": "ESC.SEMI.MOD.AST.CAL.20.71CM.28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ASTRO, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO DE MADERA, CALIBRE 20, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 26253.71,
-      "qty": 7,
+      "priceN": 26417.7,
+      "qty": 6,
       "fichaId": 95
     },
     {
-      "idx": 37,
+      "idx": 40,
       "name": "ESC.SEM.MOD.B12iT4.CAL.12.71CM28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO B12iT4, VERSION BASCULA GRIS, CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 35457.59,
+      "priceN": 35679.08,
       "qty": 6,
       "fichaId": 246
     },
     {
-      "idx": 38,
+      "idx": 41,
       "name": "ESC.SEM.MOD.B12iT4.CAL.12.71CM28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO B12iT4, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 32439.93,
+      "priceN": 32642.56,
       "qty": 3,
       "fichaId": 246
     },
     {
-      "idx": 39,
+      "idx": 42,
       "name": "ESC.SEM.MOD.B12iS.CAL.12.71CM28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO B12iS, VERSION BASCULA NEGRA, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 35306.71,
+      "priceN": 35527.25,
       "qty": 7,
       "fichaId": 247
     },
     {
-      "idx": 40,
+      "idx": 43,
       "name": "ESC.SEM.MOD.ECHO.CAL.12.71CM.28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO ECHO, VERSION BASCULA NIQUELADA, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 34250.53,
-      "qty": 3,
+      "priceN": 34464.47,
+      "qty": 6,
       "fichaId": 248
     },
     {
-      "idx": 41,
+      "idx": 44,
       "name": "ESC.SEM.MOD.TITANO L.71CM.28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO TITANO L, VERSION BASCULA GRABADA, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 46773.85,
+      "priceN": 47066.02,
       "qty": 3,
       "fichaId": 249
     },
     {
-      "idx": 42,
+      "idx": 45,
       "name": "ESC.SEM.MOD.TITANO.CAL.12.71CM28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO TITANO, VERSION BASCULA GRABADA, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 41945.58,
+      "priceN": 42207.59,
       "qty": 1,
       "fichaId": 250
     },
     {
-      "idx": 43,
+      "idx": 46,
       "name": "ESC.SEM.MOD.930i.CAL.12.71CM.28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BREDA, MODELO 930i, VERSION SPORTING CULATA AJUSTABLE, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 45265.01,
+      "priceN": 45547.76,
       "qty": 6,
       "fichaId": 251
     },
     {
-      "idx": 44,
+      "idx": 47,
       "name": "RIFLE CAL. 22\"L.R. WINCHESTER XPERT V.S.",
       "desc": "RIFLE DE ACCIÓN DE CERROJO, CALIBRE 0.22\" L.R., DE UN CAÑÓN, MARCA WINCHESTER, MODELO XPERT, VERSIÓN SINTÉTICO, CULATA Y GUARDAMANO SINTÉTICOS, 2 CARGADORES DE 10 CARTUCHOS DE CAPACIDAD, ACCESORIOS, MANUAL DE USO Y LEYENDA D.C.A.M. CD. MX.",
-      "priceN": 13893.67,
-      "qty": 2,
+      "priceN": 13945.59,
+      "qty": 5,
       "fichaId": 145
     },
     {
-      "idx": 45,
+      "idx": 48,
       "name": "RIFLE CAL. 22\"LR WINCHESTER XPERT THUMBH",
       "desc": "RIFLE DE ACCIÓN DE CERROJO, CALIBRE 0.22\" L.R., DE UN CAÑÓN, MARCA WINCHESTER, MODELO XPERT, VERSIÓN THUMBHOLE, CULATA Y GUARDAMANO DE MADERA, 2 CARGADORES DE 10 CARTUCHOS DE CAPACIDAD, ACCESORIOS, MANUAL DE USO Y LEYENDA D.C.A.M. CD. MX.",
-      "priceN": 17669.13,
+      "priceN": 17735.16,
       "qty": 7,
       "fichaId": 234
     },
     {
-      "idx": 46,
+      "idx": 49,
       "name": "RIFLE CAL.22\"LR WINCHESTER MODELO RANGER",
       "desc": "RIFLE DE ACCIÓN DE PALANCA DE UN CAÑÓN, MARCA WINCHESTER, MODELO RANGER, VERSIÓN MADERA, CULATA Y GUARDAMANO MADERA, CALIBRE 0.22\" L.R., ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M. CD. MX.",
-      "priceN": 17820.15,
+      "priceN": 17886.74,
       "qty": 4,
       "fichaId": 146
     },
     {
-      "idx": 47,
+      "idx": 50,
+      "name": "RIF.,SEMI.AU.MAR.BROW.MO.BAR.MK4.CAL.308",
+      "desc": "RIFLE SEMIAUTOMÁTICO DE UN CAÑÓN MARCA BROWNING, MODELO BAR MK4, VERSIÓN CULATA Y GUARDAMANO SINTÉTICOS, CALIBRE 0.308\" WIN., DOS CARGADORES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M. CD. MX.\".",
+      "priceN": 40602.46,
+      "qty": 7,
+      "fichaId": 148
+    },
+    {
+      "idx": 51,
       "name": "RIFLE.A.BOM.CAL308.WINCHESTER.SXR2.P.SIN",
       "desc": "RIFLE DE ACCIÓN DE BOMBA DE UN CAÑON MARCA WINCHESTER, MODELO SXR2 PUMP, VERSIÓN CULATA Y GUARDAMANO SINTÉTICOS, CALIBRE 0.308\" WIN., 2 CARGADORES, ACCESORIOS, MANUAL DE USO Y EYENDA D.C.A.M. CD. MX.",
-      "priceN": 31282.34,
+      "priceN": 31399.24,
       "qty": 5,
       "fichaId": 149
     },
     {
-      "idx": 48,
+      "idx": 52,
       "name": "RIFLE.WINCHESTER.XPR.V.SINT.CAL.308.WIN",
       "desc": "RIFLE DE ACCIÓN DE CERROJO DE UN CAÑÓN MARCA WINCHESTER, MODELO XPR, VERSIÓN SINTÉTICO, BASTIDOR SINTÉTICO, CALIBRE 0.308\" WIN., 2 CARGADORES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M. CD. MX.\".",
-      "priceN": 21574.03,
-      "qty": 2,
+      "priceN": 21654.65,
+      "qty": 4,
       "fichaId": 67
     },
     {
-      "idx": 49,
+      "idx": 53,
       "name": "RIFLE.WINCHESTER.XPR.V.SINT.CAL.30-06.SP",
       "desc": "RIFLE DE ACCIÓN DE CERROJO DE UN CAÑÓN MARCA WINCHESTER, MODELO XPR, VERSIÓN SINTÉTICO, BASTIDOR SINTÉTICO, CALIBRE 30-06 SPFLD., 2 CARGADORES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M. CD. MX.\"",
-      "priceN": 21574.03,
+      "priceN": 21654.65,
       "qty": 1,
       "fichaId": 68
     },
     {
-      "idx": 50,
+      "idx": 54,
       "name": "MODELO RM22-6000 ACABADO CAMUFLAJE COMMA",
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE COMMANDER RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 10687.93,
-      "qty": 4,
+      "qty": 2,
       "fichaId": 179
     },
     {
-      "idx": 51,
+      "idx": 55,
       "name": "MODELO RM22-6000 ACABADO CAMUFLAJE SQUAD",
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE SQUAD RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 10687.93,
@@ -412,7 +444,7 @@
       "fichaId": 52
     },
     {
-      "idx": 52,
+      "idx": 56,
       "name": "MODELO RM22-6000 ACABADO CAMUFLAJE",
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-6000 ACABADO CAMUFLAJE SAFARI RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 10687.93,
@@ -420,15 +452,15 @@
       "fichaId": 53
     },
     {
-      "idx": 53,
+      "idx": 57,
       "name": "MODELO RM22-3000 SAFARI",
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 SAFARI RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 11863.1,
-      "qty": 5,
+      "qty": 3,
       "fichaId": 54
     },
     {
-      "idx": 54,
+      "idx": 58,
       "name": "MODELO RM22-3000 SQUAD",
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 SQUAD RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 11863.1,
@@ -436,743 +468,751 @@
       "fichaId": 264
     },
     {
-      "idx": 55,
+      "idx": 59,
       "name": "RM22-3000 COMMANDER",
       "desc": "RIFLE SEMIAUTOMATICO CALIBRE .22” , MARCA MENDOZA, MODELO RM22-3000 COMMANDER RIEL PICATINNY, SUS RESPECTIVOS ACCESORIOS Y LA LEYENDA “ D.C.A.M., Cd.Mx.”",
       "priceN": 11863.1,
-      "qty": 2,
+      "qty": 1,
       "fichaId": 54
     },
     {
-      "idx": 56,
+      "idx": 60,
       "name": "ESCOPETA BROWNING MAXUS CAMO2 28\"",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION CAMO, (GENERACIÓN 2), CULATA Y GUARDAMANO CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 42069.35,
-      "qty": 1,
+      "priceN": 42226.56,
+      "qty": 7,
       "fichaId": 270
     },
     {
-      "idx": 57,
+      "idx": 61,
       "name": "ESCOP.SEMI.BROWNING.MAXUS.B.G.CAL12.LC71",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION BLACK GOLD, (GENERACIÓN 2), CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM.(28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 42878.38,
-      "qty": 3,
+      "priceN": 43038.61,
+      "qty": 7,
       "fichaId": 269
     },
     {
-      "idx": 58,
+      "idx": 62,
       "name": "ESCOPETA CAL.12 BROWNING MAXUS MAD REF28",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION HUNTER, (GENERACIÓN 2), CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\".",
-      "priceN": 41395.17,
-      "qty": 4,
+      "priceN": 41549.86,
+      "qty": 7,
       "fichaId": 273
     },
     {
-      "idx": 59,
+      "idx": 63,
       "name": "ESC.MOD.MAX.VER.SIN.SC.CAL.12.71CM",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION SINTETICA SC, (GENERACIÓN 2), CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 48811.24,
+      "priceN": 48993.64,
       "qty": 5,
       "fichaId": 274
     },
     {
-      "idx": 60,
+      "idx": 64,
       "name": "ESCOPETA 12 BROWNING MAXUS ULTIMATE G2",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA BROWNING, MODELO MAXUS, VERSION ULTIMATE, (GENERACIÓN 2), CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 49485.43,
-      "qty": 4,
+      "priceN": 49670.35,
+      "qty": 5,
       "fichaId": 275
     },
     {
-      "idx": 61,
+      "idx": 65,
       "name": "ESCOPETA 12 WINCHESTER SX4 CAMO",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4, VERSION CAMO, CULATA Y GUARDAMANO CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS ESPECIALES, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 32765.56,
-      "qty": 1,
+      "priceN": 32888.0,
+      "qty": 6,
       "fichaId": 272
     },
     {
-      "idx": 62,
+      "idx": 66,
       "name": "ESCOPETA 12 WINCHESTER SX4 FIELD",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4, VERSION FIELD, CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 30608.15,
-      "qty": 2,
+      "priceN": 30722.53,
+      "qty": 6,
       "fichaId": 222
     },
     {
-      "idx": 63,
+      "idx": 67,
+      "name": "ESCOPETA 12 WINCHESTER SX4 SINTETICA",
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4, VERSION SINTETICA, CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
+      "priceN": 29504.46,
+      "qty": 7,
+      "fichaId": 94
+    },
+    {
+      "idx": 68,
       "name": "ESC.SEMI.SX4.CAL.12 SINT VER.",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4, VERSION SINTETICA VERDE, CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 29394.61,
+      "priceN": 29504.46,
       "qty": 1,
       "fichaId": 94
     },
     {
-      "idx": 64,
+      "idx": 69,
+      "name": "ESCOPETA 12 WINCHESTER SX4 SILVER",
+      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SX4 SILVER PERFORMANCE, VERSION CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28 PULG.), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
+      "priceN": 30587.19,
+      "qty": 7,
+      "fichaId": 271
+    },
+    {
+      "idx": 70,
       "name": "RIFLE.A.BOM.CAL308.WINCHESTER.SXR2.P.SIN",
       "desc": "RIFLE DE ACCION DE BOMBA DE UN CAÑÓN, MARCA WINCHESTER, MODELO SXR2 PUMP, VERSION CULATA Y GUARDAMANO SINTETICOS, CALIBRE 0.308\" WIN., 2 CARGADORES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 31282.34,
+      "priceN": 31399.24,
       "qty": 5,
       "fichaId": 149
     },
     {
-      "idx": 65,
+      "idx": 71,
       "name": "RIFLE.WINCHESTER.XPR.V.THUMB.L.CAL.270W",
       "desc": "RIFLE DE ACCION DE CERROJO DE UN CAÑÓN, MARCA WINCHESTER, MODELO XPR, VERSION SINTETICO, BASTIDOR SINTETICO, CALIBRE 0.270\" WIN., 2 CARGADORES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA \"D.C.A.M., Cd. Mx.\"",
-      "priceN": 22248.22,
-      "qty": 1,
+      "priceN": 22331.36,
+      "qty": 8,
       "fichaId": null
     },
     {
-      "idx": 66,
+      "idx": 72,
       "name": "RIFLE BENELLI CAL. 223REM MR1 CAÑ. 16\"",
       "desc": "RIFLE SEMIAUTOMÁTICO MARCA BENELLI CAL. .223 REM, MODELO MR1, CAÑON DE 16” , CULATA FIJA, RIEL PICATINNY. INCLUYE: UN CARGADOR DE SERVICIO Y UNO ADICIONAL CON CAPACIDAD DE 5 CARTUCHOS, KIT DE LIMPIEZA, ACCESORIOS Y MANUALES DE USO. CÓDIGO A0488100. Y LEYENDA D.C.A.M. CD. MX.",
-      "priceN": 37056.96,
-      "qty": 1,
+      "priceN": 37288.43,
+      "qty": 8,
       "fichaId": 231
     },
     {
-      "idx": 67,
+      "idx": 73,
       "name": "RIF.CAÑ.COR.CAL.223.W YLDE,.FOL.MOBETTA",
       "desc": "RIFLE DE CAÑON CORTO, CALIBRE .223 WYLDE, MARCA FOLDAR MOBETTA 2024, MODELO CCR, AUTOMATICO, CON 2 CARGADORES DE SERVICIO, 1 (UNO) DE 15 MUNICIONES Y 1 (UNO) DE 30 MUNICIONES, ACCESORIOS: INCLUYE UNA MOCHILA, LEYENDA GRABADA DE \"D.C.A.M.\", Cd. MX.",
-      "priceN": 180412.81,
+      "priceN": 181086.99,
       "qty": 2,
       "fichaId": 252
     },
     {
-      "idx": 68,
+      "idx": 74,
       "name": "RIF.CAÑ.COR.CAL.223WYLDEMOD.FOL.TENEP",
       "desc": "RIFLE DE CAÑON CORTO, CALIBRE .223 WYLDE, MARCA FOLDAR TNEP 2025, MODELO CCR, AUTOMATICO, CON 2 CARGADORES DE SERVICIO, 1 (UNO) DE 15 MUNICIONES Y 1 (UNO) DE 30 MUNICIONES, ACCESORIOS: INCLUYE UNA MOCHILA, LEYENDA GRABADA DE \"D.C.A.M.\", Cd. MX.",
-      "priceN": 180412.81,
+      "priceN": 181086.99,
       "qty": 3,
       "fichaId": null
     },
     {
-      "idx": 69,
+      "idx": 75,
       "name": "RIF.CAÑ.COR.CAL.223 WYLDE.FOL.MOFLDR1F",
       "desc": "RIFLE DE CAÑON CORTO, CALIBRE .223 WYLDE, MARCA FOLDAR MOBETTA 2024, MODELO FLDR15F, AUTOMATICO, CON 2 CARGADORES DE SERVICIO, 1 (UNO) DE 15 MUNICIONES Y 1 (UNO) DE 30 MUNICIONES, ACCESORIOS: INCLUYE UNA MOCHILA, LEYENDA GRABADA DE \"D.C.A.M.\", Cd. MX.",
-      "priceN": 180412.81,
+      "priceN": 181086.99,
       "qty": 2,
       "fichaId": null
     },
     {
-      "idx": 70,
+      "idx": 76,
       "name": "FUSIL CAL. 5.56x45 mm CESKA CZ BREN2 C8\"",
       "desc": "FUSIL AUTOMATICO CALIBRE 5.56X45 MM. NATO MARCA CZ, MODELO CZ BREN 2 CON LONGITUD DEL CAÑON DE 8” ,CON 5 CARGADORES CON CAPACIDAD DE 30 CARTUCHOS, CULATA PEGABLE, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO “ S.D.N. MÉXICO, CD.MX.” .",
-      "priceN": 54339.58,
+      "priceN": 54542.64,
       "qty": 2,
       "fichaId": 221
     },
     {
-      "idx": 71,
+      "idx": 77,
       "name": "FUSIL 5.56x45 mm CESKA CZ BREN2 C11\"",
       "desc": "FUSIL AUTOMATICO CALIBRE 5.56X45 MM. NATO, MARCA CESKA ZBROJOVKA, MODELO CZ BREN 2 CON LONGITUD DEL CAÑON DE 11” , CON 5 CARGADORES CON CAPACIDAD DE 30 CARTUCHOS, CULATA PEGABLE, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO “ S.D.N. MÉXICO, CD.MX.” .",
-      "priceN": 54339.58,
+      "priceN": 54542.64,
       "qty": 11,
       "fichaId": 221
     },
     {
-      "idx": 72,
+      "idx": 78,
       "name": "RIFLE CAL.0.22\" L.R CESKA CZ 457 AMERICA",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 AMERICAN CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 13996.15,
+      "priceN": 14048.45,
       "qty": 5,
       "fichaId": 57
     },
     {
-      "idx": 73,
+      "idx": 79,
       "name": "RIF.MAR.CES.ZB.TIP.CERR.CZ457AMERICAN",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 AMERICAN LH (PARA ZURDOS) CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 13996.15,
+      "priceN": 14048.45,
       "qty": 8,
       "fichaId": 57
     },
     {
-      "idx": 74,
+      "idx": 80,
       "name": "RIFLE CESKA Z.,CZ 457 PREMIUM, C. 22 LR",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 PREMIUM CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 21708.87,
+      "priceN": 21789.99,
       "qty": 9,
       "fichaId": 236
     },
     {
-      "idx": 75,
+      "idx": 81,
       "name": "RIF.CESKA.CZ457PREMIUMLH(PARA ZURDOS)",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 PREMIUM LH (PARA ZURDOS) CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 21708.87,
+      "priceN": 21789.99,
       "qty": 8,
       "fichaId": 236
     },
     {
-      "idx": 76,
+      "idx": 82,
       "name": "RIFLE 0.22\" L.R. CESKA CZ 457 VARMINTMTR",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 VARMINT MTR CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 20926.81,
-      "qty": 2,
+      "priceN": 21005.01,
+      "qty": 6,
       "fichaId": 227
     },
     {
-      "idx": 77,
-      "name": "RIFLE CESKA Z. CZ 457 VARMINT CAL. 22 LR",
-      "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 VARMINT CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 16612.0,
-      "qty": 1,
-      "fichaId": 237
-    },
-    {
-      "idx": 78,
+      "idx": 83,
       "name": "RIF.CESKA.CZ457VARMINT LH CAL. 22 LR",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 VARMINT LH CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 16612.0,
+      "priceN": 16674.08,
       "qty": 6,
       "fichaId": 237
     },
     {
-      "idx": 79,
+      "idx": 84,
       "name": "RIFLE CESKA457 VARMINT SYNTET CAL. 22 LR",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 VARMINT SYNTHET IC CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 14589.44,
-      "qty": 5,
+      "priceN": 14643.96,
+      "qty": 3,
       "fichaId": 238
     },
     {
-      "idx": 80,
+      "idx": 85,
+      "name": "RIFLE CESKA Z. CZ 457 JAGUAR XII CAL. 22",
+      "desc": "RRIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 JAGUAR XII CALIBRE 22 LR, CON 1 CARGADOR DE 10 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
+      "priceN": 18920.75,
+      "qty": 6,
+      "fichaId": 256
+    },
+    {
+      "idx": 86,
       "name": "RIFLE .22 CESKA ZBRO M CZ 457 THUMBHOLE",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 THUMBHOLE CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANT ÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 20333.52,
+      "priceN": 20409.51,
       "qty": 8,
       "fichaId": 241
     },
     {
-      "idx": 81,
+      "idx": 87,
       "name": "RIFLE CESKA Z. CZ 457 AT-ONE CAL. 22 LR",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 457 AT-ONE CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO D.C.A.M., Cd. Mx.",
-      "priceN": 24243.81,
-      "qty": 1,
+      "priceN": 24334.41,
+      "qty": 6,
       "fichaId": 242
     },
     {
-      "idx": 82,
+      "idx": 88,
       "name": "RIFLE CESKA Z. CZ 457 STAINLESS CAL. 22",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERRROJO, MODELO CZ 457 STAINLESS CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 15479.37,
+      "priceN": 15537.21,
       "qty": 6,
       "fichaId": 229
     },
     {
-      "idx": 83,
+      "idx": 89,
       "name": "RIFLE CESKA Z., CZ 457 TRAINING XII C.22",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERRROJO, MODELO CZ 457 TRAINING RIFLE XII CALIBRE 22 LR, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 13753.44,
+      "priceN": 13804.84,
       "qty": 5,
       "fichaId": 243
     },
     {
-      "idx": 84,
-      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 LIN/WO",
-      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA WOOD, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0573000, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 24986.29,
-      "qty": 1,
+      "idx": 90,
+      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 ELI/WO",
+      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA ELITE WOOD, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0538401, GRABADO: \"D.C.A.M. Cd. M.x.\",",
+      "priceN": 26782.08,
+      "qty": 5,
       "fichaId": 196
     },
     {
-      "idx": 85,
+      "idx": 91,
       "name": "ESCOPETA 12 GA FRANCHI AFFINITY 3 B SYN",
       "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA BLACK SYNT, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0519700, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 20489.96,
+      "priceN": 20617.95,
       "qty": 2,
       "fichaId": 196
     },
     {
-      "idx": 86,
+      "idx": 92,
       "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3 LIN/SP",
       "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. LÍNEA SPORTING, CAÑÓN DE 30” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0513001, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 25438.94,
-      "qty": 2,
+      "priceN": 25597.84,
+      "qty": 4,
       "fichaId": null
     },
     {
-      "idx": 87,
-      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3CA/OP/",
-      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. CON RECUBRIMIENTO CAMO OPTIFADE MARSH, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0526900, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 21123.67,
-      "qty": 3,
+      "idx": 93,
+      "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3CAM.M",
+      "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3. CON RECUBRIMIENTO CAMO MAX7, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0635600, GRABADO: \"D.C.A.M. Cd. M.x.\",",
+      "priceN": 21255.62,
+      "qty": 4,
       "fichaId": null
     },
     {
-      "idx": 88,
+      "idx": 94,
       "name": "ESCOPETA CAL.12 FRANCHI AFFINITY3.5BLA/S",
       "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3.5. LÍNEA BLACK SYNT, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0546700, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 20489.96,
+      "priceN": 20617.95,
       "qty": 6,
       "fichaId": 197
     },
     {
-      "idx": 89,
+      "idx": 95,
       "name": "ESCOPETACAL.12 FRANCHI AFFINITY3.5CAM/MA",
       "desc": "ESCOPETA SEMIAUTOMÁTICA CAL. 12GA MARCA FRANCHI, MODELO AFFINITY 3.5. CON RECUBRIMIENTO CAMO MAX5, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0481300, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 21123.67,
-      "qty": 1,
+      "priceN": 21255.62,
+      "qty": 5,
       "fichaId": 197
     },
     {
-      "idx": 90,
+      "idx": 96,
       "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/STE",
       "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA STEEL, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0435500, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 31444.1,
-      "qty": 5,
+      "priceN": 31640.51,
+      "qty": 3,
       "fichaId": 198
     },
     {
-      "idx": 91,
+      "idx": 97,
       "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/ALL",
       "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA ALLOY, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0434500, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 34673.0,
-      "qty": 8,
-      "fichaId": 198
-    },
-    {
-      "idx": 92,
-      "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/SEL",
-      "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA SELECT, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0458400, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 41100.63,
+      "priceN": 34889.59,
       "qty": 7,
       "fichaId": 198
     },
     {
-      "idx": 93,
+      "idx": 98,
+      "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/SEL",
+      "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA SELECT, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0458400, GRABADO: \"D.C.A.M. Cd. M.x.\",",
+      "priceN": 41357.37,
+      "qty": 7,
+      "fichaId": 198
+    },
+    {
+      "idx": 99,
       "name": "ESCOPETA CAL.12 FRANCHI FEELING LIN/SPOR",
       "desc": "ESCOPETA SOBREPUESTA CAL. 12GA MARCA FRANCHI, MODELO FEELING. LÍNEA SPORTING ADJUSTABLE, CAÑÓN DE 28” . INCLUYE MANUAL DE USUARIO, CHOKES Y ACCESORIOS. CÓDIGO A0462300, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 45808.19,
+      "priceN": 46094.34,
       "qty": 4,
       "fichaId": 198
     },
     {
-      "idx": 94,
+      "idx": 100,
       "name": "RIFLE 0.243\"WIN FRANCHI HORIZON CAÑ. 22",
       "desc": "RIFLE DE CERROJO CAL. 243 WIN MARCA FRANCHI MODELO HORIZON, TIPO BLACK SYNT CAÑÓN 22” . INCLUYE UN CARGADOR DE SERVICIO Y UNO ADICIONAL, MANUAL DE USUARIO Y ACCESORIOS. CÓDIGO A0555900, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 17864.59,
+      "priceN": 17976.18,
       "qty": 1,
       "fichaId": 257
     },
     {
-      "idx": 95,
+      "idx": 101,
       "name": "RIFLE CERROJO CAL.308 WIN FRANCHI HORIZ",
       "desc": "RIFLE DE CERROJO CAL. 308 WIN MARCA FRANCHI MODELO HORIZON, TIPO BLACK SYNT CAÑÓN 22” . INCLUYE UN CARGADOR DE SERVICIO Y UNO ADICIONAL, MANUAL DE USUARIO Y ACCESORIOS. CÓDIGO A0545700, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 17864.59,
+      "priceN": 17976.18,
       "qty": 2,
       "fichaId": 199
     },
     {
-      "idx": 96,
+      "idx": 102,
       "name": "RIFLE CERROJO CAL.223 WIN FRANCHI HORIZ",
       "desc": "RIFLE DE CERROJO CAL. 223 REM MARCA FRANCHI MODELO HORIZON, TIPO WHITE, CAÑÓN 22” . INCLUYE UN CARGADOR DE SERVICIO Y UNO ADICIONAL MANUAL, DE USUARIO Y ACCESORIOS. CÓDIGO A0512700, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 19071.66,
-      "qty": 2,
+      "priceN": 19190.79,
+      "qty": 5,
       "fichaId": 200
     },
     {
-      "idx": 97,
+      "idx": 103,
       "name": "RIFLE .300 WIN MAG. FRANCHI HORIZON WHIT",
       "desc": "RIFLE DE CERROJO CAL. 300 WIN MAG MARCA FRANCHI MODELO HORIZON, TIPO ELITE CON RECUBRIMIENTO CAMO STRATA, CAÑÓN 24” . INCLUYE UN CARGADOR DE SERVICIO Y UNO ADICIONAL, MANUAL DE USUARIO Y ACCESORIOS. CÓDIGO A0553100, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 20218.37,
+      "priceN": 20344.67,
       "qty": 7,
       "fichaId": 201
     },
     {
-      "idx": 98,
+      "idx": 104,
       "name": "RIFLE 243 WIN FRANCHI HORIZON ELITE GRAY",
       "desc": "RIFLE DE CERROJO CAL. 243 WIN MARCA FRANCHI MODELO HORIZON, TIPO ELITE GRAY, CAÑÓN 22” . INCLUYE UN CARGADOR DE SERVICIO Y UNO ADICIONAL, MANUAL DE USUARIO Y ACCESORIOS. CÓDIGO A0556100, GRABADO: \"D.C.A.M. Cd. M.x.\",",
-      "priceN": 19856.25,
-      "qty": 2,
+      "priceN": 19980.29,
+      "qty": 6,
       "fichaId": 60
     },
     {
-      "idx": 99,
+      "idx": 105,
       "name": "FUSIL CAL. 5.56MM IWI US Z-15 CAÑ. 11.5\"",
       "desc": "FUSIL DE ASALTO, MARCA IWI US INC, MODELO Z-15 CON CAÑÓN DE 11.5\", CAL. 5.56X45 MM, SEMIAUTOMÁTICO, INCLUYE: RIEL PICATINNY SUPERIOR, MIRAS AUXILIARES, 5 (CINCO) CARGADORES CON CAPACIDAD DE 30 CARTUCHOS C/U, EMPUÑADURAS DE ASALTO, KIT DE LIMPIEZA, PORTAFUSIL Y MANUAL DE OPERACIÓN EN ESPAÑOL. CÓDIGO Z15556MX115 Y LEYENDA D.C.A.M. CD. MX.",
-      "priceN": 31012.67,
+      "priceN": 31128.56,
       "qty": 5,
       "fichaId": 150
     },
     {
-      "idx": 100,
+      "idx": 106,
       "name": "FUSIL.IWI.GALIL.ACE.21N.S.A.8.5.CAL.5.56",
       "desc": "FUSIL DE ASALTO, MARCA IWI, MODELO GALIL ACE 2IN S.A., CAÑÓN DE 8.5” , CAL. 5.56X45 MM, SEMIAUTOMÁTICO, INCLUYE 5 (CINCO) CARGADORES TIPO OTAN CON CAPACIDAD DE 30 CARTUCHOS C/U., EMPUÑADURA DE ASALTO, 3 TAPAS DE RIEL, KIT DE LIMPIEZA, PORTAFUSIL Y MANUAL DE OPERACIÓN EN ESPAÑOL. CÓDIGO: 117700000NSA1 Y LA LEYENDA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 39642.28,
+      "priceN": 39790.42,
       "qty": 4,
       "fichaId": 112
     },
     {
-      "idx": 101,
+      "idx": 107,
       "name": "FUSIL 7.62X39 mm IWI M GALIL ACE 31 C8.5",
       "desc": "FUSIL DE ASALTO, MARCA IWI, MODELO GALIL ACE 31 CON CAÑÓN DE 8.5” , CAL. 7.62X39 MM, SEMIAUTOMÁTICO-AUTOMÁTICO, INCLUYE: 5 (CINCO) CARGADORES CON CAPACIDAD DE 30 (TREINTA) CARTUCHOS C/U., EMPUÑADURA DE ASALTO, KIT DE LIMPIEZA Y MANTENIMIENTO PARA EL USUARIO, PORTA FUSIL Y MANUAL DE OPERACIÓN EN ESPAÑOL. CÓDIGO 317700000AUTO Y LA LEYENDA “ D.C.A.M., CD. MX.”",
-      "priceN": 43201.99,
+      "priceN": 43363.43,
       "qty": 5,
       "fichaId": 75
     },
     {
-      "idx": 102,
+      "idx": 108,
       "name": "FUSIL CAL 5.56 X 45mm SD-15TAC SYSTEM D",
       "desc": "FUSIL DE ASALTO SD-15/TACTICAL, MARCA SYSTEM DEFENCE, CAL. 5.56 X 45 MM OTAN, CAÑÓN 11\", UN CARGADOR DE SERVICIO Y UNO ADICIONAL CON CAPACIDAD DE 30 CARTUCHOS, CULATA: RETRÁCTIL AJUSTABLE DE 6 POSICIONES, GUARDAMANOS: M-LOK, TYBE, MALETÍN RÍGIDO, MANUAL DE USO, CORREA Y KIT DE LIMPIEZA. Y LA LEYENDA \"S.D.N. MÉXICO CD. MX\".",
-      "priceN": 27608.07,
+      "priceN": 27711.24,
       "qty": 1,
       "fichaId": 191
     },
     {
-      "idx": 103,
+      "idx": 109,
       "name": "ESCOPETA CAL. 410 DERYA AG410 C. 26\"",
       "desc": "ESCOPETA ACCIÓN DE BOMBA MARCA DERYA, MODELO AG410, CALIBRE 0.410\", CAÑÓN DE 26 \", RECÁMARA 3\", CAPACIDAD 5+1, 3 CHOKES Y LLAVE, MANUAL DE USO Y GARANTÍA EN IDIOMA INGLÉS.",
-      "priceN": 14799.78,
+      "priceN": 14855.09,
       "qty": 6,
       "fichaId": 103
     },
     {
-      "idx": 104,
+      "idx": 110,
       "name": "RIFLE CESKA CZ 600 ALPHA CAL.223REM",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 ALPHA CALIBRE 223 REM, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 20387.46,
+      "priceN": 20463.64,
       "qty": 5,
       "fichaId": 203
     },
     {
-      "idx": 105,
+      "idx": 111,
       "name": "RIFLE CESKA CZ 600 LUX CAL.308 WIN.",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 LUX CALIBRE 308 WIN, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 27291.15,
-      "qty": 1,
+      "priceN": 27393.13,
+      "qty": 5,
       "fichaId": 204
     },
     {
-      "idx": 106,
+      "idx": 112,
       "name": "RIFLE CESKA CZ 600 LUX CAL.223REM.",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 LUX CALIBRE 223 REM, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 27992.3,
+      "priceN": 28096.91,
       "qty": 8,
       "fichaId": 205
     },
     {
-      "idx": 107,
+      "idx": 113,
       "name": "RIFLE CESKA CZ 600 RANCE CAL308 WIN.",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 RANCE CALIBRE 308 WIN, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 28747.39,
+      "priceN": 28854.82,
       "qty": 9,
       "fichaId": 206
     },
     {
-      "idx": 108,
+      "idx": 114,
       "name": "RIFLE CESKA CZ 600 ERGO CAL.308WIN.",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 ERGO CALIBRE 308 WIN, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 28100.17,
+      "priceN": 28205.18,
       "qty": 8,
       "fichaId": 207
     },
     {
-      "idx": 109,
+      "idx": 115,
       "name": "RIFLE CESKA CZ 600 ERGO CAL.223 REM.",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 ERGO CALIBRE 223 REM, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 28100.17,
+      "priceN": 28205.18,
       "qty": 3,
       "fichaId": 208
     },
     {
-      "idx": 110,
+      "idx": 116,
       "name": "RIFLE CESKA CZ 600 AMERICAN CSL. 223 REM",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 AMERICAN CALIBRE 223 REM, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 24055.04,
+      "priceN": 24144.93,
       "qty": 7,
       "fichaId": 209
     },
     {
-      "idx": 111,
+      "idx": 117,
       "name": "RIFLE CESKA CZ 600 AMERICAN CAL.308WIN.",
       "desc": "RIFLE MARCA CESKA ZBROJOVKA TIPO CERROJO, MODELO CZ 600 AMERICAN CALIBRE 308 WIN, CON 1 CARGADOR DE 5 CARTUCHOS, 1 JUEGO DE ANILLOS, ESTUCHE, MANUAL, GARANTÍA Y EL GRABADO S.D.N. MÉXICO CD. MX.",
-      "priceN": 24055.04,
+      "priceN": 24144.93,
       "qty": 1,
       "fichaId": 59
     },
     {
-      "idx": 112,
+      "idx": 118,
       "name": "RIFLE CAL22 TIPPMANN M4-22 REDLINE",
       "desc": "RIFLE CAL. 22 MARCA TIPPMANN ARMS, MODELO M4-22, VERSIÓN REDLINE INCLUYE: UN ESTUCHE DE PLÁSTICO RÍGIDO, UN CARGADOR DE 25 TIROS, UNA MIRA TIPO REFLEX, MANUAL DE USO EN ESPAÑOL, CANDADO DE SEGURIDAD, MIRAS ABATIBLES. Y GRABADA LA LEYENDA \"S.D.N. MEXICO CD.MX.\"",
-      "priceN": 28315.91,
+      "priceN": 28421.73,
       "qty": 6,
       "fichaId": 81
     },
     {
-      "idx": 113,
+      "idx": 119,
       "name": "ESCOP.AP.OPTIMUM.ARMS.LRT12AL.CAL12,18.5",
       "desc": "ESCOPETA DE ACCIÓN DE PALANCA, MARCA OPTIMUM ARMS, MODELO LRT 12 AL, CALIBRE 12 GA, CAÑÓN DE 18.5\", CON LA LEYENDA GRABADA \"D.C.A.M. Cd. Mx.\", JUEGO DE BOQUILLAS INTERCAMBIABLES, ACABADO NEGRO Y NOGAL TURCO, ACCESORIOS, MANUAL DE USO EN ESPAÑOL Y GARANTÍA.",
-      "priceN": 19028.29,
+      "priceN": 19099.4,
       "qty": 4,
       "fichaId": 165
     },
     {
-      "idx": 114,
+      "idx": 120,
       "name": "ESCP.OPTIMUMARMS.OPT200PRO.CAL12,20\"N",
       "desc": "ESCOPETA SEMIAUTOMÁTICA PLEGABLE, MARCA OPTIMUM ARMS, MODELO OPT 200 PRO, CALIBRE 12 GA, CAÑÓN DE 20\", CON LA LEYENDA GRABADA \"D.C.A.M. Cd. Mx.\", JUEGO DE BOQUILLAS INTERCAMBIABLES, ACABADO NEGRO, ACCESORIOS, MANUAL DE USO EN ESPAÑOL Y GARANTÍA.",
-      "priceN": 21142.55,
+      "priceN": 21221.56,
       "qty": 7,
       "fichaId": 166
     },
     {
-      "idx": 115,
+      "idx": 121,
       "name": "ESCP.OPTIMUMARMS.OPTVMG2.CAL.12,18.5\"ND",
       "desc": "ESCOPETA SEMIAUTOMÁTICA, MARCA OPTIMUM ARMS, MODELO OPT VM G2, CALIBRE 12 GA, CAÑÓN DE 18.5\", CON LA LEYENDA GRABADA \"D.C.A.M. Cd. Mx.\", CULATA RETRÁCTIL, ACABADO NEGRO CON DESIERTO, CON 2 CARGADORES DE 5 CARTUCHOS DE CAPACIDAD CADA UNO, ACCESORIOS, MANUAL DE USO EN ESPAÑOL Y GARANTÍA.",
-      "priceN": 24162.91,
+      "priceN": 24253.21,
       "qty": 1,
       "fichaId": 167
     },
     {
-      "idx": 116,
+      "idx": 122,
       "name": "ESCOPETA CAL. 12 ARMSAN PHENOMA A.C.",
       "desc": "ESCOPETA CALIBRE 12, SEMIAUTOMÁTICA DE UN CAÑÓN MARCA ARMSAN (ARMSAN SILAH A.S.) MODELO PHENOMA, CAÑÓN DE 71 CM, ACABADO CAMO, CINTA VENTILADA, CON ACCESORIOS Y GRABADA LA LEYENDA \"S.D.N. MEXICO, CD. MX.\"",
-      "priceN": 18061.78,
+      "priceN": 18129.27,
       "qty": 6,
       "fichaId": 211
     },
     {
-      "idx": 117,
+      "idx": 123,
       "name": "ESCOPETA CAL. 12 ARMSAN PHENOMA A.S.N.",
       "desc": "ESCOPETA CALIBRE 12, SEMIAUTOMÁTICA DE UN CAÑÓN MARCA ARMSAN (ARMSAN SILAH A.S.) MODELO PHENOMA, CAÑÓN DE 71 CM, ACABADO SINTÉTICO NEGRO, CINTA VENTILADA, CON ACCESORIOS Y GRABADA LA LEYENDA \"S.D.N. MEXICO, CD. MX.\"",
-      "priceN": 14739.38,
-      "qty": 7,
+      "priceN": 14794.46,
+      "qty": 6,
       "fichaId": 211
     },
     {
-      "idx": 118,
+      "idx": 124,
       "name": "ESCOPETA CAL. 12 ARMSAN P612 A.C.",
       "desc": "ESCOPETA CALIBRE 12, DE BOMBA DE UN CAÑÓN, MARCA ARMSAN (ARMSAN SILAH A.S.), MODELO P612, CAÑÓN 71 CM, ACABADO SINTÉTICO NEGRO, CINTA VENTILADA, CON ACCESORIOS Y GRABADA LA LEYENDA \"S.D.N. MEXICO, CD. MX.\"",
-      "priceN": 10390.05,
+      "priceN": 10428.88,
       "qty": 6,
       "fichaId": 91
     },
     {
-      "idx": 119,
+      "idx": 125,
       "name": "ESCOPETA CAL. 12 ARMSAN P612 A.C.",
       "desc": "ESCOPETA CALIBRE 12, DE BOMBA DE UN CAÑÓN, MARCA ARMSAN (ARMSAN SILAH A.S.), MODELO. P612, CAÑÓN DE 71 CM, ACABADO CAMO, CINTA VENTILADA, CON ACCESORIOS Y GRABADA LA LEYENDA \"S.D.N. MEXICO, CD. MX.\"",
-      "priceN": 11779.42,
+      "priceN": 11823.44,
       "qty": 6,
       "fichaId": 92
     },
     {
-      "idx": 120,
+      "idx": 126,
       "name": "ESCOPETA CAL. 16 ARMSAN P616 A.C.",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA ARMSAN (ARMSAN SILAH A.S.), MOD. A616 (A SIX SIXTEEN), CALIBRE 16, CAÑÓN DE 71 CM, ACABADO MADERA, CINTA VENTILADA CON ACCESORIOS Y GRABADA LA LEYENDA \"S.D.N. MEXICO, CD. MX.\"",
-      "priceN": 15917.32,
+      "priceN": 15976.8,
       "qty": 3,
       "fichaId": 214
     },
     {
-      "idx": 121,
+      "idx": 127,
       "name": "ESCO.SEM.A.U. CAL. ARM.A636 CAL. 410 A.C",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA ARMSAN (ARMSAN SILAH A.S.), MOD. A636 (A SIX THIRTY SIX), CALIBRE 410, CAÑÓN DE 66 CM, ACABADO MADERA, CINTA VENTILADA, CON ACCESORIOS Y GRABADA LA LEYENDA \"S.D.N. MEXICO, CD. MX.\"",
-      "priceN": 15705.89,
+      "priceN": 15764.58,
       "qty": 2,
       "fichaId": 215
     },
     {
-      "idx": 122,
+      "idx": 128,
       "name": "ESCOPETA SEMI CAL. 12 HUGLU RENOVA VBN",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA HUGLU, MODELO RENOVA, VERSIÓN CULATA Y GUARDAMANO DE MADERA CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 17669.13,
+      "priceN": 17735.16,
       "qty": 1,
       "fichaId": 178
     },
     {
-      "idx": 123,
+      "idx": 129,
       "name": "ESCOPETA SEMI CAL. 12 HUGLU RENOVA VBN",
       "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA HUGLU, MODELO RENOVA, VERSIÓN BASCULA NEGRA, CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 17276.48,
-      "qty": 7,
+      "priceN": 17341.04,
+      "qty": 6,
       "fichaId": 178
     },
     {
-      "idx": 124,
-      "name": "ESCOPETA SEMIAUT. CAL12 HUGLU RENOV CAMO",
-      "desc": "ESCOPETA SEMIAUTOMÁTICA DE UN CAÑÓN, MARCA HUGLU, MODELO RENOVA, VERSIÓN CAMO, CULATA Y GUARDAMANO CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 19179.31,
-      "qty": 1,
-      "fichaId": 226
-    },
-    {
-      "idx": 125,
+      "idx": 130,
       "name": "ESCOPETA BOMBA 12 HUGLU ATROX C. 28\"",
       "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN, MARCA HUGLU, MODELO ATROX, VERSIÓN SINTETICA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 12383.49,
-      "qty": 6,
-      "fichaId": 99
-    },
-    {
-      "idx": 126,
-      "name": "ESCOPETA BOMBA 12 HUGLU ATROX C. 28\"",
-      "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN, MARCA HUGLU, MODELO ATROX, VERSIÓN CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 14346.73,
-      "qty": 4,
-      "fichaId": 99
-    },
-    {
-      "idx": 127,
-      "name": "ESCOPETA BOMBA 12 HUGLU ATROX MAD 28\"",
-      "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN, MARCA HUGLU, MODELO ATROX, VERSIÓN CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 14346.73,
-      "qty": 4,
-      "fichaId": 99
-    },
-    {
-      "idx": 128,
-      "name": "ESCOPETA BOMBA 12 HUGLU ATROX SB 26\"",
-      "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN, MARCA HUGLU, MODELO ATROX, VERSIÓN SPORT BLACK, CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 66 CM. (26\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
-      "priceN": 13591.64,
+      "priceN": 12429.77,
       "qty": 5,
       "fichaId": 99
     },
     {
-      "idx": 129,
+      "idx": 131,
+      "name": "ESCOPETA BOMBA 12 HUGLU ATROX C. 28\"",
+      "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN, MARCA HUGLU, MODELO ATROX, VERSIÓN CAMO, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
+      "priceN": 14400.34,
+      "qty": 3,
+      "fichaId": 99
+    },
+    {
+      "idx": 132,
+      "name": "ESCOPETA BOMBA 12 HUGLU ATROX MAD 28\"",
+      "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN, MARCA HUGLU, MODELO ATROX, VERSIÓN CULATA Y GUARDAMANO DE MADERA, CALIBRE 12, LONGITUD DE CAÑÓN 71 CM. (28\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
+      "priceN": 14400.34,
+      "qty": 2,
+      "fichaId": 99
+    },
+    {
+      "idx": 133,
+      "name": "ESCOPETA BOMBA 12 HUGLU ATROX SB 26\"",
+      "desc": "ESCOPETA DE ACCIÓN DE BOMBA DE UN CAÑÓN, MARCA HUGLU, MODELO ATROX, VERSIÓN SPORT BLACK, CULATA Y GUARDAMANO SINTETICOS, CALIBRE 12, LONGITUD DE CAÑÓN 66 CM. (26\"), BOQUILLAS INTERCAMBIABLES, ACCESORIOS, MANUAL DE USO Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
+      "priceN": 13642.43,
+      "qty": 5,
+      "fichaId": 99
+    },
+    {
+      "idx": 134,
       "name": "PISTOLA SEMI CAL 9mm GLOCK MOD. 17 G4",
       "desc": "",
-      "priceN": 11730.88,
-      "qty": 7,
+      "priceN": 11774.71,
+      "qty": 6,
       "fichaId": 132
     },
     {
-      "idx": 130,
+      "idx": 135,
       "name": "PISTOLA CAL .380 TAURUS PT58 PLUS PAVON",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA TAURUS MODELO PT 58 HC PLUS, COLOR PAVON CON 3 CARGADORES CON CAPACIDAD DE 19 CARTUCHOS, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO, MANUAL, GARANTIA Y EL GRABADO \"S.D.N MEXICO CD. MX.\"",
-      "priceN": 10679.14,
-      "qty": 19,
+      "priceN": 10719.05,
+      "qty": 16,
       "fichaId": 2
     },
     {
-      "idx": 131,
+      "idx": 136,
       "name": "PISTOLA CAL .380\" RUGER LCP NEGRO",
       "desc": "PISTOLA CALIBRE 0.380\" AUTO MARCA RUGER MODELO LCP, ACERO ALEADO, ACABADO NEGRO, LONGITUD DEL CAÑON 2.75\", LONGITUD TOTAL 5.16\" CON UN CARGADOR CON CAPACIDAD DE 6+1, CON LA LEYENDA GRABADA \"S.D.N. MÉXICO CDMX\". INCLUYE ACCESORIOS.",
-      "priceN": 9857.17,
+      "priceN": 9894.01,
       "qty": 1,
       "fichaId": 5
     },
     {
-      "idx": 132,
+      "idx": 137,
       "name": "PISTOLA CAL .380\" SIG SAUER P365 NIT NEG",
       "desc": "PISTOLA CALIBRE 0.380\" AUTO MARCA SIG SAUER MODELO P365, ACABADO NITRON NEGRO MIRAS NOCTURNAS, CON 2 CARGADORES CON CAPACIDAD DE 10 CARTUCHOS CADA UNO, INCLUYE MANUAL DE USUARIO Y ACCESORIOS, CONLA LEYENDA GRABADA \"S.D.N. MÉXICO CD. MX\".",
-      "priceN": 12334.95,
-      "qty": 13,
+      "priceN": 12381.04,
+      "qty": 10,
       "fichaId": 7
     },
     {
-      "idx": 133,
+      "idx": 138,
       "name": "PISTOLA CAL 9 mm TAURUS TS9 PAVON",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9 mm MARCA TAURUS MODELO TS9, COLOR PAVÓN CON 3 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS, 3 PARTES TRASERAS DE LA EMPUÑADURA, LLAVE ALLEN, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO, MANUAL, GARANTIA Y EL GRABADO \"S.D.N. MEXICO CD. MX.\"",
-      "priceN": 9546.51,
+      "priceN": 9582.18,
       "qty": 4,
       "fichaId": 23
     },
     {
-      "idx": 134,
+      "idx": 139,
       "name": "PISTOLA CAL 9 mm TAURUS GX4 CO PAVON",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9 mm MARCA TAURUS MODELO GX4, COLOR PAVÓN CON 2 CARGADORES CON CAPACIDAD DE 11 CARTUCHOS, 1 PARTE TRASERA DE LA EMPUÑADURA, LLAVE ALLEN, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO, MANUAL, GARANTIA Y EL GRABADO \"S.D.N. MEXICO CD. MX.\"",
-      "priceN": 8718.71,
+      "priceN": 8751.29,
       "qty": 6,
       "fichaId": 24
     },
     {
-      "idx": 135,
+      "idx": 140,
       "name": "PISTOLA CAL 9 mm TAURUS GX4XL CO PAVON",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9 mm MARCA TAURUS MODELO GX4XL, COLOR PAVÓN CON 1 CARGADOR CON CAPACIDAD DE 13 CARTUCHOS Y 1 CARGADOR CON CAPACIDAD DE 11 CARTUCHOS, 1 PARTE TRASERA DE LA EMPUÑADURA, LLAVES ALLEN, PLACAS DE MONTAJE, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO, MANUAL, GARANTIA Y EL GRABADO \"S.D.N. MEXICO CD. MX.\"",
-      "priceN": 10296.2,
+      "priceN": 10334.68,
       "qty": 15,
       "fichaId": 25
     },
     {
-      "idx": 136,
+      "idx": 141,
       "name": "PISTOLASEMI CAL9 mm SPRINGFIELD XD-M 4.5",
       "desc": "PISTOLA SEMIAUTOMATICA CALIBRE 9 X 19 mm MARCA SPRINGFIELD ARMORY MODELO XD-M ELITE 4.5\"; PERCUTOR LANZADO, INCLUYE CARGADOR DE SERVICIO Y 2 ADICIONALES CON CAPACIDAD DE 19+3, CARTUCHOS CADA UNO, MIRA FRONTAL DE FIBRA ÓPTICA Y TÁCTICAL RACK U-DOT™ TRASERO, KIT DE LIMPIEZA 3 BACK STRAP (UNO YA INSTALADO), ACCESORIOS PARA CAMBIO DE DISEÑO Y TAMAÑO DE EMPUÑADURA), ACCESORIOS, MANUAL DE USO EN ESPAÑOL, ESTUCHE PLASTICO CON ESPONJA INTERNA, GARANTÍA Y LEYENDA \"S.D.N. MÉXICO CD. MX.\", DOS CASCOS PERCUTIDOS PARA HUELLA BALÍSTICA. # DE MFG: XDME9459BHC",
-      "priceN": 11114.08,
-      "qty": 37,
+      "priceN": 11155.61,
+      "qty": 36,
       "fichaId": 36
     },
     {
-      "idx": 137,
+      "idx": 142,
       "name": "PIST.SEMI.,CAL.9X19MMGLOCK,17GEN4,L.CÑ17",
       "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: 9X19MM, MARCA: GLOCK, MODELO 17 GEN4, LONGITUD DE CAÑÓN: 114 MM, CON TRES CARGADORES DE SERVICIO CON CAPACIDAD DE 17 CARTUCHOS, CON MIRAS DE ACERO, ACCESORIOS: ADITAMENTO PARA CARGA RÁPIDA, DOS AUMENTOS DE EMPUÑADURA, KIT DE LIMPIEZA: UN CEPILLO DE LIMPIEZA Y UNA VARILLA CON PORTAPARCHE, ESTUCHE DE PLÁSTICO, MANUAL DE USO Y GARANTIA EN IDIOMA ESPAÑOL, GRABADO: S.D.N. MEXICO CD. MX., BALLISTIC PROOF, CÓDIGO: 33317.",
-      "priceN": 11730.88,
-      "qty": 29,
+      "priceN": 11774.71,
+      "qty": 28,
       "fichaId": 132
     },
     {
-      "idx": 138,
+      "idx": 143,
       "name": "PIST.SEMIA.CAL.9X19MMGLOCK,19GEN4,LC:102",
       "desc": "PISTOLA SEMIAUTOMÁTICA CALIBRE 9X19 MM, MARCA: GLOCK, MODELO: 19 GEN4, LONGITUD DE CAÑÓN: 102 MM, CON TRES CARGADORES DE SERVICIO CON CAPACIDAD DE 15 CARTUCHOS, CON MIRAS DE ACERO, ACCESORIOS: ADITAMENTO PARA CARGA RÁPIDA, DOS AUMENTOS DE EMPUÑADURAS, KIT DE LIMPIEZA: UN CEPILLO DE LIMPIEZA Y UNA VARILLA CON PORTAPARCHE, ESTUCHE DE PLÁSTICO, MANUAL DE USO Y GARANTÍA EN IDIOMA ESPAÑOL, GRABADO: S.D.N. MÉXICO CD. MX; BALLISTIC PROOF, CODÍGO: 33320",
-      "priceN": 11730.88,
+      "priceN": 11774.71,
       "qty": 15,
       "fichaId": 40
     },
     {
-      "idx": 139,
+      "idx": 144,
       "name": "PISTOLA CAL. 22 GLOCK, MOD. 44, L.C. 102",
       "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: .22 L.R., MARCA: GLOCK, MODELO 44, LONGITUD DE CAÑÓN: 102 MM, CON TRES CARGADORES DE SERVICIO CON CAPACIDAD DE 10 CARTUCHOS, CON MIRAS DE ACERO, ACCESORIOS: DOS AUMENTOS DE EMPUÑADURA, KIT DE LIMPIEZA: UN CEPILLO DE LIMPIEZA Y UNA VARILLA CON PORTAPARCHE, ESTUCHE DE PLÁSTICO, MANUAL DE USO Y GARANTIA EN IDIOMA ESPAÑOL, GRABADO: D.C.A.M., Cd. Mx., BALLISTIC PROOF, CÓDIGO: 50481.",
-      "priceN": 8359.94,
-      "qty": 31,
+      "priceN": 8391.18,
+      "qty": 26,
       "fichaId": 133
     },
     {
-      "idx": 140,
+      "idx": 145,
       "name": "PISTOLA CAL. 9MM GLOCK, MOD. 19X, 102MM",
       "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: 9X19MM, MARCA: GLOCK, MODELO 19X, COLOR COYOTE, LONGITUD DE CAÑÓN: 102 MM, CON UN CARGADOR DE SERVICIO CON CAPACIDAD DE 17 CARTUCHOS Y DOS CARGADORES DE SERVICIO DE 19 CARTUCHOS, CON MIRAS DE ACERO NOCTURNAS (TRITIO), ACCESORIOS: ADITAMENTO PARA CARGA RÁPIDA, DOS AUMENTOS DE EMPUÑADURA, KIT DE LIMPIEZA: UN CEPILLO DE LIMPEZA Y UNA VARILLA CON PORTAPARCHE, ESTUCHE DE PLÁSTICO, MANUAL DE USO Y GARANTÍA EN IDIOMA ESPAÑOL, GRABADO: D.C.A.M., Cd. Mx., BALLISTIC PROOF, CÓDIGO. 47206.",
-      "priceN": 14427.63,
-      "qty": 26,
+      "priceN": 14481.55,
+      "qty": 25,
       "fichaId": 124
     },
     {
-      "idx": 141,
+      "idx": 146,
       "name": "PISTOLA CAL. 22LR BERETTA 92 FS 22LR NEG",
       "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE .22LR, MARCA BERETTA MODELO 92 FS 22LR, COLOR NEGRO. INCLUYE UN CARGADOR DE SERVICIO Y UNO ADICIONAL CON CAPACIDAD DE 10 CARTUCHOS, MANUAL DE INSTRUCCIONES CONVERSIÓN KIT, GARANTÍA DEL USUARIO Y ACCESORIOS, Y LEYENDA S.D.N. México Cd. Mx.",
-      "priceN": 19856.25,
-      "qty": 38,
+      "priceN": 19980.29,
+      "qty": 34,
       "fichaId": 134
     },
     {
-      "idx": 142,
+      "idx": 147,
       "name": "PISTOLA CESKA Z. CZ P-07 CAL. 0.380\"",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA CESKA ZBROJOVKA MODELO CZ P-07, CON 3 CARGADORES CON CAPACIDAD DE 15 CARTUCHOS, 2 PARTES TRASERAS DE LA EMPUÑADURA, 1 SEGURO MANUAL, 1 LLAVE ALLEN, 1 ABASTECEDOR, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO, MANUAL, GARANTIA Y EL GRABADO \"S.D.N. MÉXICO, CD. MX.\"",
-      "priceN": 12351.13,
-      "qty": 26,
+      "priceN": 12397.29,
+      "qty": 16,
       "fichaId": 8
     },
     {
-      "idx": 143,
+      "idx": 148,
       "name": "PISTOLA CESKA Z. CZ P-10 C CAL. 0.380\"",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA CESKA ZBROJOVKA MODELO CZ P-10 C, CON 3 CARGADORES CAP. DE 15 CARTUCHOS, 2 PARTES TRASERAS DE LA EMPUÑADURA, 2 LLAVES ALLEN, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO, MANUAL, GARANTIA Y EL GRABADO \"S.D.N. MÉXICO, CD. MX.\"",
-      "priceN": 12647.77,
-      "qty": 23,
+      "priceN": 12695.04,
+      "qty": 1,
       "fichaId": 9
     },
     {
-      "idx": 144,
+      "idx": 149,
       "name": "PISTOLA CESKA Z. CZ SHADOW 2 CAL. 0.380\"",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA CESKA ZBROJOVKA MODELO CZ SHADOW 2, CON 3 CARGADORES CON CAPACIDAD DE 18 CARTUCHOS, KIT DE BUFFERS, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO, MANUAL, GARANTÍA Y EL GRABADO \"S.D.N. MÉXICO CD. MX\"",
-      "priceN": 35030.83,
+      "priceN": 35161.73,
       "qty": 36,
       "fichaId": 10
     },
     {
-      "idx": 145,
+      "idx": 150,
       "name": "PISTOLA CAL. 380\" CESKA CZ SHADOW 2",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE .380, MARCA CESKA ZBROJOVKA MODELO CZ SHADOW 2, CON 3 CARGADORES CON CAP. DE 18 CARTUCHOS, KIT DE BUFFERS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ S.D.N. MÉXICO CD. MX.”",
-      "priceN": 35030.83,
-      "qty": 9,
+      "priceN": 35161.73,
+      "qty": 5,
       "fichaId": 10
     },
     {
-      "idx": 146,
+      "idx": 151,
       "name": "PISTOLA 9MM IWI MASADA C. 4.1\"",
       "desc": "PISTOLA, MARCA IWI, MODELO MASADA, CAÑON DE 4.1¨ CALIBRE 9X19 MM INCLUYE: 3 (TRES) CARGADORES CON CAPACIDAD DE 17 CARTUCHOS C/ U, 3 AUMENTOS DE EMPUÑADURA, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL DE OPERACIÓN EN ESPAÑOL. CÓDIGO MASADAFULL9X19. Y LEYENDA S.D.N. MEXICO CD. MX.",
-      "priceN": 11973.59,
-      "qty": 2,
+      "priceN": 12018.33,
+      "qty": 1,
       "fichaId": 37
     },
     {
-      "idx": 147,
+      "idx": 152,
       "name": "PISTOLA CAL. 22\" L.R. TREJO MOD. 2GT",
       "desc": "PISTOLAS SEMIAUTOMÁTICAS CAL. 0.22\" L.R., MARCA TREJO MOD. 2GT DE 11 CARTUCHOS, ACCIÓN SIMPLE, TOTALMENTE DE ACERO, ACABADO EN PAVÓN NEGRO, CADA ARMA INCLUYE: 2 CARGADORES, UN ESTUCHE DE PLÁSTICO, UN INSTRUCTIVO, UNA PÓLIZA Y UN ESCOBILLÓN DE LIMPIEZA Y GRABADA LA LEYENDA D.C.A.M., Cd. Mx.",
       "priceN": 12369.47,
@@ -1180,394 +1220,394 @@
       "fichaId": 216
     },
     {
-      "idx": 148,
+      "idx": 153,
       "name": "PISTOLA 9MM MCA IWI MOD JERICHO II C4.4",
       "desc": "PISTOLA CALIBRE 9 X 19 mm MARCA I.W.I. MODELO JERICHO II, CAÑON DE 4.4\" CODIGO: 046681058MEXICO. INCLUYE: 3 (TRES) CARGADORES CON CAPACIDAD DE 17 CARTUCHOS C/U, 3 AUMENTOS DE EMPUÑADURA, KIT DE LIMPIEZA, ESTUCHE DE PLASTICO Y MANUAL DE OPERACIÓN EN ESPAÑOL Y GRABADA LA LEYENDA \"S.D.N. MEXICO CD. MX.\"",
-      "priceN": 11973.59,
-      "qty": 10,
+      "priceN": 12018.33,
+      "qty": 6,
       "fichaId": 38
     },
     {
-      "idx": 149,
+      "idx": 154,
       "name": "PISTOLA, CAL .380 A,GLOCK, MOD: 25",
       "desc": "PISTOLA SEMIATUMÁTICA, CALIBRE .380 AUTO, MARCA: GLOCK, MODELO: 25, LONGITUD DE CAÑÓN: 102 mm, CON TRES CARGADORES DE SERVICIO CON CAPACIDAD DE 15 CARTUCHOS, ACCESORIOS, KIT DE LIMPIEZA: UN CEPILLO DE LIMPIEZA Y UNA VARILLA CON PORTAPARCHE, CON MIRAS DE ACERO, FUNDA DE DEPORTE/COMBATE, ESTUCHE DE PLÁSTICO, MANUAL DE USO Y GARANTÍA EN IDIOMA ESPAÑOL, GRABADO: S.D.N. MÉXICO CD. MX., BALLISTIC PROOF CÓDIGO: 333857",
-      "priceN": 11730.88,
+      "priceN": 11774.71,
       "qty": 2,
       "fichaId": 11
     },
     {
-      "idx": 150,
+      "idx": 155,
       "name": "PISTOLA CAL. 380\" GLOCK MOD. 25 COD33857",
       "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: .380 AUTO, MARCA: GLOCK, MODELO 25, LONGITUD DE CAÑÓN: 102 mm, CON TRES CARGADORES DE SERVICIO CON CAPACIDAD DE 15 CARTUCHOS, CON MIRAS DE ACERO, ACCESORIOS: ADITAMENTO PARA CARGA RÁPIDA, KIT DE LIMPIEZA: UN CEPILLO DE LIMPIEZA Y UNA VARILLA CON PORTAPARCHE, FUNDA DE DEPORTE/COMBATE, ESTUCHE DE PLÁSTICO, MANUAL DE USO Y GARANTIA EN IDIOMA ESPAÑOL, GRABADO: S.D.N. MÉXICO CD. MX., BALLISTIC PROOF, CÓDIGO: 33857.",
-      "priceN": 11730.88,
+      "priceN": 11774.71,
       "qty": 1,
       "fichaId": 11
     },
     {
-      "idx": 151,
+      "idx": 156,
       "name": "PISTOLA CAL. 40S&W GLOCK MOD. 22 GEN4",
       "desc": "PISTOLA SEMIAUTOMÁTICA, CALIBRE: 40 S&W, MARCA : GLOCK, MODELO 22 GEN4, LONGITUD DE CAÑÓN: 114 mm, CON TRES CARGADORES DE SERVICIO CON CAPACIDAD DE 15 CARTUCHOS, CON MIRAS DE ACERO, ACCESORIOS: ADITAMENTO PARA CARGA RÁPIDA, DOS AUMENTOS DE EMPUÑADURA, KIT DE LIMPIEZA: UN CEPILLO DE LIMPIEZA Y UNA VARILLA CON PORTAPARCHE, ESTUCHE DE PLÁSTICO, MANUAL DE USO Y GARANTÍA EN IDIOMA ESPAÑOL, GRABADO: S.D.N. MEXICO CD. MX., BALLISTIC PROOF, CÓDIGO: 50862.",
-      "priceN": 11730.88,
+      "priceN": 11774.71,
       "qty": 15,
       "fichaId": 47
     },
     {
-      "idx": 152,
+      "idx": 157,
       "name": "PISTOLA CESKA CZ P-09F NOC CAL. 9MM 115",
       "desc": "PISTOLA SEMIATOMATICA, MARCA CZ, MODELO CZ P-09F NOCTURNE, CON SEGURO MANUAL, CALIBRE 9X19 MM, LONIGITUD DE CAÑON DE 115 MM, CON 3 CARGADORES CON CAPACIDAD DE 19 CARTUCHOS, INCLUYE ACCESORIOS, KIT DE LIMPIEZA, MANUAL, GARANTIA, CON LA LEYENDA GRABADA D.C.A.M. CD. MX.",
-      "priceN": 13187.12,
-      "qty": 15,
+      "priceN": 13236.4,
+      "qty": 14,
       "fichaId": 233
     },
     {
-      "idx": 153,
+      "idx": 158,
       "name": "PISTOLA CAL 9MM SIG SAUER P320 FULL SIZE",
       "desc": "PISTOLA SEMIAUTOMÁTICA, MARCA SIG SAUER, MODELO P320 FULL SIZE, CALIBRE 9X19 MM, ACABADO NITRON NEGRO, MIRAS DE CONTRASTE, 3 (TRES) CARGADORES CON CAPACIDAD DE 17 (DIECISIETE) CARTUCHOS CADA UNO. INCLUYE ACCESORIOS. CON LA LEYENDA GRABADA \"S.D.N. MÉXICO CD.MX\".",
-      "priceN": 15506.33,
-      "qty": 20,
+      "priceN": 15564.28,
+      "qty": 15,
       "fichaId": 41
     },
     {
-      "idx": 154,
+      "idx": 159,
       "name": "REVL.F.C.TAURUS889,C. 4” CAL.38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 889, CAÑÓN DE 4\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR ACERO INOXIDABLE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 14826.32,
+      "priceN": 14881.72,
       "qty": 9,
       "fichaId": 141
     },
     {
-      "idx": 155,
+      "idx": 160,
       "name": "REVL.F.C.TAURUS889,C.6” C.38SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 889, CAÑÓN DE 6\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR ACERO INOXIDABLE MATE, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 14826.32,
-      "qty": 10,
+      "priceN": 14881.72,
+      "qty": 9,
       "fichaId": 141
     },
     {
-      "idx": 156,
+      "idx": 161,
       "name": "REVL.F.C.TAURUS838,C.4” CAL .38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 838, CAÑÓN DE 4\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR ACERO INOXIDABLE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 15702.22,
+      "priceN": 15760.9,
       "qty": 9,
       "fichaId": 173
     },
     {
-      "idx": 157,
+      "idx": 162,
       "name": "REVL.TAURUSMATE838,C.6.5” CAL.38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 838, CAÑÓN DE 6.5\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR ACERO INOXIDABLE MATE, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 15702.22,
-      "qty": 10,
-      "fichaId": 173
-    },
-    {
-      "idx": 158,
-      "name": "REVL.F.C.TAURUS838,C.6.5” CAL .38 SPL.",
-      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 838, CAÑÓN DE 6.5\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR ACERO INOXIDABLE, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 15913.65,
+      "priceN": 15760.9,
       "qty": 9,
       "fichaId": 173
     },
     {
-      "idx": 159,
+      "idx": 163,
+      "name": "REVL.F.C.TAURUS838,C.6.5” CAL .38 SPL.",
+      "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 838, CAÑÓN DE 6.5\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 8 CARTUCHOS, COLOR ACERO INOXIDABLE, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
+      "priceN": 15973.12,
+      "qty": 8,
+      "fichaId": 173
+    },
+    {
+      "idx": 164,
       "name": "REVL.F.C.TAURUS82S,C.4” .38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 82S, CAÑÓN DE 4\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR ACERO INOXIDABLE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 11352.9,
+      "priceN": 11395.33,
       "qty": 10,
       "fichaId": 126
     },
     {
-      "idx": 160,
+      "idx": 165,
       "name": "REVL.F.C.TAURUS85S,C.2” CAL.38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 85S, CAÑÓN DE 2\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 5 CARTUCHOS, COLOR ACERO INOXIDABLE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 10779.46,
+      "priceN": 10819.74,
       "qty": 10,
       "fichaId": 142
     },
     {
-      "idx": 161,
+      "idx": 166,
       "name": "REVL.F.C.TAURUS85S,CÑ.3” CAL.38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 85S, CAÑÓN DE 3\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 5 CARTUCHOS, COLOR PAVÓN, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 10568.04,
+      "priceN": 10607.53,
       "qty": 10,
       "fichaId": 142
     },
     {
-      "idx": 162,
+      "idx": 167,
       "name": "REVL.F.C.TAURUS856,CÑ.2” CAL.38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 856, CAÑÓN DE 2\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR PAVÓN MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 10356.61,
+      "priceN": 10395.31,
       "qty": 10,
       "fichaId": 20
     },
     {
-      "idx": 163,
+      "idx": 168,
       "name": "RVOL.F.C.TAURUS856,CÑ.2” CAL.38 SPL.",
       "desc": "REVÓLVER DE FUEGO CENTRAL MARCA TAURUS, MODELO 856, CAÑÓN DE 2\", CALIBRE 0.38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR ACERO INOXIDABLE MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 10779.46,
+      "priceN": 10819.74,
       "qty": 10,
       "fichaId": 19
     },
     {
-      "idx": 164,
+      "idx": 169,
       "name": "REVL.F.A.TAURUS970T.,CÑ.6.5” CAL .22 LR",
       "desc": "REVÓLVER DE FUEGO ANULAR MARCA TAURUS, MODELO 970 TRACKER, CAÑÓN DE 6.5\", CALIBRE .22 LR CON CAPACIDAD DE 7 CARTUCHOS, COLOR ACERO INOXIDABLE MATE, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"D.C.A.M., CD. MX.\".",
-      "priceN": 12440.66,
+      "priceN": 12487.15,
       "qty": 9,
       "fichaId": 276
     },
     {
-      "idx": 165,
+      "idx": 170,
       "name": "PISTOLA 9MM AREX DELTA L, LARG.CAÑ. 4.5\"",
       "desc": "PISTOLA, CAL. 9X19 MM, MARCA AREX, COLOR NEGRO, MODELO DELTA L, LARGO DEL CAÑÓN DE 4.5” CON MIRAS DE CONTRASTE, CON 3 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS CADA UNO. INCLUYE ACCESORIOS, KIT DE LIMPIEZA Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 13881.27,
+      "priceN": 13967.98,
       "qty": 7,
       "fichaId": 136
     },
     {
-      "idx": 166,
+      "idx": 171,
       "name": "PISTOLA 9MM AREX DELTA L, LARG.CAÑ. 4.5\"",
       "desc": "PISTOLA, CAL. 9X19 MM, MARCA AREX, COLOR NEGRO, MODELO DELTA L, LARGO DEL CAÑÓN DE 4.5” CON SEGURO MANUAL, CON MIRAS DE CONTRASTE, CON 3 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS CADA UNO. INCLUYE ACCESORIOS, KIT DE LIMPIEZA Y LA LEYENDA GRABADA “ D.C.A.M., Cd. Mx.”",
-      "priceN": 14183.04,
+      "priceN": 14271.63,
       "qty": 8,
       "fichaId": 136
     },
     {
-      "idx": 167,
+      "idx": 172,
       "name": "PISTOLA 9 mm CESKA CZ P-09",
       "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 9X19 MM, MARCA CZ, MODELO CZ P-09, CON 3 CARGADORES CON CAP. DE 19 CARTUCHOS, 2 PARTES TRASERAS DE LA EMPUÑADURA, 1 SEGURO MANUAL, 1 LLAVE ALLEN, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ S.D.N. MÉXICO, CD.MX.” .",
-      "priceN": 12917.45,
+      "priceN": 12965.72,
       "qty": 11,
       "fichaId": 31
     },
     {
-      "idx": 168,
+      "idx": 173,
       "name": "PISTOLA CAL. 9 MM. BERETTA M PX4 STORM",
       "desc": "PISTOLA SEMIAUTOMATICA CALIBRE 9 X 19 mm MARCA BERETTA MODELO Px4 STORM, INCLUYE UN CARGADOR DE SERVICIO Y UNO ADICIONAL, CON CAPACIDAD DE 20 CARTUCHOS, KIT DE LIMPIEZA, ACCESORIOS, MANUAL DE USO Y GARANTÍA Y GRABADA LA LEYENDA \"S.D.N. MEXICO, CD. MX.\",",
-      "priceN": 11105.02,
-      "qty": 20,
+      "priceN": 11174.38,
+      "qty": 16,
       "fichaId": 45
     },
     {
-      "idx": 169,
+      "idx": 174,
       "name": "PISTOLA CAL.40 S & W BERETTA PX4 STORM",
       "desc": "PISTOLA SEMIAUTOMATICA CALIBRE 0.40 S&W MARCA BERETTA MODELO PX4 STORM., INCLUYE UN CARGADOR DE SERVICIO Y CON UNO ADICIONAL CON CAPACIDAD DE 14 CARTUCHOS, KIT DE LIMPIEZA, ACCESORIOS, MANUAL DE USO Y GARANTIA Y GRABADA LA LEYENDA \"S.D.N. MEXICO CD. MEX.\"",
-      "priceN": 11406.78,
+      "priceN": 11478.04,
       "qty": 5,
       "fichaId": 48
     },
     {
-      "idx": 170,
+      "idx": 175,
       "name": "PIST.CAL .22 LR CESKA CZ P-07 KADET.",
       "desc": "PISTOLA MARCA CESKA ZBROJOVKA MODELO CZ P-07 KADET, CALIBRE .22 LR, CON 3 CARGADORES DE 10 TIROS CADA UNO, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO \"S.D.N. MEXICO CD. MX.\".",
-      "priceN": 11596.04,
-      "qty": 37,
+      "priceN": 11639.37,
+      "qty": 31,
       "fichaId": 217
     },
     {
-      "idx": 171,
+      "idx": 176,
       "name": "PISOLA 38 SUPER COLT GOVERNMENT CONMEMOR",
       "desc": "PISTOLA MARCA COLT MODELO GOVERNMENT CALIBRE .38 SUPER, CONMEMORATIVA, CON UN CARGADOR CON CAPACIDAD DE 9 TIROS Y CON ACCESORIOS Y GRABADA LA LEYENDA \" D.C.A.M. Cd. M.x.\"",
-      "priceN": 161805.21,
+      "priceN": 162409.86,
       "qty": 7,
       "fichaId": 49
     },
     {
-      "idx": 172,
+      "idx": 177,
       "name": "PIST. DE F.C.TAURUSGX4,CAL9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO GX4, CALIBRE 9 MM, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 13 CARTUCHOS, 1 PARTE TRASERA DE LA EMPUÑADURA, LLAVERO, FUNDA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 9179.75,
+      "priceN": 9214.05,
       "qty": 17,
       "fichaId": 24
     },
     {
-      "idx": 173,
+      "idx": 178,
       "name": "PIST.F.C.TAURUS GX4 CARRY,CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO GX4 CARRY, CALIBRE 9 MM, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 15 CARTUCHOS, 2 PARTES TRASERAS DE LA EMPUÑADURA, LLAVERO, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 7885.31,
+      "priceN": 7914.77,
       "qty": 7,
       "fichaId": 26
     },
     {
-      "idx": 174,
+      "idx": 179,
       "name": "PIST.F.C.TAURUS G3,CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO G3, CALIBRE 9 MM, COLOR PAVÓN, CON 2 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS Y 1 CARGADOR CON CAPACIDAD DE 15 CARTUCHOS, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 9017.94,
+      "priceN": 9051.64,
       "qty": 6,
       "fichaId": 137
     },
     {
-      "idx": 175,
+      "idx": 180,
       "name": "PIST.F.C.TAURUS G3,CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO G3, CALIBRE 9 MM, COLOR NEGRO/ACERO INOXIDABLE, CON 2 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS Y 1 CARGADOR CON CAPACIDAD DE 15 CARTUCHOS, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 9017.94,
+      "priceN": 9051.64,
       "qty": 8,
       "fichaId": 137
     },
     {
-      "idx": 176,
+      "idx": 181,
       "name": "PIST.F.C.TAURUS G3C, CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO G3C, CALIBRE 9 MM, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 12 CARTUCHOS, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 7561.7,
+      "priceN": 7589.95,
       "qty": 13,
       "fichaId": 138
     },
     {
-      "idx": 177,
+      "idx": 182,
       "name": "PIST.F.C.TAURUSG3TAC.,CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO G3 TACTICAL, CALIBRE 9 MM, COLOR PAVÓN, CON 2 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 12658.56,
+      "priceN": 12705.86,
       "qty": 10,
       "fichaId": 139
     },
     {
-      "idx": 178,
+      "idx": 183,
       "name": "PIST.F.C.TAURUSGX2,CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO GX2, CALIBRE 9 MM, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 13 CARTUCHOS, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 6941.44,
+      "priceN": 6967.38,
       "qty": 16,
       "fichaId": 192
     },
     {
-      "idx": 179,
+      "idx": 184,
       "name": "PIST.F.C.TAURUSTS9,CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO TS9, CALIBRE 9 MM, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS, 3 PARTES TRASERAS DE LA EMPUÑADURA, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 12173.15,
+      "priceN": 12218.64,
       "qty": 8,
       "fichaId": 23
     },
     {
-      "idx": 180,
+      "idx": 185,
       "name": "PIST.F.C.TAURUSTH9,CAL.9MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO TH9, CALIBRE 9 MM, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS, 2 PARTES TRASERAS DE LA EMPUÑADURA, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 9880.9,
+      "priceN": 9917.83,
       "qty": 21,
       "fichaId": 140
     },
     {
-      "idx": 181,
+      "idx": 186,
       "name": "PIST.F.C.TAURUSPT 92 AF-D,CAL.9 MM",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO PT 92 AF-D, CALIBRE 9 MM, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 11498.96,
+      "priceN": 11541.93,
       "qty": 6,
       "fichaId": 27
     },
     {
-      "idx": 182,
+      "idx": 187,
       "name": "PIST.F.C.TAURUS MODELO PT 92 AFS-D,CAL.9",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO PT 92 AFS-D, CALIBRE 9 MM, COLOR ACERO INOXIDABLE, CON 3 CARGADORES CON CAPACIDAD DE 17 CARTUCHOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 11741.66,
+      "priceN": 11785.54,
       "qty": 10,
       "fichaId": 27
     },
     {
-      "idx": 183,
+      "idx": 188,
       "name": "PIST.F.C.TAURUSPT 59,CAL.0.380",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO PT 59, CALIBRE 0.380, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD DE 19 CARTUCHOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 16890.09,
-      "qty": 25,
+      "priceN": 16953.21,
+      "qty": 24,
       "fichaId": 3
     },
     {
-      "idx": 184,
+      "idx": 189,
       "name": "PIST.F.C.TAURUS,PT 59,CAL.0.380",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO PT 59, CALIBRE 0.380, COLOR ACERO INOXIDABLE, CON 3 CARGADORES CON CAPACIDAD DE 19 CARTUCHOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 17584.77,
-      "qty": 25,
+      "priceN": 17650.49,
+      "qty": 24,
       "fichaId": 3
     },
     {
-      "idx": 185,
+      "idx": 190,
       "name": "PIST. F.C.TAURUS TH380,CAL.0.380",
       "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS MODELO TH380, CALIBRE 0.380, COLOR PAVÓN, CON 2 CARGADORES CON CAPACIDAD DE 18 CARTUCHOS, 2 PARTES TRASERAS DE LA EMPUÑADURA, ACCESORIOS, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 10878.7,
+      "priceN": 10919.36,
       "qty": 16,
       "fichaId": 1
     },
     {
-      "idx": 186,
+      "idx": 191,
       "name": "REVL.F.C.TAURUS82S,C. 4” CAL .38 SPL.",
       "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 82S, CAÑÓN DE 4” CALIBRE .38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR PAVÓN, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 10426.94,
+      "priceN": 10465.91,
       "qty": 15,
       "fichaId": 126
     },
     {
-      "idx": 187,
+      "idx": 192,
       "name": "REVL.F.C.TAURUS82S,C. 4” CAL.38 SPL.",
       "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 82S, CAÑÓN DE 4” CALIBRE .38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR PAVÓN MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 10426.94,
+      "priceN": 10465.91,
       "qty": 18,
       "fichaId": 126
     },
     {
-      "idx": 188,
+      "idx": 193,
       "name": "REVL.F.C.TAURUS85S,CÑ.3” CAL.38 SPL.",
       "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 85S, CAÑÓN DE 3” CALIBRE .38 SPL. CON CAPACIDAD DE 5 CARTUCHOS, COLOR PAVÓN MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO “ D.C.A.M., CD. MX.”",
-      "priceN": 10245.29,
+      "priceN": 10283.58,
       "qty": 4,
       "fichaId": 142
     },
     {
-      "idx": 189,
+      "idx": 194,
       "name": "REVL.TAURUS.856.,CÑ.3\"CAL.38SPL.AC.IN.MT",
       "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 856, CAÑÓN DE 3\" CALIBRE .38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR ACERO INOXIDABLE MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO D.C.A.M., CD. MX.",
-      "priceN": 10426.51,
+      "priceN": 10465.47,
       "qty": 7,
       "fichaId": 19
     },
     {
-      "idx": 190,
+      "idx": 195,
       "name": "REVL.TAURUS.856,CÑ.3\"CAL.38SPL.PV.MT",
       "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 856, CAÑÓN DE 3\" CALIBRE .38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR PAVÓN MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO D.C.A.M., CD. MX.",
-      "priceN": 10033.86,
+      "priceN": 10071.36,
       "qty": 9,
       "fichaId": 20
     },
     {
-      "idx": 191,
+      "idx": 196,
       "name": "REVL.TAURUS.856,CÑ.3\"CAL.38SPL.AC.IN.MT",
       "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 856, CAÑÓN DE 3\" CALIBRE .38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR ACERO INOXIDABLE/NEGRO MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO D.C.A.M., CD. MX.",
-      "priceN": 10426.51,
+      "priceN": 10465.47,
       "qty": 17,
       "fichaId": 19
     },
     {
-      "idx": 192,
+      "idx": 197,
       "name": "REVL.TAURUS856,CÑ.3\"CAL.38SPL.TUNGS.N.MT",
       "desc": "REVOLVER DE FUEGO CENTRAL MARCA TAURUS MODELO 856, CAÑÓN DE 3\" CALIBRE .38 SPL. CON CAPACIDAD DE 6 CARTUCHOS, COLOR TUNGSTENO/NEGRO MATE, KIT DE LIMPIEZA, ESTUCHE DE PLÁSTICO, MANUAL, GARANTÍA Y EL GRABADO D.C.A.M., CD. MX.",
-      "priceN": 11604.45,
+      "priceN": 11647.82,
       "qty": 12,
       "fichaId": 21
     },
     {
-      "idx": 193,
+      "idx": 198,
       "name": "PISTOLA 0.38\" SUPER COLT GOVERNMENT",
       "desc": "PISTOLA MARCA COLT, MODELO GOVERNMENT CALIBRE .38 SUPER, CONMEMORATIVA, CON UN CARGADOR CON CAPACIDAD DE 9 TIROS Y CON ACCESORIOS Y LEYENDA S.D.N. MEXICO CD. MX.",
-      "priceN": 161805.21,
+      "priceN": 162409.86,
       "qty": 3,
       "fichaId": 49
     },
     {
-      "idx": 194,
+      "idx": 199,
       "name": "PISTOLA CAL. 9mm SYSTEM DEFENCE C102mm",
       "desc": "PISTOLA C9 COMPACT SEMI AUTOMÁTICA, MARCA SYSTEM DEFENCE, CALIBRE 9X19 MM OTAN, SEMI AUTOMÁTICA, LONGITUD DEL CAÑÓN: 102 MM, ESTRIADO DEL CAÑÓN: 6 RANURAS 6 JUEGOS GIRO A LA DERECHA 1/10, TIPO DE PISTOLA: SEMIAUTOMÁTICA HEXAGONAL, MECANISMO: ACCIÓN SEGURA, CARGADOR: POLÍMERO, CAPACIDAD 15 CARTUCHOS, MIRA DELANTERA: PUNTO DE MIRA FIJO, MIRA TRASERA: PUNTO DE MIRA FIJO, INCLUYE FUNDA ESTÁNDAR, UN CARGADOR DE SERVICIO Y DOS ADICIONALES CON CAPACIDAD DE 15 CARTUCHOS, ESTUCHE RÍGIDO, KIT DE LIMPIEZA , ACCESORIOS Y MANUAL DE USO.",
-      "priceN": 11286.02,
+      "priceN": 11328.2,
       "qty": 13,
       "fichaId": 220
     },
     {
-      "idx": 195,
+      "idx": 200,
       "name": "PISTOLA CAL 9mm SYSTEM DEFENCE C122mm",
       "desc": "PISTOLA C9 FS SEMI AUTOMÁTICA, MARCA SYSTEM DEFENCE, CALIBRE 9X19 MM OTAN, SEMI AUTOMÁTICA, LONGITUD DEL CAÑÓN: 122 MM, ESTRIADO DEL CAÑÓN: 6 RANURAS 6 JUEGOS GIRO A LA DERECHA 1/10. TIPO PISTOLA: SEMIAUTOMÁTICA HEXAGONAL, MECANISMO: ACCIÓN SEGURA, CARGADOR: POLÍMERO, CAPACIDAD 17 CARTUCHOS, MIRA DELANTERA: PUNTO DE MIRA FIJO, MIRA TRASERA: PUNTO DE MIRA FIJO, INCLUYE FUNDA ESTÁNDAR, UN CARGADOR DE SERVICIO Y DOS ADICIONALES CON CAPACIDAD DE 17 CARTUCHOS, ESTUCHE RÍGIDO, KIT DE LIMPIEZA, ACCESORIOS Y MANUAL DE USO.Y LA LEYENDA \"S.D.N. MÉXICO CD. MX\"",
-      "priceN": 12135.39,
+      "priceN": 12180.74,
       "qty": 3,
       "fichaId": 46
     },
     {
-      "idx": 196,
+      "idx": 201,
       "name": "PISTOLA CAL. 9MM REXIMEX MOD. TRX9",
       "desc": "PISTOLA SEMIAUTOMATICA, MARCA REXIMEX, CALIBRE 9 X 19 MM., MODELO TRX9 COLOR NEGRO, CON 3 (TRES) CARGADORES CON CAPACIDAD DE 15 CARTUCHOS CADA UNO, ACCESORIO, MANUAL Y GARANTIA.CON LA LEYENDA GRABADA \"S.D.N. MÉXICO, CD. MX.\",",
-      "priceN": 10420.26,
+      "priceN": 10459.19,
       "qty": 1,
       "fichaId": 253
     }
