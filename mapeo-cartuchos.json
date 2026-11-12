@@ -24,7 +24,8 @@
     "2103": 6600,
     "2112": 3000,
     "2114": 3000,
-    "2120": 5050
+    "2120": 5050,
+    "2126": 1000
   },
   "precios": {
     "2004": 8.96,
@@ -51,21 +52,14 @@
     "2103": 8.96,
     "2112": 11.9,
     "2114": 10.93,
-    "2120": 16.76
+    "2120": 16.76,
+    "2126": 14.09
   },
   "factores": [
     1.001912,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 14,
-      "name": "CART. CAL. 12 EXCOPESA T5 PICH 36GR M8",
-      "priceN": 14.09,
-      "qty": 1000,
-      "desc": "CARTUCHO MARCA J&G EXCOPESA CALIBRE 12 T5 PICHON MUN. 8 36GR CATALOGO 150 - 80"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2063,
@@ -95,7 +89,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 93833,
-  "totalMapped": 92833,
+  "totalMapped": 93833,
   "excluidos": [],
   "regresos": [],
   "regresosRechazados": [],

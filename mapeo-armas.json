@@ -114,6 +114,7 @@
     "220": 13,
     "221": 13,
     "222": 6,
+    "223": 1,
     "227": 6,
     "229": 6,
     "231": 8,
@@ -148,7 +149,8 @@
     "273": 7,
     "274": 5,
     "275": 5,
-    "276": 9
+    "276": 9,
+    "277": 6
   },
   "precios": {
     "1": 10919.36,
@@ -244,7 +246,7 @@
     "191": 27711.24,
     "192": 6967.38,
     "193": 15916.21,
-    "196": 26782.08,
+    "196": 24990.49,
     "197": 20617.95,
     "198": 31640.51,
     "199": 17976.18,
@@ -265,6 +267,7 @@
     "220": 11328.2,
     "221": 54542.64,
     "222": 30722.53,
+    "223": 224975.58,
     "227": 21005.01,
     "229": 15537.21,
     "231": 37288.43,
@@ -299,28 +302,14 @@
     "273": 41549.86,
     "274": 48993.64,
     "275": 49670.35,
-    "276": 12487.15
+    "276": 12487.15,
+    "277": 38776.33
   },
   "factores": [
     1.003737,
     1.006247
   ],
-  "sinFicha": [
-    {
-      "idx": 0,
-      "name": "ESCOPETA 12 BENELLI SB EAG II COMFORTECH",
-      "priceN": 38776.33,
-      "qty": 6,
-      "desc": "ESCOPETA SEMIAUTOMATICA CALIBRE 12 G.A. MARCA BENELLI MODELO SUPER BLACK EAGLE II (COMFORTECH) CAÑON DE 28\",. INCLUYE MA"
-    },
-    {
-      "idx": 31,
-      "name": "ESCOPETA 12 BERETTA DT11 BLACK EDITION S",
-      "priceN": 224975.58,
-      "qty": 1,
-      "desc": "ESCOPETA SOBREPUESTA MARCA BERETTA MODELO DT11 (BLACK DLC PRO) TIPO SKEET, CULATA TIPO TSK, CAL. 12 GA, CAÑÓN DE 30\", IN"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 226,
@@ -328,9 +317,18 @@
       "refPrice": 19179.31
     }
   ],
-  "revisarPrecio": [],
+  "revisarPrecio": [
+    {
+      "fichaId": 196,
+      "dcamRef": "ESCOPETA CAL.12 FRANCHI AFFINITY3 LIN/WO",
+      "renglon": "ESCOPETA CAL.12 FRANCHI AFFINITY3 ELI/WO",
+      "precio": 26782.08,
+      "ultimo": 24990.49,
+      "motivo": "solucionador: el renglón dcamRef (LIN/WO) no vino; ELI/WO (variante Elite Wood, x1.0717) y B SYN (x0.825) no encadenan con el último precio de la ficha — regla C4: se queda el último"
+    }
+  ],
   "totalPdf": 1413,
-  "totalMapped": 1373,
+  "totalMapped": 1380,
   "excluidos": [
     {
       "idx": 70,
