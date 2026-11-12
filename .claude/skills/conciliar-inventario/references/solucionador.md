@@ -270,3 +270,18 @@ Lo que sobrevive es alta nueva.
   `otca` (registro anterior y mediana general); prueba en `scripts/test_verificar_cierre.py`.
 - **Si vuelve a pasar**: no es trabajo de datos; compara con el `man_acc_<fecha>` DCAM y
   repórtalo en `pendiente`.
+
+### C18. Variante publicada cuando falta el renglón de la ficha (11-nov-2026)
+
+- **Síntoma (antes del arreglo)**: verificar-cierre marca un salto en una ficha con varios
+  renglones el día en que no viene el de su dcamRef (11-nov: 196 Affinity 3, la variante
+  ELI/WO publicaba 26,782.08 = +7.2 % sobre 24,990.49).
+- **Causa**: el paso 3b de `mapear-existencias.py` daba por bueno (`ok = True`) cualquier
+  renglón de la ficha que no fuera libre, aunque llegara por liga de variante o encadenara
+  consigo mismo y no con el precio publicado.
+- **Ya corregido en código**: `era_representante()` limita la excepción al renglón cuya
+  pareja en la referencia se llamaba como la ficha o tenía su último precio (±0.2 %); los
+  demás pasan por la guardia y van a `revisarPrecio` con el último precio. Prueba en
+  `scripts/test_representante.py`.
+- **Si vuelve a pasar**: arreglo de datos de la regla C4 (`precios[<id>]` = último precio en
+  `mapeo-<cat>.json`, entrada en `revisarPrecio`, `--rehacer`) y repórtalo en `pendiente`.

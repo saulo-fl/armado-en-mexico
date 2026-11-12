@@ -284,6 +284,22 @@ def elegir_representante(rows, dcam_ref, ultimo, factors, tol=0.02):
     return r, motivo, ok
 
 
+def era_representante(ref_row, dcam_ref, ultimo, tol=0.002):
+    """¿El renglón de la referencia fijaba el precio de la ficha? (C18, 11-nov-2026)
+
+    Sí si se llama como la ficha (dcamRef) o si su precio es el último publicado
+    (±tol relativo: fue el elegido ayer). Un renglón que llegó por liga forzada o
+    que era otra variante no lo es: su cadena no prueba nada sobre el precio de
+    la ficha.
+    """
+    if not ref_row:
+        return False
+    if dcam_ref and _norm_nombre(ref_row.get("name")) == _norm_nombre(dcam_ref):
+        return True
+    p = ref_row.get("priceN") or 0
+    return bool(ultimo) and p > 0 and abs(p / ultimo - 1) <= tol
+
+
 def cargar_catalogo(data_dir, antes_de=None):
     """{fichaId: {dcamRef, ultimo}} evaluando los data-*.js con node.
 
@@ -574,8 +590,10 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
     consumidos = set()
     if catalogo:
         dueno = {}
+        ref_de = {}   # id(renglón nuevo) → su renglón de la referencia (solo cadena)
         for ni, ri, _ in matched:
             dueno[ni] = ref_rows[ri]["fichaId"]
+            ref_de[id(new_items[ni])] = ref_rows[ri]
         for ni, fid in forzados.items():
             dueno[ni] = fid if fid is not None else "excluido"
         por_nombre = defaultdict(list)
@@ -591,9 +609,12 @@ def map_existencias(ref_path, new_items, verbose=False, catalogo=None, ligas=Non
                 continue
             elegido, motivo, ok = elegir_representante(cands, dref, info.get("ultimo"), factors)
             # Un renglón emparejado por la cadena de precios encadena por
-            # construcción con su renglón del PDF anterior: es válido aunque
-            # el último registro de la ficha fuera de otra variante.
-            if any(elegido is r for r in ficha_rows[fid] if r not in libres):
+            # construcción con su renglón del PDF anterior. Eso solo lo hace
+            # válido si ESE renglón era el representante de la ficha (C18,
+            # 11-nov-2026): si no, encadena consigo mismo y no con el precio
+            # publicado. La 196 (Affinity 3) se quedó sin su LIN/WO y la liga
+            # de variante ELI/WO publicó +7.2 % saltándose la guardia.
+            if era_representante(ref_de.get(id(elegido)), dref, info.get("ultimo")):
                 ok = True
             if elegido in libres:
                 existencias[fid] += elegido["qty"]
