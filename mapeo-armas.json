@@ -5,7 +5,7 @@
     "3": 27,
     "5": 1,
     "7": 8,
-    "8": 1,
+    "8": 51,
     "9": 48,
     "10": 42,
     "11": 3,
@@ -297,15 +297,7 @@
     0.999978,
     0.996118
   ],
-  "sinFicha": [
-    {
-      "idx": 166,
-      "name": "PISTOLA CALIBRE .380\" CESKA CZ P07",
-      "priceN": 12364.75,
-      "qty": 50,
-      "desc": "PISTOLA MARCA CESKA ZBROJOVKA MODELO CZ P-07, CALIBRE .380, CON 3 CARGADORES DE 15 TIROS CADA UNO, KIT DE LIMPIEZA, ESTU"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 68,
@@ -329,7 +321,7 @@
     }
   ],
   "totalPdf": 1373,
-  "totalMapped": 1297,
+  "totalMapped": 1347,
   "excluidos": [
     {
       "idx": 63,

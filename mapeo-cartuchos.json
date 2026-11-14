@@ -29,7 +29,8 @@
     "2118": 3000,
     "2119": 3000,
     "2120": 2650,
-    "2126": 500
+    "2126": 500,
+    "2127": 3000
   },
   "precios": {
     "2004": 8.96,
@@ -61,25 +62,18 @@
     "2118": 10.8,
     "2119": 10.8,
     "2120": 16.53,
-    "2126": 13.9
+    "2126": 13.9,
+    "2127": 11.98
   },
   "factores": [
     1.0,
     0.996416
   ],
-  "sinFicha": [
-    {
-      "idx": 15,
-      "name": "CAR. BULLETT4C.CAL12MUN.7.5-36GR.0072-75",
-      "priceN": 11.98,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA BULLET T-4 CAZA CAL. 12 MUN. 7.5 36 GR. CAT. 0072-75"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [],
   "revisarPrecio": [],
   "totalPdf": 102433,
-  "totalMapped": 99433,
+  "totalMapped": 102433,
   "excluidos": [],
   "regresos": [
     {
