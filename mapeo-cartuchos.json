@@ -26,7 +26,8 @@
     "2118": 2300,
     "2120": 1425,
     "2126": 500,
-    "2127": 2000
+    "2127": 2000,
+    "2128": 100
   },
   "precios": {
     "2004": 8.96,
@@ -55,21 +56,14 @@
     "2118": 10.76,
     "2120": 16.42,
     "2126": 13.8,
-    "2127": 11.89
+    "2127": 11.89,
+    "2128": 5.38
   },
   "factores": [
     0.996556,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 23,
-      "name": "CARTS CAL.9 mm MK FEDERAL FMJ 90 GR",
-      "priceN": 5.38,
-      "qty": 100,
-      "desc": "CARTUCHO CAL. 9mm. MAKAROV MARCA FEDERAL AMERICAN EAGLE F.M.J. DE 90 GR. COD. AE9MK"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2074,
@@ -94,7 +88,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 77948,
-  "totalMapped": 77848,
+  "totalMapped": 77948,
   "excluidos": [],
   "regresos": [],
   "regresosRechazados": [],
