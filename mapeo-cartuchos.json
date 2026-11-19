@@ -7,6 +7,7 @@
     "2026": 1292,
     "2028": 20,
     "2030": 1300,
+    "2032": 25000,
     "2033": 2790,
     "2034": 4300,
     "2035": 7300,
@@ -27,7 +28,8 @@
     "2118": 1825,
     "2120": 7150,
     "2126": 500,
-    "2127": 1000
+    "2127": 1000,
+    "2129": 5000
   },
   "precios": {
     "2004": 8.96,
@@ -37,6 +39,7 @@
     "2026": 50.99,
     "2028": 23.78,
     "2030": 28.16,
+    "2032": 10.93,
     "2033": 14.57,
     "2034": 11.14,
     "2035": 12.09,
@@ -57,28 +60,14 @@
     "2118": 10.71,
     "2120": 16.25,
     "2126": 13.66,
-    "2127": 11.77
+    "2127": 11.77,
+    "2129": 12.43
   },
   "factores": [
     0.995392,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 4,
-      "name": "CARTUCHO CALIBRE 0.380\" AUTO, MARCA PMC,",
-      "priceN": 10.93,
-      "qty": 25000,
-      "desc": "CARTUCHO CALIBRE 0.380” AUTO, MARCA PMC, BRONZE, 90 GRAINS, FULL METAL JACKET (FMJ)."
-    },
-    {
-      "idx": 5,
-      "name": "CART.CAL.0.38\"SPL,MARCA PMC, 132 GRAINS",
-      "priceN": 12.43,
-      "qty": 5000,
-      "desc": "CARTUCHO CALIBRE 0.38” SPL, MARCA PMC, BRONZE, 132 GRAINS, FULL METAL JACKET (FMJ)."
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2051,
@@ -98,7 +87,7 @@
   ],
   "revisarPrecio": [],
   "totalPdf": 124688,
-  "totalMapped": 94688,
+  "totalMapped": 124688,
   "excluidos": [],
   "regresos": [
     {
@@ -115,21 +104,7 @@
       "tramo": 4
     }
   ],
-  "regresosRechazados": [
-    {
-      "idx": 4,
-      "name": "CARTUCHO CALIBRE 0.380\" AUTO, MARCA PMC,",
-      "priceN": 10.93,
-      "fichaId": 2032,
-      "fechaAntes": "2026-07-06",
-      "antes": 9.33,
-      "razon": 1.17149,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 13,
-      "general": 1.056665,
-      "tramo": 0
-    }
-  ],
+  "regresosRechazados": [],
   "gemelos": [],
   "sinDueno": []
 }
