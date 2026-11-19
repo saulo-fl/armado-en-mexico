@@ -7,91 +7,129 @@
     "2026": 1292,
     "2028": 20,
     "2030": 1300,
-    "2033": 3390,
+    "2033": 2790,
     "2034": 4300,
     "2035": 7300,
-    "2037": 4150,
     "2042": 14400,
     "2043": 7620,
     "2044": 35,
-    "2050": 650,
-    "2051": 10,
-    "2057": 525,
-    "2061": 475,
-    "2075": 1900,
+    "2050": 450,
+    "2057": 3000,
+    "2061": 3000,
+    "2074": 3000,
+    "2075": 400,
+    "2080": 3000,
     "2092": 400,
-    "2096": 450,
+    "2096": 3000,
     "2103": 6600,
-    "2117": 2750,
-    "2118": 2300,
-    "2120": 1425,
+    "2112": 3000,
+    "2117": 5250,
+    "2118": 1825,
+    "2120": 7150,
     "2126": 500,
-    "2127": 2000,
-    "2128": 100
+    "2127": 1000
   },
   "precios": {
     "2004": 8.96,
     "2019": 8.96,
-    "2021": 26.04,
-    "2024": 23.89,
-    "2026": 51.22,
-    "2028": 23.89,
+    "2021": 25.92,
+    "2024": 23.78,
+    "2026": 50.99,
+    "2028": 23.78,
     "2030": 28.16,
-    "2033": 14.63,
-    "2034": 11.19,
+    "2033": 14.57,
+    "2034": 11.14,
     "2035": 12.09,
-    "2037": 7.32,
-    "2042": 24.53,
-    "2043": 32.07,
-    "2044": 11.62,
-    "2050": 26.04,
-    "2051": 26.04,
-    "2057": 13.8,
-    "2061": 10.23,
-    "2075": 11.84,
-    "2092": 30.77,
-    "2096": 15.7,
+    "2042": 24.42,
+    "2043": 31.92,
+    "2044": 11.57,
+    "2050": 25.92,
+    "2057": 13.66,
+    "2061": 10.12,
+    "2074": 10.12,
+    "2075": 11.78,
+    "2080": 9.89,
+    "2092": 30.63,
+    "2096": 15.54,
     "2103": 8.96,
-    "2117": 10.76,
-    "2118": 10.76,
-    "2120": 16.42,
-    "2126": 13.8,
-    "2127": 11.89,
-    "2128": 5.38
+    "2112": 11.54,
+    "2117": 10.71,
+    "2118": 10.71,
+    "2120": 16.25,
+    "2126": 13.66,
+    "2127": 11.77
   },
   "factores": [
-    0.996556,
+    0.995392,
     1.0
   ],
-  "sinFicha": [],
+  "sinFicha": [
+    {
+      "idx": 4,
+      "name": "CARTUCHO CALIBRE 0.380\" AUTO, MARCA PMC,",
+      "priceN": 10.93,
+      "qty": 25000,
+      "desc": "CARTUCHO CALIBRE 0.380” AUTO, MARCA PMC, BRONZE, 90 GRAINS, FULL METAL JACKET (FMJ)."
+    },
+    {
+      "idx": 5,
+      "name": "CART.CAL.0.38\"SPL,MARCA PMC, 132 GRAINS",
+      "priceN": 12.43,
+      "qty": 5000,
+      "desc": "CARTUCHO CALIBRE 0.38” SPL, MARCA PMC, BRONZE, 132 GRAINS, FULL METAL JACKET (FMJ)."
+    }
+  ],
   "sinPrecio": [
     {
-      "fichaId": 2074,
-      "refName": "CART. CAL. 12GA RIO GAME LOAD-32 32GR P4",
-      "refPrice": 10.3
+      "fichaId": 2051,
+      "refName": "CART. CAL 30-06 SPRG AGUILA 150GR SP",
+      "refPrice": 26.04
     },
     {
-      "fichaId": 2078,
-      "refName": "CART. CAL. 12 SAGA ELITE 28 GR MUN. 7.5",
-      "refPrice": 10.54
+      "fichaId": 2037,
+      "refName": "CARTS CAL.9 mm CCI-SPEER LAWN FMJ 115GR",
+      "refPrice": 7.32
     },
     {
-      "fichaId": 2112,
-      "refName": "CARTUCHO CAL 12 SAGA SPORTING 32 M7.5",
-      "refPrice": 11.74
-    },
-    {
-      "fichaId": 2119,
-      "refName": "CART.MARC.FIOCCHI, CAL.12 GA, 7.5, 32 GR",
-      "refPrice": 10.8
+      "fichaId": 2128,
+      "refName": "CARTS CAL.9 mm MK FEDERAL FMJ 90 GR",
+      "refPrice": 5.38
     }
   ],
   "revisarPrecio": [],
-  "totalPdf": 77948,
-  "totalMapped": 77948,
+  "totalPdf": 124688,
+  "totalMapped": 94688,
   "excluidos": [],
-  "regresos": [],
-  "regresosRechazados": [],
+  "regresos": [
+    {
+      "idx": 13,
+      "name": "CART.CAL. 12G.A.SAGA EXPORT 32, 32GR,M7.",
+      "priceN": 9.89,
+      "fichaId": 2080,
+      "fechaAntes": "2026-11-06",
+      "antes": 10.23,
+      "razon": 0.966764,
+      "motivo": "mismo aumento que 4 fichas de su tramo",
+      "apoyos": 24,
+      "general": 0.986718,
+      "tramo": 4
+    }
+  ],
+  "regresosRechazados": [
+    {
+      "idx": 4,
+      "name": "CARTUCHO CALIBRE 0.380\" AUTO, MARCA PMC,",
+      "priceN": 10.93,
+      "fichaId": 2032,
+      "fechaAntes": "2026-07-06",
+      "antes": 9.33,
+      "razon": 1.17149,
+      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
+      "apoyos": 13,
+      "general": 1.056665,
+      "tramo": 0
+    }
+  ],
   "gemelos": [],
   "sinDueno": []
 }
