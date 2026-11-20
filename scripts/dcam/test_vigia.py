@@ -502,6 +502,41 @@ def test_otca_nuevo_escribe_su_senal_y_no_la_de_dcam():
         assert "señal OTCA escrita" in msgs[-1]["texto"] and "sin señal" in msgs[-1]["texto"], msgs[-1]["texto"]
 
 
+def test_fecha_senal_usa_la_del_pdf():
+    # 19-nov-2026: a las 10:00 el vigía bajó los PDFs del 18 y los fechó con el día de lectura.
+    ahora = datetime(2026, 11, 19, 10)
+    del18 = lambda p: datetime(2026, 11, 18)
+    assert vigia.fecha_senal([Path("a"), Path("b")], ahora, leer=del18) == "18-NOV-2026"
+    assert vigia.fecha_senal([Path("a")], ahora, leer=lambda p: None) == "19-NOV-2026"
+    mixtas = {Path("a"): datetime(2026, 11, 18), Path("b"): datetime(2026, 11, 19)}
+    assert vigia.fecha_senal(list(mixtas), ahora, leer=mixtas.get) == "19-NOV-2026"
+
+
+def test_regex_del_encabezado():
+    m = vigia._CIERRE.search("EXISTENCIA DE ARMAS\nal cierre del día 18/ 11/ 2026\nLAS EXISTENCIAS")
+    assert m and m.groups() == ("18", "11", "2026"), m
+    assert vigia._CIERRE.search("AL CIERRE DEL DIA 3/1/2027").groups() == ("3", "1", "2027")
+
+
+def test_senal_lleva_la_fecha_del_pdf():
+    orig = vigia.fecha_del_pdf
+    vigia.fecha_del_pdf = lambda p: datetime(2026, 9, 14)
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            paginas = {vigia.PAGINAS["comercializacion"]: COM, vigia.PAGINAS["costos"]: COS}
+            archivos = _archivos_de(COM)
+            vigia.correr(_bajador(paginas, archivos), base, datetime(2026, 9, 14, 20), reintento_seg=0)
+            u = next(u for u in archivos if "1103069" in u)
+            archivos2 = dict(archivos); archivos2[u] = b"CONTENIDO NUEVO"
+            codigo, msgs = vigia.correr(_bajador(paginas, archivos2), base, datetime(2026, 9, 15, 10), reintento_seg=0)
+            s = vigia.cargar_estado(base / "pendiente-conciliar.json")
+            assert s["fecha"] == "14-SEP-2026", s
+            assert "(inventario del 14-SEP-2026, según el PDF)" in msgs[-1]["texto"], msgs[-1]["texto"]
+    finally:
+        vigia.fecha_del_pdf = orig
+
+
 if __name__ == "__main__":
     pruebas = [f for n, f in sorted(globals().items()) if n.startswith("test_")]
     for f in pruebas:

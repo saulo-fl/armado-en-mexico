@@ -121,3 +121,52 @@ test('prep usa categoria_pdf y su fallo llega al aviso con motivo', () => {
   assert.doesNotMatch(prep, /tr '\[:upper:\]' '\[:lower:\]'/, 'sigue el tag arbitrario por nombre');
   assert.match(s, /\nstep_prep \|\| falla "[^"\n]*\$\{MOTIVO/);
 });
+
+// ── Fecha del PDF (19-nov-2026: los PDFs del 18 se conciliaron como del 19) ──
+function fechaPdf(encabezado) {
+  const t = fs.mkdtempSync(path.join(os.tmpdir(), 'dcam-fecha-'));
+  const pdf = path.join(t, 'x.pdf');
+  fs.writeFileSync(pdf, '%PDF-1.4\n');
+  if (encabezado !== undefined) fs.writeFileSync(`${pdf}.txt`, encabezado);
+  const out = bash(`${funcion('fecha_pdf')}
+declare -F fecha_pdf >/dev/null || { echo SIN_FUNCION; exit 99; }
+echo "f=[$(fecha_pdf "$T/x.pdf")]"`, t);
+  return (out.match(/^f=\[(.*)\]$/m) || [null, `SALIDA: ${out}`])[1];
+}
+
+test('fecha_pdf lee «al cierre del día 18/ 11/ 2026» (con espacios, con o sin acento)', () => {
+  assert.equal(fechaPdf(ENC('ARMAS').replace('03/ 11/ 2026', '18/ 11/ 2026')), '2026-11-18');
+  assert.equal(fechaPdf('EXISTENCIA DE ARMAS\nal cierre del dia 3/11/2026\n'), '2026-11-03');
+  assert.equal(fechaPdf('EXISTENCIA DE ARMAS\nAL CIERRE DEL DÍA 09 / 1 / 2027\n'), '2027-01-09');
+});
+
+test('fecha_pdf sin encabezado legible → vacío (prep sigue con la fecha de la señal)', () => {
+  assert.equal(fechaPdf(), '');
+  assert.equal(fechaPdf('EXISTENCIA DE ARMAS\nsin fecha\n'), '');
+});
+
+function prep(encabezado) {
+  const t = fs.mkdtempSync(path.join(os.tmpdir(), 'dcam-prep-'));
+  const pdf = path.join(t, '1116983_ARMAS18.pdf');
+  fs.writeFileSync(pdf, '%PDF-1.4\n');
+  fs.writeFileSync(`${pdf}.txt`, encabezado);
+  // git y parse_pdf falsos: el paso debe pararse ANTES de parsear si la fecha no cuadra.
+  return bash(`WORKDIR="$T"; VENV=true; SCRIPTS="$T"; RAMA=auto/x; GH_REPO=o/r; PDFS="$T/1116983_ARMAS18.pdf"; mkdir -p "$T/public/inventarios"
+git(){ return 0; }; gh(){ return 0; }
+${funcion('categoria_pdf')}
+${funcion('fecha_pdf')}
+${funcion('step_prep')}
+cd "$T"; step_prep; echo "rc=$?"; echo "motivo=$MOTIVO"; echo "--log"; cat "$LOG"`, t);
+}
+
+test('prep frena un PDF de otro día con motivo (señal 03-NOV, PDF del 02)', () => {
+  const out = prep(ENC('ARMAS').replace('03/ 11/ 2026', '02/ 11/ 2026'));
+  assert.match(out, /^rc=1$/m, out);
+  assert.match(out, /^motivo=PDF 1116983_ARMAS18\.pdf es del 2026-11-02 y la señal dice 03-NOV-2026/m, out);
+});
+
+test('prep con la fecha correcta no se frena por la fecha', () => {
+  const out = prep(ENC('ARMAS'));
+  assert.doesNotMatch(out, /es del .* y la señal dice/, out);
+  assert.match(out, /parseado armas/, out);   // pasó la fecha y llegó a parsear
+});

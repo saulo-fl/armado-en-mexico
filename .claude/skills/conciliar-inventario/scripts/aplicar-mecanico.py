@@ -186,6 +186,22 @@ def quitar_registros_dia(content, marcador, manual_id):
 # 1) Register manuals
 # ═══════════════════════════════════════════════════════════════════════════════
 
+def rehacer_si_ya_hay(content, marcador, manual_id, rehacer, cat):
+    """Si el historial ya trae registros de esta fecha, siempre se rehace.
+
+    Sin esto, una segunda corrida con la misma fecha (19-nov-2026: primero los PDFs del 18
+    fechados como 19, luego los del 19) actualizaba existencias pero saltaba los registros
+    por idempotencia, y el precio principal («último registro») volvía a los del PDF anterior:
+    datos a medias sin aviso. Con la misma entrada, rehacer da el mismo resultado."""
+    if rehacer:
+        return True
+    span = _span_bloque(content, marcador)
+    if span and re.search(r"manualId:\s*'" + re.escape(manual_id) + "'", content[span[0]:span[1]]):
+        eprint(f"  [{cat}] ya había registros de {manual_id}: se reemplazan (--rehacer automático)")
+        return True
+    return False
+
+
 def register_manual_armas(content, fecha, manual_id, dry_run=False):
     """Agrega entrada a AMX_MANUALES_SEED en data-precios.js."""
     if f"id: '{manual_id}'" in content:  # no basta con que aparezca en una ficha
@@ -482,6 +498,7 @@ def process_armas(mapeo, fecha, manual_id, data_dir, dry_run, rehacer=False):
     precios_path = Path(data_dir) / "data-precios.js"
     precios_content = read_file(precios_path)
     quitados = {}
+    rehacer = rehacer_si_ya_hay(precios_content, 'window.AMX_PRICE_HISTORY_SEED', manual_id, rehacer, "armas")
     if rehacer:
         precios_content, quitados = quitar_registros_dia(
             precios_content, 'window.AMX_PRICE_HISTORY_SEED', manual_id)
@@ -562,6 +579,7 @@ def process_cartuchos(mapeo, fecha, data_dir, dry_run, rehacer=False):
     mun_path = Path(data_dir) / "data-municiones.js"
     content = read_file(mun_path)
     quitados = {}
+    rehacer = rehacer_si_ya_hay(content, 'window.MUNICIONES_PRICE_HISTORY', fecha_to_manual_id(fecha, "man_mun_dcam"), rehacer, "cartuchos")
     if rehacer:
         content, quitados = quitar_registros_dia(
             content, 'window.MUNICIONES_PRICE_HISTORY', fecha_to_manual_id(fecha, "man_mun_dcam"))
@@ -610,6 +628,7 @@ def process_accesorios(mapeo, fecha, data_dir, dry_run, rehacer=False):
 
     acc_path = Path(data_dir) / "data-accesorios.js"
     content = read_file(acc_path)
+    rehacer = rehacer_si_ya_hay(content, 'window.ACCESORIOS_PRICE_HISTORY', fecha_to_manual_id(fecha, "man_acc"), rehacer, "accesorios")
     if rehacer:
         content, quitados = quitar_registros_dia(
             content, 'window.ACCESORIOS_PRICE_HISTORY', fecha_to_manual_id(fecha, "man_acc"))
