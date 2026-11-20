@@ -10,7 +10,7 @@ const documentos = [...Object.values(corpus.fuentes), ...corpus.documentosComple
 
 test('cada PDF anunciado en el índice existe y contiene un PDF real', () => {
   const locales = documentos.filter((d) => d.archivoLocal);
-  assert.equal(locales.length, 19);
+  assert.equal(locales.length, 20);
   const rutas = new Set();
   for (const d of locales) {
     assert.equal(d.pdf, true, d.titulo);

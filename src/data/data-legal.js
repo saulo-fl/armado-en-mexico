@@ -52,9 +52,9 @@
         { id: 'que-armas', pregunta: '¿Qué armas puede tener una persona común?',
           texto: 'Puedes tener un arma en tu casa para defenderte {{cpeum}}. Pero no cualquiera: a los civiles solo se les permiten pistolas de calibre .380 o menor y revólveres de hasta .38 Especial. Las 9 mm, las .38 Súper, las .357, los rifles .223 y las armas automáticas son del Ejército y nunca se autorizan a un civil. Si practicas tiro o caza en un club registrado, puedes tener además rifles y escopetas deportivas, hasta diez armas. Desde 2025 también están prohibidas las armas impresas en 3D, las hechizas y las réplicas {{lfafe}}.' },
         { id: 'donde', pregunta: '¿Dónde puede estar el arma?',
-          texto: 'Solo en el domicilio que declaraste ante la Defensa, y cada persona declara uno solo {{lfafe}}. Si la compras en la DCAM, sale ya registrada {{dcam}}. Para tener más de dos armas en la misma casa tienes que justificarlo {{reglamento-lfafe}}. Tener más de cinco sin permiso especial ya es delito, con cárcel de uno a siete años {{lfafe}}.' },
+          texto: 'Solo en el domicilio que declaraste ante la Defensa, y cada persona declara uno solo {{lfafe}}. Si la compras en la DCAM, sale ya registrada {{dcam}}. Para tener más de dos armas en la misma casa tienes que justificarlo {{reglamento-lfafe-2026}}. Tener más de cinco sin permiso especial ya es delito, con cárcel de uno a siete años {{lfafe}}.' },
         { id: 'portar', pregunta: '¿Puedo llevarla conmigo fuera de casa?',
-          texto: 'No, salvo que tengas licencia de portación. Sin ella, llevarla en la calle o en el coche es delito: de tres a ocho años de cárcel {{lfafe}}. La licencia es un trámite aparte, cuesta $6,359 y se renueva cada año; la Defensa la da solo si considera que la necesitas, así que cumplir los requisitos no garantiza que te la den {{lfd}}. Para ir al club de tiro o de caza basta un permiso de transportación, siempre con el arma descargada {{reglamento-lfafe}}.' },
+          texto: 'No, salvo que tengas licencia de portación. Sin ella, llevarla en la calle o en el coche es delito: de tres a ocho años de cárcel {{lfafe}}. La licencia es un trámite aparte, cuesta $6,359 y se renueva cada año; la Defensa la da solo si considera que la necesitas, así que cumplir los requisitos no garantiza que te la den {{lfd}}. Para ir al club de tiro o de caza basta un permiso de transportación, siempre con el arma descargada {{reglamento-lfafe-2026}}.' },
         { id: 'comprar', pregunta: '¿Dónde se compra?',
           texto: 'Solo en la tienda de la Defensa: la DCAM, en Naucalpan, o la OTCA, en Monterrey, si vives en Coahuila, Nuevo León, San Luis Potosí o Tamaulipas {{dcam}}. La venta por internet está prohibida. Comprarle a un particular solo es legal con permiso; si compras un arma sin poder demostrar de dónde salió, la pena es de seis a diez años de cárcel {{lfafe}}.' },
         { id: 'cartuchos', pregunta: '¿Cuántas balas puedo comprar?',
@@ -108,15 +108,30 @@
         ultimaReforma: '2025-05-29',
         fechaConsulta: '2026-09-19',
       },
+      // El Reglamento vigente. Se publicó el 20-11-2026 y abrogó al de 1972, que se
+      // conserva abajo (`reglamento-lfafe`) solo porque las fichas `reg-*` y varios
+      // fundamentos todavía describen ese texto: se reescriben contra este en un cambio
+      // aparte. El PDF es el de la edición del DOF; su texto se cotejó contra la nota
+      // oficial 5804497 (129 artículos y seis transitorios, sin diferencias).
+      'reglamento-lfafe-2026': {
+        titulo: 'Reglamento de la Ley Federal de Armas de Fuego y Explosivos (DOF 20-11-2026, vigente)',
+        emisor: 'Diario Oficial de la Federación',
+        nivel: 1,
+        url: 'https://dof.gob.mx/nota_detalle.php?codigo=5804497&fecha=20/11/2026',
+        archivoLocal: 'documentos-legales/reglamento-lfafe-2026.pdf',
+        pdf: true,
+        fechaConsulta: '2026-11-20',
+        nota: 'Decreto publicado en el DOF el 20-11-2026 (nota 5804497), en vigor desde el 21-11-2026. Su transitorio Sexto abroga el Reglamento del 06-05-1972.',
+      },
       'reglamento-lfafe': {
-        titulo: 'Reglamento de la Ley Federal de Armas de Fuego y Explosivos',
+        titulo: 'Reglamento de la Ley Federal de Armas de Fuego y Explosivos de 1972 (abrogado el 21-11-2026)',
         emisor: 'Cámara de Diputados del H. Congreso de la Unión',
         nivel: 1,
         url: 'https://www.diputados.gob.mx/LeyesBiblio/regley/Reg_LFAFE.pdf',
         archivoLocal: 'documentos-legales/reglamento-lfafe.pdf',
         pdf: true,
-        fechaConsulta: '2026-09-19',
-        nota: 'Nuevo Reglamento publicado en el DOF el 06-05-1972. El texto vigente que publica la Cámara de Diputados no registra una sola reforma en 54 años.',
+        fechaConsulta: '2026-11-20',
+        nota: 'Publicado en el DOF el 06-05-1972 y sin una sola reforma en 54 años. Abrogado por el transitorio Sexto del Reglamento publicado el 20-11-2026, en vigor desde el 21-11-2026. Se conserva como referencia histórica. La URL de la Cámara de Diputados es la del «texto vigente»: cuando la Cámara la actualice servirá el Reglamento nuevo, y la copia de 1972 quedará solo en el PDF local.',
       },
       lfd: {
         titulo: 'Ley Federal de Derechos',
@@ -470,12 +485,12 @@
         rango: 'reglamento',
         rotulo: 'Reglamento',
         titulo: 'Reglamento de la Ley Federal de Armas de Fuego y Explosivos',
-        resumen: 'Explica cómo se cumple la ley en la ventanilla: cómo se manifiesta un arma, con qué papel se acredita cada requisito de la licencia, cómo se venden y transportan las armas. Sigue siendo el publicado el 6 de mayo de 1972 y no tiene ni una sola reforma.',
-        fuente: 'reglamento-lfafe',
+        resumen: 'Explica cómo se cumple la ley en la ventanilla: cómo se manifiesta un arma, con qué papel se acredita cada requisito de la licencia, cómo se venden y transportan las armas. El vigente se publicó en el DOF el 20 de noviembre de 2026, entró en vigor al día siguiente y abrogó el del 6 de mayo de 1972.',
+        fuente: 'reglamento-lfafe-2026',
         articulos: ['reg-11', 'reg-15', 'reg-21', 'reg-25', 'reg-30', 'reg-54'],
-        notaVigencia: 'CONFLICTO ABIERTO. El transitorio Tercero del decreto de 2025 dio 180 días al Ejecutivo para actualizar el Reglamento; el plazo venció hacia el 25-26 de noviembre de 2025 y no se ha publicado uno nuevo. El transitorio Cuarto lo mantiene aplicable solo «en lo que no se oponga» a la ley, de modo que hoy conviven una ley de 2025 y un reglamento de 1972: hay artículos reglamentarios que ya remiten a una numeración y a autoridades que la reforma cambió o derogó. Léelo siempre con esa advertencia.',
+        notaVigencia: 'REGLAMENTO NUEVO. El decreto publicado en el DOF el 20-11-2026 expidió un Reglamento de 129 artículos, en vigor desde el 21-11-2026, y su transitorio Sexto abrogó el del 6 de mayo de 1972. Con eso se cierra el conflicto que dejó la reforma de 2025, cuyo transitorio Tercero había dado 180 días para actualizarlo. Las seis fichas de artículos de esta norma todavía describen el texto de 1972.',
         revisar: true,
-        nota: 'Falta el mapeo artículo por artículo de qué partes del Reglamento de 1972 quedaron desplazadas por la ley reformada. Solo está verificado el conflicto general, no la lista completa.',
+        nota: 'Las fichas reg-11 a reg-54 y los fundamentos que citan «el Reglamento» describen el texto de 1972, abrogado el 21-11-2026. Falta reescribirlos contra el Reglamento de 2026 (equivalencias: 11→17, 21 y 22; 15→26; 21→34; 25→38; 30→45 y 46; 54→82, que además cambió de fondo: permiso extraordinario presencial y candado de un año).',
       },
       {
         id: 'acuerdo-medico',
