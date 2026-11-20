@@ -1,6 +1,7 @@
 {
   "existencias": {
     "1": 10,
+    "2": 30,
     "3": 35,
     "5": 1,
     "7": 3,
@@ -9,6 +10,7 @@
     "10": 47,
     "11": 3,
     "15": 2,
+    "18": 80,
     "19": 34,
     "20": 19,
     "21": 12,
@@ -141,6 +143,7 @@
   },
   "precios": {
     "1": 11129.46,
+    "2": 10925.3,
     "3": 17279.42,
     "5": 10084.39,
     "7": 12619.28,
@@ -149,6 +152,7 @@
     "10": 35838.31,
     "11": 12001.28,
     "15": 18648.29,
+    "18": 14443.75,
     "19": 10666.85,
     "20": 10265.15,
     "21": 11871.94,
@@ -283,29 +287,7 @@
     1.018996,
     1.021784
   ],
-  "sinFicha": [
-    {
-      "idx": 117,
-      "name": "PISTOLA CAL .380 TAURUS PT58 PLUS PAVON",
-      "priceN": 10925.3,
-      "qty": 30,
-      "desc": "PISTOLA DE FUEGO CENTRAL CALIBRE 0.380\" MARCA TAURUS MODELO PT 58 HC PLUS, COLOR PAVON CON 3 CARGADORES CON CAPACIDAD DE"
-    },
-    {
-      "idx": 186,
-      "name": "PISTOLA 22 LR SIG SAUER P322 COYOTE",
-      "priceN": 14976.71,
-      "qty": 40,
-      "desc": "PISTOLA CALIBRE .22” LR MARCA SIG SAUER, MODELO P322, COLOR COYOTE, MIRAS TRASERAS Y DELANTERAS ÓPTICAS, CON 2 CARGADORE"
-    },
-    {
-      "idx": 187,
-      "name": "PISTOLA 22 LR SIG SAUER P322 NIT. NEG.",
-      "priceN": 12217.8,
-      "qty": 40,
-      "desc": "PISTOLA CALIBRE .22” LR MARCA SIG SAUER, MODELO P322, ACABADO NITRON NEGRO, MIRAS TRASERAS Y DELANTERAS ÓPTICAS, CON 2 C"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [],
   "revisarPrecio": [
     {
@@ -315,27 +297,21 @@
       "precio": 26748.71,
       "ultimo": 24990.49,
       "motivo": "encadenado"
+    },
+    {
+      "fichaId": 18,
+      "dcamRef": "PISTOLA 22 LR SIG SAUER P322 NIT NEG",
+      "renglon": "PISTOLA 22 LR SIG SAUER P322 NIT. NEG.",
+      "precio": 12217.8,
+      "ultimo": 14443.75,
+      "motivo": "nombre exacto"
     }
   ],
   "totalPdf": 1384,
-  "totalMapped": 1254,
+  "totalMapped": 1364,
   "excluidos": [],
   "regresos": [],
-  "regresosRechazados": [
-    {
-      "idx": 187,
-      "name": "PISTOLA 22 LR SIG SAUER P322 NIT. NEG.",
-      "priceN": 12217.8,
-      "fichaId": 18,
-      "fechaAntes": "2026-07-06",
-      "antes": 14443.75,
-      "razon": 0.845888,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 82,
-      "general": 1.088763,
-      "tramo": 0
-    }
-  ],
+  "regresosRechazados": [],
   "gemelos": [],
   "sinDueno": [
     {
