@@ -117,7 +117,7 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
   assert.doesNotMatch(t2, /\b0\d · /, 'volvieron los peldaños numerados');
   assert.doesNotMatch(t2, /resumen y cita/, 'volvieron las fichas de artículos');
   assert.doesNotMatch(t2, /\{\{/, 'una nota al pie salió cruda, sin convertir');
-  // Tres folders exactos y doce plegables dentro (5 preguntas + 6 trámites) más el de
+  // Tres folders exactos y trece plegables dentro (6 preguntas + 6 trámites) más el de
   // «Más documentos» en Fuentes; un solo botón, el de la entrevista (el arnés no carga
   // ui.jsx, así que ReportarError no cuenta).
   const conClase = (nodo, clase, n = { v: 0 }) => {
@@ -129,7 +129,7 @@ test('LegalidadHub pinta sin reventar, con los datos reales', (t) => {
     return n.v;
   };
   assert.equal(conClase(arbol, 'amx-leg-folder'), 3, 'el cajón lleva exactamente tres folders');
-  assert.equal(conClase(arbol, 'amx-leg-plegable'), 12, 'van doce plegables');
+  assert.equal(conClase(arbol, 'amx-leg-plegable'), 13, 'van trece plegables');
   // Cada nota [n] tiene su entrada en Fuentes, y ninguna entrada sobra.
   const refs = win.amxReferencias(C);
   assert.ok(refs.length >= 5, 'la página cita muy pocas fuentes: ' + refs.length);
@@ -182,7 +182,7 @@ test('Lo que permite la ley responde cada pregunta en llano, sin publicar huecos
   if (!win.LegalidadFederal) return t.skip('pantalla aún no escrita');
   const t2 = texto(win.LegalidadFederal({ onNav: () => {} }));
   const C = win.AMX_LEGAL;
-  assert.ok(C.explicado.ley.length === 5, 'son cinco preguntas');
+  assert.ok(C.explicado.ley.length === 6, 'son seis preguntas');
   for (const p of C.explicado.ley) {
     const plano = win.amxPartirCitas(p.texto)[0].texto;
     assert.ok(t2.replace(/\s+/g, ' ').includes(plano.slice(0, 60)), 'no se pinta la respuesta a «' + p.pregunta + '»');

@@ -27,16 +27,19 @@ copian aqui porque caducan: las da el juez, `node scripts/check-legal.mjs`.
   migratoria FM2»— **manda la ley**, y el conflicto queda escrito en `notaVigencia`
   (decision de Saulo, 19-sep-2026).
 - **El Reglamento es el del 20 de noviembre de 2026** (DOF, nota 5804497; en vigor desde el
-  21-nov-2026). Su transitorio Sexto abrogo el de 1972. Las fichas `reg-*` y los fundamentos
-  que citan «el Reglamento» todavia describen el texto de 1972: estan marcados en la norma
-  `reglamento` (`revisar`) y pendientes de reescribirse contra el nuevo.
+  21-nov-2026). Su transitorio Sexto abrogo el de 1972. El 20-nov-2026 se reescribieron contra
+  el las fichas `reg-*`, los requisitos, la entrevista y las FAQ. Los formatos y fichas de
+  gob.mx son anteriores: donde piden menos o algo distinto, **manda el Reglamento** y el
+  texto lo dice (decision de Saulo, 20-nov-2026). El Reglamento remite formatos y
+  especificaciones a un Manual de Servicios al Publico (art. 122) que aun no se publica:
+  cuando salga, o cuando gob.mx actualice las fichas, hay que volver a cotejar.
 - **Trampa medida:** el PDF vigente del formato (edicion Civiles 2026) conserva en el pie la
   leyenda «Mayo de 2021». La fecha del pie no dice que edicion es; hay que comparar el punto 5
   del instructivo, que es donde cambiaron las cantidades de cartuchos y los periodos.
 - Las cuotas de $490 y $201 son de 2026 y **caducan el 1 de enero de 2027**: el juez lo avisa
   solo, porque cada costo lleva su `anio`.
 
-## Los 18 huecos, y por que
+## Los huecos, y por que
 
 Ninguno se renderiza como afirmacion. Salen listados en el hub de Legalidad, bajo «que falta
 por verificar», con su nota.
@@ -45,7 +48,6 @@ por verificar», con su nota.
 |---|---|---|
 | `fuente` | `acuerdo-medico-2021` | HUECO — No se pudo leer el texto íntegro: dof.gob.mx, diariooficial.gob.mx y sidof.segob.gob.mx rechazaron la conexión durante la investigación. Faltan: qué exámenes exige exactamente, quién puede aplicarlos y la vigencia del certificado. Recuperarlo desde APOLO con la nota DOF código 5616435 del 21-04-2021 y volver a fundamentar con la URL oficial. |
 | `fuente` | `acuerdo-simplificacion-2026` | HUECO CRÍTICO — Nota SIDOF 5789879 (posible nota relacionada 5784083 del 06-04-2026), sin fecha exacta ni texto confirmado. Podría eliminar requisitos del DEFENSA-02-040 y del DEFENSA-02-062 (CURP impresa, acta de nacimiento, escritos libres). Verificarlo en el DOF antes de publicar la lista de requisitos. |
-| `normas` | `reglamento` | Las fichas reg-11 a reg-54 y los fundamentos que citan «el Reglamento» describen el texto de 1972, abrogado el 21-11-2026. Falta reescribirlos contra el Reglamento de 2026. |
 | `normas` | `acuerdo-medico` | HUECO — No se pudo abrir el texto en el DOF durante la investigación (código 5616435, 21-04-2021). Quedan sin verificar los exámenes exactos que exige, quién puede aplicarlos y la vigencia del certificado. Lo que sí está verificado es que el formato SEDENA-02-040 lo cita como fundamento de su requisito 4. |
 | `normas` | `formato-02040` | Decidir caso por caso qué se publica del formato de 2021 y qué se corrige contra la ley de 2025. Los conflictos concretos están marcados en los límites de cada trámite y en las variantes de cada requisito. |
 | `normas` | `acuerdo-simplificacion` | HUECO CRÍTICO — Sin fecha de publicación confirmada ni texto (nota SIDOF 5789879). La ficha oficial del DEFENSA-02-040 consultada el 19-09-2026 todavía pide CURP y acta de nacimiento, es decir, aún no refleja la simplificación. Verificar en el DOF antes de publicar. |
@@ -56,7 +58,6 @@ por verificar», con su nota.
 | `limite` | `ra-lim-costo-viejo` | Confirmar que la ficha oficial ya no publica el importe de $47.00 antes de citar la contradicción en el sitio. |
 | `limite` | `ra-lim-avisos` | Lectura resumida de la página oficial, no transcripción literal. Confirmar el texto exacto de cada aviso antes de publicarlo. |
 | `limite` | `pt-lim-alcance` | Confirmar con un formato o pliego posterior a 2025 antes de publicar estas cifras como vigentes. |
-| `limite` | `pt-lim-vigencia` | HUECO EN LA DURACION. La ficha oficial no publica cuantos meses dura. Saulo aporta que es de un anio y que para tiro deportivo y competencia nacional corre por anio calendario, del 1 de enero al 31 de diciembre; no se hallo fuente oficial que lo diga, asi que no se publica como afirmacion hasta confirmarlo. El formato RFA-LC-017 de 2010 deja que el solicitante indique el periodo, con un minimo de 15 dias desde la solicitud. |
 | `variante` | `pa-smn/extranjero` | Se corrige la terminologia obsoleta del formato conforme a la Ley de Migracion. Queda por confirmar que condicion de estancia exige en ventanilla la DGRFAFyCE para ADQUIRIR: el art. 27 de la LFAFE exige residente permanente, pero ese articulo regula la PORTACION, no la adquisicion. Falta tambien fijar la URL de la Ley de Migracion en el catalogo de fuentes. |
 | `variante` | `dc-identificacion/extranjero` | HUECO — El pliego de la DCAM para personal civil solo enumera credencial para votar, pasaporte, cartilla del SMN y cédula profesional. No dice qué identificación admite de una persona extranjera residente. Preguntar en la DCAM antes de afirmarlo. |
 | `variante` | `lp-smn/militar` | HUECO — No se verificó qué documento sustituye a la cartilla para el personal militar en activo o en retiro en este trámite. |
