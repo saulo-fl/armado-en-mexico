@@ -18,6 +18,8 @@ import hashlib
 import http.client
 import json
 import os
+import re
+import subprocess
 import sys
 import tempfile
 import time
@@ -195,6 +197,37 @@ def fecha(dt: datetime) -> str:
     return f"{dt.day:02d}-{MESES[dt.month - 1]}-{dt.year}"
 
 
+# «al cierre del día 18/ 11/ 2026» en la 1.ª página de cada PDF de existencias del DCAM.
+_CIERRE = re.compile(r"al\s+cierre\s+del\s+d\S{1,3}a\s+(\d{1,2})\s*/\s*(\d{1,2})\s*/\s*(\d{4})", re.I)
+
+
+def fecha_del_pdf(ruta: Path) -> datetime | None:
+    """Fecha del encabezado del PDF (pdftotext), o None si no se puede leer."""
+    try:
+        r = subprocess.run(["pdftotext", "-l", "1", str(ruta), "-"], capture_output=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    m = _CIERRE.search(r.stdout.decode("utf-8", errors="replace"))
+    if not m:
+        return None
+    try:
+        return datetime(int(m.group(3)), int(m.group(2)), int(m.group(1)))
+    except ValueError:
+        return None
+
+
+def fecha_senal(pdfs: list[Path], ahora: datetime, leer=None) -> str:
+    """La fecha del inventario es la del PDF, no la del día en que se leyó: gob.mx a veces
+    publica el del día anterior después de las 20:00 y el vigía lo ve a las 10:00 siguientes
+    (19-nov-2026). Si los PDFs no dicen fecha o no coinciden, queda la de lectura (y el
+    paso 0 del pipeline lo frena con motivo si no cuadra)."""
+    leer = leer or fecha_del_pdf   # se busca al llamar: las pruebas lo reemplazan
+    fechas = {leer(p) for p in pdfs}
+    if len(fechas) == 1 and None not in fechas:
+        return fecha(fechas.pop())
+    return fecha(ahora)
+
+
 class LecturaInvalida(Exception):
     """estructural=True: la página cargó pero cambió de forma (esperar no lo arregla).
     estructural=False: falla pasajera (red, 404, redirección en bucle, verificación de Akamai)."""
@@ -365,13 +398,17 @@ def correr(bajar, dir_base: Path, ahora: datetime, reintento_seg: float = 60) ->
                     if actuales[u]["tipo"] == "existencias" and u in archivos]
     if exist_nuevas:
         senal = dir_base / "pendiente-conciliar.json"
+        f_senal = fecha_senal([archivos[u] for u in exist_nuevas], ahora)
         senal.write_text(json.dumps({
-            "fecha": fecha(ahora),
+            "fecha": f_senal,
             "pdfs": [str(archivos[u]) for u in exist_nuevas],
             "shas": {actuales[u]["etiqueta"]: actuales[u]["sha256"] for u in exist_nuevas},
         }, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    msgs[-1]["texto"] += " · señal escrita" if exist_nuevas else " · sin señal"
+    if exist_nuevas:
+        msgs[-1]["texto"] += " · señal escrita" + ("" if f_senal == fecha(ahora) else f" (inventario del {f_senal}, según el PDF)")
+    else:
+        msgs[-1]["texto"] += " · sin señal"
     if otca_nuevo:
         msgs[-1]["texto"] += " · señal OTCA escrita"
     msgs[-1]["texto"] += _codigo_viejo()
