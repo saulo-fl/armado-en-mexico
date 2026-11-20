@@ -11,10 +11,10 @@ const src = readFileSync(new URL('../src/lib/store.js', import.meta.url), 'utf8'
 const faq = [...src.matchAll(/^      \{ tema: '(.*?)', q: '(.*?)', a: '(.*?)' \},$/gm)]
   .map(([, tema, q, a]) => ({ tema, q, a }));
 
-test('el seed del FAQ trae las 12 preguntas', () => {
+test('el seed del FAQ trae las 14 preguntas', () => {
   // Si sube o baja el número, actualiza aquí: es el aviso de que alguien tocó
   // el contenido legal de la pantalla.
-  assert.equal(faq.length, 12);
+  assert.equal(faq.length, 14);
 });
 
 test('cada pregunta tiene tema, pregunta y respuesta', () => {

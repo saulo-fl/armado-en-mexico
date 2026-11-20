@@ -33,7 +33,7 @@
   window.AMX_ENTREVISTA = {
     version: '2026-09-20',
     titulo: '¿Puedo comprar un arma?',
-    advertencia: 'Esta entrevista es informativa y está escrita sobre el formato DEFENSA-02-040 y la ley vigente al 19 de septiembre de 2026. Reunir todos los documentos no obliga a la autoridad a otorgar el permiso: la autorización la decide la Secretaría de la Defensa Nacional.',
+    advertencia: 'Esta entrevista es informativa y está escrita sobre el formato DEFENSA-02-040, la ley y el Reglamento vigentes al 21 de noviembre de 2026. Reunir todos los documentos no obliga a la autoridad a otorgar el permiso: la autorización la decide la Secretaría de la Defensa Nacional.',
     etapas: [
       {
         id: 'quien',
@@ -373,7 +373,7 @@
               tipo: 'subsanable',
               motivo: 'El requisito 2 acredita tu ingreso con el certificado de ejidatario, comunero o jornalero del campo y, a falta de ese, con la constancia de posesión. Sin alguno de los dos no hay comprobante de ingresos en tu caso.',
               remedio: 'Pide el certificado al Presidente del Comisariado Ejidal o de bienes comunales reconocido por la Asamblea e inscrito en el Registro Agrario Nacional, o acreditado por ejecutoria del Tribunal Agrario. Si no lo consigues, acude a la primera autoridad administrativa municipal por la constancia de posesión, y cuida que salga con membrete, sello, número de oficio, teléfono y dirección.',
-              fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 2 del anverso, variante de ejidatario, e instructivo punto 13; concordante con el artículo 14 del Reglamento de la LFAFE.',
+              fundamento: 'Formato DEFENSA-02-040 Civiles 2026, requisito 2 del anverso, variante de ejidatario, e instructivo punto 13; concordante con el artículo 73 del Reglamento de la LFAFE (DOF 20-11-2026).',
             },
           },
         ],
@@ -383,7 +383,7 @@
         id: 'antecedentes',
         etapa: 'historial',
         texto: '¿Tienes antecedentes penales?',
-        ayuda: 'La constancia la expide la autoridad de la entidad donde RESIDES, no donde naciste ni donde te juzgaron. Va en original, con firma autógrafa y sello, y con fecha de expedición no mayor a seis meses.',
+        ayuda: 'Desde el Reglamento de 2026 se piden dos constancias de antecedentes no penales: la federal y la estatal. La estatal la expide la autoridad de la entidad donde RESIDES, no donde naciste ni donde te juzgaron; va en original, con firma autógrafa y sello, y con fecha de expedición no mayor a seis meses.',
         opciones: [
           {
             clave: 'n',
@@ -549,7 +549,7 @@
         id: 'medico',
         etapa: 'papeles',
         texto: '¿Puedes hacerte el certificado médico-psicológico de salud mental con un profesional que tenga cédula?',
-        ayuda: 'Para ADQUIRIR solo se revisa la salud mental: no hay examen físico ni toxicológico, esos son de la licencia de portación. Por eso una persona con discapacidad motriz sí puede adquirir y poseer. El certificado se elabora conforme al Acuerdo publicado en el DOF el 21 de abril de 2021; los exámenes exactos que ese Acuerdo exige no se pudieron verificar en la fuente oficial, así que confirma el contenido con quien te lo expida.',
+        ayuda: 'Para el permiso de compra el Reglamento de 2026 pide acreditar solo la capacidad mental, con un certificado psicológico (artículo 72). Ojo con el paso siguiente: al registrar el arma por primera vez el mismo Reglamento pide además certificado médico y toxicológico (artículo 22). El certificado psicológico se elabora conforme al Acuerdo publicado en el DOF el 21 de abril de 2021; los exámenes exactos que ese Acuerdo exige no se pudieron verificar en la fuente oficial, así que confirma el contenido con quien te lo expida.',
         opciones: [
           {
             clave: 's',
