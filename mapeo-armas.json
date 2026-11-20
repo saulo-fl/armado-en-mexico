@@ -22,6 +22,7 @@
     "38": 18,
     "40": 7,
     "41": 8,
+    "43": 8,
     "45": 11,
     "46": 3,
     "47": 15,
@@ -161,6 +162,7 @@
     "38": 12021.23,
     "40": 11777.55,
     "41": 15568.03,
+    "43": 30168.51,
     "45": 10922.53,
     "46": 12183.68,
     "47": 11777.55,
@@ -281,15 +283,7 @@
     1.011079,
     1.008504
   ],
-  "sinFicha": [
-    {
-      "idx": 182,
-      "name": "PISTOLA 9MM SIG SAUER P320 X-FIVE FS 5\"",
-      "priceN": 30168.51,
-      "qty": 8,
-      "desc": "PISTOLA SEMIAUTOMATICA, MARCA SIG SAUER, MODELO P320 X- FIVE, LARGO DEL CAÑON DE 5” FULL SIZE, CALIBRE 9 X 19 MM, COLOR "
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 264,
@@ -313,7 +307,7 @@
     }
   ],
   "totalPdf": 1194,
-  "totalMapped": 1166,
+  "totalMapped": 1174,
   "excluidos": [],
   "regresos": [],
   "regresosRechazados": [],
