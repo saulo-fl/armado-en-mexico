@@ -204,6 +204,20 @@ categoria_pdf() {
   return 0
 }
 
+# Fecha ISO del encabezado de la 1.ª página («al cierre del día 18/ 11/ 2026»; el
+# DCAM pone espacios tras las diagonales). Nada si no la encuentra. El 19-nov-2026
+# el vigía bajó a las 10:00 los PDFs del 18 (gob.mx los publicó después de las
+# 20:00 del 18) y la señal los fechó con el día de lectura: se concilió el 18 como
+# si fuera el 19. `d[^[:space:]]{1,3}a` = «día» con o sin acento, en cualquier locale.
+fecha_pdf() {
+  local d m y
+  read -r d m y < <(pdftotext -l 1 "$1" - 2>/dev/null | tr -d '\r' \
+    | grep -oiE 'al cierre del d[^[:space:]]{1,3}a[[:space:]]+[0-9]{1,2}[[:space:]]*/[[:space:]]*[0-9]{1,2}[[:space:]]*/[[:space:]]*[0-9]{4}' \
+    | head -1 | sed -E 's#.*[[:space:]]([0-9]{1,2})[[:space:]]*/[[:space:]]*([0-9]{1,2})[[:space:]]*/[[:space:]]*([0-9]{4})$#\1 \2 \3#')
+  [[ "${d:-}" =~ ^[0-9]+$ && "${m:-}" =~ ^[0-9]+$ && "${y:-}" =~ ^[0-9]{4}$ ]] || return 0
+  printf '%s-%02d-%02d\n' "$y" "$((10#$m))" "$((10#$d))"
+}
+
 step_prep() {
   STEP="0-prep"
   log "paso 0: prep"
@@ -211,11 +225,20 @@ step_prep() {
   git checkout -B "$RAMA" origin/main --quiet 2>>"$LOG"
 
   # Parse each PDF
-  local vistos=" "
+  local vistos=" " fpdf
   for pdf in $PDFS; do
     tag="$(categoria_pdf "$pdf")"
     if [ -z "$tag" ]; then
       MOTIVO="PDF $(basename "$pdf") sin categoría reconocible (ni por encabezado ni por nombre)"
+      log "  $MOTIVO"
+      return 1
+    fi
+    # La fecha del PDF manda: un inventario con la fecha de otro día ensucia el historial.
+    fpdf="$(fecha_pdf "$pdf")"
+    if [ -z "$fpdf" ]; then
+      log "  ⚠ $(basename "$pdf"): no leí la fecha del encabezado; sigo con la de la señal ($FECHA_ISO)"
+    elif [ "$fpdf" != "$FECHA_ISO" ]; then
+      MOTIVO="PDF $(basename "$pdf") es del $fpdf y la señal dice $FECHA: no concilio con la fecha equivocada"
       log "  $MOTIVO"
       return 1
     fi

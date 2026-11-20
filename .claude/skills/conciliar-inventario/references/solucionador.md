@@ -285,3 +285,20 @@ Lo que sobrevive es alta nueva.
   `scripts/test_representante.py`.
 - **Si vuelve a pasar**: arreglo de datos de la regla C4 (`precios[<id>]` = último precio en
   `mapeo-<cat>.json`, entrada en `revisarPrecio`, `--rehacer`) y repórtalo en `pendiente`.
+
+### C19. PDF del día anterior conciliado con la fecha de hoy (19-nov-2026)
+- **Síntoma (antes del arreglo)**: dos corridas con la misma fecha; la segunda trae factores ~1 %
+  en todo el catálogo y el mecánico no mueve los precios de armas (19-nov: 3 de 137 cambiaron).
+- **Causa**: gob.mx publicó los PDFs del 18 después de las 20:00 del 18; el vigía los vio a las
+  10:00 del 19 y la señal llevó la fecha de lectura. En la segunda corrida (PDFs del 19 real),
+  `aplicar-mecanico.py` saltó por idempotencia los registros `*_2026_11_19` ya existentes y la
+  regla del precio principal («último registro») devolvió los precios del 18. Pasó antes igual el
+  31-oct (PDF del 30) y el 10-nov (PDF del 9), sin segunda corrida que lo destapara.
+- **Ya corregido en código**: el vigía fecha la señal con el encabezado de los PDFs
+  (`fecha_senal`, «al cierre del día dd/ mm/ aaaa»); el paso 0 del pipeline frena con motivo un PDF
+  cuyo encabezado no coincide con la señal (`fecha_pdf`); y el mecánico rehace solo si ya hay
+  registros de esa fecha (`rehacer_si_ya_hay`). Pruebas en `conciliar-pipeline-categoria.test.mjs`,
+  `scripts/dcam/test_vigia.py` y `test_mecanico_rehacer.py`.
+- **Si vuelve a pasar**: re-mapeo + `aplicar-mecanico --rehacer` con los PDFs correctos; re-registrar
+  el día real con su fecha (copiar los registros del commit anterior, renombrar el manualId y
+  publicar sus PDFs) y justificar saltos contra el último registro real.
