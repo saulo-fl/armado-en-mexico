@@ -26,8 +26,10 @@ copian aqui porque caducan: las da el juez, `node scripts/check-legal.mjs`.
   dicen lo mismo —calibres, tope de armas en el domicilio, candado de un anio, «forma
   migratoria FM2»— **manda la ley**, y el conflicto queda escrito en `notaVigencia`
   (decision de Saulo, 19-sep-2026).
-- **El Reglamento sigue siendo el de 1972** y no se ha actualizado, pese a que el transitorio
-  Tercero del decreto de 2025 dio 180 dias para hacerlo.
+- **El Reglamento es el del 20 de noviembre de 2026** (DOF, nota 5804497; en vigor desde el
+  21-nov-2026). Su transitorio Sexto abrogo el de 1972. Las fichas `reg-*` y los fundamentos
+  que citan «el Reglamento» todavia describen el texto de 1972: estan marcados en la norma
+  `reglamento` (`revisar`) y pendientes de reescribirse contra el nuevo.
 - **Trampa medida:** el PDF vigente del formato (edicion Civiles 2026) conserva en el pie la
   leyenda «Mayo de 2021». La fecha del pie no dice que edicion es; hay que comparar el punto 5
   del instructivo, que es donde cambiaron las cantidades de cartuchos y los periodos.
@@ -43,7 +45,7 @@ por verificar», con su nota.
 |---|---|---|
 | `fuente` | `acuerdo-medico-2021` | HUECO — No se pudo leer el texto íntegro: dof.gob.mx, diariooficial.gob.mx y sidof.segob.gob.mx rechazaron la conexión durante la investigación. Faltan: qué exámenes exige exactamente, quién puede aplicarlos y la vigencia del certificado. Recuperarlo desde APOLO con la nota DOF código 5616435 del 21-04-2021 y volver a fundamentar con la URL oficial. |
 | `fuente` | `acuerdo-simplificacion-2026` | HUECO CRÍTICO — Nota SIDOF 5789879 (posible nota relacionada 5784083 del 06-04-2026), sin fecha exacta ni texto confirmado. Podría eliminar requisitos del DEFENSA-02-040 y del DEFENSA-02-062 (CURP impresa, acta de nacimiento, escritos libres). Verificarlo en el DOF antes de publicar la lista de requisitos. |
-| `normas` | `reglamento` | Falta el mapeo artículo por artículo de qué partes del Reglamento de 1972 quedaron desplazadas por la ley reformada. Solo está verificado el conflicto general, no la lista completa. |
+| `normas` | `reglamento` | Las fichas reg-11 a reg-54 y los fundamentos que citan «el Reglamento» describen el texto de 1972, abrogado el 21-11-2026. Falta reescribirlos contra el Reglamento de 2026. |
 | `normas` | `acuerdo-medico` | HUECO — No se pudo abrir el texto en el DOF durante la investigación (código 5616435, 21-04-2021). Quedan sin verificar los exámenes exactos que exige, quién puede aplicarlos y la vigencia del certificado. Lo que sí está verificado es que el formato SEDENA-02-040 lo cita como fundamento de su requisito 4. |
 | `normas` | `formato-02040` | Decidir caso por caso qué se publica del formato de 2021 y qué se corrige contra la ley de 2025. Los conflictos concretos están marcados en los límites de cada trámite y en las variantes de cada requisito. |
 | `normas` | `acuerdo-simplificacion` | HUECO CRÍTICO — Sin fecha de publicación confirmada ni texto (nota SIDOF 5789879). La ficha oficial del DEFENSA-02-040 consultada el 19-09-2026 todavía pide CURP y acta de nacimiento, es decir, aún no refleja la simplificación. Verificar en el DOF antes de publicar. |
@@ -84,11 +86,11 @@ trae su fundamento y su enlace dentro de `data-legal.js`.
 
 ## Copias PDF para consulta (22-sep-2026)
 
-`public/documentos-legales/` contiene 19 PDF descargados de las URL oficiales: 13 del
+`public/documentos-legales/` contiene 20 PDF descargados de las URL oficiales: 14 del
 catalogo `fuentes`, cuatro leyes nombradas en la entrevista y los requisitos, y dos
 formularios estatales. `archivoLocal` conserva la ruta de cada copia y `url` conserva
 la fuente oficial. La pagina `/legalidad/documentos` muestra ambas; el sitemap incluye
-los 19 PDF. `scripts/documentos-legales.test.mjs` comprueba que no falte ninguno ni
+los 20 PDF. `scripts/documentos-legales.test.mjs` comprueba que no falte ninguno ni
 haya archivos sin ficha. El build copia `public/` a `out/` sin transformar el PDF.
 
 Estas copias son una fotografia del texto descargado, no una afirmacion de vigencia
