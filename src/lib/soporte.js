@@ -5,9 +5,26 @@
     calibre: 'Calibre', legalidad: 'Legalidad', faq: 'Preguntas frecuentes',
   };
 
-  window.amxCorreccionUrl = function ({ tipo, titulo, ruta, origin }) {
+  // Dirección completa de la página que se reporta (el campo «Página exacta» del formulario).
+  window.amxPaginaAbsoluta = function (ruta, origin) {
     const base = origin || (window.location && window.location.origin) || 'https://armado.mx';
-    const pagina = new URL(ruta || (window.location && window.location.pathname) || '/', base).href;
+    return new URL(ruta || (window.location && window.location.pathname) || '/', base).href;
+  };
+
+  // Los tres campos que la ficha ya sabe: los prellenan el enlace a GitHub y el formulario web.
+  window.amxCamposCorreccion = function ({ tipo, titulo, ruta, origin }) {
+    return {
+      pagina: window.amxPaginaAbsoluta(ruta, origin),
+      tipo: TIPO_ISSUE[tipo] || 'Otro',
+      nombre: String(titulo || ''),
+    };
+  };
+
+  // Reporte sin cuenta: lo recibe functions/api/_issues.js y lo publica como issue.
+  window.AMX_REPORTE_URL = '/api/append/issues';
+
+  window.amxCorreccionUrl = function ({ tipo, titulo, ruta, origin }) {
+    const pagina = window.amxPaginaAbsoluta(ruta, origin);
     const url = new URL(ISSUE_URL);
     url.searchParams.set('template', 'correccion.yml');
     url.searchParams.set('title', '[Corrección]: ' + String(titulo || 'Dato de la enciclopedia'));
@@ -40,7 +57,7 @@
       try { data = await res.json(); } catch (e) {}
       return res.ok
         ? { ok: true, status: res.status, data }
-        : { ok: false, status: res.status, error: data.error || 'http_' + res.status };
+        : { ok: false, status: res.status, error: data.error || 'http_' + res.status, campo: data.campo };
     } catch (e) {
       return { ok: false, status: 0, error: 'red_no_disponible' };
     }

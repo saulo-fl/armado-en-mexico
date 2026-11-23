@@ -33,6 +33,7 @@ export function renderSoporteHtml(c) {
 ${hoja('moderacion', 'Cómo se moderan las reseñas', lista(c.moderacion), ' amx-soporte-carbon')}
 ${hoja('denuncia', 'Denunciar una reseña',
   `<p>${esc(c.denuncia.intro)}</p><p class="amx-soporte-alcance">${esc(c.denuncia.privacidad)}</p>`)}
+${hoja('fallo', c.fallo.titulo, `<p>${esc(c.fallo.intro)}</p>`)}
 ${hoja('clasificacion', c.clasificacion.titulo, lista(c.clasificacion.criterios))}
 ${hoja('correccion', c.correccion.titulo,
   `<p>${esc(c.correccion.intro)}</p>${lista(c.correccion.pasos)}` +
