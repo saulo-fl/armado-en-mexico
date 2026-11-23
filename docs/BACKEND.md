@@ -26,6 +26,7 @@ functions/
     append/[domain].js          POST /api/append/:domain         → escritura pública (merge atómico)
     admin/state/[domain].js     PUT  /api/admin/state/:domain    → reemplazo de dominio (solo admin)
     admin/moderar.js            POST /api/admin/moderar          → mueve UNA reseña o denuncia (solo admin)
+    admin/reportes.js           GET/POST /api/admin/reportes     → reportes web: listar, reintentar, retirar, sincronizar
 scripts/sql/schema.sql          tabla `state(domain, data, updated_at)` — un blob JSON por dominio
                                 y tabla `visitas_dia(dia, arma_id, n)` — contador de visitas
                                 y tabla `reportes_web` — una fila por reporte sin cuenta
@@ -129,6 +130,14 @@ curl -sD - -o /dev/null -H 'If-None-Match: <etag>' https://armado.mx/api/state |
   solo Issues: Read and write en los dos repos; **caduca al año**: renovarlo en los dos entornos).
   Sin `TURNSTILE_SECRET` responde `503 captcha_no_configurado`; sin token, guarda y deja `pendiente`.
 - **Tabla:** `scripts/sql/reportes-web.sql` (aditiva). Sin ella: `503 reportes_no_disponible`.
+- **Admin** (pestaña REPORTES WEB, `functions/api/admin/reportes.js`, con `requireAdmin`):
+  `GET ?estado=abiertos|todos|<estado>`; `POST {accion:'reintentar', id}` publica un pendiente
+  (sin tope diario; reclama la fila con escritura condicional y busca el marcador antes de crear,
+  así que no duplica); `POST {accion:'retirar', id, motivo}` vacía, cierra (*not planned*) y
+  bloquea el issue, y D1 guarda el original; `POST {accion:'sincronizar'}` marca `cerrado` o
+  `publicado` según el estado en GitHub (listado por etiqueta, una llamada por repo).
+  **Retirar no borra el historial de ediciones de GitHub**, que sigue mostrando el texto original:
+  borrarlo del todo solo se puede a mano («Delete issue»), y el panel lo avisa con el enlace.
 - **Local:** `wrangler pages dev` con `--binding TURNSTILE_SECRET=1x0000000000000000000000000000000AA`
   (clave de prueba oficial, siempre pasa).
 

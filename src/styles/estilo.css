@@ -7524,6 +7524,28 @@
   border-top: 1px dashed var(--oficio-tinta-2);
 }
 .amx-v2 .amx-reporte fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+/* Advertencia de datos personales, arriba de los campos: sello restringido, no letra chica. */
+.amx-v2 .amx-reporte-advertencia {
+  margin: var(--e2, 8px) 0 var(--e3);
+  padding: 12px 14px;
+  border: 1.5px solid var(--sello-restr);
+  border-left-width: 5px;
+  border-radius: 3px;
+  background: var(--oficio);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-reporte-advertencia p { margin: 0 0 6px; }
+.amx-v2 .amx-reporte-advertencia p:last-child { margin-bottom: 0; }
+.amx-v2 .amx-reporte-advertencia-tit {
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .02em;
+  color: var(--sello-restr);
+}
 .amx-v2 .amx-reporte-campo { min-width: 0; }
 .amx-v2 .amx-reporte fieldset.amx-reporte-firma {
   margin-top: var(--e5, 24px);

@@ -222,6 +222,15 @@ function FormularioReporteCuerpo({ formatoId, formato, inicial, enlaceGitHub }) 
 
   return (
     <form className="amx-reporte" onSubmit={enviar} noValidate aria-label={formato.name}>
+      {/* Advertencia arriba de los campos, a la vista y no en letra chica. Es la versión
+          web del aviso del bloque markdown de cada Issue Form («No incluyas datos personales»),
+          que es lo que ve quien reporta desde GitHub. */}
+      <div className="amx-reporte-advertencia" role="note">
+        <p className="amx-reporte-advertencia-tit">No incluyas datos personales</p>
+        <p>Lo que escribas abajo será público en GitHub. No pongas nombres completos, teléfonos, direcciones,
+          CURP ni números de permiso o de registro de armas, tuyos ni de nadie más. Tu correo va solo en su
+          campo, que no se publica.</p>
+      </div>
       {formato.body.filter((c) => c.type !== 'markdown').map((c) => (
         <CampoReporte key={c.id} campo={c} id={idDe(c.id)} valor={campos[c.id]}
           onCambio={(v) => cambiar(c.id, v)} error={errorDe(c.id)} registrar={registrar(c.id)} />
