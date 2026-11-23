@@ -414,6 +414,34 @@
       return { ok: true };
     },
 
+    // ─── REPORTES WEB (admin) ──────────────────────────────
+    // Reportes sin cuenta de GitHub (functions/api/admin/reportes.js). No pasan por
+    // localStorage ni por /api/state: llevan correo y metadata, solo viven en D1.
+    async reportesWeb(estado) {
+      if (!REMOTE.enabled) return { ok: false, status: 0, error: 'sin_backend' };
+      try {
+        const res = await fetch(REMOTE.base + '/admin/reportes?estado=' + encodeURIComponent(estado || 'abiertos'), { credentials: 'include' });
+        let data = {};
+        try { data = await res.json(); } catch (e) {}
+        return res.ok ? { ok: true, data } : { ok: false, status: res.status, error: data.error || 'http_' + res.status };
+      } catch (e) { return { ok: false, status: 0, error: 'sin_conexion_o_sesion' }; }
+    },
+    async accionReporteWeb(accion, id, motivo) {
+      if (!REMOTE.enabled) return { ok: false, status: 0, error: 'sin_backend' };
+      try {
+        const res = await fetch(REMOTE.base + '/admin/reportes', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accion, id, motivo }), credentials: 'include',
+        });
+        let data = {};
+        try { data = await res.json(); } catch (e) {}
+        // Un reintento que GitHub vuelve a rechazar responde 200 con ok:false y la fila al día.
+        return res.ok && data.ok !== false
+          ? { ok: true, data }
+          : { ok: false, status: res.status, error: data.error || 'http_' + res.status, data };
+      } catch (e) { return { ok: false, status: 0, error: 'sin_conexion_o_sesion' }; }
+    },
+
     // ─── DENUNCIAS DE CONTENIDO ────────────────────────────
     async addReport(rep) {
       const item = {

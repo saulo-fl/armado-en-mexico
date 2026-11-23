@@ -17,6 +17,7 @@ npm test                           # las suites de node:test (scripts/*.test.mjs
 node --test scripts/faq.test.mjs   # una sola suite
 npm run smoke                      # abre out/ en un Chrome real, una página por ruta
 npm run bench:api                  # CPU de las Functions (límite gratis: 10 ms por petición)
+npm run formatos                   # tras tocar .github/ISSUE_TEMPLATE/*.yml (formatos del reporte web)
 ```
 
 Tras editar un `.jsx` hay que recompilar: **no hay bundler ni hot reload**.

@@ -10,12 +10,17 @@
 // otro envío se le adelantó: así dos envíos simultáneos no se pisan.
 // Las visitas NO pasan por ahí desde nov-2026: son un upsert de un contador en
 // `visitas_dia` (_visitas.js), sin leer ni reescribir ningún blob.
+// Los reportes sin cuenta (`issues`) tampoco: van a su tabla `reportes_web` y se publican
+// como issue de GitHub (_issues.js). Viven bajo /api/append/* para heredar la regla de
+// rate limit de la zona, que es la única que permite el plan gratis.
 import { json, APPEND_DOMAINS, MAX_BODY, normalizeReport, actualizarDominio, mergeAppend } from '../_lib.js';
 import { armaIdValido, registrarVisita } from '../_visitas.js';
+import { recibirReporte } from '../_issues.js';
 
 export async function onRequestPost(context) {
   const { request, env, params } = context;
   const domain = params.domain;
+  if (domain === 'issues') return recibirReporte(context);
   if (!APPEND_DOMAINS.includes(domain)) return json({ error: 'dominio_invalido' }, 400);
   if (!env.DB) return json({ error: 'sin_backend' }, 503);
 

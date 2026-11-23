@@ -27,3 +27,16 @@ test('las guías separan issue, revisión y PR opcional', () => {
   assert.match(pull, /fuentes/i);
   assert.match(pull, /verificaci/i);
 });
+
+test('CONTRIBUTING da el formato preferencial de los dos formularios', () => {
+  const contributing = read('../CONTRIBUTING.md');
+  assert.match(contributing, /## Formato preferencial para reportar/);
+  assert.match(contributing, /correccion\.yml/);
+  assert.match(contributing, /fallo\.yml/);
+  assert.match(contributing, /\[Corrección\]: /);
+  assert.match(contributing, /\[Fallo\]: /);
+  assert.match(contributing, /Pasos para reproducirlo/);
+  assert.match(contributing, /datos personales/);
+  assert.match(contributing, /Sin cuenta de GitHub/);
+  assert.match(contributing, /folio/);
+});

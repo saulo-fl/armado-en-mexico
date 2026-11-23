@@ -7476,3 +7476,183 @@
   outline: 2px solid var(--ficha-tinta);
   outline-offset: 2px;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   REPORTE WEB (reportes.jsx) — corrección o fallo sin cuenta de GitHub.
+   Reutiliza los renglones del bloque de opiniones (.amx-renglon, .amx-renglon-etq,
+   .amx-renglon-ayuda, .amx-renglones-2) y .amx-boton-tinta; aquí solo lo propio.
+   Vive dentro de ReportarError (hoja de oficio) y de la hoja al carbón de Soporte.
+   ══════════════════════════════════════════════════════════════ */
+.amx-v2 .amx-reportar-error-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e3) var(--e4);
+  margin-top: 10px;
+}
+.amx-v2 .amx-reportar-error-boton {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1.5px solid var(--manila-tinta);
+  border-radius: 3px;
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--manila-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-reportar-error-boton:hover { background: color-mix(in srgb, var(--manila-tinta) 8%, transparent); }
+.amx-v2 .amx-reporte-alterno {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--manila-tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.amx-v2 .amx-reporte {
+  max-width: 760px;
+  margin-top: var(--e4);
+  padding-top: var(--e2, 8px);
+  border-top: 1px dashed var(--oficio-tinta-2);
+}
+.amx-v2 .amx-reporte fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+/* Advertencia de datos personales, arriba de los campos: sello restringido, no letra chica. */
+.amx-v2 .amx-reporte-advertencia {
+  margin: var(--e2, 8px) 0 var(--e3);
+  padding: 12px 14px;
+  border: 1.5px solid var(--sello-restr);
+  border-left-width: 5px;
+  border-radius: 3px;
+  background: var(--oficio);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-reporte-advertencia p { margin: 0 0 6px; }
+.amx-v2 .amx-reporte-advertencia p:last-child { margin-bottom: 0; }
+.amx-v2 .amx-reporte-advertencia-tit {
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: .02em;
+  color: var(--sello-restr);
+}
+.amx-v2 .amx-reporte-campo { min-width: 0; }
+.amx-v2 .amx-reporte fieldset.amx-reporte-firma {
+  margin-top: var(--e5, 24px);
+  padding-top: var(--e3);
+  border-top: 1px solid var(--fichero-azul);
+}
+.amx-v2 .amx-reporte-sub {
+  padding: 0;
+  font-family: Archivo, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-reporte fieldset.amx-reporte-casillas { margin-top: var(--e4); }
+.amx-v2 .amx-reporte-casillas legend { padding: 0; margin: 0 0 2px; }
+.amx-v2 .amx-reporte-casilla {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 0;
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--manila-tinta);
+  cursor: pointer;
+}
+.amx-v2 .amx-reporte-casilla input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--manila-tinta);
+}
+.amx-v2 .amx-reporte-meta { margin-top: var(--e4); }
+.amx-v2 .amx-reporte-meta summary {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  color: var(--manila-tinta);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.amx-v2 .amx-reporte-meta pre {
+  max-height: 240px;
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  overflow: auto;
+  background: var(--oficio);
+  border: 1px solid var(--hair);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--oficio-tinta-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* Turnstile en modo «interaction-only»: solo ocupa sitio si Cloudflare pide un clic. */
+.amx-v2 .amx-reporte-turnstile { margin-top: var(--e3); }
+.amx-v2 .amx-reporte-turnstile:empty { margin-top: 0; }
+.amx-v2 .amx-reporte-aviso {
+  max-width: 68ch;
+  margin: var(--e3) 0 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--oficio-tinta-2);
+}
+.amx-v2 .amx-reporte-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e3) var(--e4);
+  margin-top: var(--e4);
+}
+.amx-v2 .amx-reporte-err {
+  margin: 4px 0 0;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--sello-restr);
+}
+.amx-v2 .amx-reporte-err--general {
+  margin-top: var(--e3);
+  padding: 10px 12px;
+  border: 1px solid var(--sello-restr);
+  border-radius: 4px;
+}
+.amx-v2 .amx-reporte [aria-invalid="true"] { border-bottom-color: var(--sello-restr); }
+.amx-v2 .amx-reporte :focus-visible,
+.amx-v2 .amx-reportar-error-acciones :focus-visible { outline: 3px solid var(--manila-tinta); outline-offset: 3px; }
+.amx-v2 .amx-reporte-exito {
+  max-width: 760px;
+  margin-top: var(--e4);
+  padding: 14px 16px;
+  background: var(--oficio);
+  border: 1px solid var(--sello-civil);
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--manila-tinta);
+}
+.amx-v2 .amx-reporte-exito p { margin: 0 0 6px; }
+.amx-v2 .amx-reporte-exito p:last-child { margin-bottom: 0; }
+.amx-v2 .amx-reporte-exito-tit { font-family: Archivo, sans-serif; font-weight: 700; font-size: 15px; color: var(--sello-civil); }
+.amx-v2 .amx-reporte-exito a { color: var(--manila-tinta); text-underline-offset: 3px; }

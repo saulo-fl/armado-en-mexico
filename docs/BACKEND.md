@@ -20,12 +20,16 @@ functions/
   api/
     _lib.js                     utilidades (JSON, allowlists, verificación de Access JWT)
     _visitas.js                 visitas por día + ranking «Más visitadas» (no es ruta)
+    _issues.js                  reportes sin cuenta → issue de GitHub (no es ruta)
+    _formatos.js                GENERADO desde .github/ISSUE_TEMPLATE/*.yml (npm run formatos)
     state.js                    GET  /api/state                 → snapshot público (read, con caché)
     append/[domain].js          POST /api/append/:domain         → escritura pública (merge atómico)
     admin/state/[domain].js     PUT  /api/admin/state/:domain    → reemplazo de dominio (solo admin)
     admin/moderar.js            POST /api/admin/moderar          → mueve UNA reseña o denuncia (solo admin)
+    admin/reportes.js           GET/POST /api/admin/reportes     → reportes web: listar, reintentar, retirar, sincronizar
 scripts/sql/schema.sql          tabla `state(domain, data, updated_at)` — un blob JSON por dominio
                                 y tabla `visitas_dia(dia, arma_id, n)` — contador de visitas
+                                y tabla `reportes_web` — una fila por reporte sin cuenta
 wrangler.toml                   binding D1 (env.DB) + config de Pages
 ```
 
@@ -100,6 +104,43 @@ curl -sD - -o /dev/null https://armado.mx/api/state | grep -i x-amx-cache
 curl -sD - -o /dev/null -H 'If-None-Match: <etag>' https://armado.mx/api/state | grep -i '^HTTP'
 ```
 
+## Reportes sin cuenta de GitHub (nov-2026)
+
+`POST /api/append/issues` recibe una corrección o un fallo hecho desde armado.mx y lo publica
+**solo** como issue de GitHub desde la cuenta de Saulo, acreditando la firma de quien reportó
+(`functions/api/_issues.js`; diseño en `Documentos de Proyecto/2026-11-23-reportes-internos-plan.md`).
+
+- **Formato:** el de los Issue Forms. `npm run formatos` los convierte en
+  `functions/api/_formatos.js` y `src/lib/formatos-issue.js`; `scripts/formatos-issue.test.mjs`
+  falla si se desfasan, y `scripts/functions-issues.test.mjs` exige que una corrección salga
+  idéntica, carácter por carácter, al cuerpo del #485 (hecho con el formulario de GitHub).
+- **Orden:** valida los campos (sin red ni D1) → Turnstile (`siteverify`, acción `reporte`, host de
+  armado.mx o `*.armado-en-mexico.pages.dev`) → fila en `reportes_web` → issue en GitHub (tope 8 s).
+  Si GitHub falla, la fila queda `pendiente` con su `error` y la respuesta sigue siendo 200 con el folio.
+- **Repo destino por host:** solo `armado.mx` publica en `saulo-fl/armado-en-mexico`; todo lo demás
+  (preview, local) en el privado `saulo-fl/armado-reportes-pruebas`. No hay variable que lo cambie.
+- **Topes:** 300 reportes sin publicar → `503 cola_llena`; 30 publicaciones automáticas por día UTC,
+  el resto queda `pendiente` (`tope_diario`) para el admin. Además, la regla de rate limit de
+  `/api/append/*`.
+- **Privacidad:** correo y metadata del dispositivo se quedan en D1; el issue solo dice que se adjuntó.
+  Las menciones `@usuario` del texto se neutralizan y `<!--` se escapa (no se puede falsificar el
+  marcador `<!-- armado-reporte:<folio> -->` que usa el reintento para no duplicar).
+- **Secretos de Pages** (production y preview): `TURNSTILE_SECRET` (widget «armado.mx · reportes»,
+  site key pública `0x4AAAAAAGPXQUOTWCmKQqAV`) y `GITHUB_TOKEN_ISSUES` (PAT fine-grained de saulo-fl,
+  solo Issues: Read and write en los dos repos; **caduca al año**: renovarlo en los dos entornos).
+  Sin `TURNSTILE_SECRET` responde `503 captcha_no_configurado`; sin token, guarda y deja `pendiente`.
+- **Tabla:** `scripts/sql/reportes-web.sql` (aditiva). Sin ella: `503 reportes_no_disponible`.
+- **Admin** (pestaña REPORTES WEB, `functions/api/admin/reportes.js`, con `requireAdmin`):
+  `GET ?estado=abiertos|todos|<estado>`; `POST {accion:'reintentar', id}` publica un pendiente
+  (sin tope diario; reclama la fila con escritura condicional y busca el marcador antes de crear,
+  así que no duplica); `POST {accion:'retirar', id, motivo}` vacía, cierra (*not planned*) y
+  bloquea el issue, y D1 guarda el original; `POST {accion:'sincronizar'}` marca `cerrado` o
+  `publicado` según el estado en GitHub (listado por etiqueta, una llamada por repo).
+  **Retirar no borra el historial de ediciones de GitHub**, que sigue mostrando el texto original:
+  borrarlo del todo solo se puede a mano («Delete issue»), y el panel lo avisa con el enlace.
+- **Local:** `wrangler pages dev` con `--binding TURNSTILE_SECRET=1x0000000000000000000000000000000AA`
+  (clave de prueba oficial, siempre pasa).
+
 ## Alta (una sola vez)
 
 Requisitos: [`wrangler`](https://developers.cloudflare.com/workers/wrangler/) y el repo ya
@@ -160,6 +201,7 @@ Sin `wrangler` (solo estático, ej. `python3 -m http.server`): la app corre en m
 
 - Lectura pública abierta (`GET /api/state`); es contenido de display.
 - Escritura admin verificada por Access (path rule + JWT). Las variables faltantes = fail-closed.
+- Reportes sin cuenta (`/api/append/issues`): Turnstile + topes de cola y diario; ver §Reportes.
 - Escritura pública acotada: solo 3 dominios *append*, cuerpo ≤ 1 MB, strings recortados,
   arrays con tope, visitas solo para ids 1–5000 (la tabla guarda 60 días), reseñas de 100 a
   1200 caracteres (`RESENA_MIN`/`RESENA_MAX`) que esperan moderación en `reviewsQueue`.
