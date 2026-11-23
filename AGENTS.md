@@ -169,6 +169,7 @@ node .claude/skills/conciliar-inventario/scripts/auditar.js   # antes de cada co
 npm test                     # las suites de node:test (scripts/*.test.mjs)
 npm run smoke                # abre out/ en un Chrome real: una página por forma de ruta
 npm run bench:api            # CPU de las Functions públicas (límite del plan gratis: 10 ms)
+npm run formatos             # tras tocar .github/ISSUE_TEMPLATE/*.yml: regenera los formatos del reporte web
 node --test scripts/faq.test.mjs   # una sola suite
 ```
 

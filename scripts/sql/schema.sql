@@ -29,3 +29,27 @@ CREATE TABLE IF NOT EXISTS visitas_dia (
   n        INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (dia, arma_id)     -- dia primero: el ranking y la limpieza filtran por rango de días
 );
+
+-- Reportes de corrección y de fallo hechos desde armado.mx sin cuenta de GitHub (nov-2026).
+-- Una fila por reporte; NO viaja en GET /api/state (llevan correo y metadata privados).
+-- Al recibirse se publican solos como issue (functions/api/_issues.js). Tabla sola en
+-- scripts/sql/reportes-web.sql. Diseño: Documentos de Proyecto/2026-11-23-reportes-internos-plan.md.
+CREATE TABLE IF NOT EXISTS reportes_web (
+  id          TEXT PRIMARY KEY,     -- folio que ve quien reporta: 'AMX-' + 6 caracteres
+  formato     TEXT NOT NULL,        -- id del Issue Form: 'correccion' | 'fallo'
+  titulo      TEXT NOT NULL,        -- título completo del issue, con su prefijo
+  campos      TEXT NOT NULL,        -- JSON { idCampo: valor } ya validado contra el formato
+  firma       TEXT NOT NULL,        -- nombre o apodo (público en el issue)
+  github      TEXT,                 -- usuario de GitHub opcional (el issue lo menciona)
+  email       TEXT,                 -- opcional y PRIVADO: nunca sale a GitHub
+  metadata    TEXT,                 -- JSON del dispositivo solo si lo aceptó; NULL si no. Nunca sale a GitHub
+  estado      TEXT NOT NULL,        -- 'publicando' | 'pendiente' | 'publicado' | 'retirado' | 'cerrado'
+  repo        TEXT NOT NULL,        -- repo destino, decidido por el host de la petición
+  issue_num   INTEGER,
+  issue_url   TEXT,
+  error       TEXT,                 -- último motivo por el que quedó pendiente (github_401, tope_diario…)
+  creado      TEXT NOT NULL,
+  publicado   TEXT,
+  actualizado TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS reportes_web_estado ON reportes_web (estado, creado);

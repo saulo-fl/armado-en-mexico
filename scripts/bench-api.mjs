@@ -102,3 +102,36 @@ console.log('\nPOST /api/append/visits');
     await Promise.all(c.pendientes);
   });
 }
+
+console.log('\nPOST /api/append/issues');
+{
+  // Reporte de corrección con los textos casi al tope (peor caso). Turnstile y GitHub van
+  // simulados: su espera es red, no CPU. Se vacía la tabla en cada vuelta para medir siempre
+  // la ruta completa (validar, captcha, contar topes, insertar, armar el issue, marcarlo).
+  const DB = sembrar(estado);
+  const largo = 'Dato con fuente verificable. '.repeat(130);
+  const cuerpo = JSON.stringify({
+    formato: 'correccion', firma: 'Banco de CPU', turnstile: 'token', email: 'banco@example.com',
+    campos: {
+      pagina: 'https://armado.mx/pistolas/glock-19', tipo: 'Arma', nombre: 'Glock 19',
+      dato_actual: largo, correccion: largo, fuentes: largo, relacion: 'Ninguna',
+      pull_request: 'No', derechos: [true],
+    },
+    adjuntarMetadata: true, metadata: { navegador: 'Chrome 142', ventana: '412x915', errores: ['TypeError: x'] },
+  });
+  let n = 0;
+  const fetchFn = async (url) => (String(url).startsWith('https://challenges.cloudflare.com/')
+    ? Response.json({ success: true, action: 'reporte', hostname: 'armado.mx' })
+    : Response.json({ number: ++n, html_url: 'https://github.com/x/y/issues/' + n }, { status: 201 }));
+  await cpu('un reporte publicado en GitHub', async () => {
+    DB.sqlite.exec('DELETE FROM reportes_web');
+    const c = ctx(new Request('https://armado.mx/api/append/issues', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: cuerpo,
+    }), DB);
+    c.params.domain = 'issues';
+    c.env = { DB, TURNSTILE_SECRET: 's', GITHUB_TOKEN_ISSUES: 't' };
+    c.fetchFn = fetchFn;
+    const r = await onRequestPost(c);
+    if (!r.ok) throw new Error('append issues respondió ' + r.status + ' ' + await r.text());
+  });
+}
