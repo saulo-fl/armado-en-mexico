@@ -86,6 +86,19 @@ test('la ficha y Soporte usan el formulario web, y conservan la vía de GitHub',
   assert.match(rep, /window\.AMX_FORMATOS_ISSUE/);
 });
 
+test('el formulario advierte arriba de los campos que no se incluyan datos personales', () => {
+  const rep = leer('../src/components/reportes.jsx');
+  const form = rep.slice(rep.indexOf('<form className="amx-reporte"'));
+  const aviso = form.indexOf('amx-reporte-advertencia');
+  assert.ok(aviso > 0 && aviso < form.indexOf('<CampoReporte'), 'la advertencia va antes del primer campo');
+  assert.match(form, /No incluyas datos personales/);
+  assert.match(form, /será público en GitHub/);
+  for (const [id, f] of Object.entries(FORMATOS)) {
+    const md = f.body.filter((c) => c.type === 'markdown').map((c) => c.attributes.value).join(' ');
+    assert.match(md, /No incluyas datos personales/, `${id}.yml debe conservar el aviso`);
+  }
+});
+
 test('index.html carga cada pieza antes de quien la usa', () => {
   const html = leer('../src/pages/index.html');
   const pos = (f) => {
