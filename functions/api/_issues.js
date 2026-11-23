@@ -324,6 +324,52 @@ export async function publicarIssue({ db, fila, token, fetchFn = fetch, buscarAn
   return { ok: true, ...resultado };
 }
 
+// ── Moderación (admin) ───────────────────────────────────────────────────────
+// «Retirar del público»: reemplaza título y cuerpo, cierra como not_planned y bloquea el
+// issue. OJO: GitHub conserva el texto original en el historial de ediciones (visible para
+// cualquiera); borrarlo del todo solo se puede a mano en GitHub («Delete issue»). Por eso el
+// admin enlaza el issue después de retirarlo.
+export const TEXTO_RETIRADO = 'Este reporte se retiró por moderación. El equipo de armado.mx conserva el original.';
+
+export async function retirarIssue({ repo, numero, token, fetchFn = fetch }) {
+  const base = `https://api.github.com/repos/${repo}/issues/${numero}`;
+  try {
+    const res = await fetchFn(base, {
+      method: 'PATCH', headers: cabecerasGitHub(token), signal: AbortSignal.timeout(TIMEOUT_GITHUB_MS),
+      body: JSON.stringify({ title: '[Retirado por moderación]', body: TEXTO_RETIRADO, state: 'closed', state_reason: 'not_planned' }),
+    });
+    if (!res.ok) return { ok: false, error: 'github_' + res.status };
+  } catch {
+    return { ok: false, error: 'github_red' };
+  }
+  let bloqueado = false;
+  try {
+    const res = await fetchFn(base + '/lock', {
+      method: 'PUT', headers: cabecerasGitHub(token), signal: AbortSignal.timeout(TIMEOUT_GITHUB_MS), body: '{}',
+    });
+    bloqueado = res.status === 204;
+  } catch { /* el contenido ya se retiró; el bloqueo es un extra */ }
+  return { ok: true, bloqueado };
+}
+
+// Estado (open/closed) de los issues con la etiqueta reporte-web de un repo, desde `desde`.
+// Devuelve Map numero → 'open' | 'closed'. Hasta 10 páginas de 100.
+export async function estadosIssuesWeb({ repo, desde, token, fetchFn = fetch }) {
+  const estados = new Map();
+  for (let pagina = 1; pagina <= 10; pagina++) {
+    const q = new URLSearchParams({ labels: ETIQUETA_WEB, state: 'all', since: desde, per_page: '100', page: String(pagina) });
+    const res = await fetchFn(`https://api.github.com/repos/${repo}/issues?${q}`, {
+      method: 'GET', headers: cabecerasGitHub(token), signal: AbortSignal.timeout(TIMEOUT_GITHUB_MS),
+    });
+    if (!res.ok) throw new Error('github_' + res.status);
+    const lista = await res.json();
+    if (!Array.isArray(lista)) break;
+    for (const i of lista) if (i && Number.isInteger(i.number)) estados.set(i.number, i.state);
+    if (lista.length < 100) break;
+  }
+  return estados;
+}
+
 // ── D1 ───────────────────────────────────────────────────────────────────────
 export function nuevoFolio() {
   const bytes = crypto.getRandomValues(new Uint8Array(6));

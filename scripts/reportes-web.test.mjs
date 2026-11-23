@@ -109,3 +109,21 @@ test('Soporte explica la vía sin cuenta y ya no dice que hay que pulsar Submit 
   assert.doesNotMatch(JSON.stringify(C), /Submit new issue|no publica nada en tu nombre/);
   assert.equal(C.fallo.titulo, 'Reportar un fallo del sitio');
 });
+
+test('admin: la pestaña REPORTES WEB usa la API del servidor y avisa del historial de GitHub al retirar', () => {
+  const admin = leer('../src/admin.jsx').replace(/\r\n/g, '\n');
+  const tab = admin.slice(admin.indexOf('function ReportesWebTab'), admin.indexOf('window.ReportesWebTab = ReportesWebTab'));
+  assert.ok(tab.length > 1000, 'no encontré ReportesWebTab');
+  assert.match(admin, /^window\.ReportesWebTab = ReportesWebTab;$/m);
+  assert.match(admin, /tab === 'reportesWeb' && <ReportesWebTab/);
+  assert.match(tab, /window\.Store\.reportesWeb\(/);
+  for (const accion of ['reintentar', 'retirar', 'sincronizar']) assert.match(tab, new RegExp(`actuar\\('${accion}'`));
+  assert.match(tab, /historial de ediciones[\s\S]*Delete issue/);
+  assert.match(tab, /rep\.metadata/);
+  const store = leer('../src/lib/store.js');
+  assert.match(store, /'\/admin\/reportes\?estado='/);
+  assert.match(store, /REMOTE\.base \+ '\/admin\/reportes', \{/);
+  const html = leer('../src/pages/admin.html');
+  assert.ok(html.indexOf('formatos-issue.js?v=') > 0 && html.indexOf('formatos-issue.js?v=') < html.indexOf('admin.js?v='),
+    'el admin necesita los formatos para nombrar los campos');
+});

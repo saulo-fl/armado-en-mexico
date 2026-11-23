@@ -28,6 +28,7 @@ function AdminShell({ onLogout, children, tab, setTab, stats }) {
   const tabs = [
     { id: 'reviews',    label: 'RESEÑAS',      badge: stats.reviews },
     { id: 'reports',    label: 'DENUNCIAS',    badge: stats.reports },
+    { id: 'reportesWeb', label: 'REPORTES WEB', badge: stats.reportesWeb || null },
     { id: 'catalog',    label: 'CATÁLOGO',     badge: null },
     { id: 'manuales',   label: 'INVENTARIOS',  badge: stats.manuales || null },
     { id: 'favorites',  label: 'FAVORITOS',    badge: null },
@@ -979,17 +980,24 @@ function AdminApp() {
     reports: window.Store.getReports().length,
   });
   const [stats, setStats] = useState(leerStats);
+  // Pendientes de los reportes web: viven solo en D1, se piden aparte (no están en Store).
+  const [reportesWeb, setReportesWeb] = useState(0);
+  const contarReportesWeb = (conteo) => setReportesWeb(conteo.pendiente || 0);
 
   useEffect(() => window.Store.onChange(() => setStats(leerStats())), []);
+  useEffect(() => {
+    window.Store.reportesWeb('pendiente').then((r) => { if (r.ok) contarReportesWeb(r.data.conteo || {}); });
+  }, []);
 
   return (
     <AdminShell
       // Cierra la sesión de Cloudflare Access (borra la cookie CF_Authorization).
       onLogout={() => { window.location.href = '/cdn-cgi/access/logout'; }}
-      tab={tab} setTab={setTab} stats={stats}
+      tab={tab} setTab={setTab} stats={Object.assign({}, stats, { reportesWeb })}
     >
       {tab === 'reviews'  && <ReviewsTab />}
       {tab === 'reports'  && <ReportsTab />}
+      {tab === 'reportesWeb' && <ReportesWebTab onConteo={contarReportesWeb} />}
       {tab === 'catalog'  && <CatalogTab onEdit={(a, mode) => setEditing({ arma: a, mode })} />}
       {tab === 'manuales' && <ManualesTab />}
       {tab === 'favorites'&& <FavoritesTab />}
@@ -1180,6 +1188,167 @@ function ReportsTab() {
   );
 }
 window.ReportsTab = ReportsTab;
+
+// ════════════════════════════════════════════════════════════════
+// REPORTES WEB — correcciones y fallos enviados desde armado.mx SIN cuenta de
+// GitHub. Se publican SOLOS como issue (functions/api/_issues.js); aquí se ven
+// con su correo y metadata (que nunca salen a GitHub) y se actúa sobre ellos
+// por /api/admin/reportes (Store.reportesWeb / Store.accionReporteWeb).
+// ════════════════════════════════════════════════════════════════
+const REPORTE_WEB_ESTADO = {
+  pendiente:  { label: 'PENDIENTE',  color: P.amber },
+  publicando: { label: 'PUBLICANDO', color: P.blue },
+  publicado:  { label: 'EN GITHUB',  color: P.green },
+  cerrado:    { label: 'CERRADO',    color: P.textDim },
+  retirado:   { label: 'RETIRADO',   color: P.red },
+};
+const REPORTE_WEB_ERROR = {
+  tope_diario: 'se pasó del tope de 30 publicaciones automáticas del día',
+  github_no_configurado: 'falta el token de GitHub en Pages',
+  github_red: 'GitHub no respondió a tiempo',
+  github_401: 'GitHub rechazó el token (¿caducó?)',
+  github_403: 'el token no tiene permiso de Issues en ese repo',
+  github_404: 'GitHub no encuentra el repo (¿el token incluye ese repo?)',
+};
+const errorReporteWeb = (e) => (e && (REPORTE_WEB_ERROR[e] || e)) || '';
+
+function ReportesWebTab({ onConteo }) {
+  const [filtro, setFiltro] = useState('abiertos');
+  const [datos, setDatos] = useState({ reportes: [], conteo: {} });
+  const [estado, setEstado] = useState({ kind: 'cargando' });
+  const [ocupado, setOcupado] = useState('');
+
+  const cargar = async (f = filtro) => {
+    const r = await window.Store.reportesWeb(f);
+    if (r.ok) {
+      setDatos(r.data);
+      setEstado({ kind: 'listo' });
+      if (onConteo) onConteo(r.data.conteo || {});
+    } else {
+      setEstado({ kind: 'error', error: r.error });
+    }
+  };
+  useEffect(() => { cargar(filtro); }, [filtro]);
+
+  const actuar = async (accion, rep, motivo) => {
+    setOcupado(accion + (rep ? rep.id : ''));
+    const r = await window.Store.accionReporteWeb(accion, rep && rep.id, motivo);
+    setOcupado('');
+    if (!r.ok) alert('No se pudo (' + errorReporteWeb(r.error) + ').');
+    await cargar();
+    return r;
+  };
+  const reintentar = (rep) => actuar('reintentar', rep);
+  const retirar = async (rep) => {
+    const motivo = prompt(
+      'Motivo interno (no se publica). El issue se vaciará, se cerrará y se bloqueará en GitHub; el original se queda aquí:',
+      rep.issue_num ? 'datos personales' : 'spam');
+    if (motivo === null) return;
+    const r = await actuar('retirar', rep, motivo);
+    if (r.ok && rep.issue_url) {
+      alert('Retirado. OJO: GitHub conserva el texto original en el historial de ediciones del issue.\n' +
+        'Para borrarlo del todo, ábrelo en GitHub → «Delete issue» (barra derecha):\n' + rep.issue_url);
+    }
+  };
+  const sincronizar = async () => {
+    const r = await actuar('sincronizar');
+    if (r.ok) alert(`Sincronizado: ${r.data.cambios.cerrados} cerrados y ${r.data.cambios.reabiertos} reabiertos en GitHub.`);
+  };
+
+  const c = datos.conteo || {};
+  const filtros = [
+    ['abiertos', 'Abiertos', (c.pendiente || 0) + (c.publicando || 0) + (c.publicado || 0)],
+    ['pendiente', 'Pendientes', c.pendiente || 0],
+    ['cerrado', 'Cerrados', c.cerrado || 0],
+    ['retirado', 'Retirados', c.retirado || 0],
+    ['todos', 'Todos', Object.values(c).reduce((a, b) => a + b, 0)],
+  ];
+  const formatos = window.AMX_FORMATOS_ISSUE || {};
+  const reintentable = (rep) => rep.estado === 'pendiente'
+    || (rep.estado === 'publicando' && Date.now() - Date.parse(rep.actualizado) > 60000);
+  const mono = { fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: P.textDim };
+
+  return (
+    <div>
+      <SectionHead title="Reportes web" sub={`${c.pendiente || 0} pendientes · ${c.publicado || 0} abiertos en GitHub · sin cuenta, desde el sitio`} action={
+        <button onClick={sincronizar} disabled={!!ocupado} style={btnSecondary}>
+          {ocupado === 'sincronizar' ? 'Sincronizando…' : '↻ Sincronizar con GitHub'}
+        </button>
+      }/>
+      <p style={txtMuted}>
+        Se publican solos en GitHub con la firma de quien reporta. Correo y datos del dispositivo solo se ven aquí.
+        «Pendiente» = no se pudo publicar (GitHub falló o se pasó el tope diario): «Reintentar» lo sube.
+      </p>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+        {filtros.map(([id, label, n]) => (
+          <button key={id} onClick={() => setFiltro(id)} style={Object.assign({}, btnGhost, filtro === id ? { color: P.amber, borderColor: P.amber } : {})}>
+            {label} ({n})
+          </button>
+        ))}
+      </div>
+
+      {estado.kind === 'cargando' && <p style={txtMuted}>Cargando…</p>}
+      {estado.kind === 'error' && <p style={Object.assign({}, txtMuted, { color: P.red })}>No se pudieron leer los reportes ({estado.error}).</p>}
+      {estado.kind === 'listo' && datos.reportes.length === 0 && <p style={txtMuted}>No hay reportes en esta vista.</p>}
+
+      {datos.reportes.map((rep) => {
+        const f = formatos[rep.formato];
+        const est = REPORTE_WEB_ESTADO[rep.estado] || { label: rep.estado, color: P.textDim };
+        const campos = f ? f.body.filter((x) => x.type !== 'markdown') : [];
+        return (
+          <div key={rep.id} style={{ background: P.bgCard, border: `1px solid ${P.border}`, padding: 14, marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 9 }}>
+              <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', padding: '2px 7px', color: '#000', background: est.color }}>{est.label}</span>
+              <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 14, color: P.text, letterSpacing: '0.04em' }}>{rep.titulo}</span>
+              <span style={{ flex: 1 }} />
+              <span style={mono}>{rep.id} · {String(rep.creado || '').slice(0, 16).replace('T', ' ')} UTC</span>
+            </div>
+            <div style={Object.assign({}, mono, { marginBottom: 8 })}>
+              Firma: <b style={{ color: P.text }}>{rep.firma}</b>
+              {rep.github ? ` · @${rep.github}` : ''} · {rep.email || 'sin correo'}
+              {rep.issue_url && <> · <a href={rep.issue_url} target="_blank" rel="noopener noreferrer" style={{ color: P.amber }}>#{rep.issue_num} ↗</a></>}
+              {rep.repo && !/armado-en-mexico$/.test(rep.repo) ? ` · ${rep.repo}` : ''}
+            </div>
+            {rep.error && rep.estado !== 'publicado' &&
+              <div style={Object.assign({}, mono, { color: rep.estado === 'retirado' ? P.textDim : P.amber, marginBottom: 8 })}>
+                {rep.estado === 'retirado' ? rep.error : '⚠ ' + errorReporteWeb(rep.error)}
+              </div>}
+            <dl style={{ margin: '0 0 9px', borderLeft: `2px solid ${P.border}`, paddingLeft: 10 }}>
+              {campos.map((x) => {
+                const v = rep.campos[x.id];
+                const texto = x.type === 'checkboxes'
+                  ? x.attributes.options.map((o, i) => (v && v[i] ? '☑ ' : '☐ ') + o.label).join('\n')
+                  : (v || '—');
+                return (
+                  <div key={x.id} style={{ marginBottom: 6 }}>
+                    <dt style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 9, color: P.textMuted, letterSpacing: '0.12em', textTransform: 'uppercase' }}>{x.attributes.label}</dt>
+                    <dd style={{ margin: 0, fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: P.text, lineHeight: 1.6, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{texto}</dd>
+                  </div>
+                );
+              })}
+            </dl>
+            {rep.metadata &&
+              <details style={{ marginBottom: 9 }}>
+                <summary style={Object.assign({}, mono, { cursor: 'pointer' })}>Datos del dispositivo ({rep.metadata.navegador || '?'} · {rep.metadata.sistema || '?'} · {rep.metadata.ventana || '?'})</summary>
+                <pre style={{ margin: '6px 0 0', padding: 10, background: P.bg, border: `1px solid ${P.border}`, color: P.textDim, fontSize: 11, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{JSON.stringify(rep.metadata, null, 2)}</pre>
+              </details>}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              {rep.estado !== 'retirado' && rep.estado !== 'publicando' &&
+                <button onClick={() => retirar(rep)} disabled={!!ocupado} style={btnDanger}>
+                  {ocupado === 'retirar' + rep.id ? 'Retirando…' : 'Retirar del público'}
+                </button>}
+              {reintentable(rep) &&
+                <button onClick={() => reintentar(rep)} disabled={!!ocupado} style={btnPrimary}>
+                  {ocupado === 'reintentar' + rep.id ? 'Publicando…' : 'Reintentar publicación'}
+                </button>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+window.ReportesWebTab = ReportesWebTab;
 
 // ════════════════════════════════════════════════════════════════
 // BULK IMPORT (CSV) — añadir/modificar masivamente con hojas de datos
