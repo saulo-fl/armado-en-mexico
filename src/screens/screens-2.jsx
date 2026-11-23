@@ -815,6 +815,32 @@ function SoporteDenuncia({ reportContext }) {
   );
 }
 
+// Fallos del sitio: el formulario web del Issue Form fallo.yml (reportes.jsx), sin cuenta.
+// Plegado hasta que se pide: así el captcha de Cloudflare solo se carga si alguien lo usa.
+function SoporteFallo() {
+  const contenido = window.AMX_SOPORTE_CONTENT.fallo;
+  const [abierto, setAbierto] = useState2(false);
+  const gitHub = 'https://github.com/saulo-fl/armado-en-mexico/issues/new?template=fallo.yml';
+  return (
+    <section className="amx-soporte-carbon amx-soporte-fallo" aria-labelledby="soporte-fallo">
+      <h3 id="soporte-fallo">{contenido.titulo}</h3>
+      <p>{contenido.intro}</p>
+      {abierto
+        ? <window.FormularioReporte formato="fallo" enlaceGitHub={gitHub} />
+        : (
+          <div className="amx-reportar-error-acciones">
+            <button type="button" className="amx-reportar-error-boton" onClick={() => setAbierto(true)}>
+              Reportar un fallo
+            </button>
+            <a className="amx-reporte-alterno" href={gitHub} target="_blank" rel="noopener noreferrer">
+              ¿Tienes cuenta de GitHub? Ábrelo allá ↗
+            </a>
+          </div>
+        )}
+    </section>
+  );
+}
+
 function SoporteDirectorio({ contenido, onNav }) {
   return (
     <section className="amx-soporte-cierre">
@@ -854,6 +880,7 @@ function SoporteScreen({ onNav, reportContext }) {
       </section>
       <SoporteModeracion contenido={contenido} />
       <SoporteDenuncia reportContext={reportContext} />
+      <SoporteFallo />
       <SoporteDirectorio contenido={contenido} onNav={onNav} />
     </main>
   );

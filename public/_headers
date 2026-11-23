@@ -48,6 +48,12 @@
   Cache-Control: public, max-age=0, must-revalidate
 /soporte.js
   Cache-Control: public, max-age=0, must-revalidate
+/formatos-issue.js
+  Cache-Control: public, max-age=0, must-revalidate
+/turnstile.js
+  Cache-Control: public, max-age=0, must-revalidate
+/metadata-dispositivo.js
+  Cache-Control: public, max-age=0, must-revalidate
 /cotejo.js
   Cache-Control: public, max-age=0, must-revalidate
 /arsenal-hub.js
@@ -57,6 +63,8 @@
 /filtros.js
   Cache-Control: public, max-age=0, must-revalidate
 /ui.js
+  Cache-Control: public, max-age=0, must-revalidate
+/reportes.js
   Cache-Control: public, max-age=0, must-revalidate
 /estilo.css
   Cache-Control: public, max-age=0, must-revalidate
