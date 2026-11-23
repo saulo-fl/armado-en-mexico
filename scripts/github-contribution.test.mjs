@@ -37,4 +37,6 @@ test('CONTRIBUTING da el formato preferencial de los dos formularios', () => {
   assert.match(contributing, /\[Fallo\]: /);
   assert.match(contributing, /Pasos para reproducirlo/);
   assert.match(contributing, /datos personales/);
+  assert.match(contributing, /Sin cuenta de GitHub/);
+  assert.match(contributing, /folio/);
 });

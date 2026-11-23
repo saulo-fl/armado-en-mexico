@@ -73,9 +73,13 @@
       ['otro', 'Otro'],
     ],
     denuncia: {
-      intro: 'Este formulario sirve para señalar una reseña comunitaria. Para corregir una ficha, utiliza la aportación pública.',
+      intro: 'Este formulario sirve para señalar una reseña comunitaria. Para corregir una ficha, usa «Repórtalo» al final de esa ficha.',
       privacidad: 'Puedes denunciar de forma anónima. El correo es opcional y no se publicará.',
       exito: 'Revisaremos el reporte. Si dejaste un correo, podremos contactarte para pedir información adicional o comunicarte el resultado. No publicaremos tu dirección.',
+    },
+    fallo: {
+      titulo: 'Reportar un fallo del sitio',
+      intro: 'Si algo no carga, se ve mal o no hace lo que debería, cuéntanos qué pasó y cómo llegar a ello. No hace falta cuenta: se publica en GitHub con tu firma.',
     },
     clasificacion: {
       titulo: 'Cómo clasificamos la información',
@@ -87,9 +91,9 @@
     },
     correccion: {
       titulo: 'Corregir información de la enciclopedia',
-      intro: 'Las correcciones factuales se proponen públicamente en GitHub con la página, el dato actual, la solución y sus fuentes.',
+      intro: 'Las correcciones factuales se envían con «Repórtalo», al final de cada ficha, sin crear cuenta: se publican en GitHub con tu firma, la página, el dato actual, la solución y sus fuentes. Si tienes cuenta de GitHub, también puedes abrir el formulario allá.',
       pasos: [
-        'Revisa el formulario y pulsa personalmente Submit new issue; Armado en México no publica nada en tu nombre.',
+        'Revisa el formulario antes de enviarlo: se publica tal cual en GitHub, con la firma que elijas. Tu correo, si lo dejas, no se publica.',
         'El equipo contrasta la información y confirma si el cambio es necesario.',
         'El equipo puede corregirlo, invitarte a aportar un pull request o cerrar el issue explicando la decisión.',
       ],

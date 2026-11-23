@@ -2,7 +2,18 @@
 
 ## Formato preferencial para reportar
 
-Hay dos formularios y los dos se llenan igual. Elige el que corresponda:
+Hay dos formularios y los dos se llenan igual, en armado.mx o en GitHub.
+
+**Sin cuenta de GitHub (vía preferida):** pulsa **Repórtalo** al final de cada ficha, de Legalidad o de
+las preguntas frecuentes, o **Reportar un fallo** en [armado.mx/soporte](https://armado.mx/soporte). Son los
+mismos campos de abajo y, al enviarlo, se publica solo como issue desde la cuenta del proyecto con tu
+**firma** (nombre o apodo) y un **folio** (`AMX-…`). Si das tu usuario de GitHub, el issue te menciona.
+El correo es opcional y no se publica; los datos del dispositivo, si marcas la casilla, solo los ve el
+equipo.
+
+**Con cuenta de GitHub:** abre el formulario directamente en *Issues → New issue*.
+
+Elige el formulario que corresponda:
 
 | Qué quieres reportar | Formulario | Título |
 |---|---|---|
@@ -42,7 +53,7 @@ Uno que no se puede revisar: «El precio de la pistola está mal», sin página,
 
 ### Después de enviarlo
 
-1. Revisa personalmente todos los campos y pulsa **Submit new issue**.
+1. Revisa personalmente todos los campos. En armado.mx recibes el folio y el enlace al issue; en GitHub, pulsa **Submit new issue**.
 2. Espera la revisión editorial. Abrir el issue no garantiza que el cambio sea aceptado.
 3. Crea un pull request solo si el cambio fue confirmado o si el issue lo solicita. El PR es opcional.
 

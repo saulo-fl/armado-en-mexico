@@ -116,6 +116,39 @@ try {
     if (reales.length) fallos.push({ ruta, motivos: [...new Set(reales)] });
     process.stdout.write(reales.length ? 'x' : '.');
   }
+
+  // El formulario de reporte no existe hasta que alguien pulsa el botón: cargar la página no
+  // lo ejecuta. Se abre en una ficha y en Soporte y se exige que pinte todos sus campos.
+  // Los errores que vengan del iframe de Turnstile (challenges.cloudflare.com) no son nuestros.
+  const rutas = await urlsDelSitemap();
+  const ficha = rutas.find((r) => /^\/pistolas\/[^/]+$/.test(r)) || rutas.find((r) => r.split('/').length === 3);
+  for (const [ruta, boton, minimo] of [[ficha, '.amx-reportar-error .amx-reportar-error-boton', 9], ['/soporte', '.amx-soporte-fallo .amx-reportar-error-boton', 8]]) {
+    if (!ruta) continue;
+    const pagina = await navegador.newPage();
+    const suyos = [];
+    pagina.on('pageerror', (e) => suyos.push(String(e.message).split('\n')[0]));
+    pagina.on('console', (m) => {
+      if (m.type() !== 'error') return;
+      const donde = (m.location() && m.location().url) || '';
+      if (/challenges\.cloudflare\.com/.test(donde)) return;
+      suyos.push(m.text().split('\n')[0] + (donde ? ' ← ' + donde : ''));
+    });
+    try {
+      await pagina.goto(raiz + ruta, { waitUntil: 'networkidle2', timeout: 30000 });
+      await pagina.waitForSelector(boton, { timeout: 10000 });
+      await pagina.$eval(boton, (b) => { b.scrollIntoView(); b.click(); });
+      await pagina.waitForSelector('form.amx-reporte', { timeout: 10000 });
+      const campos = await pagina.$$eval('form.amx-reporte .amx-reporte-campo, form.amx-reporte .amx-reporte-casillas', (xs) => xs.length);
+      if (campos < minimo) suyos.push(`el formulario pintó ${campos} campos (esperaba ≥ ${minimo})`);
+    } catch (e) {
+      suyos.push('formulario de reporte: ' + e.message.split('\n')[0]);
+    }
+    await pagina.close();
+    revisadas++;
+    const reales = suyos.filter((s) => !(local && /\/api\//.test(s)));
+    if (reales.length) fallos.push({ ruta: ruta + ' (formulario de reporte)', motivos: [...new Set(reales)] });
+    process.stdout.write(reales.length ? 'x' : '.');
+  }
 } finally {
   await navegador.close();
   if (local) local.server.close();
