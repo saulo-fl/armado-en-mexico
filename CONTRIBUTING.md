@@ -1,8 +1,48 @@
 # Cómo contribuir
 
-## Correcciones de la enciclopedia
+## Formato preferencial para reportar
 
-1. Abre primero el formulario público **Corregir información de la enciclopedia** (`correccion.yml`) con la página exacta, el dato actual, la propuesta y sus fuentes. Revisa personalmente todos los campos y pulsa **Submit new issue** para enviarlo.
+Hay dos formularios y los dos se llenan igual. Elige el que corresponda:
+
+| Qué quieres reportar | Formulario | Título |
+|---|---|---|
+| Un dato incorrecto de la enciclopedia (ficha, calibre, Legalidad, FAQ) | **Corregir información de la enciclopedia** (`correccion.yml`) | `[Corrección]: <ficha o sección>` |
+| Algo del sitio que no carga, se ve mal o no hace lo que debería | **Reportar un fallo del sitio** (`fallo.yml`) | `[Fallo]: <qué falla, en pocas palabras>` |
+
+Las denuncias de reseñas no van aquí: se hacen en privado desde [armado.mx/soporte](https://armado.mx/soporte).
+Ningún reporte debe incluir datos personales, tuyos ni de terceros: el issue es público.
+
+### Correcciones, campo por campo
+
+1. **Página exacta:** la URL donde aparece el dato, no la portada ni «la ficha de la Glock».
+2. **Tipo de contenido** y **ficha o sección:** el nombre tal como aparece en el sitio.
+3. **Dato actual:** cópialo tal cual lo muestra la página.
+4. **Corrección propuesta:** el dato correcto y por qué. Una corrección por issue.
+5. **Fuentes:** una por línea, con título y URL, siguiendo la jerarquía de fuentes de abajo.
+6. **Relación comercial o institucional:** decláralo aunque sea «Ninguna».
+
+Un buen ejemplo es el [#485](https://github.com/saulo-fl/armado-en-mexico/issues/485):
+
+> - **Página exacta:** https://armado.mx/escopetas/derya-mr-s1
+> - **Dato actual:** En capacidad dice que es 4+1 y es una escopeta superpuesta. Su capacidad es de 2 cartuchos.
+> - **Corrección propuesta:** Capacidad 2 o 1+1.
+> - **Fuentes:** https://deryaarms.com/urun/meriva-sport-mr-s1
+
+Uno que no se puede revisar: «El precio de la pistola está mal», sin página, sin el dato que aparece y sin fuente.
+
+### Fallos, campo por campo
+
+1. **Página donde ocurre:** la URL exacta.
+2. **¿Qué pasó?:** lo que viste, con el texto exacto de cualquier mensaje de error.
+3. **¿Qué esperabas que pasara?**
+4. **Pasos para reproducirlo:** numerados y en orden, desde que entraste a la página.
+5. **Frecuencia:** siempre, a veces o solo una vez.
+6. **Dispositivo y navegador** (opcional, pero ayuda mucho): por ejemplo «iPhone 13 · Safari» o «Windows · Chrome».
+7. **Captura o video** (opcional): un enlace donde se vea el fallo.
+
+### Después de enviarlo
+
+1. Revisa personalmente todos los campos y pulsa **Submit new issue**.
 2. Espera la revisión editorial. Abrir el issue no garantiza que el cambio sea aceptado.
 3. Crea un pull request solo si el cambio fue confirmado o si el issue lo solicita. El PR es opcional.
 
