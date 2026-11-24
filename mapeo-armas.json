@@ -150,7 +150,7 @@
     "10": 35830.39,
     "11": 11998.63,
     "15": 18648.29,
-    "18": 14443.75,
+    "18": 12215.1,
     "19": 10664.49,
     "20": 10262.88,
     "21": 11869.32,
@@ -304,14 +304,6 @@
       "precio": 26658.93,
       "ultimo": 24990.49,
       "motivo": "encadenado"
-    },
-    {
-      "fichaId": 18,
-      "dcamRef": "PISTOLA 22 LR SIG SAUER P322 NIT NEG",
-      "renglon": "PISTOLA 22 LR SIG SAUER P322 NIT. NEG.",
-      "precio": 12215.1,
-      "ultimo": 14443.75,
-      "motivo": "nombre exacto"
     }
   ],
   "totalPdf": 1297,
