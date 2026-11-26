@@ -35,6 +35,7 @@
     "57": 13,
     "59": 1,
     "60": 1,
+    "67": 5,
     "73": 1,
     "74": 4,
     "75": 4,
@@ -83,7 +84,7 @@
     "178": 6,
     "179": 5,
     "180": 5,
-    "181": 6,
+    "181": 16,
     "184": 1,
     "191": 1,
     "192": 15,
@@ -134,7 +135,8 @@
     "273": 3,
     "274": 4,
     "276": 4,
-    "277": 1
+    "277": 1,
+    "278": 1
   },
   "precios": {
     "1": 11525.46,
@@ -172,6 +174,7 @@
     "57": 14828.25,
     "59": 25485.15,
     "60": 20565.82,
+    "67": 22856.64,
     "73": 39999.12,
     "74": 39999.12,
     "75": 45770.42,
@@ -188,7 +191,7 @@
     "91": 11007.76,
     "92": 12479.73,
     "94": 31142.17,
-    "99": 15199.67,
+    "99": 14005.64,
     "103": 15679.66,
     "112": 41999.08,
     "113": 33113.56,
@@ -271,42 +274,14 @@
     "273": 43856.18,
     "274": 51713.15,
     "276": 13180.28,
-    "277": 39912.69
+    "277": 39912.69,
+    "278": 36913.47
   },
   "factores": [
     1.028135,
     1.02612
   ],
-  "sinFicha": [
-    {
-      "idx": 0,
-      "name": "RIFLE CAL .243 WIN WEATHERBY MOD307",
-      "priceN": 36913.47,
-      "qty": 1,
-      "desc": "RIFLE DE CERROJO MARCA WEATHERBY, MODELO 307 O MODELO 307 MEATEATER, CALIBRE .243 WIN, CULATA SINTÉTICA, CAÑÓN DE 24 PUL"
-    },
-    {
-      "idx": 27,
-      "name": "ESCOPETA BOM 12 STOEGER P3500 LIN SYNTHE",
-      "priceN": 10291.66,
-      "qty": 5,
-      "desc": "ESCOPETA A BOMBA CAL. 12GA MARCA STOEGER MODELO P3500, LÍNEA SYNTHETIC, CAÑÓN DE 28\" (71 CM). INCLUYE MANUAL DE USUARIO "
-    },
-    {
-      "idx": 28,
-      "name": "ESCOPETA BOM 12 STOEGER P3500 CAMO MAX5",
-      "priceN": 12286.98,
-      "qty": 5,
-      "desc": "ESCOPETA A BOMBA CAL. 12 GA MARCA STOEGER MODELO P3500, CON RECUBRIMIENTO TIPO CAMO MAX7, CAÑÓN DE 28\" (71 CM). INCLUYE "
-    },
-    {
-      "idx": 48,
-      "name": "RIFLE.WINCHESTER.XPR.V.SINT.CAL.308.WIN",
-      "priceN": 22856.64,
-      "qty": 5,
-      "desc": "RIFLE DE ACCIÓN DE CERROJO DE UN CAÑÓN MARCA WINCHESTER, MODELO XPR, VERSIÓN SINTÉTICO, BASTIDOR SINTÉTICO, CALIBRE 0.30"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 95,
@@ -362,25 +337,20 @@
       "precio": 27566.95,
       "ultimo": 24990.49,
       "motivo": "encadenado"
+    },
+    {
+      "fichaId": 99,
+      "dcamRef": "ESCOPETA BOMBA 12 HUGLU ATROX",
+      "renglon": "ESCOPETA BOMBA 12 HUGLU ATROX C. 28\"",
+      "precio": 15199.67,
+      "ultimo": 14005.64,
+      "motivo": "variante sin el renglón representante (C18, a mano por el solucionador)"
     }
   ],
   "totalPdf": 1100,
-  "totalMapped": 1066,
+  "totalMapped": 1082,
   "excluidos": [],
   "regresos": [
-    {
-      "idx": 26,
-      "name": "ESCOPETA BOM 12 STOEGER P3500 LIN WOOD",
-      "priceN": 11621.87,
-      "fichaId": 181,
-      "fechaAntes": "2026-11-20",
-      "antes": 11276.91,
-      "razon": 1.03059,
-      "motivo": "aumento general",
-      "apoyos": 129,
-      "general": 1.035581,
-      "tramo": 0
-    },
     {
       "idx": 52,
       "name": "MODELO RM22-3000 SQUAD",
@@ -390,7 +360,7 @@
       "antes": 11863.1,
       "razon": 1.0,
       "motivo": "mismo aumento que 3 fichas de su tramo",
-      "apoyos": 126,
+      "apoyos": 128,
       "general": 1.066944,
       "tramo": 3
     }
