@@ -8,7 +8,7 @@
     "10": 33,
     "11": 2,
     "15": 2,
-    "18": 82,
+    "18": 102,
     "19": 33,
     "20": 16,
     "21": 12,
@@ -131,7 +131,9 @@
     "273": 3,
     "274": 4,
     "276": 4,
-    "278": 1
+    "278": 1,
+    "279": 15,
+    "280": 15
   },
   "precios": {
     "2": 11323.4,
@@ -265,35 +267,15 @@
     "273": 43892.46,
     "274": 51755.93,
     "276": 13191.18,
-    "278": 36944.01
+    "278": 36944.01,
+    "279": 13062.62,
+    "280": 9443.71
   },
   "factores": [
     1.000827,
     1.003985
   ],
-  "sinFicha": [
-    {
-      "idx": 132,
-      "name": "PIST. F.C.TAURUS TH380 GRAPHE,CAL.0.380",
-      "priceN": 13062.62,
-      "qty": 15,
-      "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS, MODELO TH380 GRAPHENE, CALIBRE 0.380, COLOR PAVÓN, CON 3 CARGADORES CON CAPACIDAD"
-    },
-    {
-      "idx": 133,
-      "name": "PIST. DE F.C.TAURGX4 CARR.GRAP,CAL.380",
-      "priceN": 9443.71,
-      "qty": 15,
-      "desc": "PISTOLA DE FUEGO CENTRAL MARCA TAURUS, MODELO GX4 CARRY GRAPHENE, CALIBRE 0.380, COLOR PAVÓN, CON 1 CARGADOR CON CAPACID"
-    },
-    {
-      "idx": 181,
-      "name": "PISTOLA 22 LR SIG SAUER P322, 2 CARGS.",
-      "priceN": 16298.83,
-      "qty": 20,
-      "desc": "PISTOLA CALIBRE .22” LR MARCA SIG SAUER, MODELO P322, COLOR NEGRO, MIRA DELANTERA ÓPTICA, CON 2 CARGADORES CON CAPACIDAD"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 277,
@@ -337,7 +319,7 @@
     }
   ],
   "totalPdf": 1251,
-  "totalMapped": 1183,
+  "totalMapped": 1233,
   "excluidos": [],
   "regresos": [],
   "regresosRechazados": [],

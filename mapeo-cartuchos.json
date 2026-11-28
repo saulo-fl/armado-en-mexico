@@ -1,6 +1,7 @@
 {
   "existencias": {
     "2004": 116,
+    "2015": 3000,
     "2019": 11500,
     "2021": 580,
     "2024": 660,
@@ -15,22 +16,32 @@
     "2043": 7620,
     "2044": 35,
     "2050": 250,
+    "2069": 3000,
     "2072": 2750,
+    "2085": 2500,
+    "2088": 3000,
     "2089": 2000,
     "2092": 400,
+    "2093": 650,
     "2097": 2850,
     "2098": 350,
     "2099": 2000,
     "2100": 1750,
     "2103": 6300,
+    "2105": 3000,
     "2108": 3000,
     "2110": 1750,
+    "2111": 3000,
     "2120": 17800,
     "2123": 1250,
-    "2129": 10250
+    "2129": 10250,
+    "2130": 3000,
+    "2131": 3000,
+    "2132": 3000
   },
   "precios": {
     "2004": 8.96,
+    "2015": 11.05,
     "2019": 8.96,
     "2021": 27.68,
     "2024": 25.39,
@@ -45,96 +56,34 @@
     "2043": 34.08,
     "2044": 12.35,
     "2050": 27.68,
+    "2069": 9.79,
     "2072": 12.05,
+    "2085": 10.54,
+    "2088": 14.56,
     "2089": 14.56,
     "2092": 32.71,
+    "2093": 11.9,
     "2097": 12.81,
     "2098": 13.73,
     "2099": 15.1,
     "2100": 9.54,
     "2103": 8.96,
-    "2108": 10.29,
+    "2105": 10.79,
+    "2108": 10.62,
     "2110": 10.79,
+    "2111": 9.54,
     "2120": 17.32,
     "2123": 10.54,
-    "2129": 13.27
+    "2129": 13.27,
+    "2130": 11.05,
+    "2131": 11.55,
+    "2132": 11.55
   },
   "factores": [
     1.000723,
     1.0
   ],
-  "sinFicha": [
-    {
-      "idx": 5,
-      "name": "CARTS. CAL. 12 EG DEL SUR SH 29 GR M.7.5",
-      "priceN": 10.79,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12, MARCA EG DEL SUR, SUBMARCA SPECIAL HUNTER 29 GRAMOS, MUNICIÓN 7.5."
-    },
-    {
-      "idx": 6,
-      "name": "CARTS. CAL. 12 EG DEL SUR SH 30GR MUN 8",
-      "priceN": 11.05,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12, MARCA EG DEL SUR, SUBMARCA SPECIAL HUNTER 30 GRAMOS, MUNICIÓN 8."
-    },
-    {
-      "idx": 7,
-      "name": "CARTS. CAL. 12 EG DEL SUR SH 32GR MUN8",
-      "priceN": 11.55,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12, MARCA EG DEL SUR, SUBMARCA SPECIAL HUNTER 32 GRAMOS, MUNICIÓN 8."
-    },
-    {
-      "idx": 8,
-      "name": "CARTS. CAL. 12 EG DEL SUR SH 32GR MUN6",
-      "priceN": 11.55,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12, MARCA EG DEL SUR, SUBMARCA SPECIAL HUNTER 32 GRAMOS, MUNICIÓN 6."
-    },
-    {
-      "idx": 9,
-      "name": "CART CAL. 12 EG DEL SUR (SH) 30 GR M.7.5",
-      "priceN": 11.05,
-      "qty": 3000,
-      "desc": "CARTUCHO DE ESCOPETA CALIBRE 12 MARCA EG DEL SUR SUBMARCA SPECIAL HUNTER 30 GRAMOS, MUN. 7.5"
-    },
-    {
-      "idx": 20,
-      "name": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
-      "priceN": 9.54,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA BULLET COMPETICIÓN CAL. 12 MUN. 7.5 24 GR. CAT. 0096-75"
-    },
-    {
-      "idx": 21,
-      "name": "CAR.BULLETC.CAL12MUN.6 32 GR.CAT.0100-06",
-      "priceN": 10.54,
-      "qty": 2500,
-      "desc": "CARTUCHO MARCA BULLET CAZA CAL. 12 MUN. 6 32 GR. CAT. 0100-06"
-    },
-    {
-      "idx": 22,
-      "name": "CRT.BULLETT-5P1400F.CL12M.7.5-36,0078-75",
-      "priceN": 14.56,
-      "qty": 3000,
-      "desc": "CARTUCHO MARCA BULLET T-5 PICHON 1400 FPS CAL. 12 MUN. 7.5 36 GR. CAT. 0078-75"
-    },
-    {
-      "idx": 24,
-      "name": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
-      "priceN": 9.79,
-      "qty": 3000,
-      "desc": "CARTUCHO PARA ESCOPETA MARCA TRUST, CALIBRE 12, MODELO TRAP COMPETICIÓN (COMPETITION) 24 GRAMOS, MUNICIÓN DEL 7.5, EMPAC"
-    },
-    {
-      "idx": 37,
-      "name": "CARTS CAL.380\" AUTO FEDERAL FMJ 95 GR.",
-      "priceN": 11.9,
-      "qty": 650,
-      "desc": "CARTUCHO CALIBRE 0.380\" AUTO, MARCA FEDERAL F. M. J. DE 95 GRS. CODIGO AE380AP"
-    }
-  ],
+  "sinFicha": [],
   "sinPrecio": [
     {
       "fichaId": 2096,
@@ -152,9 +101,18 @@
       "refPrice": 11.43
     }
   ],
-  "revisarPrecio": [],
+  "revisarPrecio": [
+    {
+      "fichaId": 2108,
+      "dcamRef": "CART. CAL. 12 ELEY EOB 32GR 7.5",
+      "renglon": "CARTUCHO CAL12 ELEY OLYMPIC 32GR M7.5",
+      "precio": 10.29,
+      "ultimo": 10.62,
+      "motivo": "variante sin el renglón de su dcamRef (C18): se conserva el último precio"
+    }
+  ],
   "totalPdf": 129973,
-  "totalMapped": 102823,
+  "totalMapped": 129973,
   "excluidos": [],
   "regresos": [
     {
@@ -179,8 +137,8 @@
       "antes": 12.93,
       "razon": 1.061872,
       "motivo": "aumento general",
-      "apoyos": 18,
-      "general": 1.061103,
+      "apoyos": 19,
+      "general": 1.060997,
       "tramo": 0
     },
     {
@@ -192,7 +150,7 @@
       "antes": 14.29,
       "razon": 1.056683,
       "motivo": "aumento general",
-      "apoyos": 18,
+      "apoyos": 19,
       "general": 1.056156,
       "tramo": 0
     },
@@ -204,10 +162,10 @@
       "fechaAntes": "2026-10-27",
       "antes": 9.17,
       "razon": 1.040349,
-      "motivo": "mismo aumento que 2 fichas de su tramo",
-      "apoyos": 18,
-      "general": 1.061103,
-      "tramo": 2
+      "motivo": "mismo aumento que 3 fichas de su tramo",
+      "apoyos": 19,
+      "general": 1.060997,
+      "tramo": 3
     },
     {
       "idx": 19,
@@ -217,10 +175,10 @@
       "fechaAntes": "2026-10-26",
       "antes": 10.42,
       "razon": 1.035509,
-      "motivo": "mismo aumento que 2 fichas de su tramo",
-      "apoyos": 18,
+      "motivo": "mismo aumento que 3 fichas de su tramo",
+      "apoyos": 19,
       "general": 1.056156,
-      "tramo": 2
+      "tramo": 3
     },
     {
       "idx": 23,
@@ -230,79 +188,13 @@
       "fechaAntes": "2026-11-03",
       "antes": 14.16,
       "razon": 1.028249,
-      "motivo": "mismo aumento que 2 fichas de su tramo",
+      "motivo": "mismo aumento que 3 fichas de su tramo",
       "apoyos": 19,
       "general": 1.04907,
-      "tramo": 2
+      "tramo": 3
     }
   ],
-  "regresosRechazados": [
-    {
-      "idx": 5,
-      "name": "CARTS. CAL. 12 EG DEL SUR SH 29 GR M.7.5",
-      "priceN": 10.79,
-      "fichaId": 2105,
-      "fechaAntes": "2026-09-25",
-      "antes": 10.01,
-      "razon": 1.077922,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 17,
-      "general": 1.117526,
-      "tramo": 0
-    },
-    {
-      "idx": 20,
-      "name": "CART. CAL. 12 BULLET C 24GR M7.5 0096-75",
-      "priceN": 9.54,
-      "fichaId": 2111,
-      "fechaAntes": "2026-10-13",
-      "antes": 8.99,
-      "razon": 1.061179,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 15,
-      "general": 1.080251,
-      "tramo": 0
-    },
-    {
-      "idx": 21,
-      "name": "CAR.BULLETC.CAL12MUN.6 32 GR.CAT.0100-06",
-      "priceN": 10.54,
-      "fichaId": 2085,
-      "fechaAntes": "2026-09-25",
-      "antes": 9.63,
-      "razon": 1.094496,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 17,
-      "general": 1.117526,
-      "tramo": 0
-    },
-    {
-      "idx": 22,
-      "name": "CRT.BULLETT-5P1400F.CL12M.7.5-36,0078-75",
-      "priceN": 14.56,
-      "fichaId": 2088,
-      "fechaAntes": "2026-11-05",
-      "antes": 14.11,
-      "razon": 1.031892,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 17,
-      "general": 1.058358,
-      "tramo": 1
-    },
-    {
-      "idx": 24,
-      "name": "CART CAL12 TRUST TRAP COMP 24 EN 7.5",
-      "priceN": 9.79,
-      "fichaId": 2069,
-      "fechaAntes": "2026-10-13",
-      "antes": 9.23,
-      "razon": 1.060672,
-      "motivo": "el precio no cuadra con el aumento general ni con un tramo",
-      "apoyos": 15,
-      "general": 1.080251,
-      "tramo": 0
-    }
-  ],
+  "regresosRechazados": [],
   "gemelos": [],
   "sinDueno": []
 }
